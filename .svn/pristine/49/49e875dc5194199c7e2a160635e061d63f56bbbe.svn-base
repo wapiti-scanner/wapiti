@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wapiti scan report</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="css/kube.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/master.css" />
+</head>
+<body>
+    <div id="page">
+        <header style="text-align: center">
+        <h2 class="title" style="text-align: center">Wapiti vulnerability report</h2>
+        <h3>Target: ${target}</h3>
+        <p>Date of the scan: ${scan_date}. Scope of the scan: ${scan_scope}</p>
+        </header>
+        <hr />
+        <h4>Summary</h4>
+        <table class="width-100 hovered" style="background: url('logo_clear.png') no-repeat center;">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Number of vulnerabilities found</th>
+                </tr>
+            </thead>
+            <tbody id="summary">
+                % for i, vuln_name in enumerate(vulnerabilities):
+                    <tr>
+                        <td class="small">
+                            % if len(vulnerabilities[vuln_name]):
+                            <a href="#vuln_type_${i}">${vuln_name}</a>
+                            % else:
+                            ${vuln_name}
+                            % endif
+                        </td>
+                        <td class="small .text-centered">${len(vulnerabilities[vuln_name])}</td>
+                    </tr>
+                % endfor
+                % for i, anomaly_name in enumerate(anomalies):
+                    <tr>
+                        <td class="small">
+                            % if len(anomalies[anomaly_name]):
+                            <a href="#anom_type_${i}">${anomaly_name}</a>
+                            % else:
+                            ${anomaly_name}
+                            % endif
+                        </td>
+                        <td class="small .text-centered">${len(anomalies[anomaly_name])}</td>
+                    </tr>
+                % endfor
+            </tbody>
+        </table>
+        <hr />
+        <div id="details">
+            % for i, vuln_name in enumerate(vulnerabilities):
+                % if len(vulnerabilities[vuln_name]):
+                <h3 id="vuln_type_${i}">${vuln_name}</h3>
+                <dl>
+                    <dt>Description</dt>
+                    <dd>${flaws[vuln_name]["desc"] | h}</dd>
+                </dl>
+
+                    % for j, vulnerability in enumerate(vulnerabilities[vuln_name]):
+                        <h4>Vulnerability found in ${vulnerability["path"] | h}</h4>
+                        <nav class="tabs" data-component="tabs" data-equals="true" data-height="equal">
+                            <ul>
+                                <li class="active"><a href="#tab-vuln-${i}-${j}-1">Description</a></li>
+                                <li><a href="#tab-vuln-${i}-${j}-2">HTTP Request</a></li>
+                                <li><a href="#tab-vuln-${i}-${j}-3">cURL command line</a></li>
+                            </ul>
+                        </nav>
+                        <div id="tab-vuln-${i}-${j}-1" style="min-height: 124px;">
+                            <pre>${vulnerability["info"] | h}</pre>
+                        </div>
+                        <div id="tab-vuln-${i}-${j}-2" style="min-height: 124px;">
+                            <pre>${vulnerability["http_request"] | h}</pre>
+                        </div>
+                        <div id="tab-vuln-${i}-${j}-3" style="min-height: 124px;">
+                            <pre>${vulnerability["curl_command"] | h}</pre>
+                        </div>
+                    % endfor
+
+                <dl><dt>Solutions</dt><dd>${flaws[vuln_name]["sol"]}</dd></dl>
+                <h5>References</h5>
+                <ul>
+                    % for ref_name, ref_url in flaws[vuln_name]["ref"].items():
+                    <li><a href="${ref_url}">${ref_name | h}</a></li>
+                    % endfor
+                </ul>
+                <br />
+                <hr>
+                % endif
+            % endfor
+            % for i, anomaly_name in enumerate(anomalies):
+                % if len(anomalies[anomaly_name]):
+                <h3 id="anom_type_${i}">${anomaly_name}</h3>
+                <dl>
+                    <dt>Description</dt>
+                    <dd>${flaws[anomaly_name]["desc"] | h}</dd>
+                </dl>
+
+                    % for j, anomaly in enumerate(anomalies[anomaly_name]):
+                        <h4>Anomaly found in ${anomaly["path"] | h}</h4>
+                        <nav class="tabs" data-component="tabs" data-equals="true">
+                            <ul>
+                                <li class="active"><a href="#tab-anom-${i}-${j}-1">Description</a></li>
+                                <li><a href="#tab-anom-${i}-${j}-2">HTTP Request</a></li>
+                                <li><a href="#tab-anom-${i}-${j}-3">cURL command line</a></li>
+                            </ul>
+                        </nav>
+                        <div id="tab-anom-${i}-${j}-1" style="min-height: 124px;">
+                            <pre>${anomaly["info"] | h}</pre>
+                        </div>
+                        <div id="tab-anom-${i}-${j}-2" style="min-height: 124px;">
+                            <pre>${anomaly["http_request"] | h}</pre>
+                        </div>
+                        <div id="tab-anom-${i}-${j}-3" style="min-height: 124px;">
+                            <pre>${anomaly["curl_command"] | h}</pre>
+                        </div>
+                    % endfor
+
+                <dl><dt>Solutions</dt><dd>${flaws[anomaly_name]["sol"]}</dd></dl>
+                <h5>References</h5>
+                <ul>
+                    % for ref_name, ref_url in flaws[anomaly_name]["ref"].items():
+                    <li><a href="${ref_url}">${ref_name | h}</a></li>
+                    % endfor
+                </ul>
+                <br />
+                <hr>
+                % endif
+            % endfor
+        </div>
+        <footer class="small" id="footer"><a href="http://wapiti.sf.net/" id="wapiti_link">${wapiti_version}</a> &copy; Nicolas SURRIBAS 2006-2018</footer>
+	</div>
+    <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/kube.min.js"></script>
+</body>
+</html>

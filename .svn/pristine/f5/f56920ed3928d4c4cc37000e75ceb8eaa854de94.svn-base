@@ -1,0 +1,186 @@
+03/01/2017
+    Release of Wapiti 3.0.0
+
+23/12/2017
+    lswww is now renamed to Crawler.
+    All HTML parsing is now made with BeautifulSoup. lxml should be the parsing engine but it's possible to opt-out at
+    setup with --html5lib.
+    Analysis on JS in event handlers (onblur, onclick, etc)
+    Changed behavior ot 'page' scope, added 'url' scope.
+    Default mime type used for upload fields is image/gif.
+    Added yaswf as a dependency for SWF parsing.
+    Custom HTTP error codes check.
+    Fixed a bug with 'button' input types.
+    Updated pynarcissus with a python3 version for js parsing.
+    Rewrote "in scope" check.
+
+29/12/2009
+    Version 2.3.1
+    Fixed a bug in lswww if root url is not given complete.
+    Fixed a bug in lswww with a call to BeautifulSoup made on non text files.
+    Fixed a bug that occured when verbosity = 2. Unicode error on stderr.
+
+27/12/2009
+	Version 2.3.0
+	Internationalization and translation to english and spanish when called from
+	Wapiti.
+	Ability to save a scan session and restore it later (-i)
+	Added option -b to set the scope of the scan based on the root url given as
+	argument.
+	Fixed bug ID 2779441 "Python Version 2.5 required?"
+	Use an home made cookie library instead or urllib2's one.
+	Keep aditionnal informations on the webpages (headers + encoding)
+	Use BeautifulSoup to detect webpage encoding and handle parsing errors.
+	Fixed a bug when "a href" or "form action" have an empty string as value.
+	Better support of Unicode.
+
+26/03/2009
+	Version 2.2.0
+	Fixed bug ID 2433127 with HTTP 404 error codes.
+	Don't let httplib2 manage HTTP redirections : return the status code
+	and let lswww handle the new url.
+
+25/03/2009
+	Version 2.1.9
+	Added option -e (or --export)
+	Saves urls and forms data to a XML file.
+	We hope other fuzzers will allow importation of this file.
+
+24/03/2009
+	More verifications on timeout errors.
+
+22/03/2009
+	Version 2.1.8
+	Fixed bug ID: 2415094
+	Check on protocol found in hyperlinks was case-sentitive.
+	Moved it to non-case-sensitive.
+	Integration of a second linkParser class called linkParser2 from
+	lswwwv2.py. This parser use only regexp to extract links and forms.
+
+25/11/2008
+	httplib2 use lowercase names for the HTTP headers in opposition to
+	urllib2 (first letter was uppercase).
+	Changed the verifications on headers.
+
+15/11/2008
+	Fixed a bug with links going to parrent directory.
+
+02/11/2008
+	Better integration of proxy support provided by httplib2.
+	It's now possible to use SOCKS proxies.
+
+19/10/2008
+	Version 2.1.7
+	Now use httplib2 (http://code.google.com/p/httplib2/)n MIT licence
+	instead of urllib2.
+	The ability to use persistents connections makes the scan faster.
+
+09/10/2008
+	Version 2.1.6
+	HTTP authentification now works
+	Added the option -n (or --nice) to prevent endless loops during scanning
+
+28/01/2007
+	Version 2.1.5
+	First take a look at the Content-Type instead of the document extension
+	Added BeautifulSoup as an optionnal module to correct bad html documents
+	(better use tidy if you can)
+
+24/10/2006
+	Version 2.1.4
+	Wildcard exclusion with -x (--exclude) option
+
+22/10/2006
+	Fixed an error with url parameters handling that appeared in precedent
+	version.
+	Fixed a typo in lswww.py (setAuthCreddentials : one 'd' is enough)
+
+07/10/2006
+	Version 2.1.3
+	Three verbose mode with -v (--verbose) option
+	0: print only results
+	1: print dots for each page accessed (default mode)
+	2: print each found url durring scan
+	Timeout in seconds can be set with -t (--timeout) option
+	Fixed bug "crash when no content-type is returned"
+	Fixed an error with 404 webpages
+	Fixed a bug when the only parameter of an url is a forbidden one
+
+09/08/2006
+	Version 2.1.2
+	Fixed a bug with regular expressions
+
+05/08/2006
+	Version 2.1.1
+	Remove redundant slashes from urls
+	(e.g. http://server/dir//page.php converted to
+	http://server/dir/page.php)
+
+20/07/2006
+	Version 2.1.0 with urllib2
+
+11/07/2006
+	-r (--remove) option to remove parameters from URLs
+	Generate URL with GET forms instead of using POST by default
+	Support for Basic HTTP Auth added but don't work with Python 2.4.
+	Now use cookie files (option "-c file" or "--cookie file")
+	Extracts links from Location header fields
+	
+
+06/07/2006
+	Extract links from "Location:" headers (HTTP 301 and 302)
+	Default type for "input" elements is set to "text"
+	(as written in the HTML 4.0 specifications)
+	Added "search" in input types (created for Safari browsers)
+
+04/07/2006
+	Fixed a bug with empty parameters tuples
+	(convert http://server/page?&a=2 to http://server/page?a=2)
+
+23/06/2006
+	Version 2.0.1
+	Take care of the "submit" type
+	No extra data sent when a page contains several forms
+	Corrected a bug with urls finishing by '?'
+	Support Cookies !!
+
+25/04/2006
+	Version 2.0
+	Extraction des formulaires sous la forme d'une liste de tuples
+	contenant chacun un string (url du script cible) et un dict
+	contenant les noms des champs et leur valeur par d�faut (ou 'true'
+	si vide)
+	Recense les scripts gerant l'upload
+	Peut maintenant fonctionner comme module
+
+19/04/2006
+	Version 1.1
+	Lecture des tags insensible a la casse
+	Gestion du Ctrl+C pour interrompre proprement le programme
+	Extraction des urls dans les balises form (action)
+
+12/10/2005
+	Version 1.0
+	Gestion des liens syntaxiquement valides mais pointant
+	vers des ressources inexistantes (404)
+
+11/09/2005
+	Beta4
+	Utilisation du module getopt qui permet de specifier
+	facilement les urls a visiter en premier, les urls a
+	exclure (nouveau !) ou encore le proxy a utiliser
+
+24/08/2005
+	Beta3
+	Ajout d'un timeout pour la lecture des pages pour ne pas
+	bloquer sur un script bugge
+
+23/08/2005
+	Version beta2
+	Prise en charge des indexs generes par Apache
+	Filtre sur les protocoles
+	Gestion des liens qui remontent l'arborescence
+	Gestion des liens vides
+
+02/08/2005
+	Sortie de la beta1

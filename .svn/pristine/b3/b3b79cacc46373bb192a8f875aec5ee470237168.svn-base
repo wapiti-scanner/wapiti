@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vulnerabilities>
+    <vulnerability name="SQL Injection">
+        <description>SQL Injection description</description>
+        <solution text="SQL Injection solution"/>
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/SQL_Injection</title>
+                <url>http://www.owasp.org/index.php/SQL_Injection</url>
+            </reference>
+            <reference>
+                <title>http://en.wikipedia.org/wiki/SQL_injection</title>
+                <url>http://en.wikipedia.org/wiki/SQL_injection</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/89.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Blind SQL Injection">
+        <description>Blind SQL Injection description</description>
+        <solution text="Blind SQL Injection solution" />
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/Blind_SQL_Injection</title>
+                <url>http://www.owasp.org/index.php/Blind_SQL_Injection</url>
+            </reference>
+            <reference>
+                <title>http://www.imperva.com/resources/adc/blind_sql_server_injection.html</title>
+                <url>http://www.imperva.com/resources/adc/blind_sql_server_injection.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/89.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="File Handling">
+        <description>File Handling description</description>
+        <solution text="File Handling solution" />
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/Path_Traversal</title>
+                <url>http://www.owasp.org/index.php/Path_Traversal</url>
+            </reference>
+            <reference>
+                <title>http://www.acunetix.com/websitesecurity/directory-traversal.htm</title>
+                <url>http://www.acunetix.com/websitesecurity/directory-traversal.htm</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/22.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Cross Site Scripting">
+        <description>Cross Site Scripting description</description>
+        <solution text="Cross Site Scripting solution" />
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/Cross_Site_Scripting</title>
+                <url>http://www.owasp.org/index.php/Cross_Site_Scripting</url>
+            </reference>
+            <reference>
+                <title>http://en.wikipedia.org/wiki/Cross-site_scripting</title>
+                <url>http://en.wikipedia.org/wiki/Cross-site_scripting</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/79.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="CRLF Injection">
+        <description>CRLF description</description>
+        <solution text="CRLF solution"/>
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/CRLF_Injection</title>
+                <url>http://www.owasp.org/index.php/CRLF_Injection</url>
+            </reference>
+            <reference>
+                <title>http://www.acunetix.com/websitesecurity/crlf-injection.htm</title>
+                <url>http://www.acunetix.com/websitesecurity/crlf-injection.htm</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-93: Improper Neutralization of CRLF Sequences ('CRLF Injection')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/93.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Commands execution">
+        <description>Commands execution description</description>
+        <solution text="Commands execution solution"/>
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/Command_Injection</title>
+                <url>http://www.owasp.org/index.php/Command_Injection</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/78.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Htaccess Bypass">
+        <description>Htaccess bypass description</description>
+        <solution text="Htaccess bypass solution"/>
+        <references>
+            <reference>
+                <title>http://blog.teusink.net/2009/07/common-apache-htaccess-misconfiguration.html</title>
+                <url>http://blog.teusink.net/2009/07/common-apache-htaccess-misconfiguration.html</url>
+            </reference>
+            <reference>
+                <title>CWE-538: File and Directory Information Exposure</title>
+                <url>http://cwe.mitre.org/data/definitions/538.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Backup file">
+        <description>Backup file description</description>
+        <solution text="Backup file solution"/>
+        <references>
+            <reference>
+                <title>Testing for Old, Backup and Unreferenced Files (OWASP-CM-006)</title>
+                <url>http://www.owasp.org/index.php/Testing_for_Old,_Backup_and_Unreferenced_Files_(OWASP-CM-006)</url>
+            </reference>
+            <reference>
+                <title>CWE-530: Exposure of Backup File to an Unauthorized Control Sphere</title>
+                <url>http://cwe.mitre.org/data/definitions/530.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Potentially dangerous file">
+        <description>Potentially dangerous file description</description>
+        <solution text="Potentially dangerous file solution"/>
+        <references>
+            <reference>
+                <title>The Open Source Vulnerability Database</title>
+                <url>http://osvdb.org/</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="Server Side Request Forgery">
+        <description>Server Side Request Forgery description</description>
+        <solution text="Server Side Request Forgery solution" />
+        <references>
+            <reference>
+                <title>Server Side Request Forgery (OWASP)</title>
+                <url>https://www.owasp.org/index.php/Server_Side_Request_Forgery</url>
+            </reference>
+            <reference>
+                <title>What is Server Side Request Forgery (Acunetix)?</title>
+                <url>https://www.acunetix.com/blog/articles/server-side-request-forgery-vulnerability/</url>
+            </reference>
+            <reference>
+                <title>What is the Server Side Request Forgery Vulnerability (Netsparker)</title>
+                <url>https://www.netsparker.com/blog/web-security/server-side-request-forgery-vulnerability-ssrf/</url>
+            </reference>
+        </references>
+    </vulnerability>
+</vulnerabilities>

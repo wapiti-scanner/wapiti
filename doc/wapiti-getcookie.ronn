@@ -1,0 +1,46 @@
+wapiti-getcookie(1) -- A Wapiti utility to fetch cookies from a webpage and store them in the Wapiti JSON format.
+=================================================================================================================
+
+## SYNOPSIS
+
+`wapiti` -u <URL> -c <COOKIE> [options]
+
+## DESCRIPTION
+
+wapiti-getcookie is a user-friendly interractive console utility that can be used to fill a web-form or fetch an URL 
+and extract the cookies sent by the remote server.  
+Cookie informations are stored in the JSON cookie file you have to specify with the -c option.  
+Those cookies can be loaded by Wapiti using the same -c option.
+   
+## OPTIONS
+
+  * `-p`, `--proxy` <PROXY_URL>  
+    The given URL will be used as a proxy for HTTP and HTTPS requests.  
+    This URL can have one of the following scheme : http, https, socks.  
+    To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/
+    
+  * `-d`, `--data` <DATA>  
+    wapiti-getcookie will parse forms and ask your input for each field found.  
+    But you can also pass every parameter and value as a string directly through this option.  
+    Example: -d 'login=admin&password=letmein&submit=Login'
+    
+## LICENSE
+
+Wapiti is covered by the GNU General Public License (GPL), version 2.
+Please read the COPYING file for more information.
+
+## COPYRIGHT
+
+Copyright (c) 2006-2018 Nicolas Surribas.
+
+## AUTHORS
+
+Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file.
+
+## WWW
+
+http://wapiti.sourceforge.net/
+
+## BUG REPORTS
+
+If you find a bug in Wapiti please report it to https://sourceforge.net/p/wapiti/bugs/

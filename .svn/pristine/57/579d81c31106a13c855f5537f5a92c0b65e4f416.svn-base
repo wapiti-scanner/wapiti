@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<reportGenerators>
+    <reportGenerator>
+        <description>XML format</description>
+        <reportTypeKey>xml</reportTypeKey>
+        <classModule>xmlreportgenerator</classModule>
+        <className>XMLReportGenerator</className>
+    </reportGenerator>
+    <reportGenerator>
+        <description>HTML format</description>
+        <reportTypeKey>html</reportTypeKey>
+        <classModule>htmlreportgenerator</classModule>
+        <className>HTMLReportGenerator</className>
+    </reportGenerator>
+    <reportGenerator>
+        <description>TXT format</description>
+        <reportTypeKey>txt</reportTypeKey>
+        <classModule>txtreportgenerator</classModule>
+        <className>TXTReportGenerator</className>
+    </reportGenerator>
+    <reportGenerator>
+        <description>VulneraNET format</description>
+        <reportTypeKey>vulneranet</reportTypeKey>
+        <classModule>vulneranetxmlreportgenerator</classModule>
+        <className>VulneraNetXMLReportGenerator</className>
+    </reportGenerator>
+    <reportGenerator>
+        <description>JSON format</description>
+        <reportTypeKey>json</reportTypeKey>
+        <classModule>jsonreportgenerator</classModule>
+        <className>JSONReportGenerator</className>
+    </reportGenerator>
+    <reportGenerator>
+        <description>OpenVAS XML format</description>
+        <reportTypeKey>openvas</reportTypeKey>
+        <classModule>openvasreportgenerator</classModule>
+        <className>OpenVASReportGenerator</className>
+    </reportGenerator>
+</reportGenerators>

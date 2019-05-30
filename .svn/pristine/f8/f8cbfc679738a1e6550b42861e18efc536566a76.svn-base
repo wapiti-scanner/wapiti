@@ -1,0 +1,62 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "WAPITI\-GETCOOKIE" "1" "January 2018" "" ""
+.
+.SH "NAME"
+\fBwapiti\-getcookie\fR \- A Wapiti utility to fetch cookies from a webpage and store them in the Wapiti JSON format\.
+.
+.SH "SYNOPSIS"
+\fBwapiti\fR \-u \fIURL\fR \-c \fICOOKIE\fR \fIoptions\fR
+.
+.SH "DESCRIPTION"
+wapiti\-getcookie is a user\-friendly interractive console utility that can be used to fill a web\-form or fetch an URL and extract the cookies sent by the remote server\.
+.
+.br
+Cookie informations are stored in the JSON cookie file you have to specify with the \-c option\.
+.
+.br
+Those cookies can be loaded by Wapiti using the same \-c option\.
+.
+.SH "OPTIONS"
+.
+.IP "\(bu" 4
+\fB\-p\fR, \fB\-\-proxy\fR \fIPROXY_URL\fR
+.
+.br
+The given URL will be used as a proxy for HTTP and HTTPS requests\.
+.
+.br
+This URL can have one of the following scheme : http, https, socks\.
+.
+.br
+To make Wapiti use a Tor listener you can use \-\-proxy socks://127\.0\.0\.1:9050/
+.
+.IP "\(bu" 4
+\fB\-d\fR, \fB\-\-data\fR \fIDATA\fR
+.
+.br
+wapiti\-getcookie will parse forms and ask your input for each field found\.
+.
+.br
+But you can also pass every parameter and value as a string directly through this option\.
+.
+.br
+Example: \-d \'login=admin&password=letmein&submit=Login\'
+.
+.IP "" 0
+.
+.SH "LICENSE"
+Wapiti is covered by the GNU General Public License (GPL), version 2\. Please read the COPYING file for more information\.
+.
+.SH "COPYRIGHT"
+Copyright (c) 2006\-2018 Nicolas Surribas\.
+.
+.SH "AUTHORS"
+Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file\.
+.
+.SH "WWW"
+http://wapiti\.sourceforge\.net/
+.
+.SH "BUG REPORTS"
+If you find a bug in Wapiti please report it to https://sourceforge\.net/p/wapiti/bugs/

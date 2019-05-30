@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# Copyright (C) 2013-2018 Nicolas Surribas
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from wapitiCore.language.language import _
+
+
+class GenericObservation:
+    # Constants
+    MSG_EVIL_URL = _("  Evil url: {0}")
+    MSG_PARAM_INJECT = _("{0} in {1} via injection in the parameter {2}")
+    MSG_FROM = _("  coming from {0}")
+    MSG_QS_INJECT = _("{0} in {1} via injection in the query string")
+    MSG_PATH_INJECT = _("{0} in {1} via injection in the resource path")
+    MSG_EVIL_PARAM = _("Involved parameter: {0}")
+    MSG_EVIL_REQUEST = _("Evil request:")
+
+    HIGH_LEVEL = "1"
+    MEDIUM_LEVEL = "2"
+    LOW_LEVEL = "3"
+
+    def __init__(self):
+        self.name = ""
+        self.description = ""
+        self.solution = ""
+        self.references = {}
+
+    def get_name(self):
+        return self.name
+
+    def get_description(self):
+        return self.description
+
+    def get_solution(self):
+        return self.solution
+
+    def get_references(self):
+        return self.references
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_description(self, description):
+        self.description = description
+
+    def set_solution(self, solution):
+        self.solution = solution
+
+    def set_references(self, references):
+        self.references = references
+
+
+class Notice(GenericObservation):
+    # Constants
+    ERROR_404 = _("File not found message")
+
+
+class Vulnerability(Notice):
+    # Constants
+    SQL_INJECTION = _("SQL Injection")
+    BLIND_SQL_INJECTION = _("Blind SQL Injection")
+    FILE_HANDLING = _("File Handling")
+    XSS = _("Cross Site Scripting")
+    CRLF = _("CRLF Injection")
+    EXEC = _("Commands execution")
+    HTACCESS = _("Htaccess Bypass")
+    BACKUP = _("Backup file")
+    NIKTO = _("Potentially dangerous file")
+    SSRF = _("Server Side Request Forgery")
+
+
+class Anomaly(Notice):
+    # Constants
+    ERROR_500 = _("Internal Server Error")
+    RES_CONSUMPTION = _("Resource consumption")
+
+    MSG_500 = _("Received a HTTP 500 error in {0}")
+    MSG_TIMEOUT = _("Timeout occurred in {0}")
+
+    MSG_QS_TIMEOUT = _("The request timed out while attempting to inject a payload in the query string")
+    MSG_PATH_TIMEOUT = _("The request timed out while attempting to inject a payload in the resource path")
+    MSG_PARAM_TIMEOUT = _("The request timed out while attempting to inject a payload in the parameter {0}")
+
+    MSG_QS_500 = _("The server responded with a 500 HTTP error code "
+                   "while attempting to inject a payload in the query string")
+    MSG_PATH_500 = _("The server responded with a 500 HTTP error code "
+                     "while attempting to inject a payload in the resource path")
+    MSG_PARAM_500 = _("The server responded with a 500 HTTP error code "
+                      "while attempting to inject a payload in the parameter {0}")
+
+
+# The only reason those lines are here is to allow the translation script to find them
+_("Backup file description")
+_("Backup file solution")
+
+_("Blind SQL Injection description")
+_("Blind SQL Injection solution")
+
+_("Commands execution description")
+_("Commands execution solution")
+
+_("CRLF description")
+_("CRLF solution")
+
+_("Cross Site Scripting description")
+_("Cross Site Scripting solution")
+
+_("File Handling description")
+_("File Handling solution")
+
+_("Htaccess bypass description")
+_("Htaccess bypass solution")
+
+_("Internal server error description")
+_("Internal server error solution")
+
+_("Potentially dangerous file description")
+_("Potentially dangerous file solution")
+
+_("Resource consumption description")
+_("Resource consumption solution")
+
+_("SQL Injection description")
+_("SQL Injection solution")
+
+_("Server Side Request Forgery description")
+_("Server Side Request Forgery solution")

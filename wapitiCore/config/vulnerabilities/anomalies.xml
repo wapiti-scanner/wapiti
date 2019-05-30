@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anomalies>
+    <anomaly name="Internal Server Error">
+        <description>Internal server error description</description>
+        <solution text="Internal server error solution"/>
+        <references>
+            <reference>
+                <title>Wikipedia article for 5xx HTTP error codes</title>
+                <url>https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error</url>
+            </reference>
+        </references>
+    </anomaly>
+    <anomaly name="Resource consumption">
+        <description>Resource consumption description</description>
+        <solution text="Resource consumption solution"/>
+        <references>
+            <reference>
+                <title>http://www.owasp.org/index.php/Asymmetric_resource_consumption_(amplification)</title>
+                <url>http://www.owasp.org/index.php/Asymmetric_resource_consumption_(amplification)</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')]]></title>
+                <url>http://cwe.mitre.org/data/definitions/400.html</url>
+            </reference>
+        </references>
+    </anomaly>
+</anomalies>

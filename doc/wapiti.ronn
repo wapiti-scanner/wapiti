@@ -1,0 +1,288 @@
+wapiti(1) -- A web application vulnerability scanner in Python
+==============================================================
+
+## SYNOPSIS
+
+`wapiti` -u <BASE_URL> [options]
+
+## DESCRIPTION
+
+Wapiti allows you to audit the security of your web applications.
+
+It  performs  "black-box" scans, i.e. it does not study the source code of the application but will scans the webpages of the deployed webapp, looking for scripts and forms where it can inject data.
+
+Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see if a script is vulnerable.
+
+Wapiti is useful only to discover vulnerabilities : it is not an exploitation tools.  Some well known applications can be used for the exploitation part like the recommanded sqlmap.
+
+## OPTIONS SUMMARY
+
+Here is a summary of options. It is essentially what you will get when you launch Wapiti without any argument.
+More detail on each option can be found in the following sections.
+
+TARGET SPECIFICATION:
+
+  * `-u` <URL>
+  * `--scope` {page,folder,domain,url}
+
+ATTACK SPECIFICATION:
+
+  * `-m` <MODULES_LIST>
+  * `--list-modules`
+  * `-l` <LEVEL>
+
+PROXY AND AUTHENTICATION OPTIONS:
+
+  * `-p` <PROXY_URL>
+  * `-a` <CREDENTIALS>
+  * `--auth-type` {basic,digest,kerberos,ntlm}
+  * `-c` <COOKIE_FILE>
+
+SESSION OPTIONS:
+
+  * `--skip-crawl`
+  * `--resume-crawl`
+  * `--flush-attacks`
+  * `--flush-session`
+
+SCAN AND ATTACKS TUNING:
+
+  * `-s` <URL>
+  * `-x` <URL>
+  * `-r` <PARAMETER>
+  * `--skip` <PARAMETER>
+  * `-d` <DEPTH>
+  * `--max-links-per-page` <MAX_LINKS_PER_PAGE>
+  * `--max-files-per-dir` <MAX_FILES_PER_DIR>
+  * `--max-scan-time` <MAX_SCAN_TIME>
+  * `--max-parameters` <MAX>
+  * `-S`, `--scan-force` {paranoid,sneaky,polite,normal,aggressive,insane}
+
+HTTP AND NETWORK OPTIONS:
+
+  * `-t` <SECONDS>
+  * `-H` <HEADER>
+  * `-A` <AGENT>
+  *  `--verify-ssl` {0,1}
+
+OUTPUT OPTIONS:
+
+  * `--color`
+  * `-v` <LEVEL>
+
+REPORT OPTIONS:
+
+  * `-f` {json,html,txt,openvas,vulneranet,xml}
+  * `-o` <OUPUT_PATH>
+
+OTHER OPTIONS:
+
+  * `--no-bugreport`
+  * `--version`
+  * `-h`
+
+## TARGET SPECIFICATION
+
+  * `-u`, `--url` <URL>  
+    The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see --scope for details).  
+    This is the only required argument. The scheme part of the URL must be either http or https.
+    
+  * `--scope` <SCOPE>  
+    Define the scope of the scan and attacks. Valid choices are :
+      - url : will only scan and attack the exact base URL given with -u option
+      - page : will attack every URL matching the path of the base URL (every query string variation)
+      - folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename)
+      - domain : will scan and attack every URL whose domain name match the one from the base URL.
+    
+## ATTACK SPECIFICATION
+
+  * `-m`, `--module` <MODULE_LIST>  
+    Set the list of attack modules (modules names separated with commas) to launch against the target.  
+    Default behavior (when the option is not set) is to use the most common modules.  
+    Common modules can also be specified using the "common" keyword.  
+    To launch a scan without launching any attack, just give an empty value (-m "").  
+    You can filter on http methods too (only get or post). For example -m "xss:get,exec:post".
+    
+  * `--list-modules`  
+    Print the list of available Wapiti modules and exit.
+    
+  * `-l`, `--level` <LEVEL>  
+    In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL.  
+    While it may be successful in finding vulnerabilities that way, it was causing too many requests for not enough success.  
+    This behavior is now hidden behind this option and can be reactivated by setting -l to 2.  
+    It may be useful on CGIs when developers have to parse the query-string themselves.  
+    Default value for this option is 1.
+    
+## PROXY AND AUTHENTICATION OPTIONS
+
+  * `-p`, `--proxy` <PROXY_URL>  
+    The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.  
+    To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/
+
+  * `-a`, `--auth-cred` <CREDENTIALS>  
+    Set credentials to use for HTTP authentication on the target.  
+    Given value should be in the form login%password (% is used as a separator)
+    
+  * `--auth-type` <TYPE>  
+    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.  
+    Kerberos and NTLM authentication may require you to install additionnal Python modules.
+
+  * `-c`, `--cookie` <COOKIE_FILE>  
+    Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more informations.
+    
+## SESSION OPTIONS
+
+Since Wapiti 3.0.0, scanned URLs, discovered vulnerabilities and attacks status are stored in sqlite3 databases used as Wapiti session files.  
+Default behavior when a previous scan session exists for the given base URL and scope is to resume the scan and attack status.  
+Following options allows you to bypass this behavior/
+
+  * `--skip-crawl`  
+    If a previous scan was performed but wasn't finished, don't resume the scan.
+    Attack will be made on currently known URLs without scanning more.
+    
+  * `--resume-crawl`  
+    If the crawl was previously stopped and attacks started, default behavior is to skip crawling if the session is restored.  
+    Use this option in order to continue the scan process while keeping vulnerabilities and attacks in the session.
+    
+  * `--flush-attacks`  
+    Forget everything about discovered vulnerabilities and which URL was attacked by which module.  
+    Only the scan (crawling) informations will be kept.
+    
+  * `--flush-session`  
+    Forget everything about the target for the given scope.
+
+## SCAN AND ATTACKS TUNING
+
+  * `-s`, `--start` <URL>  
+    If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with.  
+    Those URLs will be given a depth of 0, just like the base URL.  
+    This option can be called several times.  
+    You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.
+    
+  * `-x`, `--exclude` <URL>  
+    Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).  
+    This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.
+    
+  * `-r`, `--remove` <PARAMETER>  
+    If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).  
+    This option can be used several times.
+    
+  * `--skip` <PARAMETER>  
+    Given parameter will be kept in URLs and forms but won't be attacked.  
+    Useful if you already know non-vulnerable parameters.
+    
+  * `-d`, `--depth` <DEPTH>  
+    When Wapiti crawls a website it gives each found URL a depth value.  
+    The base URL, and additionnal starting URLs (-s) are given a depth of 0.  
+    Each link found in thoses URLs got a depth of 1, and so on.  
+    Default maximum depth is 40 and is very large.  
+    This limit make sure the scan will stop at some time.  
+    For a fast scan a depth inferior to 5 is recommanded.
+    
+  * `--max-links-per-page` <MAX>  
+    This is another option to be able to reduce the number of URLs discovered by the crawler.  
+    Only the first MAX links of each webpage will be extracted.  
+    This option is not really effective as the same link may appear on different webpages.  
+    It should be useful is rare conditions, for exeample when there is a lot a webpages without query string.
+    
+  * `--max-files-per-dir` <MAX>  
+    Limit the number of URLs to crawl under each folder found on the webserver.  
+    Note that an URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.  
+    Like the previous option it should be useful only in certain situations.
+    
+  * `--max-scan-time` <MINUTES>  
+    Stop the scan after MINUTES minutes if it is still running.  
+    Should be useful to automatise scanning from another process (continuous testing).
+    
+  * `--max-parameters` <MAX>  
+    URLs and forms having more than MAX input parameters will be discarded before launching attack modules.
+    
+  * `-S`, `--scan-force` <FORCE>  
+    The more input parameters an URL or form have, the more requests Wapiti will send.  
+    The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge ammount of time.  
+    Wapiti use a mathematical formula to reduce the numbers of URLs scanned for a given pattern (same variables names) when
+    the number of parameters grows.  
+    The formula is `maximum_allowed_patterns = 220 / (math.exp(number_of_parameters * factor) ** 2)`
+    where factor is an internal value controller by the <FORCE> value you give as an option.  
+    Availables choices are : paranoid, sneaky, polite, normal, aggressive, insane.  
+    Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).  
+    Insane mode just remove the calculation of thoses limits, every URL will be attacked.  
+    Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
+    
+## HTTP AND NETWORK OPTIONS
+
+  * `-t`, `--timemout` <SECONDS>  
+    Time to wait (in seconds) for a HTTP response before considering failure.
+    
+  * `-H`, `--header` <HEADER>  
+    Set a custom HTTM header to inject in every request sent by Wapiti.
+    This option can be used several times.  
+    Value should be a standard HTTP header line (parameter and value separated with a : sign).
+    
+  * `-A`, `--user-agent` <AGENT>  
+    Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.  
+    But you may have to change it to bypass some restrictions so this option is here.
+    
+  * `--verify-ssl` <VALUE>  
+    Wapiti doesn't care of certificates validation by default. That behavior can be changed by passing 1 as a value to that option.
+
+    
+## OUTPUT OPTIONS
+
+Wapiti prints its status to standard output. The two following options allow to tune the output.
+
+  * `--color`  
+    Outpout will be colorized based on the severity of the information (red is critical, orange for warnings, green for information).
+    
+  * `-v`, `--verbose` <LEVEL>  
+    Set the level of verbosity for the output.
+    Possible values are quiet (O), normal (1, default behavior) and verbose (2).
+
+## REPORT OPTIONS
+
+Wapiti will generate a report at the end of the attack process. Several formats of reports are available.
+
+  * `-f`, `--format` <FORMAT>  
+    Set the format of the report. Valid choices are json, html, txt, openvas, vulneranet and xml.  
+    Although the HTML reports were rewritten to be more responsive, they still are impraticable when there is a lot of found vulnerabilities.
+    
+  * `-o`, `--output` <OUTPUT_PATH>  
+    Set the path were the report will be generated.
+
+## OTHER OPTIONS
+
+  * `--version`  
+    Print Wapiti version then exit.
+    
+  * `--no-bugreport`  
+    If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.  
+    You can still prevent reports from being sent using that option.
+
+  * `-h`, `--help`  
+    Show detailed options description. More details are available in this manpage though.
+    
+## LICENSE
+
+Wapiti is covered by the GNU General Public License (GPL), version 2.
+Please read the COPYING file for more information.
+
+## COPYRIGHT
+
+Copyright (c) 2006-2018 Nicolas Surribas.
+
+## AUTHORS
+
+Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file.
+
+## WEBSITE
+
+http://wapiti.sourceforge.net/
+
+## BUG REPORTS
+
+If you find a bug in Wapiti please report it to https://sourceforge.net/p/wapiti/bugs/
+
+## SEE ALSO
+
+The INSTALL.md file that comes with Wapiti contains every information required to install Wapiti.
+

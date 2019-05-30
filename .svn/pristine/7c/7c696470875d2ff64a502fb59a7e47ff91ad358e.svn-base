@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# Copyright (C) 2008-2018 Nicolas Surribas
+#
+# Original author :
+# David del Pozo
+# Alberto Pastor
+# Copyright (C) 2008 Informatica Gesfor
+# ICT Romulus (http://www.ict-romulus.eu)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from xml.parsers import expat
+
+from wapitiCore.language.vulnerability import Vulnerability
+
+
+class VulnerabilityXMLParser:
+
+    VULNERABILITY = "vulnerability"
+    VULNERABILITY_NAME = "name"
+    VULNERABILITY_DESCRIPTION = "description"
+    VULNERABILITY_SOLUTION = "solution"
+    VULNERABILITY_REFERENCE = "reference"
+    VULNERABILITY_REFERENCES = "references"
+    VULNERABILITY_REFERENCE_TITLE = "title"
+    VULNERABILITY_REFERENCE_URL = "url"
+
+    def __init__(self):
+        self._parser = expat.ParserCreate()
+        self._parser.StartElementHandler = self.start_element
+        self._parser.EndElementHandler = self.end_element
+        self._parser.CharacterDataHandler = self.char_data
+        self.vulnerabilities = []
+        self.vul = None
+        self.references = {}
+        self.title = ""
+        self.url = ""
+        self.tag = ""
+
+    def parse(self, filename):
+        with open(filename) as f:
+            content = f.read()
+            self.feed(content)
+
+    def feed(self, data):
+        self._parser.Parse(data, 0)
+
+    def close(self):
+        self._parser.Parse("", 1)
+        del self._parser
+
+    def start_element(self, name, attrs):
+        if name == self.VULNERABILITY:
+            self.vul = Vulnerability()
+            self.vul.set_name(attrs[self.VULNERABILITY_NAME])
+        elif name == self.VULNERABILITY_DESCRIPTION:
+            self.tag = self.VULNERABILITY_DESCRIPTION
+        elif name == self.VULNERABILITY_SOLUTION:
+            # self.tag = self.VULNERABILITY_SOLUTION
+            self.vul.set_solution(attrs["text"])
+        elif name == self.VULNERABILITY_REFERENCES:
+            self.references = {}
+        elif name == self.VULNERABILITY_REFERENCE:
+            self.tag = self.VULNERABILITY_REFERENCE
+        elif name == self.VULNERABILITY_REFERENCE_TITLE:
+            self.tag = self.VULNERABILITY_REFERENCE_TITLE
+        elif name == self.VULNERABILITY_REFERENCE_URL:
+            self.tag = self.VULNERABILITY_REFERENCE_URL
+
+    def end_element(self, name):
+        if name == self.VULNERABILITY:
+            self.vulnerabilities.append(self.vul)
+        elif name == self.VULNERABILITY_REFERENCE:
+            self.references[self.title] = self.url
+        elif name == self.VULNERABILITY_REFERENCES:
+            self.vul.set_references(self.references)
+
+    def char_data(self, data):
+        if self.tag == self.VULNERABILITY_DESCRIPTION:
+            self.vul.set_description(data)
+#    elif self.tag==self.VULNERABILITY_SOLUTION:
+#      self.vul.set_solution(data)
+        elif self.tag == self.VULNERABILITY_REFERENCE_TITLE:
+            self.title = data
+        elif self.tag == self.VULNERABILITY_REFERENCE_URL:
+            self.url = data
+        self.tag = ""
+
+    def get_vulnerabilities(self):
+        return self.vulnerabilities
