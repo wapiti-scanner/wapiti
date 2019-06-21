@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a href="/">root</a><br />
+<a href="/#">Empty hash</a><br />
+<a href="/#/">Empty hash then slash</a><br />
+<a href="/#yolo">Valid hash</a><br />
+<a href="/.#yolo">Dot then valid hash</a><br />
+<a href="/..#yolo">Double dot then valid hash</a><br />
+<a href="/../#yolo">Double dot then slash then valid hash</a><br />
+<a href="//">Double slash</a><br />
+<a href="//.">Double slash then dot</a><br />
+<a href="/..">Useless dotdot</a><br />
+<a href="//..">Double slash then useless dotdot</a><br />
+<a href="//../">Double slash then useless dotdot then slash</a><br />
+<a href="//..//">Double slash then useless dotdot then double slash</a><br />
+<a href="//..//.">Double slash then useless dotdot then double slash then dot</a><br />
+<a href="//..//./">Double slash then useless dotdot then double slash then dot then slash</a><br />
+<a href="/../">Useless dotdot then slash</a><br />
+<a href="/..//">Useless dotdot then double slash</a><br />
+<a href="/.">Useless single dot</a><br />
+<a href="/./">Useless single dot then slash</a><br />
+<a href="/.//">Useless single dot then double slash</a><br />
+<a href="/.///">Useless single dot then triple slash</a><br />
+<a href="/.//.">Useless single dot then double slash then dot</a><br />
+<a href="/.//..">Useless single dot then double slash then double dot</a><br />
+<a href="/.//../">Useless single dot then double slash then double dot then slash</a><br />
+<a href="/.//../.">Useless single dot then double slash then double dot then slash then dot</a><br />
+<a href="/?">Question mark</a><br />
+<a href="/.?">Dot then question mark</a><br />
+<a href="/..?">Double dot then question mark</a><br />
+<a href="/./?">Dot slash then question mark</a><br />
+<a href="//./?">Double slash dot slash then question mark</a><br />
+<a href="/../?">Double dot slash then question mark</a><br />
+<a href="//../?">Double slash double dot slash then question mark</a><br />
+<a href="/.//?">Dot double slash then question mark</a><br />
+<a href="//..//?">Double slash double dot double slash then question mark</a><br />
+<a href="///..//../.././/.///.?">Seing double at the double triple slash dot stuff</a><br />
+</body>
+</html>

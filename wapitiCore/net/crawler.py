@@ -392,7 +392,7 @@ class Page:
         for tag in self.soup.find_all("button", formaction=True):
             yield tag["formaction"]
 
-    def make_absolute(self, link: str):
+    def make_absolute(self, link: str) -> str:
         """Convert a relative URL to an absolute one (with scheme, host, path, etc) and use the base href if present.
 
         @type link: str
@@ -1160,7 +1160,7 @@ class Crawler:
         )
         return Page(response, form.url)
 
-    def send(self, resource: web.Request, headers: dict=None, follow_redirects: bool = False) -> Page:
+    def send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
         if resource.method == "GET":
             page = self.get(resource, headers=headers, follow_redirects=follow_redirects)
         elif resource.method == "POST":

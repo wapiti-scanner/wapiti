@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a href="http://perdu.com/">root</a><br />
+<a href="http://perdu.com/#">Empty hash</a><br />
+<a href="http://perdu.com/#/">Empty hash then slash</a><br />
+<a href="http://perdu.com/#yolo">Valid hash</a><br />
+<a href="http://perdu.com/.#yolo">Dot then valid hash</a><br />
+<a href="http://perdu.com/..#yolo">Double dot then valid hash</a><br />
+<a href="http://perdu.com/../#yolo">Double dot then slash then valid hash</a><br />
+<a href="http://perdu.com//">Double slash</a><br />
+<a href="http://perdu.com//.">Double slash then dot</a><br />
+<a href="http://perdu.com/..">Useless dotdot</a><br />
+<a href="http://perdu.com//..">Double slash then useless dotdot</a><br />
+<a href="http://perdu.com//../">Double slash then useless dotdot then slash</a><br />
+<a href="http://perdu.com//..//">Double slash then useless dotdot then double slash</a><br />
+<a href="http://perdu.com//..//.">Double slash then useless dotdot then double slash then dot</a><br />
+<a href="http://perdu.com//..//./">Double slash then useless dotdot then double slash then dot then slash</a><br />
+<a href="http://perdu.com/../">Useless dotdot then slash</a><br />
+<a href="http://perdu.com/..//">Useless dotdot then double slash</a><br />
+<a href="http://perdu.com/.">Useless single dot</a><br />
+<a href="http://perdu.com/./">Useless single dot then slash</a><br />
+<a href="http://perdu.com/.//">Useless single dot then double slash</a><br />
+<a href="http://perdu.com/.///">Useless single dot then triple slash</a><br />
+<a href="http://perdu.com/.//.">Useless single dot then double slash then dot</a><br />
+<a href="http://perdu.com/.//..">Useless single dot then double slash then double dot</a><br />
+<a href="http://perdu.com/.//../">Useless single dot then double slash then double dot then slash</a><br />
+<a href="http://perdu.com/.//../.">Useless single dot then double slash then double dot then slash then dot</a><br />
+<a href="http://perdu.com/?">Question mark</a><br />
+<a href="http://perdu.com/.?">Dot then question mark</a><br />
+<a href="http://perdu.com/..?">Double dot then question mark</a><br />
+<a href="http://perdu.com/./?">Dot slash then question mark</a><br />
+<a href="http://perdu.com//./?">Double slash dot slash then question mark</a><br />
+<a href="http://perdu.com/../?">Double dot slash then question mark</a><br />
+<a href="http://perdu.com//../?">Double slash double dot slash then question mark</a><br />
+<a href="http://perdu.com/.//?">Dot double slash then question mark</a><br />
+<a href="http://perdu.com//..//?">Double slash double dot double slash then question mark</a><br />
+<a href="http://perdu.com///..//../.././/.///.?">Seing double at the double triple slash dot stuff</a><br />
+</body>
+</html>

@@ -58,21 +58,21 @@ if a script is vulnerable.""",
         "bin/wapiti-getcookie"
     ],
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: End Users/Desktop',
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
-        'Natural Language :: English',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
-        'Operating System :: Unix',
-        'Programming Language :: Python',
-        'Topic :: Security',
-        'Topic :: Internet :: WWW/HTTP :: Indexing/Search',
-        'Topic :: Software Development :: Testing'
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Natural Language :: English",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Topic :: Security",
+        "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+        "Topic :: Software Development :: Testing"
     ],
     install_requires=[
         "requests",
@@ -84,8 +84,8 @@ if a script is vulnerable.""",
         "PySocks"
     ],
     extras_require={
-        'NTLM': ["requests_ntlm"],
-        'Kerberos': ["requests_kerberos"],
+        "NTLM": ["requests_ntlm"],
+        "Kerberos": ["requests_kerberos"],
     },
     entry_points={
         "console_scripts": [
