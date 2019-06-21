@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <a href="file.html">File in same directory</a>
+    <a href="resource">File or directory in same directory</a>
+    <a href="folder/">Directory (trailing slash) in same directory</a>
+    <a href="folder/file.html">Folder then file</a>
+    <a href="..">Parent folder</a>
+    <a href="../">Parent folder with slash</a>
+    <a href=".">Current folder</a>
+    <a href="./">Current folder with slash</a>
+    <a href="./folder/file2.html">dotslash then folder and file</a>
+    <a href="../folder/file2.html">parent then folder and file</a>
+    <a href=".//..///.////..//./">Up to root with unnecessary dotslashes</a>
+    <a href="#yolo">Same file but relative to anchor</a>
+    <a href="file3.html#yolo">Another file with anchor</a>
+    <a href="?k=v">Same file but with parameters</a>
+    <a href="//external.tld">Protocol relative URL</a>
+    <a href="file3.html?k=v">Another file with parameters</a>
+    <a href=".?k=v">Current folder with parameters</a>
+    <a href=".//folder//.//?k=v">Subfolder with trailing slash and parameters</a>
+    <a href=".//folder?k=v">Subfolder with parameters, no trailing slash</a>
+    <a href="//external.tld/.././yolo?k=v#anchor">Protocol relative URL</a>
+    <a href="?C=D;O=A">Apache like directory listing link</a>
+</body>
+</html>
