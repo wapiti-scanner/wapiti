@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body onload="document.location='/onload.html';">
+<script>
+    window.open("/popup.html");
+    document.location='redir.html';
+    var link='con'+'cat'+'.html';
+    window.href=link;
+    document.location = link + "?var=value";
+</script>
+<a href="javascript:window.open('/link.html');">Click</a>
+</body>
+</html>

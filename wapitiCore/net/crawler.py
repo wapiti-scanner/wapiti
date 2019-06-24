@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Crawler v2.4.0 - A web spider library
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2006-2018 Nicolas SURRIBAS
+# Copyright (C) 2006-2019 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -347,7 +347,7 @@ class Page:
 
         @rtype: list
         """
-        return list(set(self._scripts()))
+        return [self.make_absolute(script_url) for script_url in self._scripts()]
 
     def iter_frames(self):
         """Returns the absolute URLs of frames loaded in the webpage."""

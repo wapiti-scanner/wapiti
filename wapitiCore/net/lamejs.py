@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # LameJs - A very basic javascript interpreter in Python
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2013-2018 Nicolas Surribas
+# Copyright (C) 2013-2019 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,7 +56,8 @@ class LameJs:
                 value = self.read_node(node.initializer)
                 self.js_vars[node.value] = value
                 return node.value, value
-            return node.value
+            else:
+                return self.js_vars.get(node.value, node.value)
         elif node.type == "NUMBER":
             logging.debug("# NUMBER")
             return node.value

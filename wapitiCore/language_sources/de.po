@@ -1,4 +1,4 @@
-# Copyright (C) YEAR 2009-2018 Nicolas SURRIBAS
+# Copyright (C) YEAR 2009-2019 Nicolas SURRIBAS
 # This file is distributed under the same license as the Wapiti package.
 #
 #, fuzzy

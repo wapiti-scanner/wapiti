@@ -31,7 +31,7 @@ doc_and_conf_files = [
     )
 ]
 
-parser_name = "html5lib"
+parser_name = "lxml"
 
 # Main
 setup(

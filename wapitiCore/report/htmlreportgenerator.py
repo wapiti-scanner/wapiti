@@ -3,7 +3,7 @@
 # HTML Report Generator Module for Wapiti Project
 # Wapiti Project (http://wapiti.sourceforge.net)
 #
-# Copyright (C) 2017-2018 Nicolas SURRIBAS
+# Copyright (C) 2017-2019 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

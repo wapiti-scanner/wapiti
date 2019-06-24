@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2009-2018 Nicolas Surribas
+# Copyright (C) 2009-2019 Nicolas Surribas
 #
 # Original authors :
 # Anthony DUBOCAGE
