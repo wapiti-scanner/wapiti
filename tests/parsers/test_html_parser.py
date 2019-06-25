@@ -192,3 +192,72 @@ def test_base_relative_links():
             "http://external.tld/",
             "http://external.tld/yolo?k=v",
         }
+
+
+@responses.activate
+def test_base_extra_links():
+    with open("tests/data/base_extra_links.html") as fd:
+        url = "http://perdu.com/"
+        responses.add(
+            responses.GET,
+            url,
+            body=fd.read()
+        )
+
+        resp = requests.get(url, allow_redirects=False)
+        page = Page(resp, url)
+
+        assert set(page.extra_urls) == {
+            "http://perdu.com/blog/",  # extracted from base href
+            "http://perdu.com/blog/planets.gif",
+            "http://perdu.com/blog/sun.html",
+            "http://perdu.com/blog/mercur.html",
+            "http://perdu.com/blog/venus.html",
+            "http://perdu.com/blog/link.html",
+            "http://perdu.com/blog/audio.html",
+            "http://perdu.com/blog/embed.html",
+            "http://perdu.com/blog/horse.ogg",
+            "http://perdu.com/blog/horse.mp3",
+            "http://perdu.com/blog/video.html",
+            "http://perdu.com/blog/subtitles_en.vtt",
+            "http://perdu.com/blog/dopequote.html",
+            "http://perdu.com/blog/del.html",
+            "http://perdu.com/blog/ins.html",
+            "http://perdu.com/blog/q.html",
+            "http://perdu.com/blog/data.html",
+            "http://perdu.com/blog/high-def.jpg",
+            "http://perdu.com/blog/low-def.jpg",
+            "http://perdu.com/blog/img_orange_flowers.jpg"
+        }
+
+
+@responses.activate
+def test_base_other_links():
+    with open("tests/data/base_other_links.html") as fd:
+        url = "http://perdu.com/"
+        responses.add(
+            responses.GET,
+            url,
+            body=fd.read(),
+            adding_headers={
+                "Location": "https://perdu.com/login"
+            },
+            status=301
+        )
+
+        resp = requests.get(url, allow_redirects=False)
+        page = Page(resp, url)
+
+        assert sorted(page.iter_frames()) == [
+            "http://perdu.com/blog/frame1.html",
+            "http://perdu.com/blog/frame2.html",
+            "http://perdu.com/blog/iframe.html"
+        ]
+
+        assert page.scripts == ["http://perdu.com/blog/script.js"]
+        assert page.redirection_url == "https://perdu.com/login"
+        assert set(page.images_urls) == {
+            "http://perdu.com/blog/img/logo.png"
+        }
+
+        assert page.html_redirections == ["http://perdu.com/blog/adblock.html"]

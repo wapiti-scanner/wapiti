@@ -194,7 +194,7 @@ class SqlitePersister:
     def add_request(self, link):
         self._set_paths([link])
 
-    def _get_paths(self, path=None, method=None, crawled: bool=True, attack_module: str="", evil: bool=False):
+    def _get_paths(self, path=None, method=None, crawled: bool = True, attack_module: str = "", evil: bool = False):
         cursor = self._conn.cursor()
 
         conditions = ["evil = ?"]
@@ -267,10 +267,10 @@ class SqlitePersister:
 
             yield http_res
 
-    def get_links(self, path=None, attack_module: str=""):
+    def get_links(self, path=None, attack_module: str = ""):
         yield from self._get_paths(path=path, method="GET", crawled=True, attack_module=attack_module)
 
-    def get_forms(self, attack_module: str=""):
+    def get_forms(self, attack_module: str = ""):
         yield from self._get_paths(method="POST", crawled=True, attack_module=attack_module)
 
     def count_paths(self) -> int:
@@ -485,22 +485,11 @@ class SqlitePersister:
 
 
 if __name__ == "__main__":
+    from wapitiCore.net.web import Request
+    # persister = SqlitePersister("/tmp/crawl.db")
+
     persister = SqlitePersister("/tmp/crawl.db")
-    for http_res in persister.get_links():
-        print(http_res)
-    print("-"*30)
-
-    for http_res in persister.get_forms():
-        print(http_res)
-    print("-" * 30)
-
-    for http_res in persister.get_to_browse():
-        print(http_res)
-
-    print("-" * 30)
-    for http_res in persister.get_links("http://127.0.0.1/users/encoding/bad.php"):
-        print(http_res)
-    print("-" * 30)
+    persister.set_root_url("http://perdu.com")
 
     print(persister.get_root_url())
 
