@@ -412,10 +412,12 @@ class Page:
         query_string = parts.query
         url_path = parts.path or '/'
         url_path = normpath(url_path.replace("\\", "/"))
+
         # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
         url_path = re.sub(r"^/{2,}", "/", url_path)
+
         # normpath removes the trailing slash so we must add it if necessary
-        if parts.path.endswith('/') and not url_path.endswith('/'):
+        if (parts.path.endswith(('/', '/.')) or parts.path == '.') and not url_path.endswith('/'):
             url_path += '/'
 
         # a hack for auto-generated Apache directory index

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <base href="http://perdu.com/blog/" target="_blank">
+</head>
+<body>
+    <a href="file.html">File in same directory</a><br />
+    <a href="resource">File or directory in same directory</a><br />
+    <a href="folder/">Directory (trailing slash) in same directory</a><br />
+    <a href="folder/file.html">Folder then file</a><br />
+    <a href="..">Parent folder</a><br />
+    <a href="../">Parent folder with slash</a><br />
+    <a href=".">Current folder</a><br />
+    <a href="folder/.">Directory (trailing slash then dot) in same directory</a><br />
+    <a href="./">Current folder with slash</a><br />
+    <a href="./folder/file2.html">dotslash then folder and file</a><br />
+    <a href="../folder/file2.html">parent then folder and file</a><br />
+    <a href=".//..///.////..//./">Up to root with unnecessary dotslashes</a><br />
+    <a href="#yolo">Same file but relative to anchor</a><br />
+    <a href="file3.html#yolo">Another file with anchor</a><br />
+    <a href="?k=v">Same file but with parameters</a><br />
+    <a href="//external.tld">Protocol relative URL</a><br />
+    <a href="file3.html?k=v">Another file with parameters</a><br />
+    <a href=".?k=v2">Current folder with parameters</a><br />
+    <a href=".//folder//.//?k=v">Subfolder with trailing slash and parameters</a><br />
+    <a href=".//folder?k=v">Subfolder with parameters, no trailing slash</a><br />
+    <a href="//external.tld/.././yolo?k=v#anchor">Protocol relative URL</a><br />
+    <a href="?C=D;O=A">Apache like directory listing link</a><br />
+</body>
+</html>

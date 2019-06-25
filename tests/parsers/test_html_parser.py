@@ -158,3 +158,37 @@ def test_meta():
         assert page.text_only == "This is dope"
         assert page.favicon_url == "http://perdu.com/custom.ico"
         assert page.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
+
+
+@responses.activate
+def test_base_relative_links():
+    with open("tests/data/base_relative_links.html") as fd:
+        url = "http://perdu.com/"
+        responses.add(
+            responses.GET,
+            url,
+            body=fd.read()
+        )
+
+        resp = requests.get(url)
+        page = Page(resp, url)
+
+        assert set(page.links) == {
+            url,
+            "http://perdu.com/blog/file.html",
+            "http://perdu.com/blog/resource",
+            "http://perdu.com/blog/folder/",
+            "http://perdu.com/blog/folder/file.html",
+            "http://perdu.com/blog/folder/file2.html",
+            "http://perdu.com/folder/file2.html",
+            "http://perdu.com/",
+            "http://perdu.com/blog/",
+            "http://perdu.com/blog/file3.html",
+            "http://perdu.com/blog/?k=v",
+            "http://perdu.com/blog/?k=v2",
+            "http://perdu.com/blog/file3.html?k=v",
+            "http://perdu.com/blog/folder/?k=v",
+            "http://perdu.com/blog/folder?k=v",
+            "http://external.tld/",
+            "http://external.tld/yolo?k=v",
+        }
