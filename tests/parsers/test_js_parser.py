@@ -5,7 +5,7 @@ from wapitiCore.net.crawler import Page
 
 
 @responses.activate
-def test_absolute_root():
+def test_js_parser():
     with open("tests/data/js_links.html") as fd:
         url = "http://perdu.com/"
         responses.add(

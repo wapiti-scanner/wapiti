@@ -34,3 +34,21 @@ def test_http():
     assert isinstance(page.bytes, bytes) and len(page.bytes)
     assert page.type == "text/html"
     assert page.encoding == "ISO-8859-1"
+
+
+@responses.activate
+def test_http():
+    url = "http://perdu.com/folder"
+    responses.add(
+        responses.GET,
+        url,
+        body="Hello world!",
+        adding_headers={
+            "Location": "http://perdu.com/folder/",
+        },
+        status=301
+    )
+
+    resp = requests.get(url, allow_redirects=False)
+    page = Page(resp, url)
+    assert page.is_directory_redirection
