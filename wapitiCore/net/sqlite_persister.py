@@ -356,7 +356,7 @@ class SqlitePersister:
         )
         self._conn.commit()
 
-    def add_anomaly(self, request_id: int=-1, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.add_payload(
             request_id,
             "anomaly",
@@ -367,7 +367,7 @@ class SqlitePersister:
             info
         )
 
-    def add_vulnerability(self, request_id: int=-1, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.add_payload(
             request_id,
             "vulnerability",
