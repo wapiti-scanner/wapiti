@@ -64,8 +64,22 @@ def test_persister():
             crawler.send(req)
             persister.add_request(req)
             assert req.path_id == 1
+            assert persister.get_path_by_id(1) == req
             break
 
     # Should be one now as the link was crawled
     assert len(list(persister.get_links()))
     assert persister.count_paths() == 4
+
+    persister.set_attacked(1, "xss")
+    assert persister.count_attacked("xss") == 1
+    assert persister.have_attacks_started()
+
+    naughty_get = Request("http://httpbin.org/?k=1%20%OR%200")
+    persister.add_vulnerability(1, "SQL Injection", 1, naughty_get, "k", "OR bypass")
+    assert next(persister.get_payloads())
+    persister.flush_attacks()
+    assert not persister.have_attacks_started()
+    assert not len(list(persister.get_payloads()))
+    persister.flush_session()
+    assert not persister.count_paths()

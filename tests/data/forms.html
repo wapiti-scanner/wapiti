@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form action="http://perdu.com/get_form?a=b">
+    <input type="text" name="name" />
+    <input type="submit" value="Go" />
+</form>
+
+
+<form action="/post_select.php?id=3" method="POST">
+    Firstname:<input type="text" name="fname" value="Smith">
+    <input type="hidden" name="csrf" value="9877665" />
+    <select name="carlist" form="carform">
+      <option value="volvo" selected>Volvo</option>
+      <option value="saab">Saab</option>
+      <option value="opel">Opel</option>
+      <option value="audi">Audi</option>
+    </select>
+    <input type="submit">
+</form>
+
+
+</body>
+</html>
