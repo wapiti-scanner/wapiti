@@ -759,14 +759,14 @@ class Page:
 
             defaults = {
                 "checkbox": "default",
-                "color": "%23adeadb",
-                "date": "2017-03-03",
-                "datetime": "2017-03-03T20:35:34.32",
-                "datetime-local": "2017-03-03T22:41",
-                "email": "wapiti2017%40mailinator.com",
+                "color": "#bada55",
+                "date": "2019-03-03",
+                "datetime": "2019-03-03T20:35:34.32",
+                "datetime-local": "2019-03-03T22:41",
+                "email": "wapiti2019%40mailinator.com",
                 "file": ["pix.gif", "GIF89a", "image/gif"],
                 "hidden": "default",
-                "month": "2017-03",
+                "month": "2019-03",
                 "number": "1337",
                 "password": "letmein",
                 "radio": "beton",  # priv8 j0k3
@@ -777,7 +777,7 @@ class Page:
                 "text": "default",
                 "time": "13:37",
                 "url": "http://wapiti.sf.net/",
-                "week": "2017-W24"
+                "week": "2019-W24"
             }
 
             for input_field in form.find_all("input", attrs={"name": True}):
@@ -794,7 +794,7 @@ class Page:
                         post_params.append([input_field["name"] + ".x", "1"])
                         post_params.append([input_field["name"] + ".y", "1"])
                 elif input_type in defaults:
-                    input_value = input_field.get("value", defaults[input_type]if autofill else "")
+                    input_value = input_field.get("value", defaults[input_type] if autofill else "")
                     if input_type == "file":
                         # With file inputs the content is only sent if the method is POST and enctype multipart
                         # otherwise only the file name is sent

@@ -17,6 +17,7 @@ def test_forms():
         resp = requests.get(url, allow_redirects=False)
         page = Page(resp, url)
         count = 0
+        form_action = False
 
         for form in page.iter_forms():
             count += 1
@@ -31,9 +32,49 @@ def test_forms():
             elif form.file_path == "/post_select.php":
                 assert form.method == "POST"
                 assert form.get_params == [["id", "3"]]
-                assert form.post_params ==[["fname", "Smith"], ["csrf", "9877665"], ["carlist", "volvo"]]
+                assert form.post_params == [["fname", "Smith"], ["csrf", "9877665"], ["carlist", "volvo"]]
                 assert form.url == "http://perdu.com/post_select.php?id=3"
                 assert not form.is_multipart
                 assert not len(form.file_params)
+            elif form.file_path == "/fields.php":
+                assert form.method == "POST"
+                assert not form.is_multipart
+                assert dict(form.post_params) == {
+                    "vehicle1": "car",
+                    "vehicle2": "boat",
+                    "color": "#bada55",
+                    "date": "2019-03-03",
+                    "datetime": "2019-03-03T20:35:34.32",
+                    "datetime-local": "2019-03-03T22:41",
+                    "email": "wapiti2019%40mailinator.com",
+                    "file": "pix.gif",
+                    "gender": "other",  # taking the last one
+                    "hidden": "default",
+                    "image.x": "1",
+                    "image.y": "1",
+                    "month": "2019-03",
+                    "number": "1337",
+                    "password": "letmein",
+                    "radio": "beton",
+                    "range": "37",
+                    "search": "default",
+                    "submit": "submit",
+                    "tel": "0606060606",
+                    "text": "default",
+                    "textarea": "Hi there!",
+                    "time": "13:37",
+                    "url": "http://wapiti.sf.net/",
+                    "week": "2019-W24"
+                }
+            elif form.file_path == "/upload.php":
+                assert form.is_multipart
+                assert not form.post_params
+                assert form.file_params == [["file", ["pix.gif", "GIF89a", "image/gif"]]]
+            elif form.file_path == "/alt.php":
+                form_action = True
+            else:
+                # Form with no action set
+                assert form.file_path == "/"
 
-        assert count == 2
+        assert count == 6
+        assert form_action

@@ -24,6 +24,47 @@
     <input type="submit">
 </form>
 
+<form action="/fields.php" method="POST">
+    <input type="checkbox" name="vehicle1" value="car"> I have a MX-5 NBFL<br>
+    <input type="checkbox" name="vehicle2" value="boat" checked> I have a MX-5 NC<br>
+    <input type="color" name="color" />
+    <input type="date" name="date" />
+    <input type="datetime" name="datetime" />
+    <input type="datetime-local" name="datetime-local" />
+    <input type="email" name="email" />
+    <input type="file" name="file" />
+    <input type="hidden" name="hidden" />
+    <input type="image" name="image" />
+    <input type="month" name="month" />
+    <input type="number" name="number" />
+    <input type="password" name="password" />
+
+    <input type="radio" name="gender" value="male"> Male<br>
+    <input type="radio" name="gender" value="female" checked> Female<br>
+    <input type="radio" name="gender" value="other"> Other
+
+    <input type="radio" name="radio">
+
+    <input type="range" name="range" />
+    <input type="search" name="search" />
+    <input type="tel" name="tel" />
+    <input type="text" name="text" />
+    <textarea name="textarea"></textarea>
+    <input type="time" name="time" />
+    <input type="url" name="url" />
+    <input type="week" name="week" />
+
+    <input type="submit" name="submit" />
+</form>
+
+<form action="/upload.php" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" />
+</form>
+
+<form method="POST">
+    <input type="text" name="yolo" />
+    <button type="submit" formaction="/alt.php">Submit to another page</button>
+</form>
 
 </body>
 </html>
