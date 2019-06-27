@@ -1,16 +1,11 @@
 import os
 
 import responses
+import requests
 
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
-
-
-try:
-    os.unlink("/tmp/crawl.db")
-except FileNotFoundError:
-    pass
+from wapitiCore.net.crawler import Crawler, Page
 
 
 @responses.activate
@@ -24,6 +19,11 @@ def test_persister():
     )
 
     crawler = Crawler("http://httpbin.org/")
+
+    try:
+        os.unlink("/tmp/crawl.db")
+    except FileNotFoundError:
+        pass
 
     persister = SqlitePersister("/tmp/crawl.db")
     persister.set_root_url("http://httpbin.org/")
@@ -83,3 +83,40 @@ def test_persister():
     assert not len(list(persister.get_payloads()))
     persister.flush_session()
     assert not persister.count_paths()
+
+
+@responses.activate
+def test_persister_forms():
+    with open("tests/data/forms.html") as fd:
+        url = "http://perdu.com/"
+        responses.add(
+            responses.GET,
+            url,
+            body=fd.read()
+        )
+
+        resp = requests.get(url, allow_redirects=False)
+        page = Page(resp, url)
+
+        forms = list(page.iter_forms())
+
+        try:
+            os.unlink("/tmp/crawl.db")
+        except FileNotFoundError:
+            pass
+
+        persister = SqlitePersister("/tmp/crawl.db")
+        persister.set_root_url("http://httpbin.org/")
+        persister.set_to_browse(forms)
+
+        assert persister.count_paths() == 6
+
+        extracted_forms = list(persister.get_to_browse())
+        assert len(extracted_forms) == 6
+        assert set(forms) == set(extracted_forms)
+
+        for form in extracted_forms:
+            if form.file_path == "/upload.php":
+                assert form.file_params[0] == ["file", ["pix.gif", "GIF89a", "image/gif"]]
+            elif form.file_path == "/fields.php":
+                assert ["file", "pix.gif"] in form.post_params
