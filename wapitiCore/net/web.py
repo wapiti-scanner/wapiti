@@ -34,7 +34,8 @@ class Request:
     def __init__(
             self, path: str, method: str = "",
             get_params: list = None, post_params: list = None, file_params: list = None,
-            encoding: str = "UTF-8", multipart: bool = False, referer: str = "", link_depth: int = 0):
+            encoding: str = "UTF-8", enctype: str = "application/x-www-form-urlencoded",
+            referer: str = "", link_depth: int = 0):
         """Create a new Request object.
 
         Takes the following arguments:
@@ -60,9 +61,20 @@ class Request:
         self._cached_encoded_data = None
         self._cached_encoded_files = None
         self._cached_hash = None
-        self._multipart = multipart
+
         self._cached_hash_params = None
         self._status = None
+
+        if not method:
+            # For lazy
+            if post_params or file_params:
+                self._method = "POST"
+            else:
+                self._method = "GET"
+        else:
+            self._method = method
+
+        self._enctype = "" if self._method == "GET" else enctype.lower().strip()
 
         # same structure as _get_params, see below
         if not post_params:
@@ -73,14 +85,19 @@ class Request:
                 # Non empty list
                 self._post_params = deepcopy(post_params)
             elif isinstance(post_params, str):
-                self._post_params = []
-                if len(post_params):
-                    for kv in post_params.split("&"):
-                        if kv.find("=") > 0:
-                            self._post_params.append(kv.split("=", 1))
-                        else:
-                            # ?param without value
-                            self._post_params.append([kv, None])
+                if "urlencoded" in self.enctype or self.is_multipart:
+                    # special case of multipart is dealt when sending request
+                    self._post_params = []
+                    if len(post_params):
+                        for kv in post_params.split("&"):
+                            if kv.find("=") > 0:
+                                self._post_params.append(kv.split("=", 1))
+                            else:
+                                # ?param without value
+                                self._post_params.append([kv, None])
+                else:
+                    # must be something like application/json or text/xml
+                    self._post_params = post_params
 
         # eg: files = [['file_field', ('file_name', 'file_content')]]
         if not file_params:
@@ -110,14 +127,6 @@ class Request:
             else:
                 self._get_params = get_params
 
-        if not method:
-            # For lazy
-            if self._post_params or self._file_params:
-                self._method = "POST"
-            else:
-                self._method = "GET"
-        else:
-            self._method = method
         self._encoding = encoding
         self._referer = referer
         self._link_depth = link_depth
@@ -140,7 +149,10 @@ class Request:
     def __hash__(self):
         if self._cached_hash is None:
             get_kv = tuple([tuple(param) for param in self._get_params])
-            post_kv = tuple([tuple(param) for param in self._post_params])
+            if isinstance(self._post_params, list):
+                post_kv = tuple([tuple(param) for param in self._post_params])
+            else:
+                post_kv = self._enctype + str(len(self._post_params))
             file_kv = tuple([tuple([param[0], param[1][0]]) for param in self._file_params])
 
             self._cached_hash = hash((self._method, self._resource_path, get_kv, post_kv, file_kv))
@@ -219,6 +231,7 @@ class Request:
             buff = "{0} {1} ({2})".format(self._method, self.url, self._link_depth)
         else:
             buff = "{0} {1} ({2})".format(self._method, self._resource_path, self._link_depth)
+
         if self._post_params:
             buff += "\n\tdata: {}".format(self.encoded_data)
         if self._file_params:
@@ -251,8 +264,12 @@ class Request:
                     "{3}/* snip file content snip */\n").format(boundary, field_name, field_value[0], left_margin)
             http_string += "{0}--\n".format(boundary)
         elif self._post_params:
-            http_string += "{}Content-Type: application/x-www-form-urlencoded\n".format(left_margin)
-            http_string += "\n{}{}".format(left_margin, self.encoded_data)
+            if "urlencoded" in self.enctype:
+                http_string += "{}Content-Type: application/x-www-form-urlencoded\n".format(left_margin)
+                http_string += "\n{}{}".format(left_margin, self.encoded_data)
+            else:
+                http_string += "{}Content-Type: {}\n".format(left_margin, self.enctype)
+                http_string += "\n{}{}".format(left_margin, self.encoded_data)
 
         return http_string.rstrip()
 
@@ -261,7 +278,9 @@ class Request:
         curl_string = "curl \"{0}\"".format(shell_escape(self.url))
         if self._referer:
             curl_string += " -e \"{0}\"".format(shell_escape(self._referer))
+
         if self._file_params:
+            # POST with multipart
             for field_name, field_value in self._post_params:
                 curl_string += " -F \"{0}\"".format(shell_escape("{0}={1}".format(field_name, field_value)))
             for field_name, field_value in self._file_params:
@@ -269,7 +288,12 @@ class Request:
                 curl_string += " -F \"{0}\"".format(shell_escape(curl_upload_kv))
             pass
         elif self._post_params:
-            curl_string += " -d \"{0}\"".format(shell_escape(self.encoded_data))
+            # POST either urlencoded
+            if "urlencoded" in self._enctype:
+                curl_string += " -d \"{0}\"".format(shell_escape(self.encoded_data))
+            else:
+                # Or raw blob
+                curl_string += " -H \"Content-Type: {}\" -d @payload_file".format(self._enctype)
 
         return curl_string
 
@@ -365,8 +389,12 @@ class Request:
         return self._encoding
 
     @property
+    def enctype(self) -> str:
+        return self._enctype
+
+    @property
     def is_multipart(self) -> bool:
-        return self._multipart
+        return "multipart" in self._enctype
 
     @property
     def headers(self):
@@ -392,7 +420,9 @@ class Request:
 
     @property
     def post_params(self):
-        return deepcopy(self._post_params)
+        if isinstance(self._post_params, list):
+            return deepcopy(self._post_params)
+        return self._post_params
 
     @property
     def file_params(self):
@@ -406,7 +436,7 @@ class Request:
 
     @property
     def post_keys(self):
-        if len(self._post_params):
+        if isinstance(self._post_params, list) and len(self._post_params):
             return list(zip(*self._post_params))[0]
         return ()
 
@@ -420,6 +450,9 @@ class Request:
     def _encode_params(params):
         if not params:
             return ""
+
+        if not isinstance(params, list):
+            return params
 
         key_values = []
         for k, v in params:
@@ -455,7 +488,7 @@ class Request:
 
     @property
     def encoded_post_keys(self):
-        if self._cached_post_keys is None:
+        if self._cached_post_keys is None and "urlencoded" in self.enctype:
             self._cached_post_keys = self._encoded_keys(self._post_params)
         return self._cached_post_keys
 

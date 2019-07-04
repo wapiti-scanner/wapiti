@@ -737,7 +737,7 @@ class Page:
             url = self.make_absolute(form.attrs.get("action", self._url))
             # If no method is specified then it's GET. If an invalid method is set it's GET.
             method = "POST" if form.attrs.get("method", "GET").upper() == "POST" else "GET"
-            multipart = method == "POST" and form.attrs.get("enctype", "").lower() == "multipart/form-data"
+            enctype = "" if method == "GET" else form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
             get_params = []
             post_params = []
             # If the form must be sent in multipart, everything should be given to requests in the files parameter
@@ -801,7 +801,7 @@ class Page:
                         if method == "GET":
                             get_params.append([input_field["name"], "pix.gif"])
                         else:
-                            if multipart:
+                            if "multipart" in enctype:
                                 file_params.append([input_field["name"], input_value])
                             else:
                                 post_params.append([input_field["name"], "pix.gif"])
@@ -860,7 +860,7 @@ class Page:
                 file_params=file_params,
                 encoding=self.apparent_encoding,
                 referer=self.url,
-                multipart=multipart
+                enctype=enctype
             )
             yield new_form
 
@@ -874,7 +874,7 @@ class Page:
                     file_params=file_params,
                     encoding=self.apparent_encoding,
                     referer=self.url,
-                    multipart=multipart
+                    enctype=enctype
                 )
                 yield new_form
 
@@ -1108,7 +1108,7 @@ class Crawler:
         @type headers: dict
         @rtype: Page
         """
-        form_headers = {}
+        form_headers = {"Content-Type": form.enctype}
         if isinstance(headers, dict) and len(headers):
             form_headers.update(headers)
 
@@ -1118,8 +1118,11 @@ class Crawler:
         if form.is_multipart:
             file_params = form.post_params + form.file_params
             post_params = []
-        else:
+        elif "urlencoded" in form.enctype:
             file_params = form.file_params
+            post_params = form.post_params
+        else:
+            file_params = None
             post_params = form.post_params
 
         response = self._session.post(

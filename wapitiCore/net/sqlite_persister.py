@@ -51,7 +51,7 @@ class SqlitePersister:
     HEADER_NAME = "name"
     HEADER_VALUE = "value"
     ENCODING = "encoding"
-    MULTIPART = "multipart"
+    ENCTYPE = "enctype"
     REFERER = "referer"
     GET_PARAMS = "get_params"
     POST_PARAMS = "post_params"
@@ -75,7 +75,7 @@ class SqlitePersister:
         self.method = ""
         self.path = ""
         self.encoding = ""
-        self.multipart = False
+        self.enctype = "application/x-www-form-urlencoded"
         self.referer = ""
         self.get_params = []
         self.post_params = []
@@ -95,7 +95,7 @@ class SqlitePersister:
                      path_id INTEGER PRIMARY KEY,
                      path TEXT,
                      method TEXT,
-                     multipart INTEGER,
+                     enctype TEXT,
                      depth INTEGER,
                      encoding TEXT,
                      http_status INTEGER,
@@ -160,7 +160,7 @@ class SqlitePersister:
                     None,
                     http_resource.path,
                     http_resource.method,
-                    int(http_resource.is_multipart),
+                    http_resource.enctype,
                     http_resource.link_depth,
                     http_resource.encoding,
                     http_resource.status if isinstance(http_resource.status, int) else None,
@@ -249,7 +249,7 @@ class SqlitePersister:
                 row[1],
                 method=row[2],
                 encoding=row[5],
-                multipart=bool(row[3]),
+                enctype=row[3],
                 referer=row[8],
                 get_params=get_params,
                 post_params=post_params,
@@ -319,7 +319,7 @@ class SqlitePersister:
                 None,
                 request.path,
                 request.method,
-                int(request.is_multipart),
+                request.enctype,
                 request.link_depth,
                 request.encoding,
                 request.status if isinstance(request.status, int) else None,
@@ -407,7 +407,7 @@ class SqlitePersister:
             row[1],
             method=row[2],
             encoding=row[5],
-            multipart=bool(row[3]),
+            enctype=row[3],
             referer=row[8],
             get_params=get_params,
             post_params=post_params,
