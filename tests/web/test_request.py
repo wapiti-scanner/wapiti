@@ -1,4 +1,7 @@
+import json
+
 from wapitiCore.net.web import Request
+from wapitiCore.net.crawler import Crawler
 
 
 def test_request_object():
@@ -127,3 +130,15 @@ def test_request_object():
     print("=== HTTP files keys as a tuple  ===")
     print(res12.file_keys)
     print('')
+
+    json_req = Request(
+        "http://httpbin.org/post?a=b",
+        post_params=json.dumps({"z": 1, "a": 2}),
+        enctype="application/json"
+    )
+
+    crawler = Crawler("http://httpbin.org/")
+    page = crawler.send(json_req)
+    assert page.json["json"] == {"z": 1, "a": 2}
+    assert page.json["headers"]["Content-Type"] == "application/json"
+    assert page.json["form"] == {}
