@@ -126,9 +126,9 @@ class mod_blindsql(Attack):
             yield original_request
 
     # TODO: should blindsql module ignore vulnerabilities that have previously been detected by the sql module ?
-    def load_require(self, dependancies: list = None):
-        if dependancies:
-            for module in dependancies:
+    def load_require(self, dependencies: list = None):
+        if dependencies:
+            for module in dependencies:
                 if module.name == "sql":
                     self.excluded_get = module.vulnerable_get
                     self.excluded_post = module.vulnerable_post

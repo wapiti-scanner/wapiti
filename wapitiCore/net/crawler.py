@@ -1091,12 +1091,20 @@ class Crawler:
         @type headers: dict
         @rtype: Page
         """
-        response = self._session.get(
-            resource.url,
-            timeout=self._timeout,
-            allow_redirects=follow_redirects,
-            headers=headers
-        )
+        try:
+            response = self._session.get(
+                resource.url,
+                timeout=self._timeout,
+                allow_redirects=follow_redirects,
+                headers=headers
+            )
+        except ConnectionError as exception:
+            # https://github.com/kennethreitz/requests/issues/2392
+            # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
+            if "Read timed out" in str(exception):
+                raise ReadTimeout("Request time out")
+            else:
+                raise exception
 
         return Page(response, resource.url)
 
@@ -1125,16 +1133,25 @@ class Crawler:
             file_params = None
             post_params = form.post_params
 
-        response = self._session.post(
-            form.path,  # We can use form.path with setting params or form.url without setting params
-            params=form.get_params,
-            data=post_params,
-            files=file_params,
-            headers=form_headers,
-            timeout=self._timeout,
-            allow_redirects=follow_redirects,
-            verify=self.secure
-        )
+        try:
+            response = self._session.post(
+                form.path,  # We can use form.path with setting params or form.url without setting params
+                params=form.get_params,
+                data=post_params,
+                files=file_params,
+                headers=form_headers,
+                timeout=self._timeout,
+                allow_redirects=follow_redirects,
+                verify=self.secure
+            )
+        except ConnectionError as exception:
+            # https://github.com/kennethreitz/requests/issues/2392
+            # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
+            if "Read timed out" in str(exception):
+                raise ReadTimeout("Request time out")
+            else:
+                raise exception
+
         return Page(response, form.url)
 
     def request(
@@ -1154,15 +1171,24 @@ class Crawler:
         if form.referer:
             form_headers["referer"] = form.referer
 
-        response = self._session.request(
-            method,
-            form.url,
-            data=form.post_params,
-            files=form.file_params,
-            headers=form_headers,
-            allow_redirects=follow_redirects,
-            timeout=self._timeout
-        )
+        try:
+            response = self._session.request(
+                method,
+                form.url,
+                data=form.post_params,
+                files=form.file_params,
+                headers=form_headers,
+                allow_redirects=follow_redirects,
+                timeout=self._timeout
+            )
+        except ConnectionError as exception:
+            # https://github.com/kennethreitz/requests/issues/2392
+            # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
+            if "Read timed out" in str(exception):
+                raise ReadTimeout("Request time out")
+            else:
+                raise exception
+
         return Page(response, form.url)
 
     def send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
