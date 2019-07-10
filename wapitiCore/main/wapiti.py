@@ -85,7 +85,7 @@ class Wapiti:
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
-    def __init__(self, root_url, scope="folder"):
+    def __init__(self, root_url, scope="folder", session_dir=None):
         self.target_url = root_url
         self.server = urlparse(root_url).netloc
         self.crawler = crawler.Crawler(root_url)
@@ -122,6 +122,11 @@ class Wapiti:
         self._max_files_per_dir = 0
         self._scan_force = "normal"
         self._max_scan_time = 0
+        self._bug_report = True
+
+        if session_dir:
+            SqlitePersister.CRAWLER_DATA_DIR = session_dir
+
         history_file = os.path.join(
             SqlitePersister.CRAWLER_DATA_DIR,
             "{}_{}_{}.db".format(
@@ -130,8 +135,8 @@ class Wapiti:
                 md5(root_url.encode(errors="replace")).hexdigest()[:8]
             )
         )
-        self._bug_report = True
-
+        if not os.path.isdir(SqlitePersister.CRAWLER_DATA_DIR):
+            os.makedirs(SqlitePersister.CRAWLER_DATA_DIR)
         self.persister = SqlitePersister(history_file)
 
     def __init_report(self):
@@ -692,6 +697,13 @@ def wapiti_main():
     )
 
     parser.add_argument(
+        "--store-session",
+        help=_("Directory where to store attack history and session data."),
+        default=None,
+        metavar="PATH",
+    )
+
+    parser.add_argument(
         "-s", "--start",
         action="append",
         default=[],
@@ -858,11 +870,8 @@ def wapiti_main():
             print("  {}".format(module_name))
         exit()
 
-    if not os.path.isdir(SqlitePersister.CRAWLER_DATA_DIR):
-        os.makedirs(SqlitePersister.CRAWLER_DATA_DIR)
-
     url = args.base_url
-    wap = Wapiti(url, scope=args.scope)
+    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session)
 
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc or not parts.path:
