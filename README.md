@@ -6,6 +6,7 @@
 Requirements
 ============
 In order to work correctly, Wapiti needs :
+
 + Python 3.x where x is >= 4 (3.4, 3.5...)
 + python-requests ( http://docs.python-requests.org/en/latest/ )
 + BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
