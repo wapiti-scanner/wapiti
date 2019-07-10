@@ -6,11 +6,11 @@
 Requirements
 ============
 In order to work correctly, Wapiti needs :
-* Python 3.x where x is >= 4 (3.4, 3.5...)
-* python-requests ( http://docs.python-requests.org/en/latest/ )
-* BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
-* yaswfp (https://github.com/facundobatista/yaswfp)
-* html5lib
++ Python 3.x where x is >= 4 (3.4, 3.5...)
++ python-requests ( http://docs.python-requests.org/en/latest/ )
++ BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
++ yaswfp (https://github.com/facundobatista/yaswfp)
++ lxml
 
 See INSTALL.md for more details on installation.
 
@@ -136,6 +136,7 @@ How to help the Wapiti project
 ==============================
 
 You can :
+
 + Support the project by making a donation ( http://sf.net/donate/index.php?group_id=168625 )
 + Create or improve attack modules
 + Create or improve report generators
@@ -152,6 +153,7 @@ What is included with Wapiti
 ============================
 
 Wapiti comes with :
+
 + a modified version of PyNarcissus (MPL 1.1 License),
   see https://github.com/jtolds/pynarcissus
 + Kube CSS framework ( see http://imperavi.com/kube/ ) and jQuery
