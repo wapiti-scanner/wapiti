@@ -797,12 +797,13 @@ class Page:
                     input_value = input_field.get("value", defaults[input_type] if autofill else "")
                     if input_type == "file":
                         # With file inputs the content is only sent if the method is POST and enctype multipart
-                        # otherwise only the file name is sent
+                        # otherwise only the file name is sent.
+                        # Having a default value set in HTML for a file input doesn't make sense... force our own.
                         if method == "GET":
                             get_params.append([input_field["name"], "pix.gif"])
                         else:
                             if "multipart" in enctype:
-                                file_params.append([input_field["name"], input_value])
+                                file_params.append([input_field["name"], defaults["file"]])
                             else:
                                 post_params.append([input_field["name"], "pix.gif"])
                     else:

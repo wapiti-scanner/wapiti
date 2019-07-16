@@ -109,10 +109,10 @@ def test_persister_forms():
         persister.set_root_url("http://httpbin.org/")
         persister.set_to_browse(forms)
 
-        assert persister.count_paths() == 6
+        assert persister.count_paths() == 7
 
         extracted_forms = list(persister.get_to_browse())
-        assert len(extracted_forms) == 6
+        assert len(extracted_forms) == 7
         assert set(forms) == set(extracted_forms)
 
         for form in extracted_forms:
