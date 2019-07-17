@@ -676,17 +676,19 @@ class Page:
                     yield self.make_absolute(url)
 
         for script in self.soup.find_all("script", string=True):
-            allowed_ext = [".php", ".asp", ".xml", ".js", ".json", ".jsp"]
             urls = lamejs.LameJs(script.string).get_links()
-            candidates = re.findall(r'"([A-Za-z0-9_=#&%.+?/-]*)"', script.string)
-            candidates += re.findall(r"'([A-Za-z0-9_=#&%.+?/-]*)'", script.string)
 
-            for jstr in candidates:
-                if "." in jstr and jstr not in COMMON_JS_STRINGS:
-                    for ext in allowed_ext:
-                        if ext in jstr:
-                            urls.append(jstr)
-                            break
+            # too many annoying false positives
+            # candidates = re.findall(r'"([A-Za-z0-9_=#&%.+?/-]*)"', script.string)
+            # candidates += re.findall(r"'([A-Za-z0-9_=#&%.+?/-]*)'", script.string)
+            #
+            # allowed_ext = [".php", ".asp", ".xml", ".js", ".json", ".jsp"]
+            # for jstr in candidates:
+            #     if "." in jstr and jstr not in COMMON_JS_STRINGS:
+            #         for ext in allowed_ext:
+            #             if ext in jstr:
+            #                 urls.append(jstr)
+            #                 break
             for url in urls:
                 yield self.make_absolute(url)
 
