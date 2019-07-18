@@ -67,6 +67,11 @@ class LameJs:
         elif node.type == "PLUS":
             logging.debug("# PLUS")
             eax = None
+            # It some items of concatenation includes function calls or accessing parts of array, stop here to prevent
+            # false positives
+            if set([sub_node.type for sub_node in node]) & {"CALL", "INDEX"}:
+                return None
+
             for sub_node in node:
                 value = self.read_node(sub_node)
                 if eax is None:
@@ -82,6 +87,7 @@ class LameJs:
                             eax = str(eax) + value
                         elif isinstance(value, int):
                             eax += value
+
             return eax
         elif node.type == "FUNCTION":
             logging.debug("# FUNCTION")
