@@ -101,6 +101,7 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 )
 
 JS_SCHEME_REGEX = re.compile(r"^javascript:", re.I)
+BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
 
 
 def not_empty(original_function):
@@ -516,7 +517,6 @@ class Page:
             tld = urlparse(url).netloc
         except TldBadUrl:
             tld = None
-            print("bad url", url, "found within", self._url)
         return tld != self._tld
 
     def is_internal_to_domain(self, url: str) -> bool:
@@ -1533,6 +1533,11 @@ class Explorer:
                     depth = request.link_depth + 1
 
                 new_url = web.Request(path, get_params=get_params, link_depth=depth)
+
+                if BAD_URL_REGEX.search(new_url.file_path):
+                    # Malformed link due to HTML issues
+                    continue
+
                 if not self._crawler.is_in_scope(new_url):
                     continue
 
