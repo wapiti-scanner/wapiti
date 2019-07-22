@@ -220,7 +220,10 @@ class Request:
         return False
 
     def __len__(self):
-        return len(self.get_params) + len(self._post_params) + len(self._file_params)
+        if isinstance(self._post_params, list):
+            return len(self.get_params) + len(self._post_params) + len(self._file_params)
+        else:
+            return len(self.get_params) + len(self._file_params)
 
     @staticmethod
     def _encoded_keys(params):

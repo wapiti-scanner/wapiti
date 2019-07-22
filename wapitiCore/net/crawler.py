@@ -1387,9 +1387,14 @@ class Explorer:
             # Won't enter if qs_limit is 0 (aka insane mode)
             if self._qs_limit:
                 if len(request):
-                    if self._pattern_counts[
-                        request.pattern
-                    ] >= 220 / (math.exp(len(request) * self._qs_limit) ** 2):
+                    try:
+                        if self._pattern_counts[
+                            request.pattern
+                        ] >= 220 / (math.exp(len(request) * self._qs_limit) ** 2):
+                            continue
+                    except OverflowError:
+                        # Oh boy... that's not good to try to attack a form with more than 600 input fields
+                        # but I guess insane mode can do it as it is insane
                         continue
 
             if is_forbidden(resource_url):
