@@ -19,6 +19,10 @@
 import os
 import sys
 
+if sys.version_info.major < 3:
+    print("Wapiti needs Python 3, you are using {}.{}".format(sys.version_info.major, sys.version_info.minor))
+    exit()
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 if os.path.exists(os.path.join(parent_dir, "wapitiCore")):
     sys.path.append(parent_dir)

@@ -97,6 +97,8 @@ class Wapiti:
             self.crawler.scope = crawler.Scope.FOLDER
         elif scope == "domain":
             self.crawler.scope = crawler.Scope.DOMAIN
+        elif scope == "punk":
+            self.crawler.scope = crawler.Scope.PUNK
         else:
             self.crawler.scope = crawler.Scope.URL
 
@@ -598,8 +600,20 @@ def wapiti_main():
     elif moon_phase == "new":
         print(_("[*] Be careful! New moon tonight."))
 
-    if datetime.now().weekday() == 4 and datetime.now().day == 13:
-        print(_("[*] Watch out! Bad things can happen on Friday the 13th."))
+    if datetime.now().weekday() == 4:
+        if datetime.now().day == 13:
+            print(_("[*] Watch out! Bad things can happen on Friday the 13th."))
+        elif datetime.now().month == 8 and datetime.now().day < 8:
+            print(_("[*] Today is International Beer Day!"))
+
+    if datetime.now().month == 5 and datetime.now().day == 4:
+        print(_("[*] May the force be with you!"))
+    elif datetime.now().month == datetime.now().day == 1:
+        print(_("[*] Happy new year!"))
+    elif datetime.now().month == 12 and datetime.now().day == 25:
+        print(_("[*] Merry christmas!"))
+    elif datetime.now().month == 3 and datetime.now().day == 31:
+        print(_("[*] Today is world backup day! Is your data safe?"))
 
     parser = argparse.ArgumentParser(description="Wapiti-3.0.1: Web application vulnerability scanner")
 
@@ -615,7 +629,7 @@ def wapiti_main():
         "--scope",
         help=_("Set scan scope"),
         default="folder",
-        choices=["page", "folder", "domain", "url"]
+        choices=["page", "folder", "domain", "url", "punk"]
     )
 
     parser.add_argument(
@@ -862,6 +876,9 @@ def wapiti_main():
     )
 
     args = parser.parse_args()
+
+    if args.scope == "punk":
+        print(_("[*] Do you feel lucky punk?"))
 
     if args.list_modules:
         print(_("[*] Available modules:"))

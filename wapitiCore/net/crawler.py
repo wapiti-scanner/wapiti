@@ -42,7 +42,7 @@ from requests.packages.urllib3.exceptions import ReadTimeoutError
 from requests.exceptions import ConnectionError, RequestException, ReadTimeout, SSLError
 from requests.models import Response
 from requests.adapters import HTTPAdapter
-from tld import get_tld
+from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -66,6 +66,7 @@ class Scope(Enum):
     PAGE = 2
     URL = 3
     DOMAIN = 4
+    PUNK = 5
 
 
 MIME_TEXT_TYPES = ('text/', 'application/xml')
@@ -131,9 +132,9 @@ class Page:
         self._soup = None
         self._is_empty = empty
         try:
-            self._tld = get_tld(url)
+            self._fld = get_fld(url)
         except TldDomainNotFound:
-            self._tld = urlparse(url).netloc
+            self._fld = urlparse(url).netloc
 
     @property
     def url(self) -> str:
@@ -511,13 +512,13 @@ class Page:
         @rtype: bool
         """
         try:
-            tld = get_tld(url)
+            fld = get_fld(url)
         except TldDomainNotFound:
             # Not yet known TLD or IP address or local hostname
-            tld = urlparse(url).netloc
+            fld = urlparse(url).netloc
         except TldBadUrl:
-            tld = None
-        return tld != self._tld
+            fld = None
+        return fld != self._fld
 
     def is_internal_to_domain(self, url: str) -> bool:
         """Returns True if url is under the same TLD as the crawled URL, False otherwise.
@@ -999,30 +1000,34 @@ class Crawler:
         self._scope = value
 
     def is_in_scope(self, resource):
+        if self._scope == Scope.PUNK:
+            # Life is short
+            return True
+
         if isinstance(resource, web.Request):
             if self._scope == Scope.FOLDER:
                 return resource.url.startswith(self._base.path)
-            elif self._scope == Scope.PAGE:
+            if self._scope == Scope.PAGE:
                 return resource.path == self._base.path
-            elif self._scope == Scope.URL:
+            if self._scope == Scope.URL:
                 return resource.url == self._base.url
-            else:  # Scope.DOMAIN
-                try:
-                    return get_tld(resource.url) == get_tld(self._base.url)
-                except TldDomainNotFound:
-                    return resource.hostname == self._base.hostname
+            # Scope.DOMAIN
+            try:
+                return get_fld(resource.url) == get_fld(self._base.url)
+            except TldDomainNotFound:
+                return resource.hostname == self._base.hostname
         else:
             if self._scope == Scope.FOLDER:
                 return resource.startswith(self._base.path)
-            elif self._scope == Scope.PAGE:
+            if self._scope == Scope.PAGE:
                 return resource.split("?")[0] == self._base.path
-            elif self._scope == Scope.URL:
+            if self._scope == Scope.URL:
                 return resource == self._base.url
-            else:  # Scope.DOMAIN
-                try:
-                    return get_tld(resource) == get_tld(self._base.url)
-                except TldDomainNotFound:
-                    return urlparse(resource).netloc == self._base.hostname
+            # Scope.DOMAIN
+            try:
+                return get_fld(resource) == get_fld(self._base.url)
+            except TldDomainNotFound:
+                return urlparse(resource).netloc == self._base.hostname
 
     @property
     def user_agent(self):

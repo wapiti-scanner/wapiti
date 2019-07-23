@@ -16,6 +16,8 @@ def test_domain_scope():
     resp = requests.get(url)
     page = Page(resp, url)
     assert page.is_external_to_domain("http://yolo.tld")
+    assert page.is_external_to_domain("http://www.google.com/")
+    assert page.is_external_to_domain("http://jesuisperdu.com/")
     assert not page.is_external_to_domain("http://perdu.com/robots.txt")
     assert not page.is_external_to_domain("http://www.perdu.com/blog/")
     assert not page.is_external_to_domain("https://perdu.com/blog/")
