@@ -78,5 +78,5 @@ def test_forms():
                 # Form with no action set
                 assert form.file_path == "/"
 
-        assert count == 7
+        assert count == 8
         assert form_action

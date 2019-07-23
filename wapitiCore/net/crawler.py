@@ -400,7 +400,7 @@ class Page:
         @param link: A relative URL.
         @rtype: str
         """
-        if not link:
+        if not link.strip():
             return ""
 
         current_url_parts = urlparse(self._base or self._url)
@@ -736,7 +736,7 @@ class Page:
         @rtype: generator
         """
         for form in self.soup.find_all("form"):
-            url = self.make_absolute(form.attrs.get("action", self._url))
+            url = self.make_absolute(form.attrs.get("action", "").strip() or self._url)
             # If no method is specified then it's GET. If an invalid method is set it's GET.
             method = "POST" if form.attrs.get("method", "GET").upper() == "POST" else "GET"
             enctype = "" if method == "GET" else form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
@@ -814,8 +814,14 @@ class Page:
                         else:
                             post_params.append([input_field["name"], input_value])
 
-                if "formaction" in input_field.attrs:
-                    form_actions.add(self.make_absolute(input_field["formaction"]))
+            # A formaction doesn't need a name
+            for input_field in form.find_all("input", attrs={"formaction": True}):
+                form_actions.add(self.make_absolute(input_field["formaction"].strip() or self._url))
+
+            for button_field in form.find_all("button", formaction=True):
+                # If formaction is empty it basically send to the current URL
+                # which can be different from the defined action attribute on the form...
+                form_actions.add(self.make_absolute(button_field["formaction"].strip() or self._url))
 
             if form.find("input", attrs={"name": False, "type": "image"}):
                 # Unnamed input type file => names will be set as x and y
@@ -825,9 +831,6 @@ class Page:
                 else:
                     post_params.append(["x", "1"])
                     post_params.append(["y", "1"])
-
-            for button_field in form.find_all("button", formaction=True):
-                form_actions.add(self.make_absolute(button_field["formaction"]))
 
             for select in form.find_all("select", attrs={"name": True}):
                 select_values = None

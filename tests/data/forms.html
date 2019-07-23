@@ -61,6 +61,7 @@
     <input type="file" name="file" />
 </form>
 
+<!-- missing action attribute -->
 <form method="POST">
     <input type="text" name="yolo" />
     <button type="submit" formaction="/alt.php">Submit to another page</button>
@@ -68,6 +69,12 @@
 
 <form action="/upload_empty_value.php" method="POST" enctype="multipart/form-data">
     <input type="file" name="file" value="" />
+</form>
+
+<!-- empty action attribute -->
+<form method="POST" action="">
+    <input type="text" name="yolo2" />
+    <input type="submit" value="Submit" />
 </form>
 
 </body>
