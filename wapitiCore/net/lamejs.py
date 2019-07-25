@@ -110,7 +110,7 @@ class LameJs:
             logging.debug("func_name = {0}".format(func_name))
             logging.debug("params = {0}".format(params))
             if func_name == "window.open":
-                if len(params):
+                if len(params) and params[0]:
                     self.links.append(params[0])
             elif func_name.endswith(".asyncRequest"):
                 if len(params) > 1:
@@ -186,5 +186,13 @@ if __name__ == "__main__":
     script.src = target;
     head.appendChild(script);
     """
-    lame_js = LameJs(data)
+
+    data3 = """
+    function yolo() {
+      u='http://www.website.com/page.php?uid=1';
+      t='Hi there';
+      window.open('http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
+      return false;
+    }"""
+    lame_js = LameJs(data3)
     print(lame_js.get_links())

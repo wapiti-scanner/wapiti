@@ -1431,8 +1431,8 @@ class Explorer:
 
             try:
                 page = self._crawler.send(request)
-            except TypeError:
-                print("TypeError with url", resource_url)  # debug
+            except (TypeError, UnicodeDecodeError) as exception:
+                print("{} with url {}".format(exception, resource_url))  # debug
                 continue
             except SSLError:
                 print(_("[!] SSL/TLS error occurred with URL"), resource_url)
