@@ -239,6 +239,15 @@ class Mutator:
         # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
+            if params_list is get_params and not self._mutate_get:
+                continue
+
+            if params_list is post_params and not self._mutate_post:
+                continue
+
+            if params_list is file_params and not self._mutate_file:
+                continue
+
             for i in range(len(params_list)):
                 param_name = quote(params_list[i][0])
 

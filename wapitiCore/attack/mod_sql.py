@@ -99,15 +99,25 @@ class mod_sql(Attack):
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
 
         for original_request in chain(http_resources, forms):
-            timeouted = False
-            page = original_request.path
-            saw_internal_error = False
-
             if self.verbose >= 1:
                 print("[+] {}".format(original_request))
 
+            timeouted = False
+            page = original_request.path
+            saw_internal_error = False
+            current_parameter = None
+            vulnerable_parameter = False
+
             for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
                 try:
+                    if current_parameter != parameter:
+                        # Forget what we know about current parameter
+                        current_parameter = parameter
+                        vulnerable_parameter = False
+                    elif vulnerable_parameter:
+                        # If parameter is vulnerable, just skip till next parameter
+                        continue
+
                     if self.verbose == 2:
                         print("[¨] {0}".format(mutated_request))
 
@@ -167,8 +177,9 @@ class mod_sql(Attack):
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 
-                            # We reached maximum exploitation, stop here
-                            break
+                            # We reached maximum exploitation for this parameter, don't send more payloads
+                            vulnerable_parameter = True
+                            continue
 
                         elif response.status == 500 and not saw_internal_error:
                             saw_internal_error = True

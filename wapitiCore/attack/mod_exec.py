@@ -80,14 +80,25 @@ class mod_exec(Attack):
             timeouted = False
             page = original_request.path
             saw_internal_error = False
+            current_parameter = None
+            vulnerable_parameter = False
 
             if self.verbose >= 1:
                 print("[+] {}".format(original_request))
 
             for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
                 try:
+                    if current_parameter != parameter:
+                        # Forget what we know about current parameter
+                        current_parameter = parameter
+                        vulnerable_parameter = False
+                    elif vulnerable_parameter:
+                        # If parameter is vulnerable, just skip till next parameter
+                        continue
+
                     if self.verbose == 2:
                         print("[¨] {0}".format(mutated_request))
+
                     try:
                         response = self.crawler.send(mutated_request)
                     except ReadTimeout:
@@ -119,7 +130,8 @@ class mod_exec(Attack):
                             self.log_red(Vulnerability.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
-                            break
+                            vulnerable_parameter = True
+                            continue
 
                         elif timeouted:
                             continue
@@ -145,6 +157,7 @@ class mod_exec(Attack):
                         )
                         timeouted = True
                     else:
+                        # No timeout raised
                         vuln_info, executed, warned = self._find_pattern_in_response(response.content, warned)
                         if vuln_info:
                             # An error message implies that a vulnerability may exists
@@ -177,8 +190,10 @@ class mod_exec(Attack):
                             self.log_red("---")
 
                             if executed:
-                                # We reached maximum exploitation, stop here
-                                break
+                                # We reached maximum exploitation for this parameter, don't send more payloads
+                                vulnerable_parameter = True
+                                continue
+
                         elif response.status == 500 and not saw_internal_error:
                             saw_internal_error = True
                             if parameter == "QUERY_STRING":
@@ -201,6 +216,6 @@ class mod_exec(Attack):
                             self.log_orange(mutated_request.http_repr())
                             self.log_orange("---")
                 except (KeyboardInterrupt, RequestException) as exception:
-                        yield exception
+                    yield exception
 
             yield original_request
