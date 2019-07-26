@@ -766,7 +766,7 @@ class Page:
                 "date": "2019-03-03",
                 "datetime": "2019-03-03T20:35:34.32",
                 "datetime-local": "2019-03-03T22:41",
-                "email": "wapiti2019%40mailinator.com",
+                "email": "wapiti2019@mailinator.com",
                 "file": ["pix.gif", "GIF89a", "image/gif"],
                 "hidden": "default",
                 "month": "2019-03",
@@ -797,7 +797,12 @@ class Page:
                         post_params.append([input_field["name"] + ".x", "1"])
                         post_params.append([input_field["name"] + ".y", "1"])
                 elif input_type in defaults:
-                    input_value = input_field.get("value", defaults[input_type] if autofill else "")
+                    if input_type == "text" and "mail" in input_field["name"] and autofill:
+                        # If an input text match name "mail" then put a valid email address in it
+                        input_value = defaults["email"]
+                    else:
+                        input_value = input_field.get("value", defaults[input_type] if autofill else "")
+
                     if input_type == "file":
                         # With file inputs the content is only sent if the method is POST and enctype multipart
                         # otherwise only the file name is sent.

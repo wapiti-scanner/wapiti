@@ -46,7 +46,7 @@ def test_forms():
                     "date": "2019-03-03",
                     "datetime": "2019-03-03T20:35:34.32",
                     "datetime-local": "2019-03-03T22:41",
-                    "email": "wapiti2019%40mailinator.com",
+                    "email": "wapiti2019@mailinator.com",
                     "file": "pix.gif",
                     "gender": "other",  # taking the last one
                     "hidden": "default",
@@ -80,3 +80,26 @@ def test_forms():
 
         assert count == 8
         assert form_action
+
+
+@responses.activate
+def test_email_input():
+    url = "http://perdu.com/"
+    responses.add(
+        responses.GET,
+        url,
+        body="""<html>
+        <body>
+        <form method="POST">
+        <input type="text" name="email_address" />
+        </form>
+        </body>
+        </html>
+        """
+    )
+
+    resp = requests.get(url, allow_redirects=False)
+    page = Page(resp, url)
+
+    form = next(page.iter_forms())
+    assert "@" in form.post_params[0][1]
