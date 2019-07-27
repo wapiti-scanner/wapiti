@@ -131,7 +131,7 @@ class SsrfMutator(Mutator):
                 payload = SSRF_PAYLOAD.format(
                     random_id=self._session_id,
                     path_id=request.path_id,
-                    hex_param=hexlify("QUERY_STRING").decode()
+                    hex_param=hexlify(b"QUERY_STRING").decode()
                 )
 
                 evil_req = Request(
