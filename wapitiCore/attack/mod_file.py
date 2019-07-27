@@ -37,7 +37,8 @@ class mod_file(Attack):
     # Most important patterns must appear at the top of this table.
     warnings_desc = [
         # Vulnerabilities
-        ("<title>Google</title>", _("Remote inclusion vulnerability"), 1),
+        ("aa9d05b9ab864e169d723e9668d3dc77", _("Remote inclusion vulnerability"), 1),
+        ("w4p1t1_cleartext", _("Remote file disclosure vulnerability"), 1),
         ("root:x:0:0", _("Linux local file disclosure vulnerability"), 1),
         ("root:*:0:0", _("BSD local file disclosure vulnerability"), 1),
         ("# Network services, Internet style", _("Unix local file disclosure vulnerability"), 1),
