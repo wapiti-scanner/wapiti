@@ -344,7 +344,7 @@ class Mutator:
                     )
                     flags.add(PayloadType.get)
 
-                    yield evil_req, "QUERY_STRING", flags
+                    yield evil_req, "QUERY_STRING", payload, flags
 
 
 class PayloadReader:
