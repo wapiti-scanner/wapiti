@@ -33,7 +33,7 @@ from hashlib import md5
 from random import choice
 
 import requests
-from requests.exceptions import RequestException, ConnectionError, Timeout, ChunkedEncodingError
+from requests.exceptions import RequestException, ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError
 from requests.packages.urllib3 import disable_warnings
 
 from wapitiCore.language.language import _
@@ -369,7 +369,7 @@ class Wapiti:
                     else:
                         # if answer is 3, raise KeyboardInterrupt and it will stop cleanly
                         raise exception
-                except (ConnectionError, Timeout, ChunkedEncodingError):
+                except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
                     sleep(.5)
                     skipped += 1
                     continue
