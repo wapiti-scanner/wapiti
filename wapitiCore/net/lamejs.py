@@ -57,7 +57,7 @@ class LameJs:
                 self.js_vars[node.value] = value
                 return node.value, value
             else:
-                return self.js_vars.get(node.value, node.value)
+                return self.js_vars.get(node.value)
         elif node.type == "NUMBER":
             logging.debug("# NUMBER")
             return node.value
@@ -164,28 +164,12 @@ class LameJs:
         elif node == "THIS":
             logging.debug("# THIS")
             return "this"
+        else:
+            logging.debug("? {}".format(node.type))
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-
-    data = """
-    window.open("/toto.html");
-    document.location='bidule.html';
-    var link='ab'+'cd'+'.html';
-    window.href=link;
-    document.location = link + "?var=value";
-    """
-
-    # from https://public-firing-range.appspot.com/remoteinclude/script_hash.html
-    data2 = """
-    var target = location.hash.substr(1);
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = target;
-    head.appendChild(script);
-    """
 
     data3 = """
     function yolo() {
@@ -194,5 +178,6 @@ if __name__ == "__main__":
       window.open('http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
       return false;
     }"""
+
     lame_js = LameJs(data3)
     print(lame_js.get_links())

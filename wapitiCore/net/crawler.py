@@ -647,7 +647,10 @@ class Page:
             image_rel_url = image_tag["src"]
             if not image_rel_url or image_rel_url.startswith("#"):
                 continue
-            urls.add(self.make_absolute(image_rel_url))
+
+            image_url = self.make_absolute(image_rel_url)
+            if image_url:
+                urls.add(image_url)
         return list(urls)
 
     @property
@@ -729,7 +732,7 @@ class Page:
                     url = meta_tag["content"][url_eq_idx + 4:]
                     if url:
                         urls.add(self.make_absolute(url))
-        return list(urls)
+        return [url for url in urls if url]
 
     def iter_forms(self, autofill=True):
         """Returns a generator of Request extracted from the Page.
@@ -1022,6 +1025,9 @@ class Crawler:
             except TldDomainNotFound:
                 return resource.hostname == self._base.hostname
         else:
+            if not resource:
+                return False
+
             if self._scope == Scope.FOLDER:
                 return resource.startswith(self._base.path)
             if self._scope == Scope.PAGE:
@@ -1512,7 +1518,7 @@ class Explorer:
             for url in swf_links + js_links:
                 if url:
                     url = page.make_absolute(url)
-                    if self._crawler.is_in_scope(url):
+                    if url and self._crawler.is_in_scope(url):
                         allowed_links.append(url)
 
             for new_url in allowed_links:

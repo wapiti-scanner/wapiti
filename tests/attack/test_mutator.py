@@ -54,7 +54,7 @@ def test_mutations():
         skip={"p"}
     )
     count = 0
-    for __ in mutator.mutate(req):
+    for __, __, __, __ in mutator.mutate(req):
         count += 1
     assert count == 9
 
@@ -76,6 +76,6 @@ def test_mutations():
     req3 = Request("http://perdu.com/page.php")
     mutator = Mutator(payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set())], qs_inject=True)
     count = 0
-    for __ in mutator.mutate(req3):
+    for __, __, __, __ in mutator.mutate(req3):
         count += 1
     assert count == 2
