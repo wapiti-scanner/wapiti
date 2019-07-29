@@ -33,7 +33,8 @@ from collections import deque, defaultdict
 from posixpath import normpath
 import pickle
 import math
-import json
+import functools
+from time import sleep
 
 # Third-parties
 import requests
@@ -41,7 +42,6 @@ from requests.packages.urllib3 import disable_warnings
 from requests.packages.urllib3.exceptions import ReadTimeoutError
 from requests.exceptions import ConnectionError, RequestException, ReadTimeout, SSLError
 from requests.models import Response
-from requests.adapters import HTTPAdapter
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
@@ -912,18 +912,41 @@ def wildcard_translate(pattern):
     return re.compile(res + '\Z(?ms)')
 
 
-class WapitiAdapter(requests.adapters.HTTPAdapter):
-    # requests currently raise a useless MaxRetryError instead of ReadTimeout when max_retries is set.
-    # this adapter catch MaxRetryError and raise ReadTimeout if the real exception is a ReadTimeoutError from urllib3
-    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
-        try:
-            ret = super().send(request, stream=stream, timeout=timeout, verify=verify, cert=cert, proxies=proxies)
-        except ConnectionError as error:
-            if hasattr(error.args[0], "reason") and isinstance(error.args[0].reason, ReadTimeoutError):
-                raise ReadTimeout(error.args[0], request=request)
-            raise error
-        else:
-            return ret
+def retry(delay=1, times=3):
+    """
+    A decorator for retrying a request with a specified delay in case of Timeout exception
+
+    Parameter List
+    -------------
+    :param delay: Amount of delay (seconds) needed between successive retries.
+    :param times: no of times the function should be retried
+    """
+
+    def outer_wrapper(function):
+        @functools.wraps(function)
+        def inner_wrapper(*args, **kwargs):
+            final_excep = None
+            for counter in range(times):
+                if counter > 0:
+                    sleep(delay)
+
+                try:
+                    value = function(*args, **kwargs)
+                    return value
+                except ConnectionError as exception:
+                    if hasattr(exception.args[0], "reason") and isinstance(exception.args[0].reason, ReadTimeoutError):
+                        final_excep = ReadTimeout(exception.args[0], request=request)
+                    else:
+                        raise exception
+                except ReadTimeout as exception:
+                    final_excep = exception
+
+            if final_excep is not None:
+                raise final_excep
+
+        return inner_wrapper
+
+    return outer_wrapper
 
 
 class Crawler:
@@ -940,9 +963,6 @@ class Crawler:
             proxies: dict = None, user_agent: str = None):
         self._timeout = timeout
         self._session = requests.Session()
-        retry_adapter = WapitiAdapter(max_retries=3)
-        self._session.mount("http://", retry_adapter)
-        self._session.mount("https://", retry_adapter)
         if user_agent:
             self._session.headers["User-Agent"] = user_agent
         else:
@@ -1101,6 +1121,7 @@ class Crawler:
             from requests_kerberos import HTTPKerberosAuth
             self._session.auth = HTTPKerberosAuth()
 
+    @retry(delay=1, times=3)
     def get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
         """Fetch the given url, returns a Page object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
@@ -1130,6 +1151,7 @@ class Crawler:
 
         return Page(response, resource.url)
 
+    @retry(delay=1, times=3)
     def post(self, form: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.
 
@@ -1176,6 +1198,7 @@ class Crawler:
 
         return Page(response, form.url)
 
+    @retry(delay=1, times=3)
     def request(
             self, method: str, form: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.

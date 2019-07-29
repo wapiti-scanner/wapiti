@@ -6,7 +6,6 @@ from time import sleep
 import pytest
 from requests.exceptions import ReadTimeout
 
-
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.net.web import Request
 
