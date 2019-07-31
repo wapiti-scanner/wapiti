@@ -27,7 +27,7 @@ import locale
 import gettext
 import sys
 
-AVAILABLE_LANGS = ["en", "es", "fr"]  # "de", "ms"]
+AVAILABLE_LANGS = ["en", "es", "fr", "pt", "zh"]  # "de", "ms"]
 
 if sys.platform == "win32":
     import ctypes
@@ -51,7 +51,7 @@ if lang is None:
     lang = "en"
 elif lang not in AVAILABLE_LANGS:
     # if lang is not one of the supported languages, we use english
-    print("Oups! No translations found for your language... Using english.")
+    print("Oops! No translations found for your language... Using english.")
     print("Please send your translations for improvements.")
     print("===============================================================")
     lang = "en"

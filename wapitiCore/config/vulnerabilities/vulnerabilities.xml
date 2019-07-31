@@ -160,4 +160,14 @@
             </reference>
         </references>
     </vulnerability>
+    <vulnerability name="Open Redirect">
+        <description>Open Redirect description</description>
+        <solution text="Open Redirect solution"/>
+        <references>
+            <reference>
+                <title>Owasp Open Redirect</title>
+                <url>https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html</url>
+            </reference>
+        </references>
+    </vulnerability>
 </vulnerabilities>

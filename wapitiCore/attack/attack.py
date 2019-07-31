@@ -44,7 +44,8 @@ modules = [
     "mod_buster",
     "mod_shellshock",
     "mod_methods",
-    "mod_ssrf"
+    "mod_ssrf",
+    "mod_redirect"
 ]
 
 commons = ["blindsql", "exec", "file", "permanentxss", "sql", "xss", "ssrf"]

@@ -367,7 +367,7 @@ class Page:
         if self._response.is_redirect or self._response.is_permanent_redirect:
             if "location" in self._response.headers:
                 return self.make_absolute(self._response.headers["location"])
-        return None
+        return ""
 
     @property
     def is_directory_redirection(self):
@@ -733,6 +733,16 @@ class Page:
                     if url:
                         urls.add(self.make_absolute(url))
         return [url for url in urls if url]
+
+    @property
+    def all_redirections(self):
+        result = set()
+        if self.redirection_url:
+            result.add(self.redirection_url)
+        result.update(self.js_redirections)
+        result.update(self.html_redirections)
+        return result
+
 
     def iter_forms(self, autofill=True):
         """Returns a generator of Request extracted from the Page.
@@ -1599,15 +1609,3 @@ class Explorer:
                     break
 
         self._crawler._session.stream = False
-
-
-if __name__ == "__main__":
-    c = Crawler("https://httpbin.org/")
-    request = web.Request(
-        "https://httpbin.org/post?get1=a&get2=b",
-        post_params=[['post1', 'c'], ['post2', 'd']]
-    )
-
-    page = c.post(request)
-    print(json.dumps(page.json, indent=2))
-

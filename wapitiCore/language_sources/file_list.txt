@@ -9,8 +9,10 @@
 ../attack/mod_htaccess.py
 ../attack/mod_nikto.py
 ../attack/mod_permanentxss.py
+../attack/mod_redirect.py
 ../attack/mod_shellshock.py
 ../attack/mod_sql.py
+../attack/mod_ssrf.py
 ../attack/mod_xss.py
 ../language/vulnerability.py
 ../main/getcookie.py
