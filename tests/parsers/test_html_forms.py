@@ -39,6 +39,8 @@ def test_forms():
             elif form.file_path == "/fields.php":
                 assert form.method == "POST"
                 assert not form.is_multipart
+                assert len([gender[1] for gender in form.post_params if gender[0] == "gender"]) == 1
+
                 assert dict(form.post_params) == {
                     "vehicle1": "car",
                     "vehicle2": "boat",

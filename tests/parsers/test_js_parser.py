@@ -28,7 +28,7 @@ def test_js_parser():
         }
 
 
-def test_lamejs():
+def test_js_false_positives():
     scripts = [
         # from https://public-firing-range.appspot.com/remoteinclude/script_hash.html
         """
@@ -58,7 +58,8 @@ def test_lamejs():
     
         function openBrWindow(theURL,winName,features) { //v2.0
         window.open(theURL,winName,features);
-        }"""
+        }""",
+        """window.location.href = this.value;"""
     ]
     for script in scripts:
         lame_js = LameJs(script)

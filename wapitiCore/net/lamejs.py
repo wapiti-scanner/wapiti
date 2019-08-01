@@ -129,19 +129,21 @@ class LameJs:
         elif node.type == "ASSIGN":
             logging.debug("# ASSIGN")
             left_value = self.read_node(node[0])
-            right_value = self.read_node(node[1])
-            logging.debug("left_value = {0}".format(left_value))
-            logging.debug("right_value = {0}".format(right_value))
-            if right_value and (
-                left_value.endswith(".href") or
-                left_value.endswith(".action") or
-                left_value.endswith(".location") or
-                left_value.endswith(".src")
-            ):
-                if node[1].type == "IDENTIFIER" and self.js_vars.get(right_value):
-                    self.links.append(self.js_vars[right_value])
-                else:
-                    self.links.append(right_value)
+            if node[1].type != "DOT":
+                # Seems too complicated to process objects attributes...
+                right_value = self.read_node(node[1])
+                logging.debug("left_value = {0}".format(left_value))
+                logging.debug("right_value = {0}".format(right_value))
+                if right_value and (
+                    left_value.endswith(".href") or
+                    left_value.endswith(".action") or
+                    left_value.endswith(".location") or
+                    left_value.endswith(".src")
+                ):
+                    if node[1].type == "IDENTIFIER" and self.js_vars.get(right_value):
+                        self.links.append(self.js_vars[right_value])
+                    else:
+                        self.links.append(right_value)
         elif node.type == "WITH":
             logging.debug("# WITH")
             for sub_node in node.body:

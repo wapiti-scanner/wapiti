@@ -796,6 +796,7 @@ class Page:
                 "week": "2019-W24"
             }
 
+            radio_inputs = {}
             for input_field in form.find_all("input", attrs={"name": True}):
                 input_type = input_field.attrs.get("type", "text").lower()
 
@@ -827,6 +828,9 @@ class Page:
                                 file_params.append([input_field["name"], defaults["file"]])
                             else:
                                 post_params.append([input_field["name"], "pix.gif"])
+                    elif input_type == "radio":
+                        # Do not put in forms now, do it at the end
+                        radio_inputs[input_field["name"]] = input_value
                     else:
                         if method == "GET":
                             get_params.append([input_field["name"], input_value])
@@ -876,6 +880,14 @@ class Page:
                 else:
                     post_params.append([text_area["name"], "Hi there!" if autofill else ""])
 
+            # I guess I should raise a new form for every possible radio values...
+            # For the moment, just use the last value
+            for radio_name, radio_value in radio_inputs.items():
+                if method == "GET":
+                    get_params.append([radio_name, radio_value])
+                else:
+                    post_params.append([radio_name, radio_value])
+
             # First raise the form with the URL specified in the action attribute
             new_form = web.Request(
                 url,
@@ -916,10 +928,10 @@ def wildcard_translate(pattern):
         char = pattern[i]
         i += 1
         if char == '*':
-            res += '.*'
+            res += r'.*'
         else:
             res += re.escape(char)
-    return re.compile(res + '\Z(?ms)')
+    return re.compile(res + r'\Z(?ms)')
 
 
 def retry(delay=1, times=3):
@@ -945,7 +957,7 @@ def retry(delay=1, times=3):
                     return value
                 except ConnectionError as exception:
                     if hasattr(exception.args[0], "reason") and isinstance(exception.args[0].reason, ReadTimeoutError):
-                        final_excep = ReadTimeout(exception.args[0], request=request)
+                        final_excep = ReadTimeout(exception.args[0])
                     else:
                         raise exception
                 except ReadTimeout as exception:
