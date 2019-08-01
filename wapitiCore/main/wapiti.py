@@ -350,24 +350,28 @@ class Wapiti:
                 except KeyboardInterrupt as exception:
                     print('')
                     print(_("Attack process was interrupted. Do you want to:"))
-                    print(_("\t1) stop everything here and generate the report"))
-                    print(_("\t2) move to the next attack module (if any)"))
-                    print(_("\t3) stop everything here without generating the report"))
-                    print(_("\t4) continue the current attack"))
+                    print(_("\tr) stop everything here and generate the (R)eport"))
+                    print(_("\tn) move to the (N)ext attack module (if any)"))
+                    print(_("\tq) (Q)uit without generating the report"))
+                    print(_("\tc) (C)ontinue the current attack"))
 
                     while True:
-                        answer = input("? ").strip()
-                        if answer not in ("1", "2", "3", "4"):
-                            print(_("Invalid choice. Valid choices are 1, 2, 3 and 4."))
+                        try:
+                            answer = input("? ").strip().lower()
+                        except UnicodeDecodeError:
+                            pass
+
+                        if answer not in ("r", "n", "q", "c"):
+                            print(_("Invalid choice. Valid choices are r, n, q and c."))
                         else:
                             break
 
-                    if answer in ("1", "2"):
+                    if answer in ("r", "n"):
                         break
-                    elif answer == "4":
+                    elif answer == "c":
                         continue
                     else:
-                        # if answer is 3, raise KeyboardInterrupt and it will stop cleanly
+                        # if answer is q, raise KeyboardInterrupt and it will stop cleanly
                         raise exception
                 except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
                     sleep(.5)

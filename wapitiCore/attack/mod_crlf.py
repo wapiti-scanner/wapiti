@@ -75,7 +75,7 @@ class mod_crlf(Attack):
                                 level=Vulnerability.HIGH_LEVEL,
                                 request=mutated_request,
                                 parameter=parameter,
-                                info=self.MSG_VULN + " (" + parameter + ")"
+                                info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
                             )
 
                             if parameter == "QUERY_STRING":
