@@ -279,6 +279,7 @@ class Mutator:
                     self._attack_hashes.add(hash(attack_pattern))
 
                     for payload, original_flags in self.iter_payloads():
+
                         # no quoting: send() will do it for us
                         payload = payload.replace("[FILE_NAME]", request.file_name)
                         payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
@@ -288,11 +289,23 @@ class Mutator:
                         flags = set(original_flags)
 
                         if params_list is file_params:
+                            if "[EXTVALUE]" in payload:
+                                if "." not in saved_value[0][:-1]:
+                                    # Nothing that looks like an extension, skip the payload
+                                    continue
+                                payload = payload.replace("[EXTVALUE]", saved_value[0].rsplit(".", 1)[-1])
+
                             payload = payload.replace("[VALUE]", saved_value[0])
                             payload = payload.replace("[DIRVALUE]", saved_value[0].rsplit('/', 1)[0])
                             params_list[i][1][0] = payload
                             flags.add(PayloadType.file)
                         else:
+                            if "[EXTVALUE]" in payload:
+                                if "." not in saved_value[:-1]:
+                                    # Nothing that looks like an extension, skip the payload
+                                    continue
+                                payload = payload.replace("[EXTVALUE]", saved_value.rsplit(".", 1)[-1])
+
                             payload = payload.replace("[VALUE]", saved_value)
                             payload = payload.replace("[DIRVALUE]", saved_value.rsplit('/', 1)[0])
                             params_list[i][1] = payload
