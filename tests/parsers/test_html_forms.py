@@ -76,11 +76,14 @@ def test_forms():
                 form_action = True
             elif form.file_path == "/upload_empty_value.php":
                 assert form.file_params == [["file", ["pix.gif", "GIF89a", "image/gif"]]]
+            elif form.file_path == "/select_no_defaults.php":
+                items = dict(form.post_params)
+                assert items["choices"] == "3rd_choice"
             else:
                 # Form with no action set
                 assert form.file_path == "/"
 
-        assert count == 8
+        assert count == 9
         assert form_action
 
 

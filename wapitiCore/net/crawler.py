@@ -743,7 +743,6 @@ class Page:
         result.update(self.html_redirections)
         return result
 
-
     def iter_forms(self, autofill=True):
         """Returns a generator of Request extracted from the Page.
 
@@ -856,20 +855,21 @@ class Page:
                     post_params.append(["y", "1"])
 
             for select in form.find_all("select", attrs={"name": True}):
-                select_values = None
-                select_value = "on"
+                all_values = []
+                selected_value = None
                 for option in select.find_all("option", value=True):
-                    if select_values is None:
-                        select_values = {}
-
-                    select_values[option.get_text(" ", strip=True).lower()] = option["value"]
+                    all_values.append(option["value"])
                     if "selected" in option.attrs:
-                        select_value = option["value"]
-                # new_form.add_select_field(select["name"], value=select_value, values=select_values)
+                        selected_value = option["value"]
+
+                if selected_value is None and all_values:
+                    # First value may be a placeholder but last entry should be valid
+                    selected_value = all_values[-1]
+
                 if method == "GET":
-                    get_params.append([select["name"], select_value])
+                    get_params.append([select["name"], selected_value])
                 else:
-                    post_params.append([select["name"], select_value])
+                    post_params.append([select["name"], selected_value])
 
             # if form.find("input", attrs={"type": "image", "name": False}):
             #     new_form.add_image_field()

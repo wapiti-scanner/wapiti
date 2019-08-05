@@ -18,10 +18,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from urllib.parse import quote
 
-from requests.exceptions import ReadTimeout, HTTPError, RequestException
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Vulnerability, _
 
 
 class mod_redirect(Attack):
