@@ -1182,7 +1182,12 @@ class Crawler:
         @type headers: dict
         @rtype: Page
         """
-        form_headers = {"Content-Type": form.enctype}
+        form_headers = {}
+        if not form.is_multipart:
+            # requests won't generate valid upload HTTP request if we give it a multipart/form-data content-type
+            # valid requests with boundary info or made if file_params is not empty.
+            form_headers = {"Content-Type": form.enctype}
+
         if isinstance(headers, dict) and len(headers):
             form_headers.update(headers)
 
@@ -1393,8 +1398,12 @@ class Explorer:
         to_explore = deque()
         invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
 
-        # Common params used for tracking
-        self._bad_params.update(["utm_source", "utm_medium", "utm_content", "utm_campaign"])
+        # Common params used for tracking or other stuff
+        self._bad_params.update(
+            [
+                "utm_source", "utm_medium", "utm_content", "utm_campaign", "g-recaptcha-response"
+            ]
+        )
 
         while True:
             try:

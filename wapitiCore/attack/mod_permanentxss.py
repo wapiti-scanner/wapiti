@@ -203,9 +203,9 @@ class mod_permanentxss(Attack):
 
             yield original_request
 
-    def load_require(self, dependancies: list = None):
-        if dependancies:
-            for module in dependancies:
+    def load_require(self, dependencies: list = None):
+        if dependencies:
+            for module in dependencies:
                 if module.name == "xss":
                     self.SUCCESSFUL_XSS = module.SUCCESSFUL_XSS
                     self.TRIED_XSS = module.TRIED_XSS

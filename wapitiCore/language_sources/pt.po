@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Wapiti GIT\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-31 18:22+0200\n"
+"POT-Creation-Date: 2019-08-08 11:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,17 +84,17 @@ msgid "Potentially dangerous file"
 msgstr "Arquivo potencialmente malicioso"
 
 #: ../vulnerability.py:80 ../language/vulnerability.py:88
-#: ../language/vulnerability.py:90
+#: ../language/vulnerability.py:90 ../language/vulnerability.py:91
 msgid "Internal Server Error"
 msgstr "Erro interno de servidor"
 
 #: ../vulnerability.py:81 ../language/vulnerability.py:89
-#: ../language/vulnerability.py:91
+#: ../language/vulnerability.py:91 ../language/vulnerability.py:92
 msgid "Resource consumption"
 msgstr "Consumo de recursos"
 
 #: ../vulnerability.py:83 ../language/vulnerability.py:91
-#: ../language/vulnerability.py:93
+#: ../language/vulnerability.py:93 ../language/vulnerability.py:94
 #, python-brace-format
 msgid "Received a HTTP 500 error in {0}"
 msgstr "Recebido um erro HTTP 500 em {0}"
@@ -104,33 +104,33 @@ msgid "Timeout occured in {0}"
 msgstr "Timeout ocorrido em {0}"
 
 #: ../vulnerability.py:86 ../language/vulnerability.py:94
-#: ../language/vulnerability.py:96
+#: ../language/vulnerability.py:96 ../language/vulnerability.py:97
 msgid "The request timed out while attempting to inject a payload in the query string"
 msgstr "O tempo de requisição expirou ao tentar injetar uma carga na String de consulta"
 
 #: ../vulnerability.py:87 ../language/vulnerability.py:95
-#: ../language/vulnerability.py:97
+#: ../language/vulnerability.py:97 ../language/vulnerability.py:98
 msgid "The request timed out while attempting to inject a payload in the resource path"
 msgstr "O tempo de requisição expirou ao tentar injetar uma carga no caminho do recurso"
 
 #: ../vulnerability.py:88 ../language/vulnerability.py:96
-#: ../language/vulnerability.py:98
+#: ../language/vulnerability.py:98 ../language/vulnerability.py:99
 #, python-brace-format
 msgid "The request timed out while attempting to inject a payload in the parameter {0}"
 msgstr "O tempo de requisição expirou ao tentar injetar uma carga no parâmetro {0}"
 
 #: ../vulnerability.py:90 ../language/vulnerability.py:98
-#: ../language/vulnerability.py:100
+#: ../language/vulnerability.py:100 ../language/vulnerability.py:101
 msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the query string"
 msgstr "O servidor respondeu com um erro HTTP código 500 ao tentar injetar uma carga na String de consulta"
 
 #: ../vulnerability.py:92 ../language/vulnerability.py:100
-#: ../language/vulnerability.py:102
+#: ../language/vulnerability.py:102 ../language/vulnerability.py:103
 msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the resource path"
 msgstr "O servidor respondeu com um erro HTTP código 500 ao tentar injetar uma carga no caminho do recurso"
 
 #: ../vulnerability.py:94 ../language/vulnerability.py:102
-#: ../language/vulnerability.py:104
+#: ../language/vulnerability.py:104 ../language/vulnerability.py:105
 #, python-brace-format
 msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the parameter {0}"
 msgstr "O servidor respondeu com um erro HTTP código 500 ao tentar injetar uma carga no parâmetro {0}"
@@ -165,15 +165,18 @@ msgid "Upload scripts found:"
 msgstr "Scripts de Upload encontrados: "
 
 #: ../wapiti.py:335 ../main/wapiti.py:459 ../main/wapiti.py:454
+#: ../main/wapiti.py:458
 msgid "Report"
 msgstr "Relatório"
 
 #: ../wapiti.py:337 ../main/wapiti.py:461 ../main/wapiti.py:456
+#: ../main/wapiti.py:460
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
 msgstr "Um relatório foi gerado no arquivo {0}"
 
 #: ../wapiti.py:339 ../main/wapiti.py:463 ../main/wapiti.py:458
+#: ../main/wapiti.py:462
 #, python-brace-format
 msgid "Open {0} with a browser to see this report."
 msgstr "Abra {0} com um browser para ver este relatório."
@@ -234,6 +237,8 @@ msgstr "{0} via injeção na string de consulta"
 #: ../attack/mod_exec.py:154 ../attack/mod_file.py:140 ../attack/mod_sql.py:145
 #: ../attack/mod_blindsql.py:85 ../attack/mod_exec.py:111
 #: ../attack/mod_exec.py:169 ../attack/mod_file.py:152 ../attack/mod_sql.py:158
+#: ../attack/mod_crlf.py:78 ../attack/mod_file.py:148
+#: ../attack/mod_redirect.py:59
 #, python-brace-format
 msgid "{0} via injection in the parameter {1}"
 msgstr "{0} via injeção no parâmetro {1}"
@@ -311,7 +316,7 @@ msgstr "vulnerabilidade highlight_file() em diretório base"
 msgid "include() of file in include_path"
 msgstr "include() do arquivo em include_path"
 
-#: ../attack/mod_file.py:84 ../attack/mod_file.py:83
+#: ../attack/mod_file.py:84 ../attack/mod_file.py:83 ../attack/mod_file.py:79
 #, python-brace-format
 msgid "Possible {0} vulnerability"
 msgstr "Possíveis vulnerabilidades: {0}"
@@ -643,90 +648,112 @@ msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Não foi possível encontrar o módulo denominado {0}"
 
 #: ../language/vulnerability.py:107 ../language/vulnerability.py:109
+#: ../language/vulnerability.py:110
 msgid "Backup file description"
 msgstr "Pode ser que seja possível encontrar arquivos de backup de scripts no servidor web que o administrador colocou aqui para salvar uma versão anterior, ou arquivos de backup que são gerados automaticamente pelo editor de software (como por exemplo o Emacs). Essas cópias podem revelar informações importantes, como código-fonte ou credenciais "
 
 #: ../language/vulnerability.py:108 ../language/vulnerability.py:110
+#: ../language/vulnerability.py:111
 msgid "Backup file solution"
 msgstr "O administrador da aplicação web deve excluir manualmente os arquivos de backup ou removê-lo da raiz da web. Ele também deve reconfigurar seu editor para desativar os backups automáticos."
 
 #: ../language/vulnerability.py:110 ../language/vulnerability.py:112
+#: ../language/vulnerability.py:113
 msgid "Blind SQL Injection description"
 msgstr "Injeção cega de SQL é uma técnica que explora uma vulnerabilidade que ocorre no banco de dados de um aplicativo. Esse tipo de vulnerabilidade é mais difícil de detectar do que as injeções básicas de SQL, porque nenhuma mensagem de erro será exibida na página da Web."
 
 #: ../language/vulnerability.py:111 ../language/vulnerability.py:113
+#: ../language/vulnerability.py:114
 msgid "Blind SQL Injection solution"
 msgstr "Para proteger contra injeção de SQL, a entrada do usuário não deve ser incorporada diretamente nas instruções SQL. Em vez disso, a entrada do usuário deve ter escape ou instruções filtradas ou com parâmetros devem ser usadas."
 
 #: ../language/vulnerability.py:113 ../language/vulnerability.py:115
+#: ../language/vulnerability.py:116
 msgid "Commands execution description"
 msgstr "Este ataque consiste em executar comandos do sistema no servidor. O atacante tenta injetar esses comandos nos parâmetros da solicitação"
 
 #: ../language/vulnerability.py:114 ../language/vulnerability.py:116
+#: ../language/vulnerability.py:117
 msgid "Commands execution solution"
 msgstr "Prefira trabalhar sem entrada do usuário ao usar chamadas do sistema de arquivos"
 
 #: ../language/vulnerability.py:116 ../language/vulnerability.py:118
+#: ../language/vulnerability.py:119
 msgid "CRLF description"
 msgstr "O termo CRLF refere-se a alimentação de linha de retorno (ASCII 13, \\r)  ou nova linha(ASCII 10, \\n). Normalmente estão acostumados a notar a terminação de uma linha sendo, no entanto, tratados de forma diferente nos sistemas operacionais populares atuais. Por exemplo: no Windows, um CR e um LF precisam observar o final de uma linha, enquanto no Linux / UNIX um LF é necessário apenas. Esta combinação de CR e LR é usada, por exemplo, ao pressionar 'Enter' no teclado. Dependendo do aplicativo sendo usado, pressionar \"Enter\" geralmente instrui o aplicativo a iniciar uma nova linha ou enviar um comando."
 
 #: ../language/vulnerability.py:117 ../language/vulnerability.py:119
+#: ../language/vulnerability.py:120
 msgid "CRLF solution"
 msgstr "Verifique os parâmetros enviados e não permita a injeção de CRLF, filtrando o CRLF"
 
 #: ../language/vulnerability.py:119 ../language/vulnerability.py:121
+#: ../language/vulnerability.py:122
 msgid "Cross Site Scripting description"
 msgstr "O script entre sites (XSS) é um tipo de vulnerabilidade de segurança do computador normalmente encontrada em aplicativos da Web que permitem a injeção de código por usuários mal-intencionados da Web nas páginas da Web visualizadas por outros usuários. Exemplos desse código incluem código HTML e scripts do lado do cliente."
 
 #: ../language/vulnerability.py:120 ../language/vulnerability.py:122
+#: ../language/vulnerability.py:123
 msgid "Cross Site Scripting solution"
 msgstr "A melhor maneira de proteger um aplicativo da Web contra ataques XSS é garantir que o aplicativo realize a validação de todos os cabeçalhos, cookies, sequências de consulta, campos de formulário e campos ocultos. A codificação da saída fornecida pelo usuário no lado do servidor também pode impedir as vulnerabilidades do XSS, impedindo que os scripts inseridos sejam transmitidos aos usuários em um formato executável. Os aplicativos podem obter proteção significativa contra ataques baseados em javascript convertendo os seguintes caracteres em toda a saída gerada na codificação de entidade HTML apropriada: & lt ;, & gt ;, & amp ;, & quot ;, ', (,), #,%,; , +, -."
 
 #: ../language/vulnerability.py:122 ../language/vulnerability.py:124
+#: ../language/vulnerability.py:125
 msgid "File Handling description"
 msgstr "Este ataque também é conhecido como Path ou Directory Traversal, seu objetivo é o acesso a arquivos e diretórios que são armazenados fora da pasta raiz da web. O invasor tenta explorar os diretórios armazenados no servidor da web. O invasor usa algumas técnicas, por exemplo, a manipulação de variáveis que fazem referência a arquivos com seqüências 'dot-dot-slash (../)' e suas variações para mover até o diretório raiz para navegar pelo sistema de arquivos."
 
 #: ../language/vulnerability.py:123 ../language/vulnerability.py:125
+#: ../language/vulnerability.py:126
 msgid "File Handling solution"
 msgstr "Prefira trabalhar sem a entrada do usuário ao usar as chamadas do sistema de arquivos. Use índices em vez de porções reais de nomes de arquivos ao modelar ou usar arquivos de idioma (por exemplo: valor 5 do envio do usuário = tchecoslovaco, em vez de esperar que o usuário retorne 'tchecoslovaco'). Certifique-se de que o usuário não possa fornecer todas as partes do caminho - coloque-o em seu código de caminho. Valide a entrada do usuário aceitando apenas o bem conhecido - não limpe os dados. Use cadeias chrooted e políticas de acesso de código para restringir onde os arquivos podem ser obtidos ou salvos."
 
 #: ../language/vulnerability.py:125 ../language/vulnerability.py:127
+#: ../language/vulnerability.py:128
 msgid "Htaccess bypass description"
 msgstr "Os arquivos htaccess são usados para restringir o acesso a alguns arquivos ou método HTTP. Em alguns casos, pode ser possível contornar essa restrição e acessar os arquivos."
 
 #: ../language/vulnerability.py:126 ../language/vulnerability.py:128
+#: ../language/vulnerability.py:129
 msgid "Htaccess bypass solution"
 msgstr "Certifique-se de que todo método HTTP seja proibido se as credenciais forem ruins."
 
 #: ../language/vulnerability.py:128 ../language/vulnerability.py:130
+#: ../language/vulnerability.py:131
 msgid "Internal server error description"
 msgstr "Ocorreu um erro no lado do servidor, impedindo que ele processasse a solicitação. Pode ser sinal de uma vulnerabilidade."
 
 #: ../language/vulnerability.py:129 ../language/vulnerability.py:131
+#: ../language/vulnerability.py:132
 msgid "Internal server error solution"
 msgstr "Mais informações sobre o erro devem ser encontradas nos logs do servidor."
 
 #: ../language/vulnerability.py:131 ../language/vulnerability.py:133
+#: ../language/vulnerability.py:134
 msgid "Potentially dangerous file description"
 msgstr "Um arquivo com vulnerabilidades potenciais foi encontrado no site."
 
 #: ../language/vulnerability.py:132 ../language/vulnerability.py:134
+#: ../language/vulnerability.py:135
 msgid "Potentially dangerous file solution"
 msgstr "Certifique-se de que o script esteja atualizado e restrinja o acesso a ele, se possível"
 
 #: ../language/vulnerability.py:134 ../language/vulnerability.py:136
+#: ../language/vulnerability.py:137
 msgid "Resource consumption description"
 msgstr "Observou-se um tempo anormal para o servidor responder a uma consulta. Um invasor pode aproveitar esse tipo de fraqueza para sobrecarregar o servidor"
 
 #: ../language/vulnerability.py:135 ../language/vulnerability.py:137
+#: ../language/vulnerability.py:138
 msgid "Resource consumption solution"
 msgstr "O script envolvido talvez esteja usando os recursos do servidor (CPU, memória, rede, acesso a arquivos ...) de maneira ineficiente"
 
 #: ../language/vulnerability.py:137 ../language/vulnerability.py:139
+#: ../language/vulnerability.py:140
 msgid "SQL Injection description"
 msgstr "As vulnerabilidades de injeção de SQL permitem que um invasor altere as consultas executadas no banco de dados de back-end. Um invasor pode então extrair ou modificar informações armazenadas no banco de dados ou até escalar seus privilégios no sistema."
 
 #: ../language/vulnerability.py:138 ../language/vulnerability.py:140
+#: ../language/vulnerability.py:141
 msgid "SQL Injection solution"
 msgstr "Para proteger contra injeção de SQL, a entrada do usuário não deve ser incorporada diretamente nas instruções SQL. Em vez disso, a entrada do usuário deve ter escape ou instruções filtradas ou com parâmetros devem ser usadas."
 
@@ -755,7 +782,7 @@ msgstr "Aviso de avaliação"
 msgid "Blind command execution"
 msgstr "Execução de comando cego"
 
-#: ../attack/mod_file.py:43 ../attack/mod_file.py:44
+#: ../attack/mod_file.py:43 ../attack/mod_file.py:44 ../attack/mod_file.py:45
 msgid "Unix local file disclosure vulnerability"
 msgstr "Vulnerabilidade de divulgação de arquivos locais Unix"
 
@@ -789,12 +816,13 @@ msgid "File not found message"
 msgstr "Mensagem de arquivo não encontrado"
 
 #: ../language/vulnerability.py:92 ../language/vulnerability.py:94
+#: ../language/vulnerability.py:95
 #, python-brace-format
 msgid "Timeout occurred in {0}"
 msgstr "O tempo limite ocorreu em {0}"
 
 #: ../main/getcookie.py:57 ../main/wapiti.py:859 ../main/wapiti.py:860
-#: ../main/wapiti.py:895
+#: ../main/wapiti.py:895 ../main/wapiti.py:899
 msgid "Invalid base URL was specified, please give a complete URL with protocol scheme and slash after the domain name."
 msgstr "Uma URL inválida foi especificada, forneça uma URL completa com esquema de protocolo e barra após o nome do domínio."
 
@@ -866,55 +894,55 @@ msgstr "\t4) continuar o ataque"
 msgid "Invalid choice. Valid choices are 1, 2, 3 and 4."
 msgstr "Escolha inválida. As escolhas válidas são 1, 2, 3 e 4."
 
-#: ../main/wapiti.py:403 ../main/wapiti.py:398
+#: ../main/wapiti.py:403 ../main/wapiti.py:398 ../main/wapiti.py:402
 msgid "Sending crash report {} ... {}"
 msgstr "Enviando relatório de falhas {} ... {}"
 
-#: ../main/wapiti.py:405 ../main/wapiti.py:400
+#: ../main/wapiti.py:405 ../main/wapiti.py:400 ../main/wapiti.py:404
 msgid "Error sending crash report"
 msgstr "Erro ao enviar relatório de falhas"
 
-#: ../main/wapiti.py:412 ../main/wapiti.py:407
+#: ../main/wapiti.py:412 ../main/wapiti.py:407 ../main/wapiti.py:411
 msgid "{} requests were skipped due to network issues"
 msgstr "{} solicitações foram ignoradas devido a problemas de rede"
 
-#: ../main/wapiti.py:614 ../main/wapiti.py:623
+#: ../main/wapiti.py:614 ../main/wapiti.py:623 ../main/wapiti.py:627
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr "URL base usada para definir o escopo da verificação (escopo padrão é pasta)"
 
-#: ../main/wapiti.py:621 ../main/wapiti.py:630
+#: ../main/wapiti.py:621 ../main/wapiti.py:630 ../main/wapiti.py:634
 msgid "Set scan scope"
 msgstr "Definir escopo de verificação"
 
-#: ../main/wapiti.py:629 ../main/wapiti.py:638
+#: ../main/wapiti.py:629 ../main/wapiti.py:638 ../main/wapiti.py:642
 msgid "List of modules to load"
 msgstr "Lista de módulos para carregar"
 
-#: ../main/wapiti.py:637 ../main/wapiti.py:652
+#: ../main/wapiti.py:637 ../main/wapiti.py:652 ../main/wapiti.py:656
 msgid "Set attack level"
 msgstr "Definir nível de ataque"
 
-#: ../main/wapiti.py:647 ../main/wapiti.py:662
+#: ../main/wapiti.py:647 ../main/wapiti.py:662 ../main/wapiti.py:666
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "Configure o proxy HTTP(S) a ser usado. Suportados: proxies http(s) e socks"
 
-#: ../main/wapiti.py:656 ../main/wapiti.py:671
+#: ../main/wapiti.py:656 ../main/wapiti.py:671 ../main/wapiti.py:675
 msgid "Set HTTP authentication credentials"
 msgstr "Definir credenciais de autenticação HTTP"
 
-#: ../main/wapiti.py:663 ../main/wapiti.py:678
+#: ../main/wapiti.py:663 ../main/wapiti.py:678 ../main/wapiti.py:682
 msgid "Set the authentication type to use"
 msgstr "Defina o tipo de autenticação a ser usada"
 
-#: ../main/wapiti.py:669 ../main/wapiti.py:684
+#: ../main/wapiti.py:669 ../main/wapiti.py:684 ../main/wapiti.py:688
 msgid "Set a JSON cookie file to use"
 msgstr "Defina um arquivo de cookie JSON a ser usado"
 
-#: ../main/wapiti.py:677 ../main/wapiti.py:692
+#: ../main/wapiti.py:677 ../main/wapiti.py:692 ../main/wapiti.py:696
 msgid "Don't resume the scanning process, attack URLs scanned during a previous session"
 msgstr "Não será retomado o processo de verificação, URLs de ataque verificados durante uma sessão anterior"
 
-#: ../main/wapiti.py:683 ../main/wapiti.py:704
+#: ../main/wapiti.py:683 ../main/wapiti.py:704 ../main/wapiti.py:708
 msgid "Flush attack history and vulnerabilities for the current session"
 msgstr "Limpar histórico de ataques e vulnerabilidades para a sessão atual"
 
@@ -922,43 +950,43 @@ msgstr "Limpar histórico de ataques e vulnerabilidades para a sessão atual"
 msgid "Flush everything that was previously found for this target (crawled, URLs, vulns, etc)"
 msgstr "Limpar tudo o que foi encontrado anteriormente para este alvo (rastreados, URLs, vulnerabilidades, etc)"
 
-#: ../main/wapiti.py:696 ../main/wapiti.py:724
+#: ../main/wapiti.py:696 ../main/wapiti.py:724 ../main/wapiti.py:728
 msgid "Adds an url to start scan with"
 msgstr "Definir uma URL para iniciar a verificação"
 
-#: ../main/wapiti.py:705 ../main/wapiti.py:733
+#: ../main/wapiti.py:705 ../main/wapiti.py:733 ../main/wapiti.py:737
 msgid "Adds an url to exclude from the scan"
 msgstr "Definir uma URL a ser excluída da verificação"
 
-#: ../main/wapiti.py:714 ../main/wapiti.py:742
+#: ../main/wapiti.py:714 ../main/wapiti.py:742 ../main/wapiti.py:746
 msgid "Remove this parameter from urls"
 msgstr "Remover este parâmetro das urls"
 
-#: ../main/wapiti.py:723 ../main/wapiti.py:751
+#: ../main/wapiti.py:723 ../main/wapiti.py:751 ../main/wapiti.py:755
 msgid "Skip attacking given parameter(s)"
 msgstr "Ignorar ataque com os parâmetro(s) definidos"
 
-#: ../main/wapiti.py:730 ../main/wapiti.py:758
+#: ../main/wapiti.py:730 ../main/wapiti.py:758 ../main/wapiti.py:762
 msgid "Set how deep the scanner should explore the website"
 msgstr "Defina o nível de profundidade que o scanner deve explorar no site"
 
-#: ../main/wapiti.py:737 ../main/wapiti.py:765
+#: ../main/wapiti.py:737 ../main/wapiti.py:765 ../main/wapiti.py:769
 msgid "Set how many (in-scope) links the scanner should extract for each page"
 msgstr "Defina quantos links (no escopo) o scanner deve extrair para cada página"
 
-#: ../main/wapiti.py:744 ../main/wapiti.py:772
+#: ../main/wapiti.py:744 ../main/wapiti.py:772 ../main/wapiti.py:776
 msgid "Set how many pages the scanner should explore per directory"
 msgstr "Defina quantas páginas o scanner deve explorar por diretório"
 
-#: ../main/wapiti.py:751 ../main/wapiti.py:779
+#: ../main/wapiti.py:751 ../main/wapiti.py:779 ../main/wapiti.py:783
 msgid "Set how many minutes you want the scan to last (floats accepted)"
 msgstr "Defina quantos minutos você deseja que a verificação dure (números decimais são aceitos)"
 
-#: ../main/wapiti.py:758 ../main/wapiti.py:786
+#: ../main/wapiti.py:758 ../main/wapiti.py:786 ../main/wapiti.py:790
 msgid "URLs and forms having more than MAX input parameters will be erased before attack."
 msgstr "URLs e formulários com mais parâmetros que o limite máximo serão apagados antes do ataque."
 
-#: ../main/wapiti.py:766 ../main/wapiti.py:794
+#: ../main/wapiti.py:766 ../main/wapiti.py:794 ../main/wapiti.py:798
 msgid ""
 "Easy way to reduce the number of scanned and attacked URLs.\n"
 "Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
@@ -966,81 +994,88 @@ msgstr ""
 "Maneira fácil de reduzir o número de URLs digitalizados e atacados.\n"
 "Valores possíveis: paranoico, sorrateiro, educado, normal, agressivo, insano"
 
-#: ../main/wapiti.py:776 ../main/wapiti.py:804
+#: ../main/wapiti.py:776 ../main/wapiti.py:804 ../main/wapiti.py:808
 msgid "Set timeout for requests"
 msgstr "Definir tempo limite para requisições"
 
-#: ../main/wapiti.py:784 ../main/wapiti.py:812
+#: ../main/wapiti.py:784 ../main/wapiti.py:812 ../main/wapiti.py:816
 msgid "Set a custom header to use for every requests"
 msgstr "Definir um cabeçalho personalizado para ser usado em todas as requisições"
 
-#: ../main/wapiti.py:792 ../main/wapiti.py:820
+#: ../main/wapiti.py:792 ../main/wapiti.py:820 ../main/wapiti.py:824
 msgid "Set a custom user-agent to use for every requests"
 msgstr "Definir um usuário ativo personalizado para ser usado em todas as solicitações"
 
-#: ../main/wapiti.py:801 ../main/wapiti.py:829
+#: ../main/wapiti.py:801 ../main/wapiti.py:829 ../main/wapiti.py:833
 msgid "Set SSL check (default is no check)"
 msgstr "Definir verificação de SSL (o padrão é sem verificação)"
 
-#: ../main/wapiti.py:809 ../main/wapiti.py:837
+#: ../main/wapiti.py:809 ../main/wapiti.py:837 ../main/wapiti.py:841
 msgid "Colorize output"
 msgstr "Colorir saída"
 
-#: ../main/wapiti.py:816 ../main/wapiti.py:844
+#: ../main/wapiti.py:816 ../main/wapiti.py:844 ../main/wapiti.py:848
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Definir nível de verbosidade (0: baixo, 1: normal, 2: detalhado)"
 
-#: ../main/wapiti.py:825 ../main/wapiti.py:853
+#: ../main/wapiti.py:825 ../main/wapiti.py:853 ../main/wapiti.py:857
 msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
 msgstr "Definir formato de saída. Suportados: json, html (padrão), txt, openvas, vulneranet, xml"
 
-#: ../main/wapiti.py:834 ../main/wapiti.py:862
+#: ../main/wapiti.py:834 ../main/wapiti.py:862 ../main/wapiti.py:866
 msgid "Output file or folder"
 msgstr "Arquivo ou pasta de saída "
 
-#: ../main/wapiti.py:840 ../main/wapiti.py:868
+#: ../main/wapiti.py:840 ../main/wapiti.py:868 ../main/wapiti.py:872
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Não enviar um relatório automático de erros quando um módulo de ataque falhar"
 
 #: ../main/wapiti.py:878 ../main/wapiti.py:879 ../main/wapiti.py:914
+#: ../main/wapiti.py:918
 msgid "Error: File given with the -s option must be UTF-8 encoded !"
 msgstr "Erro: O arquivo fornecido com a opção -s deve ser codificado em UTF-8 !"
 
 #: ../main/wapiti.py:975 ../main/wapiti.py:976 ../main/wapiti.py:1014
+#: ../main/wapiti.py:1018
 msgid "[*] Resuming scan from previous session, please wait"
 msgstr "[*] Retomando a varredura da sessão anterior, por favor aguarde"
 
 #: ../main/wapiti.py:980 ../main/wapiti.py:981 ../main/wapiti.py:1021
+#: ../main/wapiti.py:1025
 #, python-brace-format
 msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
 msgstr "[*] {0} URLs e formulários com mais de {1} parâmetros foram removidos."
 
 #: ../main/wapiti.py:985 ../main/wapiti.py:986 ../main/wapiti.py:1026
+#: ../main/wapiti.py:1030
 #, python-brace-format
 msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr "[*] O Wapiti encontrou {0} URLs e formulários durante a verificação"
 
 #: ../main/wapiti.py:990 ../main/wapiti.py:991 ../main/wapiti.py:1031
+#: ../main/wapiti.py:1035
 msgid "Attack process interrupted. Scan will be resumed next time unless you specify \"--flush-attacks\" or \"--flush-session\"."
 msgstr "Processo de ataque interrompido. A verificação será retomada na próxima vez, a menos que você especifique \"--flash-attacks\" ou \"--flush-session\"."
 
 #: ../main/wapiti.py:995 ../main/wapiti.py:996 ../main/wapiti.py:1036
+#: ../main/wapiti.py:1040
 msgid "[!] Can't store informations in persister. SQLite database must have been locked by another process"
 msgstr "[!] Não é possível armazenar informações no repositório. O banco de dados SQLite deve ter sido bloqueado por outro processo"
 
 #: ../main/wapiti.py:996 ../main/wapiti.py:997 ../main/wapiti.py:1037
+#: ../main/wapiti.py:1041
 msgid "[!] You should unlock and launch Wapiti again."
 msgstr "[!] Você deve desbloquear e iniciar o Wapiti novamente."
 
-#: ../net/crawler.py:1382 ../net/crawler.py:1482
+#: ../net/crawler.py:1382 ../net/crawler.py:1482 ../net/crawler.py:1494
 msgid "[!] SSL/TLS error occurred with URL"
 msgstr "[!] Ocorreu um erro SSL/TLS com a URL"
 
-#: ../net/crawler.py:1386 ../net/crawler.py:1486
+#: ../net/crawler.py:1386 ../net/crawler.py:1486 ../net/crawler.py:1498
 msgid "[!] Connection error with URL"
 msgstr "[!] Erro de conexão com URL"
 
-#: ../net/crawler.py:1389 ../net/crawler.py:1489
+#: ../net/crawler.py:1389 ../net/crawler.py:1489 ../net/crawler.py:1501
 msgid "[!] {} with url {}"
 msgstr "[!] {} com url {}"
 
@@ -1053,11 +1088,11 @@ msgstr "Resumo das anomalias:"
 msgid "URL {0} seems vulnerable to Shellshock attack!"
 msgstr "A URL {0} parece vulnerável ao ataque Shellshock!"
 
-#: ../main/wapiti.py:689 ../main/wapiti.py:710
+#: ../main/wapiti.py:689 ../main/wapiti.py:710 ../main/wapiti.py:714
 msgid "Flush everything that was previously found for this target (crawled URLs, vulns, etc)"
 msgstr "Limpar tudo o que foi encontrado anteriormente para este alvo (rastreados, URLs, vulnerabilidades, etc)"
 
-#: ../main/wapiti.py:846 ../main/wapiti.py:874
+#: ../main/wapiti.py:846 ../main/wapiti.py:874 ../main/wapiti.py:878
 msgid "Show program's version number and exit"
 msgstr "Mostrar o número da versão do programa e encerrar"
 
@@ -1091,7 +1126,7 @@ msgstr ""
 msgid "SSRF vulnerability"
 msgstr ""
 
-#: ../attack/mod_ssrf.py:229
+#: ../attack/mod_ssrf.py:229 ../attack/mod_ssrf.py:225
 #, python-brace-format
 msgid ""
 "{0} via injection in the parameter {1}.\n"
@@ -1103,70 +1138,102 @@ msgstr ""
 msgid "Server Side Request Forgery"
 msgstr ""
 
-#: ../language/vulnerability.py:142
+#: ../language/vulnerability.py:142 ../language/vulnerability.py:143
 msgid "Server Side Request Forgery description"
 msgstr ""
 
-#: ../language/vulnerability.py:143
+#: ../language/vulnerability.py:143 ../language/vulnerability.py:144
 msgid "Server Side Request Forgery solution"
 msgstr ""
 
-#: ../language/vulnerability.py:145
+#: ../language/vulnerability.py:145 ../language/vulnerability.py:146
 msgid "Open Redirect description"
 msgstr ""
 
-#: ../language/vulnerability.py:146
+#: ../language/vulnerability.py:146 ../language/vulnerability.py:147
 msgid "Open Redirect solution"
 msgstr ""
 
-#: ../main/wapiti.py:599
+#: ../main/wapiti.py:599 ../main/wapiti.py:603
 msgid "[*] You are lucky! Full moon tonight."
 msgstr ""
 
-#: ../main/wapiti.py:601
+#: ../main/wapiti.py:601 ../main/wapiti.py:605
 msgid "[*] Be careful! New moon tonight."
 msgstr "[*] Seja cuidadoso! Lua nova esta noite."
 
-#: ../main/wapiti.py:605
+#: ../main/wapiti.py:605 ../main/wapiti.py:609
 msgid "[*] Watch out! Bad things can happen on Friday the 13th."
 msgstr ""
 
-#: ../main/wapiti.py:607
+#: ../main/wapiti.py:607 ../main/wapiti.py:611
 msgid "[*] Today is International Beer Day!"
 msgstr ""
 
-#: ../main/wapiti.py:610
+#: ../main/wapiti.py:610 ../main/wapiti.py:614
 msgid "[*] May the force be with you!"
 msgstr ""
 
-#: ../main/wapiti.py:612
+#: ../main/wapiti.py:612 ../main/wapiti.py:616
 msgid "[*] Happy new year!"
 msgstr ""
 
-#: ../main/wapiti.py:614
+#: ../main/wapiti.py:614 ../main/wapiti.py:618
 msgid "[*] Merry christmas!"
 msgstr ""
 
-#: ../main/wapiti.py:616
+#: ../main/wapiti.py:616 ../main/wapiti.py:620
 msgid "[*] Today is world backup day! Is your data safe?"
 msgstr ""
 
-#: ../main/wapiti.py:645
+#: ../main/wapiti.py:645 ../main/wapiti.py:649
 msgid "List Wapiti attack modules and exit"
 msgstr ""
 
-#: ../main/wapiti.py:698
+#: ../main/wapiti.py:698 ../main/wapiti.py:702
 msgid "Resume the scanning process (if stopped) even if some attacks were previously performed"
 msgstr ""
 
-#: ../main/wapiti.py:715
+#: ../main/wapiti.py:715 ../main/wapiti.py:719
 msgid "Directory where to store attack history and session data."
 msgstr ""
 
-#: ../main/wapiti.py:881
+#: ../main/wapiti.py:881 ../main/wapiti.py:885
 msgid "[*] Do you feel lucky punk?"
 msgstr ""
 
-#: ../main/wapiti.py:884
+#: ../main/wapiti.py:884 ../main/wapiti.py:888
 msgid "[*] Available modules:"
+msgstr ""
+
+#: ../language/vulnerability.py:86
+msgid "XXE"
+msgstr ""
+
+#: ../language/vulnerability.py:149
+msgid "XXE description"
+msgstr ""
+
+#: ../language/vulnerability.py:150
+msgid "XXE solution"
+msgstr ""
+
+#: ../main/wapiti.py:353
+msgid "\tr) stop everything here and generate the (R)eport"
+msgstr ""
+
+#: ../main/wapiti.py:354
+msgid "\tn) move to the (N)ext attack module (if any)"
+msgstr ""
+
+#: ../main/wapiti.py:355
+msgid "\tq) (Q)uit without generating the report"
+msgstr ""
+
+#: ../main/wapiti.py:356
+msgid "\tc) (C)ontinue the current attack"
+msgstr ""
+
+#: ../main/wapiti.py:365
+msgid "Invalid choice. Valid choices are r, n, q and c."
 msgstr ""

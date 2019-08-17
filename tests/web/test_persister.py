@@ -1,4 +1,5 @@
 import os
+import json
 
 import responses
 import requests
@@ -120,3 +121,25 @@ def test_persister_forms():
                 assert form.file_params[0] == ["file", ["pix.gif", "GIF89a", "image/gif"]]
             elif form.file_path == "/fields.php":
                 assert ["file", "pix.gif"] in form.post_params
+
+
+def test_raw_post():
+    json_req = Request(
+        "http://httpbin.org/post?a=b",
+        post_params=json.dumps({"z": 1, "a": 2}),
+        enctype="application/json"
+    )
+
+    try:
+        os.unlink("/tmp/crawl.db")
+    except FileNotFoundError:
+        pass
+
+    persister = SqlitePersister("/tmp/crawl.db")
+    persister.set_root_url("http://httpbin.org/")
+    persister.set_to_browse([json_req])
+    assert persister.count_paths() == 1
+
+    extracted = next(persister.get_to_browse())
+    assert json_req == extracted
+    assert json.loads(extracted.post_params) == {"z": 1, "a": 2}

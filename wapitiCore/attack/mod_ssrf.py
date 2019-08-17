@@ -154,10 +154,6 @@ class mod_ssrf(Attack):
     payloads = ("\xBF'\"(", set())
     MSG_VULN = _("SSRF vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self._session_id = "".join([choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
-
     def attack(self):
         methods = ""
         if self.do_get:
@@ -207,7 +203,7 @@ class mod_ssrf(Attack):
             if isinstance(data, dict):
                 for request_id in data:
                     original_request = self.persister.get_path_by_id(request_id)
-                    if not original_request:
+                    if original_request is None:
                         raise ValueError("Could not find the original request with that ID")
 
                     page = original_request.path
@@ -242,10 +238,11 @@ class mod_ssrf(Attack):
                                 methods="G" if original_request.method == "GET" else "P",
                                 payloads=[("http://external.url/page", set())],
                                 qs_inject=self.must_attack_query_string,
+                                parameters=[parameter],
                                 skip=self.options.get("skipped_parameters")
                             )
 
-                            mutated_request, parameter, taint, flags = next(mutator.mutate(original_request))
+                            mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
                             self.add_vuln(
                                 request_id=original_request.path_id,

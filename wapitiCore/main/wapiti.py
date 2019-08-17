@@ -407,6 +407,9 @@ class Wapiti:
                     if original_request_or_exception and original_request_or_exception.path_id is not None:
                         self.persister.set_attacked(original_request_or_exception.path_id, attack_module.name)
 
+            if hasattr(attack_module, "finish"):
+                attack_module.finish()
+
             if skipped:
                 print(_("{} requests were skipped due to network issues").format(skipped))
 

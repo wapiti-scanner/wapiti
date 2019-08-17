@@ -29,19 +29,11 @@ class mod_blindsql(Attack):
     """
 
     PAYLOADS_FILE = "blindSQLPayloads.txt"
-    blind_sql_payloads = []
     TIME_TO_SLEEP = 6
     name = "blindsql"
-    require = ["sql"]
     PRIORITY = 6
 
     MSG_VULN = _("Blind SQL vulnerability")
-
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.blind_sql_payloads = self.payloads
-        self.excluded_get = []
-        self.excluded_post = []
 
     def set_timeout(self, timeout):
         self.TIME_TO_SLEEP = str(1 + int(timeout))
@@ -135,11 +127,3 @@ class mod_blindsql(Attack):
                     yield exception
 
             yield original_request
-
-    # TODO: should blindsql module ignore vulnerabilities that have previously been detected by the sql module ?
-    def load_require(self, dependencies: list = None):
-        if dependencies:
-            for module in dependencies:
-                if module.name == "sql":
-                    self.excluded_get = module.vulnerable_get
-                    self.excluded_post = module.vulnerable_post

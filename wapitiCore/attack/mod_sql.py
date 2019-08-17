@@ -43,6 +43,8 @@ class mod_sql(Attack):
             return _("MySQL Injection")
         if "Warning: mysql_fetch_array()" in data:
             return _("MySQL Injection")
+        if "mysqli_fetch_assoc() expects parameter 1 to be" in data:
+            return _("MySQL Injection")
         if "com.mysql.jdbc.exceptions" in data:
             return _("MySQL Injection")
         if "MySqlException (0x" in data:
@@ -83,7 +85,7 @@ class mod_sql(Attack):
         if "StatementCallback; bad SQL grammar" in data:
             return _("Spring JDBC Injection")
 
-        ora_test = re.search("ORA-[0-9]{4,}", data)
+        ora_test = re.search(r"ORA-[0-9]{4,}", data)
         if ora_test is not None:
             return _("Oracle Injection") + " " + ora_test.group(0)
 

@@ -25,6 +25,7 @@ from enum import Enum
 from math import ceil
 import random
 from types import GeneratorType, FunctionType
+from binascii import hexlify
 
 from wapitiCore.net.web import Request
 
@@ -45,10 +46,11 @@ modules = [
     "mod_shellshock",
     "mod_methods",
     "mod_ssrf",
-    "mod_redirect"
+    "mod_redirect",
+    "mod_xxe"
 ]
 
-commons = ["blindsql", "exec", "file", "permanentxss", "sql", "xss", "ssrf"]
+commons = ["blindsql", "exec", "file", "permanentxss", "redirect", "sql", "xss", "ssrf"]
 
 
 class PayloadType(Enum):
@@ -113,6 +115,7 @@ class Attack:
 
     def __init__(self, crawler, persister, logger, attack_options):
         super().__init__()
+        self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
         self.persister = persister
         self.add_vuln = persister.add_vulnerability
@@ -123,9 +126,6 @@ class Attack:
         # List of attack urls already launched in the current module
         self.attacked_get = []
         self.attacked_post = []
-
-        self.vulnerable_get = []
-        self.vulnerable_post = []
 
         self.verbose = 0
         self.color = 0
@@ -158,8 +158,8 @@ class Attack:
             return self.payload_reader.read_payloads(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE))
         return []
 
-    def load_require(self, dependancies: list = None):
-        self.deps = dependancies
+    def load_require(self, dependencies: list = None):
+        self.deps = dependencies
 
     @property
     def attack_level(self):
@@ -284,6 +284,14 @@ class Mutator:
                         payload = payload.replace("[FILE_NAME]", request.file_name)
                         payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
 
+                        if isinstance(request.path_id, int):
+                            payload = payload.replace("[PATH_ID]", str(request.path_id))
+
+                        payload = payload.replace(
+                            "[PARAM_AS_HEX]",
+                            hexlify(param_name.encode("utf-8", errors="replace")).decode()
+                        )
+
                         # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
                         # so let's copy them just to be sure we don't mess with them.
                         flags = set(original_flags)
@@ -348,6 +356,15 @@ class Mutator:
 
                     payload = payload.replace("[FILE_NAME]", request.file_name)
                     payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+
+                    if isinstance(request.path_id, int):
+                        payload = payload.replace("[PATH_ID]", str(request.path_id))
+
+                    payload = payload.replace(
+                        "[PARAM_AS_HEX]",
+                        hexlify(b"QUERY_STRING").decode()
+                    )
+
                     flags = set(original_flags)
 
                     evil_req = Request(
@@ -361,6 +378,74 @@ class Mutator:
                     yield evil_req, "QUERY_STRING", payload, flags
 
 
+class FileMutator:
+    def __init__(self, payloads=None, parameters=None, skip=None):
+        self._payloads = payloads
+        self._attack_hashes = set()
+        self._parameters = parameters if isinstance(parameters, list) else []
+        self._skip_list = skip if isinstance(skip, set) else set()
+
+    def iter_payloads(self):
+        # raise tuples of (payloads, flags)
+        if isinstance(self._payloads, tuple):
+            yield self._payloads
+        elif isinstance(self._payloads, list) or isinstance(self._payloads, GeneratorType):
+            yield from self._payloads
+        elif isinstance(self._payloads, FunctionType):
+            result = self._payloads()
+            if isinstance(result, GeneratorType):
+                yield from result
+            else:
+                yield result
+
+    def mutate(self, request: Request):
+        get_params = request.get_params
+        post_params = request.post_params
+        referer = request.referer
+
+        for i in range(len(request.file_params)):
+            new_params = request.file_params
+            param_name = new_params[i][0]
+
+            if self._skip_list and param_name in self._skip_list:
+                continue
+
+            if self._parameters and param_name not in self._parameters:
+                continue
+
+            for payload, original_flags in self.iter_payloads():
+
+                # no quoting: send() will do it for us
+                payload = payload.replace("[FILE_NAME]", request.file_name)
+                payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+
+                if isinstance(request.path_id, int):
+                    payload = payload.replace("[PATH_ID]", str(request.path_id))
+
+                payload = payload.replace(
+                    "[PARAM_AS_HEX]",
+                    hexlify(param_name.encode("utf-8", errors="replace")).decode()
+                )
+
+                # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
+                # so let's copy them just to be sure we don't mess with them.
+                flags = set(original_flags)
+
+                new_params[i][1] = ["content.xml", payload, "text/xml"]
+                flags.add(PayloadType.file)
+
+                evil_req = Request(
+                    request.path,
+                    method=request.method,
+                    get_params=get_params,
+                    post_params=post_params,
+                    file_params=new_params,
+                    referer=referer,
+                    link_depth=request.link_depth
+                )
+                yield evil_req, param_name, payload, flags
+
+
 class PayloadReader:
     """Class for reading and writing in text files"""
 
@@ -371,27 +456,31 @@ class PayloadReader:
         """returns a array"""
         lines = []
         try:
-            # Reminder : don't try to read payload files as UTF-8, must give str type
             with open(filename) as f:
                 for line in f:
-                    flags = set()
-                    clean_line = line.strip(" \n")
-                    clean_line = clean_line.replace("[TAB]", "\t")
-                    clean_line = clean_line.replace("[LF]", "\n")
-                    clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
-
-                    payload_type = PayloadType.pattern
-                    if "[TIMEOUT]" in clean_line:
-                        payload_type = PayloadType.time
-                        clean_line = clean_line.replace("[TIMEOUT]", "")
-
-                    flags.add(payload_type)
-
-                    if clean_line != "":
-                        lines.append((clean_line.replace("\\0", "\0"), flags))
+                    clean_line, flags = self.process_line(line)
+                    if clean_line:
+                        lines.append((clean_line, flags))
         except IOError as exception:
             print(exception)
         return lines
+
+    def process_line(self, line):
+        flags = set()
+        clean_line = line.strip(" \n")
+        clean_line = clean_line.replace("[TAB]", "\t")
+        clean_line = clean_line.replace("[LF]", "\n")
+        clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
+
+        payload_type = PayloadType.pattern
+        if "[TIMEOUT]" in clean_line:
+            payload_type = PayloadType.time
+            clean_line = clean_line.replace("[TIMEOUT]", "")
+
+        clean_line = clean_line.replace("\\0", "\0")
+
+        flags.add(payload_type)
+        return clean_line, flags
 
 
 if __name__ == "__main__":

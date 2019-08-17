@@ -85,7 +85,7 @@ def test_request_object():
     assert res13.file_name == "videos"
     assert res10.path == "http://httpbin.org/post"
     assert res10.file_name == "post"
-    assert res10.url == "http://httpbin.org/post?qs0"
+    assert res10.url == "http://httpbin.org/post?qs0="
     assert res13.parent_dir == res14.url
     assert res15.is_root
     assert res15.parent_dir == res15.url
@@ -142,3 +142,15 @@ def test_request_object():
     assert page.json["json"] == {"z": 1, "a": 2}
     assert page.json["headers"]["Content-Type"] == "application/json"
     assert page.json["form"] == {}
+
+    page = crawler.send(res12)
+    assert page.json["files"]
+
+    res19 = Request(
+        "http://httpbin.org/post?qs1",
+        post_params=[['post1', 'c'], ['post2', 'd']],
+        file_params=[['file1', ['fname1', 'content']], ['file2', ['fname2', 'content']]],
+        enctype="multipart/form-data"
+    )
+    page = crawler.send(res19)
+    assert page.json["files"]

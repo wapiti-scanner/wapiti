@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse, quote, parse_qsl, urlencode
 import posixpath
 from copy import deepcopy
 
@@ -34,7 +34,7 @@ class Request:
     def __init__(
             self, path: str, method: str = "",
             get_params: list = None, post_params: list = None, file_params: list = None,
-            encoding: str = "UTF-8", enctype: str = "application/x-www-form-urlencoded",
+            encoding: str = "UTF-8", enctype: str = "",
             referer: str = "", link_depth: int = 0):
         """Create a new Request object.
 
@@ -74,7 +74,15 @@ class Request:
         else:
             self._method = method
 
-        self._enctype = "" if self._method == "GET" else enctype.lower().strip()
+        self._enctype = ""
+        if self._method == "POST":
+            if enctype:
+                self._enctype = enctype.lower().strip()
+            else:
+                if file_params:
+                    self._enctype = "multipart/form-data"
+                else:
+                    self._enctype = "application/x-www-form-urlencoded"
 
         # same structure as _get_params, see below
         if not post_params:
@@ -113,12 +121,7 @@ class Request:
             self._get_params = []
             if "?" in self._resource_path:
                 query_string = urlparse(self._resource_path).query
-                for kv in query_string.split("&"):
-                    if kv.find("=") > 0:
-                        self._get_params.append(kv.split("=", 1))
-                    else:
-                        # ?param without value
-                        self._get_params.append([kv, None])
+                self._get_params = [[k, v] for k, v in parse_qsl(query_string, keep_blank_values=True)]
                 self._resource_path = self._resource_path.split("?")[0]
         else:
             if isinstance(get_params, list):
@@ -264,15 +267,25 @@ class Request:
             for field_name, field_value in self._file_params:
                 http_string += (
                     "{3}{0}\n{3}Content-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\n\n"
-                    "{3}/* snip file content snip */\n").format(boundary, field_name, field_value[0], left_margin)
-            http_string += "{0}--\n".format(boundary)
+                    "{3}{4}\n"
+                ).format(
+                    boundary,
+                    field_name,
+                    field_value[0],
+                    left_margin,
+                    field_value[1].replace("\n", "\n" + left_margin).strip()
+                )
+            http_string += "{0}{1}--\n".format(left_margin, boundary)
         elif self._post_params:
             if "urlencoded" in self.enctype:
                 http_string += "{}Content-Type: application/x-www-form-urlencoded\n".format(left_margin)
                 http_string += "\n{}{}".format(left_margin, self.encoded_data)
             else:
                 http_string += "{}Content-Type: {}\n".format(left_margin, self.enctype)
-                http_string += "\n{}{}".format(left_margin, self.encoded_data)
+                http_string += "\n{}{}".format(
+                    left_margin,
+                    self.encoded_data.replace("\n", "\n" + left_margin).strip()
+                )
 
         return http_string.rstrip()
 
@@ -459,16 +472,12 @@ class Request:
 
         key_values = []
         for k, v in params:
-            k = quote(k, safe='%')
-            if v is None:
-                key_values.append(k)
+            if isinstance(v, tuple) or isinstance(v, list):
+                key_values.append((k, v[0]))
             else:
-                if isinstance(v, tuple) or isinstance(v, list):
-                    # for upload fields
-                    v = v[0]
-                v = quote(v, safe='%')
-                key_values.append("%s=%s" % (k, v))
-        return "&".join(key_values)
+                key_values.append((k, v or ""))
+
+        return urlencode(key_values)
 
     @property
     def encoded_params(self):
