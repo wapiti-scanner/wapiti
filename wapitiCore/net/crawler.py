@@ -410,7 +410,12 @@ class Page:
         path = current_url_parts.path
         params = current_url_parts.params
 
-        parts = urlparse(link)
+        try:
+            parts = urlparse(link)
+        except ValueError:
+            # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
+            return ""
+        
         query_string = parts.query
         url_path = parts.path or '/'
         url_path = normpath(url_path.replace("\\", "/"))
