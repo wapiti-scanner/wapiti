@@ -84,6 +84,14 @@ class mod_xxe(Attack):
             skip=self.options.get("skipped_parameters")
         )
 
+    def false_positive(self, request: Request) -> bool:
+        try:
+            response = self.crawler.send(request)
+        except RequestException:
+            return False
+        else:
+            return check_success(response.content)
+
     def attack(self):
         mutator = self.get_mutator()
 
@@ -153,7 +161,7 @@ class mod_xxe(Attack):
                         )
                         timeouted = True
                     else:
-                        if check_success(response.content):
+                        if check_success(response.content) and not self.false_positive(original_request):
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
                                 vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
@@ -225,7 +233,7 @@ class mod_xxe(Attack):
             except (KeyboardInterrupt, RequestException) as exception:
                 yield exception
             else:
-                if check_success(response.content):
+                if check_success(response.content) and not self.false_positive(original_request):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=Vulnerability.XXE,
@@ -271,7 +279,7 @@ class mod_xxe(Attack):
                 except RequestException as exception:
                     yield exception
                 else:
-                    if check_success(response.content):
+                    if check_success(response.content) and not self.false_positive(original_request):
                         if check_success(response.content):
                             self.add_vuln(
                                 request_id=original_request.path_id,

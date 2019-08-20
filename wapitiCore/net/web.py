@@ -16,9 +16,123 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from urllib.parse import urlparse, quote, parse_qsl, urlencode
+from urllib.parse import urlparse, quote_plus, unquote, quote
 import posixpath
 from copy import deepcopy
+import sys
+
+
+def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote_plus):
+    """Encode a dict or sequence of two-element tuples into a URL query string.
+
+    If the query arg is a sequence of two-element tuples, the order of the
+    parameters in the output will match the order of parameters in the
+    input.
+    The components of a query arg may each be either a string or a bytes type.
+    The safe, encoding, and errors parameters are passed down to the function
+    specified by quote_via (encoding and errors only if a component is a str).
+    """
+
+    if hasattr(query, "items"):
+        query = query.items()
+    else:
+        # It's a bother at times that strings and string-like objects are
+        # sequences.
+        try:
+            # non-sequence items should not work with len()
+            # non-empty strings will fail this
+            if len(query) and not isinstance(query[0], tuple):
+                raise TypeError
+            # Zero-length sequences of all types will get here and succeed,
+            # but that's a minor nit.  Since the original implementation
+            # allowed empty dicts that type of behavior probably should be
+            # preserved for consistency
+        except TypeError:
+            ty, va, tb = sys.exc_info()
+            raise TypeError("not a valid non-string sequence "
+                            "or mapping object").with_traceback(tb)
+
+    key_value_pair = []
+
+    for k, v in query:
+        if isinstance(k, bytes):
+            k = quote_via(k, safe)
+        else:
+            k = quote_via(str(k), safe, encoding, errors)
+
+        if v is None:
+            key_value_pair.append(k)
+        elif isinstance(v, bytes):
+            v = quote_via(v, safe)
+            key_value_pair.append(k + '=' + v)
+        elif isinstance(v, str):
+            v = quote_via(v, safe, encoding, errors)
+            key_value_pair.append(k + '=' + v)
+        else:
+            try:
+                # Is this a sufficient test for sequence-ness?
+                x = len(v)
+            except TypeError:
+                # not a sequence
+                v = quote_via(str(v), safe, encoding, errors)
+                key_value_pair.append(k + '=' + v)
+            else:
+                # loop over the sequence
+                for elt in v:
+                    if isinstance(elt, bytes):
+                        elt = quote_via(elt, safe)
+                    else:
+                        elt = quote_via(str(elt), safe, encoding, errors)
+                    key_value_pair.append(k + '=' + elt)
+    return '&'.join(key_value_pair)
+
+
+def parse_qsl(qs, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None):
+    """Parse a query given as a string argument.
+        Arguments:
+        qs: percent-encoded query string to be parsed
+        strict_parsing: flag indicating what to do with parsing errors. If
+            false (the default), errors are silently ignored. If true,
+            errors raise a ValueError exception.
+        encoding and errors: specify how to decode percent-encoded sequences
+            into Unicode characters, as accepted by the bytes.decode() method.
+        max_num_fields: int. If set, then throws a ValueError
+            if there are more than n fields read by parse_qsl().
+        Returns a list, as G-d intended.
+    """
+    # If max_num_fields is defined then check that the number of fields
+    # is less than max_num_fields. This prevents a memory exhaustion DOS
+    # attack via post bodies with many fields.
+    if max_num_fields is not None:
+        num_fields = 1 + qs.count('&') + qs.count(';')
+        if max_num_fields < num_fields:
+            raise ValueError('Max number of fields exceeded')
+
+    pairs = [s2 for s1 in qs.split('&') for s2 in s1.split(';')]
+    r = []
+
+    for name_value in pairs:
+        if not name_value and not strict_parsing:
+            continue
+
+        nv = name_value.split('=', 1)
+        if len(nv) != 2:
+            if strict_parsing:
+                raise ValueError("bad query field: %r" % (name_value,))
+            # Handle case of a control-name with no equal sign
+            nv.append(None)
+
+        name = nv[0].replace('+', ' ')
+        name = unquote(name, encoding=encoding, errors=errors)
+
+        if nv[1]:
+            value = nv[1].replace('+', ' ')
+            value = unquote(value, encoding=encoding, errors=errors)
+        else:
+            value = nv[1]
+
+        r.append((name, value))
+    return r
 
 
 def shell_escape(s: str):
@@ -121,7 +235,7 @@ class Request:
             self._get_params = []
             if "?" in self._resource_path:
                 query_string = urlparse(self._resource_path).query
-                self._get_params = [[k, v] for k, v in parse_qsl(query_string, keep_blank_values=True)]
+                self._get_params = [[k, v] for k, v in parse_qsl(query_string)]
                 self._resource_path = self._resource_path.split("?")[0]
         else:
             if isinstance(get_params, list):
@@ -475,7 +589,8 @@ class Request:
             if isinstance(v, tuple) or isinstance(v, list):
                 key_values.append((k, v[0]))
             else:
-                key_values.append((k, v or ""))
+                # May be empty string or None but will be processed differently by our own urlencode()
+                key_values.append((k, v))
 
         return urlencode(key_values)
 

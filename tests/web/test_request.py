@@ -85,7 +85,7 @@ def test_request_object():
     assert res13.file_name == "videos"
     assert res10.path == "http://httpbin.org/post"
     assert res10.file_name == "post"
-    assert res10.url == "http://httpbin.org/post?qs0="
+    assert res10.url == "http://httpbin.org/post?qs0"
     assert res13.parent_dir == res14.url
     assert res15.is_root
     assert res15.parent_dir == res15.url

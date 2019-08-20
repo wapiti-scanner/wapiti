@@ -20,11 +20,12 @@
 
 # Standard libraries
 import re
+import sys
 from random import choice
 from string import ascii_letters
 from enum import Enum
 from functools import lru_cache
-from urllib.parse import urlparse, urlunparse, parse_qsl
+from urllib.parse import urlparse, urlunparse
 from hashlib import md5
 from http.client import IncompleteRead
 import warnings
@@ -97,8 +98,8 @@ COMMON_PAGE_EXTENSIONS = {
 EXCLUDED_MEDIA_EXTENSIONS = (
     # File extensions we don't want to deal with. Js and SWF files won't be in this list.
     '.7z', '.aac', '.aiff', '.au', '.avi', '.bin', '.bmp', '.cab', '.dll', '.dmp', '.ear', '.exe', '.flv', '.gif',
-    '.gz', '.image', '.iso', '.jar', '.jpeg', '.jpg', '.mkv', '.mov', '.mp3', '.mp4', '.mpeg', '.mpg', '.pdf', '.png',
-    '.ps', '.rar', '.scm', '.so', '.tar', '.tif', '.war', '.wav', '.wmv', '.zip'
+    '.gz', '.ico', '.image', '.iso', '.jar', '.jpeg', '.jpg', '.mkv', '.mov', '.mp3', '.mp4', '.mpeg', '.mpg', '.pdf',
+    '.png', '.ps', '.rar', '.scm', '.so', '.tar', '.tif', '.war', '.wav', '.wmv', '.zip'
 )
 
 JS_SCHEME_REGEX = re.compile(r"^javascript:", re.I)
@@ -415,7 +416,7 @@ class Page:
         except ValueError:
             # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
             return ""
-        
+
         query_string = parts.query
         url_path = parts.path or '/'
         url_path = normpath(url_path.replace("\\", "/"))
@@ -1600,7 +1601,7 @@ class Explorer:
                     get_params = [
                         list(t) for t in filter(
                             lambda param_tuple: param_tuple[0] not in self._bad_params,
-                            parse_qsl(query_string, keep_blank_values=True)
+                            web.parse_qsl(query_string)
                         )
                     ]
                 elif new_url.endswith(EXCLUDED_MEDIA_EXTENSIONS):
