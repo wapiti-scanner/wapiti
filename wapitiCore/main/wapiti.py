@@ -129,7 +129,7 @@ class Wapiti:
         if session_dir:
             SqlitePersister.CRAWLER_DATA_DIR = session_dir
 
-        history_file = os.path.join(
+        self._history_file = os.path.join(
             SqlitePersister.CRAWLER_DATA_DIR,
             "{}_{}_{}.db".format(
                 self.server.replace(':', '_'),
@@ -137,9 +137,11 @@ class Wapiti:
                 md5(root_url.encode(errors="replace")).hexdigest()[:8]
             )
         )
+
         if not os.path.isdir(SqlitePersister.CRAWLER_DATA_DIR):
             os.makedirs(SqlitePersister.CRAWLER_DATA_DIR)
-        self.persister = SqlitePersister(history_file)
+
+        self.persister = SqlitePersister(self._history_file)
 
     def __init_report(self):
         for rep_gen_info in self.xml_rep_gen_parser.get_report_generators():
@@ -558,11 +560,17 @@ class Wapiti:
         self.persister.flush_attacks()
 
     def flush_session(self):
-        self.persister.flush_session()
+        self.persister.close()
+        try:
+            os.unlink(self._history_file)
+        except FileNotFoundError:
+            pass
+
         try:
             os.unlink(self.persister.output_file[:-2] + "pkl")
         except FileNotFoundError:
             pass
+        self.persister = SqlitePersister(self._history_file)
 
     def count_resources(self) -> int:
         return self.persister.count_paths()

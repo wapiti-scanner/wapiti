@@ -10,8 +10,7 @@ from wapitiCore.net.crawler import Crawler, Page
 
 
 @responses.activate
-def test_persister():
-
+def test_persister_basic():
     url = "http://httpbin.org/?k=v"
     responses.add(
         responses.GET,
@@ -37,15 +36,8 @@ def test_persister():
     )
     persister.set_to_browse([simple_get, simple_post])
 
-    simple_upload = Request(
-        "http://httpbin.org/post?qs1",
-        post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["file1", ["'fname1", "content"]], ["file2", ["fname2", "content"]]]
-    )
-    persister.add_request(simple_upload)
-
     assert persister.get_root_url() == "http://httpbin.org/"
-    assert persister.count_paths() == 3
+    assert persister.count_paths() == 2
     assert not len(list(persister.get_links()))
     assert not len(list(persister.get_forms()))
     assert not len(list(persister.get_payloads()))
@@ -53,7 +45,6 @@ def test_persister():
     stored_requests = set(persister.get_to_browse())
     assert simple_get in stored_requests
     assert simple_post in stored_requests
-    assert simple_upload in stored_requests
 
     # If there is some requests stored then it means scan was started
     assert persister.has_scan_started()
@@ -70,7 +61,7 @@ def test_persister():
 
     # Should be one now as the link was crawled
     assert len(list(persister.get_links()))
-    assert persister.count_paths() == 4
+    assert persister.count_paths() == 3
 
     persister.set_attacked(1, "xss")
     assert persister.count_attacked("xss") == 1
@@ -84,6 +75,44 @@ def test_persister():
     assert not len(list(persister.get_payloads()))
     persister.flush_session()
     assert not persister.count_paths()
+
+
+@responses.activate
+def test_persister_upload():
+    try:
+        os.unlink("/tmp/crawl.db")
+    except FileNotFoundError:
+        pass
+
+    persister = SqlitePersister("/tmp/crawl.db")
+    persister.set_root_url("http://httpbin.org/")
+
+    simple_upload = Request(
+        "http://httpbin.org/post?qs1",
+        post_params=[["post1", "c"], ["post2", "d"]],
+        file_params=[["file1", ["'fname1", "content"]], ["file2", ["fname2", "content"]]]
+    )
+
+    xml_upload = Request(
+        "http://httpbin.org/post?qs1",
+        post_params=[["post1", "c"], ["post2", "d"]],
+        file_params=[["calendar", ["calendar.xml", "<xml>Hello there</xml"]]]
+    )
+    persister.add_request(simple_upload)
+    persister.add_request(xml_upload)
+    assert persister.count_paths() == 2
+    stored_requests = set(persister.get_to_browse())
+    assert simple_upload in stored_requests
+    assert xml_upload in stored_requests
+
+    for req in stored_requests:
+        if req == simple_upload:
+            assert req.file_params == simple_upload.file_params
+            assert req.file_params[0] == ["file1", ["'fname1", "content"]]
+            assert req.file_params[1] == ["file2", ["fname2", "content"]]
+        else:
+            assert req.file_params == xml_upload.file_params
+            assert req.file_params[0] == ["calendar", ["calendar.xml", "<xml>Hello there</xml"]]
 
 
 @responses.activate

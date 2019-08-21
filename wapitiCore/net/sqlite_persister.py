@@ -111,7 +111,9 @@ class SqlitePersister:
                     type TEXT,
                     param_order INTEGER,
                     name TEXT,
-                    value TEXT,
+                    value1 TEXT,
+                    value2 TEXT,
+                    meta TEXT,
                     FOREIGN KEY(path_id) REFERENCES paths(path_id)
                 )"""
             )
@@ -133,6 +135,9 @@ class SqlitePersister:
             )
 
             self._conn.commit()
+
+    def close(self):
+        self._conn.close()
 
     def set_root_url(self, root_url):
         cursor = self._conn.cursor()
@@ -172,29 +177,33 @@ class SqlitePersister:
             path_id = cursor.lastrowid
             for i, (k, v) in enumerate(http_resource.get_params):
                 cursor.execute(
-                    """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                    (path_id, "GET", i, k, v)
+                    """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (path_id, "GET", i, k, v, None, None)
                 )
 
             post_params = http_resource.post_params
             if isinstance(post_params, list):
                 for i, (k, v) in enumerate(http_resource.post_params):
                     cursor.execute(
-                        """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                        (path_id, "POST", i, k, v)
+                        """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                        (path_id, "POST", i, k, v, None, None)
                     )
             elif len(post_params):
                 cursor.execute(
-                    """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                    (path_id, "POST", 0, "__RAW__", post_params)
+                    """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (path_id, "POST", 0, "__RAW__", post_params, None, None)
                 )
 
             for i, (k, v) in enumerate(http_resource.file_params):
                 # v kill be something like ['pix.gif', 'GIF89a', 'image/gif']
                 # just keep the file name
+                if len(v) == 3:
+                    meta = v[2]
+                else:
+                    meta = None
                 cursor.execute(
-                    """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                    (path_id, "FILE", i, k, v[0])
+                    """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (path_id, "FILE", i, k, v[0], v[1], meta)
                 )
         self._conn.commit()
 
@@ -241,20 +250,32 @@ class SqlitePersister:
             file_params = []
 
             for param_row in cursor.execute(
-                    "SELECT type, name, value FROM params WHERE path_id = ? ORDER BY type, param_order", (path_id, )
+                    (
+                            "SELECT type, name, value1, value2, meta "
+                            "FROM params "
+                            "WHERE path_id = ? "
+                            "ORDER BY type, param_order"
+                    ),
+                    (path_id, )
             ):
                 name = param_row[1]
-                value = param_row[2]
+                value1 = param_row[2]
+
                 if param_row[0] == "GET":
-                    get_params.append([name, value])
+                    get_params.append([name, value1])
                 elif param_row[0] == "POST":
                     if name == "__RAW__" and not post_params:
                         # First POST parameter is __RAW__, it should mean that we have raw content
-                        post_params = value
+                        post_params = value1
                     elif isinstance(post_params, list):
-                        post_params.append([name, value])
+                        post_params.append([name, value1])
+                elif param_row[0] == "FILE":
+                    if param_row[4]:
+                        file_params.append([name, [value1, param_row[3], param_row[4]]])
+                    else:
+                        file_params.append([name, [value1, param_row[3]]])
                 else:
-                    file_params.append([name, [value, "GIF89a", "image/gif"]])
+                    raise ValueError("Unknown param type {}".format(param_row[0]))
 
             http_res = web.Request(
                 row[1],
@@ -344,27 +365,32 @@ class SqlitePersister:
         path_id = cursor.lastrowid
         for i, (k, v) in enumerate(request.get_params):
             cursor.execute(
-                """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                (path_id, "GET", i, k, v)
+                """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (path_id, "GET", i, k, v, None, None)
             )
 
         post_params = request.post_params
         if isinstance(post_params, list):
             for i, (k, v) in enumerate(request.post_params):
                 cursor.execute(
-                    """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                    (path_id, "POST", i, k, v)
+                    """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (path_id, "POST", i, k, v, None, None)
                 )
         elif len(post_params):
             cursor.execute(
-                """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                (path_id, "POST", 0, "__RAW__", post_params)
+                """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (path_id, "POST", 0, "__RAW__", post_params, None, None)
             )
 
         for i, (k, v) in enumerate(request.file_params):
+            if len(v) == 3:
+                meta = v[2]
+            else:
+                meta = None
+
             cursor.execute(
-                """INSERT INTO params VALUES (?, ?, ?, ?, ?)""",
-                (path_id, "FILE", i, k, v[0])
+                """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (path_id, "FILE", i, k, v[0], v[1], meta)
             )
 
         # request_id is the ID of the original (legit) request
@@ -410,16 +436,32 @@ class SqlitePersister:
         file_params = []
 
         for param_row in cursor.execute(
-                "SELECT type, name, value FROM params WHERE path_id = ? ORDER BY type, param_order", (path_id, )
+                (
+                        "SELECT type, name, value1, value2, meta "
+                        "FROM params "
+                        "WHERE path_id = ? "
+                        "ORDER BY type, param_order"
+                ),
+                (path_id, )
         ):
             name = param_row[1]
-            value = param_row[2]
+            value1 = param_row[2]
+
             if param_row[0] == "GET":
-                get_params.append([name, value])
+                get_params.append([name, value1])
             elif param_row[0] == "POST":
-                post_params.append([name, value])
+                if name == "__RAW__" and not post_params:
+                    # First POST parameter is __RAW__, it should mean that we have raw content
+                    post_params = value1
+                elif isinstance(post_params, list):
+                    post_params.append([name, value1])
+            elif param_row[0] == "FILE":
+                if param_row[4]:
+                    file_params.append([name, [value1, param_row[3], param_row[4]]])
+                else:
+                    file_params.append([name, [value1, param_row[3]]])
             else:
-                file_params.append([name, [value, "GIF89a", "image/gif"]])
+                raise ValueError("Unknown param type {}".format(param_row[0]))
 
         request = web.Request(
             row[1],
