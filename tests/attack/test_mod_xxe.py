@@ -29,7 +29,7 @@ class FakePersister:
         elif parameter == "QUERY_STRING":
             self.vulnerabilities.append(("QUERY_STRING", ""))
         else:
-            for parameter_name, value in request.get_params:
+            for parameter_name, value in request.get_params + request.file_params:
                 if parameter_name == parameter:
                     self.vulnerabilities.append((parameter, value))
 
@@ -69,6 +69,7 @@ def test_direct_body():
 
 
 def test_direct_param():
+    # check for false positives too
     persister = FakePersister()
     request = Request("http://127.0.0.1:65080/xxe/direct/param.php?foo=bar&vuln=yolo")
     request.path_id = 42
@@ -102,6 +103,30 @@ def test_direct_query_string():
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "QUERY_STRING"
+
+
+def test_direct_upload():
+    persister = FakePersister()
+    request = Request(
+        "http://127.0.0.1:65080/xxe/direct/upload.php",
+        file_params=[
+            ["foo", ["bar.xml", "<xml>test</xml>"]],
+            ["calendar", ["calendar.xml", "<xml>test</xml>"]]
+        ]
+    )
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65080/")
+    options = {"timeout": 10, "level": 1}
+    logger = Mock()
+
+    module = mod_xxe(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities[0][0] == "calendar"
 
 
 if __name__ == "__main__":

@@ -73,7 +73,7 @@ class mod_file(Attack):
 
         payloads = []
 
-        config_reader = ConfigParser()
+        config_reader = ConfigParser(interpolation=None)
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
         # No time based payloads here so we don't care yet
         reader = PayloadReader(self.options["timeout"])

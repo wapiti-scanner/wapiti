@@ -20,10 +20,12 @@ from itertools import chain
 from binascii import unhexlify
 from time import sleep
 from urllib.parse import quote
+from configparser import ConfigParser
+from os.path import join as path_join
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack, FileMutator, Mutator
+from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.web import Request
 
@@ -31,21 +33,11 @@ from wapitiCore.net.web import Request
 XXE_PAYLOAD = "http://wapiti3.ovh/xxe/{random_id}/{path_id}/{hex_param}/{payload}.dtd"
 
 
-def check_success(content: str) -> bool:
-    if "root:x:0:" in content:
-        # either /etc/passwd or /etc/group
-        return True
-    if "root:*:0:0" in content:
-        return True
-    if "Network services, Internet style" in content:
-        return True
-    if "RFC6335" in content:
-        return True
-    if "defined by IANA" in content:
-        return True
-    if "network name/network number mappings" in content:
-        return True
-    return False
+def search_pattern(content: str, patterns: list) -> str:
+    for pattern in patterns:
+        if pattern in content:
+            return pattern
+    return ""
 
 
 class mod_xxe(Attack):
@@ -55,19 +47,39 @@ class mod_xxe(Attack):
     do_get = True
     do_post = True
 
-    PAYLOADS_FILE = "xxePayloads.txt"
+    PAYLOADS_FILE = "xxePayloads.ini"
     MSG_VULN = _("XXE vulnerability")
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
         self.vulnerables = set()
         self.attacked_urls = set()
+        self.payload_to_rules = {}
 
     @property
     def payloads(self):
-        return [(payload.replace("[SESSION_ID]", self._session_id), tags) for payload, tags in super().payloads]
-        # for payload, tags in super().payloads:
-        #     yield payload.replace("[SESSION_ID]", self._session_id), tags
+        """Load the payloads from the specified file"""
+        if not self.PAYLOADS_FILE:
+            return []
+
+        payloads = []
+
+        config_reader = ConfigParser(interpolation=None)
+        config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
+        # No time based payloads here so we don't care yet
+        reader = PayloadReader(self.options["timeout"])
+
+        for section in config_reader.sections():
+            clean_payload, flags = reader.process_line(config_reader[section]["payload"])
+            clean_payload = clean_payload.replace("[SESSION_ID]", self._session_id)
+            flags.add(section)
+
+            rules = config_reader[section]["rules"].splitlines()
+            self.payload_to_rules[section] = rules
+
+            payloads.append((clean_payload, flags))
+
+        return payloads
 
     def get_mutator(self):
         methods = ""
@@ -84,13 +96,19 @@ class mod_xxe(Attack):
             skip=self.options.get("skipped_parameters")
         )
 
-    def false_positive(self, request: Request) -> bool:
+    def false_positive(self, request: Request, pattern: str) -> bool:
         try:
             response = self.crawler.send(request)
         except RequestException:
             return False
         else:
-            return check_success(response.content)
+            return pattern in response.content
+
+    def flag_to_patterns(self, flags):
+        for flag in flags:
+            if isinstance(flag, str) and flag in self.payload_to_rules:
+                return self.payload_to_rules[flag]
+        return []
 
     def attack(self):
         mutator = self.get_mutator()
@@ -161,7 +179,8 @@ class mod_xxe(Attack):
                         )
                         timeouted = True
                     else:
-                        if check_success(response.content) and not self.false_positive(original_request):
+                        pattern = search_pattern(response.content, self.flag_to_patterns(flags))
+                        if pattern and not self.false_positive(original_request, pattern):
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
                                 vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
@@ -233,7 +252,8 @@ class mod_xxe(Attack):
             except (KeyboardInterrupt, RequestException) as exception:
                 yield exception
             else:
-                if check_success(response.content) and not self.false_positive(original_request):
+                pattern = search_pattern(response.content, self.flag_to_patterns(tags))
+                if pattern and not self.false_positive(original_request, pattern):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=Vulnerability.XXE,
@@ -279,29 +299,29 @@ class mod_xxe(Attack):
                 except RequestException as exception:
                     yield exception
                 else:
-                    if check_success(response.content) and not self.false_positive(original_request):
-                        if check_success(response.content):
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=Vulnerability.XXE,
-                                level=Vulnerability.HIGH_LEVEL,
-                                request=mutated_request,
-                                info="XXE vulnerability leading to file disclosure",
-                                parameter=parameter
-                            )
+                    pattern = search_pattern(response.content, self.flag_to_patterns(flags))
+                    if pattern and not self.false_positive(original_request, pattern):
+                        self.add_vuln(
+                            request_id=original_request.path_id,
+                            category=Vulnerability.XXE,
+                            level=Vulnerability.HIGH_LEVEL,
+                            request=mutated_request,
+                            info="XXE vulnerability leading to file disclosure",
+                            parameter=parameter
+                        )
 
-                            self.log_red("---")
-                            self.log_red(
-                                Vulnerability.MSG_PARAM_INJECT,
-                                self.MSG_VULN,
-                                original_request.url,
-                                parameter
-                            )
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
-                            self.log_red(mutated_request.http_repr())
-                            self.log_red("---")
-                            vulnerable_parameter = True
-                            self.vulnerables.add(original_request.path_id)
+                        self.log_red("---")
+                        self.log_red(
+                            Vulnerability.MSG_PARAM_INJECT,
+                            self.MSG_VULN,
+                            original_request.url,
+                            parameter
+                        )
+                        self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                        self.log_red(mutated_request.http_repr())
+                        self.log_red("---")
+                        vulnerable_parameter = True
+                        self.vulnerables.add(original_request.path_id)
             except KeyboardInterrupt as exception:
                 yield exception
 

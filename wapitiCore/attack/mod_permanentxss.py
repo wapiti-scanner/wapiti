@@ -335,7 +335,7 @@ class mod_permanentxss(Attack):
 
         payloads = []
 
-        config_reader = ConfigParser()
+        config_reader = ConfigParser(interpolation=None)
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
 
         for section in config_reader.sections():
@@ -361,7 +361,7 @@ class mod_permanentxss(Attack):
         return payloads
 
     def check_payload(self, response, flags, taint):
-        config_reader = ConfigParser()
+        config_reader = ConfigParser(interpolation=None)
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
 
         for section in config_reader.sections():
