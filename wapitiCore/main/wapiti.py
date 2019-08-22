@@ -376,7 +376,7 @@ class Wapiti:
                         # if answer is q, raise KeyboardInterrupt and it will stop cleanly
                         raise exception
                 except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
-                    sleep(.5)
+                    sleep(1)
                     skipped += 1
                     continue
                 except StopIteration:
@@ -582,6 +582,27 @@ class Wapiti:
         return self.persister.have_attacks_started()
 
 
+def is_valid_endpoint(url):
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        return False
+    else:
+        if parts.params or parts.query or parts.fragment:
+            return False
+        if parts.scheme in ("http", "https") and parts.netloc and parts.path:
+            return True
+    return False
+
+
+def ping(url):
+    try:
+        requests.get(url, timeout=5)
+    except RequestException:
+        return False
+    return True
+
+
 def wapiti_main():
     banners = [
         """
@@ -677,6 +698,12 @@ def wapiti_main():
         help=_("Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"),
         metavar="PROXY_URL",
         dest="proxies"
+    )
+
+    parser.add_argument(
+        "--tor",
+        action="store_true",
+        help=_("Use Tor listener (127.0.0.1:9050)")
     )
 
     parser.add_argument(
@@ -847,8 +874,8 @@ def wapiti_main():
     )
 
     parser.add_argument(
-        '--color',
-        action='store_true',
+        "--color",
+        action="store_true",
         help=_("Colorize output")
     )
 
@@ -875,6 +902,27 @@ def wapiti_main():
         metavar="OUPUT_PATH",
         default=argparse.SUPPRESS,
         help=_("Output file or folder")
+    )
+
+    parser.add_argument(
+        "--external-endpoint",
+        metavar="EXTERNAL_ENDPOINT_URL",
+        default=argparse.SUPPRESS,
+        help=_("Url serving as endpoint for target")
+    )
+
+    parser.add_argument(
+        "--internal-endpoint",
+        metavar="INTERNAL_ENDPOINT_URL",
+        default=argparse.SUPPRESS,
+        help=_("Url serving as endpoint for attacker")
+    )
+
+    parser.add_argument(
+        "--endpoint",
+        metavar="ENDPOINT_URL",
+        default="https://wapiti3.ovh/",
+        help=_("Url serving as endpoint for both attacker and target")
     )
 
     parser.add_argument(
@@ -943,6 +991,9 @@ def wapiti_main():
             else:
                 raise InvalidOptionValue("-p", proxy_url)
 
+        if args.tor:
+            wap.set_proxy("socks://127.0.0.1:9050/")
+
         if "cookie" in args:
             if os.path.isfile(args.cookie):
                 wap.set_cookie_file(args.cookie)
@@ -1004,6 +1055,28 @@ def wapiti_main():
             "level": args.level,
             "timeout": args.timeout
         }
+
+        if is_valid_endpoint(args.endpoint):
+            attack_options["external_endpoint"] = args.endpoint
+            attack_options["internal_endpoint"] = args.endpoint
+
+        if "external_endpoint" in args:
+            if is_valid_endpoint(args.external_endpoint):
+                attack_options["external_endpoint"] = args.external_endpoint
+            else:
+                print(_("Error: Endpoint URL must contain scheme, host and path with trailing slash!"))
+                raise InvalidOptionValue("--external-endpoint", args.external_endpoint)
+
+        if "internal_endpoint" in args:
+            if is_valid_endpoint(args.internal_endpoint):
+                if ping(args.internal_endpoint):
+                    attack_options["internal_endpoint"] = args.internal_endpoint
+                else:
+                    print(_("Error: Internal endpoint URL must be accessible from Wapiti!"))
+                    raise InvalidOptionValue("--internal-endpoint", args.internal_endpoint)
+            else:
+                print(_("Error: Endpoint URL must contain scheme, host and path with trailing slash!"))
+                raise InvalidOptionValue("--internal-endpoint", args.internal_endpoint)
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)

@@ -69,6 +69,8 @@ class mod_blindsql(Attack):
                     try:
                         response = self.crawler.send(mutated_request)
                     except ReadTimeout:
+                        if self.does_timeout(original_request):
+                            continue
 
                         if parameter == "QUERY_STRING":
                             vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)

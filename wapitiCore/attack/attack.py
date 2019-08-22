@@ -27,6 +27,8 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 
+from requests.exceptions import RequestException, ReadTimeout
+
 from wapitiCore.net.web import Request
 
 
@@ -120,7 +122,7 @@ class Attack:
         self.persister = persister
         self.add_vuln = persister.add_vulnerability
         self.add_anom = persister.add_anomaly
-        self.payload_reader = PayloadReader(timeout=attack_options["timeout"])
+        self.payload_reader = PayloadReader(attack_options)
         self.options = attack_options
 
         # List of attack urls already launched in the current module
@@ -166,6 +168,14 @@ class Attack:
         return self.options["level"]
 
     @property
+    def internal_endpoint(self):
+        return self.options["internal_endpoint"]
+
+    @property
+    def external_endpoint(self):
+        return self.options["external_endpoint"]
+
+    @property
     def must_attack_query_string(self):
         return self.attack_level == 2
 
@@ -185,6 +195,15 @@ class Attack:
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters")
         )
+
+    def does_timeout(self, request):
+        try:
+            self.crawler.send(request)
+        except ReadTimeout:
+            return True
+        except RequestException:
+            pass
+        return False
 
 
 class Mutator:
@@ -449,8 +468,9 @@ class FileMutator:
 class PayloadReader:
     """Class for reading and writing in text files"""
 
-    def __init__(self, timeout=20):
-        self._timeout = timeout
+    def __init__(self, options):
+        self._timeout = options["timeout"]
+        self._endpoint_url = options["external_endpoint"]
 
     def read_payloads(self, filename):
         """returns a array"""
@@ -471,6 +491,7 @@ class PayloadReader:
         clean_line = clean_line.replace("[TAB]", "\t")
         clean_line = clean_line.replace("[LF]", "\n")
         clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
+        clean_line = clean_line.replace("[EXTERNAL_ENDPOINT]", self._endpoint_url)
 
         payload_type = PayloadType.pattern
         if "[TIMEOUT]" in clean_line:

@@ -30,9 +30,6 @@ from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.web import Request
 
 
-XXE_PAYLOAD = "http://wapiti3.ovh/xxe/{random_id}/{path_id}/{hex_param}/{payload}.dtd"
-
-
 def search_pattern(content: str, patterns: list) -> str:
     for pattern in patterns:
         if pattern in content:
@@ -67,7 +64,7 @@ class mod_xxe(Attack):
         config_reader = ConfigParser(interpolation=None)
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
         # No time based payloads here so we don't care yet
-        reader = PayloadReader(self.options["timeout"])
+        reader = PayloadReader(self.options)
 
         for section in config_reader.sections():
             clean_payload, flags = reader.process_line(config_reader[section]["payload"])
@@ -328,11 +325,11 @@ class mod_xxe(Attack):
     def finish(self):
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
-        endpoint_request = Request("http://wapiti3.ovh/get_xxe.php?id={}".format(self._session_id))
+        endpoint_request = Request("{}get_xxe.php?id={}".format(self.internal_endpoint, self._session_id))
         try:
             response = self.crawler.send(endpoint_request)
-        except ReadTimeout:
-            pass
+        except RequestException:
+            print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:
             data = response.json
             if isinstance(data, dict):

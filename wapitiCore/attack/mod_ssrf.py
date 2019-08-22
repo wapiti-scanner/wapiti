@@ -27,19 +27,21 @@ from wapitiCore.attack.attack import Attack, Mutator, PayloadType
 from wapitiCore.language.vulnerability import Vulnerability, _
 from wapitiCore.net.web import Request
 
-SSRF_PAYLOAD = "http://wapiti3.ovh/ssrf/{random_id}/{path_id}/{hex_param}/"
+SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
 
 
 class SsrfMutator(Mutator):
     def __init__(
             self, session_id: str, methods="FGP", payloads=None, qs_inject=False, max_queries_per_pattern: int = 1000,
             parameters=None,  # Restrict attack to a whitelist of parameters
-            skip=None  # Must not attack those parameters (blacklist)
+            skip=None,  # Must not attack those parameters (blacklist)
+            endpoint: str = "http://wapiti3.ovh/"
     ):
         Mutator.__init__(
             self, methods=methods, payloads=payloads, qs_inject=qs_inject,
             max_queries_per_pattern=max_queries_per_pattern, parameters=parameters, skip=skip)
         self._session_id = session_id
+        self._endpoint = endpoint
 
     def mutate(self, request: Request):
         get_params = request.get_params
@@ -86,6 +88,7 @@ class SsrfMutator(Mutator):
                     self._attack_hashes.add(hash(attack_pattern))
 
                     payload = SSRF_PAYLOAD.format(
+                        external_endpoint=self._endpoint,
                         random_id=self._session_id,
                         path_id=request.path_id,
                         hex_param=hexlify(param_name.encode("utf-8", errors="replace")).decode()
@@ -129,6 +132,7 @@ class SsrfMutator(Mutator):
 
                 flags = set()
                 payload = SSRF_PAYLOAD.format(
+                    external_endpoint=self._endpoint,
                     random_id=self._session_id,
                     path_id=request.path_id,
                     hex_param=hexlify(b"QUERY_STRING").decode()
@@ -193,11 +197,11 @@ class mod_ssrf(Attack):
             yield original_request
 
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
-        endpoint_request = Request("https://wapiti3.ovh/get_ssrf.php?id={}".format(self._session_id))
+        endpoint_request = Request("{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id))
         try:
             response = self.crawler.send(endpoint_request)
-        except ReadTimeout:
-            pass
+        except RequestException:
+            print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:
             data = response.json
             if isinstance(data, dict):

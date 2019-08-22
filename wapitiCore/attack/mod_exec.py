@@ -102,7 +102,7 @@ class mod_exec(Attack):
                     try:
                         response = self.crawler.send(mutated_request)
                     except ReadTimeout:
-                        if PayloadType.time in flags:
+                        if PayloadType.time in flags and not self.does_timeout(original_request):
 
                             vuln_info = _("Blind command execution")
                             if parameter == "QUERY_STRING":
