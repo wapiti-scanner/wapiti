@@ -169,11 +169,11 @@ class Attack:
 
     @property
     def internal_endpoint(self):
-        return self.options["internal_endpoint"]
+        return self.options.get("internal_endpoint", "https://wapiti3.ovh/")
 
     @property
     def external_endpoint(self):
-        return self.options["external_endpoint"]
+        return self.options.get("external_endpoint", "http://wapiti3.ovh")
 
     @property
     def must_attack_query_string(self):
@@ -470,7 +470,7 @@ class PayloadReader:
 
     def __init__(self, options):
         self._timeout = options["timeout"]
-        self._endpoint_url = options["external_endpoint"]
+        self._endpoint_url = options.get("external_endpoint", "http://wapiti3.ovh/")
 
     def read_payloads(self, filename):
         """returns a array"""
