@@ -46,8 +46,22 @@ def getcookie_main():
     )
 
     parser.add_argument(
+        "--tor",
+        action="store_true",
+        help=_("Use Tor listener (127.0.0.1:9050)")
+    )
+
+    parser.add_argument(
         '-d', '--data',
         help='Data to send to the form with POST'
+    )
+
+    parser.add_argument(
+        "-A", "--user-agent",
+        default=argparse.SUPPRESS,
+        help=_("Set a custom user-agent to use for every requests"),
+        metavar="AGENT",
+        dest="user_agent"
     )
 
     args = parser.parse_args()
@@ -68,6 +82,12 @@ def getcookie_main():
         if proxy_parts.scheme and proxy_parts.netloc:
             if proxy_parts.scheme.lower() in ("http", "https", "socks"):
                 crawler.set_proxy(args.proxy)
+
+    if args.tor:
+        crawler.set_proxy("socks://127.0.0.1:9050/")
+
+    if "user_agent" in args:
+        crawler.add_custom_header("user-agent", args.user_agent)
 
     # Open or create the cookie file and delete previous cookies from this server
     jc = jsoncookie.JsonCookie()

@@ -1,6 +1,7 @@
 ;env
 a;env
 a);env
+../../../../../../../../../../../../../../../usr/bin/env|
 [VALUE];env
 [VALUE][LF]env
 /e\0

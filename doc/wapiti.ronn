@@ -116,8 +116,10 @@ OTHER OPTIONS:
 ## PROXY AND AUTHENTICATION OPTIONS
 
   * `-p`, `--proxy` <PROXY_URL>  
-    The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.  
-    To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/
+    The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.
+    
+  * `--tor`  
+    Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
     Set credentials to use for HTTP authentication on the target.  
@@ -150,6 +152,9 @@ Following options allows you to bypass this behavior/
     
   * `--flush-session`  
     Forget everything about the target for the given scope.
+    
+  * `--store-session`
+    Specify an alternative path for storing session (.db and .pkl) files
 
 ## SCAN AND ATTACKS TUNING
 
