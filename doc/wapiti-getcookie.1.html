@@ -41,12 +41,6 @@
   ol.man-decor li.tc {text-align:center;letter-spacing:4px}
   ol.man-decor li.tr {text-align:right;float:right}
   </style>
-  <style type='text/css' media='all'>
-  /* style: toc */
-  .man-navigation {display:block !important;position:fixed;top:0;left:113ex;height:100%;width:100%;padding:48px 0 0 0;border-left:1px solid #dbdbdb;background:#eee}
-  .man-navigation a,.man-navigation a:hover,.man-navigation a:link,.man-navigation a:visited {display:block;margin:0;padding:5px 2px 5px 30px;color:#999;text-decoration:none}
-  .man-navigation a:hover {color:#111;text-decoration:underline}
-  </style>
 </head>
 <!--
   The following styles are deprecated and will be removed at some point:
@@ -83,7 +77,7 @@
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>wapiti</code> -u <var>URL</var> -c <var>COOKIE</var> <a href="#OPTIONS" title="OPTIONS" data-bare-link="true">options</a></p>
+<p><code>wapiti-getcookie</code> -u <var>URL</var> -c <var>COOKIE</var> <a href="#OPTIONS" title="OPTIONS" data-bare-link="true">options</a></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
@@ -99,6 +93,21 @@ Those cookies can be loaded by Wapiti using the same -c option.</p>
 The given URL will be used as a proxy for HTTP and HTTPS requests.<br />
 This URL can have one of the following scheme : http, https, socks.<br />
 To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/</p></li>
+<li><p><code>--tor</code><br />
+Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li>
+<li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
+Set credentials to use for HTTP authentication on the target.<br />
+Given value should be in the form login%password (% is used as a separator)</p></li>
+<li><p><code>--auth-type</code> <var>TYPE</var><br />
+Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.<br />
+Kerberos and NTLM authentication may require you to install additionnal Python modules.</p></li>
+<li><p><code>-H</code>, <code>--header</code> <var>HEADER</var><br />
+Set a custom HTTM header to inject in every request sent by Wapiti.
+This option can be used several times.<br />
+Value should be a standard HTTP header line (parameter and value separated with a : sign).</p></li>
+<li><p><code>-A</code>, <code>--user-agent</code> <var>AGENT</var><br />
+Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.<br />
+But you may have to change it to bypass some restrictions so this option is here.</p></li>
 <li><p><code>-d</code>, <code>--data</code> <var>DATA</var><br />
 wapiti-getcookie will parse forms and ask your input for each field found.<br />
 But you can also pass every parameter and value as a string directly through this option.<br />
@@ -130,7 +139,7 @@ Please read the COPYING file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>January 2018</li>
+    <li class='tc'>August 2019</li>
     <li class='tr'>wapiti-getcookie(1)</li>
   </ol>
 

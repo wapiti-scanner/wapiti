@@ -41,12 +41,6 @@
   ol.man-decor li.tc {text-align:center;letter-spacing:4px}
   ol.man-decor li.tr {text-align:right;float:right}
   </style>
-  <style type='text/css' media='all'>
-  /* style: toc */
-  .man-navigation {display:block !important;position:fixed;top:0;left:113ex;height:100%;width:100%;padding:48px 0 0 0;border-left:1px solid #dbdbdb;background:#eee}
-  .man-navigation a,.man-navigation a:hover,.man-navigation a:link,.man-navigation a:visited {display:block;margin:0;padding:5px 2px 5px 30px;color:#999;text-decoration:none}
-  .man-navigation a:hover {color:#111;text-decoration:underline}
-  </style>
 </head>
 <!--
   The following styles are deprecated and will be removed at some point:
@@ -241,8 +235,9 @@ Default value for this option is 1.</p></li>
 
 <ul>
 <li><p><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var><br />
-The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.<br />
-To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/</p></li>
+The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.</p></li>
+<li><p><code>--tor</code><br />
+Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li>
 <li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
 Set credentials to use for HTTP authentication on the target.<br />
 Given value should be in the form login%password (% is used as a separator)</p></li>
@@ -272,6 +267,8 @@ Forget everything about discovered vulnerabilities and which URL was attacked by
 Only the scan (crawling) informations will be kept.</p></li>
 <li><p><code>--flush-session</code><br />
 Forget everything about the target for the given scope.</p></li>
+<li><p><code>--store-session</code>
+Specify an alternative path for storing session (.db and .pkl) files</p></li>
 </ul>
 
 
@@ -411,7 +408,7 @@ Please read the COPYING file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>January 2018</li>
+    <li class='tc'>August 2019</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 
