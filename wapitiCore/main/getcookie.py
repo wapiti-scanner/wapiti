@@ -25,6 +25,15 @@ from wapitiCore.language.language import _
 from wapitiCore.net.web import Request
 
 
+class InvalidOptionValue(Exception):
+    def __init__(self, opt_name, opt_value):
+        self.opt_name = opt_name
+        self.opt_value = opt_value
+
+    def __str__(self):
+        return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
+
+
 def getcookie_main():
     parser = argparse.ArgumentParser(description="Wapiti-getcookie: An utility to grab cookies from a webpage")
 
@@ -52,6 +61,21 @@ def getcookie_main():
     )
 
     parser.add_argument(
+        "-a", "--auth-cred",
+        dest="credentials",
+        default=argparse.SUPPRESS,
+        help=_("Set HTTP authentication credentials"),
+        metavar="CREDENTIALS"
+    )
+
+    parser.add_argument(
+        "--auth-type",
+        default=argparse.SUPPRESS,
+        help=_("Set the authentication type to use"),
+        choices=["basic", "digest", "kerberos", "ntlm"]
+    )
+
+    parser.add_argument(
         '-d', '--data',
         help='Data to send to the form with POST'
     )
@@ -62,6 +86,15 @@ def getcookie_main():
         help=_("Set a custom user-agent to use for every requests"),
         metavar="AGENT",
         dest="user_agent"
+    )
+
+    parser.add_argument(
+        "-H", "--header",
+        action="append",
+        default=[],
+        help=_("Set a custom header to use for every requests"),
+        metavar="HEADER",
+        dest="headers"
     )
 
     args = parser.parse_args()
@@ -88,6 +121,20 @@ def getcookie_main():
 
     if "user_agent" in args:
         crawler.add_custom_header("user-agent", args.user_agent)
+
+    if "credentials" in args:
+        if "%" in args.credentials:
+            crawler.credentials = args.credentials.split("%", 1)
+        else:
+            raise InvalidOptionValue("-a", args.credentials)
+
+    if "auth_type" in args:
+        crawler.auth_method = args.auth_type
+
+    for custom_header in args.headers:
+        if ":" in custom_header:
+            hdr_name, hdr_value = custom_header.split(":", 1)
+            crawler.add_custom_header(hdr_name.strip(), hdr_value.strip())
 
     # Open or create the cookie file and delete previous cookies from this server
     jc = jsoncookie.JsonCookie()

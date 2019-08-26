@@ -3,7 +3,7 @@ wapiti-getcookie(1) -- A Wapiti utility to fetch cookies from a webpage and stor
 
 ## SYNOPSIS
 
-`wapiti` -u <URL> -c <COOKIE> [options]
+`wapiti-getcookie` -u <URL> -c <COOKIE> [options]
 
 ## DESCRIPTION
 
@@ -18,6 +18,26 @@ Those cookies can be loaded by Wapiti using the same -c option.
     The given URL will be used as a proxy for HTTP and HTTPS requests.  
     This URL can have one of the following scheme : http, https, socks.  
     To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/
+
+  * `--tor`  
+    Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
+
+  * `-a`, `--auth-cred` <CREDENTIALS>  
+    Set credentials to use for HTTP authentication on the target.  
+    Given value should be in the form login%password (% is used as a separator)
+    
+  * `--auth-type` <TYPE>  
+    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.  
+    Kerberos and NTLM authentication may require you to install additionnal Python modules.
+
+  * `-H`, `--header` <HEADER>  
+    Set a custom HTTM header to inject in every request sent by Wapiti.
+    This option can be used several times.  
+    Value should be a standard HTTP header line (parameter and value separated with a : sign).
+    
+  * `-A`, `--user-agent` <AGENT>  
+    Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.  
+    But you may have to change it to bypass some restrictions so this option is here.
     
   * `-d`, `--data` <DATA>  
     wapiti-getcookie will parse forms and ask your input for each field found.  
