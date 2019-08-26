@@ -64,3 +64,11 @@ def test_js_false_positives():
     for script in scripts:
         lame_js = LameJs(script)
         assert not lame_js.get_links()
+
+
+def test_html_comments():
+    lame_js = LameJs("""<!--
+    window.location = "http://perdu.com/";
+    -->
+    """)
+    assert lame_js.get_links() == ["http://perdu.com/"]

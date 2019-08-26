@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import logging
+import re
 
 from wapitiCore.net.jsparser import jsparser3
 
@@ -28,6 +29,10 @@ class LameJs:
         self.js_vars = {}
         self.links = []
         self.debug = False
+        # https://stackoverflow.com/questions/5780047/html-comments-in-a-javascript-block
+        # trick used by http://php.testsparker.com/
+        data = re.sub(r"(?m)^[^\S\n]*<!--", "//", data)
+        data = re.sub(r"(?m)^[^\S\n]*--", "//", data)
         try:
             self.js_vars = {}
             self.links = []

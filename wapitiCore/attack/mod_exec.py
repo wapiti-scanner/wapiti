@@ -43,6 +43,9 @@ class mod_exec(Attack):
         if "PATH=" in data and "PWD=" in data:
             vuln_info = _("Command execution")
             executed = True
+        if "COMPUTERNAME=" in data and "Program" in data:
+            vuln_info = _("Command execution")
+            executed = True
         if "w4p1t1_eval" in data or "1d97830e30da7214d3e121859cfa695f" in data:
             vuln_info = _("PHP evaluation")
             executed = True
