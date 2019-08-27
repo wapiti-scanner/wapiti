@@ -469,6 +469,36 @@ Insane mode just remove the calculation of thoses limits, every URL will be atta
 .br
 Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more)\.
 .
+.IP "\(bu" 4
+\fB\-\-endpoint\fR \fIURL\fR Some attack modules are using an HTTP endpoint to check for vulnerabilities\.
+.
+.br
+For example the SSRF module inject the endpoint URL into webpage arguments to check if the target script try to fetch that URL\.
+.
+.br
+Default endpoint is http://wapiti3\.ovh/\. Keep in mind that the target and your computer must be able to join that endpoint for the module to work\.
+.
+.br
+On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint\.
+.
+.br
+This option will set both internal and external endpoint URL to the same value\.
+.
+.IP "\(bu" 4
+\fB\-\-internal\-endpoint\fR \fIURL\fR You may want to specify an internal endpoint different from the external one\.
+.
+.br
+The internal endpoint is used by Wapiti to fetch results of attacks\.
+.
+.br
+If you are behind a NAT it may be an URL for a local server (for example http://192\.168\.0\.1/)
+.
+.IP "\(bu" 4
+\fB\-\-external\-endpoint\fR \fIURL\fR Set the endpoint URL (the one that the target will fetch in case of vulnerability)\.
+.
+.br
+Using your own endpoint may reduce risk of being caught by NIDS or WAF\.
+.
 .IP "" 0
 .
 .SH "HTTP AND NETWORK OPTIONS"
