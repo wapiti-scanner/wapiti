@@ -353,7 +353,7 @@ class Request:
             buff = "{0} {1} ({2})".format(self._method, self._resource_path, self._link_depth)
 
         if self._post_params:
-            buff += "\n\tdata: {}".format(self.encoded_data.replace("\n", "\t\n"))
+            buff += "\n\tdata: {}".format(self.encoded_data.replace("\n", "\n\t"))
         if self._file_params:
             buff += "\n\tfiles: {}".format(self.encoded_files)
         return buff
