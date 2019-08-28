@@ -43,7 +43,6 @@ class mod_blindsql(Attack):
 
         http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
-        known_false_positives = set()
 
         for original_request in chain(http_resources, forms):
             page = original_request.path
@@ -70,9 +69,9 @@ class mod_blindsql(Attack):
                     try:
                         response = self.crawler.send(mutated_request)
                     except ReadTimeout:
-                        if original_request.path_id in known_false_positives or self.does_timeout(original_request):
-                            known_false_positives.add(original_request.path_id)
-                            continue
+                        if self.does_timeout(original_request):
+                            print("[!] Too much lag from website, can't reliably test time-based blind SQL")
+                            break
 
                         if parameter == "QUERY_STRING":
                             vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
