@@ -1,57 +1,32 @@
 from unittest.mock import Mock
-from subprocess import Popen
-import os
-import sys
-from time import sleep
 import re
 
-import pytest
 import responses
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
-from wapitiCore.attack.mod_redirect import mod_redirect
+from wapitiCore.attack.mod_sql import mod_sql
 
 
 class FakePersister:
     def __init__(self):
         self.requests = []
         self.anomalies = set()
-        self.vulnerabilities = set()
+        self.vulnerabilities = []
 
     def get_links(self, path=None, attack_module: str = ""):
-        return self.requests
+        return [request for request in self.requests if request.method == "GET"]
+
+    def get_forms(self, attack_module: str = ""):
+        return [request for request in self.requests if request.method == "POST"]
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.anomalies.add(parameter)
 
     def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.add(parameter)
-
-
-@pytest.fixture(autouse=True)
-def run_around_tests():
-    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
-    test_directory = os.path.join(base_dir, "..", "tests/data/")
-
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
-    sleep(.5)
-    yield
-    proc.terminate()
-
-
-def test_redirect_detection():
-    persister = FakePersister()
-    persister.requests.append(Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto"))
-    crawler = Crawler("http://127.0.0.1:65080/")
-    options = {"timeout": 10, "level": 2}
-    logger = Mock()
-
-    module = mod_redirect(crawler, persister, logger, options)
-    for __ in module.attack():
-        pass
-
-    assert persister.vulnerabilities == {"url"}
+        for parameter_name, value in request.get_params:
+            if parameter_name == parameter:
+                self.vulnerabilities.append((parameter, value))
 
 
 @responses.activate
@@ -85,7 +60,7 @@ def test_whole_stuff():
     options = {"timeout": 1, "level": 2}
     logger = Mock()
 
-    module = mod_redirect(crawler, persister, logger, options)
+    module = mod_sql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
     for __ in module.attack():

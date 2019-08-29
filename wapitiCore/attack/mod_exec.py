@@ -78,6 +78,8 @@ class mod_exec(Attack):
         http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
 
+        false_positive_timeouts = set()
+
         for original_request in chain(http_resources, forms):
             warned = False
             timeouted = False
@@ -99,13 +101,21 @@ class mod_exec(Attack):
                         # If parameter is vulnerable, just skip till next parameter
                         continue
 
+                    if PayloadType.time in flags and original_request.path_id in false_positive_timeouts:
+                        # If the original request is known to gives timeout and payload is time-based, just skip
+                        # and move to next payload
+                        continue
+
                     if self.verbose == 2:
                         print("[¨] {0}".format(mutated_request))
 
                     try:
                         response = self.crawler.send(mutated_request)
                     except ReadTimeout:
-                        if PayloadType.time in flags and not self.does_timeout(original_request):
+                        if PayloadType.time in flags:
+                            if self.does_timeout(original_request):
+                                false_positive_timeouts.add(original_request.path_id)
+                                continue
 
                             vuln_info = _("Blind command execution")
                             if parameter == "QUERY_STRING":
