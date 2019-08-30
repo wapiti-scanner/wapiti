@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2018 Nicolas Surribas
+# Copyright (C) 2018-2019 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from itertools import chain
-from random import choice
+from time import sleep
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
@@ -146,7 +146,7 @@ class SsrfMutator(Mutator):
                 )
                 flags.add(PayloadType.get)
 
-                yield evil_req, "QUERY_STRING", flags
+                yield evil_req, "QUERY_STRING", payload, flags
 
 
 class mod_ssrf(Attack):
@@ -155,7 +155,6 @@ class mod_ssrf(Attack):
     """
 
     name = "ssrf"
-    payloads = ("\xBF'\"(", set())
     MSG_VULN = _("SSRF vulnerability")
 
     def attack(self):
@@ -196,6 +195,9 @@ class mod_ssrf(Attack):
 
             yield original_request
 
+    def finish(self):
+        print(_("[*] Asking endpoint for results, please wait..."))
+        sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request("{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id))
         try:
@@ -239,7 +241,7 @@ class mod_ssrf(Attack):
                                 )
 
                             mutator = Mutator(
-                                methods="G" if original_request.method == "GET" else "P",
+                                methods="G" if original_request.method == "GET" else "PF",
                                 payloads=[("http://external.url/page", set())],
                                 qs_inject=self.must_attack_query_string,
                                 parameters=[parameter],

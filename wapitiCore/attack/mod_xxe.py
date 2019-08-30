@@ -323,6 +323,7 @@ class mod_xxe(Attack):
                 yield exception
 
     def finish(self):
+        print(_("[*] Asking endpoint for results, please wait..."))
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request("{}get_xxe.php?id={}".format(self.internal_endpoint, self._session_id))
