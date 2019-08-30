@@ -476,7 +476,7 @@ class PayloadReader:
         """returns a array"""
         lines = []
         try:
-            with open(filename) as f:
+            with open(filename, errors="ignore") as f:
                 for line in f:
                     clean_line, flags = self.process_line(line)
                     if clean_line:
