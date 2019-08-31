@@ -91,6 +91,16 @@ class mod_sql(Attack):
 
         return ""
 
+    def is_false_positive(self, request):
+        try:
+            response = self.crawler.send(request)
+        except RequestException:
+            pass
+        else:
+            if self._find_pattern_in_response(response.content):
+                return True
+        return False
+
     def set_timeout(self, timeout):
         self.TIME_TO_SLEEP = str(1 + int(timeout))
 
@@ -151,7 +161,7 @@ class mod_sql(Attack):
                         timeouted = True
                     else:
                         vuln_info = self._find_pattern_in_response(response.content)
-                        if vuln_info:
+                        if vuln_info and not self.is_false_positive(original_request):
                             # An error message implies that a vulnerability may exists
 
                             if parameter == "QUERY_STRING":

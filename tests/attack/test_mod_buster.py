@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import re
 
 import responses
@@ -79,11 +79,15 @@ def test_whole_stuff():
     options = {"timeout": 1, "level": 2}
     logger = Mock()
 
-    module = mod_buster(crawler, persister, logger, options)
-    module.verbose = 2
-    module.do_get = True
-    for __ in module.attack():
-        pass
+    with patch(
+            "wapitiCore.attack.mod_buster.mod_buster.payloads",
+            [("nawak", set()), ("admin", set()), ("config.inc", set()), ("authconfig.php", set())]
+    ):
+        module = mod_buster(crawler, persister, logger, options)
+        module.verbose = 2
+        module.do_get = True
+        for __ in module.attack():
+            pass
 
-    assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
-    assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]
+        assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
+        assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]

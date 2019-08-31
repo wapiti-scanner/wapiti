@@ -67,3 +67,63 @@ def test_whole_stuff():
         pass
 
     assert True
+
+
+@responses.activate
+def test_false_positive():
+    responses.add(
+        responses.GET,
+        url="http://perdu.com/",
+        body="You have an error in your SQL syntax"
+    )
+
+    persister = FakePersister()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 1
+    persister.requests.append(request)
+
+    crawler = Crawler("http://perdu.com/", timeout=1)
+    options = {"timeout": 1, "level": 1}
+    logger = Mock()
+
+    module = mod_sql(crawler, persister, logger, options)
+    module.verbose = 2
+    module.do_post = True
+    for __ in module.attack():
+        pass
+
+    assert not persister.vulnerabilities
+
+
+@responses.activate
+def test_true_positive():
+    responses.add(
+        responses.GET,
+        url="http://perdu.com/?foo=bar",
+        body="Hi there"
+    )
+
+    responses.add(
+        responses.GET,
+        url=re.compile(r"http://perdu.com/\?foo=.*"),
+        body="You have an error in your SQL syntax"
+    )
+
+    persister = FakePersister()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 1
+    persister.requests.append(request)
+
+    crawler = Crawler("http://perdu.com/", timeout=1)
+    options = {"timeout": 1, "level": 1}
+    logger = Mock()
+
+    module = mod_sql(crawler, persister, logger, options)
+    module.verbose = 2
+    module.do_post = True
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
