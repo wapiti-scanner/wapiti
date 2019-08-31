@@ -1,8 +1,34 @@
 #!/usr/bin/env python3
+import sys
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 VERSION = "3.0.1"
 DOC_DIR = "share/doc/wapiti"
+
+
+class PyTest(TestCommand):
+    user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        try:
+            from multiprocessing import cpu_count
+            self.pytest_args = ["-n", str(cpu_count()), "--boxed"]
+        except (ImportError, NotImplementedError):
+            self.pytest_args = ["-n", "1", "--boxed"]
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
+
 
 doc_and_conf_files = [
     (
@@ -93,5 +119,9 @@ if a script is vulnerable.""",
             "wapiti = wapitiCore.main.wapiti:wapiti_main",
             "wapiti-getcookie = wapitiCore.main.getcookie:getcookie_main",
         ],
-    }
+    },
+    # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
+    tests_require=["pytest", "responses"],
+    setup_requires=["pytest-runner"],
+    cmdclass={"test": PyTest}
 )
