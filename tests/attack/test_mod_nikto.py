@@ -32,6 +32,8 @@ class FakePersister:
 @responses.activate
 def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
+    responses.add_passthru("https://raw.githubusercontent.com/sullo/nikto/master/program/databases/db_tests")
+
     responses.add(
         responses.GET,
         url="http://perdu.com/cgi-bin/a1disp3.cgi?../../../../../../../../../../etc/passwd",
@@ -68,6 +70,4 @@ def test_whole_stuff():
         "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
     )
     assert "This CGI allows attackers read arbitrary files on the host" in persister.vulnerabilities[0][1]
-
-
 

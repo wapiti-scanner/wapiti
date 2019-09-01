@@ -1,0 +1,11 @@
+FROM python:3.5
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update
+RUN apt-get install php7.3-cli php7.3-xml -y
+RUN mkdir /usr/src/app
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+CMD ["python", "setup.py", "test", "-vv"]
