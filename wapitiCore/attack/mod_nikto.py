@@ -113,7 +113,7 @@ class mod_nikto(Attack):
             path = path.replace("@NUKE", "/modules/")
             path = path.replace("@PHPMYADMIN", "/phpMyAdmin/")
             path = path.replace("@POSTNUKE", "/postnuke/")
-            path = re.sub("JUNK\((\d+)\)", lambda x: junk_string[:int(x.group(1))], path)
+            path = re.sub(r"JUNK\((\d+)\)", lambda x: junk_string[:int(x.group(1))], path)
 
             if path[0] == "@":
                 continue

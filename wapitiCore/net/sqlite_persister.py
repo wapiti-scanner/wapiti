@@ -542,16 +542,3 @@ class SqlitePersister:
         for path_id in path_ids:
             self.delete_path_by_id(path_id)
         return len(path_ids)
-
-
-if __name__ == "__main__":
-    from wapitiCore.net.web import Request
-    # persister = SqlitePersister("/tmp/crawl.db")
-
-    persister = SqlitePersister("/tmp/crawl.db")
-    persister.set_root_url("http://perdu.com")
-
-    print(persister.get_root_url())
-
-    for http_res in persister.get_links(attack_module="xss"):
-        print(http_res.path_id)

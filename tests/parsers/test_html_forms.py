@@ -56,7 +56,7 @@ def test_forms():
                     "image.y": "1",
                     "month": "2019-03",
                     "number": "1337",
-                    "password": "letmein",
+                    "password": "Letm3in_",
                     "radio": "beton",
                     "range": "37",
                     "search": "default",

@@ -104,22 +104,10 @@ Don't hesitate to move to OWASP Zed Attack Proxy for in-depth pentesting.
 Internet is like a box of chocolates: You never know what you're gonna get.  
 Broken webpages, malformed links, mixed standards for HTML/XML/XHTML, proprietary technologies, network or protocol issues...
 So the only way to make sure Wapiti is Internet proof is to launch it on random targets.  
-Don't take it personnaly, you are helping to make the Internet a safer place.
+Don't take it personally, you are helping to make the Internet a safer place.
 
-### Do you have a personnal website? Twitter ? ###
+### Do you have a personal website? Twitter ? ###
 
 Yes you can follow me at @devl00p.  
 My website is http://devloop.users.sourceforge.net/  
 I write some CTF walkthrough. Articles are in french though.
-
-### Why did it took you so much time before releasing a new version ? ###
-
-Dude, I have a baby girl, a girlfriend, a fat cat, a job in cybersecurity and a rusty Miata... do the math.
-
-### Which one takes the most time ? ###
-
-Man, my girlfriend will kill me if I give you the answer.
-
-### And now what ? ###
-
-Something completely different I guess.

@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import responses
 
 from wapitiCore.net.web import Request
@@ -69,7 +67,7 @@ def test_whole_stuff():
     persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
-    options = {"timeout": 1, "level": 2}
+    options = {"timeout": 10, "level": 2}
     logger = FakeLogger()
 
     module = mod_methods(crawler, persister, logger, options)

@@ -82,7 +82,7 @@ def test_whole_stuff():
     persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
-    options = {"timeout": 1, "level": 2}
+    options = {"timeout": 10, "level": 2}
     logger = Mock()
 
     module = mod_redirect(crawler, persister, logger, options)

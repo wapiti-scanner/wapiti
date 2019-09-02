@@ -20,7 +20,6 @@
 
 # Standard libraries
 import re
-import sys
 from random import choice
 from string import ascii_letters
 from enum import Enum
@@ -768,16 +767,6 @@ class Page:
             file_params = []
             form_actions = set()
 
-            try:
-                ref_url = self._url.encode(self._response.encoding, errors="ignore")
-            except LookupError:
-                # La page spécifie un encodage qui n'existe pas (ex: uft-8 au lieu de utf-8)
-                if self._response.apparent_encoding:
-                    # auquel cas l'encodage est détecté via chardet
-                    ref_url = self._url.encode(self._response.apparent_encoding, errors="ignore")
-                else:
-                    ref_url = ""
-
             defaults = {
                 "checkbox": "default",
                 "color": "#bada55",
@@ -789,7 +778,7 @@ class Page:
                 "hidden": "default",
                 "month": "2019-03",
                 "number": "1337",
-                "password": "letmein",
+                "password": "Letm3in_",  # 8 characters with uppercase, digit and special char for common rules
                 "radio": "beton",  # priv8 j0k3
                 "range": "37",
                 "search": "default",
@@ -819,6 +808,10 @@ class Page:
                     if input_type == "text" and "mail" in input_field["name"] and autofill:
                         # If an input text match name "mail" then put a valid email address in it
                         input_value = defaults["email"]
+                    elif input_type == "text" and "pass" in input_field["name"] or \
+                            "pwd" in input_field["name"] and autofill:
+                        # Looks like a text field but waiting for a password
+                        input_value = defaults["password"]
                     else:
                         input_value = input_field.get("value", defaults[input_type] if autofill else "")
 
@@ -893,6 +886,11 @@ class Page:
                     get_params.append([radio_name, radio_value])
                 else:
                     post_params.append([radio_name, radio_value])
+
+            if method == "POST" and not post_params and not file_params:
+                # Ignore empty forms. Those are either webdev issues or forms having only "button" types that
+                # only rely on JS code.
+                continue
 
             # First raise the form with the URL specified in the action attribute
             new_form = web.Request(

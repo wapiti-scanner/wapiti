@@ -197,11 +197,11 @@ class Tokenizer(object):
 
     def peek(self):
         if self.lookahead:
-            next = self.tokens.get((self.tokenIndex + self.lookahead) & 3)
+            next_one = self.tokens.get((self.tokenIndex + self.lookahead) & 3)
             if self.scanNewlines and (getattr(next, "lineno", None) != getattr(self, "lineno", None)):
                 tt = NEWLINE
             else:
-                tt = getattr(next, "type_", None)
+                tt = getattr(next_one, "type_", None)
         else:
             tt = self.get()
             self.unget()
@@ -255,66 +255,66 @@ class Tokenizer(object):
             return END
 
         def matchInput():
-            match = fpRegExp.match(input__)
-            if match:
+            match_result = fpRegExp.match(input__)
+            if match_result:
                 token.type_ = NUMBER
-                token.value = float(match.group(0))
-                return match.group(0)
+                token.value = float(match_result.group(0))
+                return match_result.group(0)
 
-            match = re.match(r'^0[0-7]+', input__)
-            if match:
+            match_result = re.match(r'^0[0-7]+', input__)
+            if match_result:
                 token.type_ = NUMBER
                 # octal. 077 does not work in python 3 but 0o77 works in
                 # python 2 and 3
-                token.value = eval("0o" + match.group(0)[1:])
-                return match.group(0)
+                token.value = eval("0o" + match_result.group(0)[1:])
+                return match_result.group(0)
 
-            match = re.match(r'^0[xX][\da-fA-F]+|^\d+', input__)
-            if match:
+            match_result = re.match(r'^0[xX][\da-fA-F]+|^\d+', input__)
+            if match_result:
                 token.type_ = NUMBER
-                token.value = eval(match.group(0))
-                return match.group(0)
+                token.value = eval(match_result.group(0))
+                return match_result.group(0)
 
-            match = re.match(r'^[$_\w]+', input__)  # FIXME no ES3 unicode
-            if match:
-                id_ = match.group(0)
+            match_result = re.match(r'^[$_\w]+', input__)  # FIXME no ES3 unicode
+            if match_result:
+                id_ = match_result.group(0)
                 token.type_ = keywords.get(id_, IDENTIFIER)
                 token.value = id_
-                return match.group(0)
+                return match_result.group(0)
 
-            match = re.match(r'^"(?:\\.|[^"])*"|^\'(?:\\.|[^\'])*\'', input__)
-            if match:
+            match_result = re.match(r'^"(?:\\.|[^"])*"|^\'(?:\\.|[^\'])*\'', input__)
+            if match_result:
                 token.type_ = STRING
-                token.value = eval(match.group(0))
-                return match.group(0)
+                token.value = eval(match_result.group(0))
+                return match_result.group(0)
 
             if self.scanOperand:
-                match = reRegExp.match(input__)
-                if match:
+                match_result = reRegExp.match(input__)
+                if match_result:
                     token.type_ = REGEXP
-                    token.value = {"regexp": match.group(1), "modifiers": match.group(2)}
-                    return match.group(0)
+                    token.value = {"regexp": match_result.group(1), "modifiers": match_result.group(2)}
+                    return match_result.group(0)
 
-            match = opRegExp.match(input__)
-            if match:
-                op = match.group(0)
+            match_result = opRegExp.match(input__)
+            if match_result:
+                op = match_result.group(0)
                 if op in assignOps and input__[len(op)] == '=':
                     token.type_ = ASSIGN
                     token.assignOp = globals()[opTypeNames[op]]
                     token.value = op
-                    return match.group(0) + "="
+                    return match_result.group(0) + "="
                 token.type_ = globals()[opTypeNames[op]]
                 if self.scanOperand and (token.type_ in (PLUS, MINUS)):
                     token.type_ += UNARY_PLUS - PLUS
                 token.assignOp = None
                 token.value = op
-                return match.group(0)
+                return match_result.group(0)
 
             if self.scanNewlines:
-                match = re.match(r'^\n', input__)
-                if match:
+                match_result = re.match(r'^\n', input__)
+                if match_result:
                     token.type_ = NEWLINE
-                    return match.group(0)
+                    return match_result.group(0)
 
             raise self.newSyntaxError("Illegal token")
 

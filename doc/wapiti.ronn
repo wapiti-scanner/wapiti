@@ -89,10 +89,11 @@ OTHER OPTIONS:
     
   * `--scope` <SCOPE>  
     Define the scope of the scan and attacks. Valid choices are :
-      - url : will only scan and attack the exact base URL given with -u option
-      - page : will attack every URL matching the path of the base URL (every query string variation)
-      - folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename)
+      - url : will only scan and attack the exact base URL given with -u option.
+      - page : will attack every URL matching the path of the base URL (every query string variation).
+      - folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename).
       - domain : will scan and attack every URL whose domain name match the one from the base URL.
+      - punk : will scan and attack every URL found whatever the domain. Think twice before using that scope.
     
 ## ATTACK SPECIFICATION
 

@@ -114,7 +114,6 @@ class mod_xxe(Attack):
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
 
         for original_request in chain(http_resources, forms):
-            warned = False
             timeouted = False
             page = original_request.path
             saw_internal_error = False
@@ -323,10 +322,11 @@ class mod_xxe(Attack):
                 yield exception
 
     def finish(self):
-        print(_("[*] Asking endpoint for results, please wait..."))
+        endpoint_url = "{}get_xxe.php?id={}".format(self.internal_endpoint, self._session_id)
+        print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
-        endpoint_request = Request("{}get_xxe.php?id={}".format(self.internal_endpoint, self._session_id))
+        endpoint_request = Request(endpoint_url)
         try:
             response = self.crawler.send(endpoint_request)
         except RequestException:

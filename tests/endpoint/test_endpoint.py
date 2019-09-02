@@ -8,8 +8,6 @@ from shutil import rmtree
 import pytest
 import requests
 
-import wapitiCore
-
 
 @pytest.fixture(autouse=True)
 def run_around_tests():

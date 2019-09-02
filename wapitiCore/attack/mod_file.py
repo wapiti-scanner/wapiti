@@ -195,6 +195,10 @@ class mod_file(Attack):
                                 continue
 
                             if not inclusion_succeed:
+                                if warned:
+                                    # No need to warn more than once
+                                    continue
+
                                 # Mark as eventuality
                                 vuln_info = _("Possible {0} vulnerability").format(vuln_info)
                                 warned = True

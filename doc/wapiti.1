@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "August 2019" "" ""
+.TH "WAPITI" "1" "September 2019" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -189,16 +189,19 @@ This is the only required argument\. The scheme part of the URL must be either h
 Define the scope of the scan and attacks\. Valid choices are :
 .
 .IP "\(bu" 4
-url : will only scan and attack the exact base URL given with \-u option
+url : will only scan and attack the exact base URL given with \-u option\.
 .
 .IP "\(bu" 4
-page : will attack every URL matching the path of the base URL (every query string variation)
+page : will attack every URL matching the path of the base URL (every query string variation)\.
 .
 .IP "\(bu" 4
-folder : will scan and attack every URL starting with the base URL value\. This base URL should have a trailing slash (no filename)
+folder : will scan and attack every URL starting with the base URL value\. This base URL should have a trailing slash (no filename)\.
 .
 .IP "\(bu" 4
 domain : will scan and attack every URL whose domain name match the one from the base URL\.
+.
+.IP "\(bu" 4
+punk : will scan and attack every URL found whatever the domain\. Think twice before using that scope\.
 .
 .IP "" 0
 

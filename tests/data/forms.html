@@ -86,5 +86,10 @@
 <INPUT TYPE="SUBMIT" VALUE="Submit"> | <INPUT TYPE="RESET" VALUE="Reset">
 </FORM>
 
+<!-- won't be submitted because button types doesn't generate network requests and can only be used with JS
+ so in fact it's an empty form -->
+<form method="POST" action="/go_to_nowhere.php">
+    <input type="button" name="benjamin" value="bradpitt" />
+</form>
 </body>
 </html>

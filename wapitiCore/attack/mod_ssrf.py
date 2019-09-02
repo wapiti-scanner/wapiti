@@ -196,10 +196,11 @@ class mod_ssrf(Attack):
             yield original_request
 
     def finish(self):
-        print(_("[*] Asking endpoint for results, please wait..."))
+        endpoint_url = "{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id)
+        print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
-        endpoint_request = Request("{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id))
+        endpoint_request = Request(endpoint_url)
         try:
             response = self.crawler.send(endpoint_request)
         except RequestException:
