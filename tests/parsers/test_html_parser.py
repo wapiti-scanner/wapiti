@@ -133,8 +133,9 @@ def test_extra_links():
             "http://perdu.com/data.html",
             "http://perdu.com/high-def.jpg",
             "http://perdu.com/low-def.jpg",
-            "http://perdu.com/img_orange_flowers.jpg"
-
+            "http://perdu.com/img_orange_flowers.jpg",
+            "http://perdu.com/style.css?should_not_be_crawled",
+            "http://perdu.com/yolo.js?v=53"
         }
 
 

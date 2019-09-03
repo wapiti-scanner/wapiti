@@ -36,3 +36,14 @@ def test_qs_limit():
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len(list(explorer.explore(start_urls, excluded_urls))) == 3
+
+
+def test_explorer_filtering():
+    crawler = Crawler("http://127.0.0.1:65080/")
+    explorer = Explorer(crawler)
+    start_urls = deque(["http://127.0.0.1:65080/filters.html"])
+    excluded_urls = []
+    results = set([resource.url for resource in explorer.explore(start_urls, excluded_urls)])
+    # We should have current URL and JS URL but without query string.
+    # CSS URL should be excluded
+    assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}

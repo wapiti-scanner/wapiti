@@ -1514,10 +1514,6 @@ class Explorer:
                 print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
                 continue
 
-            # Should we keep the encoding of each page ?
-            # if url not in self.link_encoding:
-            #     self.link_encoding[url] = ""
-
             if self._max_files_per_dir:
                 self._file_counts[dir_name] += 1
 
@@ -1556,10 +1552,15 @@ class Explorer:
                 allowed_links.extend(filter(self._crawler.is_in_scope, page.js_redirections + page.html_redirections))
 
                 for extra_url in filter(self._crawler.is_in_scope, page.extra_urls):
-                    # parts = urlparse(extra_url)
-                    # Those URLs are of relative importance so let's keep them only if they seems to contain a QS
-                    # are if this is a parsable SWF file.
-                    # if parts.query or parts.path.lower().endswith(".swf"):
+                    parts = urlparse(extra_url)
+                    # There are often css and js URLs with useless parameters like version or random number
+                    # used to prevent caching in browser. So let's exclude those extensions
+                    if parts.path.endswith(".css"):
+                        continue
+                    if parts.path.endswith(".js") and parts.query:
+                        # For JS script, allow to process them but remove parameters
+                        allowed_links.append(extra_url.split("?")[0])
+                        continue
                     allowed_links.append(extra_url)
 
                 for form in page.iter_forms():
