@@ -207,22 +207,22 @@ class Wapiti:
 
             opts = self.module_options.split(",")
 
-            for opt in opts:
-                if opt.strip() == "":
+            for module_opt in opts:
+                if module_opt.strip() == "":
                     continue
 
                 method = ""
-                if opt.find(":") > 0:
-                    module_name, method = opt.split(":", 1)
+                if module_opt.find(":") > 0:
+                    module_name, method = module_opt.split(":", 1)
                 else:
-                    module_name = opt
+                    module_name = module_opt
 
                 # deactivate some module options
                 if module_name.startswith("-"):
                     module_name = module_name[1:]
-                    if module_name == "all":
+                    if module_name in ("all", "common"):
                         for attack_module in self.attacks:
-                            if attack_module.name in attack.commons:
+                            if module_name == "all" or attack_module.name in attack.commons:
                                 if method == "get" or method == "":
                                     attack_module.do_get = False
                                 if method == "post" or method == "":
@@ -243,12 +243,10 @@ class Wapiti:
                 else:
                     if module_name.startswith("+"):
                         module_name = module_name[1:]
-                    if module_name == "all":
-                        print(
-                            _("[!] Keyword 'all' was removed for activation. Use 'common' and modules names instead."))
-                    elif module_name == "common":
+
+                    if module_name in ("all", "common"):
                         for attack_module in self.attacks:
-                            if attack_module.name in attack.commons:
+                            if module_name == "all" or attack_module.name in attack.commons:
                                 if method == "get" or method == "":
                                     attack_module.do_get = True
                                 if method == "post" or method == "":
