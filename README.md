@@ -93,14 +93,17 @@ The aforementioned attacks are tied to the following module names :
 + crlf (CR-LF injection in HTTP headers)
 + delay (Not an attack module, prints the 10 slowest to load webpages of the target)
 + exec (Code execution or command injection)
-+ file (Path traversal, file inclusion and XXE)
++ file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)
++ methods (Look for uncommon availables HTTP methods like PUT)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
++ redirect (Open Redirects)
 + shellshock (Test Shellshock attack, see https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29 )
 + sql (Error-based SQL injection detection)
 + ssrf (Server Side Request Forgery)
 + xss (XSS injection module)
++ xxe (XML External Entity attack)
 
 Module names can be given as comma separated list using the "-m" or "--module" option.
 
