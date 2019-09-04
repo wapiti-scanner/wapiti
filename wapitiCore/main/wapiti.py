@@ -143,7 +143,7 @@ class Wapiti:
 
         self.persister = SqlitePersister(self._history_file)
 
-    def __init_report(self):
+    def _init_report(self):
         for rep_gen_info in self.xml_rep_gen_parser.get_report_generators():
             if self.report_generator_type.lower() == rep_gen_info.get_key():
                 self.report_gen = rep_gen_info.create_instance()
@@ -175,8 +175,8 @@ class Wapiti:
                 anomaly.get_references()
             )
 
-    def __init_attacks(self):
-        self.__init_report()
+    def _init_attacks(self):
+        self._init_report()
 
         logger = ConsoleLogger()
         if self.color:
@@ -313,7 +313,7 @@ class Wapiti:
 
     def attack(self):
         """Launch the attacks based on the preferences set by the command line"""
-        self.__init_attacks()
+        self._init_attacks()
 
         for attack_module in self.attacks:
             if attack_module.do_get is False and attack_module.do_post is False:
@@ -945,7 +945,8 @@ def wapiti_main():
         print(_("[*] Available modules:"))
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
         for module_name in modules_list:
-            print("  {}".format(module_name))
+            is_common = " (default)" if module_name in attack.commons else ""
+            print("  {}{}".format(module_name, is_common))
         exit()
 
     url = args.base_url

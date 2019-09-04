@@ -100,7 +100,8 @@ OTHER OPTIONS:
   * `-m`, `--module` <MODULE_LIST>  
     Set the list of attack modules (modules names separated with commas) to launch against the target.  
     Default behavior (when the option is not set) is to use the most common modules.  
-    Common modules can also be specified using the "common" keyword.
+    Common modules can also be specified using the "common" keyword.  
+    If you want to use common modules along with XXE module you can pass -m common,xxe.  
     Activating all modules can be done with the "all" keyword (not recommended though).  
     To launch a scan without launching any attack, just give an empty value (-m "").  
     You can filter on http methods too (only get or post). For example -m "xss:get,exec:post".
