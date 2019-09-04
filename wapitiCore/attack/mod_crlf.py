@@ -32,7 +32,7 @@ class mod_crlf(Attack):
     MSG_VULN = _("CRLF Injection")
     do_get = False
     do_post = False
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.1 version"), set())
+    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.2 version"), set())
 
     def attack(self):
         mutator = self.get_mutator()

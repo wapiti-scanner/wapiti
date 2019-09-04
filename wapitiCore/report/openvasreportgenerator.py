@@ -29,7 +29,7 @@ class OpenVASReportGenerator(ReportGenerator):
     method add_vulnerability(vulnerabilityTypeName,level,url,parameter,info).
     The format of the file is XML and it has the following structure:
     <report type="security">
-        <generatedBy id="Wapiti 3.0.1"/>
+        <generatedBy id="Wapiti 3.0.2"/>
         <vulnerabilityTypeList>
             <vulnerabilityType name="SQL Injection">
 

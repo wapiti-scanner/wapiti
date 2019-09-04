@@ -1,4 +1,4 @@
-                                WAPITI - VERSION 3.0.1
+                                WAPITI - VERSION 3.0.2
                     Wapiti is a web application security auditor.
                            http://wapiti.sourceforge.net/
 
@@ -7,11 +7,14 @@ Requirements
 ============
 In order to work correctly, Wapiti needs :
 
-+ Python 3.x where x is >= 4 (3.4, 3.5...)
++ Python 3.x where x is >= 5 (3.5, 3.6, 3.7...)
 + python-requests ( http://docs.python-requests.org/en/latest/ )
 + BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
-+ yaswfp (https://github.com/facundobatista/yaswfp)
-+ lxml
++ yaswfp ( https://github.com/facundobatista/yaswfp )
++ lxml ( https://lxml.de/ )
++ tld ( https://github.com/barseghyanartur/tld )
++ Mako ( https://www.makotemplates.org/ )
++ PySocks ( https://github.com/Anorov/PySocks )
 
 See INSTALL.md for more details on installation.
 

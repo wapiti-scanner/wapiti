@@ -1,4 +1,5 @@
 02/09/2019
+    Wapiti 3.0.2
     New XXE module cans end payloads in parameters, query string, file uploads and raw body.
     New module for detection Open Redirect vulnerabilities (header based our HTML meta based or JS based).
     Fixed domain scope scanning.

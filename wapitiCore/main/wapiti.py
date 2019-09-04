@@ -53,7 +53,7 @@ logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.C
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
 BASE_DIR = None
-WAPITI_VERSION = "Wapiti 3.0.1"
+WAPITI_VERSION = "Wapiti 3.0.2"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 disable_warnings()
@@ -627,7 +627,7 @@ def wapiti_main():
     ]
 
     print(choice(banners))
-    print("Wapiti-3.0.1 (wapiti.sourceforge.net)")
+    print("Wapiti-3.0.2 (wapiti.sourceforge.net)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))
@@ -649,7 +649,7 @@ def wapiti_main():
     elif datetime.now().month == 3 and datetime.now().day == 31:
         print(_("[*] Today is world backup day! Is your data safe?"))
 
-    parser = argparse.ArgumentParser(description="Wapiti-3.0.1: Web application vulnerability scanner")
+    parser = argparse.ArgumentParser(description="Wapiti-3.0.2: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(

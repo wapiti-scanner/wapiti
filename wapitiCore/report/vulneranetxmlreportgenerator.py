@@ -43,7 +43,7 @@ class VulneraNetXMLReportGenerator(ReportGenerator):
     method add_vulnerability(category,level,url,parameter,info).
     The format of the file is XML and it has the following structure:
     <report type="security">
-        <generatedBy id="Wapiti 3.0.1"/>
+        <generatedBy id="Wapiti 3.0.2"/>
             <bugTypeList>
                 <bugType name="SQL Injection">
                     <bugList/>

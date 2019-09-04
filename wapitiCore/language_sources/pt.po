@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Wapiti GIT\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-08 11:33+0200\n"
+"POT-Creation-Date: 2019-09-04 14:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -136,11 +136,12 @@ msgid "The server responded with a 500 HTTP error code while attempting to injec
 msgstr "O servidor respondeu com um erro HTTP código 500 ao tentar injetar uma carga no parâmetro {0}"
 
 #: ../wapiti.py:69 ../main/wapiti.py:82 ../main/wapiti.py:77
+#: ../main/getcookie.py:34
 #, python-brace-format
 msgid "Invalid argument for option {0} : {1}"
 msgstr "Argumento inválido para opção {0} : {1}"
 
-#: ../wapiti.py:226 ../main/wapiti.py:183
+#: ../wapiti.py:226 ../main/wapiti.py:183 ../main/wapiti.py:185
 msgid "[*] Loading modules:"
 msgstr "[*] Carregando módulos:"
 
@@ -165,18 +166,18 @@ msgid "Upload scripts found:"
 msgstr "Scripts de Upload encontrados: "
 
 #: ../wapiti.py:335 ../main/wapiti.py:459 ../main/wapiti.py:454
-#: ../main/wapiti.py:458
+#: ../main/wapiti.py:458 ../main/wapiti.py:461
 msgid "Report"
 msgstr "Relatório"
 
 #: ../wapiti.py:337 ../main/wapiti.py:461 ../main/wapiti.py:456
-#: ../main/wapiti.py:460
+#: ../main/wapiti.py:460 ../main/wapiti.py:463
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
 msgstr "Um relatório foi gerado no arquivo {0}"
 
 #: ../wapiti.py:339 ../main/wapiti.py:463 ../main/wapiti.py:458
-#: ../main/wapiti.py:462
+#: ../main/wapiti.py:462 ../main/wapiti.py:465
 #, python-brace-format
 msgid "Open {0} with a browser to see this report."
 msgstr "Abra {0} com um browser para ver este relatório."
@@ -222,6 +223,7 @@ msgid "Backup file {0} found for {1}"
 msgstr "Arquivo backup {0} encontrado por {1}"
 
 #: ../attack/mod_blindsql.py:40 ../attack/mod_blindsql.py:38
+#: ../attack/mod_blindsql.py:36
 msgid "Blind SQL vulnerability"
 msgstr "Vulnerabilidade de SQL cego"
 
@@ -238,7 +240,10 @@ msgstr "{0} via injeção na string de consulta"
 #: ../attack/mod_blindsql.py:85 ../attack/mod_exec.py:111
 #: ../attack/mod_exec.py:169 ../attack/mod_file.py:152 ../attack/mod_sql.py:158
 #: ../attack/mod_crlf.py:78 ../attack/mod_file.py:148
-#: ../attack/mod_redirect.py:59
+#: ../attack/mod_redirect.py:59 ../attack/mod_blindsql.py:80
+#: ../attack/mod_exec.py:124 ../attack/mod_exec.py:182
+#: ../attack/mod_file.py:210 ../attack/mod_redirect.py:57
+#: ../attack/mod_sql.py:170
 #, python-brace-format
 msgid "{0} via injection in the parameter {1}"
 msgstr "{0} via injeção no parâmetro {1}"
@@ -256,29 +261,29 @@ msgstr "(QUERY_STRING)"
 msgid "Error: The server did not understand this request"
 msgstr "Erro: O servidor não entendeu a requisição"
 
-#: ../attack/mod_exec.py:45 ../attack/mod_exec.py:44
+#: ../attack/mod_exec.py:45 ../attack/mod_exec.py:44 ../attack/mod_exec.py:47
 msgid "Command execution"
 msgstr "Execução de comando"
 
-#: ../attack/mod_exec.py:48 ../attack/mod_exec.py:47
+#: ../attack/mod_exec.py:48 ../attack/mod_exec.py:47 ../attack/mod_exec.py:50
 msgid "PHP evaluation"
 msgstr "Avaliação PHP"
 
 #: ../attack/mod_exec.py:51 ../attack/mod_exec.py:54 ../attack/mod_exec.py:50
-#: ../attack/mod_exec.py:53
+#: ../attack/mod_exec.py:53 ../attack/mod_exec.py:56
 msgid "Warning exec"
 msgstr "Advertência exec"
 
 #: ../attack/mod_exec.py:57 ../attack/mod_exec.py:63 ../attack/mod_exec.py:56
-#: ../attack/mod_exec.py:62
+#: ../attack/mod_exec.py:62 ../attack/mod_exec.py:59 ../attack/mod_exec.py:65
 msgid "preg_replace injection"
 msgstr "Injeção preg_replace"
 
-#: ../attack/mod_exec.py:60 ../attack/mod_exec.py:59
+#: ../attack/mod_exec.py:60 ../attack/mod_exec.py:59 ../attack/mod_exec.py:62
 msgid "Warning usort()"
 msgstr "Advertência usort()"
 
-#: ../attack/mod_exec.py:66 ../attack/mod_exec.py:65
+#: ../attack/mod_exec.py:66 ../attack/mod_exec.py:65 ../attack/mod_exec.py:68
 msgid "Warning assert"
 msgstr "Advertência assert"
 
@@ -317,6 +322,7 @@ msgid "include() of file in include_path"
 msgstr "include() do arquivo em include_path"
 
 #: ../attack/mod_file.py:84 ../attack/mod_file.py:83 ../attack/mod_file.py:79
+#: ../attack/mod_file.py:203
 #, python-brace-format
 msgid "Possible {0} vulnerability"
 msgstr "Possíveis vulnerabilidades: {0}"
@@ -355,12 +361,13 @@ msgid "Downloading from the web..."
 msgstr "Efetuando download da web..."
 
 #: ../attack/mod_nikto.py:90 ../attack/mod_nikto.py:92
+#: ../attack/mod_nikto.py:94
 msgid "Error downloading Nikto database"
 msgstr "Erro no download da base de dados Nikto"
 
 #: ../attack/mod_nikto.py:235 ../attack/mod_nikto.py:237
 #: ../attack/mod_nikto.py:240 ../attack/mod_nikto.py:238
-#: ../attack/mod_nikto.py:241
+#: ../attack/mod_nikto.py:241 ../attack/mod_nikto.py:243
 msgid "References:"
 msgstr "Referências:"
 
@@ -436,7 +443,7 @@ msgstr "Injeção de SQL em .NET"
 msgid "Acess-Based SQL Injection"
 msgstr "Injeção de SQL baseado em Access"
 
-#: ../attack/mod_sql.py:76 ../attack/mod_sql.py:88
+#: ../attack/mod_sql.py:76 ../attack/mod_sql.py:88 ../attack/mod_sql.py:90
 msgid "Oracle Injection"
 msgstr "Injeção no Oracle"
 
@@ -466,15 +473,15 @@ msgstr "Nenhum formulário encontrado nesta página !"
 msgid "Choose the form you want to use :"
 msgstr "Escolha o formulário que você deseja usar:"
 
-#: ../net/getcookie.py:113 ../main/getcookie.py:97
+#: ../net/getcookie.py:113 ../main/getcookie.py:97 ../main/getcookie.py:164
 msgid "Enter a number : "
 msgstr "Digite um número:"
 
-#: ../net/getcookie.py:120 ../main/getcookie.py:108
+#: ../net/getcookie.py:120 ../main/getcookie.py:108 ../main/getcookie.py:175
 msgid "Please enter values for the following form: "
 msgstr "Por favor digite valores no formulário a seguir:"
 
-#: ../net/getcookie.py:121 ../main/getcookie.py:109
+#: ../net/getcookie.py:121 ../main/getcookie.py:109 ../main/getcookie.py:176
 #, python-brace-format
 msgid "url = {0}"
 msgstr "url = {0}"
@@ -642,7 +649,7 @@ msgid "File {0} not found. Wapiti will scan the web site again"
 msgstr "Arquivo {0} não encontrado. O Wapiti fará a varredura do site novamente"
 
 #: ../main/wapiti.py:239 ../main/wapiti.py:265 ../main/wapiti.py:238
-#: ../main/wapiti.py:264
+#: ../main/wapiti.py:264 ../main/wapiti.py:240
 #, python-brace-format
 msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Não foi possível encontrar o módulo denominado {0}"
@@ -774,11 +781,11 @@ msgstr "Com uma velocidade de download de {0} bps:"
 msgid "Warning eval()"
 msgstr "Advertência eval()"
 
-#: ../attack/mod_exec.py:69 ../attack/mod_exec.py:68
+#: ../attack/mod_exec.py:69 ../attack/mod_exec.py:68 ../attack/mod_exec.py:71
 msgid "Evaluation warning"
 msgstr "Aviso de avaliação"
 
-#: ../attack/mod_exec.py:94 ../attack/mod_exec.py:107
+#: ../attack/mod_exec.py:94 ../attack/mod_exec.py:107 ../attack/mod_exec.py:120
 msgid "Blind command execution"
 msgstr "Execução de comando cego"
 
@@ -822,11 +829,12 @@ msgid "Timeout occurred in {0}"
 msgstr "O tempo limite ocorreu em {0}"
 
 #: ../main/getcookie.py:57 ../main/wapiti.py:859 ../main/wapiti.py:860
-#: ../main/wapiti.py:895 ../main/wapiti.py:899
+#: ../main/wapiti.py:895 ../main/wapiti.py:899 ../main/getcookie.py:104
+#: ../main/wapiti.py:957
 msgid "Invalid base URL was specified, please give a complete URL with protocol scheme and slash after the domain name."
 msgstr "Uma URL inválida foi especificada, forneça uma URL completa com esquema de protocolo e barra após o nome do domínio."
 
-#: ../main/getcookie.py:88
+#: ../main/getcookie.py:88 ../main/getcookie.py:155
 msgid "Choose the form you want to use or enter 'q' to leave :"
 msgstr "Escolha o formulário que você deseja utilizar ou digite 'q' para sair:"
 
@@ -903,46 +911,57 @@ msgid "Error sending crash report"
 msgstr "Erro ao enviar relatório de falhas"
 
 #: ../main/wapiti.py:412 ../main/wapiti.py:407 ../main/wapiti.py:411
+#: ../main/wapiti.py:414
 msgid "{} requests were skipped due to network issues"
 msgstr "{} solicitações foram ignoradas devido a problemas de rede"
 
 #: ../main/wapiti.py:614 ../main/wapiti.py:623 ../main/wapiti.py:627
+#: ../main/wapiti.py:657
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr "URL base usada para definir o escopo da verificação (escopo padrão é pasta)"
 
 #: ../main/wapiti.py:621 ../main/wapiti.py:630 ../main/wapiti.py:634
+#: ../main/wapiti.py:664
 msgid "Set scan scope"
 msgstr "Definir escopo de verificação"
 
 #: ../main/wapiti.py:629 ../main/wapiti.py:638 ../main/wapiti.py:642
+#: ../main/wapiti.py:672
 msgid "List of modules to load"
 msgstr "Lista de módulos para carregar"
 
 #: ../main/wapiti.py:637 ../main/wapiti.py:652 ../main/wapiti.py:656
+#: ../main/wapiti.py:686
 msgid "Set attack level"
 msgstr "Definir nível de ataque"
 
 #: ../main/wapiti.py:647 ../main/wapiti.py:662 ../main/wapiti.py:666
+#: ../main/wapiti.py:696
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "Configure o proxy HTTP(S) a ser usado. Suportados: proxies http(s) e socks"
 
 #: ../main/wapiti.py:656 ../main/wapiti.py:671 ../main/wapiti.py:675
+#: ../main/getcookie.py:67 ../main/wapiti.py:711
 msgid "Set HTTP authentication credentials"
 msgstr "Definir credenciais de autenticação HTTP"
 
 #: ../main/wapiti.py:663 ../main/wapiti.py:678 ../main/wapiti.py:682
+#: ../main/getcookie.py:74 ../main/wapiti.py:718
 msgid "Set the authentication type to use"
 msgstr "Defina o tipo de autenticação a ser usada"
 
 #: ../main/wapiti.py:669 ../main/wapiti.py:684 ../main/wapiti.py:688
+#: ../main/wapiti.py:724
 msgid "Set a JSON cookie file to use"
 msgstr "Defina um arquivo de cookie JSON a ser usado"
 
 #: ../main/wapiti.py:677 ../main/wapiti.py:692 ../main/wapiti.py:696
+#: ../main/wapiti.py:732
 msgid "Don't resume the scanning process, attack URLs scanned during a previous session"
 msgstr "Não será retomado o processo de verificação, URLs de ataque verificados durante uma sessão anterior"
 
 #: ../main/wapiti.py:683 ../main/wapiti.py:704 ../main/wapiti.py:708
+#: ../main/wapiti.py:744
 msgid "Flush attack history and vulnerabilities for the current session"
 msgstr "Limpar histórico de ataques e vulnerabilidades para a sessão atual"
 
@@ -951,42 +970,52 @@ msgid "Flush everything that was previously found for this target (crawled, URLs
 msgstr "Limpar tudo o que foi encontrado anteriormente para este alvo (rastreados, URLs, vulnerabilidades, etc)"
 
 #: ../main/wapiti.py:696 ../main/wapiti.py:724 ../main/wapiti.py:728
+#: ../main/wapiti.py:764
 msgid "Adds an url to start scan with"
 msgstr "Definir uma URL para iniciar a verificação"
 
 #: ../main/wapiti.py:705 ../main/wapiti.py:733 ../main/wapiti.py:737
+#: ../main/wapiti.py:773
 msgid "Adds an url to exclude from the scan"
 msgstr "Definir uma URL a ser excluída da verificação"
 
 #: ../main/wapiti.py:714 ../main/wapiti.py:742 ../main/wapiti.py:746
+#: ../main/wapiti.py:782
 msgid "Remove this parameter from urls"
 msgstr "Remover este parâmetro das urls"
 
 #: ../main/wapiti.py:723 ../main/wapiti.py:751 ../main/wapiti.py:755
+#: ../main/wapiti.py:791
 msgid "Skip attacking given parameter(s)"
 msgstr "Ignorar ataque com os parâmetro(s) definidos"
 
 #: ../main/wapiti.py:730 ../main/wapiti.py:758 ../main/wapiti.py:762
+#: ../main/wapiti.py:798
 msgid "Set how deep the scanner should explore the website"
 msgstr "Defina o nível de profundidade que o scanner deve explorar no site"
 
 #: ../main/wapiti.py:737 ../main/wapiti.py:765 ../main/wapiti.py:769
+#: ../main/wapiti.py:805
 msgid "Set how many (in-scope) links the scanner should extract for each page"
 msgstr "Defina quantos links (no escopo) o scanner deve extrair para cada página"
 
 #: ../main/wapiti.py:744 ../main/wapiti.py:772 ../main/wapiti.py:776
+#: ../main/wapiti.py:812
 msgid "Set how many pages the scanner should explore per directory"
 msgstr "Defina quantas páginas o scanner deve explorar por diretório"
 
 #: ../main/wapiti.py:751 ../main/wapiti.py:779 ../main/wapiti.py:783
+#: ../main/wapiti.py:819
 msgid "Set how many minutes you want the scan to last (floats accepted)"
 msgstr "Defina quantos minutos você deseja que a verificação dure (números decimais são aceitos)"
 
 #: ../main/wapiti.py:758 ../main/wapiti.py:786 ../main/wapiti.py:790
+#: ../main/wapiti.py:826
 msgid "URLs and forms having more than MAX input parameters will be erased before attack."
 msgstr "URLs e formulários com mais parâmetros que o limite máximo serão apagados antes do ataque."
 
 #: ../main/wapiti.py:766 ../main/wapiti.py:794 ../main/wapiti.py:798
+#: ../main/wapiti.py:834
 msgid ""
 "Easy way to reduce the number of scanned and attacked URLs.\n"
 "Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
@@ -995,87 +1024,99 @@ msgstr ""
 "Valores possíveis: paranoico, sorrateiro, educado, normal, agressivo, insano"
 
 #: ../main/wapiti.py:776 ../main/wapiti.py:804 ../main/wapiti.py:808
+#: ../main/wapiti.py:844
 msgid "Set timeout for requests"
 msgstr "Definir tempo limite para requisições"
 
 #: ../main/wapiti.py:784 ../main/wapiti.py:812 ../main/wapiti.py:816
+#: ../main/getcookie.py:95 ../main/wapiti.py:852
 msgid "Set a custom header to use for every requests"
 msgstr "Definir um cabeçalho personalizado para ser usado em todas as requisições"
 
 #: ../main/wapiti.py:792 ../main/wapiti.py:820 ../main/wapiti.py:824
+#: ../main/getcookie.py:86 ../main/wapiti.py:860
 msgid "Set a custom user-agent to use for every requests"
 msgstr "Definir um usuário ativo personalizado para ser usado em todas as solicitações"
 
 #: ../main/wapiti.py:801 ../main/wapiti.py:829 ../main/wapiti.py:833
+#: ../main/wapiti.py:869
 msgid "Set SSL check (default is no check)"
 msgstr "Definir verificação de SSL (o padrão é sem verificação)"
 
 #: ../main/wapiti.py:809 ../main/wapiti.py:837 ../main/wapiti.py:841
+#: ../main/wapiti.py:877
 msgid "Colorize output"
 msgstr "Colorir saída"
 
 #: ../main/wapiti.py:816 ../main/wapiti.py:844 ../main/wapiti.py:848
+#: ../main/wapiti.py:884
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Definir nível de verbosidade (0: baixo, 1: normal, 2: detalhado)"
 
 #: ../main/wapiti.py:825 ../main/wapiti.py:853 ../main/wapiti.py:857
+#: ../main/wapiti.py:893
 msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
 msgstr "Definir formato de saída. Suportados: json, html (padrão), txt, openvas, vulneranet, xml"
 
 #: ../main/wapiti.py:834 ../main/wapiti.py:862 ../main/wapiti.py:866
+#: ../main/wapiti.py:902
 msgid "Output file or folder"
 msgstr "Arquivo ou pasta de saída "
 
 #: ../main/wapiti.py:840 ../main/wapiti.py:868 ../main/wapiti.py:872
+#: ../main/wapiti.py:929
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Não enviar um relatório automático de erros quando um módulo de ataque falhar"
 
 #: ../main/wapiti.py:878 ../main/wapiti.py:879 ../main/wapiti.py:914
-#: ../main/wapiti.py:918
+#: ../main/wapiti.py:918 ../main/wapiti.py:976
 msgid "Error: File given with the -s option must be UTF-8 encoded !"
 msgstr "Erro: O arquivo fornecido com a opção -s deve ser codificado em UTF-8 !"
 
 #: ../main/wapiti.py:975 ../main/wapiti.py:976 ../main/wapiti.py:1014
-#: ../main/wapiti.py:1018
+#: ../main/wapiti.py:1018 ../main/wapiti.py:1101
 msgid "[*] Resuming scan from previous session, please wait"
 msgstr "[*] Retomando a varredura da sessão anterior, por favor aguarde"
 
 #: ../main/wapiti.py:980 ../main/wapiti.py:981 ../main/wapiti.py:1021
-#: ../main/wapiti.py:1025
+#: ../main/wapiti.py:1025 ../main/wapiti.py:1108
 #, python-brace-format
 msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
 msgstr "[*] {0} URLs e formulários com mais de {1} parâmetros foram removidos."
 
 #: ../main/wapiti.py:985 ../main/wapiti.py:986 ../main/wapiti.py:1026
-#: ../main/wapiti.py:1030
+#: ../main/wapiti.py:1030 ../main/wapiti.py:1113
 #, python-brace-format
 msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr "[*] O Wapiti encontrou {0} URLs e formulários durante a verificação"
 
 #: ../main/wapiti.py:990 ../main/wapiti.py:991 ../main/wapiti.py:1031
-#: ../main/wapiti.py:1035
+#: ../main/wapiti.py:1035 ../main/wapiti.py:1118
 msgid "Attack process interrupted. Scan will be resumed next time unless you specify \"--flush-attacks\" or \"--flush-session\"."
 msgstr "Processo de ataque interrompido. A verificação será retomada na próxima vez, a menos que você especifique \"--flash-attacks\" ou \"--flush-session\"."
 
 #: ../main/wapiti.py:995 ../main/wapiti.py:996 ../main/wapiti.py:1036
-#: ../main/wapiti.py:1040
+#: ../main/wapiti.py:1040 ../main/wapiti.py:1123
 msgid "[!] Can't store informations in persister. SQLite database must have been locked by another process"
 msgstr "[!] Não é possível armazenar informações no repositório. O banco de dados SQLite deve ter sido bloqueado por outro processo"
 
 #: ../main/wapiti.py:996 ../main/wapiti.py:997 ../main/wapiti.py:1037
-#: ../main/wapiti.py:1041
+#: ../main/wapiti.py:1041 ../main/wapiti.py:1124
 msgid "[!] You should unlock and launch Wapiti again."
 msgstr "[!] Você deve desbloquear e iniciar o Wapiti novamente."
 
 #: ../net/crawler.py:1382 ../net/crawler.py:1482 ../net/crawler.py:1494
+#: ../net/crawler.py:1507
 msgid "[!] SSL/TLS error occurred with URL"
 msgstr "[!] Ocorreu um erro SSL/TLS com a URL"
 
 #: ../net/crawler.py:1386 ../net/crawler.py:1486 ../net/crawler.py:1498
+#: ../net/crawler.py:1511
 msgid "[!] Connection error with URL"
 msgstr "[!] Erro de conexão com URL"
 
 #: ../net/crawler.py:1389 ../net/crawler.py:1489 ../net/crawler.py:1501
+#: ../net/crawler.py:1514
 msgid "[!] {} with url {}"
 msgstr "[!] {} com url {}"
 
@@ -1089,10 +1130,12 @@ msgid "URL {0} seems vulnerable to Shellshock attack!"
 msgstr "A URL {0} parece vulnerável ao ataque Shellshock!"
 
 #: ../main/wapiti.py:689 ../main/wapiti.py:710 ../main/wapiti.py:714
+#: ../main/wapiti.py:750
 msgid "Flush everything that was previously found for this target (crawled URLs, vulns, etc)"
 msgstr "Limpar tudo o que foi encontrado anteriormente para este alvo (rastreados, URLs, vulnerabilidades, etc)"
 
 #: ../main/wapiti.py:846 ../main/wapiti.py:874 ../main/wapiti.py:878
+#: ../main/wapiti.py:935
 msgid "Show program's version number and exit"
 msgstr "Mostrar o número da versão do programa e encerrar"
 
@@ -1111,22 +1154,24 @@ msgid "Permanent XSS vulnerability found in {0} by injecting the parameter {1} o
 msgstr ""
 
 #: ../attack/mod_redirect.py:32 ../language/vulnerability.py:85
+#: ../attack/mod_redirect.py:30
 msgid "Open Redirect"
 msgstr ""
 
-#: ../attack/mod_sql.py:52
+#: ../attack/mod_sql.py:52 ../attack/mod_sql.py:54
 msgid "MSAccess-Based SQL Injection"
 msgstr ""
 
-#: ../attack/mod_sql.py:84
+#: ../attack/mod_sql.py:84 ../attack/mod_sql.py:86
 msgid "Spring JDBC Injection"
 msgstr ""
 
-#: ../attack/mod_ssrf.py:155
+#: ../attack/mod_ssrf.py:155 ../attack/mod_ssrf.py:158
 msgid "SSRF vulnerability"
 msgstr ""
 
 #: ../attack/mod_ssrf.py:229 ../attack/mod_ssrf.py:225
+#: ../attack/mod_ssrf.py:232
 #, python-brace-format
 msgid ""
 "{0} via injection in the parameter {1}.\n"
@@ -1154,55 +1199,55 @@ msgstr ""
 msgid "Open Redirect solution"
 msgstr ""
 
-#: ../main/wapiti.py:599 ../main/wapiti.py:603
+#: ../main/wapiti.py:599 ../main/wapiti.py:603 ../main/wapiti.py:633
 msgid "[*] You are lucky! Full moon tonight."
 msgstr ""
 
-#: ../main/wapiti.py:601 ../main/wapiti.py:605
+#: ../main/wapiti.py:601 ../main/wapiti.py:605 ../main/wapiti.py:635
 msgid "[*] Be careful! New moon tonight."
 msgstr "[*] Seja cuidadoso! Lua nova esta noite."
 
-#: ../main/wapiti.py:605 ../main/wapiti.py:609
+#: ../main/wapiti.py:605 ../main/wapiti.py:609 ../main/wapiti.py:639
 msgid "[*] Watch out! Bad things can happen on Friday the 13th."
 msgstr ""
 
-#: ../main/wapiti.py:607 ../main/wapiti.py:611
+#: ../main/wapiti.py:607 ../main/wapiti.py:611 ../main/wapiti.py:641
 msgid "[*] Today is International Beer Day!"
 msgstr ""
 
-#: ../main/wapiti.py:610 ../main/wapiti.py:614
+#: ../main/wapiti.py:610 ../main/wapiti.py:614 ../main/wapiti.py:644
 msgid "[*] May the force be with you!"
 msgstr ""
 
-#: ../main/wapiti.py:612 ../main/wapiti.py:616
+#: ../main/wapiti.py:612 ../main/wapiti.py:616 ../main/wapiti.py:646
 msgid "[*] Happy new year!"
 msgstr ""
 
-#: ../main/wapiti.py:614 ../main/wapiti.py:618
+#: ../main/wapiti.py:614 ../main/wapiti.py:618 ../main/wapiti.py:648
 msgid "[*] Merry christmas!"
 msgstr ""
 
-#: ../main/wapiti.py:616 ../main/wapiti.py:620
+#: ../main/wapiti.py:616 ../main/wapiti.py:620 ../main/wapiti.py:650
 msgid "[*] Today is world backup day! Is your data safe?"
 msgstr ""
 
-#: ../main/wapiti.py:645 ../main/wapiti.py:649
+#: ../main/wapiti.py:645 ../main/wapiti.py:649 ../main/wapiti.py:679
 msgid "List Wapiti attack modules and exit"
 msgstr ""
 
-#: ../main/wapiti.py:698 ../main/wapiti.py:702
+#: ../main/wapiti.py:698 ../main/wapiti.py:702 ../main/wapiti.py:738
 msgid "Resume the scanning process (if stopped) even if some attacks were previously performed"
 msgstr ""
 
-#: ../main/wapiti.py:715 ../main/wapiti.py:719
+#: ../main/wapiti.py:715 ../main/wapiti.py:719 ../main/wapiti.py:755
 msgid "Directory where to store attack history and session data."
 msgstr ""
 
-#: ../main/wapiti.py:881 ../main/wapiti.py:885
+#: ../main/wapiti.py:881 ../main/wapiti.py:885 ../main/wapiti.py:942
 msgid "[*] Do you feel lucky punk?"
 msgstr ""
 
-#: ../main/wapiti.py:884 ../main/wapiti.py:888
+#: ../main/wapiti.py:884 ../main/wapiti.py:888 ../main/wapiti.py:945
 msgid "[*] Available modules:"
 msgstr ""
 
@@ -1236,4 +1281,36 @@ msgstr ""
 
 #: ../main/wapiti.py:365
 msgid "Invalid choice. Valid choices are r, n, q and c."
+msgstr ""
+
+#: ../attack/mod_ssrf.py:200
+msgid "[*] Asking endpoint URL {} for results, please wait..."
+msgstr ""
+
+#: ../attack/mod_ssrf.py:207
+msgid "[!] Unable to request endpoint URL '{}'"
+msgstr ""
+
+#: ../main/getcookie.py:60 ../main/wapiti.py:704
+msgid "Use Tor listener (127.0.0.1:9050)"
+msgstr ""
+
+#: ../main/wapiti.py:909
+msgid "Url serving as endpoint for target"
+msgstr ""
+
+#: ../main/wapiti.py:916
+msgid "Url serving as endpoint for attacker"
+msgstr ""
+
+#: ../main/wapiti.py:923
+msgid "Url serving as endpoint for both attacker and target"
+msgstr ""
+
+#: ../main/wapiti.py:1066 ../main/wapiti.py:1077
+msgid "Error: Endpoint URL must contain scheme, host and path with trailing slash!"
+msgstr ""
+
+#: ../main/wapiti.py:1074
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
 msgstr ""
