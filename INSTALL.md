@@ -25,7 +25,7 @@ In this example it will be created in the current working directory.
 
 `python -m venv wapiti3`
 
-Now let's activate it (make it our current working environnement) :
+Now let's activate it (make it our current working environment) :
  
 `. ./wapiti3/bin/activate`
 
@@ -37,7 +37,7 @@ Now you are in the virtual environment you can install Wapiti and its dependenci
 
 `python3 setup.py install`
 
-To leave the virtual environnement just call the following command :
+To leave the virtual environment just call the following command :
 
 `deactivate`
 
