@@ -76,11 +76,13 @@ Supported attacks
 + Shellshock
 + DirBuster like
 + Server Side Request Forgery (through use of an external Wapiti website)
++ Open Redirects
++ Detection of uncommon HTTP methods (like PUT)
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
-Display a warning when an anomaly is found (for example 500 errors and timeouts)
-Makes the difference  beetween permanent  and reflected  XSS vulnerabilities.
+Display a warning when an anomaly is found (for example 500 errors and timeouts)  
+Makes the difference  between permanent  and reflected  XSS vulnerabilities.
 
 Module names
 ============
