@@ -50,3 +50,12 @@ Installing Wapiti without virtual environment
 You can install wapiti the regular way :
 
 `python setup.py install`
+
+
+Installing Wapiti using pip
+===========================
+
+There is a Pip package called wapiti3 :
+
+`pip install wapiti3`
+ 
