@@ -58,4 +58,12 @@ Installing Wapiti using pip
 There is a Pip package called wapiti3 :
 
 `pip install wapiti3`
- 
+
+Installing Wapiti from the Git repository
+=========================================
+
+You can pull latest dev version from Git :
+
+`git clone https://git.code.sf.net/p/wapiti/git wapiti-git`
+
+Then use setup.py for installation. Remember that dev version may contain unknown bugs.
