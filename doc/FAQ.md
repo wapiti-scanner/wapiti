@@ -54,7 +54,7 @@ Nope.
 
 ### Is the proxy option sure ? Will it leak my IP ? ###
 
-The proxy option should work and act as expected. But humans make mistakes. I may have made some mistakes. You might make some mistakes.  
+The proxy option should work and act as expected. But humans make mistakes. I may have made some mistakes. You may make some mistakes.  
 If you plan to hack a 3 letter agency I hope you know exactly what you are doing.
 
 ### I was trying to hack a website but Wapiti crashed. Can you help me ? ###
@@ -63,7 +63,7 @@ Sure, create an issue on the bug tracker.
 
 ### I'm a forensic expert working on a case where Wapiti is used, can you help me ? ###
 
-Yes I can help you understanding how Wapiti works and what are the files involved.
+Yes I can help you understand how Wapiti works and what are the files involved.
 
 ### I found some vulnerabilities in a web application using Wapiti, should I mention it ? ###
 
@@ -71,12 +71,12 @@ You don't have to, but it would be appreciated.
 
 ### Can I add some attack payloads easily ? ###
 
-Yes, most of the payloads are stored in text files. You just have to add your owns.
+Yes, most of the payloads are stored in plain text or .ini files. You just have to add your owns.
 
 ### Launched a Wapiti scan, it takes sooooooo muuuuuuuuch time ####
 
 Yes it can happens if there is lot of webpages and/or forms or urls with lot of inputs.  
-There is a lot of available option to reduce the amount of scanned pages. See the manpages.
+There is a lot of available options to reduce the amount of scanned pages. See the manpages.
 
 ### I launched Wireshark/tshark/tcpdump/whatever and I don't see any network activity ###
 
@@ -87,7 +87,7 @@ Best option for that problem should be to use Linux... sorry MS dudes.
 ### Why should I use Wapiti and not another vulnerability scanner ? ###
 
 First Wapiti is a free and open-source software, that's a huge difference with some other solutions.  
-Wapiti also have the advantage to be usable as an automated task, for exemple for continuous testing of a web-application.
+Wapiti also have the advantage to be usable as an automated task, for example for continuous testing of a web-application.
 
 ### Why should I use Wapiti and not SQLmap ? ###
 
@@ -99,15 +99,26 @@ For pentests I usually do a scan with Wapiti then exploit SQLi vulnerabilities w
 Yes, it can find a lot. But Wapiti doesn't act like a MITM proxy so it may not find scripts where Ajax (XHR) is involved.  
 Don't hesitate to move to OWASP Zed Attack Proxy for in-depth pentesting.
 
+### What about endpoints ? Can I set my own ? ###
+
+An HTTP endpoint is used for some modules in order to see if the target is vulnerable.  
+Such modules are currently XXE and SSRF. The endpoint is necessary to see if the target generates an external HTTP request.  
+The default endpoint is hosted at wapiti3.ovh so your computer and the target must be able to contact it to check vulnerability results.  
+You can set up your own endpoint, all required files can be found here : https://sourceforge.net/p/wapiti/git/ci/master/tree/endpoint/  
+You will need URL rewriting to set up the endpoint.  
+Wapiti have several options that can be used to specify the endpoint's URL.
+
 ### How do you test Wapiti ? ###
 
 Internet is like a box of chocolates: You never know what you're gonna get.  
 Broken webpages, malformed links, mixed standards for HTML/XML/XHTML, proprietary technologies, network or protocol issues...
 So the only way to make sure Wapiti is Internet proof is to launch it on random targets.  
-Don't take it personally, you are helping to make the Internet a safer place.
+Don't take it personally, you are helping to make the Internet a safer place.  
+The stability of the code is also checked with unittests to prevent regressions.  
+Crash reports are also sent to the wapiti3.ovh website so I can try to fix bugs.
 
-### Do you have a personal website? Twitter ? ###
+### Do you have a personal website ? Twitter ? ###
 
-Yes you can follow me at @devl00p.  
+Yes you can follow me on Twitter @devl00p.  
 My website is http://devloop.users.sourceforge.net/  
 I write some CTF walkthrough. Articles are in french though.
