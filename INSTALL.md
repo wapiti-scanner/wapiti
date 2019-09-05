@@ -59,6 +59,7 @@ There is a Pip package called wapiti3 :
 
 `pip install wapiti3`
 
+
 Installing Wapiti from the Git repository
 =========================================
 
@@ -67,3 +68,13 @@ You can pull latest dev version from Git :
 `git clone https://git.code.sf.net/p/wapiti/git wapiti-git`
 
 Then use setup.py for installation. Remember that dev version may contain unknown bugs.
+
+
+Installation tutorials
+======================
+
+I made several YouTube videos to show Wapiti installation :
+
+* on Windows : https://www.youtube.com/watch?v=j3LCVj15VBE
+* on OpenSUSE : https://www.youtube.com/watch?v=RmF2Sr2B3ZA
+* on Ubuntu : https://www.youtube.com/watch?v=TD5rehelHPY

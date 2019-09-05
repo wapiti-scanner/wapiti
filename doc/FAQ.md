@@ -34,6 +34,11 @@ On Windows you will have to specify the interpreter (`python wapiti`).
 The manpage (Linux or HTML version) is the best way to have detailed informations about the options.  
 If you are really lost, feel free to contact me.
 
+### I have some UnicodeDecodeError as soon as I launch Wapiti ! ###
+
+You must make sure your terminal support unicode characters.  
+On Windows you can use the command `chcp 65001` to change the codepage before using Wapiti.
+
 ### I found a bug. Where to report ? ###
 
 Please create an issue on https://sourceforge.net/p/wapiti/bugs/
