@@ -165,7 +165,7 @@ class Attack:
 
     @property
     def attack_level(self):
-        return self.options["level"]
+        return self.options.get("level", 1)
 
     @property
     def internal_endpoint(self):

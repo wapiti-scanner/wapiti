@@ -120,7 +120,7 @@ class Wapiti:
         self._excluded_urls = []
         self._bad_params = set()
         self._max_depth = 40
-        self._max_links_per_page = -1
+        self._max_links_per_page = 0
         self._max_files_per_dir = 0
         self._scan_force = "normal"
         self._max_scan_time = 0
@@ -544,7 +544,7 @@ class Wapiti:
         self.module_options = options
 
     def set_report_generator_type(self, report_type="xml"):
-        """Set the format of the generated report. Can be xml, html of txt"""
+        """Set the format of the generated report. Can be html, json, txt or xml"""
         self.report_generator_type = report_type
 
     def set_output_file(self, output_file: str):
