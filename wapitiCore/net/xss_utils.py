@@ -95,7 +95,7 @@ def generate_payloads(html_code, code, independant_payloads):
             before_code = html_code[:code_index]
 
             # Not perfect but still best than the former rfind
-            attr_pattern = "\s*" + elem["name"] + "\s*=\s*"
+            attr_pattern = r"\s*" + elem["name"] + r"\s*=\s*"
 
             # Let's find the last match
             for m in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
@@ -160,17 +160,13 @@ def generate_payloads(html_code, code, independant_payloads):
         # we control the text of the tag
         # ex: <textarea>our_string</textarea>
         elif elem["type"] == "text":
-            if elem["parent"] in ["title", "textarea"]:  # we can't execute javascript in those tags
+            if elem["parent"] in ["script", "title", "textarea"]:
+                # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
+                # will be executed if we have partial control over a script tag content, so let's escape them
                 if elem["noscript"] != "":
                     payload = elem["noscript"]
                 else:
                     payload = "</{0}>".format(elem["parent"])
-            elif elem["parent"] == "script":  # Control over the body of a script :)
-                # Just check if we can use brackets
-                js_code = "String.fromCharCode(0,__XSS__,1)".replace("__XSS__", code)
-                flags = {"script_fromcharcode"}
-                if (js_code, flags) not in payloads:
-                    payloads.insert(0, (js_code, flags))
 
             for xss, flags in independant_payloads:
                 js_code = payload + xss.replace("__XSS__", code)
@@ -181,17 +177,13 @@ def generate_payloads(html_code, code, independant_payloads):
         # ex: <!-- <div> whatever our_string blablah </div> -->
         elif elem["type"] == "comment":
             payload = "-->"
-            if elem["parent"] in ["title", "textarea"]:  # we can't execute javascript in those tags
+            if elem["parent"] in ["script", "title", "textarea"]:
+                # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
+                # will be executed if we have partial control over a script tag content, so let's escape them
                 if elem["noscript"] != "":
                     payload += elem["noscript"]
                 else:
                     payload += "</{0}>".format(elem["parent"])
-            elif elem["parent"] == "script":  # Control over the body of a script :)
-                # Just check if we can use brackets
-                js_code = payload + "String.fromCharCode(0,__XSS__,1)".replace("__XSS__", code)
-                flags = {"script_fromcharcode"}
-                if (js_code, flags) not in payloads:
-                    payloads.insert(0, (js_code, flags))
 
             for xss, flags in independant_payloads:
                 js_code = payload + xss.replace("__XSS__", code)

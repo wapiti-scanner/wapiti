@@ -30,7 +30,7 @@ class mod_redirect(Attack):
     MSG_VULN = _("Open Redirect")
     do_get = True
     do_post = False
-    payloads = ("https://duckduckgo.com/", set())
+    payloads = ("https://openbugbounty.org/", set())
 
     def attack(self):
         mutator = self.get_mutator()
@@ -47,7 +47,7 @@ class mod_redirect(Attack):
 
                     response = self.crawler.send(mutated_request)
 
-                    if any([url.startswith("https://duckduckgo.com/") for url in response.all_redirections]):
+                    if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
                         self.add_vuln(
                             request_id=http_res.path_id,
                             category=Vulnerability.REDIRECT,

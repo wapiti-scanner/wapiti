@@ -378,6 +378,13 @@ class mod_permanentxss(Attack):
                         else:
                             if value.lower() in tag.string.lower():
                                 return True
+                    elif attribute == "full_string" and tag.string:
+                        if case_sensitive:
+                            if value == tag.string.strip():
+                                return True
+                        else:
+                            if value.lower() == tag.string.strip().lower():
+                                return True
                     else:
                         if attribute in tag.attrs:
                             if case_sensitive:
