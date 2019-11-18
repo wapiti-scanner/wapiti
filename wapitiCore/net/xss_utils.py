@@ -75,7 +75,7 @@ def study(bs_node, parent=None, keyword=""):
 # generate a list of payloads based on where in the webpage the js-code will be injected
 def generate_payloads(html_code, code, independant_payloads):
     # We must keep the original source code because bs gives us something that may differ...
-    soup = BeautifulSoup(html_code, "lxml")
+    soup = BeautifulSoup(html_code, "html.parser")
     entries = study(soup, keyword=code)
 
     payloads = []

@@ -208,7 +208,7 @@ class mod_xss(Attack):
                 timeouted = True
 
             else:
-                if self.check_payload(response, xss_flags, taint):
+                if valid_xss_content_type(evil_request) and self.check_payload(response, xss_flags, taint):
                     self.SUCCESSFUL_XSS[taint] = (xss_payload, xss_flags)
                     self.add_vuln(
                         request_id=original_request.path_id,
@@ -286,12 +286,13 @@ class mod_xss(Attack):
                             if value.lower() == tag.string.strip().lower():
                                 return True
                     else:
+                        # Found attribute specified in .ini file in attributes of the HTML tag
                         if attribute in tag.attrs:
                             if case_sensitive:
-                                if value in tag[attribute]:
+                                if tag[attribute] == value:
                                     return True
                             else:
-                                if value.lower() in tag[attribute].lower():
+                                if tag[attribute].lower() == value.lower():
                                     return True
                 break
 
