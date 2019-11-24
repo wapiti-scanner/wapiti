@@ -208,7 +208,11 @@ class mod_xss(Attack):
                 timeouted = True
 
             else:
-                if valid_xss_content_type(evil_request) and self.check_payload(response, xss_flags, taint):
+                if (
+                        response.status not in (301, 302, 303) and
+                        valid_xss_content_type(evil_request) and
+                        self.check_payload(response, xss_flags, taint)
+                ):
                     self.SUCCESSFUL_XSS[taint] = (xss_payload, xss_flags)
                     self.add_vuln(
                         request_id=original_request.path_id,
