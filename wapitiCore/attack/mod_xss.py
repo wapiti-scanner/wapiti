@@ -270,33 +270,39 @@ class mod_xss(Attack):
 
         for section in config_reader.sections():
             if section in flags:
-                value = config_reader[section]["value"].replace("__XSS__", taint)
+                expected_value = config_reader[section]["value"].replace("__XSS__", taint)
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")
+                match_type = config_reader[section].get("match_type", "exact")
 
                 for tag in response.soup.find_all(config_reader[section]["tag"]):
                     if attribute == "string" and tag.string:
                         if case_sensitive:
-                            if value in tag.string:
+                            if expected_value in tag.string:
                                 return True
                         else:
-                            if value.lower() in tag.string.lower():
+                            if expected_value.lower() in tag.string.lower():
                                 return True
                     elif attribute == "full_string" and tag.string:
                         if case_sensitive:
-                            if value == tag.string.strip():
+                            if expected_value == tag.string.strip():
                                 return True
                         else:
-                            if value.lower() == tag.string.strip().lower():
+                            if expected_value.lower() == tag.string.strip().lower():
                                 return True
                     else:
                         # Found attribute specified in .ini file in attributes of the HTML tag
                         if attribute in tag.attrs:
                             if case_sensitive:
-                                if tag[attribute] == value:
+                                if match_type == "exact" and tag[attribute] == expected_value:
+                                    return True
+                                elif match_type == "starts_with" and tag[attribute].startswith(expected_value):
                                     return True
                             else:
-                                if tag[attribute].lower() == value.lower():
+                                if match_type == "exact" and tag[attribute].lower() == expected_value.lower():
+                                    return True
+                                elif match_type == "starts_with" and \
+                                        expected_value.lower().startswith(tag[attribute].lower()):
                                     return True
                 break
 
