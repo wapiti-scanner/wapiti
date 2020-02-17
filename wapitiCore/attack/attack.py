@@ -490,6 +490,7 @@ class PayloadReader:
         clean_line = line.strip(" \n")
         clean_line = clean_line.replace("[TAB]", "\t")
         clean_line = clean_line.replace("[LF]", "\n")
+        clean_line = clean_line.replace("[FF]", "\f")  # Form feed
         clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
         clean_line = clean_line.replace("[EXTERNAL_ENDPOINT]", self._endpoint_url)
 
@@ -539,8 +540,8 @@ if __name__ == "__main__":
     print('')
 
     def iterator():
-        yield ("abc", set())
-        yield ("def", set())
+        yield "abc", set()
+        yield "def", set()
 
     mutator = Mutator(payloads=iterator, qs_inject=True, max_queries_per_pattern=16)
     for evil_request, param_name, payload, flags in mutator.mutate(res3):

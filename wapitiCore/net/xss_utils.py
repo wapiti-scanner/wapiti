@@ -2,23 +2,33 @@ import re
 
 from bs4 import BeautifulSoup, element
 
+# Everything under those tags will be treated as text
+NONEXEC_PARENTS = {
+    "iframe",
+    "noframes",
+    "noembed",
+    "noscript",
+    "plaintext",
+    "style",
+    "template",
+    "textarea",
+    "title",
+    "xmp"
+}
 
-# Note: il n'est pas nécessaire de fermer tous les parents, le noscript suffira
-def close_noscript(tag):
+
+def find_non_exec_parent(tag):
     """Return a string with each closing parent tags for escaping a noscript"""
-    s = ""
-    if tag.findParent("noscript"):
-        curr = tag.parent
-        while True:
-            s += "</{0}>".format(curr.name)
-            if curr.name == "noscript":
-                break
-            curr = curr.parent
-    return s
+    no_exec_parent = ""
+    for parent in tag.parents:
+        if parent and parent.name in NONEXEC_PARENTS:
+            no_exec_parent = parent.name
+
+    return no_exec_parent
 
 
 # type/name/tag ex: attrval/img/src
-def study(bs_node, parent=None, keyword=""):
+def get_context(bs_node, keyword, parent=None, ):
     entries = []
 
     # if parent is None:
@@ -30,42 +40,42 @@ def study(bs_node, parent=None, keyword=""):
                 for k, v in bs_node.attrs.items():
                     if keyword in v:
                         # print("Found in attribute value {0} of tag {1}".format(k, bs_node.name))
-                        noscript = close_noscript(bs_node)
-                        d = {"type": "attrval", "name": k, "tag": bs_node.name, "noscript": noscript}
+                        bad_parent = find_non_exec_parent(bs_node)
+                        d = {"type": "attrval", "name": k, "tag": bs_node.name, "non_exec_parent": bad_parent}
                         if d not in entries:
                             entries.append(d)
 
                     if keyword in k:
                         # print("Found in attribute name {0} of tag {1}".format(k, bs_node.name))
-                        noscript = close_noscript(bs_node)
-                        d = {"type": "attrname", "name": k, "tag": bs_node.name, "noscript": noscript}
+                        bad_parent = find_non_exec_parent(bs_node)
+                        d = {"type": "attrname", "name": k, "tag": bs_node.name, "non_exec_parent": bad_parent}
                         if d not in entries:
                             entries.append(d)
 
             elif keyword in bs_node.name:
                 # print("Found in tag name")
-                noscript = close_noscript(bs_node)
-                d = {"type": "tag", "value": bs_node.name, "noscript": noscript}
+                bad_parent = find_non_exec_parent(bs_node)
+                d = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent}
                 if d not in entries:
                     entries.append(d)
 
             # recursively search injection points for the same variable
             for x in bs_node.contents:
-                for entry in study(x, parent=bs_node, keyword=keyword):
+                for entry in get_context(x, keyword, parent=bs_node):
                     if entry not in entries:
                         entries.append(entry)
 
         elif isinstance(bs_node, element.Comment):
             # print("Found in comment, tag {0}".format(parent.name))
-            noscript = close_noscript(bs_node)
-            d = {"type": "comment", "parent": parent.name, "noscript": noscript}
+            bad_parent = find_non_exec_parent(bs_node)
+            d = {"type": "comment", "parent": parent.name, "non_exec_parent": bad_parent}
             if d not in entries:
                 entries.append(d)
 
         elif isinstance(bs_node, element.NavigableString):
             # print("Found in text, tag {0}".format(parent.name))
-            noscript = close_noscript(bs_node)
-            d = {"type": "text", "parent": parent.name, "noscript": noscript}
+            bad_parent = find_non_exec_parent(bs_node)
+            d = {"type": "text", "parent": parent.name, "non_exec_parent": bad_parent}
             if d not in entries:
                 entries.append(d)
 
@@ -76,7 +86,7 @@ def study(bs_node, parent=None, keyword=""):
 def generate_payloads(html_code, code, independant_payloads):
     # We must keep the original source code because bs gives us something that may differ...
     soup = BeautifulSoup(html_code, "html.parser")
-    entries = study(soup, keyword=code)
+    entries = get_context(soup, code)
 
     payloads = []
 
@@ -115,7 +125,9 @@ def generate_payloads(html_code, code, independant_payloads):
             else:
                 payload += "></" + elem["tag"] + ">"
 
-            payload += elem["noscript"]
+            if elem["non_exec_parent"]:
+                payload += "</" + elem["non_exec_parent"] + ">"
+
             # ok let's send the requests
             for xss, flags in independant_payloads:
                 js_code = payload + xss.replace("__XSS__", code)
@@ -137,7 +149,11 @@ def generate_payloads(html_code, code, independant_payloads):
         elif elem["type"] == "attrname":  # name,tag
             if code == elem["name"]:
                 for xss, flags in independant_payloads:
-                    js_code = '>' + elem["noscript"] + xss.replace("__XSS__", code)
+                    js_code = '>'
+                    if elem["non_exec_parent"]:
+                        payload += "</" + elem["non_exec_parent"] + ">"
+                    js_code += xss.replace("__XSS__", code)
+
                     if (js_code, flags) not in payloads:
                         payloads.append((js_code, flags))
 
@@ -147,13 +163,21 @@ def generate_payloads(html_code, code, independant_payloads):
             if elem["value"].startswith(code):
                 # use independent payloads, just remove the first character (<)
                 for xss, flags in independant_payloads:
-                    payload = elem["noscript"] + xss.replace("__XSS__", code)
+                    payload = ""
+                    if elem["non_exec_parent"]:
+                        payload += "</" + elem["non_exec_parent"] + ">"
+                    payload += xss.replace("__XSS__", code)
+
                     js_code = payload[1:]
                     if (js_code, flags) not in payloads:
                         payloads.append((js_code, flags))
             else:
                 for xss, flags in independant_payloads:
-                    js_code = "/>" + elem["noscript"] + xss.replace("__XSS__", code)
+                    js_code = "/>"
+                    if elem["non_exec_parent"]:
+                        payload += "</" + elem["non_exec_parent"] + ">"
+                    payload += xss.replace("__XSS__", code)
+
                     if (js_code, flags) not in payloads:
                         payloads.append((js_code, flags))
 
@@ -163,8 +187,8 @@ def generate_payloads(html_code, code, independant_payloads):
             if elem["parent"] in ["script", "title", "textarea"]:
                 # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
                 # will be executed if we have partial control over a script tag content, so let's escape them
-                if elem["noscript"] != "":
-                    payload = elem["noscript"]
+                if elem["non_exec_parent"] != "":
+                    payload = "</" + elem["non_exec_parent"] + ">"
                 else:
                     payload = "</{0}>".format(elem["parent"])
 
@@ -180,8 +204,8 @@ def generate_payloads(html_code, code, independant_payloads):
             if elem["parent"] in ["script", "title", "textarea"]:
                 # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
                 # will be executed if we have partial control over a script tag content, so let's escape them
-                if elem["noscript"] != "":
-                    payload += elem["noscript"]
+                if elem["non_exec_parent"] != "":
+                    payload += "</" + elem["non_exec_parent"] + ">"
                 else:
                     payload += "</{0}>".format(elem["parent"])
 
@@ -199,7 +223,25 @@ def valid_xss_content_type(http_res):
     # When no content-type is returned, browsers try to display the HTML
     if "content-type" not in http_res.headers:
         return True
+
     # else only text/html will allow javascript (maybe text/plain will work for IE...)
     if "text/html" in http_res.headers["content-type"]:
         return True
     return False
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+
+    source_code = """<html>
+    <body>
+    <title>yolo</title>
+    <a href="yolo">hello</a>
+    <textarea><strong>yolo</strong></textarea>
+    <!-- <div><p style="yolo">test</p></div> -->
+    </body>
+    </html>
+    """
+
+    my_soup = BeautifulSoup(source_code, "html.parser")
+    pprint(get_context(my_soup, "yolo"))

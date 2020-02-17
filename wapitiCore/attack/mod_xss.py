@@ -32,10 +32,6 @@ from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type
 class mod_xss(Attack):
     """This class implements a cross site scripting attack"""
 
-    # magic strings we must see to be sure script is vulnerable to XSS
-    # payloads must be created on those patterns
-    script_ok = ["alert('__XSS__')", "alert(\"__XSS__\")", "String.fromCharCode(0,__XSS__,1)"]
-
     # simple payloads that doesn't rely on their position in the DOM structure
     # payloads injected after closing a tag attribute value (attrval) or in the
     # content of a tag (text node like between <p> and </p>)
@@ -285,10 +281,15 @@ class mod_xss(Attack):
                                 return True
                     elif attribute == "full_string" and tag.string:
                         if case_sensitive:
-                            if expected_value == tag.string.strip():
+                            if match_type == "exact" and expected_value == tag.string.strip():
+                                return True
+                            elif match_type == "starts_with" and tag.string.strip().startswith(expected_value):
                                 return True
                         else:
-                            if expected_value.lower() == tag.string.strip().lower():
+                            if match_type == "exact" and expected_value.lower() == tag.string.strip().lower():
+                                return True
+                            elif match_type == "starts_with" and \
+                                    tag.string.strip().lower().startswith(expected_value.lower()):
                                 return True
                     else:
                         # Found attribute specified in .ini file in attributes of the HTML tag
