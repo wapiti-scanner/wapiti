@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
 # Copyright (C) 2008-2020 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ class TXTReportGenerator(ReportGenerator):
         fd = codecs.open(output_path, mode="w", encoding="UTF-8")
         try:
             fd.write(separator)
-            fd.write(center("{0} - wapiti.sourceforge.net\n".format(self._infos["version"])))
+            fd.write(center("{0} - wapiti.sourceforge.io\n".format(self._infos["version"])))
             fd.write(center(_("Report for {0}\n").format(self._infos["target"])))
             fd.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
             if "scope" in self._infos:

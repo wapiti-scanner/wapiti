@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Crawler v2.4.0 - A web spider library
-# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
 # Copyright (C) 2006-2020 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify

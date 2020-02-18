@@ -59,7 +59,7 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WWW
 
-http://wapiti.sourceforge.net/
+http://wapiti.sourceforge.io/
 
 ## BUG REPORTS
 

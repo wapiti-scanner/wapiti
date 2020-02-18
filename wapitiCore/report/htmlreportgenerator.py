@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # HTML Report Generator Module for Wapiti Project
-# Wapiti Project (http://wapiti.sourceforge.net)
+# Wapiti Project (http://wapiti.sourceforge.io)
 #
 # Copyright (C) 2017-2020 Nicolas SURRIBAS
 #

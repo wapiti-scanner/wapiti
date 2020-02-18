@@ -184,8 +184,8 @@ msgid "Open {0} with a browser to see this report."
 msgstr "Ouvrez {0} dans un navigateur pour voir ce rapport."
 
 #: ../wapiti.py:418
-msgid "Wapiti-3.0.0 (wapiti.sourceforge.net)"
-msgstr "Wapiti-3.0.0 (wapiti.sourceforge.net)"
+msgid "Wapiti-3.0.0 (wapiti.sourceforge.io)"
+msgstr "Wapiti-3.0.0 (wapiti.sourceforge.io)"
 
 #: ../wapiti.py:549
 msgid "File {0} loaded. Wapiti will use it to perform the attack"

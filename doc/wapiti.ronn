@@ -300,7 +300,7 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WEBSITE
 
-http://wapiti.sourceforge.net/
+http://wapiti.sourceforge.io/
 
 ## BUG REPORTS
 

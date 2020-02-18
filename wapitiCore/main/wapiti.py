@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (http://wapiti.sourceforge.net)
+# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
 # Copyright (C) 2006-2020 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
@@ -627,7 +627,7 @@ def wapiti_main():
     ]
 
     print(choice(banners))
-    print("Wapiti-3.0.2 (wapiti.sourceforge.net)")
+    print("Wapiti-3.0.2 (wapiti.sourceforge.io)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))

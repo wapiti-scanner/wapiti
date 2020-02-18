@@ -47,7 +47,7 @@ application but will scans the webpages of the deployed webapp, looking for
 scripts and forms where it can inject data.
 Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see
 if a script is vulnerable.""",
-    url="http://wapiti.sourceforge.net/",
+    url="http://wapiti.sourceforge.io/",
     author="Nicolas SURRIBAS",
     author_email="nicolas.surribas@gmail.com",
     license="GPLv2",

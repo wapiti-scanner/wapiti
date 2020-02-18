@@ -1,6 +1,6 @@
                                 WAPITI - VERSION 3.0.2
                     Wapiti is a web application security auditor.
-                           http://wapiti.sourceforge.net/
+                           http://wapiti.sourceforge.io/
 
 
 Requirements
