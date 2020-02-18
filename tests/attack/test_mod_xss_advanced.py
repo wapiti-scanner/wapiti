@@ -43,7 +43,7 @@ def run_around_tests():
 def test_title_false_positive():
     # We should fail at escaping the title tag and we should be aware of it
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/title_false_positive.php?title=yolo&fixed=yes")
+    request = Request("http://127.0.0.1:65080/title_false_positive.php?title=yolo&fixed=yes")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -61,7 +61,7 @@ def test_title_false_positive():
 def test_title_positive():
     # We should succeed at escaping the title tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/title_false_positive.php?title=yolo")
+    request = Request("http://127.0.0.1:65080/title_false_positive.php?title=yolo")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -81,7 +81,7 @@ def test_title_positive():
 def test_script_filter_bypass():
     # We should succeed at bypass the <script filter
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/script_tag_filter.php?name=kenobi")
+    request = Request("http://127.0.0.1:65080/script_tag_filter.php?name=kenobi")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -101,7 +101,7 @@ def test_script_filter_bypass():
 def test_attr_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/attr_quote_escape.php?class=custom")
+    request = Request("http://127.0.0.1:65080/attr_quote_escape.php?class=custom")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -121,7 +121,7 @@ def test_attr_quote_escape():
 def test_attr_double_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/attr_double_quote_escape.php?class=custom")
+    request = Request("http://127.0.0.1:65080/attr_double_quote_escape.php?class=custom")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -141,7 +141,7 @@ def test_attr_double_quote_escape():
 def test_attr_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/attr_escape.php?state=checked")
+    request = Request("http://127.0.0.1:65080/attr_escape.php?state=checked")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -161,7 +161,7 @@ def test_attr_escape():
 def test_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/tag_name_escape.php?tag=textarea")
+    request = Request("http://127.0.0.1:65080/tag_name_escape.php?tag=textarea")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
@@ -181,7 +181,7 @@ def test_tag_name_escape():
 def test_partial_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:6666/partial_tag_name_escape.php?importance=2")
+    request = Request("http://127.0.0.1:65080/partial_tag_name_escape.php?importance=2")
     request.path_id = 42
     persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65080/")
