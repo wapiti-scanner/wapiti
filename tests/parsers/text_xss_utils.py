@@ -102,3 +102,17 @@ def test_tagname_context():
     assert get_context(soup, "injection") == [
         {"non_exec_parent": "", "type": "tag", "value": "injection"}
     ]
+
+
+def test_partial_tagname_context():
+    html = """<html>
+    <head>
+    <body>
+    <noinjection>Hello there<noinjection>
+    </body>
+    </html>"""
+
+    soup = BeautifulSoup(html, "html.parser")
+    assert get_context(soup, "injection") == [
+        {"non_exec_parent": "", "type": "tag", "value": "noinjection"}
+    ]

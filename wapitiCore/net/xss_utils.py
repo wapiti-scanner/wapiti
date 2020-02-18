@@ -176,7 +176,7 @@ def generate_payloads(html_code, code, independant_payloads):
                     js_code = "/>"
                     if elem["non_exec_parent"]:
                         payload += "</" + elem["non_exec_parent"] + ">"
-                    payload += xss.replace("__XSS__", code)
+                    js_code += xss.replace("__XSS__", code)
 
                     if (js_code, flags) not in payloads:
                         payloads.append((js_code, flags))

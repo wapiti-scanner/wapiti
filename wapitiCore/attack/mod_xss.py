@@ -26,7 +26,7 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
 
 
 class mod_xss(Attack):
@@ -272,6 +272,9 @@ class mod_xss(Attack):
                 match_type = config_reader[section].get("match_type", "exact")
 
                 for tag in response.soup.find_all(config_reader[section]["tag"]):
+                    if find_non_exec_parent(tag):
+                        continue
+
                     if attribute == "string" and tag.string:
                         if case_sensitive:
                             if expected_value in tag.string:
