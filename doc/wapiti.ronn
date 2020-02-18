@@ -292,7 +292,7 @@ Please read the COPYING file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2019 Nicolas Surribas.
+Copyright (c) 2006-2020 Nicolas Surribas.
 
 ## AUTHORS
 

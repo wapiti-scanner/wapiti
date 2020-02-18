@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2017-2019 Nicolas Surribas
+# Copyright (C) 2017-2020 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
