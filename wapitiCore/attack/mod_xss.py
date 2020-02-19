@@ -26,7 +26,7 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
 
 
 class mod_xss(Attack):
@@ -210,14 +210,17 @@ class mod_xss(Attack):
                         self.check_payload(response, xss_flags, taint)
                 ):
                     self.SUCCESSFUL_XSS[taint] = (xss_payload, xss_flags)
+                    message = _("XSS vulnerability found via injection in the parameter {0}").format(xss_param)
+                    if has_csp(response):
+                        message += ".\n" + _("Warning: Content-Security-Policy is present!")
+
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=Vulnerability.XSS,
                         level=Vulnerability.HIGH_LEVEL,
                         request=evil_request,
                         parameter=xss_param,
-                        info=_("XSS vulnerability found via injection"
-                               " in the parameter {0}").format(xss_param)
+                        info=message
                     )
 
                     if xss_param == "QUERY_STRING":
@@ -232,6 +235,10 @@ class mod_xss(Attack):
                         page,
                         xss_param
                     )
+
+                    if has_csp(response):
+                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+
                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)
                     self.log_red(evil_request.http_repr())
                     self.log_red("---")
