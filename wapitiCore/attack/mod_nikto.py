@@ -149,9 +149,6 @@ class mod_nikto(Attack):
 
             page = response.content
             code = response.status
-            # encoding = BeautifulSoup(page, "lxml").originalEncoding
-            # if encoding:
-            #     page = unicode(page, encoding, errors='ignore')
             raw = " ".join([x + ": " + y for x, y in response.headers.items()])
             raw += page
 

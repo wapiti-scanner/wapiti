@@ -53,7 +53,7 @@ logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.C
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
 BASE_DIR = None
-WAPITI_VERSION = "Wapiti 3.0.2"
+WAPITI_VERSION = "Wapiti 3.0.3"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 disable_warnings()
@@ -605,17 +605,17 @@ def wapiti_main():
     banners = [
         """
      __      __               .__  __  .__________
-    /  \    /  \_____  ______ |__|/  |_|__\_____  \ 
-    \   \/\/   /\__  \ \____ \|  \   __\  | _(__  <
-     \        /  / __ \|  |_> >  ||  | |  |/       \ 
-      \__/\  /  (____  /   __/|__||__| |__/______  /
-           \/        \/|__|                      \/""",
+    /  \\    /  \\_____  ______ |__|/  |_|__\\_____  \\ 
+    \\   \\/\\/   /\\__  \\ \\____ \\|  \\   __\\  | _(__  <
+     \\        /  / __ \\|  |_> >  ||  | |  |/       \\ 
+      \\__/\\  /  (____  /   __/|__||__| |__/______  /
+           \\/        \\/|__|                      \\/""",
         """
      __    __            _ _   _ _____
-    / / /\ \ \__ _ _ __ (_) |_(_)___ /
-    \ \/  \/ / _` | '_ \| | __| | |_ \ 
-     \  /\  / (_| | |_) | | |_| |___) |
-      \/  \/ \__,_| .__/|_|\__|_|____/
+    / / /\\ \\ \\__ _ _ __ (_) |_(_)___ /
+    \\ \\/  \\/ / _` | '_ \\| | __| | |_ \\ 
+     \\  /\\  / (_| | |_) | | |_| |___) |
+      \\/  \\/ \\__,_| .__/|_|\\__|_|____/
                   |_|                 """,
         """
  ██╗    ██╗ █████╗ ██████╗ ██╗████████╗██╗██████╗ 
@@ -627,7 +627,7 @@ def wapiti_main():
     ]
 
     print(choice(banners))
-    print("Wapiti-3.0.2 (wapiti.sourceforge.io)")
+    print("Wapiti-3.0.3 (wapiti.sourceforge.io)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))
@@ -649,7 +649,7 @@ def wapiti_main():
     elif datetime.now().month == 3 and datetime.now().day == 31:
         print(_("[*] Today is world backup day! Is your data safe?"))
 
-    parser = argparse.ArgumentParser(description="Wapiti-3.0.2: Web application vulnerability scanner")
+    parser = argparse.ArgumentParser(description="Wapiti-3.0.3: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(

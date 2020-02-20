@@ -3,7 +3,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-VERSION = "3.0.2"
+VERSION = "3.0.3"
 DOC_DIR = "share/doc/wapiti"
 
 
@@ -58,7 +58,7 @@ doc_and_conf_files = [
     )
 ]
 
-parser_name = "lxml"
+# parser_name = "html5lib"
 
 # Main
 setup(
@@ -104,7 +104,7 @@ if a script is vulnerable.""",
     install_requires=[
         "requests",
         "beautifulsoup4",
-        parser_name,
+        # parser_name,
         "tld",
         "yaswfp",
         "mako",

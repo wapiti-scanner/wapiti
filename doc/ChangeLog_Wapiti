@@ -1,3 +1,9 @@
+20/02/2020
+    Wapiti 3.0.3
+    An important work was made to reduce false positives in XSS detections.
+    That research involved scanning more than 1 million websites to discover those issues.
+    More details here: http://devloop.users.sourceforge.net/index.php?article217/one-crazy-month-of-web-vulnerability-scanning
+
 02/09/2019
     Wapiti 3.0.2
     New XXE module cans end payloads in parameters, query string, file uploads and raw body.

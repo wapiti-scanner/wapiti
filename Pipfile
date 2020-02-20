@@ -14,8 +14,6 @@ beautifulsoup4 = "*"
 pysocks = "*"
 responses = "==0.10.6"
 pytest = "*"
-html5lib = "*"
-lxml = "*"
 
 [requires]
 python_version = "3.7"
