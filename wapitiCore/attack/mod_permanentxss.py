@@ -26,7 +26,7 @@ from requests.exceptions import Timeout, ReadTimeout
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net import web
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
 
 
 class mod_permanentxss(Attack):
@@ -65,8 +65,9 @@ class mod_permanentxss(Attack):
         get_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
 
         for original_request in get_resources:
-            if not valid_xss_content_type(original_request):
+            if not valid_xss_content_type(original_request) or original_request.status in (301, 302, 303):
                 # If that content-type can't be interpreted as HTML by browsers then it is useless
+                # Same goes for redirections
                 continue
 
             url = original_request.url
@@ -159,6 +160,9 @@ class mod_permanentxss(Attack):
                                             input_request.path
                                         )
 
+                                    if has_csp(response):
+                                        description += ".\n" + _("Warning: Content-Security-Policy is present!")
+
                                     self.add_vuln(
                                         request_id=original_request.path_id,
                                         category=Vulnerability.XSS,
@@ -180,6 +184,10 @@ class mod_permanentxss(Attack):
                                         original_request.path,
                                         parameter
                                     )
+
+                                    if has_csp(response):
+                                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+
                                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)
                                     self.log_red(evil_request.http_repr())
                                     self.log_red("---")
@@ -261,7 +269,11 @@ class mod_permanentxss(Attack):
                 except ReadTimeout:
                     continue
 
-                if self.check_payload(response, xss_flags, taint):
+                if (
+                        response.status not in (301, 302, 303) and
+                        valid_xss_content_type(evil_request) and
+                        self.check_payload(response, xss_flags, taint)
+                ):
 
                     if page == output_request.path:
                         description = _(
@@ -276,6 +288,9 @@ class mod_permanentxss(Attack):
                             parameter,
                             page
                         )
+
+                    if has_csp(response):
+                        description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                     self.add_vuln(
                         request_id=injection_request.path_id,
@@ -299,6 +314,10 @@ class mod_permanentxss(Attack):
                         output_url,
                         xss_param
                     )
+
+                    if has_csp(response):
+                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+
                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)
                     self.log_red(evil_request.http_repr())
                     self.log_red("---")
