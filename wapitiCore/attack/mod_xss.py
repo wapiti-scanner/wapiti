@@ -24,7 +24,7 @@ from math import ceil
 
 from requests.exceptions import ReadTimeout
 
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType
+from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
 
@@ -69,7 +69,7 @@ class mod_xss(Attack):
         """Create a random unique ID that will be used to test injection."""
         # doesn't uppercase letters as BeautifulSoup make some data lowercase
         code = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 9)])
-        return code, set()
+        return code, Flags()
 
     def attack(self):
         methods = ""
@@ -113,9 +113,9 @@ class mod_xss(Attack):
                             payloads = generate_payloads(response.content, taint, self.independant_payloads)
 
                             # TODO: check that and make it better
-                            if PayloadType.get in flags:
+                            if flags.method == PayloadType.get:
                                 method = "G"
-                            elif PayloadType.file in flags:
+                            elif flags.method == PayloadType.file:
                                 method = "F"
                             else:
                                 method = "P"
@@ -138,8 +138,10 @@ class mod_xss(Attack):
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
 
         for section in config_reader.sections():
+            if not config_reader.getboolean(section, "independant", fallback=True):
+                continue
+
             payload = config_reader[section]["payload"]
-            flags = {section}
 
             clean_payload = payload.strip(" \n")
             clean_payload = clean_payload.replace("[TAB]", "\t")
@@ -154,8 +156,7 @@ class mod_xss(Attack):
                 payload_type = PayloadType.time
                 clean_payload = clean_payload.replace("[TIMEOUT]", "")
 
-            flags.add(payload_type)
-            payloads.append((clean_payload, flags))
+            payloads.append((clean_payload, Flags(type=payload_type, section=section)))
 
         return payloads
 
@@ -272,7 +273,7 @@ class mod_xss(Attack):
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
 
         for section in config_reader.sections():
-            if section in flags:
+            if section == flags.section:
                 expected_value = config_reader[section]["value"].replace("__XSS__", taint)
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")

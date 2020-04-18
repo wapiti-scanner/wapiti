@@ -20,7 +20,7 @@ from urllib.parse import quote
 
 from requests.exceptions import ReadTimeout, HTTPError, RequestException
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 
@@ -32,7 +32,7 @@ class mod_crlf(Attack):
     MSG_VULN = _("CRLF Injection")
     do_get = False
     do_post = False
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.3 version"), set())
+    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.3 version"), Flags())
 
     def attack(self):
         mutator = self.get_mutator()

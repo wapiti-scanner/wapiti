@@ -23,7 +23,7 @@ from binascii import hexlify, unhexlify
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType
+from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Vulnerability, _
 from wapitiCore.net.web import Request
 
@@ -94,17 +94,15 @@ class SsrfMutator(Mutator):
                         hex_param=hexlify(param_name.encode("utf-8", errors="replace")).decode()
                     )
 
-                    flags = set()
-
                     if params_list is file_params:
                         params_list[i][1][0] = payload
-                        flags.add(PayloadType.file)
+                        method = PayloadType.file
                     else:
                         params_list[i][1] = payload
                         if params_list is get_params:
-                            flags.add(PayloadType.get)
+                            method = PayloadType.get
                         else:
-                            flags.add(PayloadType.post)
+                            method = PayloadType.post
 
                     evil_req = Request(
                         request.path,
@@ -115,7 +113,7 @@ class SsrfMutator(Mutator):
                         referer=referer,
                         link_depth=request.link_depth
                     )
-                    yield evil_req, param_name, payload, flags
+                    yield evil_req, param_name, payload, Flags(method=method)
 
                 params_list[i][1] = saved_value
 
@@ -130,7 +128,6 @@ class SsrfMutator(Mutator):
             if hash(attack_pattern) not in self._attack_hashes:
                 self._attack_hashes.add(hash(attack_pattern))
 
-                flags = set()
                 payload = SSRF_PAYLOAD.format(
                     external_endpoint=self._endpoint,
                     random_id=self._session_id,
@@ -144,9 +141,8 @@ class SsrfMutator(Mutator):
                     referer=referer,
                     link_depth=request.link_depth
                 )
-                flags.add(PayloadType.get)
 
-                yield evil_req, "QUERY_STRING", payload, flags
+                yield evil_req, "QUERY_STRING", payload, Flags(method=PayloadType.get)
 
 
 class mod_ssrf(Attack):
@@ -243,7 +239,7 @@ class mod_ssrf(Attack):
 
                             mutator = Mutator(
                                 methods="G" if original_request.method == "GET" else "PF",
-                                payloads=[("http://external.url/page", set())],
+                                payloads=[("http://external.url/page", Flags())],
                                 qs_inject=self.must_attack_query_string,
                                 parameters=[parameter],
                                 skip=self.options.get("skipped_parameters")

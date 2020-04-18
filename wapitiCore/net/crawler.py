@@ -717,8 +717,11 @@ class Page:
         """
         urls = set()
 
-        for script in self.soup.find_all("script"):
-            js = script.get_text(" ", strip=True)
+        for script in self.soup.find_all("script", text=True):
+            js = script.string.strip()
+            if not js:
+                continue
+
             search = re.search(RE_JS_REDIR, js)
             if search:
                 url = self.make_absolute(search.group(4))

@@ -78,6 +78,42 @@ COMMON_ANNOYING_PARAMETERS = (
 )
 
 
+class Flags:
+    def __init__(self, type=PayloadType.pattern, section="", method=PayloadType.get, platform="all", dbms="all"):
+        self.type = type
+        self.section = section
+        self.method = method
+        self.platform = platform
+        self.dbms = dbms
+
+    def with_method(self, method):
+        return Flags(type=self.type, section=self.section, method=method, platform=self.platform, dbms=self.dbms)
+
+    def with_section(self, section):
+        return Flags(type=self.type, section=section, method=self.method, platform=self.platform, dbms=self.dbms)
+
+    def __str__(self):
+        return "Flags(type={}, section='{}', method={}, platform='{}', dbms='{}')".format(
+            self.type,
+            self.section,
+            self.method,
+            self.platform,
+            self.dbms
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, Flags):
+            raise ValueError("Can't compare a Flags object to another kind of object")
+
+        return (
+                self.type == other.type and
+                self.section == other.section and
+                self.method == other.method and
+                self.platform == other.platform and
+                self.dbms == other.dbms
+        )
+
+
 class Attack:
     """This class represents an attack, it must be extended	for any class which implements a new type of attack"""
 
@@ -311,10 +347,6 @@ class Mutator:
                             hexlify(param_name.encode("utf-8", errors="replace")).decode()
                         )
 
-                        # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
-                        # so let's copy them just to be sure we don't mess with them.
-                        flags = set(original_flags)
-
                         if params_list is file_params:
                             if "[EXTVALUE]" in payload:
                                 if "." not in saved_value[0][:-1]:
@@ -325,7 +357,7 @@ class Mutator:
                             payload = payload.replace("[VALUE]", saved_value[0])
                             payload = payload.replace("[DIRVALUE]", saved_value[0].rsplit('/', 1)[0])
                             params_list[i][1][0] = payload
-                            flags.add(PayloadType.file)
+                            method = PayloadType.file
                         else:
                             if "[EXTVALUE]" in payload:
                                 if "." not in saved_value[:-1]:
@@ -337,9 +369,9 @@ class Mutator:
                             payload = payload.replace("[DIRVALUE]", saved_value.rsplit('/', 1)[0])
                             params_list[i][1] = payload
                             if params_list is get_params:
-                                flags.add(PayloadType.get)
+                                method = PayloadType.get
                             else:
-                                flags.add(PayloadType.post)
+                                method = PayloadType.post
 
                         evil_req = Request(
                             request.path,
@@ -350,7 +382,9 @@ class Mutator:
                             referer=referer,
                             link_depth=request.link_depth
                         )
-                        yield evil_req, param_name, payload, flags
+                        # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
+                        # so let's copy them just to be sure we don't mess with them.
+                        yield evil_req, param_name, payload, original_flags.with_method(method)
 
                 params_list[i][1] = saved_value
 
@@ -384,17 +418,14 @@ class Mutator:
                         hexlify(b"QUERY_STRING").decode()
                     )
 
-                    flags = set(original_flags)
-
                     evil_req = Request(
                         "{}?{}".format(request.path, quote(payload)),
                         method=request.method,
                         referer=referer,
                         link_depth=request.link_depth
                     )
-                    flags.add(PayloadType.get)
 
-                    yield evil_req, "QUERY_STRING", payload, flags
+                    yield evil_req, "QUERY_STRING", payload, original_flags.with_method(PayloadType.get)
 
 
 class FileMutator:
@@ -446,12 +477,7 @@ class FileMutator:
                     hexlify(param_name.encode("utf-8", errors="replace")).decode()
                 )
 
-                # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
-                # so let's copy them just to be sure we don't mess with them.
-                flags = set(original_flags)
-
                 new_params[i][1] = ["content.xml", payload, "text/xml"]
-                flags.add(PayloadType.file)
 
                 evil_req = Request(
                     request.path,
@@ -462,7 +488,9 @@ class FileMutator:
                     referer=referer,
                     link_depth=request.link_depth
                 )
-                yield evil_req, param_name, payload, flags
+                # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
+                # so let's copy them just to be sure we don't mess with them.
+                yield evil_req, param_name, payload, original_flags.with_method(PayloadType.file)
 
 
 class PayloadReader:
@@ -486,7 +514,7 @@ class PayloadReader:
         return lines
 
     def process_line(self, line):
-        flags = set()
+        flag_type = PayloadType.pattern
         clean_line = line.strip(" \n")
         clean_line = clean_line.replace("[TAB]", "\t")
         clean_line = clean_line.replace("[LF]", "\n")
@@ -494,20 +522,18 @@ class PayloadReader:
         clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
         clean_line = clean_line.replace("[EXTERNAL_ENDPOINT]", self._endpoint_url)
 
-        payload_type = PayloadType.pattern
         if "[TIMEOUT]" in clean_line:
-            payload_type = PayloadType.time
+            flag_type = PayloadType.time
             clean_line = clean_line.replace("[TIMEOUT]", "")
 
         clean_line = clean_line.replace("\\0", "\0")
 
-        flags.add(payload_type)
-        return clean_line, flags
+        return clean_line, Flags(type=flag_type)
 
 
 if __name__ == "__main__":
 
-    mutator = Mutator(payloads=[("INJECT", set()), ("ATTACK", set())], qs_inject=True, max_queries_per_pattern=16)
+    mutator = Mutator(payloads=[("INJECT", Flags()), ("ATTACK", Flags())], qs_inject=True, max_queries_per_pattern=16)
     res1 = Request(
         "http://httpbin.org/post?var1=a&var2=b",
         post_params=[['post1', 'c'], ['post2', 'd']]
@@ -540,8 +566,8 @@ if __name__ == "__main__":
     print('')
 
     def iterator():
-        yield "abc", set()
-        yield "def", set()
+        yield "abc", Flags()
+        yield "def", Flags()
 
     mutator = Mutator(payloads=iterator, qs_inject=True, max_queries_per_pattern=16)
     for evil_request, param_name, payload, flags in mutator.mutate(res3):
@@ -554,12 +580,25 @@ if __name__ == "__main__":
     def random_string():
         """Create a random unique ID that will be used to test injection."""
         # doesn't uppercase letters as BeautifulSoup make some data lowercase
-        return "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 9)]), set()
+        return "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 9)]), Flags()
 
     mutator = Mutator(payloads=random_string, qs_inject=True, max_queries_per_pattern=16)
     for evil_request, param_name, payload, flags in mutator.mutate(res3):
         print(evil_request)
         print("Payload is", payload)
 
-    mutator = Mutator(methods="G", payloads=[("INJECT", set()), ("ATTACK", set())], qs_inject=True, parameters=["var1"])
+    mutator = Mutator(
+        methods="G",
+        payloads=[("INJECT", Flags()), ("ATTACK", Flags())],
+        qs_inject=True,
+        parameters=["var1"]
+    )
+
     assert len(list(mutator.mutate(res1))) == 2
+
+    f1 = Flags()
+    f2 = Flags()
+    assert f1 == f2
+    assert f1.with_section("abcd") == f2.with_section("abcd")
+    assert f1 != f1.with_section("abcd")
+

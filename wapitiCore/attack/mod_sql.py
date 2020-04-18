@@ -21,7 +21,7 @@ from itertools import chain
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 
@@ -32,7 +32,7 @@ class mod_sql(Attack):
 
     TIME_TO_SLEEP = 6
     name = "sql"
-    payloads = ("\xBF'\"(", set())
+    payloads = ("\xBF'\"(", Flags())
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
 
     @staticmethod

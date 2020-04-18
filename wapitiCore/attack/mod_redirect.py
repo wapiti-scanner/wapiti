@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from requests.exceptions import RequestException
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Vulnerability, _
 
 
@@ -30,7 +30,7 @@ class mod_redirect(Attack):
     MSG_VULN = _("Open Redirect")
     do_get = True
     do_post = False
-    payloads = ("https://openbugbounty.org/", set())
+    payloads = ("https://openbugbounty.org/", Flags())
 
     def attack(self):
         mutator = self.get_mutator()

@@ -25,7 +25,7 @@ from os.path import join as path_join
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader
+from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.web import Request
 
@@ -69,12 +69,11 @@ class mod_xxe(Attack):
         for section in config_reader.sections():
             clean_payload, flags = reader.process_line(config_reader[section]["payload"])
             clean_payload = clean_payload.replace("[SESSION_ID]", self._session_id)
-            flags.add(section)
 
             rules = config_reader[section]["rules"].splitlines()
             self.payload_to_rules[section] = rules
 
-            payloads.append((clean_payload, flags))
+            payloads.append((clean_payload, flags.with_section(section)))
 
         return payloads
 
@@ -102,10 +101,10 @@ class mod_xxe(Attack):
             return pattern in response.content
 
     def flag_to_patterns(self, flags):
-        for flag in flags:
-            if isinstance(flag, str) and flag in self.payload_to_rules:
-                return self.payload_to_rules[flag]
-        return []
+        try:
+            return self.payload_to_rules[flags.section]
+        except AttributeError:
+            return []
 
     def attack(self):
         mutator = self.get_mutator()
@@ -408,7 +407,7 @@ class mod_xxe(Attack):
                             elif parameter in original_request.get_keys or parameter in original_request.post_keys:
                                 mutator = Mutator(
                                     methods="G" if original_request.method == "GET" else "P",
-                                    payloads=[(payload, set())],
+                                    payloads=[(payload, Flags())],
                                     qs_inject=self.must_attack_query_string,
                                     parameters=[parameter],
                                     skip=self.options.get("skipped_parameters")
@@ -417,7 +416,7 @@ class mod_xxe(Attack):
                                 mutated_request, __, __, __ = next(mutator.mutate(original_request))
                             else:
                                 mutator = FileMutator(
-                                    payloads=[(payload, set())],
+                                    payloads=[(payload, Flags())],
                                     parameters=[parameter],
                                     skip=self.options.get("skipped_parameters")
                                 )

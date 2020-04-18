@@ -6,14 +6,15 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-requests = "*"
-tld = "*"
-yaswfp = "*"
-mako = "*"
-beautifulsoup4 = "*"
-pysocks = "*"
+beautifulsoup4 = ">=4.8.2"
+mako = ">=1.1.2"
+markupsafe = "==1.1.1"
+pysocks = ">=1.7.1"
+pytest = ">=5.4.1"
+requests = ">=2.23.0"
 responses = "==0.10.6"
-pytest = "*"
+tld = ">=0.11.11"
+yaswfp = ">=0.9.3"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"

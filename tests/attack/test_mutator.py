@@ -1,4 +1,4 @@
-from wapitiCore.attack.attack import Mutator
+from wapitiCore.attack.attack import Mutator, Flags
 from wapitiCore.net.web import Request
 
 
@@ -10,38 +10,38 @@ def test_mutations():
         post_params=[["user", "admin"], ["password", "letmein"]],
         file_params=[["file", ["pix.gif", "GIF89a", "image/gif"]]]
     )
-    mutator = Mutator(payloads=[("INJECT", set())])
+    mutator = Mutator(payloads=[("INJECT", Flags())])
     count = 0
     for __ in mutator.mutate(req):
         count += 1
     assert count == 4
 
-    mutator = Mutator(payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())])
+    mutator = Mutator(payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())])
     count = 0
     for __ in mutator.mutate(req):
         count += 1
     assert count == 12
 
-    mutator = Mutator(methods="G", payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())])
+    mutator = Mutator(methods="G", payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())])
     count = 0
     for __ in mutator.mutate(req):
         count += 1
     assert count == 3
 
-    mutator = Mutator(methods="P", payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())])
+    mutator = Mutator(methods="P", payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())])
     count = 0
     for __ in mutator.mutate(req):
         count += 1
     assert count == 6
 
-    mutator = Mutator(methods="PF", payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())])
+    mutator = Mutator(methods="PF", payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())])
     count = 0
     for __ in mutator.mutate(req):
         count += 1
     assert count == 9
 
     mutator = Mutator(
-        payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())],
+        payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())],
         parameters=["user", "file"]
     )
     count = 0
@@ -50,7 +50,7 @@ def test_mutations():
     assert count == 6
 
     mutator = Mutator(
-        payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set()), ("PAYLOAD_3", set())],
+        payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags()), ("PAYLOAD_3", Flags())],
         skip={"p"}
     )
     count = 0
@@ -66,7 +66,7 @@ def test_mutations():
         post_params=[["user", "admin"], ["password", "letmein"]],
         file_params=[["file", ["pix.gif", "GIF89a", "image/gif"]]]
     )
-    mutator = Mutator(payloads=[("INJECT", set())])
+    mutator = Mutator(payloads=[("INJECT", Flags())])
     count = 0
     for __ in mutator.mutate(req2):
         count += 1
@@ -74,7 +74,7 @@ def test_mutations():
 
     # Inject into query string. Will only work if method is GET without any parameter
     req3 = Request("http://perdu.com/page.php")
-    mutator = Mutator(payloads=[("PAYLOAD_1", set()), ("PAYLOAD_2", set())], qs_inject=True)
+    mutator = Mutator(payloads=[("PAYLOAD_1", Flags()), ("PAYLOAD_2", Flags())], qs_inject=True)
     count = 0
     for __, __, __, __ in mutator.mutate(req3):
         count += 1

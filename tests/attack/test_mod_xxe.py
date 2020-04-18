@@ -3,6 +3,7 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
+import logging
 
 import pytest
 import responses
@@ -10,6 +11,9 @@ import responses
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_xxe import mod_xxe
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class FakePersister:

@@ -79,8 +79,8 @@ class mod_file(Attack):
         reader = PayloadReader(self.options)
 
         for section in config_reader.sections():
-            clean_payload, flags = reader.process_line(config_reader[section]["payload"])
-            flags.add(section)
+            clean_payload, original_flags = reader.process_line(config_reader[section]["payload"])
+            flags = original_flags.with_section(section)
 
             rules = config_reader[section]["rules"].splitlines()
             messages = [_(message) for message in config_reader[section]["messages"].splitlines()]
@@ -178,8 +178,8 @@ class mod_file(Attack):
                         )
                         timeouted = True
                     else:
-                        original_payload = [flag for flag in flags if flag in self.payload_to_rules][0]
-                        for rule in self.payload_to_rules[original_payload]:
+                        # original_payload = self.payload_to_rules[flags.section]
+                        for rule in self.payload_to_rules[flags.section]:
                             if rule in response.content:
                                 found_pattern = rule
                                 vuln_info = self.rules_to_messages[rule]

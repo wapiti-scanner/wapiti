@@ -6,6 +6,7 @@ import responses
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_buster import mod_buster
+from wapitiCore.attack.attack import Flags
 
 
 class FakePersister:
@@ -81,7 +82,7 @@ def test_whole_stuff():
 
     with patch(
             "wapitiCore.attack.mod_buster.mod_buster.payloads",
-            [("nawak", set()), ("admin", set()), ("config.inc", set()), ("authconfig.php", set())]
+            [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
     ):
         module = mod_buster(crawler, persister, logger, options)
         module.verbose = 2

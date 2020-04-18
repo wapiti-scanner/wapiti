@@ -37,20 +37,33 @@ def get_context(bs_node, keyword, parent=None, ):
     #  print("Keyword is: {0}".format(keyword))
     if keyword in str(bs_node).lower():
         if isinstance(bs_node, element.Tag):
+            events = set(bs_node.attrs.keys())
             if keyword in str(bs_node.attrs):
 
                 for k, v in bs_node.attrs.items():
                     if keyword in v:
                         # print("Found in attribute value {0} of tag {1}".format(k, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        d = {"type": "attrval", "name": k, "tag": bs_node.name, "non_exec_parent": bad_parent}
+                        d = {
+                            "type": "attrval",
+                            "name": k,
+                            "tag": bs_node.name,
+                            "non_exec_parent": bad_parent,
+                            "events": events
+                        }
                         if d not in entries:
                             entries.append(d)
 
                     if keyword in k:
                         # print("Found in attribute name {0} of tag {1}".format(k, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        d = {"type": "attrname", "name": k, "tag": bs_node.name, "non_exec_parent": bad_parent}
+                        d = {
+                            "type": "attrname",
+                            "name": k,
+                            "tag": bs_node.name,
+                            "non_exec_parent": bad_parent,
+                            "events": events
+                        }
                         if d not in entries:
                             entries.append(d)
 
