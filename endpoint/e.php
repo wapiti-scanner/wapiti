@@ -1,1 +1,0 @@
-<?php echo "<?php echo md5(\"w4p1t1_cleartext\"); ?>"; ?>
