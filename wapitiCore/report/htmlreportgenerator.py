@@ -34,6 +34,7 @@ class HTMLReportGenerator(JSONReportGenerator):
     """
     This class generates a Wapiti scan report in HTML format.
     """
+
     def __init__(self):
         super().__init__()
         self._final__path = None

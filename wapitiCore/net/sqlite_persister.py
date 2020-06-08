@@ -251,10 +251,10 @@ class SqlitePersister:
 
             for param_row in cursor.execute(
                     (
-                            "SELECT type, name, value1, value2, meta "
-                            "FROM params "
-                            "WHERE path_id = ? "
-                            "ORDER BY type, param_order"
+                        "SELECT type, name, value1, value2, meta "
+                        "FROM params "
+                        "WHERE path_id = ? "
+                        "ORDER BY type, param_order"
                     ),
                     (path_id, )
             ):
@@ -437,10 +437,10 @@ class SqlitePersister:
 
         for param_row in cursor.execute(
                 (
-                        "SELECT type, name, value1, value2, meta "
-                        "FROM params "
-                        "WHERE path_id = ? "
-                        "ORDER BY type, param_order"
+                    "SELECT type, name, value1, value2, meta "
+                    "FROM params "
+                    "WHERE path_id = ? "
+                    "ORDER BY type, param_order"
                 ),
                 (path_id, )
         ):

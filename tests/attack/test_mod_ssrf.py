@@ -41,7 +41,6 @@ def test_whole_stuff():
         body="Hello there"
     )
 
-
     persister = FakePersister()
 
     request = Request("http://perdu.com/")

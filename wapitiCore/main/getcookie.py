@@ -196,5 +196,3 @@ def getcookie_main():
 
     jc.dump()
     jc.close()
-
-

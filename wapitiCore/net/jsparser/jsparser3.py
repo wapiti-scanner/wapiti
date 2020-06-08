@@ -906,8 +906,8 @@ def Expression(t, x, stop=None):
                 if t.scanOperand:
                     raise BreakOutOfLoops
                 while (
-                            (operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(tt, -1)) or
-                            (tt == COLON and operators and operators[-1].type_ == ASSIGN)
+                    (operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(tt, -1)) or
+                    (tt == COLON and operators and operators[-1].type_ == ASSIGN)
                 ):
                     reduce_()
                 if tt == COLON:
@@ -942,7 +942,7 @@ def Expression(t, x, stop=None):
                 if t.scanOperand:
                     raise BreakOutOfLoops
                 while operators and opPrecedence.get(operators[-1].type_, -1) and (
-                            opPrecedence.get(operators[-1].type_, -1) >= opPrecedence.get(tt, -1)
+                    opPrecedence.get(operators[-1].type_, -1) >= opPrecedence.get(tt, -1)
                 ):
                     reduce_()
                 if tt == DOT:

@@ -259,7 +259,7 @@ class mod_ssrf(Attack):
                             self.log_red("---")
                             self.log_red(
                                 Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING"
-                                    else Vulnerability.MSG_PARAM_INJECT,
+                                else Vulnerability.MSG_PARAM_INJECT,
                                 self.MSG_VULN,
                                 page,
                                 parameter
