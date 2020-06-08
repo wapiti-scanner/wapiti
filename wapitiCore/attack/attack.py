@@ -106,11 +106,11 @@ class Flags:
             raise ValueError("Can't compare a Flags object to another kind of object")
 
         return (
-                self.type == other.type and
-                self.section == other.section and
-                self.method == other.method and
-                self.platform == other.platform and
-                self.dbms == other.dbms
+            self.type == other.type and
+            self.section == other.section and
+            self.method == other.method and
+            self.platform == other.platform and
+            self.dbms == other.dbms
         )
 
 
@@ -601,4 +601,3 @@ if __name__ == "__main__":
     assert f1 == f2
     assert f1.with_section("abcd") == f2.with_section("abcd")
     assert f1 != f1.with_section("abcd")
-

@@ -89,9 +89,9 @@ COMMON_JS_STRINGS = {
 }
 
 COMMON_PAGE_EXTENSIONS = {
-        'php', 'html', 'htm', 'xml', 'xhtml', 'xht', 'xhtm', 'cgi',
-        'asp', 'aspx', 'php3', 'php4', 'php5', 'txt', 'shtm',
-        'shtml', 'phtm', 'phtml', 'jhtml', 'pl', 'jsp', 'cfm', 'cfml'
+    'php', 'html', 'htm', 'xml', 'xhtml', 'xht', 'xhtm', 'cgi',
+    'asp', 'aspx', 'php3', 'php4', 'php5', 'txt', 'shtm',
+    'shtml', 'phtm', 'phtml', 'jhtml', 'pl', 'jsp', 'cfm', 'cfml'
 }
 
 EXCLUDED_MEDIA_EXTENSIONS = (

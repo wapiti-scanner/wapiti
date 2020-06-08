@@ -81,8 +81,3 @@ def test_whole_stuff():
     assert persister.vulnerabilities[0][0].url == (
         "http://perdu.com/vuln/"
     )
-
-
-
-
-

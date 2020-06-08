@@ -21,4 +21,3 @@ def uqe(self, params_list):  # , encoding = None):
 def escape(url):
     """Change special characters in their html entities representation."""
     return html.escape(url, quote=True).replace("'", "%27")
-

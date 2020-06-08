@@ -180,7 +180,8 @@ class mod_xxe(Attack):
                             if parameter == "QUERY_STRING":
                                 vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
                             else:
-                                vuln_message = _("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                                vuln_message = _("{0} via injection in the parameter {1}").format(
+                                    self.MSG_VULN, parameter)
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
