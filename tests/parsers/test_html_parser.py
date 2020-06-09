@@ -6,12 +6,12 @@ from wapitiCore.net.crawler import Page
 
 @responses.activate
 def test_absolute_root():
-    with open("tests/data/absolute_root_links.html") as fd:
+    with open("tests/data/absolute_root_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url)
@@ -22,12 +22,12 @@ def test_absolute_root():
 
 @responses.activate
 def test_relative_root():
-    with open("tests/data/relative_root_links.html") as fd:
+    with open("tests/data/relative_root_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url)
@@ -39,12 +39,12 @@ def test_relative_root():
 
 @responses.activate
 def test_relative_links():
-    with open("tests/data/relative_links.html") as fd:
+    with open("tests/data/relative_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url)
@@ -69,12 +69,12 @@ def test_relative_links():
 
 @responses.activate
 def test_other_links():
-    with open("tests/data/other_links.html") as fd:
+    with open("tests/data/other_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read(),
+            body=data_body.read(),
             adding_headers={
                 "Location": "https://perdu.com/login"
             },
@@ -103,12 +103,12 @@ def test_other_links():
 
 @responses.activate
 def test_extra_links():
-    with open("tests/data/extra_links.html") as fd:
+    with open("tests/data/extra_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url, allow_redirects=False)
@@ -141,12 +141,12 @@ def test_extra_links():
 
 @responses.activate
 def test_meta():
-    with open("tests/data/meta.html") as fd:
+    with open("tests/data/meta.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url, allow_redirects=False)
@@ -163,12 +163,12 @@ def test_meta():
 
 @responses.activate
 def test_base_relative_links():
-    with open("tests/data/base_relative_links.html") as fd:
+    with open("tests/data/base_relative_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url)
@@ -197,12 +197,12 @@ def test_base_relative_links():
 
 @responses.activate
 def test_base_extra_links():
-    with open("tests/data/base_extra_links.html") as fd:
+    with open("tests/data/base_extra_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url, allow_redirects=False)
@@ -234,12 +234,12 @@ def test_base_extra_links():
 
 @responses.activate
 def test_base_other_links():
-    with open("tests/data/base_other_links.html") as fd:
+    with open("tests/data/base_other_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read(),
+            body=data_body.read(),
             adding_headers={
                 "Location": "https://perdu.com/login"
             },
