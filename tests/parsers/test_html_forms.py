@@ -6,12 +6,12 @@ from wapitiCore.net.crawler import Page
 
 @responses.activate
 def test_forms():
-    with open("tests/data/forms.html") as fd:
+    with open("tests/data/forms.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url, allow_redirects=False)
