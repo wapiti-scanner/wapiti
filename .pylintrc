@@ -24,7 +24,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=too-few-public-methods,too-many-instance-attributes,too-many-arguments,too-many-locals,logging-format-interpolation,not-an-iterable,too-many-public-methods,missing-function-docstring
+disable=too-few-public-methods,too-many-instance-attributes,too-many-arguments,too-many-locals,logging-format-interpolation,not-an-iterable,too-many-public-methods,missing-function-docstring,missing-class-docstring,missing-module-docstring
 
 [FORMAT]
 
