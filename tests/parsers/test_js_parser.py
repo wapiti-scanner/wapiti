@@ -7,12 +7,12 @@ from wapitiCore.net.lamejs import LameJs
 
 @responses.activate
 def test_js_parser():
-    with open("tests/data/js_links.html") as fd:
+    with open("tests/data/js_links.html") as data_body:
         url = "http://perdu.com/"
         responses.add(
             responses.GET,
             url,
-            body=fd.read()
+            body=data_body.read()
         )
 
         resp = requests.get(url)
