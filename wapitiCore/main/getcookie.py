@@ -137,14 +137,14 @@ def getcookie_main():
             crawler.add_custom_header(hdr_name.strip(), hdr_value.strip())
 
     # Open or create the cookie file and delete previous cookies from this server
-    jc = jsoncookie.JsonCookie()
-    jc.open(args.cookie)
-    jc.delete(server)
+    json_cookie = jsoncookie.JsonCookie()
+    json_cookie.open(args.cookie)
+    json_cookie.delete(server)
 
     page = crawler.get(Request(args.url), follow_redirects=True)
 
     # A first crawl is sometimes necessary, so let's fetch the webpage
-    jc.addcookies(crawler.session_cookies)
+    json_cookie.addcookies(crawler.session_cookies)
 
     if not args.data:
         # Not data specified, try interactive mode by fetching forms
@@ -156,28 +156,28 @@ def getcookie_main():
             print("{0}) {1}".format(i, form))
             forms.append(form)
 
-        ok = False
+        valid_choice_done = False
         if forms:
             nchoice = -1
             print('')
-            while not ok:
+            while not valid_choice_done:
                 choice = input(_("Enter a number : "))
                 if choice.isdigit():
                     nchoice = int(choice)
                     if len(forms) > nchoice >= 0:
-                        ok = True
+                        valid_choice_done = True
                 elif choice == 'q':
                     break
 
-            if ok:
+            if valid_choice_done:
                 form = forms[nchoice]
                 print('')
                 print(_("Please enter values for the following form: "))
                 print(_("url = {0}").format(form.url))
 
                 post_params = form.post_params
-                for i, kv in enumerate(post_params):
-                    field, value = kv
+                for i, post_param_tuple in enumerate(post_params):
+                    field, value = post_param_tuple
                     if value:
                         new_value = input(field + " (" + value + ") : ")
                     else:
@@ -187,12 +187,12 @@ def getcookie_main():
                 request = Request(form.url, post_params=post_params)
                 crawler.send(request, follow_redirects=True)
 
-                jc.addcookies(crawler.session_cookies)
+                json_cookie.addcookies(crawler.session_cookies)
     else:
         request = Request(args.url, post_params=args.data)
         crawler.send(request, follow_redirects=True)
 
-        jc.addcookies(crawler.session_cookies)
+        json_cookie.addcookies(crawler.session_cookies)
 
-    jc.dump()
-    jc.close()
+    json_cookie.dump()
+    json_cookie.close()
