@@ -70,8 +70,8 @@ class mod_nikto(Attack):
         if not os.path.isdir(user_config_dir):
             os.makedirs(user_config_dir)
         try:
-            with open(os.path.join(user_config_dir, self.NIKTO_DB)) as fd:
-                reader = csv.reader(fd)
+            with open(os.path.join(user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+                reader = csv.reader(nikto_db_file)
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
         except IOError:
             try:
@@ -86,8 +86,8 @@ class mod_nikto(Attack):
                 reader = csv.reader(response.content.split("\n"), "nikto")
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
-                with open(os.path.join(user_config_dir, self.NIKTO_DB), "w") as fd:
-                    writer = csv.writer(fd)
+                with open(os.path.join(user_config_dir, self.NIKTO_DB), "w") as nikto_db_file:
+                    writer = csv.writer(nikto_db_file)
                     writer.writerows(self.nikto_db)
 
             except socket.timeout:
@@ -208,29 +208,29 @@ class mod_nikto(Attack):
                     refs.append("http://osvdb.org/show/osvdb/" + osv_id)
 
                 # CERT
-                m = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)
-                if m is not None:
-                    refs.append("http://www.cert.org/advisories/" + m.group(0) + ".html")
+                cert_advisory = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)
+                if cert_advisory is not None:
+                    refs.append("http://www.cert.org/advisories/" + cert_advisory.group(0) + ".html")
 
                 # SecurityFocus
-                m = re.search("BID-([0-9]{4})", vuln_desc)
-                if m is not None:
-                    refs.append("http://www.securityfocus.com/bid/" + m.group(1))
+                securityfocus_bid = re.search("BID-([0-9]{4})", vuln_desc)
+                if securityfocus_bid is not None:
+                    refs.append("http://www.securityfocus.com/bid/" + securityfocus_bid.group(1))
 
                 # Mitre.org
-                m = re.search("((CVE|CAN)-[0-9]{4}-[0-9]{4,})", vuln_desc)
-                if m is not None:
-                    refs.append("http://cve.mitre.org/cgi-bin/cvename.cgi?name=" + m.group(0))
+                mitre_cve = re.search("((CVE|CAN)-[0-9]{4}-[0-9]{4,})", vuln_desc)
+                if mitre_cve is not None:
+                    refs.append("http://cve.mitre.org/cgi-bin/cvename.cgi?name=" + mitre_cve.group(0))
 
                 # CERT Incidents
-                m = re.search("(IN-[0-9]{4}-[0-9]{2})", vuln_desc)
-                if m is not None:
-                    refs.append("http://www.cert.org/incident_notes/" + m.group(0) + ".html")
+                cert_incident = re.search("(IN-[0-9]{4}-[0-9]{2})", vuln_desc)
+                if cert_incident is not None:
+                    refs.append("http://www.cert.org/incident_notes/" + cert_incident.group(0) + ".html")
 
                 # Microsoft Technet
-                m = re.search("(MS[0-9]{2}-[0-9]{3})", vuln_desc)
-                if m is not None:
-                    refs.append("http://www.microsoft.com/technet/security/bulletin/" + m.group(0) + ".asp")
+                ms_bulletin = re.search("(MS[0-9]{2}-[0-9]{3})", vuln_desc)
+                if ms_bulletin is not None:
+                    refs.append("http://www.microsoft.com/technet/security/bulletin/" + ms_bulletin.group(0) + ".asp")
 
                 info = vuln_desc
                 if refs:
