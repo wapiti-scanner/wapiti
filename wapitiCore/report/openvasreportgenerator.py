@@ -157,17 +157,17 @@ class OpenVASReportGenerator(ReportGenerator):
         results.setAttribute("max", str(self._vuln_count + self._anom_count))
 
         # Loop on each flaw classification
-        for flawType in self._flaw_types:
+        for flaw_type in self._flaw_types:
             classification = ""
             flaw_dict = {}
-            if flawType in self._vulns:
+            if flaw_type in self._vulns:
                 classification = "vulnerability"
                 flaw_dict = self._vulns
-            elif flawType in self._anomalies:
+            elif flaw_type in self._anomalies:
                 classification = "anomaly"
                 flaw_dict = self._anomalies
 
-            for flaw in flaw_dict[flawType]:
+            for flaw in flaw_dict[flaw_type]:
                 result = self._xml_doc.createElement("result")
                 result.setAttribute("id", str(uuid.uuid4()))
 
@@ -187,7 +187,7 @@ class OpenVASReportGenerator(ReportGenerator):
                 nvt.setAttribute("oid", str(uuid.uuid4()))
 
                 name = self._xml_doc.createElement("name")
-                name.appendChild(self._xml_doc.createTextNode(flawType))
+                name.appendChild(self._xml_doc.createTextNode(flaw_type))
                 nvt.appendChild(name)
 
                 family = self._xml_doc.createElement("family")
@@ -241,5 +241,5 @@ class OpenVASReportGenerator(ReportGenerator):
         report_infos.appendChild(results)
         report.appendChild(report_infos)
 
-        with open(output_path, "w") as fd:
-            self._xml_doc.writexml(fd, addindent="   ", newl="\n")
+        with open(output_path, "w") as openvas_report_file:
+            self._xml_doc.writexml(openvas_report_file, addindent="   ", newl="\n")
