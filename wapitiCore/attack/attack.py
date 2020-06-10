@@ -504,8 +504,8 @@ class PayloadReader:
         """returns a array"""
         lines = []
         try:
-            with open(filename, errors="ignore") as f:
-                for line in f:
+            with open(filename, errors="ignore") as file:
+                for line in file:
                     clean_line, flags = self.process_line(line)
                     if clean_line:
                         lines.append((clean_line, flags))
