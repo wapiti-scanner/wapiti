@@ -233,5 +233,5 @@ class XMLReportGenerator(ReportGenerator):
         report.appendChild(vulnerabilities)
         report.appendChild(anomalies)
 
-        with open(output_path, "w") as fd:
-            self._xml_doc.writexml(fd, addindent="   ", newl="\n")
+        with open(output_path, "w") as xml_report_file:
+            self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")
