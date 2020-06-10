@@ -215,8 +215,8 @@ class mod_permanentxss(Attack):
         if dependencies:
             for module in dependencies:
                 if module.name == "xss":
-                    self.successful_xss = module.SUCCESSFUL_XSS
-                    self.tried_xss = module.TRIED_XSS
+                    self.successful_xss = module.successful_xss
+                    self.tried_xss = module.tried_xss
 
     def attempt_exploit(self, method, payloads, injection_request, parameter, taint, output_request):
         timeouted = False
