@@ -30,7 +30,7 @@ class mod_sql(Attack):
     This class implements an error-based SQL Injection attack
     """
 
-    TIME_TO_SLEEP = 6
+    time_to_sleep = 6
     name = "sql"
     payloads = ("\xBF'\"(", Flags())
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
@@ -102,7 +102,7 @@ class mod_sql(Attack):
         return False
 
     def set_timeout(self, timeout):
-        self.TIME_TO_SLEEP = str(1 + int(timeout))
+        self.time_to_sleep = str(1 + int(timeout))
 
     def attack(self):
         mutator = self.get_mutator()
