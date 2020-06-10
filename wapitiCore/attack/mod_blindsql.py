@@ -29,14 +29,14 @@ class mod_blindsql(Attack):
     """
 
     PAYLOADS_FILE = "blindSQLPayloads.txt"
-    TIME_TO_SLEEP = 6
+    time_to_sleep = 6
     name = "blindsql"
     PRIORITY = 6
 
     MSG_VULN = _("Blind SQL vulnerability")
 
     def set_timeout(self, timeout):
-        self.TIME_TO_SLEEP = str(1 + int(timeout))
+        self.time_to_sleep = str(1 + int(timeout))
 
     def attack(self):
         mutator = self.get_mutator()
