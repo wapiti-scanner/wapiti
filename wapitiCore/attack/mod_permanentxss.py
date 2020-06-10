@@ -47,10 +47,10 @@ class mod_permanentxss(Attack):
 
     # Attempted payload injection from mod_xss.
     # key is tainted value, dict values are (mutated_request, parameter, flags)
-    TRIED_XSS = {}
+    tried_xss = {}
 
     # key = xss code, valid = (payload, flags)
-    SUCCESSFUL_XSS = {}
+    successful_xss = {}
 
     PAYLOADS_FILE = "xssPayloads.ini"
 
@@ -97,8 +97,8 @@ class mod_permanentxss(Attack):
             # Exploiting those may imply sending more GET requests
 
             # Search in the page source for every taint code used by mod_xss
-            for taint in self.TRIED_XSS:
-                input_request = self.TRIED_XSS[taint][0]
+            for taint in self.tried_xss:
+                input_request = self.tried_xss[taint][0]
 
                 # Such situations should not occur as it would be stupid to block POST (or GET) requests for mod_xss
                 # and not mod_permanentxss, but it is possible so let's filter that.
@@ -111,9 +111,9 @@ class mod_permanentxss(Attack):
                 if taint.lower() in data.lower():
                     # Code found in the webpage !
                     # Did mod_xss saw this as a reflected XSS ?
-                    if taint in self.SUCCESSFUL_XSS:
+                    if taint in self.successful_xss:
                         # Yes, it means XSS payloads were injected, not just tainted code.
-                        payload, flags = self.SUCCESSFUL_XSS[taint]
+                        payload, flags = self.successful_xss[taint]
 
                         if self.check_payload(response, flags, taint):
                             # If we can find the payload again, this is in fact a stored XSS
@@ -195,9 +195,9 @@ class mod_permanentxss(Attack):
 
                     # Ok the content is stored, but will we be able to inject javascript?
                     else:
-                        parameter = self.TRIED_XSS[taint][1]
+                        parameter = self.tried_xss[taint][1]
                         payloads = generate_payloads(response.content, taint, self.independant_payloads)
-                        flags = self.TRIED_XSS[taint][2]
+                        flags = self.tried_xss[taint][2]
 
                         # TODO: check that and make it better
                         if flags.method == PayloadType.get:
@@ -215,8 +215,8 @@ class mod_permanentxss(Attack):
         if dependencies:
             for module in dependencies:
                 if module.name == "xss":
-                    self.SUCCESSFUL_XSS = module.SUCCESSFUL_XSS
-                    self.TRIED_XSS = module.TRIED_XSS
+                    self.successful_xss = module.SUCCESSFUL_XSS
+                    self.tried_xss = module.TRIED_XSS
 
     def attempt_exploit(self, method, payloads, injection_request, parameter, taint, output_request):
         timeouted = False
