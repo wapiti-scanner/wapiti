@@ -50,11 +50,11 @@ class mod_xss(Attack):
     # POST XSS structure :
     # {uniq_code: [target_url, {param1: val1, param2: uniq_code, param3:...}, referer_ul], next_uniq_code : [...]...}
     # POST_XSS = {}
-    TRIED_XSS = {}
+    tried_xss = {}
     PHP_SELF = []
 
     # key = taint code, value = (payload, flags)
-    SUCCESSFUL_XSS = {}
+    successful_xss = {}
 
     PAYLOADS_FILE = "xssPayloads.ini"
 
@@ -103,7 +103,7 @@ class mod_xss(Attack):
                     else:
                         # We keep a history of taint values we sent because in case of stored value, the taint code
                         # may be found in another webpage by the permanentxss module.
-                        self.TRIED_XSS[taint] = (mutated_request, parameter, flags)
+                        self.tried_xss[taint] = (mutated_request, parameter, flags)
 
                         # Reminder: valid_xss_content_type is not called before before content is not necessary
                         # reflected here, may be found in another webpage so we have to inject tainted values
@@ -210,7 +210,7 @@ class mod_xss(Attack):
                         valid_xss_content_type(evil_request) and
                         self.check_payload(response, xss_flags, taint)
                 ):
-                    self.SUCCESSFUL_XSS[taint] = (xss_payload, xss_flags)
+                    self.successful_xss[taint] = (xss_payload, xss_flags)
                     message = _("XSS vulnerability found via injection in the parameter {0}").format(xss_param)
                     if has_csp(response):
                         message += ".\n" + _("Warning: Content-Security-Policy is present!")
