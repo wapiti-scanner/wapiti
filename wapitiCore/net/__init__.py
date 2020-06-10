@@ -5,11 +5,11 @@ import html
 def encode(params_list):
     """Encode a sequence of two-element lists or dictionary into a URL query string."""
     encoded_params = []
-    for par1, par2 in params_list:
+    for param_name, param_value in params_list:
         # not safe: '&=#' with of course quotes...
-        par1 = quote(par1, safe='/%[]:;$()+,!?*')
-        par2 = quote(par2, safe='/%[]:;$()+,!?*')
-        encoded_params.append("%s=%s" % (k, v))
+        param_name = quote(param_name, safe='/%[]:;$()+,!?*')
+        param_value = quote(param_value, safe='/%[]:;$()+,!?*')
+        encoded_params.append("%s=%s" % (param_name, param_value))
     return "&".join(encoded_params)
 
 
