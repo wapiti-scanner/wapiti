@@ -45,8 +45,8 @@ class AnomalyXMLParser:
         self.tag = ""
 
     def parse(self, filename):
-        with open(filename) as f:
-            content = f.read()
+        with open(filename) as file:
+            content = file.read()
             self.feed(content)
 
     def feed(self, data):
