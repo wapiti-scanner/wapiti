@@ -321,13 +321,16 @@ class Wapiti:
 
             print('')
             if attack_module.require:
-                t = [y.name for y in self.attacks if y.name in attack_module.require and (y.do_get or y.do_post)]
-                if attack_module.require != t:
+                attack_name_list = [attack.name for attack in self.attacks if attack.name in attack_module.require and
+                                    (attack.do_get or attack.do_post)]
+                if attack_module.require != attack_name_list:
                     print(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
-                    print("  {0}".format(",".join([y for y in attack_module.require if y not in t])))
+                    print("  {0}".format(",".join([attack for attack in attack_module.require
+                                                   if attack not in attack_name_list])))
                     continue
                 else:
-                    attack_module.load_require([y for y in self.attacks if y.name in attack_module.require])
+                    attack_module.load_require([attack for attack in self.attacks
+                                                if attack.name in attack_module.require])
 
             attack_module.log_green(_("[*] Launching module {0}"), attack_module.name)
 
@@ -381,16 +384,16 @@ class Wapiti:
                     break
                 except Exception as exception:
                     # Catch every possible exceptions and print it
-                    tb = sys.exc_info()[2]
+                    exception_traceback = sys.exc_info()[2]
                     print(exception.__class__.__name__, exception)
-                    print_tb(tb)
+                    print_tb(exception_traceback)
 
                     if self._bug_report:
                         traceback_file = str(uuid1())
-                        with open(traceback_file, "w") as fd:
-                            print_tb(tb, file=fd)
-                            print("{}: {}".format(exception.__class__.__name__, exception), file=fd)
-                            print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=fd)
+                        with open(traceback_file, "w") as traceback_fd:
+                            print_tb(exception_traceback, file=traceback_fd)
+                            print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
+                            print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
                             print("{}. Requests {}. OS {}".format(WAPITI_VERSION, requests.__version__, sys.platform))
 
                         try:
@@ -490,10 +493,10 @@ class Wapiti:
     def set_cookie_file(self, cookie: str):
         """Load session data from a cookie file"""
         if os.path.isfile(cookie):
-            jc = jsoncookie.JsonCookie()
-            jc.open(cookie)
-            cookiejar = jc.cookiejar(self.server)
-            jc.close()
+            json_cookie = jsoncookie.JsonCookie()
+            json_cookie.open(cookie)
+            cookiejar = json_cookie.cookiejar(self.server)
+            json_cookie.close()
             self.crawler.session_cookies = cookiejar
 
     def set_auth_credentials(self, auth_basic: tuple):
@@ -529,9 +532,9 @@ class Wapiti:
         """Put colors in the console output (terminal must support colors)"""
         self.color = 1
 
-    def verbosity(self, vb: int):
+    def verbosity(self, verbose: int):
         """Define the level of verbosity of the output."""
-        self.verbose = vb
+        self.verbose = verbose
 
     def set_bug_reporting(self, value: bool):
         self._bug_report = value
@@ -1039,8 +1042,8 @@ def wapiti_main():
             wap.set_output_file(args.output)
 
         found_generator = False
-        for repGenInfo in wap.xml_rep_gen_parser.get_report_generators():
-            if args.format == repGenInfo.get_key():
+        for report_generator_info in wap.xml_rep_gen_parser.get_report_generators():
+            if args.format == report_generator_info.get_key():
                 wap.set_report_generator_type(args.format)
                 found_generator = True
                 break
