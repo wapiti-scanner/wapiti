@@ -72,8 +72,8 @@ class HTMLReportGenerator(JSONReportGenerator):
         )
         self._final__path = os.path.join(output_path, filename)
 
-        with open(self._final__path, "w") as fd:
-            fd.write(
+        with open(self._final__path, "w") as html_report_file:
+            html_report_file.write(
                 mytemplate.render_unicode(
                     wapiti_version=self._infos["version"],
                     target=self._infos["target"],
