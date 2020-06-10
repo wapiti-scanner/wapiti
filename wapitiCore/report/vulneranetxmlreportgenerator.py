@@ -28,10 +28,10 @@ import datetime
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
-def is_peer_tuple(p):
-    """Is p a (str,int) tuple? I.E. an (ip_address,port)"""
-    if type(p) == tuple and len(p) == 2:
-        return type(p[0]) == str and type(p[1]) == int
+def is_peer_tuple(element):
+    """Is element a (str,int) tuple? I.E. an (ip_address,port)"""
+    if type(element) == tuple and len(element) == 2:
+        return type(element[0]) == str and type(element[1]) == int
     else:
         return False
 
@@ -203,5 +203,5 @@ class VulneraNetXMLReportGenerator(ReportGenerator):
         Create a xml file with a report of the vulnerabilities which have been logged with
         the method add_vulnerability(category,level,url,parameter,info)
         """
-        with open(output_path, "w") as fd:
-            self._xml_doc.writexml(fd, addindent="   ", newl="\n")
+        with open(output_path, "w") as vulneranet_report_file:
+            self._xml_doc.writexml(vulneranet_report_file, addindent="   ", newl="\n")
