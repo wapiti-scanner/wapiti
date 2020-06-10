@@ -40,39 +40,39 @@ def get_context(bs_node, keyword, parent=None, ):
             events = set(bs_node.attrs.keys())
             if keyword in str(bs_node.attrs):
 
-                for item1, item2 in bs_node.attrs.items():
-                    if keyword in item2:
-                        # print("Found in attribute value {0} of tag {1}".format(item1, bs_node.name))
+                for attr_name, attr_value in bs_node.attrs.items():
+                    if keyword in attr_value:
+                        # print("Found in attribute value {0} of tag {1}".format(attr_name, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
                         res = {
                             "type": "attrval",
-                            "name": item1,
+                            "name": attr_name,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
                         if res not in entries:
-                            entries.append(d)
+                            entries.append(res)
 
-                    if keyword in item1:
-                        # print("Found in attribute name {0} of tag {1}".format(item1, bs_node.name))
+                    if keyword in attr_name:
+                        # print("Found in attribute name {0} of tag {1}".format(attr_name, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
                         res = {
                             "type": "attrname",
-                            "name": item1,
+                            "name": attr_name,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
                         if res not in entries:
-                            entries.append(d)
+                            entries.append(res)
 
             elif keyword in bs_node.name:
                 # print("Found in tag name")
                 bad_parent = find_non_exec_parent(bs_node)
                 res = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent}
                 if res not in entries:
-                    entries.append(d)
+                    entries.append(res)
 
             # recursively search injection points for the same variable
             for node_content in bs_node.contents:
@@ -85,14 +85,14 @@ def get_context(bs_node, keyword, parent=None, ):
             bad_parent = find_non_exec_parent(bs_node)
             res = {"type": "comment", "parent": parent.name, "non_exec_parent": bad_parent}
             if res not in entries:
-                entries.append(d)
+                entries.append(res)
 
         elif isinstance(bs_node, element.NavigableString):
             # print("Found in text, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
             res = {"type": "text", "parent": parent.name, "non_exec_parent": bad_parent}
             if res not in entries:
-                entries.append(d)
+                entries.append(res)
 
     return entries
 
