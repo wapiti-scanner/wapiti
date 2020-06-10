@@ -40,58 +40,58 @@ def get_context(bs_node, keyword, parent=None, ):
             events = set(bs_node.attrs.keys())
             if keyword in str(bs_node.attrs):
 
-                for k, v in bs_node.attrs.items():
-                    if keyword in v:
-                        # print("Found in attribute value {0} of tag {1}".format(k, bs_node.name))
+                for item1, item2 in bs_node.attrs.items():
+                    if keyword in item2:
+                        # print("Found in attribute value {0} of tag {1}".format(item1, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        d = {
+                        res = {
                             "type": "attrval",
-                            "name": k,
+                            "name": item1,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
-                        if d not in entries:
+                        if res not in entries:
                             entries.append(d)
 
-                    if keyword in k:
-                        # print("Found in attribute name {0} of tag {1}".format(k, bs_node.name))
+                    if keyword in item1:
+                        # print("Found in attribute name {0} of tag {1}".format(item1, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        d = {
+                        res = {
                             "type": "attrname",
-                            "name": k,
+                            "name": item1,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
-                        if d not in entries:
+                        if res not in entries:
                             entries.append(d)
 
             elif keyword in bs_node.name:
                 # print("Found in tag name")
                 bad_parent = find_non_exec_parent(bs_node)
-                d = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent}
-                if d not in entries:
+                res = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent}
+                if res not in entries:
                     entries.append(d)
 
             # recursively search injection points for the same variable
-            for x in bs_node.contents:
-                for entry in get_context(x, keyword, parent=bs_node):
+            for node_content in bs_node.contents:
+                for entry in get_context(node_content, keyword, parent=bs_node):
                     if entry not in entries:
                         entries.append(entry)
 
         elif isinstance(bs_node, element.Comment):
             # print("Found in comment, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
-            d = {"type": "comment", "parent": parent.name, "non_exec_parent": bad_parent}
-            if d not in entries:
+            res = {"type": "comment", "parent": parent.name, "non_exec_parent": bad_parent}
+            if res not in entries:
                 entries.append(d)
 
         elif isinstance(bs_node, element.NavigableString):
             # print("Found in text, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
-            d = {"type": "text", "parent": parent.name, "non_exec_parent": bad_parent}
-            if d not in entries:
+            res = {"type": "text", "parent": parent.name, "non_exec_parent": bad_parent}
+            if res not in entries:
                 entries.append(d)
 
     return entries
@@ -123,8 +123,8 @@ def generate_payloads(html_code, code, independant_payloads):
             attr_pattern = r"\s*" + elem["name"] + r"\s*=\s*"
 
             # Let's find the last match
-            for m in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
-                attrval_index = m.end()
+            for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
+                attrval_index = match.end()
 
             attrval = before_code[attrval_index:]
             # between the tag name and our injected attribute there is an equal sign and maybe
