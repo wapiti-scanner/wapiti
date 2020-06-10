@@ -32,17 +32,17 @@ class JsonCookie:
 
     def __init__(self):
         self.cookiedict = None
-        self.fd = None
+        self.file_data = None
 
     # return a dictionary on success, None on failure
     def open(self, filename):
         if not filename:
             return None
         try:
-            self.fd = open(filename, "r+")
-            self.cookiedict = json.load(self.fd)
+            self.file_data = open(filename, "r+")
+            self.cookiedict = json.load(self.file_data)
         except (IOError, ValueError):
-            self.fd = open(filename, "w+")
+            self.file_data = open(filename, "w+")
             self.cookiedict = {}
         return self.cookiedict
 
@@ -80,10 +80,10 @@ class JsonCookie:
 
     def cookiejar(self, domain):
         """Returns a cookielib.CookieJar object containing cookies matching the given domain."""
-        cj = CookieJar()
+        cook_jar = CookieJar()
 
         if not domain:
-            return cj
+            return cook_jar
 
         # Domain comes from a urlparse().netloc so we must take care of optional port number
         search_ip = IP_REGEX.match(domain)
@@ -107,18 +107,18 @@ class JsonCookie:
             matching_domains = [d for d in parent_domains if d in self.cookiedict]
 
         if not matching_domains:
-            return cj
+            return cook_jar
 
-        for d in matching_domains:
+        for dom in matching_domains:
             for path in self.cookiedict[d]:
-                for cookie_name, cookie_attrs in self.cookiedict[d][path].items():
-                    ck = Cookie(
+                for cookie_name, cookie_attrs in self.cookiedict[dom][path].items():
+                    cook = Cookie(
                         version=cookie_attrs["version"],
                         name=cookie_name,
                         value=cookie_attrs["value"],
                         port=None,
                         port_specified=False,
-                        domain=d,
+                        domain=dom,
                         domain_specified=True,
                         domain_initial_dot=False,
                         path=path,
@@ -133,11 +133,11 @@ class JsonCookie:
                     )
 
                     if cookie_attrs["port"]:
-                        ck.port = cookie_attrs["port"]
-                        ck.port_specified = True
+                        cook.port = cookie_attrs["port"]
+                        cook.port_specified = True
 
-                    cj.set_cookie(ck)
-        return cj
+                    cook_jar.set_cookie(cook)
+        return cook_jar
 
     def delete(self, domain, path=None, key=None):
         if not domain:
@@ -180,12 +180,12 @@ class JsonCookie:
         return False
 
     def dump(self):
-        if not self.fd:
+        if not self.file_data:
             return False
-        self.fd.seek(0)
-        self.fd.truncate()
-        json.dump(self.cookiedict, self.fd, indent=2)
+        self.file_data.seek(0)
+        self.file_data.truncate()
+        json.dump(self.cookiedict, self.file_data, indent=2)
         return True
 
     def close(self):
-        self.fd.close()
+        self.file_data.close()
