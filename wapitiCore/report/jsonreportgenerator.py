@@ -51,8 +51,8 @@ class JSONReportGenerator(ReportGenerator):
             "anomalies": self._anomalies,
             "infos": self._infos
         }
-        with open(output_path, "w") as f:
-            json.dump(report_dict, f, indent=2)
+        with open(output_path, "w") as json_report_file:
+            json.dump(report_dict, json_report_file, indent=2)
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None):
