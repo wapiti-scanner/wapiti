@@ -39,13 +39,13 @@ class ReportGeneratorsXMLParser:
         self._parser.StartElementHandler = self.start_element
         self._parser.EndElementHandler = self.end_element
         self._parser.CharacterDataHandler = self.char_data
-        self.reportGenerators = []
-        self.repGen = None
+        self.report_generators = []
+        self.report_generator_info = None
         self.tag = ""
 
     def parse(self, filename):
-        with open(filename) as f:
-            content = f.read()
+        with open(filename) as file:
+            content = file.read()
             self.feed(content)
 
     def feed(self, data):
@@ -57,7 +57,7 @@ class ReportGeneratorsXMLParser:
 
     def start_element(self, name, attrs):
         if name == self.REPORT_GENERATOR:
-            self.repGen = ReportGeneratorInfo()
+            self.report_generator_info = ReportGeneratorInfo()
         elif name == self.REPORT_GENERATOR_KEY:
             self.tag = self.REPORT_GENERATOR_KEY
         elif name == self.REPORT_GENERATOR_CLASSNAME:
@@ -67,16 +67,16 @@ class ReportGeneratorsXMLParser:
 
     def end_element(self, name):
         if name == self.REPORT_GENERATOR:
-            self.reportGenerators.append(self.repGen)
+            self.report_generators.append(self.report_generator_info)
 
     def char_data(self, data):
         if self.tag == self.REPORT_GENERATOR_KEY:
-            self.repGen.set_key(data)
+            self.report_generator_info.set_key(data)
         elif self.tag == self.REPORT_GENERATOR_CLASSNAME:
-            self.repGen.set_class_name(data)
+            self.report_generator_info.set_class_name(data)
         elif self.tag == self.REPORT_GENERATOR_CLASS_MODULE:
-            self.repGen.set_class_module(data)
+            self.report_generator_info.set_class_module(data)
         self.tag = ""
 
     def get_report_generators(self):
-        return self.reportGenerators
+        return self.report_generators
