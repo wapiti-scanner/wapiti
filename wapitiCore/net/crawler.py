@@ -718,11 +718,11 @@ class Page:
         urls = set()
 
         for script in self.soup.find_all("script", text=True):
-            js = script.string.strip()
-            if not js:
+            j_script = script.string.strip()
+            if not j_script:
                 continue
 
-            search = re.search(RE_JS_REDIR, js)
+            search = re.search(RE_JS_REDIR, j_script)
             if search:
                 url = self.make_absolute(search.group(4))
                 if url:
@@ -929,9 +929,9 @@ def wildcard_translate(pattern):
     This is largely inspired by fnmatch.translate.
     """
 
-    i, n = 0, len(pattern)
+    i, length = 0, len(pattern)
     res = ''
-    while i < n:
+    while i < length:
         char = pattern[i]
         i += 1
         if char == '*':
@@ -1360,7 +1360,7 @@ class Explorer:
         self._qs_limit = value
 
     def load_saved_state(self, pickle_file: str):
-        with open(pickle_file, "wb") as fd:
+        with open(pickle_file, "wb") as file_data:
             self._custom_404_codes = {}
             self._file_counts = defaultdict(int)
             self._pattern_counts = defaultdict(int)
@@ -1378,8 +1378,8 @@ class Explorer:
 
     def save_state(self, pickle_file: str):
         try:
-            with open(pickle_file, "rb") as fd:
-                data = pickle.load(fd)
+            with open(pickle_file, "rb") as file_data:
+                data = pickle.load(file_data)
                 self._custom_404_codes = data["custom_404_codes"]
                 self._file_counts = data["file_counts"]
                 self._pattern_counts = data["pattern_counts"]
