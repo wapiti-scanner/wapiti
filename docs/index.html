@@ -1,0 +1,258 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Wapiti : a Free and Open-Source web-application vulnerability scanner in Python for Windows, Linux, BSD, OSX</title>
+        <meta name="google-site-verification" content="CdcnMW806GQmxUqq1D5yfe_WDFmWaVUUcBTcVz8lNzU" />
+        <link href="http://fonts.googleapis.com/css?family=Cantarell" rel="stylesheet" type="text/css" />
+        <link href='http://fonts.googleapis.com/css?family=Rokkitt:400,700' rel='stylesheet' type='text/css'>
+        <style type="text/css">
+            body {
+                font-family: cantarell, Arial, Verdana, Geneva, sans-serif;
+                font-size: 16px;
+                height: 100%;
+                margin: 0;
+                text-align: justify;
+            }
+            h1 {
+                font-family: 'Rokkitt', Verdana, sans-serif;
+                text-align: center;
+                font-size: 40px;
+                font-weight: 700;
+                margin: 0;
+            }
+            h2 {
+                font-family: 'Rokkitt', Verdana, sans-serif;
+                text-align: left;
+                font-size: 40px;
+                font-weight: 700;
+                margin: 0;
+            }
+            a {color: #666; text-decoration:underline}
+            a:visited {color: #666; text-decoration:underline}
+            a:hover {color: #000; }
+            .wrapper {
+                width: 850px;
+                padding-top: 5px;
+                margin: auto;
+            }
+            #header {
+                position: fixed;
+                top: 0;
+                height: 100px;
+                width: 100%;
+                margin: 0px;
+                border-bottom: 1px solid #DDD;
+                background-color: white;
+                -webkit-box-shadow:  0px 0px 7px 3px rgba(0, 0, 0, 0.2);
+                box-shadow:  0px 0px 7px 3px rgba(0, 0, 0, 0.2);
+                font-family: 'Rokkitt', Verdana, sans-serif;
+                font-weight: 400;
+                font-size: 20px;
+                z-index: 2;
+            }
+            #gradient {
+                position: fixed;
+                top: 100px;
+                height: 100px;
+                width: 100%;
+                background-image: url('gradient.png');
+                margin:0;
+                left: 0;
+            }
+            #content {
+                padding-top: 170px;
+                width: 830px;
+                margin-top: 0;
+                margin-left:auto;
+                margin-right: auto;
+            }
+            pre {
+                font-size: 12px;
+            }
+            #linediv {
+                width: 100%;
+                border-top: 1px solid #DDD;
+            }
+            .fleft {
+                float: left;
+                margin-right: 10px;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .fright {
+                float: right;
+                margin-left: 10px;
+            }
+            .clear {
+                clear: both;
+            }
+            #logo {
+                float: left;
+                margin: 0;
+                padding: 0;
+            }
+            #footer {
+                padding: 20px;
+                color: #999;
+            }
+            #news {
+                display: block;
+                border: 2px solid #555;
+                font-size: 12px;
+                text-align: center;
+                padding: 2px;
+                margin: 2px;
+                -webkit-border-radius: 8px;
+                -moz-border-radius: 8px;
+                border-radius: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper">
+                <a href="https://sourceforge.net/projects/wapiti/files/"><img class="fleft" src="download_90.png" /></a>
+                <div class="fleft">
+                    <p>Download Wapiti<br />
+                    Current stable version: 3.0.3<br />
+                    Release date: 2020-02-20</p>
+                </div>
+                <a href="http://sourceforge.net/donate/index.php?group_id=168625"><img class="fright" src="donate.png" /></a>
+                <div class="fright">
+                    <p>Love this project ?<br />
+                    Please consider making a donation</p>
+                </div>
+            </div>
+        </div>
+        <div id="gradient"></div>
+        <div id="content">
+            <div id="logo"><img src="wapiti_400.png" /></div>
+            <br />
+            <h1>The web-application vulnerability scanner</h1><br />
+            <p>Wapiti allows you to audit the security of your websites or web applications.</p>
+
+            <p>It performs &quot;black-box&quot; scans (it does not study the source code)
+            of the web application by crawling the webpages of the deployed webapp, looking for scripts
+            and forms where it can inject data.</p>
+
+            <p>Once it gets the list of URLs, forms and their inputs, Wapiti acts like a <a href="http://en.wikipedia.org/wiki/Fuzzing" lang="en">fuzzer</a>,
+            injecting payloads to see if a script is vulnerable.</p>
+
+            <div class="clear"></div>
+            <h3>What's new in Wapiti 3.0.3 ? Take a look <a href="https://sourceforge.net/p/wapiti/news/2020/02/wapiti-303/">here</a>.</h3>
+
+            <p>Wapiti can detect the following vulnerabilities :</p>
+            <ul>
+              <li>File disclosure (Local and remote include/require, fopen, readfile...)</li>
+              <li>Database Injection (PHP/JSP/ASP SQL Injections and XPath Injections)</li>
+              <li>XSS (Cross Site Scripting) injection (reflected and permanent)</li>
+              <li>Command Execution detection (eval(), system(), passtru()...)</li>
+              <li>CRLF Injection (HTTP Response Splitting, session fixation...)</li>
+              <li>XXE (XML External Entity) injection</li>
+              <li>SSRF (Server Side Request Forgery)</li>
+              <li>Use of know potentially dangerous files (thanks to the Nikto database)</li>
+              <li>Weak .htaccess configurations that can be bypassed</li>
+              <li>Presence of backup files giving sensitive information (source code disclosure)</li>
+              <li>Shellshock (aka Bash bug)</li>
+              <li>Open Redirects</li>
+              <li>Uncommon HTTP methods that can be allowed (PUT)</li>
+            </ul>
+
+            <p>A buster module also allows to brute force directories and files names on the target webserver.</p>
+            
+            <p>Wapiti supports both GET and POST HTTP methods for attacks.<br />
+            It also supports multipart forms and can inject payloads in filenames (upload).<br />
+            Warnings are raised when an anomaly is found (for example 500 errors and timeouts)<br />
+            Wapiti is able to make the difference beetween permanent and reflected XSS vulnerabilities.<br />
+            </p>
+
+            <p>General features :</p>
+            <ul>
+                <li>Generates vulnerability reports in various formats (HTML, XML, JSON, TXT...)</li>
+                <li>Can suspend and resume a scan or an attack (session mechanism using sqlite3 databases)</li>
+                <li>Can give you colors in the terminal to highlight vulnerabilities</li>
+                <li>Different levels of verbosity</li>
+                <li>Fast and easy way to activate/deactivate attack modules</li>
+                <li>Adding a payload can be as easy as adding a line to a text file</li>
+            </ul>
+
+
+            <p>Browsing features</p>
+            <ul>
+                <li>Support HTTP, HTTPS and SOCKS5 proxies</li>
+                <li>Authentication via several methods : Basic, Digest, Kerberos or NTLM</li>
+                <li>Ability to restrain the scope of the scan (domain, folder, page, url)</li>
+                <li>Automatic removal of one are more parameters in URLs</li>
+                <li>Multiple safeguards against scan endless-loops (ifor example, limit of values for a parameter)</li>
+                <li>Possibility to set the first URLs to explore (even if not in scope)</li>
+                <li>Can exclude some URLs of the scan and attacks (eg: logout URL)</li>
+                <li>Import of cookies (get them with the wapiti-getcookie tool)</li>
+                <li>Can activate / deactivate SSL certificates verification</li>
+                <li>Extract URLs from Flash SWF files</li>
+                <li>Try to extract URLs from javascript (very basic JS interpreter)</li>
+                <li>HTML5 aware (understand recent HTML tags)</li>
+                <li>Several options to control the crawler behavior and limits.</li>
+                <li>Skipping some parameter names during attack.</li>
+                <li>Setting a maximum time for the scan process.</li>
+                <li>Adding some custom HTTP headers or setting a custom User-Agent.</li>
+            </ul>
+
+            <p>Wapiti is a command-line application.<br />
+            Here is <a href="example.txt">an exemple of output</a> against a vulnerable web application.<br />
+            You may find some useful informations in the <a href="https://sourceforge.net/p/wapiti/git/ci/master/tree/README.md">README</a>
+            and the <a href="https://sourceforge.net/p/wapiti/git/ci/master/tree/INSTALL.md">INSTALL</a> files.<br />
+            Have any questions ? You may find answers in the <a href="https://sourceforge.net/p/wapiti/git/ci/master/tree/doc/FAQ.md">FAQ</a>.
+            </p>
+
+            <h2>Download</h2>
+
+            <p><a href="https://sourceforge.net/projects/wapiti/files/" lang="en">&gt;&gt; Download Wapiti here &lt;&lt;</a></p><br />
+            <h2>Usage</h2>
+<pre>
+
+ ██╗    ██╗ █████╗ ██████╗ ██╗████████╗██╗██████╗
+ ██║    ██║██╔══██╗██╔══██╗██║╚══██╔══╝██║╚════██╗
+ ██║ █╗ ██║███████║██████╔╝██║   ██║   ██║ █████╔╝
+ ██║███╗██║██╔══██║██╔═══╝ ██║   ██║   ██║ ╚═══██╗
+ ╚███╔███╔╝██║  ██║██║     ██║   ██║   ██║██████╔╝
+  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝   ╚═╝╚═════╝
+Wapiti-3.0.3 (wapiti.sourceforge.net)
+usage: wapiti [-h] [-u URL] [--scope {page,folder,domain,url,punk}]
+              [-m MODULES_LIST] [--list-modules] [-l LEVEL] [-p PROXY_URL]
+              [--tor] [-a CREDENTIALS]
+              [--auth-type {basic,digest,kerberos,ntlm}] [-c COOKIE_FILE]
+              [--skip-crawl] [--resume-crawl] [--flush-attacks]
+              [--flush-session] [--store-session PATH] [-s URL] [-x URL]
+              [-r PARAMETER] [--skip PARAMETER] [-d DEPTH]
+              [--max-links-per-page MAX] [--max-files-per-dir MAX]
+              [--max-scan-time MINUTES] [--max-parameters MAX] [-S FORCE]
+              [-t SECONDS] [-H HEADER] [-A AGENT] [--verify-ssl {0,1}]
+              [--color] [-v LEVEL] [-f FORMAT] [-o OUPUT_PATH]
+              [--external-endpoint EXTERNAL_ENDPOINT_URL]
+              [--internal-endpoint INTERNAL_ENDPOINT_URL]
+              [--endpoint ENDPOINT_URL] [--no-bugreport] [--version]
+wapiti: error: one of the arguments -u/--url --list-modules is required
+</pre>
+
+Shortest way (with default options) to launch a Wapiti scan :
+<pre>wapiti -u http://target/</pre>
+
+<p>Every option is detailed in the <a href="wapiti.1.html">wapiti(1) manpage</a>.</p>
+<p>Wapiti also comes with an utility to fetch cookies from websites called wapiti-getcookie. The corresponding manpage is <a href="wapiti-getcookie.1.html">here</a>.</p>
+<br />
+            <h2>Licensing</h2>
+            <p>Wapiti is released under the <a href="https://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License version 2 (the GPL).</a></p>
+        <br />
+    </div>
+    <div id="linediv"></div>
+    <div id="footer">
+        <div class="wrapper">
+            <p>
+            Copyright 2006-2020 &copy; <a href="http://devloop.users.sf.net/">Nicolas Surribas</a> (<a href="https://twitter.com/devl00p">@devl00p</a>)<br />
+            Contributions by Inform&aacute;tica Gesfor in the European <a href="http://www.ict-romulus.eu/web/romulus">ICT-Romulus Project</a><br />
+            Logo by <a href="http://www.gimp-attitude.org/">Gimp-Attitude</a> (thanks to <em>Le Gnou<em> &amp; <em>Ecirbaf</em>)
+            </p>
+        </div>
+    </div>
+    </body>
+</html>
