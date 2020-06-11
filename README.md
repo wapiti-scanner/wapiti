@@ -133,8 +133,7 @@ In the prompt, just type the following command to get the basic usage :
 
 You can also take a look at the manpage (wapiti.1 or wapiti.1.html) for more details on each option.
 
-If you find a bug, fill a ticket on the bugtracker :  
-https://sourceforge.net/p/wapiti/bugs/
+If you find a bug, fill a issue : https://github.com/wapiti-scanner/wapiti/issues  
 
 The official wiki can be helpful too :  
 https://sourceforge.net/p/wapiti/wiki/browse_pages/
