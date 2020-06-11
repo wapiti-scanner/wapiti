@@ -48,49 +48,49 @@ def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote_plus):
             # allowed empty dicts that type of behavior probably should be
             # preserved for consistency
         except TypeError:
-            ty, va, tb = sys.exc_info()
+            exception_traceback = sys.exc_info()[2]
             raise TypeError("not a valid non-string sequence "
-                            "or mapping object").with_traceback(tb)
+                            "or mapping object").with_traceback(exception_traceback)
 
     key_value_pair = []
 
-    for k, v in query:
-        if isinstance(k, bytes):
-            k = quote_via(k, safe)
+    for arg_key, arg_value in query:
+        if isinstance(arg_key, bytes):
+            arg_key = quote_via(arg_key, safe)
         else:
-            k = quote_via(str(k), safe, encoding, errors)
+            arg_key = quote_via(str(arg_key), safe, encoding, errors)
 
-        if v is None:
-            key_value_pair.append(k)
-        elif isinstance(v, bytes):
-            v = quote_via(v, safe)
-            key_value_pair.append(k + '=' + v)
-        elif isinstance(v, str):
-            v = quote_via(v, safe, encoding, errors)
-            key_value_pair.append(k + '=' + v)
+        if arg_value is None:
+            key_value_pair.append(arg_key)
+        elif isinstance(arg_value, bytes):
+            arg_value = quote_via(arg_value, safe)
+            key_value_pair.append(arg_key + '=' + arg_value)
+        elif isinstance(arg_value, str):
+            arg_value = quote_via(arg_value, safe, encoding, errors)
+            key_value_pair.append(arg_key + '=' + arg_value)
         else:
             try:
                 # Is this a sufficient test for sequence-ness?
-                x = len(v)
+                length = len(arg_value)
             except TypeError:
                 # not a sequence
-                v = quote_via(str(v), safe, encoding, errors)
-                key_value_pair.append(k + '=' + v)
+                arg_value = quote_via(str(arg_value), safe, encoding, errors)
+                key_value_pair.append(arg_key + '=' + arg_value)
             else:
                 # loop over the sequence
-                for elt in v:
+                for elt in arg_value:
                     if isinstance(elt, bytes):
                         elt = quote_via(elt, safe)
                     else:
                         elt = quote_via(str(elt), safe, encoding, errors)
-                    key_value_pair.append(k + '=' + elt)
+                    key_value_pair.append(arg_key + '=' + elt)
     return '&'.join(key_value_pair)
 
 
-def parse_qsl(qs, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None):
+def parse_qsl(query_string, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None):
     """Parse a query given as a string argument.
         Arguments:
-        qs: percent-encoded query string to be parsed
+        query_string: percent-encoded query string to be parsed
         strict_parsing: flag indicating what to do with parsing errors. If
             false (the default), errors are silently ignored. If true,
             errors raise a ValueError exception.
@@ -104,44 +104,44 @@ def parse_qsl(qs, strict_parsing=False, encoding='utf-8', errors='replace', max_
     # is less than max_num_fields. This prevents a memory exhaustion DOS
     # attack via post bodies with many fields.
     if max_num_fields is not None:
-        num_fields = 1 + qs.count('&') + qs.count(';')
+        num_fields = 1 + query_string.count('&') + query_string.count(';')
         if max_num_fields < num_fields:
             raise ValueError('Max number of fields exceeded')
 
-    pairs = [s2 for s1 in qs.split('&') for s2 in s1.split(';')]
-    r = []
+    pairs = [s2 for s1 in query_string.split('&') for s2 in s1.split(';')]
+    result_list = []
 
-    for name_value in pairs:
-        if not name_value and not strict_parsing:
+    for pair in pairs:
+        if not pair and not strict_parsing:
             continue
 
-        nv = name_value.split('=', 1)
-        if len(nv) != 2:
+        name_value = pair.split('=', 1)
+        if len(name_value) != 2:
             if strict_parsing:
-                raise ValueError("bad query field: %r" % (name_value,))
+                raise ValueError("bad query field: %r" % (pair,))
             # Handle case of a control-name with no equal sign
-            nv.append(None)
+            name_value.append(None)
 
-        name = nv[0].replace('+', ' ')
+        name = name_value[0].replace('+', ' ')
         name = unquote(name, encoding=encoding, errors=errors)
 
-        if nv[1]:
-            value = nv[1].replace('+', ' ')
+        if name_value[1]:
+            value = name_value[1].replace('+', ' ')
             value = unquote(value, encoding=encoding, errors=errors)
         else:
-            value = nv[1]
+            value = name_value[1]
 
-        r.append((name, value))
-    return r
+        result_list.append((name, value))
+    return result_list
 
 
-def shell_escape(s: str):
-    s = s.replace('\\', '\\\\')
-    s = s.replace('"', '\\"')
-    s = s.replace('$', '\\$')
-    s = s.replace('!', '\\!')
-    s = s.replace('`', '\\`')
-    return s
+def shell_escape(string: str):
+    string = string.replace('\\', '\\\\')
+    string = string.replace('"', '\\"')
+    string = string.replace('$', '\\$')
+    string = string.replace('!', '\\!')
+    string = string.replace('`', '\\`')
+    return string
 
 
 class Request:
@@ -211,12 +211,12 @@ class Request:
                     # special case of multipart is dealt when sending request
                     self._post_params = []
                     if len(post_params):
-                        for kv in post_params.split("&"):
-                            if kv.find("=") > 0:
-                                self._post_params.append(kv.split("=", 1))
+                        for post_param in post_params.split("&"):
+                            if post_param.find("=") > 0:
+                                self._post_params.append(post_param.split("=", 1))
                             else:
                                 # ?param without value
-                                self._post_params.append([kv, None])
+                                self._post_params.append([post_param, None])
                 else:
                     # must be something like application/json or text/xml
                     self._post_params = post_params
@@ -585,12 +585,12 @@ class Request:
             return params
 
         key_values = []
-        for k, v in params:
-            if isinstance(v, tuple) or isinstance(v, list):
-                key_values.append((k, v[0]))
+        for param_key, param_value in params:
+            if isinstance(param_value, tuple) or isinstance(param_value, list):
+                key_values.append((param_key, param_value[0]))
             else:
                 # May be empty string or None but will be processed differently by our own urlencode()
-                key_values.append((k, v))
+                key_values.append((param_key, param_value))
 
         return urlencode(key_values)
 
