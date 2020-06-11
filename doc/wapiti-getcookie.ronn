@@ -47,7 +47,7 @@ Those cookies can be loaded by Wapiti using the same -c option.
 ## LICENSE
 
 Wapiti is covered by the GNU General Public License (GPL), version 2.
-Please read the COPYING file for more information.
+Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 

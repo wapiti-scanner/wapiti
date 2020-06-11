@@ -288,7 +288,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
 ## LICENSE
 
 Wapiti is covered by the GNU General Public License (GPL), version 2.
-Please read the COPYING file for more information.
+Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
