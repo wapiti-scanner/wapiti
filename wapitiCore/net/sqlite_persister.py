@@ -175,18 +175,18 @@ class SqlitePersister:
                 )
             )
             path_id = cursor.lastrowid
-            for i, (k, v) in enumerate(http_resource.get_params):
+            for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (path_id, "GET", i, k, v, None, None)
+                    (path_id, "GET", i, get_param_key, get_param_value, None, None)
                 )
 
             post_params = http_resource.post_params
             if isinstance(post_params, list):
-                for i, (k, v) in enumerate(http_resource.post_params):
+                for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
                     cursor.execute(
                         """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                        (path_id, "POST", i, k, v, None, None)
+                        (path_id, "POST", i, post_param_key, post_param_value, None, None)
                     )
             elif len(post_params):
                 cursor.execute(
@@ -194,16 +194,16 @@ class SqlitePersister:
                     (path_id, "POST", 0, "__RAW__", post_params, None, None)
                 )
 
-            for i, (k, v) in enumerate(http_resource.file_params):
-                # v kill be something like ['pix.gif', 'GIF89a', 'image/gif']
+            for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
+                # file_param_value kill be something like ['pix.gif', 'GIF89a', 'image/gif']
                 # just keep the file name
-                if len(v) == 3:
-                    meta = v[2]
+                if len(file_param_value) == 3:
+                    meta = file_param_value[2]
                 else:
                     meta = None
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (path_id, "FILE", i, k, v[0], v[1], meta)
+                    (path_id, "FILE", i, file_param_key, file_param_value[0], file_param_value[1], meta)
                 )
         self._conn.commit()
 
@@ -363,18 +363,18 @@ class SqlitePersister:
 
         # path_id is the ID of the evil path
         path_id = cursor.lastrowid
-        for i, (k, v) in enumerate(request.get_params):
+        for i, (get_param_key, get_param_value) in enumerate(request.get_params):
             cursor.execute(
                 """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (path_id, "GET", i, k, v, None, None)
+                (path_id, "GET", i, get_param_key, get_param_value, None, None)
             )
 
         post_params = request.post_params
         if isinstance(post_params, list):
-            for i, (k, v) in enumerate(request.post_params):
+            for i, (post_param_key, post_param_value) in enumerate(request.post_params):
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (path_id, "POST", i, k, v, None, None)
+                    (path_id, "POST", i, post_param_key, post_param_value, None, None)
                 )
         elif len(post_params):
             cursor.execute(
@@ -382,15 +382,15 @@ class SqlitePersister:
                 (path_id, "POST", 0, "__RAW__", post_params, None, None)
             )
 
-        for i, (k, v) in enumerate(request.file_params):
-            if len(v) == 3:
-                meta = v[2]
+        for i, (file_param_key, file_param_value) in enumerate(request.file_params):
+            if len(file_param_value) == 3:
+                meta = file_param_value[2]
             else:
                 meta = None
 
             cursor.execute(
                 """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (path_id, "FILE", i, k, v[0], v[1], meta)
+                (path_id, "FILE", i, file_param_key, file_param_value[0], file_param_value[1], meta)
             )
 
         # request_id is the ID of the original (legit) request
