@@ -15,7 +15,7 @@ In order to work correctly, Wapiti needs :
 + Mako ( https://www.makotemplates.org/ )
 + PySocks ( https://github.com/Anorov/PySocks )
 
-See (INSTALL.md)[INSTALL.md] for more details on installation.
+See [INSTALL.md](INSTALL.md) for more details on installation.
 
 How it works
 ============
@@ -171,4 +171,4 @@ Licensing
 =========
 
 Wapiti is released under the GNU General Public License version 2 (the GPL).
-Source code is available on (Github)[https://github.com/wapiti-scanner/wapiti]
+Source code is available on [Github](https://github.com/wapiti-scanner/wapiti)
