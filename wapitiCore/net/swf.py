@@ -46,8 +46,8 @@ def looks_like_an_url(string):
     if string.startswith("/") or string.endswith("/"):
         return True
     for ext in {
-        ".php", ".asp", ".php4", ".php5", ".html", ".xhtml", ".htm", ".swf", ".xml", ".pl", ".cgi", ".rb", ".py", ".js",
-        ".pdf", ".gif", ".png", ".jpg", ".svg", ".jpeg", ".mp3", ".wav", ".aspx"
+            ".php", ".asp", ".php4", ".php5", ".html", ".xhtml", ".htm", ".swf", ".xml", ".pl", ".cgi", ".rb", ".py",
+            ".js", ".pdf", ".gif", ".png", ".jpg", ".svg", ".jpeg", ".mp3", ".wav", ".aspx"
     }:
         if ext in string and not string.startswith(ext) and "(" not in string:
             return True
@@ -58,30 +58,30 @@ def looks_like_an_url(string):
 
 def read_u30(data):
     i = 0
-    nb = 0
+    result = 0
     byte_pos = 0
     while True:
-        x = data[i]
-        bits = x & 127
+        value = data[i]
+        bits = value & 127
         i += 1
-        nb += bits << byte_pos
+        result += bits << byte_pos
         byte_pos += 7
-        if not x & 128:
+        if not value & 128:
             break
-    return nb, i
+    return result, i
 
 
 def new_read_u30(stream):
-    nb = 0
+    result = 0
     byte_pos = 0
     while True:
-        x = stream.read(1)[0]
-        bits = x & 127
-        nb += bits << byte_pos
+        value = stream.read(1)[0]
+        bits = value & 127
+        result += bits << byte_pos
         byte_pos += 7
-        if not x & 128:
+        if not value & 128:
             break
-    return nb
+    return result
 
 
 def read_abc(data):
@@ -89,39 +89,39 @@ def read_abc(data):
     minor, major = struct.unpack("HH", data[name_len + 1: name_len + 5])
 
     i = name_len + 5
-    nb, x = read_u30(data[i:])
-    i += x
-    for __ in range(nb - 1):
-        z, x = read_u30(data[i:])
-        i += x
+    read_value, read_size = read_u30(data[i:])
+    i += read_size
+    for __ in range(read_value - 1):
+        read_size = read_u30(data[i:])[1]
+        i += read_size
 
     # Read the array of uintegers :
-    nb, x = read_u30(data[i:])
-    i += x
-    for __ in range(nb - 1):
-        z, x = read_u30(data[i:])
-        i += x
+    read_value, read_size = read_u30(data[i:])
+    i += read_size
+    for __ in range(read_value - 1):
+        read_size = read_u30(data[i:])[1]
+        i += read_size
 
     # Pass the array of doubles
-    nb, x = read_u30(data[i:])
-    i += x
-    if nb > 0:
-        i += (nb - 1) * 8
+    read_value, read_size = read_u30(data[i:])
+    i += read_size
+    if read_value > 0:
+        i += (read_value - 1) * 8
 
     # Process the array of strings
-    nb, x = read_u30(data[i:])
-    i += x
-    for __ in range(nb - 1):
-        nb, x = read_u30(data[i:])
-        i += x
-        string = data[i: i + nb].decode().strip()
+    read_value, read_size = read_u30(data[i:])
+    i += read_size
+    for __ in range(read_value - 1):
+        read_value, read_size = read_u30(data[i:])
+        i += read_size
+        string = data[i: i + read_value].decode().strip()
         if "<a href=" in string:
             soup = BeautifulSoup(string, parser_name)
             for link in soup.find_all("a", href=True):
                 yield link["href"]
         else:
             yield string
-        i += nb
+        i += read_value
 
 
 def analyze_action(action):
@@ -156,13 +156,13 @@ def analyze_action(action):
 
 def analyze_tag(tag):
     if tag.name in [
-        "ShowFrame", "PlaceObject2", "DefineText", "DefineBits", "RemoveObject2", "DefineShape", "DefineFontName",
-        "FrameLabel", "DefineShape4", "DefineFont3", "DefineShape2", "JPEGTables", "CSMTextSettings",
-        "DefineFontAlignZones", "SetBackgroundColor", "Protect", "FileAttributes", "ExportAssets", "DefineShape3",
-        "Metadata", "ScriptLimits", "EnableDebugger2", "SymbolClass", "DefineBitsJPEG3", "DefineBitsLossless2",
-        "PlaceObject3", "DefineSceneAndFrameLabelData", "DefineBitsJPEG2", "DefineFont2", "DefineFontInfo2",
-        "DefineFont", "DefineMorphShape", "DefineFontInfo", "StartSound", "DefineSound", "DefineButtonSound",
-        "SoundStreamHead2", "SoundStreamHead", "SoundStreamBlock", "DefineBitsLossless", "SetTabIndex"
+            "ShowFrame", "PlaceObject2", "DefineText", "DefineBits", "RemoveObject2", "DefineShape", "DefineFontName",
+            "FrameLabel", "DefineShape4", "DefineFont3", "DefineShape2", "JPEGTables", "CSMTextSettings",
+            "DefineFontAlignZones", "SetBackgroundColor", "Protect", "FileAttributes", "ExportAssets", "DefineShape3",
+            "Metadata", "ScriptLimits", "EnableDebugger2", "SymbolClass", "DefineBitsJPEG3", "DefineBitsLossless2",
+            "PlaceObject3", "DefineSceneAndFrameLabelData", "DefineBitsJPEG2", "DefineFont2", "DefineFontInfo2",
+            "DefineFont", "DefineMorphShape", "DefineFontInfo", "StartSound", "DefineSound", "DefineButtonSound",
+            "SoundStreamHead2", "SoundStreamHead", "SoundStreamBlock", "DefineBitsLossless", "SetTabIndex"
     ]:
         return
 
