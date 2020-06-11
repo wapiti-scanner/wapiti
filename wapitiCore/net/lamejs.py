@@ -126,11 +126,11 @@ class LameJs:
             return ".".join([sub_node.value for sub_node in node])
         elif node.type == "LIST":
             logging.debug("# LIST")
-            ll = []
+            sub_node_list = []
             for sub_node in node:
-                ll.append(self.read_node(sub_node))
-            logging.debug("list = {0}".format(ll))
-            return ll
+                sub_node_list.append(self.read_node(sub_node))
+            logging.debug("list = {0}".format(sub_node_list))
+            return sub_node_list
         elif node.type == "ASSIGN":
             logging.debug("# ASSIGN")
             left_value = self.read_node(node[0])
@@ -140,10 +140,10 @@ class LameJs:
                 logging.debug("left_value = {0}".format(left_value))
                 logging.debug("right_value = {0}".format(right_value))
                 if right_value and (
-                    left_value.endswith(".href") or
-                    left_value.endswith(".action") or
-                    left_value.endswith(".location") or
-                    left_value.endswith(".src")
+                        left_value.endswith(".href") or
+                        left_value.endswith(".action") or
+                        left_value.endswith(".location") or
+                        left_value.endswith(".src")
                 ):
                     if node[1].type == "IDENTIFIER" and self.js_vars.get(right_value):
                         self.links.append(self.js_vars[right_value])
