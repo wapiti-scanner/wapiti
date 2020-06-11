@@ -195,7 +195,7 @@ class SqlitePersister:
                 )
 
             for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
-                # file_param_value kill be something like ['pix.gif', 'GIF89a', 'image/gif']
+                # file_param_value will be something like ['pix.gif', 'GIF89a', 'image/gif']
                 # just keep the file name
                 if len(file_param_value) == 3:
                     meta = file_param_value[2]
