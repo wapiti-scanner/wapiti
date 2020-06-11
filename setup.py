@@ -37,7 +37,7 @@ doc_and_conf_files = [
             "doc/AUTHORS",
             "doc/ChangeLog_Wapiti",
             "doc/ChangeLog_lswww",
-            "doc/COPYING",
+            "LICENSE",
             "doc/example.txt",
             "doc/FAQ.md",
             "doc/wapiti.1.html",
