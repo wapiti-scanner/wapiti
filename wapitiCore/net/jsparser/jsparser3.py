@@ -127,23 +127,23 @@ opTypeNames = [
 keywords = {}
 
 # Define const END, etc., based on the token names.  Also map name to index.
-for i, t in tokens.copy().items():
-    if re.match(r'^[a-z]', t):
-        const_name = t.upper()
-        keywords[t] = i
-    elif re.match(r'^\W', t):
-        const_name = dict(opTypeNames)[t]
+for i, item_2 in tokens.copy().items():
+    if re.match(r'^[a-z]', item_2):
+        const_name = item_2.upper()
+        keywords[item_2] = i
+    elif re.match(r'^\W', item_2):
+        const_name = dict(opTypeNames)[item_2]
     else:
-        const_name = t
+        const_name = item_2
     globals()[const_name] = i
-    tokens[t] = i
+    tokens[item_2] = i
 
-assignOps = {}
+assign_ops = {}
 
 # Map assignment operators to their indexes in the tokens array.
-for i, t in enumerate(['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%']):
-    assignOps[t] = tokens[t]
-    assignOps[i] = t
+for i, item_2 in enumerate(['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%']):
+    assign_ops[item_2] = tokens[item_2]
+    assign_ops[i] = item_2
 
 # Build a regexp that recognizes operators and punctuators (except newline).
 opRegExpSrc = "^"
@@ -152,10 +152,10 @@ for i, j in opTypeNames:
         continue
     if opRegExpSrc != "^":
         opRegExpSrc += "|^"
-    opRegExpSrc += re.sub(r'[?|^&(){}\[\]+\-*/.]', lambda x: "\\%s" % x.group(0), i)
+    opRegExpSrc += re.sub(r'[?|^&(){}\[\]+\-*/.]', lambda oper: "\\%s" % oper.group(0), i)
 opRegExp = re.compile(opRegExpSrc)
 
-# Convert opTypeNames to an actual dictionary now that we don't care about ordering
+# Convert opTypeNames to an actual dictionary now that we don'item_2 care about ordering
 opTypeNames = dict(opTypeNames)
 
 # A regexp to match floating point literals (but not integer literals).
@@ -176,55 +176,55 @@ class Tokenizer(object):
         self.cursor = 0
         self.source = str(s)
         self.tokens = {}
-        self.tokenIndex = 0
+        self.token_index = 0
         self.lookahead = 0
-        self.scanNewlines = False
-        self.scanOperand = True
+        self.scan_new_lines = False
+        self.scan_operand = True
         self.filename = f
         self.lineno = l
 
     input_ = property(lambda self: self.source[self.cursor:])
     done = property(lambda self: self.peek() == END)
-    token = property(lambda self: self.tokens.get(self.tokenIndex))
+    token = property(lambda self: self.tokens.get(self.token_index))
 
-    def match(self, tt):
-        return self.get() == tt or self.unget()
+    def match(self, match_var):
+        return self.get() == match_var or self.unget()
 
-    def mustMatch(self, tt):
-        if not self.match(tt):
-            raise self.newSyntaxError("Missing " + tokens.get(tt).lower())
+    def must_match(self, match_var):
+        if not self.match(match_var):
+            raise self.new_syntax_error("Missing " + tokens.get(match_var).lower())
         return self.token
 
     def peek(self):
         if self.lookahead:
-            next_one = self.tokens.get((self.tokenIndex + self.lookahead) & 3)
-            if self.scanNewlines and (getattr(next, "lineno", None) != getattr(self, "lineno", None)):
-                tt = NEWLINE
+            next_one = self.tokens.get((self.token_index + self.lookahead) & 3)
+            if self.scan_new_lines and (getattr(next, "lineno", None) != getattr(self, "lineno", None)):
+                match_var = NEWLINE
             else:
-                tt = getattr(next_one, "type_", None)
+                match_var = getattr(next_one, "type_", None)
         else:
-            tt = self.get()
+            match_var = self.get()
             self.unget()
-        return tt
+        return match_var
 
-    def peekOnSameLine(self):
-        self.scanNewlines = True
-        tt = self.peek()
-        self.scanNewlines = False
-        return tt
+    def peek_on_same_line(self):
+        self.scan_new_lines = True
+        match_var = self.peek()
+        self.scan_new_lines = False
+        return match_var
 
     def get(self):
         while self.lookahead:
             self.lookahead -= 1
-            self.tokenIndex = (self.tokenIndex + 1) & 3
-            token = self.tokens.get(self.tokenIndex)
-            if getattr(token, "type_", None) != NEWLINE or self.scanNewlines:
+            self.token_index = (self.token_index + 1) & 3
+            token = self.tokens.get(self.token_index)
+            if getattr(token, "type_", None) != NEWLINE or self.scan_new_lines:
                 return getattr(token, "type_", None)
 
         while True:
             input__ = self.input_
-            if self.scanNewlines:
-                match = re.match(r'^[ \t]+', input__)
+            if self.scan_new_lines:
+                match = re.match(r'^[ \item_2]+', input__)
             else:
                 match = re.match(r'^\s+', input__)
             if match:
@@ -244,17 +244,17 @@ class Tokenizer(object):
             if newlines:
                 self.lineno += len(newlines)
 
-        self.tokenIndex = (self.tokenIndex + 1) & 3
-        token = self.tokens.get(self.tokenIndex)
+        self.token_index = (self.token_index + 1) & 3
+        token = self.tokens.get(self.token_index)
         if not token:
             token = Object()
-            self.tokens[self.tokenIndex] = token
+            self.tokens[self.token_index] = token
 
         if not input__:
             token.type_ = END
             return END
 
-        def matchInput():
+        def match_input():
             match_result = fpRegExp.match(input__)
             if match_result:
                 token.type_ = NUMBER
@@ -288,7 +288,7 @@ class Tokenizer(object):
                 token.value = eval(match_result.group(0))
                 return match_result.group(0)
 
-            if self.scanOperand:
+            if self.scan_operand:
                 match_result = reRegExp.match(input__)
                 if match_result:
                     token.type_ = REGEXP
@@ -297,29 +297,29 @@ class Tokenizer(object):
 
             match_result = opRegExp.match(input__)
             if match_result:
-                op = match_result.group(0)
-                if op in assignOps and input__[len(op)] == '=':
+                op_value = match_result.group(0)
+                if op_value in assign_ops and input__[len(op_value)] == '=':
                     token.type_ = ASSIGN
-                    token.assignOp = globals()[opTypeNames[op]]
-                    token.value = op
+                    token.assign_op = globals()[opTypeNames[op_value]]
+                    token.value = op_value
                     return match_result.group(0) + "="
-                token.type_ = globals()[opTypeNames[op]]
-                if self.scanOperand and (token.type_ in (PLUS, MINUS)):
+                token.type_ = globals()[opTypeNames[op_value]]
+                if self.scan_operand and (token.type_ in (PLUS, MINUS)):
                     token.type_ += UNARY_PLUS - PLUS
-                token.assignOp = None
-                token.value = op
+                token.assign_op = None
+                token.value = op_value
                 return match_result.group(0)
 
-            if self.scanNewlines:
+            if self.scan_new_lines:
                 match_result = re.match(r'^\n', input__)
                 if match_result:
                     token.type_ = NEWLINE
                     return match_result.group(0)
 
-            raise self.newSyntaxError("Illegal token")
+            raise self.new_syntax_error("Illegal token")
 
         token.start = self.cursor
-        self.cursor += len(matchInput())
+        self.cursor += len(match_input())
         token.end = self.cursor
         token.lineno = self.lineno
         return getattr(token, "type_", None)
@@ -328,39 +328,39 @@ class Tokenizer(object):
         self.lookahead += 1
         if self.lookahead == 4:
             raise Exception("PANIC: too much lookahead!")
-        self.tokenIndex = (self.tokenIndex - 1) & 3
+        self.token_index = (self.token_index - 1) & 3
 
-    def newSyntaxError(self, m):
-        return SyntaxError_(m, self.filename, self.lineno)
+    def new_syntax_error(self, msg):
+        return SyntaxError_(msg, self.filename, self.lineno)
 
 
 class CompilerContext(object):
-    def __init__(self, inFunction):
-        self.inFunction = inFunction
-        self.stmtStack = []
-        self.funDecls = []
-        self.varDecls = []
-        self.bracketLevel = 0
-        self.curlyLevel = 0
-        self.parenLevel = 0
-        self.hookLevel = 0
-        self.ecmaStrictMode = False
-        self.inForLoopInit = False
+    def __init__(self, in_function):
+        self.in_function = in_function
+        self.stmt_stack = []
+        self.fun_decls = []
+        self.var_decls = []
+        self.bracket__level = 0
+        self.curly_level = 0
+        self.paren_level = 0
+        self.hook_level = 0
+        self.ecma_strict_mode = False
+        self.in_for_loop_init = False
 
 
-def Script(t, x):
-    n = Statements(t, x)
-    n.type_ = SCRIPT
-    n.funDecls = x.funDecls
-    n.varDecls = x.varDecls
-    return n
+def new_script(item_2, oper):
+    n_ident = statements(item_2, oper)
+    n_ident.type_ = SCRIPT
+    n_ident.fun_decls = oper.fun_decls
+    n_ident.var_decls = oper.var_decls
+    return n_ident
 
 
 class Node(list):
-    def __init__(self, t, type_=None, args=[]):
+    def __init__(self, item_2, type_=None, args=[]):
         list.__init__(self)
 
-        token = t.token
+        token = item_2.token
         if token:
             if type_:
                 self.type_ = type_
@@ -372,8 +372,8 @@ class Node(list):
             self.end = token.end
         else:
             self.type_ = type_
-            self.lineno = t.lineno
-        self.tokenizer = t
+            self.lineno = item_2.lineno
+        self.tokenizer = item_2
 
         for arg in args:
             self.append(arg)
@@ -389,54 +389,54 @@ class Node(list):
                 self.end = kid.end
         return list.append(self, kid)
 
-    indentLevel = 0
+    indent_level = 0
 
     def __str__(self):
-        a = list((str(i), v) for i, v in enumerate(self))
+        enum_list = list((str(i), v) for i, v in enumerate(self))
         for attr in dir(self):
             if attr[0] == "_":
                 continue
             elif attr == "tokenizer":
-                a.append((attr, "[object Object]"))
+                enum_list.append((attr, "[object Object]"))
             elif attr in (
-                    "append", "count", "extend", "getSource", "index",
+                    "append", "count", "extend", "get_source", "index",
                     "insert", "pop", "remove", "reverse", "sort", "type_",
-                    "target", "filename", "indentLevel", "type"
+                    "target", "filename", "indent_level", "type"
             ):
                 continue
             else:
-                a.append((attr, getattr(self, attr)))
+                enum_list.append((attr, getattr(self, attr)))
 
         if len(self):
-            a.append(("length", len(self)))
-        a.sort(key=lambda item: item[0])
-        INDENTATION = "    "
-        Node.indentLevel += 1
-        n = Node.indentLevel
-        s = "{\n%stype: %s" % ((INDENTATION * n), tokenstr(self.type_))
-        for i, value in a:
-            s += ",\n%s%s: " % ((INDENTATION * n), i)
+            enum_list.append(("length", len(self)))
+        enum_list.sort(key=lambda item: item[0])
+        identation = "    "
+        Node.indent_level += 1
+        n_ident = Node.indent_level
+        node_ident = "{\n%stype: %s" % ((identation * n_ident), tokenstr(self.type_))
+        for i, value in enum_list:
+            node_ident += ",\n%s%s: " % ((identation * n_ident), i)
             if i == "value" and self.type_ == REGEXP:
-                s += "/%s/%s" % (value["regexp"], value["modifiers"])
+                node_ident += "/%s/%s" % (value["regexp"], value["modifiers"])
             elif value is None:
-                s += "null"
+                node_ident += "null"
             elif value is False:
-                s += "false"
+                node_ident += "false"
             elif value is True:
-                s += "true"
+                node_ident += "true"
             elif type(value) == list:
-                s += ','.join((str(x) for x in value))
+                node_ident += ','.join((str(oper) for oper in value))
             else:
-                s += str(value)
+                node_ident += str(value)
 
-        Node.indentLevel -= 1
-        n = Node.indentLevel
-        s += "\n%s}" % (INDENTATION * n)
-        return s
+        Node.indent_level -= 1
+        n_ident = Node.indent_level
+        node_ident += "\n%s}" % (identation * n_ident)
+        return node_ident
 
     __repr__ = __str__
 
-    def getSource(self):
+    def get_source(self):
         if getattr(self, "start", None) is not None:
             if getattr(self, "end", None) is not None:
                 return self.tokenizer.source[self.start:self.end]
@@ -451,37 +451,37 @@ class Node(list):
         return True
 
 
-# Statement stack and nested statement handler.
-def nest(t, x, node, func, end=None):
-    x.stmtStack.append(node)
-    n = func(t, x)
-    x.stmtStack.pop()
+# statement stack and nested statement handler.
+def nest(item_2, oper, node, func, end=None):
+    oper.stmt_stack.append(node)
+    n_ident = func(item_2, oper)
+    oper.stmt_stack.pop()
     if end:
-        t.mustMatch(end)
-    return n
+        item_2.must_match(end)
+    return n_ident
 
 
-def tokenstr(tt):
-    t = tokens[tt]
-    if re.match(r'^\W', t):
-        return opTypeNames[t]
-    return t.upper()
+def tokenstr(match_var):
+    item_2 = tokens[match_var]
+    if re.match(r'^\W', item_2):
+        return opTypeNames[item_2]
+    return item_2.upper()
 
 
-def Statements(t, x):
-    n = Node(t, BLOCK)
-    x.stmtStack.append(n)
-    while not t.done and t.peek() != RIGHT_CURLY:
-        n.append(Statement(t, x))
-    x.stmtStack.pop()
-    return n
+def statements(item_2, oper):
+    n_ident = Node(item_2, BLOCK)
+    oper.stmt_stack.append(n_ident)
+    while not item_2.done and item_2.peek() != RIGHT_CURLY:
+        n_ident.append(statement(item_2, oper))
+    oper.stmt_stack.pop()
+    return n_ident
 
 
-def Block(t, x):
-    t.mustMatch(LEFT_CURLY)
-    n = Statements(t, x)
-    t.mustMatch(RIGHT_CURLY)
-    return n
+def block(item_2, oper):
+    item_2.must_match(LEFT_CURLY)
+    n_ident = statements(item_2, oper)
+    item_2.must_match(RIGHT_CURLY)
+    return n_ident
 
 
 DECLARED_FORM = 0
@@ -489,311 +489,311 @@ EXPRESSED_FORM = 1
 STATEMENT_FORM = 2
 
 
-def Statement(t, x):
-    tt = t.get()
+def statement(item_2, oper):
+    match_var = item_2.get()
 
     # Cases for statements ending in a right curly return early, avoiding the
     # common semicolon insertion magic after this switch.
-    if tt == FUNCTION:
-        if len(x.stmtStack) > 1:
+    if match_var == FUNCTION:
+        if len(oper.stmt_stack) > 1:
             type_ = STATEMENT_FORM
         else:
             type_ = DECLARED_FORM
-        return FunctionDefinition(t, x, True, type_)
+        return function_definition(item_2, oper, True, type_)
 
-    elif tt == LEFT_CURLY:
-        n = Statements(t, x)
-        t.mustMatch(RIGHT_CURLY)
-        return n
+    elif match_var == LEFT_CURLY:
+        n_ident = statements(item_2, oper)
+        item_2.must_match(RIGHT_CURLY)
+        return n_ident
 
-    elif tt == IF:
-        n = Node(t)
-        n.condition = ParenExpression(t, x)
-        x.stmtStack.append(n)
-        n.thenPart = Statement(t, x)
-        if t.match(ELSE):
-            n.elsePart = Statement(t, x)
+    elif match_var == IF:
+        n_ident = Node(item_2)
+        n_ident.condition = paren_expression(item_2, oper)
+        oper.stmt_stack.append(n_ident)
+        n_ident.then_part = statement(item_2, oper)
+        if item_2.match(ELSE):
+            n_ident.else_part = statement(item_2, oper)
         else:
-            n.elsePart = None
-        x.stmtStack.pop()
-        return n
+            n_ident.else_part = None
+        oper.stmt_stack.pop()
+        return n_ident
 
-    elif tt == SWITCH:
-        n = Node(t)
-        t.mustMatch(LEFT_PAREN)
-        n.discriminant = Expression(t, x)
-        t.mustMatch(RIGHT_PAREN)
-        n.cases = []
-        n.defaultIndex = -1
-        x.stmtStack.append(n)
-        t.mustMatch(LEFT_CURLY)
+    elif match_var == SWITCH:
+        n_ident = Node(item_2)
+        item_2.must_match(LEFT_PAREN)
+        n_ident.discriminant = expression(item_2, oper)
+        item_2.must_match(RIGHT_PAREN)
+        n_ident.cases = []
+        n_ident.default_index = -1
+        oper.stmt_stack.append(n_ident)
+        item_2.must_match(LEFT_CURLY)
         while True:
-            tt = t.get()
-            if tt == RIGHT_CURLY:
+            match_var = item_2.get()
+            if match_var == RIGHT_CURLY:
                 break
 
-            if tt in (DEFAULT, CASE):
-                if tt == DEFAULT and n.defaultIndex >= 0:
-                    raise t.newSyntaxError("More than one switch default")
-                n2 = Node(t)
-                if tt == DEFAULT:
-                    n.defaultIndex = len(n.cases)
+            if match_var in (DEFAULT, CASE):
+                if match_var == DEFAULT and n_ident.default_index >= 0:
+                    raise item_2.new_syntax_error("More than one switch default")
+                node_2 = Node(item_2)
+                if match_var == DEFAULT:
+                    n_ident.default_index = len(n_ident.cases)
                 else:
-                    n2.caseLabel = Expression(t, x, COLON)
+                    node_2.case_label = expression(item_2, oper, COLON)
             else:
-                raise t.newSyntaxError("Invalid switch case")
-            t.mustMatch(COLON)
-            n2.statements = Node(t, BLOCK)
+                raise item_2.new_syntax_error("Invalid switch case")
+            item_2.must_match(COLON)
+            node_2.statements = Node(item_2, BLOCK)
             while True:
-                tt = t.peek()
-                if tt == CASE or tt == DEFAULT or tt == RIGHT_CURLY:
+                match_var = item_2.peek()
+                if match_var == CASE or match_var == DEFAULT or match_var == RIGHT_CURLY:
                     break
-                n2.statements.append(Statement(t, x))
-            n.cases.append(n2)
-        x.stmtStack.pop()
-        return n
+                node_2.statements.append(statement(item_2, oper))
+            n_ident.cases.append(node_2)
+        oper.stmt_stack.pop()
+        return n_ident
 
-    elif tt == FOR:
-        n = Node(t)
-        n2 = None
-        n.isLoop = True
-        t.mustMatch(LEFT_PAREN)
-        tt = t.peek()
-        if tt != SEMICOLON:
-            x.inForLoopInit = True
-            if tt == VAR or tt == CONST:
-                t.get()
-                n2 = Variables(t, x)
+    elif match_var == FOR:
+        n_ident = Node(item_2)
+        node_2 = None
+        n_ident.is_loop = True
+        item_2.must_match(LEFT_PAREN)
+        match_var = item_2.peek()
+        if match_var != SEMICOLON:
+            oper.in_for_loop_init = True
+            if match_var == VAR or match_var == CONST:
+                item_2.get()
+                node_2 = variables(item_2, oper)
             else:
-                n2 = Expression(t, x)
-            x.inForLoopInit = False
+                node_2 = expression(item_2, oper)
+            oper.in_for_loop_init = False
 
-        if n2 and t.match(IN):
-            n.type_ = FOR_IN
-            if n2.type_ == VAR:
-                if len(n2) != 1:
-                    raise SyntaxError("Invalid for..in left-hand side", t.filename, n2.lineno)
+        if node_2 and item_2.match(IN):
+            n_ident.type_ = FOR_IN
+            if node_2.type_ == VAR:
+                if len(node_2) != 1:
+                    raise SyntaxError("Invalid for..in left-hand side", item_2.filename, node_2.lineno)
 
-                # NB: n2[0].type_ == INDENTIFIER and n2[0].value == n2[0].name
-                n.iterator = n2[0]
-                n.varDecl = n2
+                # NB: node_2[0].type_ == INDENTIFIER and node_2[0].value == node_2[0].name
+                n_ident.iterator = node_2[0]
+                n_ident.var_decl = node_2
             else:
-                n.iterator = n2
-                n.varDecl = None
-            n.object = Expression(t, x)
+                n_ident.iterator = node_2
+                n_ident.var_decl = None
+            n_ident.object = expression(item_2, oper)
         else:
-            if n2:
-                n.setup = n2
+            if node_2:
+                n_ident.setup = node_2
             else:
-                n.setup = None
-            t.mustMatch(SEMICOLON)
-            if t.peek() == SEMICOLON:
-                n.condition = None
+                n_ident.setup = None
+            item_2.must_match(SEMICOLON)
+            if item_2.peek() == SEMICOLON:
+                n_ident.condition = None
             else:
-                n.condition = Expression(t, x)
-            t.mustMatch(SEMICOLON)
-            if t.peek() == RIGHT_PAREN:
-                n.update = None
+                n_ident.condition = expression(item_2, oper)
+            item_2.must_match(SEMICOLON)
+            if item_2.peek() == RIGHT_PAREN:
+                n_ident.update = None
             else:
-                n.update = Expression(t, x)
-        t.mustMatch(RIGHT_PAREN)
-        n.body = nest(t, x, n, Statement)
-        return n
+                n_ident.update = expression(item_2, oper)
+        item_2.must_match(RIGHT_PAREN)
+        n_ident.body = nest(item_2, oper, n_ident, statement)
+        return n_ident
 
-    elif tt == WHILE:
-        n = Node(t)
-        n.isLoop = True
-        n.condition = ParenExpression(t, x)
-        n.body = nest(t, x, n, Statement)
-        return n
+    elif match_var == WHILE:
+        n_ident = Node(item_2)
+        n_ident.is_loop = True
+        n_ident.condition = paren_expression(item_2, oper)
+        n_ident.body = nest(item_2, oper, n_ident, statement)
+        return n_ident
 
-    elif tt == DO:
-        n = Node(t)
-        n.isLoop = True
-        n.body = nest(t, x, n, Statement, WHILE)
-        n.condition = ParenExpression(t, x)
-        if not x.ecmaStrictMode:
+    elif match_var == DO:
+        n_ident = Node(item_2)
+        n_ident.is_loop = True
+        n_ident.body = nest(item_2, oper, n_ident, statement, WHILE)
+        n_ident.condition = paren_expression(item_2, oper)
+        if not oper.ecma_strict_mode:
             # <script language="JavaScript"> (without version hints) may need
             # automatic semicolon insertion without a newline after do-while.
             # See http://bugzilla.mozilla.org/show_bug.cgi?id=238945.
-            t.match(SEMICOLON)
-            return n
+            item_2.match(SEMICOLON)
+            return n_ident
 
-    elif tt in (BREAK, CONTINUE):
-        n = Node(t)
-        if t.peekOnSameLine() == IDENTIFIER:
-            t.get()
-            n.label = t.token.value
-        ss = x.stmtStack
-        i = len(ss)
-        label = getattr(n, "label", None)
+    elif match_var in (BREAK, CONTINUE):
+        n_ident = Node(item_2)
+        if item_2.peek_on_same_line() == IDENTIFIER:
+            item_2.get()
+            n_ident.label = item_2.token.value
+        stmt_s = oper.stmt_stack
+        i = len(stmt_s)
+        label = getattr(n_ident, "label", None)
         if label:
             while True:
                 i -= 1
                 if i < 0:
-                    raise t.newSyntaxError("Label not found")
-                if getattr(ss[i], "label", None) == label:
+                    raise item_2.new_syntax_error("Label not found")
+                if getattr(stmt_s[i], "label", None) == label:
                     break
         else:
             while True:
                 i -= 1
                 if i < 0:
-                    if tt == BREAK:
-                        raise t.newSyntaxError("Invalid break")
+                    if match_var == BREAK:
+                        raise item_2.new_syntax_error("Invalid break")
                     else:
-                        raise t.newSyntaxError("Invalid continue")
-                if getattr(ss[i], "isLoop", None) or (tt == BREAK and ss[i].type_ == SWITCH):
+                        raise item_2.new_syntax_error("Invalid continue")
+                if getattr(stmt_s[i], "is_loop", None) or (match_var == BREAK and stmt_s[i].type_ == SWITCH):
                     break
-        n.target = ss[i]
+        n_ident.target = stmt_s[i]
 
-    elif tt == TRY:
-        n = Node(t)
-        n.tryBlock = Block(t, x)
-        n.catchClauses = []
-        while t.match(CATCH):
-            n2 = Node(t)
-            t.mustMatch(LEFT_PAREN)
-            n2.varName = t.mustMatch(IDENTIFIER).value
-            if t.match(IF):
-                if x.ecmaStrictMode:
-                    raise t.newSyntaxError("Illegal catch guard")
-                if n.catchClauses and not n.catchClauses[-1].guard:
-                    raise t.newSyntaxError("Gaurded catch after unguarded")
-                n2.guard = Expression(t, x)
+    elif match_var == TRY:
+        n_ident = Node(item_2)
+        n_ident.try_block = block(item_2, oper)
+        n_ident.catch_clauses = []
+        while item_2.match(CATCH):
+            node_2 = Node(item_2)
+            item_2.must_match(LEFT_PAREN)
+            node_2.var_name = item_2.must_match(IDENTIFIER).value
+            if item_2.match(IF):
+                if oper.ecma_strict_mode:
+                    raise item_2.new_syntax_error("Illegal catch guard")
+                if n_ident.catch_clauses and not n_ident.catch_clauses[-1].guard:
+                    raise item_2.new_syntax_error("Gaurded catch after unguarded")
+                node_2.guard = expression(item_2, oper)
             else:
-                n2.guard = None
-            t.mustMatch(RIGHT_PAREN)
-            n2.block = Block(t, x)
-            n.catchClauses.append(n2)
-        if t.match(FINALLY):
-            n.finallyBlock = Block(t, x)
-        if not n.catchClauses and not getattr(n, "finallyBlock", None):
-            raise t.newSyntaxError("Invalid try statement")
-        return n
+                node_2.guard = None
+            item_2.must_match(RIGHT_PAREN)
+            node_2.block = block(item_2, oper)
+            n_ident.catch_clauses.append(node_2)
+        if item_2.match(FINALLY):
+            n_ident.finally_block = block(item_2, oper)
+        if not n_ident.catch_clauses and not getattr(n_ident, "finally_block", None):
+            raise item_2.new_syntax_error("Invalid try statement")
+        return n_ident
 
-    elif tt in (CATCH, FINALLY):
-        raise t.newSyntaxError(tokens[tt] + " without preceding try")
+    elif match_var in (CATCH, FINALLY):
+        raise item_2.new_syntax_error(tokens[match_var] + " without preceding try")
 
-    elif tt == THROW:
-        n = Node(t)
-        n.exception = Expression(t, x)
+    elif match_var == THROW:
+        n_ident = Node(item_2)
+        n_ident.exception = expression(item_2, oper)
 
-    elif tt == RETURN:
-        if not x.inFunction:
-            raise t.newSyntaxError("Invalid return")
-        n = Node(t)
-        tt = t.peekOnSameLine()
-        if tt not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
-            n.value = Expression(t, x)
+    elif match_var == RETURN:
+        if not oper.in_function:
+            raise item_2.new_syntax_error("Invalid return")
+        n_ident = Node(item_2)
+        match_var = item_2.peek_on_same_line()
+        if match_var not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
+            n_ident.value = expression(item_2, oper)
 
-    elif tt == WITH:
-        n = Node(t)
-        n.object = ParenExpression(t, x)
-        n.body = nest(t, x, n, Statement)
-        return n
+    elif match_var == WITH:
+        n_ident = Node(item_2)
+        n_ident.object = paren_expression(item_2, oper)
+        n_ident.body = nest(item_2, oper, n_ident, statement)
+        return n_ident
 
-    elif tt in (VAR, CONST):
-        n = Variables(t, x)
+    elif match_var in (VAR, CONST):
+        n_ident = variables(item_2, oper)
 
-    elif tt == DEBUGGER:
-        n = Node(t)
+    elif match_var == DEBUGGER:
+        n_ident = Node(item_2)
 
-    elif tt in (NEWLINE, SEMICOLON):
-        n = Node(t, SEMICOLON)
-        n.expression = None
-        return n
+    elif match_var in (NEWLINE, SEMICOLON):
+        n_ident = Node(item_2, SEMICOLON)
+        n_ident.expression = None
+        return n_ident
 
     else:
-        if tt == IDENTIFIER:
-            t.scanOperand = False
-            tt = t.peek()
-            t.scanOperand = True
-            if tt == COLON:
-                label = t.token.value
-                ss = x.stmtStack
-                i = len(ss) - 1
+        if match_var == IDENTIFIER:
+            item_2.scan_operand = False
+            match_var = item_2.peek()
+            item_2.scan_operand = True
+            if match_var == COLON:
+                label = item_2.token.value
+                stmt_s = oper.stmt_stack
+                i = len(stmt_s) - 1
                 while i >= 0:
-                    if getattr(ss[i], "label", None) == label:
-                        raise t.newSyntaxError("Duplicate label")
+                    if getattr(stmt_s[i], "label", None) == label:
+                        raise item_2.new_syntax_error("Duplicate label")
                     i -= 1
-                t.get()
-                n = Node(t, LABEL)
-                n.label = label
-                n.statement = nest(t, x, n, Statement)
-                return n
+                item_2.get()
+                n_ident = Node(item_2, LABEL)
+                n_ident.label = label
+                n_ident.statement = nest(item_2, oper, n_ident, statement)
+                return n_ident
 
-        n = Node(t, SEMICOLON)
-        t.unget()
-        n.expression = Expression(t, x)
-        n.end = n.expression.end
+        n_ident = Node(item_2, SEMICOLON)
+        item_2.unget()
+        n_ident.expression = expression(item_2, oper)
+        n_ident.end = n_ident.expression.end
 
-    if t.lineno == t.token.lineno:
-        tt = t.peekOnSameLine()
-        if tt not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
-            raise t.newSyntaxError("Missing ; before statement")
-    t.match(SEMICOLON)
-    return n
+    if item_2.lineno == item_2.token.lineno:
+        match_var = item_2.peek_on_same_line()
+        if match_var not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
+            raise item_2.new_syntax_error("Missing ; before statement")
+    item_2.match(SEMICOLON)
+    return n_ident
 
 
-def FunctionDefinition(t, x, requireName, functionForm):
-    f = Node(t)
-    if f.type_ != FUNCTION:
-        if f.value == "get":
-            f.type_ = GETTER
+def function_definition(item_2, oper, require_name, function_form):
+    init_node = Node(item_2)
+    if init_node.type_ != FUNCTION:
+        if init_node.value == "get":
+            init_node.type_ = GETTER
         else:
-            f.type_ = SETTER
-    if t.match(IDENTIFIER):
-        f.name = t.token.value
-    elif requireName:
-        raise t.newSyntaxError("Missing function identifier")
+            init_node.type_ = SETTER
+    if item_2.match(IDENTIFIER):
+        init_node.name = item_2.token.value
+    elif require_name:
+        raise item_2.new_syntax_error("Missing function identifier")
 
-    t.mustMatch(LEFT_PAREN)
-    f.params = []
+    item_2.must_match(LEFT_PAREN)
+    init_node.params = []
     while True:
-        tt = t.get()
-        if tt == RIGHT_PAREN:
+        match_var = item_2.get()
+        if match_var == RIGHT_PAREN:
             break
-        if tt != IDENTIFIER:
-            raise t.newSyntaxError("Missing formal parameter")
-        f.params.append(t.token.value)
-        if t.peek() != RIGHT_PAREN:
-            t.mustMatch(COMMA)
+        if match_var != IDENTIFIER:
+            raise item_2.new_syntax_error("Missing formal parameter")
+        init_node.params.append(item_2.token.value)
+        if item_2.peek() != RIGHT_PAREN:
+            item_2.must_match(COMMA)
 
-    t.mustMatch(LEFT_CURLY)
-    x2 = CompilerContext(True)
-    f.body = Script(t, x2)
-    t.mustMatch(RIGHT_CURLY)
-    f.end = t.token.end
+    item_2.must_match(LEFT_CURLY)
+    oper_2 = CompilerContext(True)
+    init_node.body = new_script(item_2, oper_2)
+    item_2.must_match(RIGHT_CURLY)
+    init_node.end = item_2.token.end
 
-    f.functionForm = functionForm
-    if functionForm == DECLARED_FORM:
-        x.funDecls.append(f)
-    return f
+    init_node.function_form = function_form
+    if function_form == DECLARED_FORM:
+        oper.fun_decls.append(init_node)
+    return init_node
 
 
-def Variables(t, x):
-    n = Node(t)
+def variables(item_2, oper):
+    n_ident = Node(item_2)
     while True:
-        t.mustMatch(IDENTIFIER)
-        n2 = Node(t)
-        n2.name = n2.value
-        if t.match(ASSIGN):
-            if t.token.assignOp:
-                raise t.newSyntaxError("Invalid variable initialization")
-            n2.initializer = Expression(t, x, COMMA)
-        n2.readOnly = not not (n.type_ == CONST)
-        n.append(n2)
-        x.varDecls.append(n2)
-        if not t.match(COMMA):
+        item_2.must_match(IDENTIFIER)
+        node_2 = Node(item_2)
+        node_2.name = node_2.value
+        if item_2.match(ASSIGN):
+            if item_2.token.assign_op:
+                raise item_2.new_syntax_error("Invalid variable initialization")
+            node_2.initializer = expression(item_2, oper, COMMA)
+        node_2.read_only = not not (n_ident.type_ == CONST)
+        n_ident.append(node_2)
+        oper.var_decls.append(node_2)
+        if not item_2.match(COMMA):
             break
-    return n
+    return n_ident
 
 
-def ParenExpression(t, x):
-    t.mustMatch(LEFT_PAREN)
-    n = Expression(t, x)
-    t.mustMatch(RIGHT_PAREN)
-    return n
+def paren_expression(item_2, oper):
+    item_2.must_match(LEFT_PAREN)
+    n_ident = expression(item_2, oper)
+    item_2.must_match(RIGHT_PAREN)
+    return n_ident
 
 
 opPrecedence = {
@@ -850,289 +850,289 @@ for i in opArity.copy():
     opArity[globals()[i]] = opArity[i]
 
 
-def Expression(t, x, stop=None):
+def expression(item_2, oper, stop=None):
     operators = []
     operands = []
-    bl = x.bracketLevel
-    cl = x.curlyLevel
-    pl = x.parenLevel
-    hl = x.hookLevel
+    br_level = oper.bracket__level
+    cur_level = oper.curly_level
+    par_levl = oper.paren_level
+    hk_levle = oper.hook_level
 
     def reduce_():
-        n = operators.pop()
-        op = n.type_
-        arity = opArity[op]
+        n_ident = operators.pop()
+        op_value = n_ident.type_
+        arity = opArity[op_value]
         if arity == -2:
             # Flatten left-associative trees.
             left = (len(operands) >= 2 and operands[-2])
-            if left.type_ == op:
+            if left.type_ == op_value:
                 right = operands.pop()
                 left.append(right)
                 return left
             arity = 2
 
-        # Always use append to add operands to n, to update start and end.
-        a = operands[-arity:]
+        # Always use append to add operands to n_ident, to update start and end.
+        enum_list = operands[-arity:]
         del operands[-arity:]
-        for operand in a:
-            n.append(operand)
+        for operand in enum_list:
+            n_ident.append(operand)
 
         # Include closing bracket or postfix operator in [start,end).
-        if n.end < t.token.end:
-            n.end = t.token.end
+        if n_ident.end < item_2.token.end:
+            n_ident.end = item_2.token.end
 
-        operands.append(n)
-        return n
+        operands.append(n_ident)
+        return n_ident
 
     class BreakOutOfLoops(Exception):
         pass
 
     try:
         while True:
-            tt = t.get()
-            if tt == END:
+            match_var = item_2.get()
+            if match_var == END:
                 break
 
-            if (tt == stop and x.bracketLevel == bl and x.curlyLevel == cl and
-                    x.parenLevel == pl and x.hookLevel == hl):
-                # Stop only if tt matches the optional stop parameter, and that
+            if (match_var == stop and oper.bracket__level == br_level and oper.curly_level == cur_level and
+                    oper.paren_level == par_levl and oper.hook_level == hk_levle):
+                # Stop only if match_var matches the optional stop parameter, and that
                 # token is not quoted by some kind of bracket.
                 break
-            if tt == SEMICOLON:
-                # NB: cannot be empty, Statement handled that.
+            if match_var == SEMICOLON:
+                # NB: cannot be empty, statement handled that.
                 raise BreakOutOfLoops
 
-            elif tt in (ASSIGN, HOOK, COLON):
-                if t.scanOperand:
+            elif match_var in (ASSIGN, HOOK, COLON):
+                if item_2.scan_operand:
                     raise BreakOutOfLoops
                 while (
-                    (operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(tt, -1)) or
-                    (tt == COLON and operators and operators[-1].type_ == ASSIGN)
+                    (operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(match_var, -1)) or
+                    (match_var == COLON and operators and operators[-1].type_ == ASSIGN)
                 ):
                     reduce_()
-                if tt == COLON:
+                if match_var == COLON:
                     if operators:
-                        n = operators[-1]
-                    if not operators or n.type_ != HOOK:
-                        raise t.newSyntaxError("Invalid label")
-                    x.hookLevel -= 1
+                        n_ident = operators[-1]
+                    if not operators or n_ident.type_ != HOOK:
+                        raise item_2.new_syntax_error("Invalid label")
+                    oper.hook_level -= 1
                 else:
-                    operators.append(Node(t))
-                    if tt == ASSIGN:
-                        operands[-1].assignOp = t.token.assignOp
+                    operators.append(Node(item_2))
+                    if match_var == ASSIGN:
+                        operands[-1].assign_op = item_2.token.assign_op
                     else:
-                        x.hookLevel += 1
+                        oper.hook_level += 1
 
-                t.scanOperand = True
+                item_2.scan_operand = True
 
-            elif tt in (
+            elif match_var in (
                     IN, COMMA, OR, AND, BITWISE_OR, BITWISE_XOR, BITWISE_AND, EQ, NE, STRICT_EQ, STRICT_NE, LT, LE, GE,
                     GT, INSTANCEOF, LSH, RSH, URSH, PLUS, MINUS, MUL, DIV, MOD, DOT
             ):
                 # We're treating comma as left-associative so reduce can fold
                 # left-heavy COMMA trees into a single array.
-                if tt == IN:
+                if match_var == IN:
                     # An in operator should not be parsed if we're parsing the
                     # head of a for (...) loop, unless it is in the then part of
                     # a conditional expression, or parenthesized somehow.
-                    if x.inForLoopInit and not x.hookLevel and not x.bracketLevel and \
-                            not x.curlyLevel and not x.parenLevel:
+                    if oper.in_for_loop_init and not oper.hook_level and not oper.bracket__level and \
+                            not oper.curly_level and not oper.paren_level:
                         raise BreakOutOfLoops
 
-                if t.scanOperand:
+                if item_2.scan_operand:
                     raise BreakOutOfLoops
                 while operators and opPrecedence.get(operators[-1].type_, -1) and (
-                    opPrecedence.get(operators[-1].type_, -1) >= opPrecedence.get(tt, -1)
+                    opPrecedence.get(operators[-1].type_, -1) >= opPrecedence.get(match_var, -1)
                 ):
                     reduce_()
-                if tt == DOT:
-                    t.mustMatch(IDENTIFIER)
-                    operands.append(Node(t, DOT, [operands.pop(), Node(t)]))
+                if match_var == DOT:
+                    item_2.must_match(IDENTIFIER)
+                    operands.append(Node(item_2, DOT, [operands.pop(), Node(item_2)]))
                 else:
-                    operators.append(Node(t))
-                    t.scanOperand = True
+                    operators.append(Node(item_2))
+                    item_2.scan_operand = True
 
-            elif tt in (
+            elif match_var in (
                     DELETE, VOID, TYPEOF, NOT, BITWISE_NOT, UNARY_PLUS, UNARY_MINUS, NEW
             ):
-                if not t.scanOperand:
+                if not item_2.scan_operand:
                     raise BreakOutOfLoops
-                operators.append(Node(t))
+                operators.append(Node(item_2))
 
-            elif tt in (INCREMENT, DECREMENT):
-                if t.scanOperand:
-                    operators.append(Node(t))  # prefix increment or decrement
+            elif match_var in (INCREMENT, DECREMENT):
+                if item_2.scan_operand:
+                    operators.append(Node(item_2))  # prefix increment or decrement
                 else:
-                    # Don't cross a line boundary for postfix {in,de}crement.
-                    if t.tokens.get((t.tokenIndex + t.lookahead - 1) & 3).lineno != t.lineno:
+                    # Don'item_2 cross a line boundary for postfix {in,de}crement.
+                    if item_2.tokens.get((item_2.token_index + item_2.lookahead - 1) & 3).lineno != item_2.lineno:
                         raise BreakOutOfLoops
 
                     # Use >, not >=, so postfix has higher precedence than
                     # prefix.
-                    while operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(tt, -1):
+                    while operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(match_var, -1):
                         reduce_()
-                    n = Node(t, tt, [operands.pop()])
-                    n.postfix = True
-                    operands.append(n)
+                    n_ident = Node(item_2, match_var, [operands.pop()])
+                    n_ident.postfix = True
+                    operands.append(n_ident)
 
-            elif tt == FUNCTION:
-                if not t.scanOperand:
+            elif match_var == FUNCTION:
+                if not item_2.scan_operand:
                     raise BreakOutOfLoops
-                operands.append(FunctionDefinition(t, x, False, EXPRESSED_FORM))
-                t.scanOperand = False
+                operands.append(function_definition(item_2, oper, False, EXPRESSED_FORM))
+                item_2.scan_operand = False
 
-            elif tt in (NULL, THIS, TRUE, FALSE, IDENTIFIER, NUMBER, STRING, REGEXP):
-                if not t.scanOperand:
+            elif match_var in (NULL, THIS, TRUE, FALSE, IDENTIFIER, NUMBER, STRING, REGEXP):
+                if not item_2.scan_operand:
                     raise BreakOutOfLoops
-                operands.append(Node(t))
-                t.scanOperand = False
+                operands.append(Node(item_2))
+                item_2.scan_operand = False
 
-            elif tt == LEFT_BRACKET:
-                if t.scanOperand:
+            elif match_var == LEFT_BRACKET:
+                if item_2.scan_operand:
                     # Array initializer. Parse using recursive descent, as the
                     # sub-grammer here is not an operator grammar.
-                    n = Node(t, ARRAY_INIT)
+                    n_ident = Node(item_2, ARRAY_INIT)
                     while True:
-                        tt = t.peek()
-                        if tt == RIGHT_BRACKET:
+                        match_var = item_2.peek()
+                        if match_var == RIGHT_BRACKET:
                             break
-                        if tt == COMMA:
-                            t.get()
-                            n.append(None)
+                        if match_var == COMMA:
+                            item_2.get()
+                            n_ident.append(None)
                             continue
-                        n.append(Expression(t, x, COMMA))
-                        if not t.match(COMMA):
+                        n_ident.append(expression(item_2, oper, COMMA))
+                        if not item_2.match(COMMA):
                             break
 
-                    t.mustMatch(RIGHT_BRACKET)
-                    operands.append(n)
-                    t.scanOperand = False
+                    item_2.must_match(RIGHT_BRACKET)
+                    operands.append(n_ident)
+                    item_2.scan_operand = False
                 else:
-                    operators.append(Node(t, INDEX))
-                    t.scanOperand = True
-                    x.bracketLevel += 1
+                    operators.append(Node(item_2, INDEX))
+                    item_2.scan_operand = True
+                    oper.bracket__level += 1
 
-            elif tt == RIGHT_BRACKET:
-                if t.scanOperand or x.bracketLevel == bl:
+            elif match_var == RIGHT_BRACKET:
+                if item_2.scan_operand or oper.bracket__level == br_level:
                     raise BreakOutOfLoops
                 while reduce_().type_ != INDEX:
                     continue
-                x.bracketLevel -= 1
+                oper.bracket__level -= 1
 
-            elif tt == LEFT_CURLY:
-                if not t.scanOperand:
+            elif match_var == LEFT_CURLY:
+                if not item_2.scan_operand:
                     raise BreakOutOfLoops
                 # Object initializer. As for array initializers (see above),
                 # parse using recursive descent.
-                x.curlyLevel += 1
-                n = Node(t, OBJECT_INIT)
+                oper.curly_level += 1
+                n_ident = Node(item_2, OBJECT_INIT)
 
                 class BreakOutOfObjectInit(Exception):
                     pass
 
                 try:
-                    if not t.match(RIGHT_CURLY):
+                    if not item_2.match(RIGHT_CURLY):
                         while True:
-                            tt = t.get()
-                            if (t.token.value == "get" or t.token.value == "set") and t.peek == IDENTIFIER:
-                                if x.ecmaStrictMode:
-                                    raise t.newSyntaxError("Illegal property accessor")
-                                n.append(FunctionDefinition(t, x, True, EXPRESSED_FORM))
+                            match_var = item_2.get()
+                            if (item_2.token.value == "get" or item_2.token.value == "set") and item_2.peek == IDENTIFIER:
+                                if oper.ecma_strict_mode:
+                                    raise item_2.new_syntax_error("Illegal property accessor")
+                                n_ident.append(function_definition(item_2, oper, True, EXPRESSED_FORM))
                             else:
-                                if tt in (IDENTIFIER, NUMBER, STRING):
-                                    id_ = Node(t)
-                                elif tt == RIGHT_CURLY:
-                                    if x.ecmaStrictMode:
-                                        raise t.newSyntaxError("Illegal trailing ,")
+                                if match_var in (IDENTIFIER, NUMBER, STRING):
+                                    id_ = Node(item_2)
+                                elif match_var == RIGHT_CURLY:
+                                    if oper.ecma_strict_mode:
+                                        raise item_2.new_syntax_error("Illegal trailing ,")
                                     raise BreakOutOfObjectInit
                                 else:
-                                    raise t.newSyntaxError("Invalid property name")
-                                t.mustMatch(COLON)
-                                n.append(Node(t, PROPERTY_INIT, [id_, Expression(t, x, COMMA)]))
+                                    raise item_2.new_syntax_error("Invalid property name")
+                                item_2.must_match(COLON)
+                                n_ident.append(Node(item_2, PROPERTY_INIT, [id_, expression(item_2, oper, COMMA)]))
 
-                            if not t.match(COMMA):
+                            if not item_2.match(COMMA):
                                 break
-                        t.mustMatch(RIGHT_CURLY)
-                except BreakOutOfObjectInit as e:
+                        item_2.must_match(RIGHT_CURLY)
+                except BreakOutOfObjectInit as exc:
                     pass
-                operands.append(n)
-                t.scanOperand = False
-                x.curlyLevel -= 1
+                operands.append(n_ident)
+                item_2.scan_operand = False
+                oper.curly_level -= 1
 
-            elif tt == RIGHT_CURLY:
-                if not t.scanOperand and x.curlyLevel != cl:
+            elif match_var == RIGHT_CURLY:
+                if not item_2.scan_operand and oper.curly_level != cur_level:
                     raise ParseError("PANIC: right curly botch")
                 raise BreakOutOfLoops
 
-            elif tt == LEFT_PAREN:
-                if t.scanOperand:
-                    operators.append(Node(t, GROUP))
-                    x.parenLevel += 1
+            elif match_var == LEFT_PAREN:
+                if item_2.scan_operand:
+                    operators.append(Node(item_2, GROUP))
+                    oper.paren_level += 1
                 else:
                     while operators and opPrecedence.get(operators[-1].type, -1) > opPrecedence[NEW]:
                         reduce_()
 
-                    # Handle () now, to regularize the n-ary case for n > 0.
-                    # We must set scanOperand in case there are arguments and
+                    # Handle () now, to regularize the n_ident-ary case for n_ident > 0.
+                    # We must set scan_operand in case there are arguments and
                     # the first one is a regexp or unary+/-.
                     if operators:
-                        n = operators[-1]
+                        n_ident = operators[-1]
                     else:
-                        n = Object()
-                        n.type_ = None
-                    t.scanOperand = True
-                    if t.match(RIGHT_PAREN):
-                        if n.type_ == NEW:
+                        n_ident = Object()
+                        n_ident.type_ = None
+                    item_2.scan_operand = True
+                    if item_2.match(RIGHT_PAREN):
+                        if n_ident.type_ == NEW:
                             operators.pop()
-                            n.append(operands.pop())
+                            n_ident.append(operands.pop())
                         else:
-                            n = Node(t, CALL, [operands.pop(), Node(t, LIST)])
-                        operands.append(n)
-                        t.scanOperand = False
+                            n_ident = Node(item_2, CALL, [operands.pop(), Node(item_2, LIST)])
+                        operands.append(n_ident)
+                        item_2.scan_operand = False
                     else:
-                        if n.type_ == NEW:
-                            n.type_ = NEW_WITH_ARGS
+                        if n_ident.type_ == NEW:
+                            n_ident.type_ = NEW_WITH_ARGS
                         else:
-                            operators.append(Node(t, CALL))
-                        x.parenLevel += 1
+                            operators.append(Node(item_2, CALL))
+                        oper.paren_level += 1
 
-            elif tt == RIGHT_PAREN:
-                if t.scanOperand or x.parenLevel == pl:
+            elif match_var == RIGHT_PAREN:
+                if item_2.scan_operand or oper.paren_level == par_levl:
                     raise BreakOutOfLoops
                 while True:
-                    tt = reduce_().type_
-                    if tt in (GROUP, CALL, NEW_WITH_ARGS):
+                    match_var = reduce_().type_
+                    if match_var in (GROUP, CALL, NEW_WITH_ARGS):
                         break
-                if tt != GROUP:
+                if match_var != GROUP:
                     if operands:
-                        n = operands[-1]
-                        if n[1].type_ != COMMA:
-                            n[1] = Node(t, LIST, [n[1]])
+                        n_ident = operands[-1]
+                        if n_ident[1].type_ != COMMA:
+                            n_ident[1] = Node(item_2, LIST, [n_ident[1]])
                         else:
-                            n[1].type_ = LIST
+                            n_ident[1].type_ = LIST
                     else:
                         raise ParseError("Unexpected amount of operands")
-                x.parenLevel -= 1
+                oper.paren_level -= 1
 
             # Automatic semicolon insertion means we may scan across a newline
             # and into the beginning of another statement. If so, break out of
-            # the while loop and let the t.scanOperand logic handle errors.
+            # the while loop and let the item_2.scan_operand logic handle errors.
             else:
                 raise BreakOutOfLoops
-    except BreakOutOfLoops as e:
+    except BreakOutOfLoops as exc:
         pass
 
-    if x.hookLevel != hl:
-        raise t.newSyntaxError("Missing : after ?")
-    if x.parenLevel != pl:
-        raise t.newSyntaxError("Missing ) in parenthetical")
-    if x.bracketLevel != bl:
-        raise t.newSyntaxError("Missing ] in index expression")
-    if t.scanOperand:
-        raise t.newSyntaxError("Missing operand")
+    if oper.hook_level != hk_levle:
+        raise item_2.new_syntax_error("Missing : after ?")
+    if oper.paren_level != par_levl:
+        raise item_2.new_syntax_error("Missing ) in parenthetical")
+    if oper.bracket__level != br_level:
+        raise item_2.new_syntax_error("Missing ] in index expression")
+    if item_2.scan_operand:
+        raise item_2.new_syntax_error("Missing operand")
 
-    t.scanOperand = True
-    t.unget()
+    item_2.scan_operand = True
+    item_2.unget()
     while operators:
         reduce_()
     return operands.pop()
@@ -1151,12 +1151,12 @@ def parse(source, filename=None, starting_line_number=1):
     Raises:
         ParseError
     """
-    t = Tokenizer(source, filename, starting_line_number)
-    x = CompilerContext(False)
-    n = Script(t, x)
-    if not t.done:
-        raise t.newSyntaxError("Syntax error")
-    return n
+    item_2 = Tokenizer(source, filename, starting_line_number)
+    oper = CompilerContext(False)
+    n_ident = new_script(item_2, oper)
+    if not item_2.done:
+        raise item_2.new_syntax_error("Syntax error")
+    return n_ident
 
 
 if __name__ == "__main__":
