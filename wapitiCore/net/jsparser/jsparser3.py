@@ -54,11 +54,11 @@ class Object:
     pass
 
 
-class Error_(Exception):
+class BaseError(Exception):
     pass
 
 
-class ParseError(Error_):
+class ParseError(BaseError):
     pass
 
 
@@ -83,7 +83,7 @@ tokens = {
 # NB: superstring tokens (e.g., ++) must come before their substring token
 # counterparts (+ in the example), so that the opRegExp regular expression
 # synthesized from this list makes the longest possible match.
-opTypeNames = [
+operator_type_names = [
     ('\n', "NEWLINE"),
     (';', "SEMICOLON"),
     (',', "COMMA"),
@@ -127,61 +127,61 @@ opTypeNames = [
 keywords = {}
 
 # Define const END, etc., based on the token names.  Also map name to index.
-for i, item_2 in tokens.copy().items():
-    if re.match(r'^[a-z]', item_2):
-        const_name = item_2.upper()
-        keywords[item_2] = i
-    elif re.match(r'^\W', item_2):
-        const_name = dict(opTypeNames)[item_2]
+for token_id, token_name in tokens.copy().items():
+    if re.match(r'^[a-z]', token_name):
+        const_name = token_name.upper()
+        keywords[token_name] = token_id
+    elif re.match(r'^\W', token_name):
+        const_name = dict(operator_type_names)[token_name]
     else:
-        const_name = item_2
-    globals()[const_name] = i
-    tokens[item_2] = i
+        const_name = token_name
+    globals()[const_name] = token_id
+    tokens[token_name] = token_id
 
 assign_ops = {}
 
 # Map assignment operators to their indexes in the tokens array.
-for i, item_2 in enumerate(['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%']):
-    assign_ops[item_2] = tokens[item_2]
-    assign_ops[i] = item_2
+for token_id, token_name in enumerate(['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%']):
+    assign_ops[token_name] = tokens[token_name]
+    assign_ops[token_id] = token_name
 
 # Build a regexp that recognizes operators and punctuators (except newline).
-opRegExpSrc = "^"
-for i, j in opTypeNames:
-    if i == "\n":
+op_regexp_src = "^"
+for token, __ in operator_type_names:
+    if token == "\n":
         continue
-    if opRegExpSrc != "^":
-        opRegExpSrc += "|^"
-    opRegExpSrc += re.sub(r'[?|^&(){}\[\]+\-*/.]', lambda oper: "\\%s" % oper.group(0), i)
-opRegExp = re.compile(opRegExpSrc)
+    if op_regexp_src != "^":
+        op_regexp_src += "|^"
+    op_regexp_src += re.sub(r'[?|^&(){}\[\]+\-*/.]', lambda oper: "\\%s" % oper.group(0), token)
+op_regexp = re.compile(op_regexp_src)
 
-# Convert opTypeNames to an actual dictionary now that we don'item_2 care about ordering
-opTypeNames = dict(opTypeNames)
+# Convert opTypeNames to an actual dictionary now that we don't care about ordering
+operator_type_names = dict(operator_type_names)
 
 # A regexp to match floating point literals (but not integer literals).
-fpRegExp = re.compile(r'^\d+\.\d*(?:[eE][-+]?\d+)?|^\d+(?:\.\d*)?[eE][-+]?\d+|^\.\d+(?:[eE][-+]?\d+)?')
+float_regexp = re.compile(r'^\d+\.\d*(?:[eE][-+]?\d+)?|^\d+(?:\.\d*)?[eE][-+]?\d+|^\.\d+(?:[eE][-+]?\d+)?')
 
 # A regexp to match regexp literals.
-reRegExp = re.compile(r'^/((?:\\.|\[(?:\\.|[^\]])*\]|[^/])+)/([gimy]*)')
+re_regexp = re.compile(r'^/((?:\\.|\[(?:\\.|[^\]])*\]|[^/])+)/([gimy]*)')
 
 
-class SyntaxError_(ParseError):
+class JavascriptSyntaxError(ParseError):
     def __init__(self, message, filename, lineno):
         ParseError.__init__(self, "Syntax error: %s\n%s:%s" %
                                   (message, filename, lineno))
 
 
 class Tokenizer(object):
-    def __init__(self, s, f, l):
+    def __init__(self, source, filename, starting_line_number):
         self.cursor = 0
-        self.source = str(s)
+        self.source = str(source)
         self.tokens = {}
         self.token_index = 0
         self.lookahead = 0
         self.scan_new_lines = False
         self.scan_operand = True
-        self.filename = f
-        self.lineno = l
+        self.filename = filename
+        self.lineno = starting_line_number
 
     input_ = property(lambda self: self.source[self.cursor:])
     done = property(lambda self: self.peek() == END)
@@ -224,7 +224,7 @@ class Tokenizer(object):
         while True:
             input__ = self.input_
             if self.scan_new_lines:
-                match = re.match(r'^[ \item_2]+', input__)
+                match = re.match(r'^[ \t]+', input__)
             else:
                 match = re.match(r'^\s+', input__)
             if match:
@@ -238,14 +238,17 @@ class Tokenizer(object):
             match = re.match(r'^/(?:\*(?:.|\n)*?\*/|/.*)', input__)
             if not match:
                 break
+                
             comment = match.group(0)
             self.cursor += len(comment)
             newlines = re.findall(r'\n', comment)
+            
             if newlines:
                 self.lineno += len(newlines)
 
         self.token_index = (self.token_index + 1) & 3
         token = self.tokens.get(self.token_index)
+        
         if not token:
             token = Object()
             self.tokens[self.token_index] = token
@@ -255,7 +258,7 @@ class Tokenizer(object):
             return END
 
         def match_input():
-            match_result = fpRegExp.match(input__)
+            match_result = float_regexp.match(input__)
             if match_result:
                 token.type_ = NUMBER
                 token.value = float(match_result.group(0))
@@ -289,23 +292,26 @@ class Tokenizer(object):
                 return match_result.group(0)
 
             if self.scan_operand:
-                match_result = reRegExp.match(input__)
+                match_result = re_regexp.match(input__)
                 if match_result:
                     token.type_ = REGEXP
                     token.value = {"regexp": match_result.group(1), "modifiers": match_result.group(2)}
                     return match_result.group(0)
 
-            match_result = opRegExp.match(input__)
+            match_result = op_regexp.match(input__)
             if match_result:
                 op_value = match_result.group(0)
+                
                 if op_value in assign_ops and input__[len(op_value)] == '=':
                     token.type_ = ASSIGN
-                    token.assign_op = globals()[opTypeNames[op_value]]
+                    token.assign_op = globals()[operator_type_names[op_value]]
                     token.value = op_value
                     return match_result.group(0) + "="
-                token.type_ = globals()[opTypeNames[op_value]]
+                
+                token.type_ = globals()[operator_type_names[op_value]]
                 if self.scan_operand and (token.type_ in (PLUS, MINUS)):
                     token.type_ += UNARY_PLUS - PLUS
+                    
                 token.assign_op = None
                 token.value = op_value
                 return match_result.group(0)
@@ -331,16 +337,16 @@ class Tokenizer(object):
         self.token_index = (self.token_index - 1) & 3
 
     def new_syntax_error(self, msg):
-        return SyntaxError_(msg, self.filename, self.lineno)
+        return JavascriptSyntaxError(msg, self.filename, self.lineno)
 
 
 class CompilerContext(object):
     def __init__(self, in_function):
-        self.in_function = in_function
+        self.inFunction = in_function
         self.stmt_stack = []
         self.fun_decls = []
         self.var_decls = []
-        self.bracket__level = 0
+        self.bracket_level = 0
         self.curly_level = 0
         self.paren_level = 0
         self.hook_level = 0
@@ -348,19 +354,19 @@ class CompilerContext(object):
         self.in_for_loop_init = False
 
 
-def new_script(item_2, oper):
-    n_ident = statements(item_2, oper)
-    n_ident.type_ = SCRIPT
-    n_ident.fun_decls = oper.fun_decls
-    n_ident.var_decls = oper.var_decls
-    return n_ident
+def new_script(tokenizer, context):
+    node = statements(tokenizer, context)
+    node.type_ = SCRIPT
+    node.fun_decls = context.fun_decls
+    node.var_decls = context.var_decls
+    return node
 
 
 class Node(list):
-    def __init__(self, item_2, type_=None, args=[]):
+    def __init__(self, tokenizer, type_=None, args=[]):
         list.__init__(self)
 
-        token = item_2.token
+        token = tokenizer.token
         if token:
             if type_:
                 self.type_ = type_
@@ -372,8 +378,8 @@ class Node(list):
             self.end = token.end
         else:
             self.type_ = type_
-            self.lineno = item_2.lineno
-        self.tokenizer = item_2
+            self.lineno = tokenizer.lineno
+        self.tokenizer = tokenizer
 
         for arg in args:
             self.append(arg)
@@ -409,30 +415,32 @@ class Node(list):
 
         if len(self):
             enum_list.append(("length", len(self)))
+            
         enum_list.sort(key=lambda item: item[0])
-        identation = "    "
+        indentation = "    "
         Node.indent_level += 1
-        n_ident = Node.indent_level
-        node_ident = "{\n%stype: %s" % ((identation * n_ident), tokenstr(self.type_))
+        node_indent = Node.indent_level
+        node_repr = "{\n%stype: %s" % ((indentation * node_indent), tokenstr(self.type_))
+        
         for i, value in enum_list:
-            node_ident += ",\n%s%s: " % ((identation * n_ident), i)
+            node_repr += ",\n%s%s: " % ((indentation * node_indent), i)
             if i == "value" and self.type_ == REGEXP:
-                node_ident += "/%s/%s" % (value["regexp"], value["modifiers"])
+                node_repr += "/%s/%s" % (value["regexp"], value["modifiers"])
             elif value is None:
-                node_ident += "null"
+                node_repr += "null"
             elif value is False:
-                node_ident += "false"
+                node_repr += "false"
             elif value is True:
-                node_ident += "true"
+                node_repr += "true"
             elif type(value) == list:
-                node_ident += ','.join((str(oper) for oper in value))
+                node_repr += ','.join((str(oper) for oper in value))
             else:
-                node_ident += str(value)
+                node_repr += str(value)
 
         Node.indent_level -= 1
-        n_ident = Node.indent_level
-        node_ident += "\n%s}" % (identation * n_ident)
-        return node_ident
+        node_indent = Node.indent_level
+        node_repr += "\n%s}" % (indentation * node_indent)
+        return node_repr
 
     __repr__ = __str__
 
@@ -452,36 +460,36 @@ class Node(list):
 
 
 # statement stack and nested statement handler.
-def nest(item_2, oper, node, func, end=None):
-    oper.stmt_stack.append(node)
-    n_ident = func(item_2, oper)
-    oper.stmt_stack.pop()
+def nest(tokenizer, context, node, func, end=None):
+    context.stmt_stack.append(node)
+    node = func(tokenizer, context)
+    context.stmt_stack.pop()
     if end:
-        item_2.must_match(end)
-    return n_ident
+        tokenizer.must_match(end)
+    return node
 
 
-def tokenstr(match_var):
-    item_2 = tokens[match_var]
-    if re.match(r'^\W', item_2):
-        return opTypeNames[item_2]
-    return item_2.upper()
+def tokenstr(token_type):
+    token_repr = tokens[token_type]
+    if re.match(r'^\W', token_repr):
+        return operator_type_names[token_repr]
+    return token_repr.upper()
 
 
-def statements(item_2, oper):
-    n_ident = Node(item_2, BLOCK)
-    oper.stmt_stack.append(n_ident)
-    while not item_2.done and item_2.peek() != RIGHT_CURLY:
-        n_ident.append(statement(item_2, oper))
-    oper.stmt_stack.pop()
-    return n_ident
+def statements(tokenizer, context):
+    node = Node(tokenizer, BLOCK)
+    context.stmt_stack.append(node)
+    while not tokenizer.done and tokenizer.peek() != RIGHT_CURLY:
+        node.append(statement(tokenizer, context))
+    context.stmt_stack.pop()
+    return node
 
 
-def block(item_2, oper):
-    item_2.must_match(LEFT_CURLY)
-    n_ident = statements(item_2, oper)
-    item_2.must_match(RIGHT_CURLY)
-    return n_ident
+def block(tokenizer, context):
+    tokenizer.must_match(LEFT_CURLY)
+    node = statements(tokenizer, context)
+    tokenizer.must_match(RIGHT_CURLY)
+    return node
 
 
 DECLARED_FORM = 0
@@ -489,314 +497,322 @@ EXPRESSED_FORM = 1
 STATEMENT_FORM = 2
 
 
-def statement(item_2, oper):
-    match_var = item_2.get()
+def statement(tokenizer, context):
+    token_type = tokenizer.get()
 
     # Cases for statements ending in a right curly return early, avoiding the
     # common semicolon insertion magic after this switch.
-    if match_var == FUNCTION:
-        if len(oper.stmt_stack) > 1:
+    if token_type == FUNCTION:
+        if len(context.stmt_stack) > 1:
             type_ = STATEMENT_FORM
         else:
             type_ = DECLARED_FORM
-        return function_definition(item_2, oper, True, type_)
+        return function_definition(tokenizer, context, True, type_)
 
-    elif match_var == LEFT_CURLY:
-        n_ident = statements(item_2, oper)
-        item_2.must_match(RIGHT_CURLY)
-        return n_ident
+    elif token_type == LEFT_CURLY:
+        node = statements(tokenizer, context)
+        tokenizer.must_match(RIGHT_CURLY)
+        return node
 
-    elif match_var == IF:
-        n_ident = Node(item_2)
-        n_ident.condition = paren_expression(item_2, oper)
-        oper.stmt_stack.append(n_ident)
-        n_ident.then_part = statement(item_2, oper)
-        if item_2.match(ELSE):
-            n_ident.else_part = statement(item_2, oper)
+    elif token_type == IF:
+        node = Node(tokenizer)
+        node.condition = paren_expression(tokenizer, context)
+        context.stmt_stack.append(node)
+        node.then_part = statement(tokenizer, context)
+        if tokenizer.match(ELSE):
+            node.else_part = statement(tokenizer, context)
         else:
-            n_ident.else_part = None
-        oper.stmt_stack.pop()
-        return n_ident
+            node.else_part = None
+        context.stmt_stack.pop()
+        return node
 
-    elif match_var == SWITCH:
-        n_ident = Node(item_2)
-        item_2.must_match(LEFT_PAREN)
-        n_ident.discriminant = expression(item_2, oper)
-        item_2.must_match(RIGHT_PAREN)
-        n_ident.cases = []
-        n_ident.default_index = -1
-        oper.stmt_stack.append(n_ident)
-        item_2.must_match(LEFT_CURLY)
+    elif token_type == SWITCH:
+        node = Node(tokenizer)
+        tokenizer.must_match(LEFT_PAREN)
+        node.discriminant = expression(tokenizer, context)
+        tokenizer.must_match(RIGHT_PAREN)
+        node.cases = []
+        node.default_index = -1
+        context.stmt_stack.append(node)
+        tokenizer.must_match(LEFT_CURLY)
         while True:
-            match_var = item_2.get()
-            if match_var == RIGHT_CURLY:
+            token_type = tokenizer.get()
+            if token_type == RIGHT_CURLY:
                 break
 
-            if match_var in (DEFAULT, CASE):
-                if match_var == DEFAULT and n_ident.default_index >= 0:
-                    raise item_2.new_syntax_error("More than one switch default")
-                node_2 = Node(item_2)
-                if match_var == DEFAULT:
-                    n_ident.default_index = len(n_ident.cases)
+            if token_type in (DEFAULT, CASE):
+                if token_type == DEFAULT and node.default_index >= 0:
+                    raise tokenizer.new_syntax_error("More than one switch default")
+                node_2 = Node(tokenizer)
+                if token_type == DEFAULT:
+                    node.default_index = len(node.cases)
                 else:
-                    node_2.case_label = expression(item_2, oper, COLON)
+                    node_2.case_label = expression(tokenizer, context, COLON)
             else:
-                raise item_2.new_syntax_error("Invalid switch case")
-            item_2.must_match(COLON)
-            node_2.statements = Node(item_2, BLOCK)
+                raise tokenizer.new_syntax_error("Invalid switch case")
+            tokenizer.must_match(COLON)
+            node_2.statements = Node(tokenizer, BLOCK)
             while True:
-                match_var = item_2.peek()
-                if match_var == CASE or match_var == DEFAULT or match_var == RIGHT_CURLY:
+                token_type = tokenizer.peek()
+                if token_type == CASE or token_type == DEFAULT or token_type == RIGHT_CURLY:
                     break
-                node_2.statements.append(statement(item_2, oper))
-            n_ident.cases.append(node_2)
-        oper.stmt_stack.pop()
-        return n_ident
+                node_2.statements.append(statement(tokenizer, context))
+            node.cases.append(node_2)
+        context.stmt_stack.pop()
+        return node
 
-    elif match_var == FOR:
-        n_ident = Node(item_2)
+    elif token_type == FOR:
+        node = Node(tokenizer)
         node_2 = None
-        n_ident.is_loop = True
-        item_2.must_match(LEFT_PAREN)
-        match_var = item_2.peek()
-        if match_var != SEMICOLON:
-            oper.in_for_loop_init = True
-            if match_var == VAR or match_var == CONST:
-                item_2.get()
-                node_2 = variables(item_2, oper)
+        node.isLoop = True
+        tokenizer.must_match(LEFT_PAREN)
+        token_type = tokenizer.peek()
+        if token_type != SEMICOLON:
+            context.in_for_loop_init = True
+            if token_type == VAR or token_type == CONST:
+                tokenizer.get()
+                node_2 = variables(tokenizer, context)
             else:
-                node_2 = expression(item_2, oper)
-            oper.in_for_loop_init = False
+                node_2 = expression(tokenizer, context)
+            context.in_for_loop_init = False
 
-        if node_2 and item_2.match(IN):
-            n_ident.type_ = FOR_IN
+        if node_2 and tokenizer.match(IN):
+            node.type_ = FOR_IN
             if node_2.type_ == VAR:
                 if len(node_2) != 1:
-                    raise SyntaxError("Invalid for..in left-hand side", item_2.filename, node_2.lineno)
+                    raise SyntaxError("Invalid for..in left-hand side", tokenizer.filename, node_2.lineno)
 
-                # NB: node_2[0].type_ == INDENTIFIER and node_2[0].value == node_2[0].name
-                n_ident.iterator = node_2[0]
-                n_ident.var_decl = node_2
+                # NB: n2[0].type_ == INDENTIFIER and n2[0].value == n2[0].name
+                node.iterator = node_2[0]
+                node.var_decl = node_2
             else:
-                n_ident.iterator = node_2
-                n_ident.var_decl = None
-            n_ident.object = expression(item_2, oper)
+                node.iterator = node_2
+                node.var_decl = None
+            node.object = expression(tokenizer, context)
         else:
             if node_2:
-                n_ident.setup = node_2
+                node.setup = node_2
             else:
-                n_ident.setup = None
-            item_2.must_match(SEMICOLON)
-            if item_2.peek() == SEMICOLON:
-                n_ident.condition = None
+                node.setup = None
+            tokenizer.must_match(SEMICOLON)
+            if tokenizer.peek() == SEMICOLON:
+                node.condition = None
             else:
-                n_ident.condition = expression(item_2, oper)
-            item_2.must_match(SEMICOLON)
-            if item_2.peek() == RIGHT_PAREN:
-                n_ident.update = None
+                node.condition = expression(tokenizer, context)
+            tokenizer.must_match(SEMICOLON)
+            if tokenizer.peek() == RIGHT_PAREN:
+                node.update = None
             else:
-                n_ident.update = expression(item_2, oper)
-        item_2.must_match(RIGHT_PAREN)
-        n_ident.body = nest(item_2, oper, n_ident, statement)
-        return n_ident
+                node.update = expression(tokenizer, context)
+        tokenizer.must_match(RIGHT_PAREN)
+        node.body = nest(tokenizer, context, node, statement)
+        return node
 
-    elif match_var == WHILE:
-        n_ident = Node(item_2)
-        n_ident.is_loop = True
-        n_ident.condition = paren_expression(item_2, oper)
-        n_ident.body = nest(item_2, oper, n_ident, statement)
-        return n_ident
+    elif token_type == WHILE:
+        node = Node(tokenizer)
+        node.isLoop = True
+        node.condition = paren_expression(tokenizer, context)
+        node.body = nest(tokenizer, context, node, statement)
+        return node
 
-    elif match_var == DO:
-        n_ident = Node(item_2)
-        n_ident.is_loop = True
-        n_ident.body = nest(item_2, oper, n_ident, statement, WHILE)
-        n_ident.condition = paren_expression(item_2, oper)
-        if not oper.ecma_strict_mode:
+    elif token_type == DO:
+        node = Node(tokenizer)
+        node.isLoop = True
+        node.body = nest(tokenizer, context, node, statement, WHILE)
+        node.condition = paren_expression(tokenizer, context)
+        if not context.ecma_strict_mode:
             # <script language="JavaScript"> (without version hints) may need
             # automatic semicolon insertion without a newline after do-while.
             # See http://bugzilla.mozilla.org/show_bug.cgi?id=238945.
-            item_2.match(SEMICOLON)
-            return n_ident
+            tokenizer.match(SEMICOLON)
+            return node
 
-    elif match_var in (BREAK, CONTINUE):
-        n_ident = Node(item_2)
-        if item_2.peek_on_same_line() == IDENTIFIER:
-            item_2.get()
-            n_ident.label = item_2.token.value
-        stmt_s = oper.stmt_stack
-        i = len(stmt_s)
-        label = getattr(n_ident, "label", None)
+    elif token_type in (BREAK, CONTINUE):
+        node = Node(tokenizer)
+        if tokenizer.peek_on_same_line() == IDENTIFIER:
+            tokenizer.get()
+            node.label = tokenizer.token.value
+
+        stmt_stack = context.stmt_stack
+        i = len(stmt_stack)
+        label = getattr(node, "label", None)
         if label:
             while True:
                 i -= 1
                 if i < 0:
-                    raise item_2.new_syntax_error("Label not found")
-                if getattr(stmt_s[i], "label", None) == label:
+                    raise tokenizer.new_syntax_error("Label not found")
+                if getattr(stmt_stack[i], "label", None) == label:
                     break
         else:
             while True:
                 i -= 1
                 if i < 0:
-                    if match_var == BREAK:
-                        raise item_2.new_syntax_error("Invalid break")
+                    if token_type == BREAK:
+                        raise tokenizer.new_syntax_error("Invalid break")
                     else:
-                        raise item_2.new_syntax_error("Invalid continue")
-                if getattr(stmt_s[i], "is_loop", None) or (match_var == BREAK and stmt_s[i].type_ == SWITCH):
+                        raise tokenizer.new_syntax_error("Invalid continue")
+                if getattr(stmt_stack[i], "isLoop", None) or (token_type == BREAK and stmt_stack[i].type_ == SWITCH):
                     break
-        n_ident.target = stmt_s[i]
+        node.target = stmt_stack[i]
 
-    elif match_var == TRY:
-        n_ident = Node(item_2)
-        n_ident.try_block = block(item_2, oper)
-        n_ident.catch_clauses = []
-        while item_2.match(CATCH):
-            node_2 = Node(item_2)
-            item_2.must_match(LEFT_PAREN)
-            node_2.var_name = item_2.must_match(IDENTIFIER).value
-            if item_2.match(IF):
-                if oper.ecma_strict_mode:
-                    raise item_2.new_syntax_error("Illegal catch guard")
-                if n_ident.catch_clauses and not n_ident.catch_clauses[-1].guard:
-                    raise item_2.new_syntax_error("Gaurded catch after unguarded")
-                node_2.guard = expression(item_2, oper)
+    elif token_type == TRY:
+        node = Node(tokenizer)
+        node.tryBlock = block(tokenizer, context)
+        node.catchClauses = []
+        
+        while tokenizer.match(CATCH):
+            node_2 = Node(tokenizer)
+            tokenizer.must_match(LEFT_PAREN)
+            node_2.varName = tokenizer.must_match(IDENTIFIER).value
+            if tokenizer.match(IF):
+                if context.ecma_strict_mode:
+                    raise tokenizer.new_syntax_error("Illegal catch guard")
+                if node.catchClauses and not node.catchClauses[-1].guard:
+                    raise tokenizer.new_syntax_error("Gaurded catch after unguarded")
+                node_2.guard = expression(tokenizer, context)
             else:
                 node_2.guard = None
-            item_2.must_match(RIGHT_PAREN)
-            node_2.block = block(item_2, oper)
-            n_ident.catch_clauses.append(node_2)
-        if item_2.match(FINALLY):
-            n_ident.finally_block = block(item_2, oper)
-        if not n_ident.catch_clauses and not getattr(n_ident, "finally_block", None):
-            raise item_2.new_syntax_error("Invalid try statement")
-        return n_ident
+            tokenizer.must_match(RIGHT_PAREN)
+            node_2.block = block(tokenizer, context)
+            node.catchClauses.append(node_2)
+            
+        if tokenizer.match(FINALLY):
+            node.finallyBlock = block(tokenizer, context)
+            
+        if not node.catchClauses and not getattr(node, "finallyBlock", None):
+            raise tokenizer.new_syntax_error("Invalid try statement")
+        
+        return node
 
-    elif match_var in (CATCH, FINALLY):
-        raise item_2.new_syntax_error(tokens[match_var] + " without preceding try")
+    elif token_type in (CATCH, FINALLY):
+        raise tokenizer.new_syntax_error(tokens[token_type] + " without preceding try")
 
-    elif match_var == THROW:
-        n_ident = Node(item_2)
-        n_ident.exception = expression(item_2, oper)
+    elif token_type == THROW:
+        node = Node(tokenizer)
+        node.exception = expression(tokenizer, context)
 
-    elif match_var == RETURN:
-        if not oper.in_function:
-            raise item_2.new_syntax_error("Invalid return")
-        n_ident = Node(item_2)
-        match_var = item_2.peek_on_same_line()
-        if match_var not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
-            n_ident.value = expression(item_2, oper)
+    elif token_type == RETURN:
+        if not context.inFunction:
+            raise tokenizer.new_syntax_error("Invalid return")
+        node = Node(tokenizer)
+        token_type = tokenizer.peek_on_same_line()
+        if token_type not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
+            node.value = expression(tokenizer, context)
 
-    elif match_var == WITH:
-        n_ident = Node(item_2)
-        n_ident.object = paren_expression(item_2, oper)
-        n_ident.body = nest(item_2, oper, n_ident, statement)
-        return n_ident
+    elif token_type == WITH:
+        node = Node(tokenizer)
+        node.object = paren_expression(tokenizer, context)
+        node.body = nest(tokenizer, context, node, statement)
+        return node
 
-    elif match_var in (VAR, CONST):
-        n_ident = variables(item_2, oper)
+    elif token_type in (VAR, CONST):
+        node = variables(tokenizer, context)
 
-    elif match_var == DEBUGGER:
-        n_ident = Node(item_2)
+    elif token_type == DEBUGGER:
+        node = Node(tokenizer)
 
-    elif match_var in (NEWLINE, SEMICOLON):
-        n_ident = Node(item_2, SEMICOLON)
-        n_ident.expression = None
-        return n_ident
+    elif token_type in (NEWLINE, SEMICOLON):
+        node = Node(tokenizer, SEMICOLON)
+        node.expression = None
+        return node
 
     else:
-        if match_var == IDENTIFIER:
-            item_2.scan_operand = False
-            match_var = item_2.peek()
-            item_2.scan_operand = True
-            if match_var == COLON:
-                label = item_2.token.value
-                stmt_s = oper.stmt_stack
-                i = len(stmt_s) - 1
+        if token_type == IDENTIFIER:
+            tokenizer.scan_operand = False
+            token_type = tokenizer.peek()
+            tokenizer.scan_operand = True
+            
+            if token_type == COLON:
+                label = tokenizer.token.value
+                stmt_stack = context.stmt_stack
+                i = len(stmt_stack) - 1
+                
                 while i >= 0:
-                    if getattr(stmt_s[i], "label", None) == label:
-                        raise item_2.new_syntax_error("Duplicate label")
+                    if getattr(stmt_stack[i], "label", None) == label:
+                        raise tokenizer.new_syntax_error("Duplicate label")
                     i -= 1
-                item_2.get()
-                n_ident = Node(item_2, LABEL)
-                n_ident.label = label
-                n_ident.statement = nest(item_2, oper, n_ident, statement)
-                return n_ident
+                    
+                tokenizer.get()
+                node = Node(tokenizer, LABEL)
+                node.label = label
+                node.statement = nest(tokenizer, context, node, statement)
+                return node
 
-        n_ident = Node(item_2, SEMICOLON)
-        item_2.unget()
-        n_ident.expression = expression(item_2, oper)
-        n_ident.end = n_ident.expression.end
+        node = Node(tokenizer, SEMICOLON)
+        tokenizer.unget()
+        node.expression = expression(tokenizer, context)
+        node.end = node.expression.end
 
-    if item_2.lineno == item_2.token.lineno:
-        match_var = item_2.peek_on_same_line()
-        if match_var not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
-            raise item_2.new_syntax_error("Missing ; before statement")
-    item_2.match(SEMICOLON)
-    return n_ident
+    if tokenizer.lineno == tokenizer.token.lineno:
+        token_type = tokenizer.peek_on_same_line()
+        if token_type not in (END, NEWLINE, SEMICOLON, RIGHT_CURLY):
+            raise tokenizer.new_syntax_error("Missing ; before statement")
+    tokenizer.match(SEMICOLON)
+    return node
 
 
-def function_definition(item_2, oper, require_name, function_form):
-    init_node = Node(item_2)
-    if init_node.type_ != FUNCTION:
-        if init_node.value == "get":
-            init_node.type_ = GETTER
+def function_definition(tokenizer, context, require_name, function_form):
+    function_node = Node(tokenizer)
+    if function_node.type_ != FUNCTION:
+        if function_node.value == "get":
+            function_node.type_ = GETTER
         else:
-            init_node.type_ = SETTER
-    if item_2.match(IDENTIFIER):
-        init_node.name = item_2.token.value
+            function_node.type_ = SETTER
+    if tokenizer.match(IDENTIFIER):
+        function_node.name = tokenizer.token.value
     elif require_name:
-        raise item_2.new_syntax_error("Missing function identifier")
+        raise tokenizer.new_syntax_error("Missing function identifier")
 
-    item_2.must_match(LEFT_PAREN)
-    init_node.params = []
+    tokenizer.must_match(LEFT_PAREN)
+    function_node.params = []
     while True:
-        match_var = item_2.get()
-        if match_var == RIGHT_PAREN:
+        token_type = tokenizer.get()
+        if token_type == RIGHT_PAREN:
             break
-        if match_var != IDENTIFIER:
-            raise item_2.new_syntax_error("Missing formal parameter")
-        init_node.params.append(item_2.token.value)
-        if item_2.peek() != RIGHT_PAREN:
-            item_2.must_match(COMMA)
+        if token_type != IDENTIFIER:
+            raise tokenizer.new_syntax_error("Missing formal parameter")
+        function_node.params.append(tokenizer.token.value)
+        if tokenizer.peek() != RIGHT_PAREN:
+            tokenizer.must_match(COMMA)
 
-    item_2.must_match(LEFT_CURLY)
-    oper_2 = CompilerContext(True)
-    init_node.body = new_script(item_2, oper_2)
-    item_2.must_match(RIGHT_CURLY)
-    init_node.end = item_2.token.end
+    tokenizer.must_match(LEFT_CURLY)
+    context_2 = CompilerContext(True)
+    function_node.body = new_script(tokenizer, context_2)
+    tokenizer.must_match(RIGHT_CURLY)
+    function_node.end = tokenizer.token.end
 
-    init_node.function_form = function_form
+    function_node.functionForm = function_form
     if function_form == DECLARED_FORM:
-        oper.fun_decls.append(init_node)
-    return init_node
+        context.fun_decls.append(function_node)
+    return function_node
 
 
-def variables(item_2, oper):
-    n_ident = Node(item_2)
+def variables(tokenizer, context):
+    node = Node(tokenizer)
     while True:
-        item_2.must_match(IDENTIFIER)
-        node_2 = Node(item_2)
+        tokenizer.must_match(IDENTIFIER)
+        node_2 = Node(tokenizer)
         node_2.name = node_2.value
-        if item_2.match(ASSIGN):
-            if item_2.token.assign_op:
-                raise item_2.new_syntax_error("Invalid variable initialization")
-            node_2.initializer = expression(item_2, oper, COMMA)
-        node_2.read_only = not not (n_ident.type_ == CONST)
-        n_ident.append(node_2)
-        oper.var_decls.append(node_2)
-        if not item_2.match(COMMA):
+        if tokenizer.match(ASSIGN):
+            if tokenizer.token.assign_op:
+                raise tokenizer.new_syntax_error("Invalid variable initialization")
+            node_2.initializer = expression(tokenizer, context, COMMA)
+        node_2.readOnly = not not (node.type_ == CONST)
+        node.append(node_2)
+        context.var_decls.append(node_2)
+        if not tokenizer.match(COMMA):
             break
-    return n_ident
+    return node
 
 
-def paren_expression(item_2, oper):
-    item_2.must_match(LEFT_PAREN)
-    n_ident = expression(item_2, oper)
-    item_2.must_match(RIGHT_PAREN)
-    return n_ident
+def paren_expression(tokenizer, context):
+    tokenizer.must_match(LEFT_PAREN)
+    node = expression(tokenizer, context)
+    tokenizer.must_match(RIGHT_PAREN)
+    return node
 
 
-opPrecedence = {
+operator_precedence = {
     "SEMICOLON": 0,
     "COMMA": 1,
     "ASSIGN": 2, "HOOK": 2, "COLON": 2,
@@ -820,10 +836,10 @@ opPrecedence = {
 }
 
 # Map operator type code to precedence
-for i in opPrecedence.copy():
-    opPrecedence[globals()[i]] = opPrecedence[i]
+for token_id in operator_precedence.copy():
+    operator_precedence[globals()[token_id]] = operator_precedence[token_id]
 
-opArity = {
+operator_arity = {
     "COMMA": -2,
     "ASSIGN": 2,
     "HOOK": 3,
@@ -846,293 +862,300 @@ opArity = {
 }
 
 # Map operator type code to arity.
-for i in opArity.copy():
-    opArity[globals()[i]] = opArity[i]
+for token_id in operator_arity.copy():
+    operator_arity[globals()[token_id]] = operator_arity[token_id]
 
 
-def expression(item_2, oper, stop=None):
+def expression(tokenizer, context, stop=None):
     operators = []
     operands = []
-    br_level = oper.bracket__level
-    cur_level = oper.curly_level
-    par_levl = oper.paren_level
-    hk_levle = oper.hook_level
+    bracket_level = context.bracket_level
+    curly_level = context.curly_level
+    paren_level = context.paren_level
+    hook_level = context.hook_level
 
     def reduce_():
-        n_ident = operators.pop()
-        op_value = n_ident.type_
-        arity = opArity[op_value]
+        node = operators.pop()
+        node_type = node.type_
+        arity = operator_arity[node_type]
         if arity == -2:
             # Flatten left-associative trees.
             left = (len(operands) >= 2 and operands[-2])
-            if left.type_ == op_value:
+            if left.type_ == node_type:
                 right = operands.pop()
                 left.append(right)
                 return left
             arity = 2
 
-        # Always use append to add operands to n_ident, to update start and end.
-        enum_list = operands[-arity:]
+        # Always use append to add operands to node, to update start and end.
+        operand_list = operands[-arity:]
         del operands[-arity:]
-        for operand in enum_list:
-            n_ident.append(operand)
+        for operand in operand_list:
+            node.append(operand)
 
         # Include closing bracket or postfix operator in [start,end).
-        if n_ident.end < item_2.token.end:
-            n_ident.end = item_2.token.end
+        if node.end < tokenizer.token.end:
+            node.end = tokenizer.token.end
 
-        operands.append(n_ident)
-        return n_ident
+        operands.append(node)
+        return node
 
     class BreakOutOfLoops(Exception):
         pass
 
     try:
         while True:
-            match_var = item_2.get()
-            if match_var == END:
+            token_type = tokenizer.get()
+            if token_type == END:
                 break
 
-            if (match_var == stop and oper.bracket__level == br_level and oper.curly_level == cur_level and
-                    oper.paren_level == par_levl and oper.hook_level == hk_levle):
-                # Stop only if match_var matches the optional stop parameter, and that
+            if (token_type == stop and context.bracket_level == bracket_level and context.curly_level == curly_level and
+                    context.paren_level == paren_level and context.hook_level == hook_level):
+                # Stop only if token_type matches the optional stop parameter, and that
                 # token is not quoted by some kind of bracket.
                 break
-            if match_var == SEMICOLON:
+            if token_type == SEMICOLON:
                 # NB: cannot be empty, statement handled that.
                 raise BreakOutOfLoops
 
-            elif match_var in (ASSIGN, HOOK, COLON):
-                if item_2.scan_operand:
+            elif token_type in (ASSIGN, HOOK, COLON):
+                if tokenizer.scan_operand:
                     raise BreakOutOfLoops
+
                 while (
-                    (operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(match_var, -1)) or
-                    (match_var == COLON and operators and operators[-1].type_ == ASSIGN)
+                        (operators and operator_precedence.get(operators[-1].type_, -1) > operator_precedence.get(
+                            token_type, -1)) or
+                        (token_type == COLON and operators and operators[-1].type_ == ASSIGN)
                 ):
                     reduce_()
-                if match_var == COLON:
+
+                if token_type == COLON:
                     if operators:
-                        n_ident = operators[-1]
-                    if not operators or n_ident.type_ != HOOK:
-                        raise item_2.new_syntax_error("Invalid label")
-                    oper.hook_level -= 1
+                        node = operators[-1]
+                    if not operators or node.type_ != HOOK:
+                        raise tokenizer.new_syntax_error("Invalid label")
+                    context.hook_level -= 1
                 else:
-                    operators.append(Node(item_2))
-                    if match_var == ASSIGN:
-                        operands[-1].assign_op = item_2.token.assign_op
+                    operators.append(Node(tokenizer))
+                    if token_type == ASSIGN:
+                        operands[-1].assign_op = tokenizer.token.assign_op
                     else:
-                        oper.hook_level += 1
+                        context.hook_level += 1
 
-                item_2.scan_operand = True
+                tokenizer.scan_operand = True
 
-            elif match_var in (
+            elif token_type in (
                     IN, COMMA, OR, AND, BITWISE_OR, BITWISE_XOR, BITWISE_AND, EQ, NE, STRICT_EQ, STRICT_NE, LT, LE, GE,
                     GT, INSTANCEOF, LSH, RSH, URSH, PLUS, MINUS, MUL, DIV, MOD, DOT
             ):
                 # We're treating comma as left-associative so reduce can fold
                 # left-heavy COMMA trees into a single array.
-                if match_var == IN:
+                if token_type == IN:
                     # An in operator should not be parsed if we're parsing the
                     # head of a for (...) loop, unless it is in the then part of
                     # a conditional expression, or parenthesized somehow.
-                    if oper.in_for_loop_init and not oper.hook_level and not oper.bracket__level and \
-                            not oper.curly_level and not oper.paren_level:
+                    if context.in_for_loop_init and not context.hook_level and not context.bracket_level and \
+                            not context.curly_level and not context.paren_level:
                         raise BreakOutOfLoops
 
-                if item_2.scan_operand:
+                if tokenizer.scan_operand:
                     raise BreakOutOfLoops
-                while operators and opPrecedence.get(operators[-1].type_, -1) and (
-                    opPrecedence.get(operators[-1].type_, -1) >= opPrecedence.get(match_var, -1)
+                while operators and operator_precedence.get(operators[-1].type_, -1) and (
+                        operator_precedence.get(operators[-1].type_, -1) >= operator_precedence.get(token_type, -1)
                 ):
                     reduce_()
-                if match_var == DOT:
-                    item_2.must_match(IDENTIFIER)
-                    operands.append(Node(item_2, DOT, [operands.pop(), Node(item_2)]))
+                if token_type == DOT:
+                    tokenizer.must_match(IDENTIFIER)
+                    operands.append(Node(tokenizer, DOT, [operands.pop(), Node(tokenizer)]))
                 else:
-                    operators.append(Node(item_2))
-                    item_2.scan_operand = True
+                    operators.append(Node(tokenizer))
+                    tokenizer.scan_operand = True
 
-            elif match_var in (
+            elif token_type in (
                     DELETE, VOID, TYPEOF, NOT, BITWISE_NOT, UNARY_PLUS, UNARY_MINUS, NEW
             ):
-                if not item_2.scan_operand:
+                if not tokenizer.scan_operand:
                     raise BreakOutOfLoops
-                operators.append(Node(item_2))
+                operators.append(Node(tokenizer))
 
-            elif match_var in (INCREMENT, DECREMENT):
-                if item_2.scan_operand:
-                    operators.append(Node(item_2))  # prefix increment or decrement
+            elif token_type in (INCREMENT, DECREMENT):
+                if tokenizer.scan_operand:
+                    operators.append(Node(tokenizer))  # prefix increment or decrement
                 else:
-                    # Don'item_2 cross a line boundary for postfix {in,de}crement.
-                    if item_2.tokens.get((item_2.token_index + item_2.lookahead - 1) & 3).lineno != item_2.lineno:
+                    # Don't cross a line boundary for postfix {in,de}crement.
+                    if tokenizer.tokens.get(
+                            (tokenizer.token_index + tokenizer.lookahead - 1) & 3).lineno != tokenizer.lineno:
                         raise BreakOutOfLoops
 
                     # Use >, not >=, so postfix has higher precedence than
                     # prefix.
-                    while operators and opPrecedence.get(operators[-1].type_, -1) > opPrecedence.get(match_var, -1):
+                    while operators and operator_precedence.get(operators[-1].type_, -1) > operator_precedence.get(
+                            token_type, -1):
                         reduce_()
-                    n_ident = Node(item_2, match_var, [operands.pop()])
-                    n_ident.postfix = True
-                    operands.append(n_ident)
+                    node = Node(tokenizer, token_type, [operands.pop()])
+                    node.postfix = True
+                    operands.append(node)
 
-            elif match_var == FUNCTION:
-                if not item_2.scan_operand:
+            elif token_type == FUNCTION:
+                if not tokenizer.scan_operand:
                     raise BreakOutOfLoops
-                operands.append(function_definition(item_2, oper, False, EXPRESSED_FORM))
-                item_2.scan_operand = False
+                operands.append(function_definition(tokenizer, context, False, EXPRESSED_FORM))
+                tokenizer.scan_operand = False
 
-            elif match_var in (NULL, THIS, TRUE, FALSE, IDENTIFIER, NUMBER, STRING, REGEXP):
-                if not item_2.scan_operand:
+            elif token_type in (NULL, THIS, TRUE, FALSE, IDENTIFIER, NUMBER, STRING, REGEXP):
+                if not tokenizer.scan_operand:
                     raise BreakOutOfLoops
-                operands.append(Node(item_2))
-                item_2.scan_operand = False
+                operands.append(Node(tokenizer))
+                tokenizer.scan_operand = False
 
-            elif match_var == LEFT_BRACKET:
-                if item_2.scan_operand:
+            elif token_type == LEFT_BRACKET:
+                if tokenizer.scan_operand:
                     # Array initializer. Parse using recursive descent, as the
                     # sub-grammer here is not an operator grammar.
-                    n_ident = Node(item_2, ARRAY_INIT)
+                    node = Node(tokenizer, ARRAY_INIT)
                     while True:
-                        match_var = item_2.peek()
-                        if match_var == RIGHT_BRACKET:
+                        token_type = tokenizer.peek()
+                        if token_type == RIGHT_BRACKET:
                             break
-                        if match_var == COMMA:
-                            item_2.get()
-                            n_ident.append(None)
+                        if token_type == COMMA:
+                            tokenizer.get()
+                            node.append(None)
                             continue
-                        n_ident.append(expression(item_2, oper, COMMA))
-                        if not item_2.match(COMMA):
+                        node.append(expression(tokenizer, context, COMMA))
+                        if not tokenizer.match(COMMA):
                             break
 
-                    item_2.must_match(RIGHT_BRACKET)
-                    operands.append(n_ident)
-                    item_2.scan_operand = False
+                    tokenizer.must_match(RIGHT_BRACKET)
+                    operands.append(node)
+                    tokenizer.scan_operand = False
                 else:
-                    operators.append(Node(item_2, INDEX))
-                    item_2.scan_operand = True
-                    oper.bracket__level += 1
+                    operators.append(Node(tokenizer, INDEX))
+                    tokenizer.scan_operand = True
+                    context.bracket_level += 1
 
-            elif match_var == RIGHT_BRACKET:
-                if item_2.scan_operand or oper.bracket__level == br_level:
+            elif token_type == RIGHT_BRACKET:
+                if tokenizer.scan_operand or context.bracket_level == bracket_level:
                     raise BreakOutOfLoops
                 while reduce_().type_ != INDEX:
                     continue
-                oper.bracket__level -= 1
+                context.bracket_level -= 1
 
-            elif match_var == LEFT_CURLY:
-                if not item_2.scan_operand:
+            elif token_type == LEFT_CURLY:
+                if not tokenizer.scan_operand:
                     raise BreakOutOfLoops
                 # Object initializer. As for array initializers (see above),
                 # parse using recursive descent.
-                oper.curly_level += 1
-                n_ident = Node(item_2, OBJECT_INIT)
+                context.curly_level += 1
+                node = Node(tokenizer, OBJECT_INIT)
 
                 class BreakOutOfObjectInit(Exception):
                     pass
 
                 try:
-                    if not item_2.match(RIGHT_CURLY):
+                    if not tokenizer.match(RIGHT_CURLY):
                         while True:
-                            match_var = item_2.get()
-                            if (item_2.token.value == "get" or item_2.token.value == "set") and item_2.peek == IDENTIFIER:
-                                if oper.ecma_strict_mode:
-                                    raise item_2.new_syntax_error("Illegal property accessor")
-                                n_ident.append(function_definition(item_2, oper, True, EXPRESSED_FORM))
+                            token_type = tokenizer.get()
+                            if (
+                                    tokenizer.token.value == "get" or tokenizer.token.value == "set") and tokenizer.peek == IDENTIFIER:
+                                if context.ecma_strict_mode:
+                                    raise tokenizer.new_syntax_error("Illegal property accessor")
+                                node.append(function_definition(tokenizer, context, True, EXPRESSED_FORM))
                             else:
-                                if match_var in (IDENTIFIER, NUMBER, STRING):
-                                    id_ = Node(item_2)
-                                elif match_var == RIGHT_CURLY:
-                                    if oper.ecma_strict_mode:
-                                        raise item_2.new_syntax_error("Illegal trailing ,")
+                                if token_type in (IDENTIFIER, NUMBER, STRING):
+                                    id_ = Node(tokenizer)
+                                elif token_type == RIGHT_CURLY:
+                                    if context.ecma_strict_mode:
+                                        raise tokenizer.new_syntax_error("Illegal trailing ,")
                                     raise BreakOutOfObjectInit
                                 else:
-                                    raise item_2.new_syntax_error("Invalid property name")
-                                item_2.must_match(COLON)
-                                n_ident.append(Node(item_2, PROPERTY_INIT, [id_, expression(item_2, oper, COMMA)]))
+                                    raise tokenizer.new_syntax_error("Invalid property name")
+                                tokenizer.must_match(COLON)
+                                node.append(
+                                    Node(tokenizer, PROPERTY_INIT, [id_, expression(tokenizer, context, COMMA)]))
 
-                            if not item_2.match(COMMA):
+                            if not tokenizer.match(COMMA):
                                 break
-                        item_2.must_match(RIGHT_CURLY)
-                except BreakOutOfObjectInit as exc:
+                        tokenizer.must_match(RIGHT_CURLY)
+                except BreakOutOfObjectInit:
                     pass
-                operands.append(n_ident)
-                item_2.scan_operand = False
-                oper.curly_level -= 1
+                operands.append(node)
+                tokenizer.scan_operand = False
+                context.curly_level -= 1
 
-            elif match_var == RIGHT_CURLY:
-                if not item_2.scan_operand and oper.curly_level != cur_level:
+            elif token_type == RIGHT_CURLY:
+                if not tokenizer.scan_operand and context.curly_level != curly_level:
                     raise ParseError("PANIC: right curly botch")
                 raise BreakOutOfLoops
 
-            elif match_var == LEFT_PAREN:
-                if item_2.scan_operand:
-                    operators.append(Node(item_2, GROUP))
-                    oper.paren_level += 1
+            elif token_type == LEFT_PAREN:
+                if tokenizer.scan_operand:
+                    operators.append(Node(tokenizer, GROUP))
+                    context.paren_level += 1
                 else:
-                    while operators and opPrecedence.get(operators[-1].type, -1) > opPrecedence[NEW]:
+                    while operators and operator_precedence.get(operators[-1].type, -1) > operator_precedence[NEW]:
                         reduce_()
 
-                    # Handle () now, to regularize the n_ident-ary case for n_ident > 0.
-                    # We must set scan_operand in case there are arguments and
+                    # Handle () now, to regularize the n-ary case for n > 0.
+                    # We must set scanOperand in case there are arguments and
                     # the first one is a regexp or unary+/-.
                     if operators:
-                        n_ident = operators[-1]
+                        node = operators[-1]
                     else:
-                        n_ident = Object()
-                        n_ident.type_ = None
-                    item_2.scan_operand = True
-                    if item_2.match(RIGHT_PAREN):
-                        if n_ident.type_ == NEW:
+                        node = Object()
+                        node.type_ = None
+                    tokenizer.scan_operand = True
+                    if tokenizer.match(RIGHT_PAREN):
+                        if node.type_ == NEW:
                             operators.pop()
-                            n_ident.append(operands.pop())
+                            node.append(operands.pop())
                         else:
-                            n_ident = Node(item_2, CALL, [operands.pop(), Node(item_2, LIST)])
-                        operands.append(n_ident)
-                        item_2.scan_operand = False
+                            node = Node(tokenizer, CALL, [operands.pop(), Node(tokenizer, LIST)])
+                        operands.append(node)
+                        tokenizer.scan_operand = False
                     else:
-                        if n_ident.type_ == NEW:
-                            n_ident.type_ = NEW_WITH_ARGS
+                        if node.type_ == NEW:
+                            node.type_ = NEW_WITH_ARGS
                         else:
-                            operators.append(Node(item_2, CALL))
-                        oper.paren_level += 1
+                            operators.append(Node(tokenizer, CALL))
+                        context.paren_level += 1
 
-            elif match_var == RIGHT_PAREN:
-                if item_2.scan_operand or oper.paren_level == par_levl:
+            elif token_type == RIGHT_PAREN:
+                if tokenizer.scan_operand or context.paren_level == paren_level:
                     raise BreakOutOfLoops
                 while True:
-                    match_var = reduce_().type_
-                    if match_var in (GROUP, CALL, NEW_WITH_ARGS):
+                    token_type = reduce_().type_
+                    if token_type in (GROUP, CALL, NEW_WITH_ARGS):
                         break
-                if match_var != GROUP:
+                if token_type != GROUP:
                     if operands:
-                        n_ident = operands[-1]
-                        if n_ident[1].type_ != COMMA:
-                            n_ident[1] = Node(item_2, LIST, [n_ident[1]])
+                        node = operands[-1]
+                        if node[1].type_ != COMMA:
+                            node[1] = Node(tokenizer, LIST, [node[1]])
                         else:
-                            n_ident[1].type_ = LIST
+                            node[1].type_ = LIST
                     else:
                         raise ParseError("Unexpected amount of operands")
-                oper.paren_level -= 1
+                context.paren_level -= 1
 
             # Automatic semicolon insertion means we may scan across a newline
             # and into the beginning of another statement. If so, break out of
-            # the while loop and let the item_2.scan_operand logic handle errors.
+            # the while loop and let the t.scanOperand logic handle errors.
             else:
                 raise BreakOutOfLoops
-    except BreakOutOfLoops as exc:
+    except BreakOutOfLoops:
         pass
 
-    if oper.hook_level != hk_levle:
-        raise item_2.new_syntax_error("Missing : after ?")
-    if oper.paren_level != par_levl:
-        raise item_2.new_syntax_error("Missing ) in parenthetical")
-    if oper.bracket__level != br_level:
-        raise item_2.new_syntax_error("Missing ] in index expression")
-    if item_2.scan_operand:
-        raise item_2.new_syntax_error("Missing operand")
+    if context.hook_level != hook_level:
+        raise tokenizer.new_syntax_error("Missing : after ?")
+    if context.paren_level != paren_level:
+        raise tokenizer.new_syntax_error("Missing ) in parenthetical")
+    if context.bracket_level != bracket_level:
+        raise tokenizer.new_syntax_error("Missing ] in index expression")
+    if tokenizer.scan_operand:
+        raise tokenizer.new_syntax_error("Missing operand")
 
-    item_2.scan_operand = True
-    item_2.unget()
+    tokenizer.scan_operand = True
+    tokenizer.unget()
     while operators:
         reduce_()
     return operands.pop()
@@ -1151,12 +1174,12 @@ def parse(source, filename=None, starting_line_number=1):
     Raises:
         ParseError
     """
-    item_2 = Tokenizer(source, filename, starting_line_number)
-    oper = CompilerContext(False)
-    n_ident = new_script(item_2, oper)
-    if not item_2.done:
-        raise item_2.new_syntax_error("Syntax error")
-    return n_ident
+    tokenizer = Tokenizer(source, filename, starting_line_number)
+    context = CompilerContext(False)
+    node = new_script(tokenizer, context)
+    if not tokenizer.done:
+        raise tokenizer.new_syntax_error("Syntax error")
+    return node
 
 
 if __name__ == "__main__":
