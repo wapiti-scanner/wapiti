@@ -564,7 +564,7 @@ def statement(tokenizer, context):
     elif token_type == FOR:
         node = Node(tokenizer)
         node_2 = None
-        node.isLoop = True
+        node.is_loop = True
         tokenizer.must_match(LEFT_PAREN)
         token_type = tokenizer.peek()
         if token_type != SEMICOLON:
@@ -610,14 +610,14 @@ def statement(tokenizer, context):
 
     elif token_type == WHILE:
         node = Node(tokenizer)
-        node.isLoop = True
+        node.is_loop = True
         node.condition = paren_expression(tokenizer, context)
         node.body = nest(tokenizer, context, node, statement)
         return node
 
     elif token_type == DO:
         node = Node(tokenizer)
-        node.isLoop = True
+        node.is_loop = True
         node.body = nest(tokenizer, context, node, statement, WHILE)
         node.condition = paren_expression(tokenizer, context)
         if not context.ecma_strict_mode:
@@ -651,7 +651,7 @@ def statement(tokenizer, context):
                         raise tokenizer.new_syntax_error("Invalid break")
                     else:
                         raise tokenizer.new_syntax_error("Invalid continue")
-                if getattr(stmt_stack[i], "isLoop", None) or (token_type == BREAK and stmt_stack[i].type_ == SWITCH):
+                if getattr(stmt_stack[i], "is_loop", None) or (token_type == BREAK and stmt_stack[i].type_ == SWITCH):
                     break
         node.target = stmt_stack[i]
 
