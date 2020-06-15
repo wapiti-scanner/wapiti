@@ -150,7 +150,7 @@
                     <dd>${flaws[additional_name]["desc"] | h}</dd>
                 </dl>
 
-                    % for j, addtional in enumerate(additionals[additional_name]):
+                    % for j, additional in enumerate(additionals[additional_name]):
                         <h4>Additional found in ${additional["path"] | h}</h4>
                         <nav class="tabs" data-component="tabs" data-equals="true">
                             <ul>
@@ -169,6 +169,13 @@
                             <pre>${additional["curl_command"] | h}</pre>
                         </div>
                     % endfor
+                <dl><dt>Solutions</dt><dd>${flaws[additional_name]["sol"]}</dd></dl>
+                <h5>References</h5>
+                <ul>
+                    % for ref_name, ref_url in flaws[additional_name]["ref"].items():
+                    <li><a href="${ref_url}">${ref_name | h}</a></li>
+                    % endfor
+                </ul>
                 <br />
                 <hr>
                 % endif

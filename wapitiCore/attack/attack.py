@@ -49,7 +49,8 @@ modules = [
     "mod_methods",
     "mod_ssrf",
     "mod_redirect",
-    "mod_xxe"
+    "mod_xxe",
+    "mod_wapp"
 ]
 
 commons = ["blindsql", "exec", "file", "permanentxss", "redirect", "sql", "xss", "ssrf"]

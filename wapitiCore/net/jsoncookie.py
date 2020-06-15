@@ -110,7 +110,7 @@ class JsonCookie:
             return cook_jar
 
         for dom in matching_domains:
-            for path in self.cookiedict[d]:
+            for path in self.cookiedict[dom]:
                 for cookie_name, cookie_attrs in self.cookiedict[dom][path].items():
                     cook = Cookie(
                         version=cookie_attrs["version"],
