@@ -35,7 +35,7 @@ class JSONReportGenerator(ReportGenerator):
 
     def __init__(self):
         super().__init__()
-        # Use only one dict for vulnerability and anomaly types
+        # Use only one dict for vulnerability, anomaly and additional types
         self._flaw_types = {}
 
         self._vulns = {}

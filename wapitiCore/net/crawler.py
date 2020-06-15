@@ -1372,7 +1372,7 @@ class Explorer:
                     "pattern_counts": self._pattern_counts,
                     "hostnames": self._hostnames
                 },
-                fd,
+                file_data,
                 pickle.HIGHEST_PROTOCOL
             )
 
