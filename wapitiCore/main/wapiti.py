@@ -44,6 +44,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.file.reportgeneratorsxmlparser import ReportGeneratorsXMLParser
 from wapitiCore.file.vulnerabilityxmlparser import VulnerabilityXMLParser
 from wapitiCore.file.anomalyxmlparser import AnomalyXMLParser
+from wapitiCore.file.additionalxmlparser import AdditionalXMLParser
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.moon import phase
 
@@ -173,6 +174,16 @@ class Wapiti:
                 (anomaly.get_description()),
                 _(anomaly.get_solution()),
                 anomaly.get_references()
+            )
+
+        addition_xml_parser = AdditionalXMLParser()
+        addition_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "additionals.xml"))
+        for additional in addition_xml_parser.get_additionals():
+            self.report_gen.add_additional_type(
+                _(additional.get_name()),
+                (additional.get_description()),
+                _(additional.get_solution()),
+                additional.get_references()
             )
 
     def _init_attacks(self):
@@ -452,6 +463,14 @@ class Wapiti:
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
+                    category=payload.category,
+                    level=payload.level,
+                    request=payload.evil_request,
+                    parameter=payload.parameter,
+                    info=payload.info
+                )
+            elif payload.type == "additional":
+                self.report_gen.add_additional(
                     category=payload.category,
                     level=payload.level,
                     request=payload.evil_request,
