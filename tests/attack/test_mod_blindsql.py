@@ -17,11 +17,15 @@ from wapitiCore.attack.mod_blindsql import mod_blindsql
 class FakePersister:
     def __init__(self):
         self.requests = []
+        self.additionals = set()
         self.anomalies = set()
         self.vulnerabilities = []
 
     def get_links(self, path=None, attack_module: str = ""):
         return self.requests
+
+    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+        self.additionals.add(parameter)
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.anomalies.add(parameter)

@@ -14,11 +14,15 @@ from wapitiCore.attack.mod_xss import mod_xss
 class FakePersister:
     def __init__(self):
         self.requests = []
+        self.additionals = set()
         self.anomalies = set()
         self.vulnerabilities = []
 
     def get_links(self, path=None, attack_module: str = ""):
         return self.requests
+
+    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+        self.additionals.add(request)
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.anomalies.add(parameter)

@@ -12,6 +12,7 @@ from wapitiCore.attack.mod_shellshock import mod_shellshock
 class FakePersister:
     def __init__(self):
         self.requests = []
+        self.additionals = set()
         self.anomalies = set()
         self.vulnerabilities = []
 
@@ -22,6 +23,9 @@ class FakePersister:
 
     def get_forms(self, attack_module: str = ""):
         return [request for request in self.requests if request.method == "POST"]
+
+    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+        self.additionals.add(request)
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         pass
