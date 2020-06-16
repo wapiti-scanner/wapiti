@@ -135,6 +135,20 @@ msgstr "The server responded with a 500 HTTP error code while attempting to inje
 msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the parameter {0}"
 msgstr "The server responded with a 500 HTTP error code while attempting to inject a payload in the parameter {0}"
 
+#: ../language/vulnerability.py:110
+msgid "Fingerprint web technology"
+msgstr "Fingerprint web technology"
+
+#: ../language/vulnerability.py:111
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr "{0} {1} detected"
+
+#: ../language/vulnerability.py:112
+#, python-brace-format
+msgid "{0} detected (version not found)"
+msgstr "{0} detected (version not found)"
+
 #: ../wapiti.py:69 ../main/wapiti.py:82 ../main/wapiti.py:77
 #: ../main/getcookie.py:34
 #, python-brace-format
@@ -780,6 +794,14 @@ msgstr "SQL injection vulnerabilities allow an attacker to alter the queries exe
 msgid "SQL Injection solution"
 msgstr "To protect against SQL injection, user input must not directly be embedded in SQL statements. Instead, user input must be escaped or filtered or parameterized statements must be used."
 
+#: ../language/vulnerability.py:156
+msgid "Fingerprint web technology description"
+msgstr "The use of a web technology can be deducted due to the presence of its specific fingerprints."
+
+#: ../language/vulnerability.py:157
+msgid "Fingerprint web technology solution"
+msgstr "This is only for informational purposes."
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"
@@ -1143,6 +1165,10 @@ msgstr "[!] {} with url {}"
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"
 msgstr "Summary of anomalies :"
+
+#: ../report/txtreportgenerator.py:113
+msgid "Summary of additionals :"
+msgstr "Summary of additionals :"
 
 #: ../attack/mod_shellshock.py:75 ../attack/mod_shellshock.py:77
 #, python-brace-format
