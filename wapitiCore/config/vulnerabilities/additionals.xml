@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additionals>
+    <additional name="Fingerprint web technology">
+        <description>Fingerprint web technology description</description>
+        <solution text="Fingerprint web technology solution"/>
+        <references>
+            <reference>
+                <title><![CDATA[WSTG-INFO-02: Fingerprint Web Server]]></title>
+                <url>https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[WSTG-INFO-08: Fingerprint Web Application Framework]]></title>
+                <url>https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[WSTG-INFO-09: Fingerprint Web Application]]></title>
+                <url>https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/09-Fingerprint_Web_Application.html</url>
+            </reference>
+        </references>
+    </additional>
+</additionals>
