@@ -48,6 +48,18 @@
                         <td class="small .text-centered">${len(anomalies[anomaly_name])}</td>
                     </tr>
                 % endfor
+                % for i, additional_name in enumerate(additionals):
+                    <tr>
+                        <td class="small">
+                            % if len(additionals[additional_name]):
+                            <a href="#addition_type_${i}">${additional_name}</a>
+                            % else:
+                            ${additional_name}
+                            % endif
+                        </td>
+                        <td class="small .text-centered">${len(additionals[additional_name])}</td>
+                    </tr>
+                % endfor
             </tbody>
         </table>
         <hr />
@@ -126,6 +138,37 @@
                     <li><a href="${ref_url}">${ref_name | h}</a></li>
                     % endfor
                 </ul>
+                <br />
+                <hr>
+                % endif
+            % endfor
+            % for i, additional_name in enumerate(additionals):
+                % if len(additionals[additional_name]):
+                <h3 id="addition_type_${i}">${additional_name}</h3>
+                <dl>
+                    <dt>Description</dt>
+                    <dd>${flaws[additional_name]["desc"] | h}</dd>
+                </dl>
+
+                    % for j, addtional in enumerate(additionals[additional_name]):
+                        <h4>Additional found in ${additional["path"] | h}</h4>
+                        <nav class="tabs" data-component="tabs" data-equals="true">
+                            <ul>
+                                <li class="active"><a href="#tab-addition-${i}-${j}-1">Description</a></li>
+                                <li><a href="#tab-addition-${i}-${j}-2">HTTP Request</a></li>
+                                <li><a href="#tab-addition-${i}-${j}-3">cURL command line</a></li>
+                            </ul>
+                        </nav>
+                        <div id="tab-addition-${i}-${j}-1" style="min-height: 124px;">
+                            <pre>${additional["info"] | h}</pre>
+                        </div>
+                        <div id="tab-addition-${i}-${j}-2" style="min-height: 124px;">
+                            <pre>${additional["http_request"] | h}</pre>
+                        </div>
+                        <div id="tab-addition-${i}-${j}-3" style="min-height: 124px;">
+                            <pre>${additional["curl_command"] | h}</pre>
+                        </div>
+                    % endfor
                 <br />
                 <hr>
                 % endif
