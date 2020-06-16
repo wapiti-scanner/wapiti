@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.DEBUG)
 class FakePersister:
     def __init__(self):
         self.requests = []
+        self.additionals = set()
         self.anomalies = set()
         self.vulnerabilities = []
 
@@ -33,6 +34,9 @@ class FakePersister:
             if request.path_id == int(path_id):
                 return request
         return None
+
+    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+        self.additionals.add(request)
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.anomalies.add(parameter)
