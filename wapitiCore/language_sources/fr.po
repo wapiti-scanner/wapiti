@@ -135,6 +135,20 @@ msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un p
 msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the parameter {0}"
 msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un payload dans le paramètre {0}"
 
+#: ../language/vulnerability.py:110
+msgid "Fingerprint web technology"
+msgstr "Technologie web identifiée"
+
+#: ../language/vulnerability.py:111
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr "{0} {1} détecté"
+
+#: ../language/vulnerability.py:112
+#, python-brace-format
+msgid "{0} detected (version not found)"
+msgstr "{0} détecté (version non identifiée)"
+
 #: ../wapiti.py:69 ../main/wapiti.py:82 ../main/wapiti.py:77
 #: ../main/getcookie.py:34
 #, python-brace-format
@@ -777,6 +791,14 @@ msgstr "Les failles d'injection SQL permettent à un attaquant de modifier les r
 msgid "SQL Injection solution"
 msgstr "Pour se protéger des injections SQL, les données fournies par les utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes SQL mais doivent faire l'objet de vérifications (filtres, échappements) approfondies."
 
+#: ../language/vulnerability.py:156
+msgid "Fingerprint web technology description"
+msgstr "L'utilisation d'une technologie web peut être déduite à cause des traces qui lui sont spécifiques."
+
+#: ../language/vulnerability.py:157
+msgid "Fingerprint web technology solution"
+msgstr "A titre d'information seulement."
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"
@@ -1137,6 +1159,10 @@ msgstr "[!] {} avec l'URL {}"
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"
 msgstr "Résumé des anomalies :"
+
+#: ../report/txtreportgenerator.py:113
+msgid "Summary of additionals :"
+msgstr "Résumé des informations complémentaires :"
 
 #: ../main/wapiti.py:846 ../main/wapiti.py:853 ../main/wapiti.py:874
 #: ../main/wapiti.py:878 ../main/wapiti.py:935
