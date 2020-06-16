@@ -58,3 +58,10 @@ class ReportGenerator:
 
     def add_anomaly(self, category=None, level=0, request=None, parameter="", info=""):
         pass
+
+    # Additionals
+    def add_additional_type(self, name, description="", solution="", references=None):
+        pass
+
+    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+        pass
