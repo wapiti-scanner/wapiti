@@ -59,6 +59,7 @@ class XMLReportGenerator(ReportGenerator):
 
         self._vulns = {}
         self._anomalies = {}
+        self._additionals = {}
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None):
@@ -123,6 +124,41 @@ class XMLReportGenerator(ReportGenerator):
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
 
+    # Additionals
+    def add_additional_type(self, name, description="", solution="", references=None):
+        """
+        This method adds an addtional type, it can be invoked to include in the
+        report the type.
+        """
+        if name not in self._flaw_types:
+            self._flaw_types[name] = {
+                "desc": description,
+                "sol": solution,
+                "ref": references
+            }
+        if name not in self._additionals:
+            self._additionals[name] = []
+
+    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+        """
+        Store the information about the addtional to be printed later.
+        The method printToFile(fileName) can be used to save in a file the
+        addtionals notified through the current method.
+        """
+
+        addition_dict = {
+            "method": request.method,
+            "path": request.file_path,
+            "info": info,
+            "level": level,
+            "parameter": parameter,
+            "http_request": request.http_repr(left_margin=""),
+            "curl_command": request.curl_repr,
+        }
+        if category not in self._additionals:
+            self._additionals[category] = []
+        self._additionals[category].append(addition_dict)
+
     def generate_report(self, output_path):
         """
         Create a xml file with a report of the vulnerabilities which have been logged with
@@ -164,6 +200,7 @@ class XMLReportGenerator(ReportGenerator):
 
         vulnerabilities = self._xml_doc.createElement("vulnerabilities")
         anomalies = self._xml_doc.createElement("anomalies")
+        additionals = self._xml_doc.createElement("additionals")
 
         # Loop on each flaw classification
         for flaw_type in self._flaw_types:
@@ -178,6 +215,10 @@ class XMLReportGenerator(ReportGenerator):
                 container = anomalies
                 classification = "anomaly"
                 flaw_dict = self._anomalies
+            elif flaw_type in self._additionals:
+                container = additionals
+                classification = "additional"
+                flaw_dict = self._additionals
 
             # Child nodes with a description of the flaw type
             flaw_type_node = self._xml_doc.createElement(classification)
@@ -232,6 +273,7 @@ class XMLReportGenerator(ReportGenerator):
             container.appendChild(flaw_type_node)
         report.appendChild(vulnerabilities)
         report.appendChild(anomalies)
+        report.appendChild(additionals)
 
         with open(output_path, "w") as xml_report_file:
             self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")

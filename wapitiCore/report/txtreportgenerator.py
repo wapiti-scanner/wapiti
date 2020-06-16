@@ -51,6 +51,7 @@ class TXTReportGenerator(ReportGenerator):
         self._flaw_types = {}
         self._vulns = {}
         self._anomalies = {}
+        self._additionals = {}
 
     def generate_report(self, output_path):
         """
@@ -105,6 +106,21 @@ class TXTReportGenerator(ReportGenerator):
                         txt_report_file.write("\n")
                         txt_report_file.write(_("Evil request:\n"))
                         txt_report_file.write(anom["request"].http_repr())
+                        txt_report_file.write("\n\n")
+                        txt_report_file.write(center("*   *   *\n\n"))
+                    txt_report_file.write(separator)
+
+            txt_report_file.write(title(_("Summary of additionals :")))
+            for name in self._additionals:
+                txt_report_file.write(_("{0} : {1:>3}\n").format(name, len(self._additionals[name])).rjust(NB_COLUMNS))
+            txt_report_file.write(separator)
+
+            for name in self._additionals:
+                if self._additionals[name]:
+                    txt_report_file.write("\n")
+                    txt_report_file.write(title(name))
+                    for additional in self._additionals[name]:
+                        txt_report_file.write(additional["info"])
                         txt_report_file.write("\n\n")
                         txt_report_file.write(center("*   *   *\n\n"))
                     txt_report_file.write(separator)
@@ -177,3 +193,39 @@ class TXTReportGenerator(ReportGenerator):
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
+
+    # Additionals
+    def add_additional_type(self, name, description="", solution="", references=None):
+        """
+        This method adds an addtional type, it can be invoked to include in the
+        report the type.
+        The types are not stored previously, they are added when the method
+        add_addtional(category,level,url,parameter,info) is invoked
+        and if there is no additional of a type, this type will not be presented
+        in the report
+        """
+        if name not in self._flaw_types:
+            self._flaw_types[name] = {
+                "desc": description,
+                "sol": solution,
+                "ref": references
+            }
+        if name not in self._additionals:
+            self._additionals[name] = []
+
+    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+        """
+        Store the information about the addtional to be printed later.
+        The method printToFile(fileName) can be used to save in a file the
+        additionals notified through the current method.
+        """
+
+        addition_dict = {
+            "request": request,
+            "info": info,
+            "level": level,
+            "parameter": parameter,
+        }
+        if category not in self._additionals:
+            self._additionals[category] = []
+        self._additionals[category].append(addition_dict)

@@ -81,6 +81,7 @@ class HTMLReportGenerator(JSONReportGenerator):
                     scan_scope=self._infos["scope"],
                     vulnerabilities=self._vulns,
                     anomalies=self._anomalies,
+                    additionals=self._additionals,
                     flaws=self._flaw_types
                 )
             )

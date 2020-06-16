@@ -25,10 +25,11 @@ from wapitiCore.report.reportgenerator import ReportGenerator
 
 class JSONReportGenerator(ReportGenerator):
     """This class allow generating reports in JSON format.
-    The root dictionary contains 4 dictionaries :
+    The root dictionary contains 5 dictionaries :
     - classifications : contains the description and references of a vulnerability type.
     - vulnerabilities : each key is matching a vulnerability class. Value is a list of found vulnerabilities.
     - anomalies : same as vulnerabilities but used only for error messages and timeouts (items of less importance).
+    - additionals : some additional information about the target.
     - infos : several informations about the scan.
     """
 
@@ -39,16 +40,18 @@ class JSONReportGenerator(ReportGenerator):
 
         self._vulns = {}
         self._anomalies = {}
+        self._additionals = {}
 
     def generate_report(self, output_path):
         """
-        Generate a JSON report of the vulnerabilities and anomalies which have
+        Generate a JSON report of the vulnerabilities, anomalies and additionnals which have
         been previously logged with the log* methods.
         """
         report_dict = {
             "classifications": self._flaw_types,
             "vulnerabilities": self._vulns,
             "anomalies": self._anomalies,
+            "additionals": self._additionals,
             "infos": self._infos
         }
         with open(output_path, "w") as json_report_file:
@@ -110,3 +113,29 @@ class JSONReportGenerator(ReportGenerator):
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
+
+    def add_additional_type(self, name, description="", solution="", references=None):
+        """Register a type of additional"""
+        if name not in self._flaw_types:
+            self._flaw_types[name] = {
+                "desc": description,
+                "sol": solution,
+                "ref": references
+            }
+        if name not in self._additionals:
+            self._additionals[name] = []
+
+    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+        """Store the information about an additional."""
+        addition_dict = {
+            "method": request.method,
+            "path": request.file_path,
+            "info": info,
+            "level": level,
+            "parameter": parameter,
+            "http_request": request.http_repr(left_margin=""),
+            "curl_command": request.curl_repr
+        }
+        if category not in self._additionals:
+            self._additionals[category] = []
+        self._additionals[category].append(addition_dict)
