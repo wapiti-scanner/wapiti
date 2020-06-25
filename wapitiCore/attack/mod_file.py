@@ -19,12 +19,80 @@
 from itertools import chain
 from configparser import ConfigParser
 from os.path import join as path_join
-from collections import defaultdict
+from collections import defaultdict, namedtuple
+import re
 
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+
+
+PHP_WARNING_REGEXES = [
+    # Most useful regex must be at top
+    re.compile(
+        r"(?:<b>)?Warning(?:</b>)?:\s+(?P<function>\w+)\(\).*"
+        r"Failed opening '(?P<uri>.+)' (?:for inclusion)?.*in (?:<b>)?(?P<path>[^<>]*)(?:</b>)? "
+        r"on line (?:<\w+>)?(\d*)(?:</\w+>)?"
+    ),
+    re.compile(
+        r"(?:<b>)?Warning(?:</b>)?:\s+(?P<function>\w+)\((?P<uri>.+)\).*"
+        r"failed to open stream:.*in (?:<b>)?(?P<path>[^<>]*)(?:</b>)? "
+        r"on line (?:<\w+>)?(\d*)(?:</\w+>)?"
+    )
+]
+
+
+FileWarning = namedtuple('FileWarning', ['pattern', 'function', 'uri', 'path'])
+PHP_FUNCTIONS = (
+    "fread", "fpassthru", "include", "require", "file", "readfile", "file_get_contents", "show_source",
+    "highlight_file", "include_once", "require_once"
+)
+
+# The following table contains tuples of (pattern, description)
+# Most important patterns must appear at the top of this table.
+WARNING_DESC = [
+    # Warnings
+    ("java.io.FileNotFoundException:", "Java include/open"),
+    ("System.IO.FileNotFoundException:", ".NET File.Open*"),
+    ("error '800a0046'", "VBScript OpenTextFile")
+]
+
+
+def has_prefix_or_suffix(pattern, string):
+    """Return whether a pattern is present in a string with or without a prefix and/or suffix."""
+    results = []
+    if pattern not in string:
+        return results
+
+    if not string.startswith(pattern):
+        results.append("prefix")
+    if not string.endswith(pattern):
+        results.append("suffix")
+    return sorted(results)
+
+
+def find_warning_message(data, payload):
+    """This method searches patterns in the response from the server"""
+    for warning_regex in PHP_WARNING_REGEXES:
+        for match in warning_regex.finditer(data):
+            items = match.groupdict()
+            if payload not in items["uri"]:
+                # False positive: the page is raising a warning for something we do not injected
+                continue
+
+            return FileWarning(
+                pattern=match.group(),
+                function=items["function"] + "()",
+                uri=items["uri"],
+                path=items["path"]
+            )
+
+    for pattern, description in WARNING_DESC:
+        if pattern in data:
+            return FileWarning(pattern=pattern, function=description, uri="", path="")
+
+    return None
 
 
 class mod_file(Attack):
@@ -33,31 +101,6 @@ class mod_file(Attack):
     PAYLOADS_FILE = "fileHandlingPayloads.ini"
 
     name = "file"
-
-    # The following table contains tuples of (pattern, description, severity)
-    # a severity of 1 is a file disclosure (inclusion, read etc) vulnerability
-    # a severity of 0 is just the detection of an error returned by the server
-    # Most important patterns must appear at the top of this table.
-    warnings_desc = [
-        # Warnings
-        ("java.io.FileNotFoundException:", "Java include/open"),
-        ("fread(): supplied argument is not", "fread()"),
-        ("fpassthru(): supplied argument is not", "fpassthru()"),
-        ("for inclusion (include_path=", "include()"),
-        ("Failed opening required", "require()"),
-        ("Warning: file(", "file()"),
-        ("<b>Warning</b>:  file(", "file()"),
-        ("Warning: readfile(", "readfile()"),
-        ("<b>Warning:</b>  readfile(", "readfile()"),
-        ("Warning: file_get_contents(", "file_get_contents()"),
-        ("<b>Warning</b>:  file_get_contents(", "file_get_contents()"),
-        ("Warning: show_source(", "show_source()"),
-        ("<b>Warning:</b>  show_source(", "show_source()"),
-        ("Warning: highlight_file(", "highlight_file()"),
-        ("<b>Warning:</b>  highlight_file(", "highlight_file()"),
-        ("System.IO.FileNotFoundException:", ".NET File.Open*"),
-        ("error '800a0046'", "VBScript OpenTextFile")
-    ]
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
@@ -90,14 +133,6 @@ class mod_file(Attack):
             payloads.append((clean_payload, flags))
 
         return payloads
-
-    def _find_warning_message(self, data):
-        """This method searches patterns in the response from the server"""
-        for pattern, description in self.warnings_desc:
-            if pattern in data:
-                return pattern, description
-
-        return None, None
 
     def is_false_positive(self, request, pattern):
         """Check if the response for a given request contains an expected pattern."""
@@ -178,16 +213,23 @@ class mod_file(Attack):
                         )
                         timeouted = True
                     else:
+                        file_warning = None
                         # original_payload = self.payload_to_rules[flags.section]
                         for rule in self.payload_to_rules[flags.section]:
                             if rule in response.content:
                                 found_pattern = rule
-                                vuln_info = self.rules_to_messages[rule]
+                                vulnerable_method = self.rules_to_messages[rule]
                                 inclusion_succeed = True
                                 break
                         else:
-                            found_pattern, vuln_info = self._find_warning_message(response.content)
+                            # No successful inclusion or directory traversal but perhaps we can control something
                             inclusion_succeed = False
+                            file_warning = find_warning_message(response.content, payload)
+                            if file_warning:
+                                found_pattern = file_warning.pattern
+                                vulnerable_method = file_warning.function
+                            else:
+                                found_pattern = vulnerable_method = None
 
                         if found_pattern:
                             # Interesting pattern found, either inclusion or error message
@@ -200,14 +242,23 @@ class mod_file(Attack):
                                     continue
 
                                 # Mark as eventuality
-                                vuln_info = _("Possible {0} vulnerability").format(vuln_info)
+                                vulnerable_method = _("Possible {0} vulnerability").format(vulnerable_method)
                                 warned = True
 
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(vuln_info, page)
+                                vuln_message = Vulnerability.MSG_QS_INJECT.format(vulnerable_method, page)
                             else:
-                                vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
+                                vuln_message = _("{0} via injection in the parameter {1}").format(
+                                    vulnerable_method, parameter
+                                )
+
+                            constraint_message = ""
+                            if file_warning and file_warning.uri:
+                                constraints = has_prefix_or_suffix(payload, file_warning.uri)
+                                if constraints:
+                                    constraint_message += _("Constraints: {}").format(", ".join(constraints))
+                                    vuln_message += " (" + constraint_message + ")"
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
@@ -221,10 +272,14 @@ class mod_file(Attack):
                             self.log_red("---")
                             self.log_red(
                                 Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING" else Vulnerability.MSG_PARAM_INJECT,
-                                vuln_info,
+                                vulnerable_method,
                                 page,
                                 parameter
                             )
+
+                            if constraint_message:
+                                self.log_red(constraint_message)
+
                             self.log_red(Vulnerability.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
