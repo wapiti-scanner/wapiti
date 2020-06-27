@@ -110,7 +110,6 @@ if a script is vulnerable.""",
         "mako>=1.1.2",
         "PySocks>=1.7.1",
         "markupsafe==1.1.1",
-        "lxml>=4.5.0",
         "six>=1.15.0"
     ],
     extras_require={
