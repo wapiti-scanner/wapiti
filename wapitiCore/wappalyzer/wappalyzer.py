@@ -1,90 +1,29 @@
-from typing import Union
 import json
 import logging
 import re
 import warnings
-import requests
 import pkg_resources
-from bs4 import BeautifulSoup
+
+
+from wapitiCore.net.crawler import Page
 
 logger = logging.getLogger(name=__name__)
 
-class WebContent:
-    """
-    Store web page information using requests package.
-    """
-
-    def __init__(self, url, verify: bool = True, timeout: Union[int, float] = 2.5):
-        """
-        Initialize a new WebContent object.
-
-        Parameters
-        ----------
-
-        url : str
-            The web page URL.
-        verify : bool
-            SSL check (default=True).
-        timeout : Union[int, float]
-            Stop waiting for a repsonse after timeout (seconds) if no response has been received yet.
-        """
-        self.url = url
-
-        response = requests.get(url, verify=verify, timeout=timeout)
-        self.html = response.text
-        self.headers = response.headers
-        self.cookies = response.cookies.get_dict()
-
-        html_parsed = BeautifulSoup(self.html, "lxml")
-        self.scripts = [script['src'] for script in
-                        html_parsed.findAll('script', src=True)]
-        self.meta_data = {
-            meta['name'].lower():
-                meta['content'] for meta in html_parsed.findAll(
-                    'meta', attrs=dict(name=True, content=True))
-        }
-        self.icons = [icon['src'] for icon in html_parsed.findAll(['img', 'svg', 'i'], src=True)]
-        self.icons.append([icon['href'] for icon in html_parsed.findAll('link', rel="icon", href=True)])
-
-    def get_url(self):
-        """Provide the WebContent url"""
-        return self.url
-
-    def get_html(self):
-        """Provide the html response of the request done on the WebContent url"""
-        return self.html
-
-    def get_headers(self):
-        """Provide the response headers of the request done on the WebContent url"""
-        return self.headers
-
-    def get_cookies(self):
-        """Provide the response cookies of the request done on the WebContent url"""
-        return self.cookies
-
-    def get_scripts(self):
-        """Provide the scripts extracted from the html reponse of the request done on the WebContent url"""
-        return self.scripts
-
-    def get_meta_data(self):
-        """Provide the meta data extracted from the html reponse of the request done on the WebContent url"""
-        return self.meta_data
-
-    def get_icons(self):
-        """Provide the images extracted from the html reponse of the request done on the WebContent url"""
-        return self.icons
 
 class ApplicationDataException(Exception):
     """Raised when application data file is not properly formatted"""
+
     def __init__(self, message):
         message = "Application data file is not properly formatted : " + message
         super().__init__(message)
+
 
 class ApplicationData:
     """
     Store application database.
     For instance https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/apps.json.
     """
+
     def __init__(self, data_filename=None):
         """
         Initialize a new ApplicationData object.
@@ -133,7 +72,7 @@ class ApplicationData:
 
                 # Ensure keys are lowercase
                 dict_items = self.applications[application_name][dict_field].items()
-                self.applications[application_name][dict_field] = {key.lower():value for (key, value) in dict_items}
+                self.applications[application_name][dict_field] = {key.lower(): value for (key, value) in dict_items}
 
             for string_field in ["url", "icon", "website", "cpe"]:
                 if string_field not in self.applications[application_name]:
@@ -162,7 +101,7 @@ class ApplicationData:
             for list_field in ["html", "implies", "script"]:
                 self.applications[application_name][list_field] = [
                     self.normalize_regex(pattern) for pattern in self.applications[application_name][list_field]
-                    ]
+                ]
 
             for dict_field in ["meta", "cookies", "headers"]:
                 for (key, pattern) in self.applications[application_name][dict_field].items():
@@ -210,39 +149,39 @@ class ApplicationData:
         """Provide normalized ApplicationData applications"""
         return self.applications
 
+
 class Wappalyzer:
     """
     Python Wappalyzer driver.
     """
 
-    def __init__(self, application_data: ApplicationData, web_content: WebContent):
+    def __init__(self, application_data: ApplicationData, web_content: Page):
         """
         Initialize a new Wappalyzer object.
         """
         self.applications = application_data.get_applications()
         self.categories = application_data.get_categories()
-        self.web_content = web_content
+
+        self._url = web_content.url
+        self._html = web_content.content
+        # Copy some values to make sure they aren't processed more than once
+        self._scripts = web_content.scripts[:]
+        self._cookies = web_content.cookies.get_dict()
+        self._headers = web_content.headers
+        self._metas = dict(web_content.metas)
 
     def is_application_detected(self, application: dict):
         """
         Determine whether the web content matches the application regex.
         """
-        web_content = self.web_content
-        web_url = web_content.get_url()
-        web_headers = web_content.get_headers()
-        web_scripts = web_content.get_scripts()
-        web_cookies = web_content.get_cookies()
-        web_meta_data = web_content.get_meta_data()
-        web_html = web_content.get_html()
-
         is_detected = (
-            self.is_application_detected_normalize_string(application, 'url', web_url) or
-            self.is_application_detected_normalize_list(application, 'html', web_html) or
-            self.is_application_detected_normalize_list(application, 'script', web_scripts) or
-            self.is_application_detected_normalize_dict(application, 'cookies', web_cookies) or
-            self.is_application_detected_normalize_dict(application, 'headers', web_headers) or
-            self.is_application_detected_normalize_dict(application, 'meta', web_meta_data)
-            )
+                self.is_application_detected_normalize_string(application, 'url', self._url) or
+                self.is_application_detected_normalize_list(application, 'html', self._html) or
+                self.is_application_detected_normalize_list(application, 'script', self._scripts) or
+                self.is_application_detected_normalize_dict(application, 'cookies', self._cookies) or
+                self.is_application_detected_normalize_dict(application, 'headers', self._headers) or
+                self.is_application_detected_normalize_dict(application, 'meta', self._metas)
+        )
 
         return is_detected
 
@@ -307,7 +246,7 @@ class Wappalyzer:
                             and ternary.group(1) is not None
                             and ternary.group(2) is not None):
                         version_pattern = version_pattern.replace(ternary.group(0), ternary.group(1) if match != ''
-                                                                  else ternary.group(2))
+                        else ternary.group(2))
 
                     # Replace back references
                     version_pattern = version_pattern.replace('\\' + str(i + 1), match)
@@ -347,14 +286,16 @@ class Wappalyzer:
         Returns a list of the categories for a name of application.
         """
         category_numbers = self.applications.get(application_name, {}).get("cats", [])
-        category_names = [self.categories.get(str(category_number), "").get("name", "")
-                          for category_number in category_numbers]
+        category_names = [
+            self.categories.get(str(category_number), "").get("name", "")
+            for category_number in category_numbers
+        ]
 
         return category_names
 
     def get_versions(self, application_name: str):
         """
-        Retuns a list of the discovered versions for a name of application.
+        Returns a list of the discovered versions for a name of application.
         """
         return ([] if 'versions' not in self.applications[application_name]
                 else self.applications[application_name]['versions'])

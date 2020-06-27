@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys
 from wapitiCore.attack.attack import Attack
-from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, WebContent, ApplicationData, ApplicationDataException
+from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import Additional
 from wapitiCore.net.web import Request
+
 
 class mod_wapp(Attack):
     """
@@ -25,15 +25,16 @@ class mod_wapp(Attack):
             application_data = ApplicationData()
         except ApplicationDataException as exception:
             print(exception)
-            sys.exit(1)
-        web_content = WebContent(url)
-        wappalyzer = Wappalyzer(application_data, web_content)
+            return
+
+        response = self.crawler.send(request)
+        wappalyzer = Wappalyzer(application_data, response)
         detected_applications = wappalyzer.detect_with_versions_and_categories()
 
         if len(detected_applications) > 0:
             self.log_blue("---")
 
-        for application_name in detected_applications:
+        for application_name in sorted(detected_applications, key=lambda x: x.lower()):
             if len(detected_applications[application_name]["versions"]) > 0:
                 self.log_blue(Additional.MSG_TECHNO_VERSIONED, application_name,
                               detected_applications[application_name]["versions"][0])

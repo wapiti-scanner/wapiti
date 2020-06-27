@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Crawler v2.4.0 - A web spider library
 # This file is part of the Wapiti project (http://wapiti.sourceforge.io)
 # Copyright (C) 2006-2020 Nicolas SURRIBAS
 #
@@ -548,12 +547,17 @@ class Page:
         __ = self.soup
         return self._base
 
-    def _meta(self, name):
+    @property
+    def metas(self) -> dict:
+        """Returns a dictionary of all metas tags with name attribute as the key and content attribute as the value."""
+        metas = {}
         if self.soup.head is not None:
-            tag = self.soup.head.find("meta", attrs={"name": name}, content=True)
-            if tag is not None:
-                return tag["content"]
-        return ""
+            for meta_tag in self.soup.head.find_all("meta", attrs={"name": True, "content": True}, content=True):
+                tag_name = meta_tag["name"].lower().strip()
+                if tag_name:
+                    metas[tag_name] = meta_tag["content"]
+
+        return metas
 
     @property
     def description(self) -> str:
@@ -561,7 +565,7 @@ class Page:
 
         @rtype: str
         """
-        return self._meta("description")
+        return self.metas.get("description", "")
 
     @property
     def keywords(self):
@@ -569,7 +573,7 @@ class Page:
 
         @rtype: list
         """
-        return self._meta("keywords").split(",")
+        return self.metas.get("keywords", "").split(",")
 
     @property
     def generator(self) -> str:
@@ -577,7 +581,7 @@ class Page:
 
         @rtype: str
         """
-        return self._meta("generator")
+        return self.metas.get("generator", "")
 
     @property
     def text_only(self):
