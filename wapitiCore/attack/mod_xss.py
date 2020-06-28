@@ -20,7 +20,6 @@ import random
 from itertools import chain
 from os.path import join as path_join
 from configparser import ConfigParser
-from math import ceil
 
 from requests.exceptions import ReadTimeout
 
@@ -31,15 +30,6 @@ from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, 
 
 class mod_xss(Attack):
     """This class implements a cross site scripting attack"""
-
-    # simple payloads that doesn't rely on their position in the DOM structure
-    # payloads injected after closing a tag attribute value (attrval) or in the
-    # content of a tag (text node like between <p> and </p>)
-    # only trick here must be on character encoding, filter bypassing, stuff like that
-    # form the simplest to the most complex, Wapiti will stop on the first working
-    independant_payloads = []
-    php_self_payload = "%3Cscript%3Ephpselfxss()%3C/script%3E"
-    php_self_check = "<script>phpselfxss()</script>"
 
     name = "xss"
 
@@ -56,13 +46,12 @@ class mod_xss(Attack):
     # key = taint code, value = (payload, flags)
     successful_xss = {}
 
-    PAYLOADS_FILE = "xssPayloads.ini"
+    PAYLOADS_FILE = path_join(Attack.CONFIG_DIR, "xssPayloads.ini")
 
     MSG_VULN = _("XSS vulnerability")
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.independant_payloads = self.payloads
 
     @staticmethod
     def random_string():
@@ -110,7 +99,7 @@ class mod_xss(Attack):
                         # even if the Content-Type seems uninteresting.
                         if taint.lower() in response.content.lower() and valid_xss_content_type(mutated_request):
                             # Simple text injection worked in HTML response, let's try with JS code
-                            payloads = generate_payloads(response.content, taint, self.independant_payloads)
+                            payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
 
                             # TODO: check that and make it better
                             if flags.method == PayloadType.get:
@@ -125,40 +114,6 @@ class mod_xss(Attack):
                     yield exception
 
             yield original_request
-
-    @property
-    def payloads(self):
-        """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        payloads = []
-
-        config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
-
-        for section in config_reader.sections():
-            if not config_reader.getboolean(section, "independant", fallback=True):
-                continue
-
-            payload = config_reader[section]["payload"]
-
-            clean_payload = payload.strip(" \n")
-            clean_payload = clean_payload.replace("[TAB]", "\t")
-            clean_payload = clean_payload.replace("[LF]", "\n")
-            clean_payload = clean_payload.replace(
-                "[TIME]",
-                str(int(ceil(self.options["timeout"])) + 1)
-            )
-
-            payload_type = PayloadType.pattern
-            if "[TIMEOUT]" in clean_payload:
-                payload_type = PayloadType.time
-                clean_payload = clean_payload.replace("[TIMEOUT]", "")
-
-            payloads.append((clean_payload, Flags(type=payload_type, section=section)))
-
-        return payloads
 
     def attempt_exploit(self, method, payloads, original_request, parameter, taint):
         timeouted = False
@@ -275,11 +230,14 @@ class mod_xss(Attack):
         for section in config_reader.sections():
             if section == flags.section:
                 expected_value = config_reader[section]["value"].replace("__XSS__", taint)
+                tag_names = config_reader[section]["tag"].split(",")
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")
                 match_type = config_reader[section].get("match_type", "exact")
 
-                for tag in response.soup.find_all(config_reader[section]["tag"]):
+                attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
+
+                for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
                     if find_non_exec_parent(tag):
                         continue
 

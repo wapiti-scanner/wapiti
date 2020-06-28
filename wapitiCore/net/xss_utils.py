@@ -1,6 +1,10 @@
 import re
+from configparser import ConfigParser
 
 from bs4 import BeautifulSoup, element
+
+from wapitiCore.attack.attack import PayloadType, Flags
+
 
 # Everything under those tags will be treated as text
 NONEXEC_PARENTS = {
@@ -30,207 +34,294 @@ def find_non_exec_parent(tag):
 
 
 # type/name/tag ex: attrval/img/src
-def get_context(bs_node, keyword, parent=None, ):
-    entries = []
+def get_context_list(html_code, keyword, bs_node=None):
+    if bs_node is None:
+        bs_node = BeautifulSoup(html_code, "html.parser")
+
+    context_list = []
 
     # if parent is None:
     #  print("Keyword is: {0}".format(keyword))
     if keyword in str(bs_node).lower():
         if isinstance(bs_node, element.Tag):
-            events = set(bs_node.attrs.keys())
+            events = set(name for name in bs_node.attrs.keys()if name.startswith("on"))
             if keyword in str(bs_node.attrs):
-
                 for attr_name, attr_value in bs_node.attrs.items():
                     if keyword in attr_value:
                         # print("Found in attribute value {0} of tag {1}".format(attr_name, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        res = {
+
+                        code_index = html_code.find(keyword)
+                        attrval_index = 0
+                        before_code = html_code[:code_index]
+
+                        # Not perfect but still best than the former rfind
+                        attr_pattern = r"\s*" + attr_name + r"\s*=\s*"
+
+                        # Let's find the last match
+                        for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
+                            attrval_index = match.end()
+
+                        attrval = before_code[attrval_index:]
+                        # between the tag name and our injected attribute there is an equal sign and maybe
+                        # a quote or a double-quote that we need to close before adding our payload
+                        if attrval.startswith("'"):
+                            separator = "'"
+                        elif attrval.startswith('"'):
+                            separator = '"'
+                        else:
+                            separator = ""
+
+                        context = {
                             "type": "attrval",
                             "name": attr_name,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
-                            "events": events
+                            "events": events,
+                            "separator": separator
                         }
-                        if res not in entries:
-                            entries.append(res)
+
+                        if context not in context_list:
+                            context_list.append(context)
+
+                        # Remove the current injection point before going deeper
+                        html_code = html_code.replace(keyword, "A" * len(keyword), 1)  # Reduce the research zone
 
                     if keyword in attr_name:
                         # print("Found in attribute name {0} of tag {1}".format(attr_name, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
-                        res = {
+                        context = {
                             "type": "attrname",
                             "name": attr_name,
                             "tag": bs_node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
-                        if res not in entries:
-                            entries.append(res)
+                        if context not in context_list:
+                            context_list.append(context)
 
             elif keyword in bs_node.name:
                 # print("Found in tag name")
                 bad_parent = find_non_exec_parent(bs_node)
-                res = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent}
-                if res not in entries:
-                    entries.append(res)
+                context = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent, "events": events}
+                if context not in context_list:
+                    context_list.append(context)
 
             # recursively search injection points for the same variable
-            for node_content in bs_node.contents:
-                for entry in get_context(node_content, keyword, parent=bs_node):
-                    if entry not in entries:
-                        entries.append(entry)
+            for child_node in bs_node.children:
+                for context in get_context_list(html_code, keyword, bs_node=child_node):
+                    if context not in context_list:
+                        context_list.append(context)
 
         elif isinstance(bs_node, element.Comment):
             # print("Found in comment, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
-            res = {"type": "comment", "parent": parent.name, "non_exec_parent": bad_parent}
-            if res not in entries:
-                entries.append(res)
+            context = {"type": "comment", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
+            if context not in context_list:
+                context_list.append(context)
 
         elif isinstance(bs_node, element.NavigableString):
             # print("Found in text, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
-            res = {"type": "text", "parent": parent.name, "non_exec_parent": bad_parent}
-            if res not in entries:
-                entries.append(res)
+            context = {"type": "text", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
+            if context not in context_list:
+                context_list.append(context)
 
-    return entries
+    return context_list
+
+
+def load_payloads_from_ini(filename):
+    config_reader = ConfigParser(interpolation=None)
+    config_reader.read_file(open(filename))
+    payloads = []
+
+    for section in config_reader.sections():
+        payload = config_reader[section]["payload"]
+
+        clean_payload = payload.strip(" \n")
+        clean_payload = clean_payload.replace("[TAB]", "\t")
+        clean_payload = clean_payload.replace("[LF]", "\n")
+
+        infos = {
+            "name": section,
+            "payload": clean_payload,
+            "tag": config_reader[section]["tag"].split(","),
+            "attribute": config_reader[section]["attribute"],
+            "value": config_reader[section]["value"],
+            "case_sensitive": config_reader.getboolean(section, "case_sensitive", fallback=True),
+            "close_tag": config_reader.getboolean(section, "close_tag", fallback=True)
+        }
+        payloads.append(infos)
+
+    return payloads
+
+
+def apply_attrval_context(context, payloads, code):
+    # Our string is in the value of a tag attribute
+    # ex: <a href="our_string"></a>
+    result = []
+
+    for payload_infos in payloads:
+        if not payload_infos["close_tag"]:
+            # do new stuff
+            pass
+            # if context["name"].lower() == "src" and context["tag"].lower() in ["frame", "iframe"]:
+            #     if context["tag"].lower() == "frame":
+            #         flags = {"frame_src_javascript"}
+            #     else:
+            #         flags = {"iframe_src_javascript"}
+            #
+            #     js_code = "javascript:String.fromCharCode(0,__XSS__,1);".replace("__XSS__", code)
+            #     if (js_code, flags) not in payloads:
+            #         payloads.insert(0, (js_code, flags))
+        else:
+            js_code = context["separator"]
+            # we must deal differently with self-closing tags
+            if context["tag"].lower() in ["img", "input"]:
+                js_code += "/>"
+            else:
+                js_code += "></" + context["tag"] + ">"
+
+            if context["non_exec_parent"]:
+                js_code += "</" + context["non_exec_parent"] + ">"
+
+            js_code += payload_infos["payload"].replace("__XSS__", code)
+            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+
+    return result
+
+
+def apply_attrname_context(context, payloads, code):
+    # we control an attribute name
+    # ex: <a our_string="/index.html">
+    result = []
+
+    if code == context["name"]:
+        for payload_infos in payloads:
+            if not payload_infos["close_tag"]:
+                # do new stuff
+                pass
+            else:
+                js_code = '>'
+                if context["non_exec_parent"]:
+                    js_code += "</" + context["non_exec_parent"] + ">"
+                js_code += payload_infos["payload"].replace("__XSS__", code)
+
+                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+
+    return result
+
+
+def apply_tagname_context(context, payloads, code):
+    # we control the tag name
+    # ex: <our_string name="column" />
+    result = []
+
+    if context["value"].startswith(code):
+        for payload_infos in payloads:
+            if not payload_infos["close_tag"]:
+                # do new stuff
+                pass
+            else:
+                js_code = ""
+                if context["non_exec_parent"]:
+                    js_code += "</" + context["non_exec_parent"] + ">"
+                js_code += payload_infos["payload"].replace("__XSS__", code)
+
+                js_code = js_code[1:]  # use independent payloads, just remove the first character (<)
+                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+    else:
+        for payload_infos in payloads:
+            if not payload_infos["close_tag"]:
+                # do new stuff
+                pass
+            else:
+                js_code = "/>"
+                if context["non_exec_parent"]:
+                    js_code += "</" + context["non_exec_parent"] + ">"
+                js_code += payload_infos["payload"].replace("__XSS__", code)
+                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+
+    return result
+
+
+def apply_text_context(context, payloads, code):
+    # we control the text of the tag
+    # ex: <textarea>our_string</textarea>
+    result = []
+    prefix = ""
+
+    if context["parent"] in ["script", "title", "textarea"]:
+        # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
+        # will be executed if we have partial control over a script tag content, so let's escape them
+        if context["non_exec_parent"] != "":
+            prefix = "</" + context["non_exec_parent"] + ">"
+        else:
+            prefix = "</{0}>".format(context["parent"])
+
+    for payload_infos in payloads:
+        if not payload_infos["close_tag"]:
+            # do new stuff
+            pass
+        else:
+            js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
+            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+
+    return result
+
+
+def apply_comment_context(context, payloads, code):
+    # Injection occurred in a comment tag
+    # ex: <!-- <div> whatever our_string blablah </div> -->
+    result = []
+
+    prefix = "-->"
+    if context["parent"] in ["script", "title", "textarea"]:
+        # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
+        # will be executed if we have partial control over a script tag content, so let's escape them
+        if context["non_exec_parent"] != "":
+            prefix += "</" + context["non_exec_parent"] + ">"
+        else:
+            prefix += "</{0}>".format(context["parent"])
+
+    for payload_infos in payloads:
+        if not payload_infos["close_tag"]:
+            # do new stuff
+            pass
+        else:
+            js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
+            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+
+    return result
+
+
+def apply_context(context, payloads, code):
+    func = {
+        "attrval": apply_attrval_context,
+        "attrname": apply_attrname_context,
+        "tag": apply_tagname_context,
+        "text": apply_text_context,
+        "comment": apply_comment_context
+    }[context["type"]]
+
+    return func(context, payloads, code)
 
 
 # generate a list of payloads based on where in the webpage the js-code will be injected
-def generate_payloads(html_code, code, independant_payloads):
+def generate_payloads(html_code, code, payload_file):
     # We must keep the original source code because bs gives us something that may differ...
-    soup = BeautifulSoup(html_code, "html.parser")
-    entries = get_context(soup, code)
+    context_list = get_context_list(html_code, code)
+    payload_list = load_payloads_from_ini(payload_file)
 
-    payloads = []
+    payloads_and_flags = []
 
-    for elem in entries:
-        payload = ""
-        # Try each case where our string can be found
-        # Leave at the first possible exploitation found
+    for context in context_list:
 
-        # Our string is in the value of a tag attribute
-        # ex: <a href="our_string"></a>
-        if elem["type"] == "attrval":
-            # print("tag -> {0}".format(elem["tag"]))
-            # print(elem["name"])
-            code_index = html_code.find(code)
-            attrval_index = 0
-            before_code = html_code[:code_index]
+        for context_payload in apply_context(context, payload_list, code):
+            if context_payload not in payloads_and_flags:
+                payloads_and_flags.append(context_payload)
 
-            # Not perfect but still best than the former rfind
-            attr_pattern = r"\s*" + elem["name"] + r"\s*=\s*"
-
-            # Let's find the last match
-            for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
-                attrval_index = match.end()
-
-            attrval = before_code[attrval_index:]
-            # between the tag name and our injected attribute there is an equal sign and maybe
-            # a quote or a double-quote that we need to close before adding our payload
-            if attrval.startswith("'"):
-                payload = "'"
-            elif attrval.startswith('"'):
-                payload = '"'
-
-            # we must deal differently with self-closing tags
-            if elem["tag"].lower() in ["img", "input"]:
-                payload += "/>"
-            else:
-                payload += "></" + elem["tag"] + ">"
-
-            if elem["non_exec_parent"]:
-                payload += "</" + elem["non_exec_parent"] + ">"
-
-            # ok let's send the requests
-            for xss, flags in independant_payloads:
-                js_code = payload + xss.replace("__XSS__", code)
-                if (js_code, flags) not in payloads:
-                    payloads.append((js_code, flags))
-
-            if elem["name"].lower() == "src" and elem["tag"].lower() in ["frame", "iframe"]:
-                if elem["tag"].lower() == "frame":
-                    flags = {"frame_src_javascript"}
-                else:
-                    flags = {"iframe_src_javascript"}
-
-                js_code = "javascript:String.fromCharCode(0,__XSS__,1);".replace("__XSS__", code)
-                if (js_code, flags) not in payloads:
-                    payloads.insert(0, (js_code, flags))
-
-        # we control an attribute name
-        # ex: <a our_string="/index.html">
-        elif elem["type"] == "attrname":  # name,tag
-            if code == elem["name"]:
-                for xss, flags in independant_payloads:
-                    js_code = '>'
-                    if elem["non_exec_parent"]:
-                        payload += "</" + elem["non_exec_parent"] + ">"
-                    js_code += xss.replace("__XSS__", code)
-
-                    if (js_code, flags) not in payloads:
-                        payloads.append((js_code, flags))
-
-        # we control the tag name
-        # ex: <our_string name="column" />
-        elif elem["type"] == "tag":
-            if elem["value"].startswith(code):
-                # use independent payloads, just remove the first character (<)
-                for xss, flags in independant_payloads:
-                    payload = ""
-                    if elem["non_exec_parent"]:
-                        payload += "</" + elem["non_exec_parent"] + ">"
-                    payload += xss.replace("__XSS__", code)
-
-                    js_code = payload[1:]
-                    if (js_code, flags) not in payloads:
-                        payloads.append((js_code, flags))
-            else:
-                for xss, flags in independant_payloads:
-                    js_code = "/>"
-                    if elem["non_exec_parent"]:
-                        payload += "</" + elem["non_exec_parent"] + ">"
-                    js_code += xss.replace("__XSS__", code)
-
-                    if (js_code, flags) not in payloads:
-                        payloads.append((js_code, flags))
-
-        # we control the text of the tag
-        # ex: <textarea>our_string</textarea>
-        elif elem["type"] == "text":
-            if elem["parent"] in ["script", "title", "textarea"]:
-                # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
-                # will be executed if we have partial control over a script tag content, so let's escape them
-                if elem["non_exec_parent"] != "":
-                    payload = "</" + elem["non_exec_parent"] + ">"
-                else:
-                    payload = "</{0}>".format(elem["parent"])
-
-            for xss, flags in independant_payloads:
-                js_code = payload + xss.replace("__XSS__", code)
-                if (js_code, flags) not in payloads:
-                    payloads.append((js_code, flags))
-
-        # Injection occurred in a comment tag
-        # ex: <!-- <div> whatever our_string blablah </div> -->
-        elif elem["type"] == "comment":
-            payload = "-->"
-            if elem["parent"] in ["script", "title", "textarea"]:
-                # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
-                # will be executed if we have partial control over a script tag content, so let's escape them
-                if elem["non_exec_parent"] != "":
-                    payload += "</" + elem["non_exec_parent"] + ">"
-                else:
-                    payload += "</{0}>".format(elem["parent"])
-
-            for xss, flags in independant_payloads:
-                js_code = payload + xss.replace("__XSS__", code)
-                if (js_code, flags) not in payloads:
-                    payloads.append((js_code, flags))
-
-        html_code = html_code.replace(code, "none", 1)  # Reduce the research zone
-    return payloads
+    return payloads_and_flags
 
 
 def valid_xss_content_type(http_res):
@@ -261,14 +352,14 @@ if __name__ == "__main__":
     from pprint import pprint
 
     source_code = """<html>
+    <head><title>Hello injection</title>
     <body>
-    <title>yolo</title>
-    <a href="yolo">hello</a>
-    <textarea><strong>yolo</strong></textarea>
-    <!-- <div><p style="yolo">test</p></div> -->
+    <a href="injection">General Kenobi</a>
+    <!-- injection -->
+    <input type=checkbox injection />
+    <noscript><b>injection</b></noscript>
     </body>
     </html>
     """
 
-    my_soup = BeautifulSoup(source_code, "html.parser")
-    pprint(get_context(my_soup, "yolo"))
+    pprint(get_context_list(source_code, "injection"))

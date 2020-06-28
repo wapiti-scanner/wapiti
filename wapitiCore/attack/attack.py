@@ -62,6 +62,8 @@ class PayloadType(Enum):
     get = 3
     post = 4
     file = 5
+    xss_closing_tag = 6
+    xss_non_closing_tag = 7
 
 
 COMMON_ANNOYING_PARAMETERS = (

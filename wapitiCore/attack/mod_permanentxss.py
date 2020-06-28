@@ -34,13 +34,6 @@ class mod_permanentxss(Attack):
     This class detects permanent (stored) XSS vulnerabilities.
     """
 
-    # simple payloads that doesn't rely on their position in the DOM structure
-    # payloads injected after closing a tag attribute value (attrval) or in the
-    # content of a tag (text node like between <p> and </p>)
-    # only trick here must be on character encoding, filter bypassing, stuff like that
-    # form the simplest to the most complex, Wapiti will stop on the first working
-    independant_payloads = []
-
     name = "permanentxss"
     require = ["xss"]
     PRIORITY = 6
@@ -52,13 +45,12 @@ class mod_permanentxss(Attack):
     # key = xss code, valid = (payload, flags)
     successful_xss = {}
 
-    PAYLOADS_FILE = "xssPayloads.ini"
+    PAYLOADS_FILE = path_join(Attack.CONFIG_DIR, "xssPayloads.ini")
 
     MSG_VULN = _("Stored XSS vulnerability")
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.independant_payloads = self.payloads
 
     def attack(self):
         """This method searches XSS which could be permanently stored in the web application"""
@@ -196,7 +188,7 @@ class mod_permanentxss(Attack):
                     # Ok the content is stored, but will we be able to inject javascript?
                     else:
                         parameter = self.tried_xss[taint][1]
-                        payloads = generate_payloads(response.content, taint, self.independant_payloads)
+                        payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
                         flags = self.tried_xss[taint][2]
 
                         # TODO: check that and make it better
@@ -346,37 +338,6 @@ class mod_permanentxss(Attack):
                     self.log_orange("---")
                     saw_internal_error = True
 
-    @property
-    def payloads(self):
-        """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        payloads = []
-
-        config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
-
-        for section in config_reader.sections():
-            payload = config_reader[section]["payload"]
-
-            clean_payload = payload.strip(" \n")
-            clean_payload = clean_payload.replace("[TAB]", "\t")
-            clean_payload = clean_payload.replace("[LF]", "\n")
-            clean_payload = clean_payload.replace(
-                "[TIME]",
-                str(int(ceil(self.options["timeout"])) + 1)
-            )
-
-            payload_type = PayloadType.pattern
-            if "[TIMEOUT]" in clean_payload:
-                payload_type = PayloadType.time
-                clean_payload = clean_payload.replace("[TIMEOUT]", "")
-
-            payloads.append((clean_payload, Flags(type=payload_type, section=section)))
-
-        return payloads
-
     def check_payload(self, response, flags, taint):
         config_reader = ConfigParser(interpolation=None)
         config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
@@ -384,11 +345,14 @@ class mod_permanentxss(Attack):
         for section in config_reader.sections():
             if section == flags.section:
                 expected_value = config_reader[section]["value"].replace("__XSS__", taint)
+                tag_names = config_reader[section]["tag"].split(",")
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")
                 match_type = config_reader[section].get("match_type", "exact")
 
-                for tag in response.soup.find_all(config_reader[section]["tag"]):
+                attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
+
+                for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
                     if find_non_exec_parent(tag):
                         continue
 
