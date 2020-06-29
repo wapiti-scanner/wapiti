@@ -173,6 +173,33 @@ def test_multiple_contexts():
     ]
 
 
+def test_similar_contexts():
+    html = """<html>
+    <body>
+    <a href="injection">Hello there</a>
+    <a href="injection2">General Kenobi</a>
+    </body>
+    </html>"""
+
+    assert get_context_list(html, "injection") == [
+        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "\"", "non_exec_parent": ""}
+    ]
+
+
+def test_different_separator_contexts():
+    html = """<html>
+    <body>
+    <a href="injection">Hello there</a>
+    <a href='injection2'>General Kenobi</a>
+    </body>
+    </html>"""
+
+    assert get_context_list(html, "injection") == [
+        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "\"", "non_exec_parent": ""},
+        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "'", "non_exec_parent": ""}
+    ]
+
+
 @responses.activate
 def test_csp_detection():
     url = "http://perdu.com/"
@@ -254,7 +281,3 @@ def test_valid_content_type():
     resp = requests.get(url)
     page = Page(resp, url)
     assert not valid_xss_content_type(page)
-
-
-if __name__ == "__main__":
-    test_attr_value_single_quote_and_event_context()

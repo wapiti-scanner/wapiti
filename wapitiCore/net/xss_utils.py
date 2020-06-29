@@ -84,9 +84,6 @@ def get_context_list(html_code, keyword, bs_node=None):
                         if context not in context_list:
                             context_list.append(context)
 
-                        # Remove the current injection point before going deeper
-                        html_code = html_code.replace(keyword, "A" * len(keyword), 1)  # Reduce the research zone
-
                     if keyword in attr_name:
                         # print("Found in attribute name {0} of tag {1}".format(attr_name, bs_node.name))
                         bad_parent = find_non_exec_parent(bs_node)
@@ -110,6 +107,8 @@ def get_context_list(html_code, keyword, bs_node=None):
             # recursively search injection points for the same variable
             for child_node in bs_node.children:
                 for context in get_context_list(html_code, keyword, bs_node=child_node):
+                    # Remove the current injection point before going deeper
+                    html_code = html_code.replace(keyword, "A" * len(keyword), 1)  # Reduce the research zone
                     if context not in context_list:
                         context_list.append(context)
 
