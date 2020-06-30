@@ -33,6 +33,20 @@ def find_non_exec_parent(tag):
     return no_exec_parent
 
 
+def get_special_attributes(node):
+    specials = set()
+    # We don't care about the value of the following attributes but we need to know if they are present
+    for attribute in ("href", "src", "style"):
+        if attribute in node.attrs:
+            specials.add(attribute)
+
+    if "type" in node.attrs:
+        specials.add("type={}".format(node.attrs["type"].lower()))
+    if "rel" in node.attrs:
+        specials.add("rel={}".format(node.attrs["rel"].lower()))
+    return specials
+
+
 # type/name/tag ex: attrval/img/src
 def get_context_list(html_code, keyword, bs_node=None):
     if bs_node is None:
@@ -81,6 +95,10 @@ def get_context_list(html_code, keyword, bs_node=None):
                             "separator": separator
                         }
 
+                        special_attributes = get_special_attributes(bs_node)
+                        if special_attributes:
+                            context["special_attributes"] = special_attributes
+
                         if context not in context_list:
                             context_list.append(context)
 
@@ -94,13 +112,24 @@ def get_context_list(html_code, keyword, bs_node=None):
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
+
+                        special_attributes = get_special_attributes(bs_node)
+                        if special_attributes:
+                            context["special_attributes"] = special_attributes
+
                         if context not in context_list:
                             context_list.append(context)
 
             elif keyword in bs_node.name:
                 # print("Found in tag name")
                 bad_parent = find_non_exec_parent(bs_node)
-                context = {"type": "tag", "value": bs_node.name, "non_exec_parent": bad_parent, "events": events}
+                context = {
+                    "type": "tag",
+                    "value": bs_node.name,
+                    "non_exec_parent": bad_parent,
+                    "events": events
+                }
+
                 if context not in context_list:
                     context_list.append(context)
 
@@ -150,9 +179,33 @@ def load_payloads_from_ini(filename):
             "case_sensitive": config_reader.getboolean(section, "case_sensitive", fallback=True),
             "close_tag": config_reader.getboolean(section, "close_tag", fallback=True)
         }
+
+        if "requirements" in config_reader[section]:
+            infos["requirements"] = set(config_reader[section]["requirements"].split(","))
+
         payloads.append(infos)
 
     return payloads
+
+
+def meet_requirements(payload_requirements, special_attributes):
+    # payload_requirements is a set of attr_name or attr_name=value strings
+    payload_prefix = ""
+    for requirement in payload_requirements:
+        if requirement not in special_attributes:  # Condition not met but we may fix it
+            if "=" in requirement:
+                # Hardest case: Make sure there isn't an attribute with the same name but different value (conflict)
+                expected_attribute, expected_value = requirement.split("=")
+                if any(attribute.startswith(expected_attribute + "=") for attribute in special_attributes):
+                    raise RuntimeError("Requirement cannot be met")
+            else:
+                # We just name the attribute to appear whatever the value
+                expected_attribute = requirement
+                expected_value = "z"  # Can be anything
+
+            payload_prefix += "[SEP]{}=[SEP]{}".format(expected_attribute, expected_value)
+
+    return payload_prefix
 
 
 def apply_attrval_context(context, payloads, code):
@@ -162,8 +215,16 @@ def apply_attrval_context(context, payloads, code):
 
     for payload_infos in payloads:
         if not payload_infos["close_tag"]:
-            # do new stuff
-            pass
+            if context["tag"] in payload_infos["tag"] and payload_infos["attribute"] not in context["events"]:
+                try:
+                    js_code = meet_requirements(payload_infos["requirements"], context.get("special_attributes", []))
+                    js_code += payload_infos["payload"].replace("__XSS__", code)
+                    js_code = js_code.replace("[SEP]", context["separator"])
+                except RuntimeError:
+                    continue
+
+                result.append((js_code, Flags(type=PayloadType.xss_non_closing_tag, section=payload_infos["name"])))
+
             # if context["name"].lower() == "src" and context["tag"].lower() in ["frame", "iframe"]:
             #     if context["tag"].lower() == "frame":
             #         flags = {"frame_src_javascript"}

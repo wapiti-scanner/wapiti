@@ -36,7 +36,8 @@ def test_noscript_context():
             "name": "href",
             "type": "attrval",
             "separator": "\"",
-            "events": set()
+            "events": set(),
+            "special_attributes": {"href"}
         }
     ]
 
@@ -90,7 +91,14 @@ def test_attrname_context():
     </html>"""
 
     assert get_context_list(html, "injection") == [
-        {"non_exec_parent": "noembed", "tag": "input", "type": "attrname", "name": "injection", "events": set()}
+        {
+            "non_exec_parent": "noembed",
+            "tag": "input",
+            "type": "attrname",
+            "name": "injection",
+            "events": set(),
+            "special_attributes": {"type=checkbox"}
+        }
     ]
 
 
@@ -135,7 +143,8 @@ def test_attr_value_single_quote_and_event_context():
             "name": "href",
             "type": "attrval",
             "separator": "'",
-            "events": {"onclick"}
+            "events": {"onclick"},
+            "special_attributes": {"href"}
         }
     ]
 
@@ -159,7 +168,8 @@ def test_multiple_contexts():
             'non_exec_parent': '',
             'separator': '"',
             'tag': 'a',
-            'type': 'attrval'
+            'type': 'attrval',
+            "special_attributes": {"href"}
         },
         {'non_exec_parent': '', 'parent': 'body', 'type': 'comment'},
         {
@@ -167,7 +177,8 @@ def test_multiple_contexts():
             'name': 'injection',
             'non_exec_parent': '',
             'tag': 'input',
-            'type': 'attrname'
+            'type': 'attrname',
+            "special_attributes": {"type=checkbox"}
         },
         {'non_exec_parent': 'noscript', 'parent': 'b', 'type': 'text'}
     ]
@@ -182,7 +193,15 @@ def test_similar_contexts():
     </html>"""
 
     assert get_context_list(html, "injection") == [
-        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "\"", "non_exec_parent": ""}
+        {
+            "type": "attrval",
+            "name": "href",
+            "tag": "a",
+            "events": set(),
+            "separator": "\"",
+            "non_exec_parent": "",
+            "special_attributes": {"href"}
+        }
     ]
 
 
@@ -195,8 +214,24 @@ def test_different_separator_contexts():
     </html>"""
 
     assert get_context_list(html, "injection") == [
-        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "\"", "non_exec_parent": ""},
-        {"type": "attrval", "name": "href", "tag": "a", "events": set(), "separator": "'", "non_exec_parent": ""}
+        {
+            "type": "attrval",
+            "name": "href",
+            "tag": "a",
+            "events": set(),
+            "separator": "\"",
+            "non_exec_parent": "",
+            "special_attributes": {"href"}
+        },
+        {
+            "type": "attrval",
+            "name": "href",
+            "tag": "a",
+            "events": set(),
+            "separator": "'",
+            "non_exec_parent": "",
+            "special_attributes": {"href"}
+        }
     ]
 
 
