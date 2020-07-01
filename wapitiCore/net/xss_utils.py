@@ -43,7 +43,8 @@ def get_special_attributes(node):
     if "type" in node.attrs:
         specials.add("type={}".format(node.attrs["type"].lower()))
     if "rel" in node.attrs:
-        specials.add("rel={}".format(node.attrs["rel"].lower()))
+        # BeautifulSoup returns a list for rel attribute.
+        specials.add("rel={}".format(node.attrs["rel"][0].lower()))
     return specials
 
 
@@ -192,7 +193,7 @@ def meet_requirements(payload_requirements, special_attributes):
     # payload_requirements is a set of attr_name or attr_name=value strings
     payload_prefix = ""
     for requirement in payload_requirements:
-        if requirement not in special_attributes:  # Condition not met but we may fix it
+        if "!" not in requirement and requirement not in special_attributes:  # Condition not met but we may fix it
             if "=" in requirement:
                 # Hardest case: Make sure there isn't an attribute with the same name but different value (conflict)
                 expected_attribute, expected_value = requirement.split("=")
@@ -204,6 +205,9 @@ def meet_requirements(payload_requirements, special_attributes):
                 expected_value = "z"  # Can be anything
 
             payload_prefix += "[ATTR_SEP]{}=[VALUE_SEP]{}".format(expected_attribute, expected_value)
+        elif "!" in requirement:
+            if requirement.replace("!", "") in special_attributes:
+                raise RuntimeError("Requirement cannot be met")
 
     return payload_prefix
 
@@ -224,7 +228,10 @@ def apply_attrval_context(context, payloads, code):
 
                 try:
                     js_code = "y"  # Not empty value to force non-fuzzy HTML interpretation
-                    js_code += meet_requirements(payload_infos["requirements"], context.get("special_attributes", []))
+                    js_code += meet_requirements(
+                        payload_infos.get("requirements", []),
+                        context.get("special_attributes", [])
+                    )
                     js_code += payload_infos["payload"].replace("__XSS__", code)
                     js_code = js_code.replace("[ATTR_SEP]", attr_separator)
                     js_code = js_code.replace("[VALUE_SEP]", value_separator)
