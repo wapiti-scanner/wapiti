@@ -203,7 +203,7 @@ def meet_requirements(payload_requirements, special_attributes):
                 expected_attribute = requirement
                 expected_value = "z"  # Can be anything
 
-            payload_prefix += "[SEP]{}=[SEP]{}".format(expected_attribute, expected_value)
+            payload_prefix += "[ATTR_SEP]{}=[VALUE_SEP]{}".format(expected_attribute, expected_value)
 
     return payload_prefix
 
@@ -216,10 +216,18 @@ def apply_attrval_context(context, payloads, code):
     for payload_infos in payloads:
         if not payload_infos["close_tag"]:
             if context["tag"] in payload_infos["tag"] and payload_infos["attribute"] not in context["events"]:
+                if not context["separator"]:
+                    attr_separator = " "
+                    value_separator = ""
+                else:
+                    attr_separator = value_separator = context["separator"]
+
                 try:
-                    js_code = meet_requirements(payload_infos["requirements"], context.get("special_attributes", []))
+                    js_code = "y"  # Not empty value to force non-fuzzy HTML interpretation
+                    js_code += meet_requirements(payload_infos["requirements"], context.get("special_attributes", []))
                     js_code += payload_infos["payload"].replace("__XSS__", code)
-                    js_code = js_code.replace("[SEP]", context["separator"])
+                    js_code = js_code.replace("[ATTR_SEP]", attr_separator)
+                    js_code = js_code.replace("[VALUE_SEP]", value_separator)
                 except RuntimeError:
                     continue
 
