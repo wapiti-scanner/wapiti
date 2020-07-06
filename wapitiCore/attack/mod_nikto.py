@@ -64,15 +64,16 @@ class mod_nikto(Attack):
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        user_config_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
-        user_config_dir += "/config"
+        user_config_dir = os.path.join(super().BASE_DIR, "nikto", "data")
 
         if not os.path.isdir(user_config_dir):
             os.makedirs(user_config_dir)
         try:
             with open(os.path.join(user_config_dir, self.NIKTO_DB)) as nikto_db_file:
-                reader = csv.reader(nikto_db_file)
+                csv.register_dialect("nikto", quoting=csv.QUOTE_ALL, doublequote=False, escapechar="\\")
+                reader = csv.reader(nikto_db_file, "nikto")
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
+
         except IOError:
             try:
                 print(_("Problem with local nikto database."))
