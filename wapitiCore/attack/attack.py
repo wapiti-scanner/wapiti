@@ -26,13 +26,13 @@ from math import ceil
 import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
-
 from requests.exceptions import RequestException, ReadTimeout
-
 from wapitiCore.net.web import Request
 
 
 modules = [
+    "mod_blindsql",
+    "mod_basic_auth_bf",
     "mod_crlf",
     "mod_exec",
     "mod_file",
@@ -40,7 +40,6 @@ modules = [
     "mod_xss",
     "mod_backup",
     "mod_htaccess",
-    "mod_blindsql",
     "mod_permanentxss",
     "mod_nikto",
     "mod_delay",
@@ -52,6 +51,7 @@ modules = [
     "mod_xxe",
     "mod_wapp"
 ]
+
 
 commons = ["blindsql", "exec", "file", "permanentxss", "redirect", "sql", "xss", "ssrf"]
 

@@ -83,6 +83,10 @@ msgstr "Backup file"
 msgid "Potentially dangerous file"
 msgstr "Potentially dangerous file"
 
+#: ../vulnerability.py:79 ../language/vulnerability.py:87
+msgid "Basic Authentication Brute Force"
+msgstr "Basic Authentication Brute Force"
+
 #: ../vulnerability.py:80 ../language/vulnerability.py:88
 #: ../language/vulnerability.py:90 ../language/vulnerability.py:91
 msgid "Internal Server Error"

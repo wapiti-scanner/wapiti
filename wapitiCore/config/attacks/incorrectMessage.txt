@@ -1,0 +1,6 @@
+login
+Login
+error
+required error
+unrecognized
+Login failed

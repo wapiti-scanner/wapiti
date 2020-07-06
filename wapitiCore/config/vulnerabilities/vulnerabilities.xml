@@ -36,6 +36,24 @@
             </reference>
         </references>
     </vulnerability>
+    <vulnerability name="Basic Authentication Brute Force">
+        <description>Basic Authentication Brute Force description</description>
+        <solution text="Basic Authentication Brute Force solution" />
+        <references>
+            <reference>
+                <title>https://owasp.org/www-community/attacks/Brute_force_attack</title>
+                <url>https://owasp.org/www-community/attacks/Brute_force_attack</url>
+            </reference>
+            <reference>
+                <title>https://www.imperva.com/learn/application-security/brute-force-attack/</title>
+                <url>https://www.imperva.com/learn/application-security/brute-force-attack/</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-307: Improper Restriction of Excessive Authentication Attempts('Brute Force Auth')]]></title>
+                <url>https://cwe.mitre.org/data/definitions/307.html</url>
+            </reference>
+        </references>
+    </vulnerability>
     <vulnerability name="File Handling">
         <description>File Handling description</description>
         <solution text="File Handling solution" />
