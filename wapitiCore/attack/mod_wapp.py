@@ -27,7 +27,7 @@ class mod_wapp(Attack):
             print(exception)
             return
 
-        response = self.crawler.send(request)
+        response = self.crawler.send(request, follow_redirects=True)
         wappalyzer = Wappalyzer(application_data, response)
         detected_applications = wappalyzer.detect_with_versions_and_categories()
 
