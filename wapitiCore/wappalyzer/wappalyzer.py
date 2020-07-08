@@ -1,14 +1,15 @@
 import json
 import logging
+import os
 import re
+import sys
 import warnings
-import pkg_resources
 
 
 from wapitiCore.net.crawler import Page
 
 logger = logging.getLogger(name=__name__)
-
+BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 class ApplicationDataException(Exception):
     """Raised when application data file is not properly formatted"""
@@ -38,11 +39,17 @@ class ApplicationData:
             with open(data_filename, 'r') as data_file:
                 obj = json.load(data_file)
         else:
-            obj = json.loads(pkg_resources.resource_string(__name__, "data/apps.json"))
+            with open(os.path.join(BASE_DIR, "wappalyzer", "data/apps.json"), 'r') as data_file:
+                obj = json.load(data_file)
 
         self.applications = obj["apps"]
         self.normalize_applications()
-        self.normalize_application_regex()
+
+        # Ignore regex parsing warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.normalize_application_regex()
+
         self.categories = obj["categories"]
         self.normalize_categories()
 
@@ -175,12 +182,12 @@ class Wappalyzer:
         Determine whether the web content matches the application regex.
         """
         is_detected = (
-                self.is_application_detected_normalize_string(application, 'url', self._url) or
-                self.is_application_detected_normalize_list(application, 'html', self._html) or
-                self.is_application_detected_normalize_list(application, 'script', self._scripts) or
-                self.is_application_detected_normalize_dict(application, 'cookies', self._cookies) or
-                self.is_application_detected_normalize_dict(application, 'headers', self._headers) or
-                self.is_application_detected_normalize_dict(application, 'meta', self._metas)
+            self.is_application_detected_normalize_string(application, 'url', self._url) or
+            self.is_application_detected_normalize_list(application, 'html', self._html) or
+            self.is_application_detected_normalize_list(application, 'script', self._scripts) or
+            self.is_application_detected_normalize_dict(application, 'cookies', self._cookies) or
+            self.is_application_detected_normalize_dict(application, 'headers', self._headers) or
+            self.is_application_detected_normalize_dict(application, 'meta', self._metas)
         )
 
         return is_detected
@@ -206,6 +213,9 @@ class Wappalyzer:
         is_detected = False
 
         for regex_params in application[content_type]:
+            # Ensure to not iterate on a string value
+            if isinstance(contents, str):
+                contents = [contents]
             for content in contents:
                 if re.search(regex_params['regex'], content):
                     is_detected = True
@@ -245,8 +255,8 @@ class Wappalyzer:
                     if (ternary and len(ternary.groups()) == 2
                             and ternary.group(1) is not None
                             and ternary.group(2) is not None):
-                        version_pattern = version_pattern.replace(ternary.group(0), ternary.group(1) if match != ''
-                        else ternary.group(2))
+                        ternary_match = ternary.group(1) if match != '' else ternary.group(2)
+                        version_pattern = version_pattern.replace(ternary.group(0), ternary_match)
 
                     # Replace back references
                     version_pattern = version_pattern.replace('\\' + str(i + 1), match)
