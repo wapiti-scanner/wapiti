@@ -144,6 +144,9 @@ class mod_nikto(Attack):
                 # requests bug
                 yield exception
                 continue
+            except ValueError:
+                # ValueError raised by urllib3 (Method cannot contain non-token characters), we don't want to raise
+                yield
             else:
                 yield
 
