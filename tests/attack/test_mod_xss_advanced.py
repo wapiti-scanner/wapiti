@@ -202,5 +202,41 @@ def test_partial_tag_name_escape():
     assert persister.vulnerabilities[0][1].lower().startswith("/><script>")
 
 
-if __name__ == "__main__":
-    test_partial_tag_name_escape()
+def test_xss_inside_tag_input():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65080/input_text_strip_tags.php?uid=5")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65080/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    assert persister.vulnerabilities[0][0] == "uid"
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert "<" not in used_payload and ">" not in used_payload and "autofocus/onfocus" in used_payload
+
+
+def test_xss_inside_tag_link():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65080/link_href_strip_tags.php?url=http://perdu.com/")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65080/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    assert persister.vulnerabilities[0][0] == "url"
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert "<" not in used_payload and ">" not in used_payload and "onmouseover" in used_payload

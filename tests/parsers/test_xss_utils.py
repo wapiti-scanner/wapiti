@@ -1,7 +1,8 @@
 import responses
 import requests
+import pytest
 
-from wapitiCore.net.xss_utils import get_context_list, has_csp, valid_xss_content_type
+from wapitiCore.net.xss_utils import get_context_list, has_csp, valid_xss_content_type, meet_requirements
 from wapitiCore.net.crawler import Page
 
 
@@ -316,3 +317,31 @@ def test_valid_content_type():
     resp = requests.get(url)
     page = Page(resp, url)
     assert not valid_xss_content_type(page)
+
+
+def test_payload_requirements():
+    code = '<input type="hidden" value="injected"/>'
+    context_list = get_context_list(code, "injected")
+    assert context_list[0]["special_attributes"] == {"type=hidden"}
+    with pytest.raises(RuntimeError):
+        # Requirement not met due to type being "hidden"
+        meet_requirements(["!style", "type!=hidden"], context_list[0]["special_attributes"])
+
+    code = '<input type="text" value="injected" style="imgroot" />'
+    context_list = get_context_list(code, "injected")
+    assert context_list[0]["special_attributes"] == {"style", "type=text"}
+    with pytest.raises(RuntimeError):
+        # Requirement not met due to style being present
+        meet_requirements(["!style", "type!=hidden"], context_list[0]["special_attributes"])
+
+    code = '<input type="text" value="injected"/>'
+    context_list = get_context_list(code, "injected")
+    assert context_list[0]["special_attributes"] == {"type=text"}
+    # Requirement met as input type is not "hidden" and style is missing
+    assert meet_requirements(["!style", "type!=hidden"], context_list[0]["special_attributes"]) is ""
+
+    code = '<input value="injected"/>'
+    context_list = get_context_list(code, "injected")
+    # Requirement met as there is no special attributes to make our life harder
+    assert "special_attributes" not in context_list[0]
+    assert meet_requirements(["!style", "type!=hidden"], []) is ""
