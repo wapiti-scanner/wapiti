@@ -1412,7 +1412,7 @@ class Explorer:
         # Common params used for tracking or other stuff
         self._bad_params.update(
             [
-                "utm_source", "utm_medium", "utm_content", "utm_campaign", "g-recaptcha-response"
+                "g-recaptcha-response"
             ]
         )
 

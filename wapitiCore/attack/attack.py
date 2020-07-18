@@ -339,6 +339,9 @@ class Mutator:
 
                     for payload, original_flags in self.iter_payloads():
 
+                        if ("[FILE_NAME]" in payload or "[FILE_NOEXT]" in payload) and not request.file_name:
+                            continue
+
                         # no quoting: send() will do it for us
                         payload = payload.replace("[FILE_NAME]", request.file_name)
                         payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
@@ -411,6 +414,9 @@ class Mutator:
                     if "[DIRVALUE]" in payload:
                         continue
 
+                    if ("[FILE_NAME]" in payload or "[FILE_NOEXT]" in payload) and not request.file_name:
+                        continue
+
                     payload = payload.replace("[FILE_NAME]", request.file_name)
                     payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
 
@@ -468,6 +474,9 @@ class FileMutator:
                 continue
 
             for payload, original_flags in self.iter_payloads():
+
+                if ("[FILE_NAME]" in payload or "[FILE_NOEXT]" in payload) and not request.file_name:
+                    continue
 
                 # no quoting: send() will do it for us
                 payload = payload.replace("[FILE_NAME]", request.file_name)

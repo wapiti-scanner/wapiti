@@ -79,3 +79,15 @@ def test_mutations():
     for __, __, __, __ in mutator.mutate(req3):
         count += 1
     assert count == 2
+
+
+def test_missing_value():
+    req2 = Request(
+        "http://perdu.com/directory/?high=tone",
+    )
+    # Filename of the target URL should be injected but it is missing here, we should not raise a mutation
+    mutator = Mutator(payloads=[("[FILE_NAME]::$DATA", Flags())])
+    count = 0
+    for __ in mutator.mutate(req2):
+        count += 1
+    assert count == 0
