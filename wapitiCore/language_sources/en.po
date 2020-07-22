@@ -1365,3 +1365,19 @@ msgstr "Error: Endpoint URL must contain scheme, host and path with trailing sla
 #: ../main/wapiti.py:1074
 msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
 msgstr "Error: Internal endpoint URL must be accessible from Wapiti!"
+
+#: ../language/vulnerability.py:163 ../language/vulnerability.py:163
+msgid "HttpOnly Flag cookie description"
+msgstr "HttpOnly is an additional flag included in a Set-Cookie HTTP response header. Using the HttpOnly flag when generating a cookie helps mitigate the risk of client side script accessing the protected cookie (if the browser supports it)"
+
+#: ../language/vulnerability.py:164 ../language/vulnerability.py:164
+msgid "HttpOnly Flag cookie solution"
+msgstr "While creation of the cookie, make sure to set the HttpOnly Flag to True"
+
+#: ../language/vulnerability.py:166 ../language/vulnerability.py:166
+msgid "Secure Flag cookie description"
+msgstr "The secure flag is an option that can be set by the application server when sending a new cookie to the user within an HTTP Response. The purpose of the secure flag is to prevent cookies from being observed by unauthorized parties due to the transmission of a the cookie in clear text"
+
+#: ../language/vulnerability.py:167 ../language/vulnerability.py:167
+msgid "Secure Flag cookie solution"
+msgstr "While creation of the cookie, make sure to set the Secure Flag to True with the function 'set-cookie"

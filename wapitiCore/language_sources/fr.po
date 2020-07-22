@@ -804,6 +804,12 @@ msgstr "A titre d'information seulement."
 msgid "Found backup file {}"
 msgstr "Ficher de sauvegarde {} trouvé"
 
+#: ../attack/cookieflags.py:23
+msgid "Checking cookie : {}"
+msgstr "Vérification du cookie"
+
+
+
 #: ../attack/mod_delay.py:56
 msgid "Slowest resources found on the web server:"
 msgstr "Ressources les plus lentes trouvées sur ce serveur web:"
@@ -1346,3 +1352,27 @@ msgstr ""
 #: ../main/wapiti.py:1074
 msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
 msgstr ""
+
+#: ../language/vulnerability.py:163 ../language/vulnerability.py:163
+msgid "HttpOnly Flag cookie description"
+msgstr "HttpOnly est un indicateur supplémentaire inclus dans un en-tête de réponse HTTP Set-Cookie. L'utilisation de l'indicateur HttpOnly lors de la génération d'un cookie permet d'atténuer le risque que le script côté client accède au cookie protégé"
+
+#: ../language/vulnerability.py:164 ../language/vulnerability.py:164
+msgid "HttpOnly Flag cookie solution"
+msgstr "A la création de cookie, assurez vous d'activer le drapeau 'HttpOnly' avec la fonction 'set-cookie'"
+
+#: ../language/vulnerability.py:116
+msgid "HttpOnly flag is not set in the cookie : {0}"
+msgstr "L'indicateur HttpOnly n'est pas défini dans le cookie : {0}"
+
+#:  ../language/vulnerability.py:166
+msgid "Secure Flag cookie description"
+msgstr "Le flag Secure permet de laisser la décision d’envoi ou non du cookie au navigateur. Il signifie que le cookie  est uniquement envoyé au serveur avec les requêtes chiffrées, via le protocole HTTPS"
+
+#: ../language/vulnerability.py:167
+msgid "Secure Flag cookie solution"
+msgstr "A la création de cookie, assurez vous d'activer le drapeau 'Secure' avec la fonction 'set-cookie'"
+
+#: ../language/vulnerability.py:167
+msgid "Secure flag is not set in the cookie : {0}"
+msgstr "L'indicateur Secure n'est pas défini dans le cookie : {0}"
