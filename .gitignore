@@ -40,3 +40,6 @@ pip-delete-this-directory.txt
 
 ### VS Code ###
 .vscode/
+
+### Pycharm ###
+.idea/

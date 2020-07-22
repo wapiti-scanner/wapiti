@@ -248,6 +248,22 @@ msgstr "Faille d'injection SQL en aveugle"
 msgid "{0} via injection in the query string"
 msgstr "{0} via une injection dans la query string"
 
+#: ../attack/mod_http_headers.py:27
+msgid "Checking X-Frame-Options :"
+msgstr "Vérification de X-Frame-Options :"
+
+#: ../attack/mod_http_headers.py:39
+msgid "Checking X-XSS-Protection :"
+msgstr "Vérification de X-XSS-Protection :"
+
+#: ../attack/mod_http_headers.py:51
+msgid "Checking X-Content-Type-Options :"
+msgstr "Vérification de X-Content-Type-Options :"
+
+#: ../attack/mod_http_headers.py:63
+msgid "Checking Strict-Transport-Security :"
+msgstr "Vérification de Strict-Transport-Security :"
+
 #: ../attack/mod_blindsql.py:141 ../attack/mod_blindsql.py:222
 #: ../attack/mod_exec.py:195 ../attack/mod_exec.py:292
 #: ../attack/mod_file.py:211 ../attack/mod_file.py:301 ../attack/mod_sql.py:258
@@ -798,6 +814,14 @@ msgstr "L'utilisation d'une technologie web peut être déduite à cause des tra
 #: ../language/vulnerability.py:157
 msgid "Fingerprint web technology solution"
 msgstr "A titre d'information seulement."
+
+#: ../language/vulnerability.py:167
+msgid "HTTP Secure Headers"
+msgstr " Les en-têtes de sécurité HTTP indiquent au navigateur comment se comporter lors de la gestion du contenu du site Web"
+
+#: ../language/vulnerability.py:168
+msgid "HTTP Headers Secure Configuration"
+msgstr "Utilisez les recommandations pour renforcer vos en-têtes HTTP de sécurité"
 
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82

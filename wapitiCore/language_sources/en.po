@@ -802,6 +802,14 @@ msgstr "The use of a web technology can be deducted due to the presence of its s
 msgid "Fingerprint web technology solution"
 msgstr "This is only for informational purposes."
 
+#: ../language/vulnerability.py:167
+msgid "HTTP Secure Headers"
+msgstr " HTTP security headers tell the browser how to behave when handling the website's content"
+
+#: ../language/vulnerability.py:168
+msgid "HTTP Headers Secure Configuration"
+msgstr "Use the recommendations to hardening your HTTP Security Headers "
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"

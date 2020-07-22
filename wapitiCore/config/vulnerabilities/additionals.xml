@@ -18,4 +18,14 @@
             </reference>
         </references>
     </additional>
+    <additional name="HTTP Secure Headers">
+        <description>HTTP Secure Headers description </description>
+        <solution text="HTTP Secure Headers Solution"/>
+        <references>
+            <reference>
+                <title><![CDATA[WSTG-INFO-02: HTTP Secure Headers Project]]></title>
+                <url>https://owasp.org/www-project-secure-headers/</url>
+            </reference>
+        </references>
+    </additional>
 </additionals>
