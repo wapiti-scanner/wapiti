@@ -806,6 +806,10 @@ msgstr "The use of a web technology can be deducted due to the presence of its s
 msgid "Fingerprint web technology solution"
 msgstr "This is only for informational purposes."
 
+#: ../language/vulnerability.py:119
+msgid "The HttpOnly Flag is not set"
+msgstr "The HttpOnly Flag is not set"
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"

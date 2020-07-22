@@ -33,6 +33,7 @@ from wapitiCore.net.web import Request
 modules = [
     "mod_blindsql",
     "mod_basic_auth_bf",
+    "mod_check_cookies_headers",
     "mod_crlf",
     "mod_exec",
     "mod_file",

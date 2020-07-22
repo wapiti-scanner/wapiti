@@ -143,6 +143,10 @@ msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un p
 msgid "Fingerprint web technology"
 msgstr "Technologie web identifiée"
 
+#: ../language/vulnerability.py:119
+msgid "The HttpOnly Flag is not set"
+msgstr "Le flag HttpOnly n'est pas activé"
+
 #: ../language/vulnerability.py:111
 #, python-brace-format
 msgid "{0} {1} detected"

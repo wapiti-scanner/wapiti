@@ -18,4 +18,32 @@
             </reference>
         </references>
     </additional>
+    <additional name="The HttpOnly Flag is not set">
+        <description>HttpOnly Flag cookie description</description>
+        <solution text="Testing for Cookies Attributes"/>
+        <references>
+            <reference>
+                <title><![CDATA[WSTG-INFO-02: Testing for Cookies Attributes]]></title>
+                <url>https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[WSTG-INFO-08: Fingerprint Web Application Framework]]></title>
+                <url>https://owasp.org/www-community/HttpOnly</url>
+            </reference>
+        </references>
+    </additional>
+    <additional name="The Secure Flag is not set">
+        <description>Secure Flag cookie description</description>
+        <solution text="Testing for Cookies Attributes"/>
+        <references>
+            <reference>
+                <title><![CDATA[WSTG-INFO-02: Testing for Cookies Attributes]]></title>
+                <url>https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[WSTG-INFO-09: SecureFlag]]></title>
+                <url>https://owasp.org/www-community/controls/SecureFlag</url>
+            </reference>
+        </references>
+    </additional>
 </additionals>
