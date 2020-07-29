@@ -238,6 +238,10 @@ msgstr "Found backup file !"
 msgid "Backup file {0} found for {1}"
 msgstr "Backup file {0} found for {1}"
 
+#: ../vulnerability.py:79 ../language/vulnerability.py:87
+msgid "Basic Authentication Brute Force"
+msgstr "Basic Authentication Brute Force"
+
 #: ../attack/mod_blindsql.py:40 ../attack/mod_blindsql.py:38
 #: ../attack/mod_blindsql.py:36
 msgid "Blind SQL vulnerability"
@@ -875,6 +879,10 @@ msgstr "Weak restriction bypass vulnerability: {0}"
 #, python-brace-format
 msgid "HTTP status code changed from {0} to {1}"
 msgstr "HTTP status code changed from {0} to {1}"
+
+#: ../attack/mod_backup.py:169
+msgid "Credentials found on {}"
+msgstr "Credentials found on {}"
 
 #: ../attack/mod_shellshock.py:75
 #, python-brace-format

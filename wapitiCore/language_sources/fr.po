@@ -717,6 +717,18 @@ msgstr "Mise à jour du module {0}"
 msgid "Update done."
 msgstr "Mise à jour effectuée."
 
+#: ../language/vulnerability.py:76
+msgid "Basic Authentication Brute Force"
+msgstr "Basique Brute-force Authentification"
+
+#: ../language/vulnerability.py:76
+msgid "Basic Authentication Brute Force description"
+msgstr "Une attaque par force brute peut se manifester de différentes manières, mais consiste principalement en un attaquant configurant des valeurs prédéterminées, faisant des requêtes à un serveur en utilisant ces valeurs, puis analysant la réponse."
+
+#: ../language/vulnerability.py:76
+msgid "Basic Authentication Brute Force solution"
+msgstr "Le moyen le plus évident de bloquer les attaques par force brute consiste simplement à verrouiller les comptes après un nombre défini de tentatives de mot de passe incorrectes."
+
 #: ../language/vulnerability.py:107 ../language/vulnerability.py:109
 #: ../language/vulnerability.py:110
 msgid "Backup file description"
@@ -848,11 +860,18 @@ msgstr "Utilisez les recommandations pour renforcer vos en-têtes HTTP de sécur
 msgid "Found backup file {}"
 msgstr "Ficher de sauvegarde {} trouvé"
 
+#: ../attack/mod_backup.py:169
+msgid "Credentials found on {}"
+msgstr "Identifiants trouvés sur {}"
+
+#: ../attack/mod_backup.py:158
+msgid "Brute force authentication success !"
+msgstr "Succès de l'authentification par force brute !"
+
+
 #: ../attack/cookieflags.py:23
 msgid "Checking cookie : {}"
 msgstr "Vérification du cookie"
-
-
 
 #: ../attack/mod_delay.py:56
 msgid "Slowest resources found on the web server:"

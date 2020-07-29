@@ -96,6 +96,7 @@ if a script is vulnerable.""",
         "py2exe": {
             "includes": [
                 "wapitiCore.attack.mod_backup",
+                "wapitiCore.attack.mod_brute_login_form",
                 "wapitiCore.attack.mod_blindsql",
                 "wapitiCore.attack.mod_buster",
                 "wapitiCore.attack.mod_crlf",
