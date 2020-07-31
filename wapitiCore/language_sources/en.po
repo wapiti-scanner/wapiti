@@ -373,14 +373,26 @@ msgstr "|HTTP Code: {0}"
 msgid "Problem with local nikto database."
 msgstr "Problem with local nikto database."
 
+#: ../attack/mod_wapp.py:34
+msgid "Problem with local wapp database."
+msgstr "Problem with local wapp database."
+
 #: ../attack/mod_nikto.py:76 ../attack/mod_nikto.py:79
 msgid "Downloading from the web..."
 msgstr "Downloading from the web..."
 
 #: ../attack/mod_nikto.py:90 ../attack/mod_nikto.py:92
 #: ../attack/mod_nikto.py:94
-msgid "Error downloading Nikto database"
-msgstr "Error downloading Nikto database"
+msgid "Error downloading nikto database"
+msgstr "Error downloading nikto database"
+
+#: ../attack/mod_wapp.py:47
+msgid "Error downloading wapp database"
+msgstr "Error downloading wapp database"
+
+#: ../attack/mod_wapp.py:59
+msgid "Try using --store-session option, or update apps.json using --update option."
+msgstr "Try using --store-session option, or update apps.json using --update option."
 
 #: ../attack/mod_nikto.py:235 ../attack/mod_nikto.py:237
 #: ../attack/mod_nikto.py:240 ../attack/mod_nikto.py:238
@@ -683,6 +695,14 @@ msgstr "File {0} not found. Wapiti will scan the web site again"
 #, python-brace-format
 msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Unable to find a module named {0}"
+
+#: ../main/wapiti.py:288
+msgid "Updating module {0}"
+msgstr "Updating module {0}"
+
+#: ../main/wapiti.py:290
+msgid "Update done."
+msgstr "Update done."
 
 #: ../language/vulnerability.py:107 ../language/vulnerability.py:109
 #: ../language/vulnerability.py:110
@@ -1205,6 +1225,10 @@ msgstr "[*] Watch out! Bad things can happen on Friday the 13th."
 msgid "List Wapiti attack modules and exit"
 msgstr "List Wapiti attack modules and exit"
 
+#: ../main/wapiti.py:723
+msgid "Update Wapiti attack modules and exit"
+msgstr "Update Wapiti attack modules and exit"
+
 #: ../main/wapiti.py:684 ../main/wapiti.py:698 ../main/wapiti.py:702
 #: ../main/wapiti.py:738
 msgid "Resume the scanning process (if stopped) even if some attacks were previously performed"
@@ -1214,6 +1238,10 @@ msgstr "Resume the scanning process (if stopped) even if some attacks were previ
 #: ../main/wapiti.py:945
 msgid "[*] Available modules:"
 msgstr "[*] Available modules:"
+
+#: ../main/wapiti.py:1000
+msgid "[*] Updating modules"
+msgstr "[*] Updating modules"
 
 #: ../attack/mod_file.py:41
 msgid "Remote file disclosure vulnerability"

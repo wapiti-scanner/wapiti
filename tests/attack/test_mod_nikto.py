@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 import re
 
+import os
 import responses
 
 from wapitiCore.net.web import Request
@@ -9,6 +10,12 @@ from wapitiCore.attack.mod_nikto import mod_nikto
 
 
 class FakePersister:
+
+    CRAWLER_DATA_DIR_NAME = "scans"
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
+    CRAWLER_DATA_DIR = os.path.join(BASE_DIR, CRAWLER_DATA_DIR_NAME)
+
     def __init__(self):
         self.requests = []
         self.additionals = set()
