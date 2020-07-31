@@ -18,4 +18,22 @@
             </reference>
         </references>
     </additional>
+    <additional name="CSP Configuration">
+        <description>Content Security Policy description</description>
+        <solution text="Content Security Policy Solution"/>
+        <references>
+            <reference>
+                <title><![CDATA[A-CSP: Content Security Policy]]></title>
+                <url>https://owasp.org/www-community/attacks/Content_Security_Policy</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CS-CSP-CS: Content Security Policy Cheat Sheet]]></title>
+                <url>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</url>
+            </reference>
+            <reference>
+                <title><![CDATA[How to do Content Security Policy]]></title>
+                <url>https://owasp.org/www-pdf-archive//2019-02-22_-_How_do_I_Content_Security_Policy_-_Print.pdf</url>
+            </reference>
+        </references>
+    </additional>
 </additionals>

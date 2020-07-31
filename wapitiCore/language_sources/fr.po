@@ -278,6 +278,10 @@ msgstr "(QUERY_STRING)"
 msgid "Error: The server did not understand this request"
 msgstr "Erreur : Le serveur n'a pas compris la requête"
 
+#: ../attack/mod_csp.py:122
+msgid "Checking CSP :"
+msgstr "Vérification du CSP :"
+
 #: ../attack/mod_exec.py:45 ../attack/mod_exec.py:47 ../attack/mod_exec.py:44
 msgid "Command execution"
 msgstr "Exécution de commande"
@@ -695,6 +699,18 @@ msgstr "L'administrateur web doit supprimer manuellement les sauvegardes présen
 #: ../language/vulnerability.py:113
 msgid "Blind SQL Injection description"
 msgstr "Tout comme les failles d'injection SQL classiques, les injections SQL en aveugle permettent à un attaquant d'altérer les requêtes normalement exécutées sur la base de données. Ce type de vulnérabilité est plus difficile à détecter en raison de l'absence de messages d'erreur renvoyés par l'application web."
+
+#: ../language/vulnerability.py:114
+msgid "CSP Configuration"
+msgstr "Configuration du CSP"
+
+#: ../language/vulnerability.py:115
+msgid "CSP \"{0}\" is missing"
+msgstr "CSP \"{0}\" est manquant"
+
+#: ../language/vulnerability.py:116
+msgid "CSP \"{0}\" value is not safe"
+msgstr "La valeur du CSP \"{0}\" n'est pas sécurisée"
 
 #: ../language/vulnerability.py:111 ../language/vulnerability.py:113
 #: ../language/vulnerability.py:114

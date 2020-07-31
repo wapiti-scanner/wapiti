@@ -3,6 +3,7 @@
 ../attack/mod_blindsql.py
 ../attack/mod_buster.py
 ../attack/mod_crlf.py
+../attack/mod_csp.py
 ../attack/mod_delay.py
 ../attack/mod_exec.py
 ../attack/mod_file.py
