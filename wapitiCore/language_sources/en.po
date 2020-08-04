@@ -278,6 +278,10 @@ msgstr "(QUERY_STRING)"
 msgid "Error: The server did not understand this request"
 msgstr "Error: The server did not understand this request"
 
+#: ../language/vulnerability.py:80
+msgid "Cross Site Request Forgery"
+msgstr "Cross Site Request Forgery"
+
 #: ../attack/mod_exec.py:45 ../attack/mod_exec.py:47 ../attack/mod_exec.py:44
 msgid "Command execution"
 msgstr "Command execution"
@@ -743,6 +747,14 @@ msgstr "The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII
 #: ../language/vulnerability.py:120
 msgid "CRLF solution"
 msgstr "Check the submitted parameters and do not allow CRLF to be injected by filtering CRLF"
+
+#: ../language/vulnerability.py:120
+msgid "Cross Site Request Forgery description"
+msgstr "Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web application in which they’re currently authenticated."
+
+#: ../language/vulnerability.py:120
+msgid "Cross Site Request Forgery solution"
+msgstr "Check if your framework has built-in CSRF protection and use it. If framework does not have built-in CSRF protection add CSRF tokens to all state changing requests (requests that cause actions on the site) and validate them on backend."
 
 #: ../language/vulnerability.py:119 ../language/vulnerability.py:121
 #: ../language/vulnerability.py:122
