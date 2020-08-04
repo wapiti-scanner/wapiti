@@ -35,6 +35,7 @@ from wapitiCore.net.web import Request
 modules = [
     "mod_crlf",
     "mod_http_headers",
+    "mod_csrf",
     "mod_cookieflags",
     "mod_exec",
     "mod_file",

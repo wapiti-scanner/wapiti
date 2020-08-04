@@ -294,6 +294,22 @@ msgstr "(QUERY_STRING)"
 msgid "Error: The server did not understand this request"
 msgstr "Erreur : Le serveur n'a pas compris la requête"
 
+#: ../language/vulnerability.py:80
+msgid "Cross Site Request Forgery"
+msgstr "Falsification de requête inter-site (CSRF)"
+
+#: ../attack/mod_csrf.py:161
+msgid "No anti-CSRF token found"
+msgstr "Aucun jeton anti-CSRF n'a été identifié"
+
+#: ../attack/mod_csrf.py:174
+msgid "{} is not properly checked in backend"
+msgstr "{} n'est pas correctement vérifié côté serveur"
+
+#: ../attack/mod_csrf.py:177
+msgid "{} might be easy to predict"
+msgstr "{} semble prédictible"
+
 #: ../attack/mod_exec.py:45 ../attack/mod_exec.py:47 ../attack/mod_exec.py:44
 msgid "Command execution"
 msgstr "Exécution de commande"
@@ -756,6 +772,14 @@ msgstr "Le terme CRLF fait référence à Carriage Return (ASCII 13, \\r) Line F
 #: ../language/vulnerability.py:120
 msgid "CRLF solution"
 msgstr "Vérifiez que les couples nom / valeur retournés dans les entêtes HTTP ne contiennent pas la suite de caractères CRLF."
+
+#: ../language/vulnerability.py:120
+msgid "Cross Site Request Forgery description"
+msgstr "La falsification de requête inter-site (CSRF) est une attaque qui force un utilisateur à exécuter des actions non désirées sur une application web sur laquelle il est actuellement authentifié."
+
+#: ../language/vulnerability.py:120
+msgid "Cross Site Request Forgery solution"
+msgstr "Vérifier que le framework utilisé implémente nativement une protection anti-CSRF et utiliser la. Si le framework ne fournit pas de protection anti-CSRF, ajouter un jeton anti-CSRF à toutes les requêtes qui modifient l'état d'un élément de l'application, et vérifier la validité des jetons côté serveur."
 
 #: ../language/vulnerability.py:119 ../language/vulnerability.py:121
 #: ../language/vulnerability.py:122
