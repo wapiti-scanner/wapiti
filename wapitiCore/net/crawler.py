@@ -926,6 +926,57 @@ class Page:
                 )
                 yield new_form
 
+    def find_login_form(self):
+        """Returns the login Request extracted from the Page, the username and password fields."""
+
+        for form in self.soup.find_all("form"):
+            username_field_idx = []
+            password_field_idx = []
+
+            for i, input_field in enumerate(form.find_all("input")):
+                input_type = input_field.attrs.get("type", "text").lower()
+                input_name = input_field.attrs.get("name", "undefined").lower()
+                input_id = input_field.attrs.get("id", "undefined").lower()
+                if input_type == "email":
+                    username_field_idx.append(i)
+
+                elif input_type == "text" and (
+                        any(field_name in input_name for field_name in ["mail", "user", "login", "name"]) or
+                        any(field_id in input_id for field_id in ["mail", "user", "login", "name"])
+                ):
+                    username_field_idx.append(i)
+
+                elif input_type == "password":
+                    password_field_idx.append(i)
+
+            # ensure login form
+            if len(username_field_idx) == 1 and len(password_field_idx) == 1:
+                inputs = form.find_all("input", attrs={"name": True})
+
+                url = self.make_absolute(form.attrs.get("action", "").strip() or self._url)
+                method = form.attrs.get("method", "GET").strip().upper()
+                enctype = form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
+                post_params = []
+                get_params = []
+                if method == "POST":
+                    post_params = [[input_data["name"], input_data.get("value", "")] for input_data in inputs]
+                else:
+                    get_params = [[input_data["name"], input_data.get("value", "")] for input_data in inputs]
+
+                login_form = web.Request(
+                    url,
+                    method=method,
+                    post_params=post_params,
+                    get_params=get_params,
+                    encoding=self.apparent_encoding,
+                    referer=self.url,
+                    enctype=enctype,
+                )
+
+                return login_form, username_field_idx[0], password_field_idx[0]
+
+        return None, "", ""
+
 
 def wildcard_translate(pattern):
     """Translate a wildcard PATTERN to a regular expression object.
@@ -1001,10 +1052,14 @@ class Crawler:
         else:
             self._session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
         self._session.headers["Accept-Language"] = "en-US"
+        self._session.headers["Accept-Encoding"] = "gzip, deflate, br"
+        self._session.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
         self._session.max_redirects = 5
         self._session.verify = secure
         self._scope = Scope.FOLDER
         self._base = web.Request(base_url)
+        self.auth_url = self._base.url
+        self.is_logged_in = False
 
         if not compression:
             self._session.headers["accept-encoding"] = "identity"
@@ -1154,6 +1209,58 @@ class Crawler:
             from requests_kerberos import HTTPKerberosAuth
             self._session.auth = HTTPKerberosAuth()
 
+    def try_login(self, auth_url: str):
+        """Try to authenticate with the provided url and credentials."""
+        if len(self._auth_credentials) != 2:
+            print(_("Login failed") + " : " + _("Invalid credentials format"))
+            return
+
+        username, password = self._auth_credentials
+
+        # Fetch the login page and try to extract the login form
+        try:
+            page = self.get(web.Request(auth_url), follow_redirects=True)
+
+            login_form, username_field_idx, password_field_idx = page.find_login_form()
+            if login_form:
+                post_params = login_form.post_params
+                get_params = login_form.get_params
+
+                if login_form.method == "POST":
+                    post_params[username_field_idx][1] = username
+                    post_params[password_field_idx][1] = password
+                else:
+                    get_params[username_field_idx][1] = username
+                    get_params[password_field_idx][1] = password
+
+                login_request = web.Request(
+                    path=login_form.url,
+                    method=login_form.method,
+                    post_params=post_params,
+                    get_params=get_params,
+                    referer=login_form.referer,
+                    link_depth=login_form.link_depth
+                )
+                login_response = self.send(
+                    login_request,
+                    follow_redirects=True
+                )
+                # ensure logged in
+                if login_response.soup.findAll(text=re.compile(r'(?i)((log|sign)\s?out|disconnect|déconnexion)')) != []:
+                    self.is_logged_in = True
+                    print(_("Login success"))
+
+                else:
+                    print(_("Login failed") + " : " + _("Credentials might be invalid"))
+            else:
+                print(_("Login failed") + " : " + _("No login form detected"))
+
+        except ConnectionError:
+            print(_("[!] Connection error with URL"), auth_url)
+        except RequestException as error:
+            print(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
+
+
     @retry(delay=1, times=3)
     def get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
         """Fetch the given url, returns a Page object on success, None otherwise.
@@ -1172,7 +1279,8 @@ class Crawler:
                 resource.url,
                 timeout=self._timeout,
                 allow_redirects=follow_redirects,
-                headers=headers
+                headers=headers,
+                verify=self.secure
             )
         except ConnectionError as exception:
             # https://github.com/kennethreitz/requests/issues/2392
@@ -1262,7 +1370,8 @@ class Crawler:
                 files=form.file_params,
                 headers=form_headers,
                 allow_redirects=follow_redirects,
-                timeout=self._timeout
+                timeout=self._timeout,
+                verify=self.secure
             )
         except ConnectionError as exception:
             # https://github.com/kennethreitz/requests/issues/2392

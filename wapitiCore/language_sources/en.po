@@ -1190,6 +1190,26 @@ msgstr "[!] Connection error with URL"
 msgid "[!] {} with url {}"
 msgstr "[!] {} with url {}"
 
+#: ../net/crawler.py:1248
+msgid "No login form detected"
+msgstr "No login form detected"
+
+#: ../net/crawler.py:1207
+msgid "Invalid credentials format"
+msgstr "Invalid credentials format"
+
+#: ../net/crawler.py:1246
+msgid "Credentials might be invalid"
+msgstr "Credentials might be invalid"
+
+#: ../net/crawler.py:1246 ../net/crawler.py:1250
+msgid "Login success"
+msgstr "Login success"
+
+#: ../net/crawler.py:1252
+msgid "Login failed"
+msgstr "Login failed"
+
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"
 msgstr "Summary of anomalies :"
