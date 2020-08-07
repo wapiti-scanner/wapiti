@@ -760,7 +760,7 @@ def wapiti_main():
         "--auth-type",
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
-        choices=["basic", "digest", "kerberos", "ntlm"]
+        choices=["basic", "digest", "kerberos", "ntlm", "post"]
     )
 
     parser.add_argument(
@@ -1057,7 +1057,10 @@ def wapiti_main():
                 raise InvalidOptionValue("-a", args.credentials)
 
         if "auth_type" in args:
-            wap.set_auth_type(args.auth_type)
+            if args.auth_type == "post" and args.starting_urls != []:
+                wap.crawler.auth_url = args.starting_urls[0]
+            else:
+                wap.set_auth_type(args.auth_type)
 
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
@@ -1145,13 +1148,14 @@ def wapiti_main():
 
     try:
         if not args.skip_crawl:
-            if wap.has_scan_started():
-                if wap.have_attacks_started() and not args.resume_crawl:
-                    pass
-                else:
-                    print(_("[*] Resuming scan from previous session, please wait"))
-                    wap.browse()
+            if wap.have_attacks_started() and not args.resume_crawl:
+                pass
             else:
+                if wap.has_scan_started():
+                    print(_("[*] Resuming scan from previous session, please wait"))
+
+                if "auth_type" in args and args.auth_type == "post":
+                    wap.crawler.try_login(wap.crawler.auth_url)
                 wap.browse()
 
         if args.max_parameters:

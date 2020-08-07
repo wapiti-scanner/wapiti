@@ -1206,6 +1206,26 @@ msgstr "[!] Impossible de se connecter à l'URL"
 msgid "[!] {} with url {}"
 msgstr "[!] {} avec l'URL {}"
 
+#: ../net/crawler.py:966
+msgid "No login form detected"
+msgstr "Aucun formulaire de connexion n'a été détecté"
+
+#: ../net/crawler.py:1207
+msgid "Invalid credentials format"
+msgstr "Format d'identifiants invalide"
+
+#: ../net/crawler.py:1246
+msgid "Credentials might be invalid"
+msgstr "Les identifiants semblent invalides"
+
+#: ../net/crawler.py:1246 ../net/crawler.py:1250
+msgid "Login success"
+msgstr "Authentification réussie"
+
+#: ../net/crawler.py:1252
+msgid "Login failed"
+msgstr "Authentification échouée"
+
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"
 msgstr "Résumé des anomalies :"
