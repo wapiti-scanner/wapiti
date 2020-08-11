@@ -760,7 +760,7 @@ def wapiti_main():
         "--auth-type",
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
-        choices=["basic", "digest", "kerberos", "ntlm"]
+        choices=["basic", "digest", "kerberos", "ntlm", "post"]
     )
 
     parser.add_argument(

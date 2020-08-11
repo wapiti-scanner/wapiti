@@ -34,13 +34,13 @@ import pickle
 import math
 import functools
 from time import sleep
-
 # Third-parties
 import requests
 from requests.packages.urllib3 import disable_warnings
 from requests.packages.urllib3.exceptions import ReadTimeoutError
 from requests.exceptions import ConnectionError, RequestException, ReadTimeout, SSLError
 from requests.models import Response
+from requests import cookies
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
@@ -52,6 +52,7 @@ from wapitiCore import parser_name
 from wapitiCore.net import web
 from wapitiCore.net import swf
 from wapitiCore.net import lamejs
+from wapitiCore.net.web import Request
 
 disable_warnings()
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
@@ -1016,6 +1017,93 @@ class Crawler:
         self._auth_credentials = {}
         self._auth_method = "basic"
 
+    def get_auth_form(self, url):
+        head = {
+            'User-Agent': self.user_agent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br'
+        }
+
+        if len(self._auth_credentials) == 2:
+
+            list = ['email', 'user', 'mail', 'session', 'login']
+            username, password = self._auth_credentials
+            response = requests.get(url, allow_redirects=True, verify=False, headers=head)
+            req= web.Request(url)
+            page = self.get(req, follow_redirects=True, headers=head)
+            forms = []
+            for i, forma in enumerate(page.iter_forms(autofill=False)):
+                forms.append(forma)
+            form = forms[0]
+            post_params = form.post_params
+            for i, post_param_tuple in enumerate(post_params):
+                field, value = post_param_tuple
+                if value:
+                    post_params[i] = [field, value]
+                elif "password" in field:
+                    post_params[i] = [field, password]
+                elif any(ext in field for ext in list):
+                    post_params[i] = [field, username]
+
+            if form.file_name:
+                request = Request(form.url, post_params=post_params, link_depth=form.link_depth)
+            else:
+                request = Request(page._response.url, post_params=post_params, link_depth=form.link_depth)
+
+            response = self.post(request, follow_redirects=True,headers=head)
+
+        else:
+
+            page = self.get(web.Request(url), follow_redirects=True, headers=head, verify=False)
+            forms = []
+
+            for i, form in enumerate(page.iter_forms(autofill=False)):
+                if i == 0:
+                    print('')
+                    print(_("Choose the form you want to use or enter 'q' to leave :"))
+                print("{0}) {1}".format(i, form))
+                forms.append(form)
+
+            valid_choice_done = False
+            if forms:
+                nchoice = -1
+                print('')
+                while not valid_choice_done:
+                    choice = input(_("Enter a number : "))
+                    if choice.isdigit():
+                        nchoice = int(choice)
+                        if len(forms) > nchoice >= 0:
+                            valid_choice_done = True
+                    elif choice == 'q':
+                        break
+
+                if valid_choice_done:
+                    form = forms[nchoice]
+                    print('')
+                    print(_("Please enter values for the following form: "))
+                    print(_("url = {0}").format(form.url))
+
+                    post_params = form.post_params
+                    for i, post_param_tuple in enumerate(post_params):
+                        field, value = post_param_tuple
+                        if value:
+                            new_value = input(field + " (" + value + ") : ")
+                        else:
+                            new_value = input("{}: ".format(field))
+                        post_params[i] = [field, new_value]
+
+                    request = Request(page.url, post_params=post_params, link_depth=form.link_depth)
+                    response = self.post(request, follow_redirects=True)
+
+        return response
+
+    def set_session(self):
+
+        url = self._base.url
+        res = self.get_auth_form(url)
+        self.session_cookies =  requests.cookies.merge_cookies(res.cookies,self.session_cookies)
+        self.is_logged_in = True
+
     def set_proxy(self, proxy=""):
         """Set a proxy to use for HTTP requests."""
         url_parts = urlparse(proxy)
@@ -1149,10 +1237,14 @@ class Crawler:
             elif self._auth_method == "ntlm":
                 from requests_ntlm import HttpNtlmAuth
                 self._session.auth = HttpNtlmAuth(username, password)
+            elif self._auth_method == "post":
+                self.set_session()
         elif self._auth_method == "kerberos":
             # On openSUSE, "zypper in krb5-devel" before installing the pip package
             from requests_kerberos import HTTPKerberosAuth
             self._session.auth = HTTPKerberosAuth()
+        elif self._auth_method == "post":
+            self.set_session()
 
     @retry(delay=1, times=3)
     def get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
