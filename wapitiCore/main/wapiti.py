@@ -275,6 +275,20 @@ class Wapiti:
                         if not found:
                             print(_("[!] Unable to find a module named {0}").format(module_name))
 
+    def update(self):
+        """Update modules that implement an update method"""
+        logger = ConsoleLogger()
+        if self.color:
+            logger.color = True
+
+        for mod_name in attack.modules:
+            mod = import_module("wapitiCore.attack." + mod_name)
+            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options)
+            if hasattr(mod_instance, "update"):
+                print(_("Updating module {0}").format(mod_name[4:]))
+                mod_instance.update()
+        print(_("Update done."))
+
     def browse(self):
         """Extract hyperlinks and forms from the webpages found on the website"""
         for resource in self.persister.get_to_browse():
@@ -679,6 +693,7 @@ def wapiti_main():
         "-u", "--url",
         help=_("The base URL used to define the scan scope (default scope is folder)"),
         metavar="URL", dest="base_url",
+        default="http://example.com/"
         # required=True
     )
 
@@ -700,6 +715,12 @@ def wapiti_main():
         "--list-modules",
         action="store_true",
         help=_("List Wapiti attack modules and exit")
+    )
+
+    group.add_argument(
+        "--update",
+        action="store_true",
+        help=_("Update Wapiti attack modules and exit")
     )
 
     parser.add_argument(
@@ -970,16 +991,23 @@ def wapiti_main():
         for module_name in modules_list:
             is_common = " (default)" if module_name in attack.commons else ""
             print("  {}{}".format(module_name, is_common))
-        exit()
+        sys.exit()
 
     url = args.base_url
     wap = Wapiti(url, scope=args.scope, session_dir=args.store_session)
+
+    if args.update:
+        print(_("[*] Updating modules"))
+        attack_options = {"level": args.level, "timeout": args.timeout}
+        wap.set_attack_options(attack_options)
+        wap.update()
+        sys.exit()
 
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc or not parts.path:
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme"
                 " and slash after the domain name."))
-        exit()
+        sys.exit()
 
     try:
         for start_url in args.starting_urls:

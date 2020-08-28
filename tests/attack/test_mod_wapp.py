@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 
+import os
 import responses
 
 from wapitiCore.net.web import Request
@@ -7,6 +8,12 @@ from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_wapp import mod_wapp
 
 class FakePersister:
+
+    CRAWLER_DATA_DIR_NAME = "scans"
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
+    CRAWLER_DATA_DIR = os.path.join(BASE_DIR, CRAWLER_DATA_DIR_NAME)
+
     def __init__(self):
         self.requests = []
         self.additionals = []
@@ -31,6 +38,8 @@ class FakePersister:
 @responses.activate
 def test_false_positive():
     # Test for false positive
+    responses.add_passthru("https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/apps.json")
+
     responses.add(
         responses.GET,
         url="http://perdu.com/",
