@@ -1,12 +1,20 @@
 from unittest.mock import Mock
 
+import os
 import responses
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_wapp import mod_wapp
 
+
 class FakePersister:
+
+    CRAWLER_DATA_DIR_NAME = "scans"
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
+    CRAWLER_DATA_DIR = os.path.join(BASE_DIR, CRAWLER_DATA_DIR_NAME)
+
     def __init__(self):
         self.requests = []
         self.additionals = []
@@ -28,9 +36,12 @@ class FakePersister:
     def get_root_url(self):
         return self.requests[0].url
 
+
 @responses.activate
 def test_false_positive():
     # Test for false positive
+    responses.add_passthru("https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/apps.json")
+
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -56,6 +67,7 @@ def test_false_positive():
         pass
 
     assert not persister.additionals
+
 
 @responses.activate
 def test_url_detection():
@@ -86,6 +98,7 @@ def test_url_detection():
 
     assert persister.additionals
     assert persister.additionals[2] == "Outlook Web App"
+
 
 @responses.activate
 def test_html_detection():
@@ -119,6 +132,7 @@ def test_html_detection():
     assert persister.additionals
     assert persister.additionals[0] == "Atlassian Confluence 2.8.4"
 
+
 @responses.activate
 def test_script_detection():
     # Test if application is detected using its script regex
@@ -149,7 +163,8 @@ def test_script_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "AppDynamics 1-4-2"
+    assert persister.additionals[0] == "AppDynamics"
+
 
 @responses.activate
 def test_cookies_detection():
@@ -183,6 +198,7 @@ def test_cookies_detection():
     assert persister.additionals
     assert persister.additionals[0] == "CodeIgniter 2+"
 
+
 @responses.activate
 def test_headers_detection():
     # Test if application is detected using its headers regex
@@ -214,6 +230,7 @@ def test_headers_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == "Cherokee 1.3.4"
+
 
 @responses.activate
 def test_meta_detection():
@@ -247,6 +264,7 @@ def test_meta_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == "Planet 1.6.2"
+
 
 @responses.activate
 def test_implies_detection():

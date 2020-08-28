@@ -19,7 +19,6 @@
 import csv
 import re
 import os
-import socket
 import random
 
 from requests.exceptions import RequestException
@@ -58,14 +57,14 @@ class mod_nikto(Attack):
 
     name = "nikto"
     NIKTO_DB = "nikto_db"
+    NIKTO_DB_URL = "https://raw.githubusercontent.com/sullo/nikto/master/program/databases/db_tests"
 
     do_get = False
     do_post = False
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        user_config_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
-        user_config_dir += "/config"
+        user_config_dir = self.persister.CRAWLER_DATA_DIR
 
         if not os.path.isdir(user_config_dir):
             os.makedirs(user_config_dir)
@@ -73,25 +72,27 @@ class mod_nikto(Attack):
             with open(os.path.join(user_config_dir, self.NIKTO_DB)) as nikto_db_file:
                 reader = csv.reader(nikto_db_file)
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
+
         except IOError:
-            try:
-                print(_("Problem with local nikto database."))
-                print(_("Downloading from the web..."))
-                nikto_req = web.Request(
-                    "https://raw.githubusercontent.com/sullo/nikto/master/program/databases/db_tests"
-                )
-                response = self.crawler.send(nikto_req)
+            print(_("Problem with local nikto database."))
+            print(_("Downloading from the web..."))
+            self.update()
 
-                csv.register_dialect("nikto", quoting=csv.QUOTE_ALL, doublequote=False, escapechar="\\")
-                reader = csv.reader(response.content.split("\n"), "nikto")
-                self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
+    def update(self):
+        try:
+            request = web.Request(self.NIKTO_DB_URL)
+            response = self.crawler.send(request)
 
-                with open(os.path.join(user_config_dir, self.NIKTO_DB), "w") as nikto_db_file:
-                    writer = csv.writer(nikto_db_file)
-                    writer.writerows(self.nikto_db)
+            csv.register_dialect("nikto", quoting=csv.QUOTE_ALL, doublequote=False, escapechar="\\")
+            reader = csv.reader(response.content.split("\n"), "nikto")
+            self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
-            except socket.timeout:
-                print(_("Error downloading Nikto database"))
+            with open(os.path.join(self.persister.CRAWLER_DATA_DIR, self.NIKTO_DB), "w") as nikto_db_file:
+                writer = csv.writer(nikto_db_file)
+                writer.writerows(self.nikto_db)
+
+        except IOError:
+            print(_("Error downloading nikto database."))
 
     def attack(self):
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])

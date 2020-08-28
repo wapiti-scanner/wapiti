@@ -248,6 +248,22 @@ msgstr "Faille d'injection SQL en aveugle"
 msgid "{0} via injection in the query string"
 msgstr "{0} via une injection dans la query string"
 
+#: ../attack/mod_http_headers.py:27
+msgid "Checking X-Frame-Options :"
+msgstr "Vérification de X-Frame-Options :"
+
+#: ../attack/mod_http_headers.py:39
+msgid "Checking X-XSS-Protection :"
+msgstr "Vérification de X-XSS-Protection :"
+
+#: ../attack/mod_http_headers.py:51
+msgid "Checking X-Content-Type-Options :"
+msgstr "Vérification de X-Content-Type-Options :"
+
+#: ../attack/mod_http_headers.py:63
+msgid "Checking Strict-Transport-Security :"
+msgstr "Vérification de Strict-Transport-Security :"
+
 #: ../attack/mod_blindsql.py:141 ../attack/mod_blindsql.py:222
 #: ../attack/mod_exec.py:195 ../attack/mod_exec.py:292
 #: ../attack/mod_file.py:211 ../attack/mod_file.py:301 ../attack/mod_sql.py:258
@@ -377,14 +393,26 @@ msgstr "| Code HTTP : {0}"
 msgid "Problem with local nikto database."
 msgstr "Un problème est survenu avec la base de données nikto locale"
 
+#: ../attack/mod_wapp.py:34
+msgid "Problem with local wapp database."
+msgstr "Un problème est survenu avec la base de données wapp locale"
+
 #: ../attack/mod_nikto.py:76 ../attack/mod_nikto.py:79
 msgid "Downloading from the web..."
 msgstr "Téléchargement depuis le web..."
 
 #: ../attack/mod_nikto.py:90 ../attack/mod_nikto.py:92
 #: ../attack/mod_nikto.py:94
-msgid "Error downloading Nikto database"
-msgstr "Erreur de téléchargement de la base Nikto"
+msgid "Error downloading nikto database"
+msgstr "Erreur de téléchargement de la base nikto"
+
+#: ../attack/mod_wapp.py:47
+msgid "Error downloading wapp database"
+msgstr "Erreur de téléchargement de la base wapp"
+
+#: ../attack/mod_wapp.py:59
+msgid "Try using --store-session option, or update apps.json using --update option."
+msgstr "Essayez avec l'option --store-session, ou mettez à jour apps.json avec l'option --update."
 
 #: ../attack/mod_nikto.py:235 ../attack/mod_nikto.py:237
 #: ../attack/mod_nikto.py:240 ../attack/mod_nikto.py:238
@@ -685,6 +713,14 @@ msgstr "Le fichier {0} n'a pas été trouvé. Wapiti va scanner le site à nouve
 msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Impossible de trouver le module {0}"
 
+#: ../main/wapiti.py:288
+msgid "Updating module {0}"
+msgstr "Mise à jour du module {0}"
+
+#: ../main/wapiti.py:290
+msgid "Update done."
+msgstr "Mise à jour effectuée."
+
 #: ../language/vulnerability.py:107 ../language/vulnerability.py:109
 #: ../language/vulnerability.py:110
 msgid "Backup file description"
@@ -815,10 +851,24 @@ msgstr "L'utilisation d'une technologie web peut être déduite à cause des tra
 msgid "Fingerprint web technology solution"
 msgstr "A titre d'information seulement."
 
+#: ../language/vulnerability.py:167
+msgid "HTTP Secure Headers"
+msgstr " Les en-têtes de sécurité HTTP indiquent au navigateur comment se comporter lors de la gestion du contenu du site Web"
+
+#: ../language/vulnerability.py:168
+msgid "HTTP Headers Secure Configuration"
+msgstr "Utilisez les recommandations pour renforcer vos en-têtes HTTP de sécurité"
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"
 msgstr "Ficher de sauvegarde {} trouvé"
+
+#: ../attack/cookieflags.py:23
+msgid "Checking cookie : {}"
+msgstr "Vérification du cookie"
+
+
 
 #: ../attack/mod_delay.py:56
 msgid "Slowest resources found on the web server:"
@@ -1205,6 +1255,10 @@ msgstr "[*] Faites attention ! De vilaines choses peuvent survenir un vendredi 1
 msgid "List Wapiti attack modules and exit"
 msgstr "Lister les modules d'attaque de Wapiti et quitter"
 
+#: ../main/wapiti.py:723
+msgid "Update Wapiti attack modules and exit"
+msgstr "Mettre à jour les modules d'attaque de Wapiti et quitter"
+
 #: ../main/wapiti.py:684 ../main/wapiti.py:698 ../main/wapiti.py:702
 #: ../main/wapiti.py:738
 msgid "Resume the scanning process (if stopped) even if some attacks were previously performed"
@@ -1214,6 +1268,10 @@ msgstr "Reprendre le scan (si précédemment stoppé) même si les attaques avai
 #: ../main/wapiti.py:945
 msgid "[*] Available modules:"
 msgstr "[*] Modules disponibles :"
+
+#: ../main/wapiti.py:1000
+msgid "[*] Updating modules"
+msgstr "[*] Mise à jour des modules"
 
 #: ../attack/mod_file.py:41
 msgid "Remote file disclosure vulnerability"
@@ -1362,3 +1420,27 @@ msgstr ""
 #: ../main/wapiti.py:1074
 msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
 msgstr ""
+
+#: ../language/vulnerability.py:163 ../language/vulnerability.py:163
+msgid "HttpOnly Flag cookie description"
+msgstr "HttpOnly est un indicateur supplémentaire inclus dans un en-tête de réponse HTTP Set-Cookie. L'utilisation de l'indicateur HttpOnly lors de la génération d'un cookie permet d'atténuer le risque que le script côté client accède au cookie protégé"
+
+#: ../language/vulnerability.py:164 ../language/vulnerability.py:164
+msgid "HttpOnly Flag cookie solution"
+msgstr "A la création de cookie, assurez vous d'activer le drapeau 'HttpOnly' avec la fonction 'set-cookie'"
+
+#: ../language/vulnerability.py:116
+msgid "HttpOnly flag is not set in the cookie : {0}"
+msgstr "L'indicateur HttpOnly n'est pas défini dans le cookie : {0}"
+
+#:  ../language/vulnerability.py:166
+msgid "Secure Flag cookie description"
+msgstr "Le flag Secure permet de laisser la décision d’envoi ou non du cookie au navigateur. Il signifie que le cookie  est uniquement envoyé au serveur avec les requêtes chiffrées, via le protocole HTTPS"
+
+#: ../language/vulnerability.py:167
+msgid "Secure Flag cookie solution"
+msgstr "A la création de cookie, assurez vous d'activer le drapeau 'Secure' avec la fonction 'set-cookie'"
+
+#: ../language/vulnerability.py:167
+msgid "Secure flag is not set in the cookie : {0}"
+msgstr "L'indicateur Secure n'est pas défini dans le cookie : {0}"
