@@ -40,7 +40,7 @@ class FakePersister:
 @responses.activate
 def test_false_positive():
     # Test for false positive
-    responses.add_passthru("https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/apps.json")
+    responses.add_passthru("https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies.json")
 
     responses.add(
         responses.GET,
@@ -142,7 +142,7 @@ def test_script_detection():
         body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
         <h2>Pas de panique, on va vous aider</h2> \
         <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        <script src=\"http://perdu.com/adrum.1-4-2.js\"></script>\
+        <script src=\"http://chartjs.org/dist/1.4.2/Chart.js\"></script>\
         </body></html>"
     )
 
@@ -163,7 +163,7 @@ def test_script_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "AppDynamics"
+    assert persister.additionals[0] == "Chart.js 1.4.2"
 
 
 @responses.activate
