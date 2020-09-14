@@ -29,10 +29,15 @@ class mod_sql(Attack):
     """
     This class implements an error-based SQL Injection attack
     """
-
     time_to_sleep = 6
     name = "sql"
-    payloads = ("\xBF'\"(", Flags())
+
+    """
+    source of payload : https://github.com/payloadbox/sql-injection-payload-list/
+    MIT License
+    """
+    PAYLOADS_FILE = "SQLPayloads.txt"
+
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
 
     @staticmethod
