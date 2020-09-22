@@ -26,16 +26,20 @@ class mod_csp(Attack):
         1  : the element is set and his value is secure
         """
 
-        if policy_name not in csp_dict:
+        if policy_name not in csp_dict and "default-src" not in csp_dict:
             return -1
+
+        # The HTTP CSP "default-src" directive serves as a fallback for the other CSP fetch directives.
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
+        policy_values = csp_dict.get(policy_name, csp_dict["default-src"])
 
         # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present
         if policy_name in ["default-src", "script-src"]:
-            if any(policy_value in csp_dict[policy_name] for policy_value in check_list):
+            if any(unsafe_value in policy_values for unsafe_value in check_list):
                 return 0
         # If the tested element is none of the previous list, we must ensure that one of this safe values is present
         else:
-            if any(policy_value in csp_dict[policy_name] for policy_value in check_list):
+            if any(safe_value in policy_values for safe_value in check_list):
                 return 1
             else:
                 return 0
@@ -73,9 +77,10 @@ class mod_csp(Attack):
 
             self.log_blue(_("Checking CSP :"))
             i = 0
-            for policy_name in self.check_list:
 
+            for policy_name in self.check_list:
                 result = self.check_policy_values(policy_name, self.all_check[i], csp_dict)
+
                 if result == -1:
                     self.log_red(Additional.MSG_CSP_MISSING.format(policy_name))
                     self.add_addition(
