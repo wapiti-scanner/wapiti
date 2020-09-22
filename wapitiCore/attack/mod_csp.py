@@ -6,8 +6,9 @@ from wapitiCore.language.vulnerability import Additional, _
 
 
 CHECK_LISTS = {
-    "default-src": ["*", "unsafe-eval"],
-    "script-src": ["unsafe-inline", "data:", "http", "https"],
+    # As default-src is the fallback directive we may want to avoid those duplicates in the future
+    "default-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
+    "script-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
     "object-src": ["none"],
     "base-uri": ["none", "self"]
 }
@@ -62,13 +63,9 @@ class mod_csp(Attack):
         return 1
 
     def attack(self):
-        head = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br'
-        }
         url = self.persister.get_root_url()
         request = Request(url)
-        response = self.crawler.get(request, follow_redirects=True, headers=head)
+        response = self.crawler.get(request, follow_redirects=True)
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(Additional.MSG_NO_CSP)
