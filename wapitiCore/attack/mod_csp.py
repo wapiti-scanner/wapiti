@@ -5,20 +5,35 @@ from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import Additional, _
 
 
+CHECK_LISTS = {
+    "default-src": ["*", "unsafe-eval"],
+    "script-src": ["unsafe-inline", "data:", "http", "https"],
+    "object-src": ["none"],
+    "base-uri": ["none", "self"]
+}
+
+
 # This module check the basics recommendations of CSP
 class mod_csp(Attack):
     name = "csp"
 
-    check_list = ["default-src", "script-src", "object-src", "base-uri"]
+    @staticmethod
+    def csp_header_to_dict(header):
+        csp_dict = {}
+        regex = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
 
-    check_default = ["*", "unsafe-eval"]
-    check_script_src = ["unsafe-inline", "data:", "http", "https"]
-    check_object_src = ["none"]
-    check_base_uri = ["none", "self"]
+        for policy_string in header.split(";"):
+            try:
+                policy_name, policy_values = policy_string.strip().split(" ", 1)
+            except ValueError:
+                # Either it is malformed or we reach the end
+                continue
+            csp_dict[policy_name] = [value.strip("'") for value in regex.findall(policy_values)]
 
-    all_check = [check_default, check_script_src, check_object_src, check_base_uri]
+        return csp_dict
 
-    def check_policy_values(self, policy_name, check_list, csp_dict):
+    @staticmethod
+    def check_policy_values(policy_name, csp_dict):
         """
         This function return the status of the tested element in the CSP as an int. Possible values:
         -1 : the element is missing in the CSP
@@ -31,15 +46,15 @@ class mod_csp(Attack):
 
         # The HTTP CSP "default-src" directive serves as a fallback for the other CSP fetch directives.
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
-        policy_values = csp_dict.get(policy_name, csp_dict["default-src"])
+        policy_values = csp_dict.get(policy_name) or csp_dict["default-src"]
 
         # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present
         if policy_name in ["default-src", "script-src"]:
-            if any(unsafe_value in policy_values for unsafe_value in check_list):
+            if any(unsafe_value in policy_values for unsafe_value in CHECK_LISTS[policy_name]):
                 return 0
         # If the tested element is none of the previous list, we must ensure that one of this safe values is present
         else:
-            if any(safe_value in policy_values for safe_value in check_list):
+            if any(safe_value in policy_values for safe_value in CHECK_LISTS[policy_name]):
                 return 1
             else:
                 return 0
@@ -64,22 +79,10 @@ class mod_csp(Attack):
                 info=Additional.MSG_NO_CSP
             )
         else:
-            csp = response.headers["Content-Security-Policy"]
-            csp_dict = {}
-            regex = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
-            for policy_string in csp.split(";"):
-                try:
-                    policy_name, policy_values = policy_string.strip().split(" ", 1)
-                except ValueError:
-                    # Either it is malformed or we reach the end
-                    continue
-                csp_dict[policy_name] = [value.strip("'") for value in regex.findall(policy_values)]
+            csp_dict = self.csp_header_to_dict(response.headers["Content-Security-Policy"])
 
-            self.log_blue(_("Checking CSP :"))
-            i = 0
-
-            for policy_name in self.check_list:
-                result = self.check_policy_values(policy_name, self.all_check[i], csp_dict)
+            for policy_name in CHECK_LISTS:
+                result = self.check_policy_values(policy_name, csp_dict)
 
                 if result == -1:
                     self.log_red(Additional.MSG_CSP_MISSING.format(policy_name))
@@ -97,6 +100,5 @@ class mod_csp(Attack):
                         request=request,
                         info=Additional.MSG_CSP_UNSAFE.format(policy_name)
                     )
-                i += 1
 
         yield
