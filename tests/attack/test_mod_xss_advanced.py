@@ -240,3 +240,23 @@ def test_xss_inside_tag_link():
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert "<" not in used_payload and ">" not in used_payload and "onmouseover" in used_payload
+
+
+def test_xss_uppercase_no_script():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65080/uppercase_no_script.php?name=obiwan")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65080/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    assert persister.vulnerabilities[0][0] == "name"
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert used_payload.startswith("<svg onload=&")

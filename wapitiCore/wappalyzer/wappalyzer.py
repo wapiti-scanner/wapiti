@@ -22,7 +22,7 @@ class ApplicationDataException(Exception):
 class ApplicationData:
     """
     Store application database.
-    For instance https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/apps.json.
+    For instance https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies.json.
     """
 
     def __init__(self, data_filename=None):
@@ -42,7 +42,7 @@ class ApplicationData:
             with open(os.path.join(BASE_DIR, "wappalyzer", "data/apps.json"), 'r') as data_file:
                 obj = json.load(data_file)
 
-        self.applications = obj["apps"]
+        self.applications = obj["technologies"]
         self.normalize_applications()
 
         # Ignore regex parsing warnings
@@ -59,7 +59,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["cats", "html", "implies", "script"]:
+            for list_field in ["cats", "html", "implies", "scripts"]:
                 if list_field not in self.applications[application_name]:
                     # Complete with empty elements if not already present
                     self.applications[application_name][list_field] = []
@@ -105,7 +105,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["html", "implies", "script"]:
+            for list_field in ["html", "implies", "scripts"]:
                 self.applications[application_name][list_field] = [
                     self.normalize_regex(pattern) for pattern in self.applications[application_name][list_field]
                 ]
@@ -184,7 +184,7 @@ class Wappalyzer:
         is_detected = (
             self.is_application_detected_normalize_string(application, 'url', self._url) or
             self.is_application_detected_normalize_list(application, 'html', self._html) or
-            self.is_application_detected_normalize_list(application, 'script', self._scripts) or
+            self.is_application_detected_normalize_list(application, 'scripts', self._scripts) or
             self.is_application_detected_normalize_dict(application, 'cookies', self._cookies) or
             self.is_application_detected_normalize_dict(application, 'headers', self._headers) or
             self.is_application_detected_normalize_dict(application, 'meta', self._metas)

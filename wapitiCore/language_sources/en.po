@@ -739,6 +739,14 @@ msgstr "Prefer working without user input when using file system calls"
 msgid "CRLF description"
 msgstr "The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, \\n). They're used to note the termination of a line, however, dealt with differently in today's popular Operating Systems. For example: in Windows both a CR and LF are required to note the end of a line, whereas in Linux/UNIX a LF is only required. This combination of CR and LR is used for example when pressing 'Enter' on the keyboard. Depending on the application being used, pressing 'Enter' generally instructs the application to start a new line, or to send a command."
 
+#: ../language/vulnerability.py:116
+msgid "CSP \"{0}\" value is not safe"
+msgstr "CSP \"{0}\" value is not safe"
+
+#: ../language/vulnerability.py:116
+msgid "CSP  is not set"
+msgstr "CSP is not set"
+
 #: ../language/vulnerability.py:117 ../language/vulnerability.py:119
 #: ../language/vulnerability.py:120
 msgid "CRLF solution"
@@ -830,6 +838,14 @@ msgstr " HTTP security headers tell the browser how to behave when handling the 
 msgid "HTTP Headers Secure Configuration"
 msgstr "Use the recommendations to hardening your HTTP Security Headers "
 
+#: ../language/vulnerability.py:186
+msgid "Content Security Policy description"
+msgstr "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks"
+
+#: ../language/vulnerability.py:187
+msgid "Content Security Policy solution"
+msgstr "Configuring Content Security Policy involves adding the Content-Security-Policy HTTP header to a web page and giving it values to control what resources the user agent is allowed to load for that page"
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"
@@ -843,6 +859,10 @@ msgstr "Slowest resources found on the web server:"
 #, python-brace-format
 msgid "With a download speed of {0} bps:"
 msgstr "With a download speed of {0} bps:"
+
+#: ../attack/mod_csp.py:122
+msgid "Checking CSP :"
+msgstr "Checking CSP :"
 
 #: ../attack/mod_exec.py:42 ../attack/mod_exec.py:44 ../attack/mod_exec.py:41
 msgid "Warning eval()"
@@ -1189,6 +1209,26 @@ msgstr "[!] Connection error with URL"
 #: ../net/crawler.py:1501 ../net/crawler.py:1514
 msgid "[!] {} with url {}"
 msgstr "[!] {} with url {}"
+
+#: ../net/crawler.py:1248
+msgid "No login form detected"
+msgstr "No login form detected"
+
+#: ../net/crawler.py:1207
+msgid "Invalid credentials format"
+msgstr "Invalid credentials format"
+
+#: ../net/crawler.py:1246
+msgid "Credentials might be invalid"
+msgstr "Credentials might be invalid"
+
+#: ../net/crawler.py:1246 ../net/crawler.py:1250
+msgid "Login success"
+msgstr "Login success"
+
+#: ../net/crawler.py:1252
+msgid "Login failed"
+msgstr "Login failed"
 
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"

@@ -859,6 +859,18 @@ msgstr " Les en-têtes de sécurité HTTP indiquent au navigateur comment se com
 msgid "HTTP Headers Secure Configuration"
 msgstr "Utilisez les recommandations pour renforcer vos en-têtes HTTP de sécurité"
 
+#: ../language/vulnerability.py:116
+msgid "CSP  is not set"
+msgstr "CSP n'est pas configuré"
+
+#: ../language/vulnerability.py:186
+msgid "Content Security Policy description"
+msgstr "Une Content Security Policy (CSP) ou stratégie de sécurité du contenu permet d'améliorer la sécurité des sites web en permettant de détecter et réduire certains types d'attaques, dont les attaques XSS (Cross Site Scripting) et les injections de contenu"
+
+#: ../language/vulnerability.py:187
+msgid "Content Security Policy solution"
+msgstr "Configurer une stratégie CSP nécessite d'utiliser un en-tête HTTP Content-Security-Policy pour une page web et de spécifier une valeur pour contrôler les ressources que le navigateur est autorisé à charger pour cette page"
+
 #: ../attack/mod_backup.py:84 ../attack/mod_backup.py:83
 #: ../attack/mod_backup.py:82
 msgid "Found backup file {}"
@@ -1221,6 +1233,26 @@ msgstr "[!] Impossible de se connecter à l'URL"
 #: ../net/crawler.py:1501 ../net/crawler.py:1514
 msgid "[!] {} with url {}"
 msgstr "[!] {} avec l'URL {}"
+
+#: ../net/crawler.py:966
+msgid "No login form detected"
+msgstr "Aucun formulaire de connexion n'a été détecté"
+
+#: ../net/crawler.py:1207
+msgid "Invalid credentials format"
+msgstr "Format d'identifiants invalide"
+
+#: ../net/crawler.py:1246
+msgid "Credentials might be invalid"
+msgstr "Les identifiants semblent invalides"
+
+#: ../net/crawler.py:1246 ../net/crawler.py:1250
+msgid "Login success"
+msgstr "Authentification réussie"
+
+#: ../net/crawler.py:1252
+msgid "Login failed"
+msgstr "Authentification échouée"
 
 #: ../report/txtreportgenerator.py:93 ../report/txtreportgenerator.py:94
 msgid "Summary of anomalies :"
