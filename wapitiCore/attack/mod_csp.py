@@ -1,7 +1,7 @@
-import requests, re
+import re
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.net import crawler
 from wapitiCore.language.vulnerability import Additional, _
 
 
@@ -9,7 +9,7 @@ from wapitiCore.language.vulnerability import Additional, _
 class mod_csp(Attack):
     name = "csp"
 
-    checks = ["default-src", "script-src", "object-src", "base-uri"]
+    check_list = ["default-src", "script-src", "object-src", "base-uri"]
 
     check_default = ["*", "unsafe-eval"]
     check_script_src = ["unsafe-inline", "data:", "http", "https"]
@@ -18,29 +18,24 @@ class mod_csp(Attack):
 
     all_check = [check_default, check_script_src, check_object_src, check_base_uri]
 
-    def is_set(self, request: object):
-        if 'Content-Security-Policy' in request.headers:
-            return True
-        else:
-            return False
+    def check_policy_values(self, policy_name, check_list, csp_dict):
+        """
+        This function return the status of the tested element in the CSP as an int. Possible values:
+        -1 : the element is missing in the CSP
+        0  : the element is set, but his value is not secure
+        1  : the element is set and his value is secure
+        """
 
-    def check_default_src(self, request, element, check_list, dict):
-        '''
-        This function return a number who tell us the status of the tested element in the CSP
-        if the function return -1 : the element is missing in the CSP
-        if the function return 0  : the element is set, but his value is not secure
-        if the function return 1  : the element is set and his value is secure
-        '''
-
-        if not element in dict:
+        if policy_name not in csp_dict:
             return -1
-        # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present in the CSP
-        elif element in ["default-src", "script-src"]:
-            if any(el in dict[element] for el in check_list):
+
+        # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present
+        if policy_name in ["default-src", "script-src"]:
+            if any(policy_value in csp_dict[policy_name] for policy_value in check_list):
                 return 0
-        # If the tested element is none of the previous list, we must ensure that one of this safe values is present in the CSP
+        # If the tested element is none of the previous list, we must ensure that one of this safe values is present
         else:
-            if any(elm in dict[element] for elm in check_list):
+            if any(policy_value in csp_dict[policy_name] for policy_value in check_list):
                 return 1
             else:
                 return 0
@@ -55,7 +50,8 @@ class mod_csp(Attack):
         url = self.persister.get_root_url()
         request = Request(url)
         response = self.crawler.get(request, follow_redirects=True, headers=head)
-        if not self.is_set(response):
+
+        if "Content-Security-Policy" not in response.headers:
             self.log_red(Additional.MSG_NO_CSP)
             self.add_addition(
                 category=Additional.INFO_CSP,
@@ -64,33 +60,37 @@ class mod_csp(Attack):
                 info=Additional.MSG_NO_CSP
             )
         else:
-            csp = response.headers['Content-Security-Policy']
-            dict_csp = {}
+            csp = response.headers["Content-Security-Policy"]
+            csp_dict = {}
             regex = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
             for policy_string in csp.split(";"):
-                policy_name, policy_values = policy_string.strip().split(" ", 1)
-                dict_csp[policy_name] = policy_values
+                try:
+                    policy_name, policy_values = policy_string.strip().split(" ", 1)
+                except ValueError:
+                    # Either it is malformed or we reach the end
+                    continue
+                csp_dict[policy_name] = [value.strip("'") for value in regex.findall(policy_values)]
 
             self.log_blue(_("Checking CSP :"))
             i = 0
-            for element in self.checks:
+            for policy_name in self.check_list:
 
-                result = self.check_default_src(response, element, self.all_check[i], dict_csp)
+                result = self.check_policy_values(policy_name, self.all_check[i], csp_dict)
                 if result == -1:
-                    self.log_red(Additional.MSG_CSP_MISSIING.format(element))
+                    self.log_red(Additional.MSG_CSP_MISSING.format(policy_name))
                     self.add_addition(
                         category=Additional.INFO_CSP,
                         level=Additional.LOW_LEVEL,
                         request=request,
-                        info=Additional.MSG_CSP_MISSIING.format(element)
+                        info=Additional.MSG_CSP_MISSING.format(policy_name)
                     )
                 elif result == 0:
-                    self.log_red(Additional.MSG_CSP_UNSAFE.format(element))
+                    self.log_red(Additional.MSG_CSP_UNSAFE.format(policy_name))
                     self.add_addition(
                         category=Additional.INFO_CSP,
                         level=Additional.LOW_LEVEL,
                         request=request,
-                        info=Additional.MSG_CSP_UNSAFE.format(element)
+                        info=Additional.MSG_CSP_UNSAFE.format(policy_name)
                     )
                 i += 1
 
