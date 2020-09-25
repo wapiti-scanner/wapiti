@@ -21,7 +21,7 @@ def test_http():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
 
     assert page.status == 418
     assert page.headers["X-Men"] == "Wolverine"
@@ -50,5 +50,5 @@ def test_http():
     )
 
     resp = requests.get(url, allow_redirects=False)
-    page = Page(resp, url)
+    page = Page(resp)
     assert page.is_directory_redirection

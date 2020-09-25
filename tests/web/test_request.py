@@ -1,5 +1,7 @@
 import json
 
+import responses
+
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 
@@ -155,3 +157,32 @@ def test_request_object():
     )
     page = crawler.send(res19)
     assert page.json["files"]
+
+
+@responses.activate
+def test_redirect():
+    slyfx = "http://www.slyfx.com/"
+    disney = "http://www.disney.com/"
+
+    responses.add(
+        responses.GET,
+        slyfx,
+        body="Back to disneyland",
+        status=301,
+        headers={"Location": disney}
+    )
+
+    responses.add(
+        responses.GET,
+        disney,
+        body="Hello there"
+    )
+
+    crawler = Crawler(slyfx)
+    page = crawler.send(Request(slyfx))
+    assert page.url == slyfx
+    assert not page.history
+
+    page = crawler.send(Request(slyfx), follow_redirects=True)
+    assert page.url == disney
+    assert page.history[0].url == slyfx

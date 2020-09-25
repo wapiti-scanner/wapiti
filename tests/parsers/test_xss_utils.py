@@ -249,7 +249,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert not has_csp(page)
 
     url = "http://perdu.com/http_csp"
@@ -264,7 +264,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert has_csp(page)
 
     url = "http://perdu.com/meta_csp"
@@ -284,7 +284,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert has_csp(page)
 
 
@@ -301,7 +301,7 @@ def test_valid_content_type():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert valid_xss_content_type(page)
 
     url = "http://perdu.com/picture.png"
@@ -315,7 +315,7 @@ def test_valid_content_type():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert not valid_xss_content_type(page)
 
 
