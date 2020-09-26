@@ -236,6 +236,37 @@ def test_different_separator_contexts():
     ]
 
 
+def test_non_executable_context():
+    html = """<html>
+    <frameset>
+        <frame src="top.html" />
+        <frame src="bottom.html" />
+    </frameset>
+    injection
+    </html>"""
+
+    assert get_context_list(html, "injection") == []
+
+    html = """<html>
+    <frameset>
+        <frame src="top.html" />
+        <frame src="injection" />
+    </frameset>
+    </html>"""
+
+    assert get_context_list(html, "injection") == [
+        {
+            "type": "attrval",
+            "name": "src",
+            "tag": "frame",
+            "events": set(),
+            "separator": '"',
+            "non_exec_parent": "frameset",
+            "special_attributes": {"src"}
+        }
+    ]
+
+
 @responses.activate
 def test_csp_detection():
     url = "http://perdu.com/"
