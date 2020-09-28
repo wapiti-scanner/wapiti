@@ -19,7 +19,7 @@ class mod_cookieflags(Attack):
         request = Request(url)
         cookies = self.crawler.session_cookies
         for cookie in cookies:
-            self.log_blue(_("Checking cookie : {}".format(cookie.name)))
+            self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 self.log_red(Additional.INFO_COOKIE_HTTPONLY.format(cookie.name))
                 self.add_addition(

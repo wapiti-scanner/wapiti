@@ -174,9 +174,9 @@ class mod_csrf(Attack):
             if not csrf_value:
                 vuln_message = _("Lack of anti CSRF token")
             elif not self.is_csrf_verified(original_request):
-                vuln_message = _("CSRF token '{}' is not properly checked in backend".format(self.csrf_string))
+                vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
             elif not self.is_csrf_robust(csrf_value):
-                vuln_message = _("CSRF token '{}' might be easy to predict".format(self.csrf_string))
+                vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
             else:
                 yield original_request
                 continue
