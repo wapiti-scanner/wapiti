@@ -236,6 +236,37 @@ def test_different_separator_contexts():
     ]
 
 
+def test_non_executable_context():
+    html = """<html>
+    <frameset>
+        <frame src="top.html" />
+        <frame src="bottom.html" />
+    </frameset>
+    injection
+    </html>"""
+
+    assert get_context_list(html, "injection") == []
+
+    html = """<html>
+    <frameset>
+        <frame src="top.html" />
+        <frame src="injection" />
+    </frameset>
+    </html>"""
+
+    assert get_context_list(html, "injection") == [
+        {
+            "type": "attrval",
+            "name": "src",
+            "tag": "frame",
+            "events": set(),
+            "separator": '"',
+            "non_exec_parent": "frameset",
+            "special_attributes": {"src"}
+        }
+    ]
+
+
 @responses.activate
 def test_csp_detection():
     url = "http://perdu.com/"
@@ -249,7 +280,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert not has_csp(page)
 
     url = "http://perdu.com/http_csp"
@@ -264,7 +295,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert has_csp(page)
 
     url = "http://perdu.com/meta_csp"
@@ -284,7 +315,7 @@ def test_csp_detection():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert has_csp(page)
 
 
@@ -301,7 +332,7 @@ def test_valid_content_type():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert valid_xss_content_type(page)
 
     url = "http://perdu.com/picture.png"
@@ -315,7 +346,7 @@ def test_valid_content_type():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
     assert not valid_xss_content_type(page)
 
 

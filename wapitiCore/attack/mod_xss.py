@@ -238,7 +238,9 @@ class mod_xss(Attack):
                 attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
 
                 for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
-                    if find_non_exec_parent(tag):
+                    non_exec_parent = find_non_exec_parent(tag)
+
+                    if non_exec_parent and not (tag.name == "frame" and non_exec_parent == "frameset"):
                         continue
 
                     if attribute == "string" and tag.string:

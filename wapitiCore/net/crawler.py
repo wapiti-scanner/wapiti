@@ -114,26 +114,22 @@ def not_empty(original_function):
 
 
 class Page:
-    def __init__(self, response: Response, url: str, empty: bool = False):
+    def __init__(self, response: Response, empty: bool = False):
         """Create a new Page object.
 
         @type response: Response
         @param response: a requests Response instance.
 
-        @type url: str
-        @param url: URL of the Page.
-
         @type empty: bool
         @param empty: whether the Page is empty (body length == 0)"""
         self._response = response
-        self._url = url
         self._base = None
         self._soup = None
         self._is_empty = empty
         try:
-            self._fld = get_fld(url)
+            self._fld = get_fld(response.url)
         except TldDomainNotFound:
-            self._fld = urlparse(url).netloc
+            self._fld = urlparse(response.url).netloc
 
     @property
     def url(self) -> str:
@@ -141,7 +137,15 @@ class Page:
 
         @rtype: str
         """
-        return self._url
+        return self._response.url
+
+    @property
+    def history(self) -> list:
+        """Returns a list of precedent webpages in case of redirection
+
+        @rtype: list
+        """
+        return [Page(response) for response in self._response.history]
 
     @property
     def headers(self):
@@ -282,7 +286,7 @@ class Page:
 
     @not_empty
     def _scripts(self):
-        url_parts = urlparse(self._base or self._url)
+        url_parts = urlparse(self._base or self.url)
         scheme = url_parts.scheme
 
         for tag in self.soup.find_all("script", src=True):
@@ -315,7 +319,7 @@ class Page:
                 base_tag = self._soup.find("base", href=True)
                 if base_tag:
                     base_parts = urlparse(base_tag["href"])
-                    current = urlparse(self._url)
+                    current = urlparse(self.url)
                     base_path = base_parts.path or "/"
                     base_path = normpath(base_path.replace("\\", "/"))
                     # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
@@ -403,7 +407,7 @@ class Page:
         if not link.strip():
             return ""
 
-        current_url_parts = urlparse(self._base or self._url)
+        current_url_parts = urlparse(self._base or self.url)
         scheme = current_url_parts.scheme
         domain = current_url_parts.netloc
         path = current_url_parts.path
@@ -464,7 +468,7 @@ class Page:
         elif link.startswith("?"):
             return urlunparse((scheme, domain, path, params, query_string, ''))
         elif link == "" or link.startswith("#"):
-            return self._url
+            return self.url
         else:
             # relative path to file, subdirectory or parent directory
             current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
@@ -761,7 +765,7 @@ class Page:
         @rtype: generator
         """
         for form in self.soup.find_all("form"):
-            url = self.make_absolute(form.attrs.get("action", "").strip() or self._url)
+            url = self.make_absolute(form.attrs.get("action", "").strip() or self.url)
             # If no method is specified then it's GET. If an invalid method is set it's GET.
             method = "POST" if form.attrs.get("method", "GET").upper() == "POST" else "GET"
             enctype = "" if method == "GET" else form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
@@ -844,12 +848,12 @@ class Page:
 
             # A formaction doesn't need a name
             for input_field in form.find_all("input", attrs={"formaction": True}):
-                form_actions.add(self.make_absolute(input_field["formaction"].strip() or self._url))
+                form_actions.add(self.make_absolute(input_field["formaction"].strip() or self.url))
 
             for button_field in form.find_all("button", formaction=True):
                 # If formaction is empty it basically send to the current URL
                 # which can be different from the defined action attribute on the form...
-                form_actions.add(self.make_absolute(button_field["formaction"].strip() or self._url))
+                form_actions.add(self.make_absolute(button_field["formaction"].strip() or self.url))
 
             if form.find("input", attrs={"name": False, "type": "image"}):
                 # Unnamed input type file => names will be set as x and y
@@ -953,7 +957,7 @@ class Page:
             if len(username_field_idx) == 1 and len(password_field_idx) == 1:
                 inputs = form.find_all("input", attrs={"name": True})
 
-                url = self.make_absolute(form.attrs.get("action", "").strip() or self._url)
+                url = self.make_absolute(form.attrs.get("action", "").strip() or self.url)
                 method = form.attrs.get("method", "GET").strip().upper()
                 enctype = form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
                 post_params = []
@@ -1241,12 +1245,14 @@ class Crawler:
                     referer=login_form.referer,
                     link_depth=login_form.link_depth
                 )
+
                 login_response = self.send(
                     login_request,
                     follow_redirects=True
                 )
+
                 # ensure logged in
-                if login_response.soup.findAll(text=re.compile(r'(?i)((log|sign)\s?out|disconnect|déconnexion)')) != []:
+                if login_response.soup.find_all(text=re.compile(r'(?i)((log|sign)\s?out|disconnect|déconnexion)')):
                     self.is_logged_in = True
                     print(_("Login success"))
 
@@ -1259,7 +1265,6 @@ class Crawler:
             print(_("[!] Connection error with URL"), auth_url)
         except RequestException as error:
             print(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
-
 
     @retry(delay=1, times=3)
     def get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
@@ -1290,7 +1295,7 @@ class Crawler:
             else:
                 raise exception
 
-        return Page(response, resource.url)
+        return Page(response)
 
     @retry(delay=1, times=3)
     def post(self, form: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
@@ -1342,7 +1347,7 @@ class Crawler:
             else:
                 raise exception
 
-        return Page(response, form.url)
+        return Page(response)
 
     @retry(delay=1, times=3)
     def request(
@@ -1381,7 +1386,7 @@ class Crawler:
             else:
                 raise exception
 
-        return Page(response, form.url)
+        return Page(response)
 
     def send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
         if resource.method == "GET":

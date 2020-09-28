@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, Flags
 
-
 # Everything under those tags will be treated as text
 NONEXEC_PARENTS = {
     "iframe",
@@ -17,20 +16,29 @@ NONEXEC_PARENTS = {
     "template",
     "textarea",
     "title",
-    "xmp"
+    "xmp",
+    "frameset"
 }
 
 CSP_HEADERS = {"content-security-policy", "x-content-security-policy", "x-webkit-csp"}
 
 
 def find_non_exec_parent(tag):
-    """Return a string with each closing parent tags for escaping a noscript"""
+    """Return the tag name of the most upper parent preventing JS execution"""
     no_exec_parent = ""
     for parent in tag.parents:
         if parent and parent.name in NONEXEC_PARENTS:
             no_exec_parent = parent.name
 
     return no_exec_parent
+
+
+def is_context_executable(node):
+    """Returns whether the current tag doesn't follows a tag that stop JS execution (such as frameset)."""
+    # Search for any frameset sat that appeared before in the DOM but weren't parent
+    if set(node.find_all_previous("frameset")) - set(node.find_parents("frameset")):
+        return False
+    return True
 
 
 def get_special_attributes(node):
@@ -58,8 +66,8 @@ def get_context_list(html_code, keyword, bs_node=None):
     # if parent is None:
     #  print("Keyword is: {0}".format(keyword))
     if keyword in str(bs_node).lower():
-        if isinstance(bs_node, element.Tag):
-            events = set(name for name in bs_node.attrs.keys()if name.startswith("on"))
+        if isinstance(bs_node, element.Tag) and is_context_executable(bs_node):
+            events = set(name for name in bs_node.attrs.keys() if name.startswith("on"))
             if keyword in str(bs_node.attrs):
                 for attr_name, attr_value in bs_node.attrs.items():
                     if keyword in attr_value:
@@ -142,14 +150,14 @@ def get_context_list(html_code, keyword, bs_node=None):
                     if context not in context_list:
                         context_list.append(context)
 
-        elif isinstance(bs_node, element.Comment):
+        elif isinstance(bs_node, element.Comment) and is_context_executable(bs_node):
             # print("Found in comment, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
             context = {"type": "comment", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
             if context not in context_list:
                 context_list.append(context)
 
-        elif isinstance(bs_node, element.NavigableString):
+        elif isinstance(bs_node, element.NavigableString) and is_context_executable(bs_node):
             # print("Found in text, tag {0}".format(parent.name))
             bad_parent = find_non_exec_parent(bs_node)
             context = {"type": "text", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
@@ -219,6 +227,7 @@ def apply_attrval_context(context, payloads, code):
 
     for payload_infos in payloads:
         if not payload_infos["close_tag"]:
+            # Payload keeping the tag open
             if context["tag"] in payload_infos["tag"] and payload_infos["attribute"] not in context["events"]:
                 if not context["separator"]:
                     attr_separator = " "
@@ -226,38 +235,37 @@ def apply_attrval_context(context, payloads, code):
                 else:
                     attr_separator = value_separator = context["separator"]
 
-                try:
-                    js_code = "y"  # Not empty value to force non-fuzzy HTML interpretation
-                    js_code += meet_requirements(
-                        payload_infos.get("requirements", []),
-                        context.get("special_attributes", [])
-                    )
-                    js_code += payload_infos["payload"].replace("__XSS__", code)
-                    js_code = js_code.replace("[ATTR_SEP]", attr_separator)
-                    js_code = js_code.replace("[VALUE_SEP]", value_separator)
-                except RuntimeError:
-                    continue
+                if payload_infos["tag"] == ["frame"] and payload_infos["attribute"] == "src":
+                    # This is a special case... Maybe we should improve that kind of behavior by having something
+                    # similar to the match_type (from xssPayloads.ini) in the context
+                    js_code = payload_infos["payload"].replace("__XSS__", code)
+                else:
+                    try:
+                        js_code = "y"  # Not empty value to force non-fuzzy HTML interpretation
+                        js_code += meet_requirements(
+                            payload_infos.get("requirements", []),
+                            context.get("special_attributes", [])
+                        )
+                        js_code += payload_infos["payload"].replace("__XSS__", code)
+                        js_code = js_code.replace("[ATTR_SEP]", attr_separator)
+                        js_code = js_code.replace("[VALUE_SEP]", value_separator)
+                    except RuntimeError:
+                        continue
 
                 result.append((js_code, Flags(type=PayloadType.xss_non_closing_tag, section=payload_infos["name"])))
 
-            # if context["name"].lower() == "src" and context["tag"].lower() in ["frame", "iframe"]:
-            #     if context["tag"].lower() == "frame":
-            #         flags = {"frame_src_javascript"}
-            #     else:
-            #         flags = {"iframe_src_javascript"}
-            #
-            #     js_code = "javascript:String.fromCharCode(0,__XSS__,1);".replace("__XSS__", code)
-            #     if (js_code, flags) not in payloads:
-            #         payloads.insert(0, (js_code, flags))
         else:
             js_code = context["separator"]
             # we must deal differently with self-closing tags
-            if context["tag"].lower() in ["img", "input"]:
+            if context["tag"].lower() in ["img", "input", "frame"]:
                 js_code += "/>"
             else:
                 js_code += "></" + context["tag"] + ">"
 
-            if context["non_exec_parent"]:
+            if context["non_exec_parent"] == "frameset":
+                if payload_infos["tag"] != ["frame"]:
+                    continue
+            elif context["non_exec_parent"]:
                 js_code += "</" + context["non_exec_parent"] + ">"
 
             js_code += payload_infos["payload"].replace("__XSS__", code)

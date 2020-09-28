@@ -15,7 +15,7 @@ def test_absolute_root():
         )
 
         resp = requests.get(url)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert page.links == [url]
 
@@ -31,7 +31,7 @@ def test_relative_root():
         )
 
         resp = requests.get(url)
-        page = Page(resp, url)
+        page = Page(resp)
 
         # We will get invalid hostnames with dots. Browsers do that too.
         assert set(page.links) == {url, "http://./", "http://../"}
@@ -48,7 +48,7 @@ def test_relative_links():
         )
 
         resp = requests.get(url)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert set(page.links) == {
             url,
@@ -82,7 +82,7 @@ def test_other_links():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/frame1.html",
@@ -112,7 +112,7 @@ def test_extra_links():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/planets.gif",
@@ -150,7 +150,7 @@ def test_meta():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert page.title == "  -  Title :) "
         assert page.description == "Meta page"
@@ -172,7 +172,7 @@ def test_base_relative_links():
         )
 
         resp = requests.get(url)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert set(page.links) == {
             url,
@@ -206,7 +206,7 @@ def test_base_extra_links():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/blog/",  # extracted from base href
@@ -247,7 +247,7 @@ def test_base_other_links():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/blog/frame1.html",

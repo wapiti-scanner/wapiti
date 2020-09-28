@@ -18,6 +18,6 @@ def test_json():
     )
 
     resp = requests.get(url)
-    page = Page(resp, url)
+    page = Page(resp)
 
     assert page.json["key"] == "v4lu3"

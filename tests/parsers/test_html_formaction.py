@@ -15,7 +15,7 @@ def test_formactions():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
         count = 0
 
         for form in page.iter_forms():

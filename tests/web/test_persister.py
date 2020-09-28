@@ -145,7 +145,7 @@ def test_persister_forms():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
 
         forms = list(page.iter_forms())
 
