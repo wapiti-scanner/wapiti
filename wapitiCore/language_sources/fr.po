@@ -30,7 +30,7 @@ msgstr "{0} dans {1} via une injection dans le paramètre {2}"
 #: ../vulnerability.py:25 ../language/vulnerability.py:27
 #, python-brace-format
 msgid "  coming from {0}"
-msgstr "  en provanance de {0}"
+msgstr "  en provenance de {0}"
 
 #: ../vulnerability.py:26 ../language/vulnerability.py:28
 #, python-brace-format

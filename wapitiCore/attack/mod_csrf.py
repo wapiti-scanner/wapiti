@@ -1,4 +1,21 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
+# Copyright (C) 2020 Nicolas Surribas
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from collections import Counter
 import math
 from requests.exceptions import ReadTimeout
@@ -8,6 +25,7 @@ from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
 
+
 class mod_csrf(Attack):
     """
     This class implements a CSRF/XSRF attack
@@ -16,7 +34,7 @@ class mod_csrf(Attack):
     name = "csrf"
 
     do_get = False
-    do_post = True
+    do_post = False
 
     csrf_string = None
 
@@ -52,10 +70,11 @@ class mod_csrf(Attack):
                 return param[1]
 
         # Look for anti-csrf token in HTTP headers
-        for header in original_request.headers:
-            if header.lower() in self.TOKEN_HEADER_STRINGS:
-                self.csrf_string = header
-                return original_request.headers[header]
+        if original_request.headers:
+            for header in original_request.headers:
+                if header.lower() in self.TOKEN_HEADER_STRINGS:
+                    self.csrf_string = header
+                    return original_request.headers[header]
 
         return None
 
@@ -79,7 +98,7 @@ class mod_csrf(Attack):
         if original_response.status != mutated_response.status:
             return False
 
-        if original_response.content != mutated_response.content: # TODO: Maybe too strict
+        if original_response.content != mutated_response.content:  # TODO: Maybe too strict
             return False
 
         return True
@@ -94,22 +113,24 @@ class mod_csrf(Attack):
         ]
 
         # Replace anti-csrf token value from headers with "wapiti"
-        mutated_headers = original_request.headers
-        if self.csrf_string in mutated_headers:
-            mutated_headers[self.csrf_string] = "wapiti"
+        special_headers = {}
+        if original_request.headers and self.csrf_string in original_request.headers:
+            special_headers[self.csrf_string] = "wapiti"
 
         mutated_request = Request(
-            path=original_request.path, method=original_request.method,
-            get_params=original_request.get_params, post_params=mutated_post_params,
-            file_params=original_request.file_params, referer=original_request.referer,
+            path=original_request.path,
+            method=original_request.method,
+            get_params=original_request.get_params,
+            post_params=mutated_post_params,
+            file_params=original_request.file_params,
+            referer=original_request.referer,
             link_depth=original_request.link_depth
         )
 
         original_response = self.crawler.send(original_request, follow_redirects=True)
-        mutated_response = original_response
 
         try:
-            mutated_response = self.crawler.send(mutated_request, headers=mutated_headers, follow_redirects=True)
+            mutated_response = self.crawler.send(mutated_request, headers=special_headers, follow_redirects=True)
 
         except ReadTimeout:
 
@@ -134,63 +155,45 @@ class mod_csrf(Attack):
 
         return True
 
-
     def attack(self):
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
-        # list to ensure only one occurence per (vulnerable url/post_keys) tuple
+        # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
         already_vulnerable = []
 
         for original_request in forms:
             if (original_request.url, original_request.post_keys) in already_vulnerable:
+                yield original_request
                 continue
 
             if self.verbose >= 1:
                 print("[+] {}".format(original_request))
 
             csrf_value = self.is_csrf_present(original_request)
+
             # check if token is present
             if not csrf_value:
-
-                already_vulnerable.append((original_request.url, original_request.post_keys))
-
-                self.log_red("---")
-                self.log_red(
-                    Vulnerability.CSRF + Vulnerability.MSG_FROM,
-                    original_request.http_repr()
-                )
-                vuln_message = _("No anti-CSRF token found")
-                self.add_vuln(
-                    request_id=original_request.path_id,
-                    category=Vulnerability.CSRF,
-                    level=Vulnerability.HIGH_LEVEL,
-                    request=original_request,
-                    info=vuln_message,
-                )
-
+                vuln_message = _("Lack of anti CSRF token")
+            elif not self.is_csrf_verified(original_request):
+                vuln_message = _("CSRF token '{}' is not properly checked in backend".format(self.csrf_string))
+            elif not self.is_csrf_robust(csrf_value):
+                vuln_message = _("CSRF token '{}' might be easy to predict".format(self.csrf_string))
             else:
-                vuln_message = None
-                # check if token is robust and verified
-                if not self.is_csrf_verified(original_request):
-                    vuln_message = _("{} is not properly checked in backend".format(self.csrf_string))
+                yield original_request
+                continue
 
-                elif not self.is_csrf_robust(csrf_value):
-                    vuln_message = _("{} might be easy to predict".format(self.csrf_string))
+            already_vulnerable.append((original_request.url, original_request.post_keys))
 
-                if vuln_message:
+            self.log_red("---")
+            self.log_red(vuln_message)
+            self.log_red(original_request.http_repr())
+            self.log_red("---")
 
-                    already_vulnerable.append((original_request.url, original_request.post_keys))
-
-                    self.log_red("---")
-                    self.log_red(
-                        Vulnerability.CSRF + Vulnerability.MSG_FROM,
-                        original_request.http_repr()
-                    )
-                    self.add_vuln(
-                        request_id=original_request.path_id,
-                        category=Vulnerability.CSRF,
-                        level=Vulnerability.HIGH_LEVEL,
-                        request=original_request,
-                        info=vuln_message,
-                    )
+            self.add_vuln(
+                request_id=original_request.path_id,
+                category=Vulnerability.CSRF,
+                level=Vulnerability.HIGH_LEVEL,
+                request=original_request,
+                info=vuln_message,
+            )
 
             yield original_request

@@ -4,6 +4,10 @@ RUN apt-get update
 RUN apt-get install php7.3-cli php7.3-xml -y
 RUN mkdir /usr/src/app
 
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
 WORKDIR /usr/src/app
 
 COPY . .
