@@ -130,23 +130,6 @@ class mod_csrf(Attack):
             )
 
         else:
-            if mutated_response.status == 500:
-                anom_msg = Anomaly.MSG_PARAM_500.format(self.csrf_string)
-
-                self.add_anom(
-                    request_id=original_request.path_id,
-                    category=Anomaly.ERROR_500,
-                    level=Anomaly.HIGH_LEVEL,
-                    request=mutated_request,
-                    info=anom_msg,
-                )
-
-                self.log_orange("---")
-                self.log_orange(Anomaly.MSG_500, original_request.path)
-                self.log_orange(Anomaly.MSG_EVIL_REQUEST)
-                self.log_orange(mutated_request.http_repr())
-                self.log_orange("---")
-
             return not self.is_same_response(original_response, mutated_response)
 
         return True
@@ -154,8 +137,12 @@ class mod_csrf(Attack):
 
     def attack(self):
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+        # list to ensure only one occurence per (vulnerable url/post_keys) tuple
+        already_vulnerable = []
 
         for original_request in forms:
+            if (original_request.url, original_request.post_keys) in already_vulnerable:
+                continue
 
             if self.verbose >= 1:
                 print("[+] {}".format(original_request))
@@ -163,10 +150,13 @@ class mod_csrf(Attack):
             csrf_value = self.is_csrf_present(original_request)
             # check if token is present
             if not csrf_value:
+
+                already_vulnerable.append((original_request.url, original_request.post_keys))
+
                 self.log_red("---")
                 self.log_red(
                     Vulnerability.CSRF + Vulnerability.MSG_FROM,
-                    original_request
+                    original_request.http_repr()
                 )
                 vuln_message = _("No anti-CSRF token found")
                 self.add_vuln(
@@ -187,10 +177,13 @@ class mod_csrf(Attack):
                     vuln_message = _("{} might be easy to predict".format(self.csrf_string))
 
                 if vuln_message:
+
+                    already_vulnerable.append((original_request.url, original_request.post_keys))
+
                     self.log_red("---")
                     self.log_red(
                         Vulnerability.CSRF + Vulnerability.MSG_FROM,
-                        original_request
+                        original_request.http_repr()
                     )
                     self.add_vuln(
                         request_id=original_request.path_id,
