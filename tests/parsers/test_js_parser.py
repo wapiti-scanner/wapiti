@@ -16,7 +16,7 @@ def test_js_parser():
         )
 
         resp = requests.get(url)
-        page = Page(resp, url)
+        page = Page(resp)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/onload.html",

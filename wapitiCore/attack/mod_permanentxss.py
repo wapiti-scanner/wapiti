@@ -19,11 +19,10 @@
 from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
-from math import ceil
 
 from requests.exceptions import Timeout, ReadTimeout
 
-from wapitiCore.attack.attack import Attack, PayloadType, Mutator, Flags
+from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net import web
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
@@ -353,7 +352,9 @@ class mod_permanentxss(Attack):
                 attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
 
                 for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
-                    if find_non_exec_parent(tag):
+                    non_exec_parent = find_non_exec_parent(tag)
+
+                    if non_exec_parent and not (tag.name == "frame" and non_exec_parent == "frameset"):
                         continue
 
                     if attribute == "string" and tag.string:

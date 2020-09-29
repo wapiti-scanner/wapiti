@@ -15,7 +15,7 @@ def test_forms():
         )
 
         resp = requests.get(url, allow_redirects=False)
-        page = Page(resp, url)
+        page = Page(resp)
         count = 0
         form_action = False
 
@@ -104,7 +104,7 @@ def test_email_input():
     )
 
     resp = requests.get(url, allow_redirects=False)
-    page = Page(resp, url)
+    page = Page(resp)
 
     form = next(page.iter_forms())
     assert "@" in form.post_params[0][1]
