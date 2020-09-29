@@ -1,11 +1,10 @@
-from itertools import chain
 from os.path import join as path_join
-import requests
-from bs4 import BeautifulSoup
+
 from requests.exceptions import ReadTimeout
+
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Vulnerability, _
 from wapitiCore.net import web
 
 
@@ -29,34 +28,6 @@ class mod_brute_login_form(Attack):
     def set_timeout(self, timeout):
         self.time_to_sleep = str(1 + int(timeout))
 
-    def has_password_field(self):
-
-        list = ['email','user','mail','session','login']
-        url = self.persister.get_root_url()
-        request = Request(url)
-        response = self.crawler.get(request, follow_redirects=True)
-        content = response.content
-        inputs = BeautifulSoup(content, features="lxml").findAll('input')
-        if self.current_request_method == 'POST':
-            for _input in inputs:
-
-                if (_input.attrs['type']).lower() == 'submit':
-                    self.submit_var_name = _input.attrs['name']
-                    self.submit_var_value = _input.attrs['name']
-
-                if any(ext in (_input.attrs['name']).lower() for ext in list):
-                    # this condition is used to check that the field is not of type "password". For example : user_password
-                    if (_input.attrs['type']).lower() == 'text':
-                        self.username_parameter_field.append(_input.attrs['name'])
-
-                if (_input.attrs['type']).lower() == 'password':
-                    self.password_parameter.append(_input.attrs['name'])
-
-        if self.password_parameter:
-            return True
-        else:
-            return False
-
     def check_success_auth(self, content_response: str):
         with open(path_join(self.CONFIG_DIR, self.PAYLOADS_SUCCESS), 'r', errors='ignore') as success_pattern_file:
             for success_pattern in success_pattern_file:
@@ -65,114 +36,131 @@ class mod_brute_login_form(Attack):
 
         return False
 
-    def get_username_list(self):
+    def get_usernames(self):
         with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE_USER), 'r', errors='ignore') as username_file:
-            data = username_file.readlines()
-            for username in data:
-                self.payloads_username.append(username.strip())
+            for line in username_file:
+                username = line.strip()
+                if username:
+                    yield username
 
-    def get_password_list(self):
-        password_file = open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE), 'r', errors='ignore')
-        while True:
-            data = password_file.readline()
-            if not data:
-                break;
+    def get_passwords(self):
+        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE), 'r', errors='ignore') as password_file:
+            for line in password_file:
+                password = line.strip()
+                if password:
+                    yield password
 
-            self.payloads_password[0]=data.strip()
+    def test_credentials(self, login_form, username_index, password_index, username, password):
+        post_params = login_form.post_params
+        get_params = login_form.get_params
 
-    def inject_username_payload(self, original_request, username_payload):
-        for params_list in original_request.post_params:
-            if self.username_parameter_field in params_list:
-                original_request.post_params[original_request.post_params.index(params_list)][1] = username_payload
-        return original_request
+        if login_form.method == "POST":
+            post_params[username_index][1] = username
+            post_params[password_index][1] = password
+        else:
+            get_params[username_index][1] = username
+            get_params[password_index][1] = password
+
+        login_request = web.Request(
+            path=login_form.url,
+            method=login_form.method,
+            post_params=post_params,
+            get_params=get_params,
+            referer=login_form.referer,
+            link_depth=login_form.link_depth
+        )
+
+        try:
+            login_response = self.crawler.send(
+                login_request,
+                follow_redirects=True
+            )
+        except ReadTimeout:
+            return ""
+        return login_response.content
 
     def attack(self):
-        false_response = None
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+        # TODO: do GET requests too and don't forget to yield for each tried resource!
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
-        timeouted = False
-
 
         for original_request in forms:
-            page = original_request.path
-            self.current_request_url = original_request.url
-            self.current_request_method = original_request.method
+            # We leverage the fact that the crawler will fill password entries with a known placeholder
+            if "Letm3in_" not in original_request.encoded_data:
+                continue
 
-            if self.has_password_field():
-                false_data = [[self.username_parameter_field[0], "some_false_username"],
-                              [self.password_parameter[0], "some_false_password"],
-                              [self.submit_var_name, self.submit_var_value]]
+            # We may want to remove this but if not available fallback to target URL
+            if not original_request.referer:
+                continue
 
-                false_request = Request(
-                    self.current_request_url,
-                    method="POST",
-                    post_params=false_data
-                )
+            request = Request(original_request.referer)
+            page = self.crawler.get(request, follow_redirects=True)
 
-                false_response = self.crawler.send(false_request, follow_redirects=True)
+            login_form, username_field_idx, password_field_idx = page.find_login_form()
+            if not login_form:
+                continue
 
-            if self.has_password_field():
-                self.get_username_list()
+            failure_text = self.test_credentials(
+                login_form,
+                username_field_idx, password_field_idx,
+                "invalid", "invalid"
+            )
 
-                for username in self.payloads_username:
-                    if self.verbose >= 1:
-                        print("[+] {}".format(original_request))
+            if self.check_success_auth(failure_text):
+                # Ignore this case as it raise false positives
+                continue
 
-                    for payload in self.payloads:
+            for username in self.get_usernames():
+                for password in self.get_passwords():
 
-                        data = [[self.username_parameter_field[0],username],
-                                [self.password_parameter[0],payload[0]],
-                                [self.submit_var_name,self.submit_var_value]]
+                    response = self.test_credentials(
+                        login_form,
+                        username_field_idx, password_field_idx,
+                        username, password
+                    )
 
-                        request = Request(
-                            self.current_request_url,
-                            method="POST",
-                            post_params=data
+                    if self.check_success_auth(response) and failure_text != response:
+                        vuln_message = _("Credentials found for URL {} : {}:{}").format(
+                            original_request.referer,
+                            username,
+                            password
                         )
 
-                        try:
-                            response = self.crawler.send(request, follow_redirects=True)
+                        # Recreate the request that succeed in order to print and store it
+                        post_params = login_form.post_params
+                        get_params = login_form.get_params
 
-                        except ReadTimeout:
-                            if timeouted:
-                                continue
-
-                            self.log_orange("---")
-                            self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
-                            self.log_orange(request.http_repr())
-                            self.log_orange("---")
-                            anom_msg = Anomaly.MSG_QS_TIMEOUT
-
-                            self.add_anom(
-                                request_id=original_request.path_id,
-                                category=Anomaly.RES_CONSUMPTION,
-                                level=Anomaly.MEDIUM_LEVEL,
-                                request=request,
-                                info=anom_msg,
-                                parameter=self.username_parameter_field[0]
-                            )
-
-                            timeouted = True
-
+                        if login_form.method == "POST":
+                            post_params[username_field_idx][1] = username
+                            post_params[password_field_idx][1] = password
                         else:
-                            if (self.check_success_auth(response.content)) and (response.content != false_response.content):
-                                self.add_vuln(
-                                    request_id=original_request.path_id,
-                                    category=Vulnerability.BASIC_AUT_BF,
-                                    level=Vulnerability.HIGH_LEVEL,
-                                    request=request,
-                                    parameter=self.username_parameter_field[0]
-                                )
+                            get_params[username_field_idx][1] = username
+                            get_params[password_field_idx][1] = password
 
-                                self.log_red("---")
-                                self.log_red(_("Credentials found on {}").format(self.current_request_url)),
-                                self.log_red(Vulnerability.MSG_EVIL_REQUEST)
-                                self.log_red(request.http_repr())
-                                self.log_red("---")
+                        evil_request = web.Request(
+                            path=login_form.url,
+                            method=login_form.method,
+                            post_params=post_params,
+                            get_params=get_params,
+                            referer=login_form.referer,
+                            link_depth=login_form.link_depth
+                        )
 
-                                # We reached maximum exploitation for this parameter, don't send more payloads
-                                # vulnerable_parameter : variable of wapiti
-                                _vulnerable_parameter = True
-                                return
+                        # TODO: I should check if a missing "parameter" entry may cause any trouble just to be 100% sure
+                        self.add_vuln(
+                            request_id=original_request.path_id,
+                            category=Vulnerability.BASIC_AUT_BF,
+                            level=Vulnerability.HIGH_LEVEL,
+                            request=evil_request,
+                            info=vuln_message
+                        )
+
+                        self.log_red("---")
+                        self.log_red(vuln_message),
+                        self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                        self.log_red(evil_request.http_repr())
+                        self.log_red("---")
+
+                        return
+
+            # Maybe but this one at the top
             yield original_request
