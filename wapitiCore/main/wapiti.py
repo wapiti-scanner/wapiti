@@ -197,7 +197,12 @@ class Wapiti:
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
         print("\t {0}".format(", ".join(modules_list)))
         for mod_name in attack.modules:
-            mod = import_module("wapitiCore.attack." + mod_name)
+            try:
+                mod = import_module("wapitiCore.attack." + mod_name)
+            except ModuleNotFoundError:
+                print(_("[!] Could not find module {0}").format(mod_name))
+                continue
+
             mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options)
             if hasattr(mod_instance, "set_timeout"):
                 mod_instance.set_timeout(self.crawler.timeout)

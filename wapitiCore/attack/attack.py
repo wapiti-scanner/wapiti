@@ -47,7 +47,6 @@ modules = [
     "mod_blindsql",
     "mod_permanentxss",
     "mod_nikto",
-    "mod_delay",
     "mod_buster",
     "mod_shellshock",
     "mod_methods",

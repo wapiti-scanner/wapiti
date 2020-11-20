@@ -257,7 +257,6 @@ class Request:
             self._port = 443
         self._headers = None
         self._start_time = None
-        self._duration = -1
         self._size = 0
         self._path_id = None
 
@@ -438,14 +437,6 @@ class Request:
     @size.setter
     def size(self, value: int):
         self._size = value
-
-    @property
-    def duration(self):
-        return self._duration
-
-    @duration.setter
-    def duration(self, value: float):
-        self._duration = value
 
     @property
     def status(self) -> int:

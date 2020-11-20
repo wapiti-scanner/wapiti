@@ -1396,8 +1396,6 @@ class Crawler:
         else:
             page = self.request(resource.method, resource, headers=headers, follow_redirects=follow_redirects)
 
-        resource.size = page.size
-        resource.duration = page.delay
         resource.status = page.status
         resource.set_headers(page.headers)
         return page
