@@ -43,6 +43,7 @@ modules = [
     "mod_sql",
     "mod_xss",
     "mod_backup",
+    "mod_brute_login_form",
     "mod_htaccess",
     "mod_blindsql",
     "mod_permanentxss",

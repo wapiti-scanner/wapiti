@@ -210,4 +210,18 @@
             </reference>
         </references>
     </vulnerability>
+     <vulnerability name="Weak credentials">
+        <description>Usage of weak and/or default credentials</description>
+        <solution text="Weak credentials solution" />
+        <references>
+            <reference>
+                <title>OWASP: Broken Authentication</title>
+                <url>https://owasp.org/www-project-top-ten/2017/A2_2017-Broken_Authentication</url>
+            </reference>
+            <reference>
+                <title><![CDATA[CWE-521: Weak Password Requirements]]></title>
+                <url>https://cwe.mitre.org/data/definitions/521.html</url>
+            </reference>
+        </references>
+    </vulnerability>
 </vulnerabilities>

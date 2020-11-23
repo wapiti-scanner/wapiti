@@ -798,6 +798,7 @@ class Page:
                 "text": "default",
                 "time": "13:37",
                 "url": "http://wapiti.sf.net/",
+                "username": "alice",
                 "week": "2019-W24"
             }
 
@@ -823,6 +824,9 @@ class Page:
                             "pwd" in input_field["name"] and autofill:
                         # Looks like a text field but waiting for a password
                         input_value = defaults["password"]
+                    elif input_type == "text" and "user" in input_field["name"] or \
+                            "login" in input_field["name"] and autofill:
+                        input_value = defaults["username"]
                     else:
                         input_value = input_field.get("value", defaults[input_type] if autofill else "")
 
