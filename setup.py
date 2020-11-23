@@ -102,15 +102,16 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "requests>=2.23.0",
-        "beautifulsoup4>=4.8.2",
+        "requests>=2.25.0",
+        "beautifulsoup4>=4.9.3",
         # parser_name,
-        "tld>=0.11.11",
+        "tld>=0.12.2",
         "yaswfp>=0.9.3",
         "mako>=1.1.2",
         "PySocks>=1.7.1",
         "markupsafe==1.1.1",
-        "six>=1.15.0"
+        "six>=1.15.0",
+        "importlib_metadata==2.0.0"
     ],
     extras_require={
         "NTLM": ["requests_ntlm"],
@@ -123,7 +124,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=5.4.1", "responses==0.10.6"],
+    tests_require=["pytest>=6.1.2", "responses==0.12.1"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )

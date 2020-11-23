@@ -87,7 +87,10 @@ class mod_nikto(Attack):
             reader = csv.reader(response.content.split("\n"), "nikto")
             self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
-            with open(os.path.join(self.persister.CRAWLER_DATA_DIR, self.NIKTO_DB), "w") as nikto_db_file:
+            with open(
+                    os.path.join(self.persister.CRAWLER_DATA_DIR, self.NIKTO_DB),
+                    "w", errors="ignore"
+            ) as nikto_db_file:
                 writer = csv.writer(nikto_db_file)
                 writer.writerows(self.nikto_db)
 
