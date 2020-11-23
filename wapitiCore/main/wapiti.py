@@ -199,7 +199,7 @@ class Wapiti:
         for mod_name in attack.modules:
             try:
                 mod = import_module("wapitiCore.attack." + mod_name)
-            except ModuleNotFoundError:
+            except ImportError:
                 print(_("[!] Could not find module {0}").format(mod_name))
                 continue
 

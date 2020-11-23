@@ -7,7 +7,6 @@
 ../attack/mod_crlf.py
 ../attack/mod_csp.py
 ../attack/mod_csrf.py
-../attack/mod_delay.py
 ../attack/mod_exec.py
 ../attack/mod_file.py
 ../attack/mod_htaccess.py
