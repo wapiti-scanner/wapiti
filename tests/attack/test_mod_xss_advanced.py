@@ -38,7 +38,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/xss/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65081", "-a", "-t", test_directory])
     sleep(.5)
     yield
     proc.terminate()
@@ -47,10 +47,10 @@ def run_around_tests():
 def test_title_false_positive():
     # We should fail at escaping the title tag and we should be aware of it
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/title_false_positive.php?title=yolo&fixed=yes")
+    request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo&fixed=yes")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -65,10 +65,10 @@ def test_title_false_positive():
 def test_title_positive():
     # We should succeed at escaping the title tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/title_false_positive.php?title=yolo")
+    request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -85,10 +85,10 @@ def test_title_positive():
 def test_script_filter_bypass():
     # We should succeed at bypass the <script filter
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/script_tag_filter.php?name=kenobi")
+    request = Request("http://127.0.0.1:65081/script_tag_filter.php?name=kenobi")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -105,10 +105,10 @@ def test_script_filter_bypass():
 def test_attr_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/attr_quote_escape.php?class=custom")
+    request = Request("http://127.0.0.1:65081/attr_quote_escape.php?class=custom")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -125,10 +125,10 @@ def test_attr_quote_escape():
 def test_attr_double_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/attr_double_quote_escape.php?class=custom")
+    request = Request("http://127.0.0.1:65081/attr_double_quote_escape.php?class=custom")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -145,10 +145,10 @@ def test_attr_double_quote_escape():
 def test_attr_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/attr_escape.php?state=checked")
+    request = Request("http://127.0.0.1:65081/attr_escape.php?state=checked")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -165,10 +165,10 @@ def test_attr_escape():
 def test_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/tag_name_escape.php?tag=textarea")
+    request = Request("http://127.0.0.1:65081/tag_name_escape.php?tag=textarea")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -185,10 +185,10 @@ def test_tag_name_escape():
 def test_partial_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/partial_tag_name_escape.php?importance=2")
+    request = Request("http://127.0.0.1:65081/partial_tag_name_escape.php?importance=2")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -204,10 +204,10 @@ def test_partial_tag_name_escape():
 
 def test_xss_inside_tag_input():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/input_text_strip_tags.php?uid=5")
+    request = Request("http://127.0.0.1:65081/input_text_strip_tags.php?uid=5")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -224,10 +224,10 @@ def test_xss_inside_tag_input():
 
 def test_xss_inside_tag_link():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/link_href_strip_tags.php?url=http://perdu.com/")
+    request = Request("http://127.0.0.1:65081/link_href_strip_tags.php?url=http://perdu.com/")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -244,10 +244,10 @@ def test_xss_inside_tag_link():
 
 def test_xss_uppercase_no_script():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/uppercase_no_script.php?name=obiwan")
+    request = Request("http://127.0.0.1:65081/uppercase_no_script.php?name=obiwan")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -264,10 +264,10 @@ def test_xss_uppercase_no_script():
 
 def test_frame_src_escape():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/frame_src_escape.php?url=https://wapiti.sourceforge.io/")
+    request = Request("http://127.0.0.1:65081/frame_src_escape.php?url=https://wapiti.sourceforge.io/")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -284,10 +284,10 @@ def test_frame_src_escape():
 
 def test_frame_src__no_escape():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/frame_src_no_escape.php?url=https://wapiti.sourceforge.io/")
+    request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti.sourceforge.io/")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
