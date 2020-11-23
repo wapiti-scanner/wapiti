@@ -210,21 +210,17 @@
             </reference>
         </references>
     </vulnerability>
-     <vulnerability name="Basic Authentication Brute Force">
-        <description>Basic Authentication Brute Force description</description>
-        <solution text="Basic Authentication Brute Force solution" />
+     <vulnerability name="Weak credentials">
+        <description>Usage of weak and/or default credentials</description>
+        <solution text="Weak credentials solution" />
         <references>
             <reference>
-                <title>https://owasp.org/www-community/attacks/Brute_force_attack</title>
-                <url>https://owasp.org/www-community/attacks/Brute_force_attack</url>
+                <title>OWASP: Broken Authentication</title>
+                <url>https://owasp.org/www-project-top-ten/2017/A2_2017-Broken_Authentication</url>
             </reference>
             <reference>
-                <title>https://www.imperva.com/learn/application-security/brute-force-attack/</title>
-                <url>https://www.imperva.com/learn/application-security/brute-force-attack/</url>
-            </reference>
-            <reference>
-                <title><![CDATA[CWE-307: Improper Restriction of Excessive Authentication Attempts('Brute Force Auth')]]></title>
-                <url>https://cwe.mitre.org/data/definitions/307.html</url>
+                <title><![CDATA[CWE-521: Weak Password Requirements]]></title>
+                <url>https://cwe.mitre.org/data/definitions/521.html</url>
             </reference>
         </references>
     </vulnerability>

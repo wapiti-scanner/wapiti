@@ -1,6 +1,6 @@
 ../attack/attack.py
 ../attack/mod_backup.py
-../attack/mod_basic_auth_bf.py
+../attack/mod_brute_login_form.py
 ../attack/mod_blindsql.py
 ../attack/mod_buster.py
 ../attack/mod_cookieflags.py

@@ -1,4 +1,9 @@
+# This module can help to quickly find weak or default credentials in a web application.
+# You should not rely on this module for performance or fine-tuned brute force attack.
+# Using well-known tools like Hydra, Patator, Wfuzz or other tools supporting parallelism is recommended.
+# This module may be handy for CTF though.
 from os.path import join as path_join
+from itertools import product, chain
 
 from requests.exceptions import ReadTimeout
 
@@ -9,42 +14,33 @@ from wapitiCore.net import web
 
 
 class mod_brute_login_form(Attack):
-    time_to_sleep = ''
+    """Performs brute force attack on login forms, testing for known weak usernames and passwords."""
     name = "brute_login_form"
-    payloads_username = []
-    payloads_password = []
     PAYLOADS_FILE = "passwords.txt"
     PAYLOADS_FILE_USER = "users.txt"
     PAYLOADS_SUCCESS = "successMessage.txt"
     PAYLOADS_FAIL = "incorrectMessage.txt"
-    MSG_VULN = _("Brute force attack success")
-    current_request_url = None
-    current_request_method = None
-    password_parameter = []
-    username_parameter_field = []
-    submit_var_name = None
-    submit_var_value = None
 
-    def set_timeout(self, timeout):
-        self.time_to_sleep = str(1 + int(timeout))
+    do_get = False
+    do_post = False
 
     def check_success_auth(self, content_response: str):
-        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_SUCCESS), 'r', errors='ignore') as success_pattern_file:
+        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_SUCCESS), errors="ignore") as success_pattern_file:
             for success_pattern in success_pattern_file:
-                if success_pattern.strip("\n") in content_response:
+                if success_pattern.strip() in content_response:
                     return True
 
         return False
 
     def get_usernames(self):
-        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE_USER), 'r', errors='ignore') as username_file:
+        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE_USER), errors="ignore") as username_file:
             for line in username_file:
                 username = line.strip()
                 if username:
                     yield username
 
     def get_passwords(self):
-        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE), 'r', errors='ignore') as password_file:
+        with open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE), errors="ignore") as password_file:
             for line in password_file:
                 password = line.strip()
                 if password:
@@ -77,20 +73,24 @@ class mod_brute_login_form(Attack):
             )
         except ReadTimeout:
             return ""
+
         return login_response.content
 
     def attack(self):
-        # TODO: do GET requests too and don't forget to yield for each tried resource!
+        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
         forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
 
-        for original_request in forms:
+        for original_request in chain(http_resources, forms):
             # We leverage the fact that the crawler will fill password entries with a known placeholder
-            if "Letm3in_" not in original_request.encoded_data:
+            if "Letm3in_" not in (original_request.encoded_data + original_request.encoded_params):
                 continue
 
             # We may want to remove this but if not available fallback to target URL
             if not original_request.referer:
                 continue
+
+            if self.verbose >= 1:
+                print("[+] {}".format(original_request))
 
             request = Request(original_request.referer)
             page = self.crawler.get(request, follow_redirects=True)
@@ -109,58 +109,54 @@ class mod_brute_login_form(Attack):
                 # Ignore this case as it raise false positives
                 continue
 
-            for username in self.get_usernames():
-                for password in self.get_passwords():
+            for username, password in product(self.get_usernames(), self.get_passwords()):
+                response = self.test_credentials(
+                    login_form,
+                    username_field_idx, password_field_idx,
+                    username, password
+                )
 
-                    response = self.test_credentials(
-                        login_form,
-                        username_field_idx, password_field_idx,
-                        username, password
+                if self.check_success_auth(response) and failure_text != response:
+                    vuln_message = _("Credentials found for URL {} : {} / {}").format(
+                        original_request.referer,
+                        username,
+                        password
                     )
 
-                    if self.check_success_auth(response) and failure_text != response:
-                        vuln_message = _("Credentials found for URL {} : {}:{}").format(
-                            original_request.referer,
-                            username,
-                            password
-                        )
+                    # Recreate the request that succeed in order to print and store it
+                    post_params = login_form.post_params
+                    get_params = login_form.get_params
 
-                        # Recreate the request that succeed in order to print and store it
-                        post_params = login_form.post_params
-                        get_params = login_form.get_params
+                    if login_form.method == "POST":
+                        post_params[username_field_idx][1] = username
+                        post_params[password_field_idx][1] = password
+                    else:
+                        get_params[username_field_idx][1] = username
+                        get_params[password_field_idx][1] = password
 
-                        if login_form.method == "POST":
-                            post_params[username_field_idx][1] = username
-                            post_params[password_field_idx][1] = password
-                        else:
-                            get_params[username_field_idx][1] = username
-                            get_params[password_field_idx][1] = password
+                    evil_request = web.Request(
+                        path=login_form.url,
+                        method=login_form.method,
+                        post_params=post_params,
+                        get_params=get_params,
+                        referer=login_form.referer,
+                        link_depth=login_form.link_depth
+                    )
 
-                        evil_request = web.Request(
-                            path=login_form.url,
-                            method=login_form.method,
-                            post_params=post_params,
-                            get_params=get_params,
-                            referer=login_form.referer,
-                            link_depth=login_form.link_depth
-                        )
+                    self.add_vuln(
+                        request_id=original_request.path_id,
+                        category=Vulnerability.WEAK_CREDENTIALS,
+                        level=Vulnerability.HIGH_LEVEL,
+                        request=evil_request,
+                        info=vuln_message
+                    )
 
-                        # TODO: I should check if a missing "parameter" entry may cause any trouble just to be 100% sure
-                        self.add_vuln(
-                            request_id=original_request.path_id,
-                            category=Vulnerability.BASIC_AUT_BF,
-                            level=Vulnerability.HIGH_LEVEL,
-                            request=evil_request,
-                            info=vuln_message
-                        )
+                    self.log_red("---")
+                    self.log_red(vuln_message),
+                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                    self.log_red(evil_request.http_repr())
+                    self.log_red("---")
 
-                        self.log_red("---")
-                        self.log_red(vuln_message),
-                        self.log_red(Vulnerability.MSG_EVIL_REQUEST)
-                        self.log_red(evil_request.http_repr())
-                        self.log_red("---")
+                    break
 
-                        return
-
-            # Maybe but this one at the top
             yield original_request
