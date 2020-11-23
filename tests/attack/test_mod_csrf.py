@@ -39,7 +39,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/csrf/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65086", "-a", "-t", test_directory])
     sleep(.5)
     yield
     proc.terminate()
@@ -48,12 +48,12 @@ def run_around_tests():
 def test_csrf_cases():
     persister = FakePersister()
 
-    request = Request("http://127.0.0.1:65080/")
+    request = Request("http://127.0.0.1:65086/")
     request.path_id = 1
     persister.requests.append(request)
 
     request = Request(
-        "http://127.0.0.1:65080/",
+        "http://127.0.0.1:65086/",
         method="POST",
         post_params=[["email", "wapiti2020@mailinator.com"], ["xsrf_token", "weak"]],
     )
@@ -61,7 +61,7 @@ def test_csrf_cases():
     persister.requests.append(request)
 
     request = Request(
-        "http://127.0.0.1:65080/?check=true",
+        "http://127.0.0.1:65086/?check=true",
         method="POST",
         post_params=[["email", "wapiti2020@mailinator.com"], ["xsrf_token", "weak"]],
     )
@@ -69,14 +69,14 @@ def test_csrf_cases():
     persister.requests.append(request)
 
     request = Request(
-        "http://127.0.0.1:65080/?check=true",
+        "http://127.0.0.1:65086/?check=true",
         method="POST",
         post_params=[["name", "Obiwan"]],
     )
     request.path_id = 4
     persister.requests.append(request)
 
-    crawler = Crawler("http://127.0.0.1:65080/", timeout=1)
+    crawler = Crawler("http://127.0.0.1:65086/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 

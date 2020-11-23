@@ -38,7 +38,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65085", "-a", "-t", test_directory])
     sleep(.5)
     yield
     proc.terminate()
@@ -47,10 +47,10 @@ def run_around_tests():
 def test_inclusion_detection():
     # Will also test false positive detection
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/inclusion.php?yolo=nawak&f=toto")
+    request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -64,10 +64,10 @@ def test_inclusion_detection():
 
 def test_warning_false_positive():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/inclusion.php?yolo=warn&f=toto")
+    request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -82,19 +82,19 @@ def test_warning_false_positive():
 def test_no_crash():
     persister = FakePersister()
 
-    request = Request("http://127.0.0.1:65080/empty.html")
+    request = Request("http://127.0.0.1:65085/empty.html")
     request.path_id = 1
     persister.requests.append(request)
 
     request = Request(
-        "http://127.0.0.1:65080/empty.html?foo=bar",
+        "http://127.0.0.1:65085/empty.html?foo=bar",
         post_params=[["x", "y"]],
         file_params=[["file", ["fname", "content"]]]
     )
     request.path_id = 2
     persister.requests.append(request)
 
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 

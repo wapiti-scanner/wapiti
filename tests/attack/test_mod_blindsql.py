@@ -41,7 +41,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65082", "-a", "-t", test_directory])
     sleep(.5)
     yield
     proc.terminate()
@@ -51,10 +51,10 @@ def test_blindsql_detection():
     # It looks like php -S has serious limitations
     # so PHP script should wait a minimum amount of time for the test to succeed
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/blind_sql.php?foo=bar&vuln1=hello%20there")
+    request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/", timeout=1)
+    crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
@@ -70,10 +70,10 @@ def test_blindsql_detection():
 
 def test_blindsql_false_positive():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/blind_sql.php?vuln2=hello%20there")
+    request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/", timeout=1)
+    crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 

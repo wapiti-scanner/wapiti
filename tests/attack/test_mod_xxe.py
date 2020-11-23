@@ -57,7 +57,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65084", "-a", "-t", test_directory])
     sleep(.5)
     yield
     proc.terminate()
@@ -66,13 +66,13 @@ def run_around_tests():
 def test_direct_body():
     persister = FakePersister()
     request = Request(
-        "http://127.0.0.1:65080/xxe/direct/body.php",
+        "http://127.0.0.1:65084/xxe/direct/body.php",
         method="POST",
         post_params=[["placeholder", "yolo"]]
     )
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
@@ -89,10 +89,10 @@ def test_direct_body():
 def test_direct_param():
     # check for false positives too
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/xxe/direct/param.php?foo=bar&vuln=yolo")
+    request = Request("http://127.0.0.1:65084/xxe/direct/param.php?foo=bar&vuln=yolo")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
@@ -107,10 +107,10 @@ def test_direct_param():
 
 def test_direct_query_string():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/xxe/direct/qs.php")
+    request = Request("http://127.0.0.1:65084/xxe/direct/qs.php")
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -126,7 +126,7 @@ def test_direct_query_string():
 def test_direct_upload():
     persister = FakePersister()
     request = Request(
-        "http://127.0.0.1:65080/xxe/direct/upload.php",
+        "http://127.0.0.1:65084/xxe/direct/upload.php",
         file_params=[
             ["foo", ["bar.xml", "<xml>test</xml>"]],
             ["calendar", ["calendar.xml", "<xml>test</xml>"]]
@@ -134,7 +134,7 @@ def test_direct_upload():
     )
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
@@ -151,13 +151,13 @@ def test_direct_upload():
 def test_out_of_band_body():
     persister = FakePersister()
     request = Request(
-        "http://127.0.0.1:65080/xxe/outofband/body.php",
+        "http://127.0.0.1:65084/xxe/outofband/body.php",
         method="POST",
         post_params=[["placeholder", "yolo"]]
     )
     request.path_id = 42
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
         "level": 1,
@@ -200,10 +200,10 @@ def test_out_of_band_body():
 @responses.activate
 def test_out_of_band_param():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/xxe/outofband/param.php?foo=bar&vuln=yolo")
+    request = Request("http://127.0.0.1:65084/xxe/outofband/param.php?foo=bar&vuln=yolo")
     request.path_id = 7
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
         "level": 1,
@@ -246,10 +246,10 @@ def test_out_of_band_param():
 @responses.activate
 def test_out_of_band_query_string():
     persister = FakePersister()
-    request = Request("http://127.0.0.1:65080/xxe/outofband/qs.php")
+    request = Request("http://127.0.0.1:65084/xxe/outofband/qs.php")
     request.path_id = 4
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
         "level": 2,
@@ -292,7 +292,7 @@ def test_out_of_band_query_string():
 def test_direct_upload():
     persister = FakePersister()
     request = Request(
-        "http://127.0.0.1:65080/xxe/outofband/upload.php",
+        "http://127.0.0.1:65084/xxe/outofband/upload.php",
         file_params=[
             ["foo", ["bar.xml", "<xml>test</xml>"]],
             ["calendar", ["calendar.xml", "<xml>test</xml>"]]
@@ -300,7 +300,7 @@ def test_direct_upload():
     )
     request.path_id = 8
     persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = Crawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
         "level": 1,
