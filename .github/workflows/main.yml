@@ -20,7 +20,7 @@ jobs:
           pip install pylint
       - name: Pylint
         run: |
-          pylint --rcfile=.pylintrc *.py wapitiCore tests
+          pylint --rcfile=.pylintrc *.py wapitiCore
 
   build:
     runs-on: ubuntu-latest
