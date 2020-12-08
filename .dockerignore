@@ -1,0 +1,6 @@
+.git/
+.eggs/
+.github/
+.pytest_cache/
+*.egg-info/
+*.egg
