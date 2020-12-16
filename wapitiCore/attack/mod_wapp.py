@@ -79,7 +79,10 @@ class mod_wapp(Attack):
                     level=Additional.LOW_LEVEL,
                     request=request,
                     info="{0} {1}".format(application_name,
-                                          detected_applications[application_name]["versions"][0])
+                                          detected_applications[application_name]["versions"][0]),
+                    app_name=application_name,
+                    app_version=detected_applications[application_name]["versions"][0],
+                    app_categorie=detected_applications[application_name]["categories"][0]
                     )
             else:
                 self.log_blue(Additional.MSG_TECHNO, application_name)

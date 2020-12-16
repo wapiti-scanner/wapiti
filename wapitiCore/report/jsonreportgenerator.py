@@ -134,7 +134,10 @@ class JSONReportGenerator(ReportGenerator):
             "level": level,
             "parameter": parameter,
             "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr
+            "curl_command": request.curl_repr,
+            "app_name": "",
+            "app_version": "",
+            "app_categorie": ""
         }
         if category not in self._additionals:
             self._additionals[category] = []

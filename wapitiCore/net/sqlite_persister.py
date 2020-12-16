@@ -130,7 +130,10 @@ class SqlitePersister:
                     level INTEGER,
                     parameter TEXT,
                     info TEXT,
-                    type TEXT
+                    type TEXT,
+                    app_name TEXT,
+                    app_version TEXT,
+                    app_categorie TEXT
                 )"""
             )
 
@@ -342,7 +345,7 @@ class SqlitePersister:
         return False
 
     def add_payload(
-            self, request_id: int, payload_type: str, category=None, level=0, request=None, parameter="", info=""):
+            self, request_id: int, payload_type: str, category=None, level=0, request=None, parameter="", info="", app_name="", app_version="", app_categorie=""):
         cursor = self._conn.cursor()
 
         cursor.execute(
@@ -395,12 +398,12 @@ class SqlitePersister:
 
         # request_id is the ID of the original (legit) request
         cursor.execute(
-            "INSERT INTO payloads VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (path_id, request_id, category, level, parameter, info, payload_type)
+            "INSERT INTO payloads VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (path_id, request_id, category, level, parameter, info, payload_type, app_name, app_version, app_categorie)
         )
         self._conn.commit()
 
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info="", app_name="", app_version="", app_categorie=""):
         self.add_payload(
             request_id,
             "additional",
@@ -408,7 +411,10 @@ class SqlitePersister:
             level,
             request,
             parameter,
-            info
+            info,
+            app_name,
+            app_version,
+            app_categorie
         )
 
     def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
@@ -501,7 +507,7 @@ class SqlitePersister:
         cursor.execute("SELECT * FROM payloads")
 
         for row in cursor.fetchall():
-            evil_id, original_id, category, level, parameter, info, payload_type = row
+            evil_id, original_id, category, level, parameter, info, app_name, app_version, app_categorie, payload_type = row
 
             evil_request = self.get_path_by_id(evil_id)
             original_request = self.get_path_by_id(original_id)
