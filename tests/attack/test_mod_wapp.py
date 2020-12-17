@@ -97,7 +97,7 @@ def test_url_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[2] == "Outlook Web App"
+    assert persister.additionals[2] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
 
 
 @responses.activate
@@ -106,10 +106,9 @@ def test_html_detection():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+        body="<html><head><title>FishEye 2.8.4</title> \
+        </head><body><h1>Perdu sur l'Internet ?</h1> \
         <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        <title>Powered by <a href=\"http://atlassian.com/software/confluence\">Atlassian Confluence</a> 2.8.4</p> \
         </body></html>"
     )
 
@@ -130,7 +129,7 @@ def test_html_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "Atlassian Confluence 2.8.4"
+    assert persister.additionals[0] == '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
 
 
 @responses.activate
@@ -163,7 +162,7 @@ def test_script_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "Chart.js 1.4.2"
+    assert persister.additionals[0] == '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
 
 
 @responses.activate
@@ -196,7 +195,7 @@ def test_cookies_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "CodeIgniter 2+"
+    assert persister.additionals[0] == '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
 
 
 @responses.activate
@@ -229,7 +228,7 @@ def test_headers_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "Cherokee 1.3.4"
+    assert persister.additionals[0] == '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
 
 
 @responses.activate
@@ -263,7 +262,7 @@ def test_meta_detection():
         pass
 
     assert persister.additionals
-    assert persister.additionals[0] == "Planet 1.6.2"
+    assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
 
 
 @responses.activate
@@ -296,5 +295,5 @@ def test_implies_detection():
         pass
 
     assert persister.additionals
-    assert "Backdrop 4.5" in persister.additionals
-    assert "PHP" in persister.additionals
+    assert '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}' == persister.additionals[0]
+    assert '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}' == persister.additionals[1]

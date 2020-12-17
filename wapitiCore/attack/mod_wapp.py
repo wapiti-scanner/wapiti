@@ -70,24 +70,12 @@ class mod_wapp(Attack):
             self.log_blue("---")
 
         for application_name in sorted(detected_applications, key=lambda x: x.lower()):
-            if len(detected_applications[application_name]["versions"]) > 0:
                 self.log_blue(Additional.MSG_TECHNO_VERSIONED, application_name,
-                              detected_applications[application_name]["versions"][0])
-
+                              detected_applications[application_name]["versions"])
                 self.add_addition(
                     category=Additional.TECHNO_DETECTED,
                     level=Additional.LOW_LEVEL,
                     request=request,
-                    info="{0} {1}".format(application_name,
-                                          detected_applications[application_name]["versions"][0])
-                    )
-            else:
-                self.log_blue(Additional.MSG_TECHNO, application_name)
-
-                self.add_addition(
-                    category=Additional.TECHNO_DETECTED,
-                    level=Additional.LOW_LEVEL,
-                    request=request,
-                    info=application_name
+                    info=json.dumps(detected_applications[application_name])
                     )
         yield
