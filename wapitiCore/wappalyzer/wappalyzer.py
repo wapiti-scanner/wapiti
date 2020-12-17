@@ -347,6 +347,7 @@ class Wappalyzer:
         versioned_and_categorised_applications = versioned_applications
 
         for application_name in versioned_applications:
+            versioned_and_categorised_applications[application_name]["name"] = application_name
             category_names = self.get_categories(application_name)
             versioned_and_categorised_applications[application_name]["categories"] = category_names
 
