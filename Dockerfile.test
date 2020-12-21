@@ -1,4 +1,4 @@
-FROM python:3.5
+FROM python:3.6
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 RUN apt-get install php7.3-cli php7.3-xml -y

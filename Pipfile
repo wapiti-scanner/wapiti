@@ -18,4 +18,4 @@ yaswfp = ">=0.9.3"
 six = ">=1.15.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

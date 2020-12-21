@@ -7,7 +7,7 @@ Requirements
 ============
 In order to work correctly, Wapiti needs :
 
-+ Python 3.x where x is >= 5 (3.5, 3.6, 3.7...)
++ Python 3.x where x is >= 6 (3.6, 3.7, 3.8...)
 + python-requests ( http://docs.python-requests.org/en/latest/ )
 + BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
 + yaswfp ( https://github.com/facundobatista/yaswfp )
