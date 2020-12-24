@@ -74,22 +74,20 @@
 
                     % for j, vulnerability in enumerate(vulnerabilities[vuln_name]):
                         <h4>Vulnerability found in ${vulnerability["path"] | h}</h4>
-                        <nav class="tabs" data-component="tabs" data-equals="true" data-height="equal">
-                            <ul>
-                                <li class="active"><a href="#tab-vuln-${i}-${j}-1">Description</a></li>
-                                <li><a href="#tab-vuln-${i}-${j}-2">HTTP Request</a></li>
-                                <li><a href="#tab-vuln-${i}-${j}-3">cURL command line</a></li>
-                            </ul>
+                        <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
+                            <a href="#tab-vuln-${i}-${j}-1" class="is-active">Description</a>
+                            <a href="#tab-vuln-${i}-${j}-2">HTTP Request</a>
+                            <a href="#tab-vuln-${i}-${j}-3">cURL command line</a>
                         </nav>
-                        <div id="tab-vuln-${i}-${j}-1" style="min-height: 124px;">
+                        <section id="tab-vuln-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${vulnerability["info"] | h}</pre>
-                        </div>
-                        <div id="tab-vuln-${i}-${j}-2" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-vuln-${i}-${j}-2" style="min-height: 124px;" class="is-hidden">
                             <pre>${vulnerability["http_request"] | h}</pre>
-                        </div>
-                        <div id="tab-vuln-${i}-${j}-3" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-vuln-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${vulnerability["curl_command"] | h}</pre>
-                        </div>
+                        </section>
                     % endfor
 
                 <dl><dt>Solutions</dt><dd>${flaws[vuln_name]["sol"]}</dd></dl>
@@ -113,22 +111,20 @@
 
                     % for j, anomaly in enumerate(anomalies[anomaly_name]):
                         <h4>Anomaly found in ${anomaly["path"] | h}</h4>
-                        <nav class="tabs" data-component="tabs" data-equals="true">
-                            <ul>
-                                <li class="active"><a href="#tab-anom-${i}-${j}-1">Description</a></li>
-                                <li><a href="#tab-anom-${i}-${j}-2">HTTP Request</a></li>
-                                <li><a href="#tab-anom-${i}-${j}-3">cURL command line</a></li>
-                            </ul>
+                        <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
+                            <a href="#tab-anom-${i}-${j}-1" class="is-active">Description</a>
+                            <a href="#tab-anom-${i}-${j}-2">HTTP Request</a>
+                            <a href="#tab-anom-${i}-${j}-3">cURL command line</a>
                         </nav>
-                        <div id="tab-anom-${i}-${j}-1" style="min-height: 124px;">
+                        <section id="tab-anom-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${anomaly["info"] | h}</pre>
-                        </div>
-                        <div id="tab-anom-${i}-${j}-2" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-anom-${i}-${j}-2" style="min-height: 124px;" class="is-hidden">
                             <pre>${anomaly["http_request"] | h}</pre>
-                        </div>
-                        <div id="tab-anom-${i}-${j}-3" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-anom-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${anomaly["curl_command"] | h}</pre>
-                        </div>
+                        </section>
                     % endfor
 
                 <dl><dt>Solutions</dt><dd>${flaws[anomaly_name]["sol"]}</dd></dl>
@@ -152,22 +148,20 @@
 
                     % for j, additional in enumerate(additionals[additional_name]):
                         <h4>Additional found in ${additional["path"] | h}</h4>
-                        <nav class="tabs" data-component="tabs" data-equals="true">
-                            <ul>
-                                <li class="active"><a href="#tab-addition-${i}-${j}-1">Description</a></li>
-                                <li><a href="#tab-addition-${i}-${j}-2">HTTP Request</a></li>
-                                <li><a href="#tab-addition-${i}-${j}-3">cURL command line</a></li>
-                            </ul>
+                        <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
+                            <a href="#tab-addition-${i}-${j}-1" class="is-active">Description</a>
+                            <a href="#tab-addition-${i}-${j}-2">HTTP Request</a>
+                            <a href="#tab-addition-${i}-${j}-3">cURL command line</a>
                         </nav>
-                        <div id="tab-addition-${i}-${j}-1" style="min-height: 124px;">
+                        <section id="tab-addition-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${additional["info"] | h}</pre>
-                        </div>
-                        <div id="tab-addition-${i}-${j}-2" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-addition-${i}-${j}-2" style="min-height: 124px;" class="is-hidden">
                             <pre>${additional["http_request"] | h}</pre>
-                        </div>
-                        <div id="tab-addition-${i}-${j}-3" style="min-height: 124px;">
+                        </section>
+                        <section id="tab-addition-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${additional["curl_command"] | h}</pre>
-                        </div>
+                        </section>
                     % endfor
                 <dl><dt>Solutions</dt><dd>${flaws[additional_name]["sol"]}</dd></dl>
                 <h5>References</h5>
@@ -181,9 +175,9 @@
                 % endif
             % endfor
         </div>
-        <footer class="small" id="footer"><a href="https://wapiti.sourceforge.io/" id="wapiti_link">${wapiti_version}</a> &copy; Nicolas SURRIBAS 2006-2020</footer>
+        <footer class="small" id="footer"><a href="https://wapiti.sourceforge.io/" id="wapiti_link">${wapiti_version}</a> &copy; Nicolas SURRIBAS 2006-2021</footer>
 	</div>
-    <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="js/kube.min.js"></script>
+    <script>$K.init();</script>
 </body>
 </html>

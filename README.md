@@ -166,8 +166,7 @@ Wapiti comes with :
 
 + a modified version of PyNarcissus (MPL 1.1 License),
   see https://github.com/jtolds/pynarcissus
-+ Kube CSS framework ( see http://imperavi.com/kube/ ) and jQuery
-  for HTML report generation.
++ Kube CSS framework ( see http://kube7.imperavi.com/ ) for HTML report generation.
 
 Licensing
 =========
