@@ -267,6 +267,252 @@ def test_non_executable_context():
     ]
 
 
+def test_get_context_bug():
+    # From a webpage that caused bugs
+    html = """<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="publisher" content=" ">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="msvalidate.01" content="" />
+    <title>yolo GmbH</title>
+    <link rel="canonical" href="https://shop.yolo.com">
+    <link rel="alternate" href="https://shop.yolo.com" hreflang="de" />
+    <base href="https://shop.yolo.com/">
+    <link href="https://shop.yolo.com/favicon.ico" rel="shortcut icon">
+</head>
+
+<body>
+    <div id="header">
+        <div id="header_container">
+            <div class="top_header">
+                <a href='shop.php?SessID=id' id='logo' title='Startseite'>
+                    <img src='benutzerdaten/400529/shop/layout/headline.png?1609952588' class='mobile_show'></a>
+                <ul class='top_navi mobile_hide' style='width:100%'>
+                    <li><a class='popup_toggle  ' href="index.php?page=AGB&amp;SessID=id">AGB</a></li>
+                    <li><a class='popup_toggle  ' href="index.php?page=Shop&amp;SessID=id">Shop</a></li>
+                </ul>
+                <div class='top_navi_lang mobile_hide' style='display:none;'>
+                    <div id='sprachauswahl'><span class='bold'>Sprache:&nbsp;&nbsp;</span>
+                        <div class='placeholder'>
+                            <a href="javascript:void(0);" class="click_toggle">deutsch</a>
+                            <div class="click_div slide_down popup">
+                                <a class="active" href='/ad.php?SessID=id&redirect_searchstring=zozo&do=changelanguage'>
+                                    <img src='images/flaggen/de.png' target='_top' /><span>deutsch</span></a>
+                                <a href='/ad.php?SessID=id&redirect_searchstring=zozo&do=changelanguage'>i
+<img src='images/flaggen/en.png' target='_top' /><span>englisch</span></a>
+                                <a href='/administration.php?SessID=id&redirect_searchstring=zozo&do=changelanguage'>
+                                    <img src='images/flaggen/pl.png' target='_top' /><span>polnisch</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+    <div id='wrapper'>
+        <div id="column_center" class="column_center content_container hide_both">
+
+            <div class='loginTypes row flex-stretch'>
+                <div class='col-12 col-lg-6'>
+                    <form action=administration.php method=post class='styledForm'>
+                        <input type=hidden name=SessID value=id>
+                        <input type=hidden name=action value=login>
+                        <input type=hidden name=redirect value=search3>
+                        <input type=hidden name=redirect_searchstring value="zozo">
+                    </form>
+                </div>
+                <div class='col-12 col-lg-6 flex-space-between'>
+                    <div class='contentBlock'>
+                        <div class='row header'>Neuer Kunde
+                            <div class='headerIcon'><i id='openTextNewCustomer' class="fa fa-info-circle"></i></div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-full'>
+<input onClick="javascript:location.href = 'n.php?SessID=id&redirect_searchstring=zozo';"
+ class='large' type=button value='Plop'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <div class='template_footer' style='max-width:none;'>
+        <div class='footer-content'>
+            <div class='template_footer_row'>
+                <ul class='template_footer_container'>
+                    <span class='template_footer_head'><div class='user_content'>Rechtliches</div></span>
+                    <div id='sprachauswahl'><span class='bold'>Sprache:&nbsp;&nbsp;</span>
+                        <div class='placeholder'>
+                            <a href="javascript:void(0);" class="click_toggle">deutsch</a>
+                            <div class="click_div slide_down popup">
+                                <a class="active" href='/ad.php?SessID=id&redirect_searchstring=zozo&do=changelanguage'>
+                                    <img src='images/flaggen/de.png' target='_top' /><span>deutsch</span></a>
+                                <a href='/administration.php?SessID=id&redirect_searchstring=zozo&do=changelanguage'>
+                                    <img src='images/flaggen/en.png' target='_top' /><span>englisch</span></a>
+                                <a href='/administration.php?SessID=id&&redirect_searchstring=zozo&do=changelanguage'>
+                                    <img src='images/flaggen/pl.png' target='_top' /><span>polnisch</span></a>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            </ul>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>"""
+    assert get_context_list(html, "zozo") == [
+        {
+            'events': set(),
+            'name': 'href',
+            'non_exec_parent': '',
+            'separator': "'",
+            'special_attributes': {'href'},
+            'tag': 'a',
+            'type': 'attrval'
+        },
+        {
+            'events': set(),
+            'name': 'value',
+            'non_exec_parent': '',
+            'separator': '"',
+            'special_attributes': {'type=hidden'},
+            'tag': 'input',
+            'type': 'attrval'
+        },
+        {
+            'events': {'onclick'},
+            'name': 'onclick',
+            'non_exec_parent': '',
+            'separator': '"',
+            'special_attributes': {'type=button'},
+            'tag': 'input',
+            'type': 'attrval'
+        }
+    ]
+
+
+def test_get_context_bug_2():
+    html = """<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="lt" lang="lt">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Yolo.lt</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1">
+    <meta name="keywords" content="" />
+    <meta name="description" content="Yolo.lt" />
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+
+    <meta property="og:title" content="Yolo.lt" />
+    <meta property="og:site_name" content="Yolo.lt" />
+    <meta property="og:description" content="Yolo.lt" />
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="lt_LT" />
+    <meta property="og:url" content="https://yolo/?q=zozo&dispatch=products.search%2F" />
+
+    <link rel="shortcut icon" type="image/x-icon" href="https://yolo/styles/plop/images/favicon.ico" />
+    <base href="https://yolo/" />
+
+    <!--[if lt IE 9]>
+<script type="text/javascript" src="https://yolo/js/pie-1.0b4/pie.js" defer="defer"></script>
+<![endif]-->
+    <!--[if lt IE 7]>
+<link rel="stylesheet" href="https://yolo/styles/common/iefix_lt7.css" type="text/css" media="all" />
+<link rel="stylesheet" href="https://yolo/styles/plop/css/iefix_lt7.css" type="text/css" media="all" />
+<![endif]-->
+    <!--[if gte IE 7]>
+<link rel="stylesheet" href="https://yolo/styles/common/iefix_gte7.css" type="text/css" media="all" />
+<link rel="stylesheet" href="https://yolo/styles/plop/css/iefix_gte7.css" type="text/css" media="all" />
+<![endif]-->
+
+    <script src="https://yolo/js/min/js_default_03648614_2359bbe0_b08282d9.php" type="text/javascript"></script>
+    <link rel="alternate" hreflang="en" href="https://yolo/en/?q=zozo&dispatch=products.search%2F" />
+    <link rel="alternate" hreflang="ru" href="https://yolo/ru/?q=zozo&dispatch=products.search%2F" />
+    <link rel="alternate" hreflang="lv" href="https://yolo/lv/?q=zozo&dispatch=products.search%2F" />
+    <link rel="alternate" hreflang="ee" href="https://yolo/ee/?q=zozo&dispatch=products.search%2F" />
+</head>
+
+<body id="template_body_col_1" class="body_col_1 body_col_1_lt b0 page-index main index" data-base-currency='EUR'>
+    <div id="awholder">
+        <div id="content-wrap">
+            <div id="header-wrap" class="content-wrap">
+                <div id="header" class="container_60">
+                    <a id="logo" class="a0" href="https://yolo/" title="Elektroninė parduotuvė">
+                        <picture>
+                            <source type="image/webp" srcset="https://yolo/styles/plop/images/logo.png.webp">
+                            <source type="image/png" srcset="https://yolo/styles/plop/images/logo.png">
+                            <img src="https://yolo/styles/plop/images/logo.png"  alt="Yolo.lt" />
+                        </picture>
+                    </a>
+                    <div id="shop-slogan" class="hidden-xs hidden-sm">
+                    </div>
+
+                    <div id="main-search" class="hidden-xs">
+                        <form action="https://yolo/paieska" method="get" id="main_search_form">
+                            <input id="main" class="fl input" type="text" name="q" value="zozo" placeholder="zozo" />
+                            <div id="search-suggestion" class="search-suggestion dnn bg0 p5"></div>
+                            <a id="main-search-submit" href="javascript:;"><span>Truc</span></a>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>"""
+    assert get_context_list(html, "zozo") == [
+        {
+            'events': set(),
+            'name': 'content',
+            'non_exec_parent': '',
+            'separator': '"',
+            'tag': 'meta',
+            'type': 'attrval'
+        },
+        {
+            'events': set(),
+            'name': 'href',
+            'non_exec_parent': '',
+            'separator': '"',
+            'special_attributes': {'href', 'rel=alternate'},
+            'tag': 'link',
+            'type': 'attrval'
+        },
+        {
+            'events': set(),
+            'name': 'value',
+            'non_exec_parent': '',
+            'separator': '"',
+            'special_attributes': {'type=text'},
+            'tag': 'input',
+            'type': 'attrval'
+        },
+        {
+            'events': set(),
+            'name': 'placeholder',
+            'non_exec_parent': '',
+            'separator': '"',
+            'special_attributes': {'type=text'},
+            'tag': 'input',
+            'type': 'attrval'
+        }
+    ]
+
+
 @responses.activate
 def test_csp_detection():
     url = "http://perdu.com/"

@@ -23,7 +23,7 @@ from configparser import ConfigParser
 
 from requests.exceptions import ReadTimeout
 
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
+from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
 
@@ -53,13 +53,6 @@ class mod_xss(Attack):
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
 
-    @staticmethod
-    def random_string():
-        """Create a random unique ID that will be used to test injection."""
-        # doesn't uppercase letters as BeautifulSoup make some data lowercase
-        code = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 9)])
-        return code, Flags()
-
     def attack(self):
         methods = ""
         if self.do_get:
@@ -69,7 +62,7 @@ class mod_xss(Attack):
 
         mutator = Mutator(
             methods=methods,
-            payloads=self.random_string,
+            payloads=random_string_with_flags,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters")
         )

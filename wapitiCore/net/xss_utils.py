@@ -1,9 +1,11 @@
 import re
 from configparser import ConfigParser
+from typing import Tuple, List
+import json
 
 from bs4 import BeautifulSoup, element
 
-from wapitiCore.attack.attack import PayloadType, Flags
+from wapitiCore.attack.attack import PayloadType, Flags, random_string
 
 # Everything under those tags will be treated as text
 NONEXEC_PARENTS = {
@@ -56,113 +58,155 @@ def get_special_attributes(node):
     return specials
 
 
-# type/name/tag ex: attrval/img/src
-def get_context_list(html_code, keyword, bs_node=None):
-    if bs_node is None:
-        bs_node = BeautifulSoup(html_code, "html.parser")
+def get_similar_case_replacement(original_keyword, new_keyword) -> str:
+    assert len(original_keyword) == len(new_keyword)
+    result = ""
+    for old_char, new_char in zip(original_keyword, new_keyword):
+        if old_char.islower():
+            result += new_char.lower()
+        else:
+            result += new_char.upper()
+    return result
 
+
+def replace_with_unique_values(text: str, keyword: str) -> Tuple[str, List[str]]:
+    new_text = text
+    lower_text = text.lower()
+    start = 0
+    taints = []
+    while True:
+        try:
+            start = lower_text.index(keyword, start)
+        except ValueError:
+            break
+
+        end = start + len(keyword)
+        old_string = text[start:end]
+        replacement = get_similar_case_replacement(old_string, random_string("x", len(old_string)))
+        taints.append(replacement)
+        new_text = new_text.replace(old_string, replacement, 1)
+        start = end
+
+    return new_text, taints
+
+
+def put_back_code_in_context(context, tainted_code, original_code):
+    for key, value in context.items():
+        if isinstance(value, str):
+            context[key] = value.replace(tainted_code, original_code)
+
+
+# type/name/tag ex: attrval/img/src
+def get_context_list(html_code, original_keyword):
+    tainted_code, taints = replace_with_unique_values(html_code, original_keyword)
+    root_node = BeautifulSoup(tainted_code, "html.parser")
     context_list = []
 
-    # if parent is None:
     #  print("Keyword is: {0}".format(keyword))
-    if keyword in str(bs_node).lower():
-        if isinstance(bs_node, element.Tag) and is_context_executable(bs_node):
-            events = set(name for name in bs_node.attrs.keys() if name.startswith("on"))
-            if keyword in str(bs_node.attrs):
-                for attr_name, attr_value in bs_node.attrs.items():
-                    if keyword in attr_value:
-                        # print("Found in attribute value {0} of tag {1}".format(attr_name, bs_node.name))
-                        bad_parent = find_non_exec_parent(bs_node)
+    for keyword in taints:
+        keyword = keyword.lower()
+        # if keyword in found_taints:
+        #     continue
 
-                        code_index = html_code.find(keyword)
-                        attrval_index = 0
-                        before_code = html_code[:code_index]
+        for node in root_node.descendants:
 
-                        # Not perfect but still best than the former rfind
-                        attr_pattern = r"\s*" + attr_name + r"\s*=\s*"
+            # Several taints may be found in the same node but a taint will appear only once in the code
+            if keyword in str(node).lower():
+                if isinstance(node, element.Tag) and is_context_executable(node):
+                    events = set(name for name in node.attrs.keys() if name.startswith("on"))
+                    if keyword in str(node.attrs).lower():
+                        for attr_name, attr_value in node.attrs.items():
+                            # Be careful: attr_value may be a list, for example with attribute "rel" of tag "link"
+                            if keyword in str(attr_value).lower():
+                                # print("Found in attribute value {0} of tag {1}".format(attr_name, bs_node.name))
+                                bad_parent = find_non_exec_parent(node)
 
-                        # Let's find the last match
-                        for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
-                            attrval_index = match.end()
+                                code_index = tainted_code.lower().find(keyword)
+                                attrval_index = 0
+                                before_code = tainted_code[:code_index]
 
-                        attrval = before_code[attrval_index:]
-                        # between the tag name and our injected attribute there is an equal sign and maybe
-                        # a quote or a double-quote that we need to close before adding our payload
-                        if attrval.startswith("'"):
-                            separator = "'"
-                        elif attrval.startswith('"'):
-                            separator = '"'
-                        else:
-                            separator = ""
+                                # Not perfect but still best than the former rfind
+                                attr_pattern = r"\s*" + attr_name + r"\s*=\s*"
 
+                                # Let's find the last match
+                                for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
+                                    attrval_index = match.end()
+
+                                attrval = before_code[attrval_index:]
+                                # between the tag name and our injected attribute there is an equal sign and maybe
+                                # a quote or a double-quote that we need to close before adding our payload
+                                if attrval.startswith("'"):
+                                    separator = "'"
+                                elif attrval.startswith('"'):
+                                    separator = '"'
+                                else:
+                                    separator = ""
+
+                                context = {
+                                    "type": "attrval",
+                                    "name": attr_name,
+                                    "tag": node.name,
+                                    "non_exec_parent": bad_parent,
+                                    "events": events,
+                                    "separator": separator
+                                }
+
+                                special_attributes = get_special_attributes(node)
+                                if special_attributes:
+                                    context["special_attributes"] = special_attributes
+
+                                put_back_code_in_context(context, keyword, original_keyword)
+                                if context not in context_list:
+                                    context_list.append(context)
+
+                            if keyword in attr_name:
+                                # print("Found in attribute name {0} of tag {1}".format(attr_name, bs_node.name))
+                                bad_parent = find_non_exec_parent(node)
+                                context = {
+                                    "type": "attrname",
+                                    "name": attr_name,
+                                    "tag": node.name,
+                                    "non_exec_parent": bad_parent,
+                                    "events": events
+                                }
+
+                                special_attributes = get_special_attributes(node)
+                                if special_attributes:
+                                    context["special_attributes"] = special_attributes
+
+                                put_back_code_in_context(context, keyword, original_keyword)
+                                if context not in context_list:
+                                    context_list.append(context)
+
+                    elif keyword in node.name.lower():
+                        # print("Found in tag name")
+                        bad_parent = find_non_exec_parent(node)
                         context = {
-                            "type": "attrval",
-                            "name": attr_name,
-                            "tag": bs_node.name,
-                            "non_exec_parent": bad_parent,
-                            "events": events,
-                            "separator": separator
-                        }
-
-                        special_attributes = get_special_attributes(bs_node)
-                        if special_attributes:
-                            context["special_attributes"] = special_attributes
-
-                        if context not in context_list:
-                            context_list.append(context)
-
-                    if keyword in attr_name:
-                        # print("Found in attribute name {0} of tag {1}".format(attr_name, bs_node.name))
-                        bad_parent = find_non_exec_parent(bs_node)
-                        context = {
-                            "type": "attrname",
-                            "name": attr_name,
-                            "tag": bs_node.name,
+                            "type": "tag",
+                            "value": node.name,
                             "non_exec_parent": bad_parent,
                             "events": events
                         }
 
-                        special_attributes = get_special_attributes(bs_node)
-                        if special_attributes:
-                            context["special_attributes"] = special_attributes
-
+                        put_back_code_in_context(context, keyword, original_keyword)
                         if context not in context_list:
                             context_list.append(context)
 
-            elif keyword in bs_node.name:
-                # print("Found in tag name")
-                bad_parent = find_non_exec_parent(bs_node)
-                context = {
-                    "type": "tag",
-                    "value": bs_node.name,
-                    "non_exec_parent": bad_parent,
-                    "events": events
-                }
-
-                if context not in context_list:
-                    context_list.append(context)
-
-            # recursively search injection points for the same variable
-            for child_node in bs_node.children:
-                for context in get_context_list(html_code, keyword, bs_node=child_node):
-                    # Remove the current injection point before going deeper
-                    html_code = html_code.replace(keyword, "A" * len(keyword), 1)  # Reduce the research zone
+                elif isinstance(node, element.Comment) and is_context_executable(node):
+                    # print("Found in comment, tag {0}".format(parent.name))
+                    bad_parent = find_non_exec_parent(node)
+                    context = {"type": "comment", "parent": node.parent.name, "non_exec_parent": bad_parent}
+                    put_back_code_in_context(context, keyword, original_keyword)
                     if context not in context_list:
                         context_list.append(context)
 
-        elif isinstance(bs_node, element.Comment) and is_context_executable(bs_node):
-            # print("Found in comment, tag {0}".format(parent.name))
-            bad_parent = find_non_exec_parent(bs_node)
-            context = {"type": "comment", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
-            if context not in context_list:
-                context_list.append(context)
-
-        elif isinstance(bs_node, element.NavigableString) and is_context_executable(bs_node):
-            # print("Found in text, tag {0}".format(parent.name))
-            bad_parent = find_non_exec_parent(bs_node)
-            context = {"type": "text", "parent": bs_node.parent.name, "non_exec_parent": bad_parent}
-            if context not in context_list:
-                context_list.append(context)
+                elif isinstance(node, element.NavigableString) and is_context_executable(node):
+                    # print("Found in text, tag {0}".format(parent.name))
+                    bad_parent = find_non_exec_parent(node)
+                    context = {"type": "text", "parent": node.parent.name, "non_exec_parent": bad_parent}
+                    put_back_code_in_context(context, keyword, original_keyword)
+                    if context not in context_list:
+                        context_list.append(context)
 
     return context_list
 

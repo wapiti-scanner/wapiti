@@ -85,6 +85,19 @@ COMMON_ANNOYING_PARAMETERS = (
 )
 
 
+def random_string(prefix: str = "w", length: int = 10) -> str:
+    """Create a random unique ID that will be used to test injection."""
+    # doesn't uppercase letters as BeautifulSoup make some data lowercase
+    code = prefix + "".join(
+        [random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, length - len(prefix))]
+    )
+    return code
+
+
+def random_string_with_flags():
+    return random_string(), Flags()
+
+
 class Flags:
     def __init__(self, type=PayloadType.pattern, section="", method=PayloadType.get, platform="all", dbms="all"):
         self.type = type
@@ -594,12 +607,7 @@ if __name__ == "__main__":
     print("#"*50)
     print('')
 
-    def random_string():
-        """Create a random unique ID that will be used to test injection."""
-        # doesn't uppercase letters as BeautifulSoup make some data lowercase
-        return "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 9)]), Flags()
-
-    mutator = Mutator(payloads=random_string, qs_inject=True, max_queries_per_pattern=16)
+    mutator = Mutator(payloads=random_string_with_flags, qs_inject=True, max_queries_per_pattern=16)
     for evil_request, param_name, payload, flags in mutator.mutate(res3):
         print(evil_request)
         print("Payload is", payload)

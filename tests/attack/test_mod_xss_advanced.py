@@ -239,7 +239,7 @@ def test_xss_inside_tag_link():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
-    assert "<" not in used_payload and ">" not in used_payload and "onmouseover" in used_payload
+    assert "<" not in used_payload and ">" not in used_payload and "autofocus href onfocus" in used_payload
 
 
 def test_xss_uppercase_no_script():
