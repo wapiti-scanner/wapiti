@@ -1,7 +1,6 @@
-import re
 from configparser import ConfigParser
 from typing import Tuple, List
-import json
+from html.parser import attrfind_tolerant
 
 from bs4 import BeautifulSoup, element
 
@@ -96,6 +95,19 @@ def put_back_code_in_context(context, tainted_code, original_code):
             context[key] = value.replace(tainted_code, original_code)
 
 
+def find_separator(html_code, tainted_attr_value, tag_name):
+    lower_code = html_code.lower()
+    code_index = lower_code.index(tainted_attr_value)
+    tag_index = lower_code.rindex("<" + tag_name, 0, code_index)
+    tag_end = lower_code.index(">", code_index + len(tainted_attr_value))
+    attributes_string = lower_code[tag_index + len(tag_name) + 1:tag_end]
+    for attrname, rest, attrvalue in attrfind_tolerant.findall(attributes_string):
+        if tainted_attr_value in attrvalue:
+            if attrvalue[:1] == '\'' == attrvalue[-1:] or attrvalue[:1] == '"' == attrvalue[-1:]:
+                return attrvalue[:1]
+    return ""
+
+
 # type/name/tag ex: attrval/img/src
 def get_context_list(html_code, original_keyword):
     tainted_code, taints = replace_with_unique_values(html_code, original_keyword)
@@ -121,25 +133,9 @@ def get_context_list(html_code, original_keyword):
                                 # print("Found in attribute value {0} of tag {1}".format(attr_name, bs_node.name))
                                 bad_parent = find_non_exec_parent(node)
 
-                                code_index = tainted_code.lower().find(keyword)
-                                attrval_index = 0
-                                before_code = tainted_code[:code_index]
-
-                                # Not perfect but still best than the former rfind
-                                attr_pattern = r"\s*" + attr_name + r"\s*=\s*"
-
-                                # Let's find the last match
-                                for match in re.finditer(attr_pattern, before_code, flags=re.IGNORECASE):
-                                    attrval_index = match.end()
-
-                                attrval = before_code[attrval_index:]
-                                # between the tag name and our injected attribute there is an equal sign and maybe
-                                # a quote or a double-quote that we need to close before adding our payload
-                                if attrval.startswith("'"):
-                                    separator = "'"
-                                elif attrval.startswith('"'):
-                                    separator = '"'
-                                else:
+                                try:
+                                    separator = find_separator(tainted_code, keyword, node.name)
+                                except ValueError:
                                     separator = ""
 
                                 context = {
@@ -301,8 +297,14 @@ def apply_attrval_context(context, payloads, code):
         else:
             js_code = context["separator"]
             # we must deal differently with self-closing tags
-            if context["tag"].lower() in ["img", "input", "frame"]:
-                js_code += "/>"
+            # see https://developer.mozilla.org/en-US/docs/Glossary/empty_element for reference
+            if context["tag"].lower() in [
+                "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
+                "source", "track", "wbr",
+                "frame"  # Not in Mozilla list but I guess it is because it is deprecated
+            ]:
+                # We don't even need a slash to mark the end of the tag
+                js_code += ">"
             else:
                 js_code += "></" + context["tag"] + ">"
 
@@ -378,7 +380,7 @@ def apply_text_context(context, payloads, code):
     result = []
     prefix = ""
 
-    if context["parent"] in ["script", "title", "textarea"]:
+    if context["parent"] in ["script", "title", "textarea", "style"]:
         # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
         # will be executed if we have partial control over a script tag content, so let's escape them
         if context["non_exec_parent"] != "":

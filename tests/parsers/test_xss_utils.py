@@ -2,7 +2,8 @@ import responses
 import requests
 import pytest
 
-from wapitiCore.net.xss_utils import get_context_list, has_csp, valid_xss_content_type, meet_requirements
+from wapitiCore.net.xss_utils import get_context_list, has_csp, valid_xss_content_type, meet_requirements, \
+    find_separator
 from wapitiCore.net.crawler import Page
 
 
@@ -622,3 +623,14 @@ def test_payload_requirements():
     # Requirement met as there is no special attributes to make our life harder
     assert "special_attributes" not in context_list[0]
     assert meet_requirements(["!style", "type!=hidden"], []) is ""
+
+
+def test_find_separator():
+    # Here the extraction of the separator between the attribute name and the attribute value containing the taint
+    # may be annoying because the parameter named "content" may be found several time in the text, even with trailing =.
+    code = '''<html>
+<head>
+<meta property="og:url" content="https://yolo.tld/default.asp?content=expanded&search_content=results&number=zzz" />
+</head>
+</html>'''
+    assert find_separator(code, "zzz", "meta") == '"'

@@ -279,10 +279,10 @@ def test_frame_src_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
-    assert used_payload.startswith('"/><frame src="javascript:alert(/w')
+    assert used_payload.startswith('"><frame src="javascript:alert(/w')
 
 
-def test_frame_src__no_escape():
+def test_frame_src_no_escape():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti.sourceforge.io/")
     request.path_id = 42
@@ -300,3 +300,41 @@ def test_frame_src__no_escape():
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("javascript:alert(/w")
+
+
+def test_bad_separator_used():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65081/confuse_separator.php?number=42")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert used_payload.startswith("\">")
+
+
+def test_escape_with_style():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65081/escape_with_style.php?color=green")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert used_payload.startswith("</style>")
