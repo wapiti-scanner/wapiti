@@ -338,3 +338,22 @@ def test_escape_with_style():
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("</style>")
+
+
+def test_rare_tag_and_event():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65081/filter_common_keywords.php?msg=test")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    used_payload = persister.vulnerabilities[0][1].lower()
+    assert used_payload.startswith("<custom\nchecked\nonpointerenter=")
