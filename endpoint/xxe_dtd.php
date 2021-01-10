@@ -15,7 +15,7 @@ if (!ctype_xdigit($hex_param)) exit();
 include("functions.php");
 
 $num = -1;
-# We must use small files because big one won't be sent
+// We must use small files because big one won't be sent
 switch($payload) {
 	case "windows":
 		$filename = "c:/windows/system32/drivers/etc/networks";

@@ -13,8 +13,7 @@ if (strlen($id) ==6 && ctype_alnum($id))
 
     foreach (glob("$directory/*/*/*.txt") as $filename) {
         $parts = explode("/", $filename);
-        $time_and_ip = basename($filename, ".txt");
-        list($time, $payload_num, $ip) = explode("-", $time_and_ip);
+        list($time, $payload_num, $ip) = explode("-", basename($filename, ".txt"));
         $req_id = $parts[3];
         $hex_param = $parts[4];
         $url = site_url() . substr($filename, 2);
@@ -28,19 +27,20 @@ if (strlen($id) ==6 && ctype_alnum($id))
             $by_req_id[$req_id][$hex_param] = array();
         }
 
-	switch($payload_num) {
-		case 0:
-			$payload = "linux2";
-			break;
-		case 1:
-			$payload = "linux";
-			break;
-		case 2:
-			$payload = "windows";
-			break;
-		default:
-			$payload = "unknown";
-	}
+        $payload_num = intval($payload_num);
+        switch($payload_num) {
+            case 0:
+                $payload = "linux2";
+                break;
+            case 1:
+                $payload = "linux";
+                break;
+            case 2:
+                $payload = "windows";
+                break;
+            default:
+                $payload = "unknown";
+        }
 
         $by_req_id[$req_id][$hex_param][] = array(
             "date" => date('c', $time),

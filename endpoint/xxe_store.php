@@ -4,7 +4,7 @@
 $rand_id = isset($_GET["rand_id"]) ? $_GET["rand_id"] : "";
 $req_id = isset($_GET["req_id"]) ? $_GET["req_id"] : "";
 $hex_param = isset($_GET["hex_param"]) ? $_GET["hex_param"] : "";
-$payload = isset($_GET["payload"]) ? $_GET["payload"] : "";
+$payload_num = isset($_GET["payload"]) ? $_GET["payload"] : "";
 $data = isset($_GET["data"]) ? $_GET["data"] : "";
 $ip = $_SERVER["REMOTE_ADDR"];
 
@@ -13,13 +13,12 @@ if (strlen($rand_id) != 6) exit();
 if (!ctype_alnum($rand_id)) exit();
 if (!ctype_digit($req_id)) exit();
 if (!ctype_xdigit($hex_param)) exit();
-$possible_payloads = array("linux", "linux2", "windows");
-if (!in_array($payload, $possible_payloads)) exit();
+if (!ctype_digit($payload_num)) exit();
 if (!strlen($data)) exit();
 $data = base64_decode($data);
 
 $time = time();
 $directory = "./xxe_data/$rand_id/$req_id/$hex_param/";
 mkdir($directory, 0777, true);
-file_put_contents("$directory/$time-$payload-$ip.txt", $data, FILE_APPEND);
+file_put_contents("$directory/$time-$payload_num-$ip.txt", $data, FILE_APPEND);
 ?>
