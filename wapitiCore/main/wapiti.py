@@ -999,6 +999,16 @@ def wapiti_main():
         sys.exit()
 
     url = args.base_url
+
+    parts = urlparse(url)
+    # Set path to '/' if path is Null
+    if not parts.path:
+        url += '/'
+
+    if not parts.scheme or not parts.netloc:
+        print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
+        sys.exit()
+
     wap = Wapiti(url, scope=args.scope, session_dir=args.store_session)
 
     if args.update:
@@ -1006,12 +1016,6 @@ def wapiti_main():
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
         wap.update()
-        sys.exit()
-
-    parts = urlparse(url)
-    if not parts.scheme or not parts.netloc or not parts.path:
-        print(_("Invalid base URL was specified, please give a complete URL with protocol scheme"
-                " and slash after the domain name."))
         sys.exit()
 
     try:
