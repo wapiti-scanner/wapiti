@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import random
 from itertools import chain
 from os.path import join as path_join
 from configparser import ConfigParser
@@ -25,7 +24,8 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
+from wapitiCore.net.csp_utils import has_strong_csp
 
 
 class mod_xss(Attack):
@@ -160,7 +160,7 @@ class mod_xss(Attack):
                 ):
                     self.successful_xss[taint] = (xss_payload, xss_flags)
                     message = _("XSS vulnerability found via injection in the parameter {0}").format(xss_param)
-                    if has_csp(response):
+                    if has_strong_csp(response):
                         message += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                     self.add_vuln(
@@ -185,7 +185,7 @@ class mod_xss(Attack):
                         xss_param
                     )
 
-                    if has_csp(response):
+                    if has_strong_csp(response):
                         self.log_red(_("Warning: Content-Security-Policy is present!"))
 
                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)

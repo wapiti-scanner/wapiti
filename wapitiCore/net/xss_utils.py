@@ -21,8 +21,6 @@ NONEXEC_PARENTS = {
     "frameset"
 }
 
-CSP_HEADERS = {"content-security-policy", "x-content-security-policy", "x-webkit-csp"}
-
 
 def find_non_exec_parent(tag):
     """Return the tag name of the most upper parent preventing JS execution"""
@@ -462,18 +460,6 @@ def valid_xss_content_type(http_res):
     # else only text/html will allow javascript (maybe text/plain will work for IE...)
     if "text/html" in http_res.headers["content-type"]:
         return True
-    return False
-
-
-def has_csp(response):
-    headers = {header.lower() for header in response.headers}
-    if CSP_HEADERS & headers:
-        return True
-
-    for meta_http in response.soup.find_all("meta", attrs={"http-equiv": True}):
-        if meta_http["http-equiv"].lower().strip() in CSP_HEADERS:
-            return True
-
     return False
 
 

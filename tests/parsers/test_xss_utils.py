@@ -2,8 +2,9 @@ import responses
 import requests
 import pytest
 
-from wapitiCore.net.xss_utils import get_context_list, has_csp, valid_xss_content_type, meet_requirements, \
+from wapitiCore.net.xss_utils import get_context_list, valid_xss_content_type, meet_requirements, \
     find_separator
+from wapitiCore.net.csp_utils import has_csp
 from wapitiCore.net.crawler import Page
 
 

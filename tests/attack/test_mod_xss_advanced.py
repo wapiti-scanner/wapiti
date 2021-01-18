@@ -9,6 +9,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_xss import mod_xss
+from wapitiCore.language.vulnerability import _
 
 
 class FakePersister:
@@ -30,7 +31,7 @@ class FakePersister:
     def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         for parameter_name, value in request.get_params:
             if parameter_name == parameter:
-                self.vulnerabilities.append((parameter, value))
+                self.vulnerabilities.append((parameter, value, info))
 
 
 @pytest.fixture(autouse=True)
@@ -80,6 +81,7 @@ def test_title_positive():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "title"
     assert persister.vulnerabilities[0][1].startswith("</title>")
+    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
 
 
 def test_script_filter_bypass():
@@ -357,3 +359,39 @@ def test_rare_tag_and_event():
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("<custom\nchecked\nonpointerenter=")
+
+
+def test_xss_with_strong_csp():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65081/strong_csp.php?content=Hello%20there")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    assert _("Warning: Content-Security-Policy is present!") in persister.vulnerabilities[0][2]
+
+
+def test_xss_with_weak_csp():
+    persister = FakePersister()
+    request = Request("http://127.0.0.1:65081/weak_csp.php?content=Hello%20there")
+    request.path_id = 42
+    persister.requests.append(request)
+    crawler = Crawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_xss(crawler, persister, logger, options)
+    module.do_post = False
+    for __ in module.attack():
+        pass
+
+    assert persister.vulnerabilities
+    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]

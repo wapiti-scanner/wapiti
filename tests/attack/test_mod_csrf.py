@@ -9,6 +9,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
 from wapitiCore.attack.mod_csrf import mod_csrf
+from wapitiCore.language.vulnerability import _
 
 
 class FakePersister:
@@ -87,8 +88,7 @@ def test_csrf_cases():
         pass
 
     assert set(persister.vulnerabilities) == {
-        (2, "CSRF token 'xsrf_token' is not properly checked in backend"),
-        (3, "CSRF token 'xsrf_token' might be easy to predict"),
-        (4, 'Lack of anti CSRF token')
+        (2, _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")),
+        (3, _("CSRF token '{}' might be easy to predict").format("xsrf_token")),
+        (4, _("Lack of anti CSRF token"))
     }
-

@@ -25,7 +25,8 @@ from requests.exceptions import Timeout, ReadTimeout
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 from wapitiCore.net import web
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent, has_csp
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
+from wapitiCore.net.csp_utils import has_strong_csp
 
 
 class mod_permanentxss(Attack):
@@ -151,7 +152,7 @@ class mod_permanentxss(Attack):
                                             input_request.path
                                         )
 
-                                    if has_csp(response):
+                                    if has_strong_csp(response):
                                         description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                                     self.add_vuln(
@@ -176,7 +177,7 @@ class mod_permanentxss(Attack):
                                         parameter
                                     )
 
-                                    if has_csp(response):
+                                    if has_strong_csp(response):
                                         self.log_red(_("Warning: Content-Security-Policy is present!"))
 
                                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)
@@ -280,7 +281,7 @@ class mod_permanentxss(Attack):
                             page
                         )
 
-                    if has_csp(response):
+                    if has_strong_csp(response):
                         description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                     self.add_vuln(
@@ -306,7 +307,7 @@ class mod_permanentxss(Attack):
                         xss_param
                     )
 
-                    if has_csp(response):
+                    if has_strong_csp(response):
                         self.log_red(_("Warning: Content-Security-Policy is present!"))
 
                     self.log_red(Vulnerability.MSG_EVIL_REQUEST)
