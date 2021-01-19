@@ -188,7 +188,7 @@ class Page:
             if self._response.headers.get("transfer-encoding", "") != "chunked":
                 if "," in self._response.headers["content-length"]:
                     return int(self._response.headers["content-length"].split(",")[0].strip())
-                elif ";" in self._response.headers["content-length"]:
+                if ";" in self._response.headers["content-length"]:
                     return int(self._response.headers["content-length"].split(";")[0].strip())
 
                 return int(self._response.headers["content-length"])
@@ -205,7 +205,7 @@ class Page:
             if self._response.headers.get("transfer-encoding", "") != "chunked":
                 if "," in self._response.headers["content-length"]:
                     return int(self._response.headers["content-length"].split(",")[0].strip())
-                elif ";" in self._response.headers["content-length"]:
+                if ";" in self._response.headers["content-length"]:
                     return int(self._response.headers["content-length"].split(";")[0].strip())
 
             return int(self._response.headers["content-length"])
@@ -596,9 +596,9 @@ class Page:
             def is_visible(element):
                 if len(element.strip()) == 0:
                     return False
-                elif isinstance(element, Comment):
+                if isinstance(element, Comment):
                     return False
-                elif element.parent.name in ["style", "script", "[document]", "head", "title"]:
+                if element.parent.name in ["style", "script", "[document]", "head", "title"]:
                     return False
                 return True
 
@@ -645,8 +645,8 @@ class Page:
             icon_uri = icon_tag["href"]
             if icon_uri.startswith("data:"):
                 return ""
-            else:
-                return self.make_absolute(icon_uri)
+
+            return self.make_absolute(icon_uri)
         return self.make_absolute("/favicon.ico")
 
     @property
@@ -809,7 +809,7 @@ class Page:
                 if input_type in {"reset", "button"}:
                     # Those input types doesn't send any value
                     continue
-                elif input_type == "image":
+                if input_type == "image":
                     if method == "GET":
                         get_params.append([input_field["name"] + ".x", "1"])
                         get_params.append([input_field["name"] + ".y", "1"])
@@ -1296,8 +1296,8 @@ class Crawler:
             # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
             if "Read timed out" in str(exception):
                 raise ReadTimeout("Request time out")
-            else:
-                raise exception
+
+            raise exception
 
         return Page(response)
 
@@ -1348,8 +1348,8 @@ class Crawler:
             # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
             if "Read timed out" in str(exception):
                 raise ReadTimeout("Request time out")
-            else:
-                raise exception
+
+            raise exception
 
         return Page(response)
 
@@ -1387,8 +1387,8 @@ class Crawler:
             # Unfortunately chunked transfer + timeout raise ConnectionError... let's fix that
             if "Read timed out" in str(exception):
                 raise ReadTimeout("Request time out")
-            else:
-                raise exception
+
+            raise exception
 
         return Page(response)
 

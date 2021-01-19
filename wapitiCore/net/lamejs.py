@@ -61,8 +61,8 @@ class LameJs:
                 value = self.read_node(node.initializer)
                 self.js_vars[node.value] = value
                 return node.value, value
-            else:
-                return self.js_vars.get(node.value)
+
+            return self.js_vars.get(node.value)
         elif node.type == "NUMBER":
             logging.debug("# NUMBER")
             return node.value
@@ -74,7 +74,7 @@ class LameJs:
             eax = None
             # It some items of concatenation includes function calls or accessing parts of array, stop here to prevent
             # false positives
-            if set([sub_node.type for sub_node in node]) & {"CALL", "INDEX"}:
+            if {sub_node.type for sub_node in node} & {"CALL", "INDEX"}:
                 return None
 
             for sub_node in node:

@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from xml.parsers import expat
+from xml.parsers.expat import ParserCreate
 
 from wapitiCore.report.reportgeneratorinfo import ReportGeneratorInfo
 
@@ -35,7 +35,7 @@ class ReportGeneratorsXMLParser:
     REPORT_GENERATOR_CLASSNAME = "className"
 
     def __init__(self):
-        self._parser = expat.ParserCreate()
+        self._parser = ParserCreate()
         self._parser.StartElementHandler = self.start_element
         self._parser.EndElementHandler = self.end_element
         self._parser.CharacterDataHandler = self.char_data

@@ -75,8 +75,7 @@ def check_policy_values(policy_name, csp_dict):
     else:
         if any(safe_value in policy_values for safe_value in CSP_CHECK_LISTS[policy_name]):
             return 1
-        else:
-            return 0
+        return 0
 
     return 1
 

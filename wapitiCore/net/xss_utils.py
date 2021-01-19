@@ -99,7 +99,7 @@ def find_separator(html_code, tainted_attr_value, tag_name):
     tag_index = lower_code.rindex("<" + tag_name, 0, code_index)
     tag_end = lower_code.index(">", code_index + len(tainted_attr_value))
     attributes_string = lower_code[tag_index + len(tag_name) + 1:tag_end]
-    for attrname, rest, attrvalue in attrfind_tolerant.findall(attributes_string):
+    for __, __, attrvalue in attrfind_tolerant.findall(attributes_string):
         if tainted_attr_value in attrvalue:
             if attrvalue[:1] == '\'' == attrvalue[-1:] or attrvalue[:1] == '"' == attrvalue[-1:]:
                 return attrvalue[:1]
@@ -466,7 +466,7 @@ def valid_xss_content_type(http_res):
 if __name__ == "__main__":
     from pprint import pprint
 
-    source_code = """<html>
+    SOURCE_CODE = """<html>
     <head><title>Hello injection</title>
     <body>
     <a href="injection">General Kenobi</a>
@@ -477,4 +477,4 @@ if __name__ == "__main__":
     </html>
     """
 
-    pprint(get_context_list(source_code, "injection"))
+    pprint(get_context_list(SOURCE_CODE, "injection"))

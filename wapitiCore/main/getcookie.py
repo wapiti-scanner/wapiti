@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from urllib.parse import urlparse, urlunparse
 import argparse
+import sys
 
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import Crawler
@@ -27,6 +28,7 @@ from wapitiCore.net.web import Request
 
 class InvalidOptionValue(Exception):
     def __init__(self, opt_name, opt_value):
+        super().__init__()
         self.opt_name = opt_name
         self.opt_value = opt_value
 
@@ -103,7 +105,7 @@ def getcookie_main():
     if not parts.scheme or not parts.netloc or not parts.path:
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme"
                 " and slash after the domain name."))
-        exit()
+        sys.exit()
 
     server = parts.netloc
     base = urlunparse((parts.scheme, parts.netloc, parts.path, '', '', ''))

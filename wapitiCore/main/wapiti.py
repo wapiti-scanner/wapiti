@@ -31,6 +31,7 @@ from uuid import uuid1
 from sqlite3 import OperationalError
 from hashlib import md5
 from random import choice
+import codecs
 
 import requests
 from requests.exceptions import RequestException, ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError
@@ -71,6 +72,7 @@ SCAN_FORCE_VALUES = {
 
 class InvalidOptionValue(Exception):
     def __init__(self, opt_name, opt_value):
+        super().__init__()
         self.opt_name = opt_name
         self.opt_value = opt_value
 
@@ -240,18 +242,22 @@ class Wapiti:
                     if module_name in ("all", "common"):
                         for attack_module in self.attacks:
                             if module_name == "all" or attack_module.name in attack.commons:
-                                if method == "get" or method == "":
+                                if not method:
+                                    attack_module.do_get = attack_module.do_post = False
+                                elif method == "get":
                                     attack_module.do_get = False
-                                if method == "post" or method == "":
+                                elif method == "post":
                                     attack_module.do_post = False
                     else:
                         found = False
                         for attack_module in self.attacks:
                             if attack_module.name == module_name:
                                 found = True
-                                if method == "get" or method == "":
+                                if not method:
+                                    attack_module.do_get = attack_module.do_post = False
+                                elif method == "get":
                                     attack_module.do_get = False
-                                if method == "post" or method == "":
+                                elif method == "post":
                                     attack_module.do_post = False
                         if not found:
                             print(_("[!] Unable to find a module named {0}").format(module_name))
@@ -264,18 +270,22 @@ class Wapiti:
                     if module_name in ("all", "common"):
                         for attack_module in self.attacks:
                             if module_name == "all" or attack_module.name in attack.commons:
-                                if method == "get" or method == "":
+                                if not method:
+                                    attack_module.do_get = attack_module.do_post = True
+                                elif method == "get":
                                     attack_module.do_get = True
-                                if method == "post" or method == "":
+                                elif method == "post":
                                     attack_module.do_post = True
                     else:
                         found = False
                         for attack_module in self.attacks:
                             if attack_module.name == module_name:
                                 found = True
-                                if method == "get" or method == "":
+                                if not method:
+                                    attack_module.do_get = attack_module.do_post = True
+                                elif method == "get":
                                     attack_module.do_get = True
-                                if method == "post" or method == "":
+                                elif method == "post":
                                     attack_module.do_post = True
                         if not found:
                             print(_("[!] Unable to find a module named {0}").format(module_name))
@@ -359,9 +369,10 @@ class Wapiti:
                     print("  {0}".format(",".join([attack for attack in attack_module.require
                                                    if attack not in attack_name_list])))
                     continue
-                else:
-                    attack_module.load_require([attack for attack in self.attacks
-                                                if attack.name in attack_module.require])
+
+                attack_module.load_require(
+                    [attack for attack in self.attacks if attack.name in attack_module.require]
+                )
 
             attack_module.log_green(_("[*] Launching module {0}"), attack_module.name)
 
@@ -402,11 +413,12 @@ class Wapiti:
 
                     if answer in ("r", "n"):
                         break
-                    elif answer == "c":
+
+                    if answer == "c":
                         continue
-                    else:
-                        # if answer is q, raise KeyboardInterrupt and it will stop cleanly
-                        raise exception
+
+                    # if answer is q, raise KeyboardInterrupt and it will stop cleanly
+                    raise exception
                 except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
                     sleep(1)
                     skipped += 1
@@ -647,20 +659,20 @@ def wapiti_main():
     banners = [
         """
      __      __               .__  __  .__________
-    /  \\    /  \\_____  ______ |__|/  |_|__\\_____  \\ 
+    /  \\    /  \\_____  ______ |__|/  |_|__\\_____  \\
     \\   \\/\\/   /\\__  \\ \\____ \\|  \\   __\\  | _(__  <
-     \\        /  / __ \\|  |_> >  ||  | |  |/       \\ 
+     \\        /  / __ \\|  |_> >  ||  | |  |/       \\
       \\__/\\  /  (____  /   __/|__||__| |__/______  /
            \\/        \\/|__|                      \\/""",
         """
      __    __            _ _   _ _____
     / / /\\ \\ \\__ _ _ __ (_) |_(_)___ /
-    \\ \\/  \\/ / _` | '_ \\| | __| | |_ \\ 
+    \\ \\/  \\/ / _` | '_ \\| | __| | |_ \\
      \\  /\\  / (_| | |_) | | |_| |___) |
       \\/  \\/ \\__,_| .__/|_|\\__|_|____/
                   |_|                 """,
         """
- ██╗    ██╗ █████╗ ██████╗ ██╗████████╗██╗██████╗ 
+ ██╗    ██╗ █████╗ ██████╗ ██╗████████╗██╗██████╗
  ██║    ██║██╔══██╗██╔══██╗██║╚══██╔══╝██║╚════██╗
  ██║ █╗ ██║███████║██████╔╝██║   ██║   ██║ █████╔╝
  ██║███╗██║██╔══██║██╔═══╝ ██║   ██║   ██║ ╚═══██╗
@@ -1023,8 +1035,6 @@ def wapiti_main():
             if start_url.startswith(("http://", "https://")):
                 wap.add_start_url(start_url)
             elif os.path.isfile(start_url):
-                import codecs
-
                 try:
                     urlfd = codecs.open(start_url, encoding="UTF-8")
                     for urlline in urlfd:

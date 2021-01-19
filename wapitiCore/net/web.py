@@ -291,17 +291,17 @@ class Request:
             return NotImplemented
         if self.url < other.url:
             return True
-        else:
-            if self.url == other.url:
-                return self.encoded_data < other.encoded_data
-            return False
+
+        if self.url == other.url:
+            return self.encoded_data < other.encoded_data
+        return False
 
     def __le__(self, other):
         if not isinstance(other, Request):
             return NotImplemented
         if self.url < other.url:
             return True
-        elif self.url == other.url:
+        if self.url == other.url:
             return self.encoded_data <= other.encoded_data
         return False
 
@@ -322,7 +322,7 @@ class Request:
             return NotImplemented
         if self.url > other.url:
             return True
-        elif self.url == other.url:
+        if self.url == other.url:
             return self.encoded_data > other.encoded_data
         return False
 
@@ -331,7 +331,7 @@ class Request:
             return NotImplemented
         if self.url > other.url:
             return True
-        elif self.url == other.url:
+        if self.url == other.url:
             return self.encoded_data >= other.encoded_data
         return False
 
@@ -415,7 +415,6 @@ class Request:
             for field_name, field_value in self._file_params:
                 curl_upload_kv = "{0}=@your_local_file;filename={1}".format(field_name, field_value[0])
                 curl_string += " -F \"{0}\"".format(shell_escape(curl_upload_kv))
-            pass
         elif self._post_params:
             # POST either urlencoded
             if "urlencoded" in self._enctype:
@@ -476,7 +475,7 @@ class Request:
 
     @property
     def is_root(self) -> bool:
-        return True if self._file_path == "/" else False
+        return self._file_path == "/"
 
     @property
     def file_ext(self) -> str:
@@ -496,10 +495,9 @@ class Request:
     def parent_dir(self):
         if self.file_name:
             return posixpath.dirname(self._resource_path) + "/"
-        elif self.is_root:
+        if self.is_root:
             return self._resource_path
-        else:
-            return posixpath.dirname(posixpath.dirname(self._resource_path)) + "/"
+        return posixpath.dirname(posixpath.dirname(self._resource_path)) + "/"
 
     @property
     def method(self) -> str:
@@ -577,7 +575,7 @@ class Request:
 
         key_values = []
         for param_key, param_value in params:
-            if isinstance(param_value, tuple) or isinstance(param_value, list):
+            if isinstance(param_value, (tuple, list)):
                 key_values.append((param_key, param_value[0]))
             else:
                 # May be empty string or None but will be processed differently by our own urlencode()

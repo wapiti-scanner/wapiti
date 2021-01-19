@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from xml.parsers import expat
+from xml.parsers.expat import ParserCreate
 
 from wapitiCore.language.vulnerability import Additional
 
@@ -16,7 +16,7 @@ class AdditionalXMLParser:
     ADDITIONAL_REFERENCE_URL = "url"
 
     def __init__(self):
-        self._parser = expat.ParserCreate()
+        self._parser = ParserCreate()
         self._parser.StartElementHandler = self.start_element
         self._parser.EndElementHandler = self.end_element
         self._parser.CharacterDataHandler = self.char_data

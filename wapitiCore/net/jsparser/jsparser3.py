@@ -238,17 +238,17 @@ class Tokenizer(object):
             match = re.match(r'^/(?:\*(?:.|\n)*?\*/|/.*)', input__)
             if not match:
                 break
-                
+
             comment = match.group(0)
             self.cursor += len(comment)
             newlines = re.findall(r'\n', comment)
-            
+
             if newlines:
                 self.lineno += len(newlines)
 
         self.token_index = (self.token_index + 1) & 3
         token = self.tokens.get(self.token_index)
-        
+
         if not token:
             token = Object()
             self.tokens[self.token_index] = token
@@ -301,17 +301,17 @@ class Tokenizer(object):
             match_result = op_regexp.match(input__)
             if match_result:
                 op_value = match_result.group(0)
-                
+
                 if op_value in assign_ops and input__[len(op_value)] == '=':
                     token.type_ = ASSIGN
                     token.assign_op = globals()[operator_type_names[op_value]]
                     token.value = op_value
                     return match_result.group(0) + "="
-                
+
                 token.type_ = globals()[operator_type_names[op_value]]
                 if self.scan_operand and (token.type_ in (PLUS, MINUS)):
                     token.type_ += UNARY_PLUS - PLUS
-                    
+
                 token.assign_op = None
                 token.value = op_value
                 return match_result.group(0)
@@ -415,13 +415,13 @@ class Node(list):
 
         if len(self):
             enum_list.append(("length", len(self)))
-            
+
         enum_list.sort(key=lambda item: item[0])
         indentation = "    "
         Node.indent_level += 1
         node_indent = Node.indent_level
         node_repr = "{\n%stype: %s" % ((indentation * node_indent), tokenstr(self.type_))
-        
+
         for i, value in enum_list:
             node_repr += ",\n%s%s: " % ((indentation * node_indent), i)
             if i == "value" and self.type_ == REGEXP:
@@ -659,7 +659,7 @@ def statement(tokenizer, context):
         node = Node(tokenizer)
         node.tryBlock = block(tokenizer, context)
         node.catchClauses = []
-        
+
         while tokenizer.match(CATCH):
             node_2 = Node(tokenizer)
             tokenizer.must_match(LEFT_PAREN)
@@ -675,13 +675,13 @@ def statement(tokenizer, context):
             tokenizer.must_match(RIGHT_PAREN)
             node_2.block = block(tokenizer, context)
             node.catchClauses.append(node_2)
-            
+
         if tokenizer.match(FINALLY):
             node.finallyBlock = block(tokenizer, context)
-            
+
         if not node.catchClauses and not getattr(node, "finallyBlock", None):
             raise tokenizer.new_syntax_error("Invalid try statement")
-        
+
         return node
 
     elif token_type in (CATCH, FINALLY):
@@ -721,17 +721,17 @@ def statement(tokenizer, context):
             tokenizer.scan_operand = False
             token_type = tokenizer.peek()
             tokenizer.scan_operand = True
-            
+
             if token_type == COLON:
                 label = tokenizer.token.value
                 stmt_stack = context.stmt_stack
                 i = len(stmt_stack) - 1
-                
+
                 while i >= 0:
                     if getattr(stmt_stack[i], "label", None) == label:
                         raise tokenizer.new_syntax_error("Duplicate label")
                     i -= 1
-                    
+
                 tokenizer.get()
                 node = Node(tokenizer, LABEL)
                 node.label = label
