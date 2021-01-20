@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # LameJs - A very basic javascript interpreter in Python
 # This file is part of the Wapiti project (http://wapiti.sourceforge.io)
-# Copyright (C) 2013-2020 Nicolas Surribas
+# Copyright (C) 2013-2021 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

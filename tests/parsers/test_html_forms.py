@@ -48,7 +48,7 @@ def test_forms():
                     "date": "2019-03-03",
                     "datetime": "2019-03-03T20:35:34.32",
                     "datetime-local": "2019-03-03T22:41",
-                    "email": "wapiti2019@mailinator.com",
+                    "email": "wapiti2021@mailinator.com",
                     "file": "pix.gif",
                     "gender": "other",  # taking the last one
                     "hidden": "default",

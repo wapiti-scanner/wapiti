@@ -56,7 +56,7 @@ def test_csrf_cases():
     request = Request(
         "http://127.0.0.1:65086/",
         method="POST",
-        post_params=[["email", "wapiti2020@mailinator.com"], ["xsrf_token", "weak"]],
+        post_params=[["email", "wapiti2021@mailinator.com"], ["xsrf_token", "weak"]],
     )
     request.path_id = 2
     persister.requests.append(request)
@@ -64,7 +64,7 @@ def test_csrf_cases():
     request = Request(
         "http://127.0.0.1:65086/?check=true",
         method="POST",
-        post_params=[["email", "wapiti2020@mailinator.com"], ["xsrf_token", "weak"]],
+        post_params=[["email", "wapiti2021@mailinator.com"], ["xsrf_token", "weak"]],
     )
     request.path_id = 3
     persister.requests.append(request)

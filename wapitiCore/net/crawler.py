@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (http://wapiti.sourceforge.io)
-# Copyright (C) 2006-2020 Nicolas SURRIBAS
+# Copyright (C) 2006-2021 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -784,7 +784,7 @@ class Page:
                 "date": "2019-03-03",
                 "datetime": "2019-03-03T20:35:34.32",
                 "datetime-local": "2019-03-03T22:41",
-                "email": "wapiti2019@mailinator.com",
+                "email": "wapiti2021@mailinator.com",
                 "file": ["pix.gif", "GIF89a", "image/gif"],
                 "hidden": "default",
                 "month": "2019-03",
