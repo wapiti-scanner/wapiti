@@ -724,8 +724,8 @@ msgstr "Colorear la pantalla"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Establecer nivel de verbosidad (0: silencioso, 1: normal, 2: comunicativo)"
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
-msgstr "Establecer el formato del informe. Formatos admitidos: json, html (predeterminado), txt, openvas, vulneranet, xml"
+msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
+msgstr "Establecer el formato del informe. Formatos admitidos: json, html (predeterminado), txt, openvas, xml"
 
 msgid "Output file or folder"
 msgstr "Archivo o carpeta de destino"

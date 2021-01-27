@@ -716,7 +716,7 @@ msgstr ""
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr ""
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
+msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
 msgstr ""
 
 msgid "Output file or folder"

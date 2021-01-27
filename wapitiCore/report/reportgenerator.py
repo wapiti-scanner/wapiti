@@ -43,25 +43,25 @@ class ReportGenerator:
         return self._date
 
     def generate_report(self, output_path):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     def add_vulnerability(self, category=None, level=0, request=None, parameter="", info=""):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     # Anomalies
     def add_anomaly_type(self, name, description="", solution="", references=None):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     def add_anomaly(self, category=None, level=0, request=None, parameter="", info=""):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     # Additionals
     def add_additional_type(self, name, description="", solution="", references=None):
-        pass
+        raise NotImplementedError("Must be overridden")
 
     def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
-        pass
+        raise NotImplementedError("Must be overridden")

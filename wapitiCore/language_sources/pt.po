@@ -718,8 +718,8 @@ msgstr "Colorir saída"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Definir nível de verbosidade (0: baixo, 1: normal, 2: detalhado)"
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
-msgstr "Definir formato de saída. Suportados: json, html (padrão), txt, openvas, vulneranet, xml"
+msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
+msgstr "Definir formato de saída. Suportados: json, html (padrão), txt, openvas, xml"
 
 msgid "Output file or folder"
 msgstr "Arquivo ou pasta de saída "

@@ -803,8 +803,8 @@ msgstr "Colorize output"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
-msgstr "Set output format. Supported: json, html (default), txt, openvas, vulneranet, xml"
+msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
+msgstr "Set output format. Supported: json, html (default), txt, openvas, xml"
 
 msgid "Output file or folder"
 msgstr "Output file or folder"

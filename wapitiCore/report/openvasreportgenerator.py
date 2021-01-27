@@ -284,5 +284,5 @@ class OpenVASReportGenerator(ReportGenerator):
         report_infos.appendChild(results)
         report.appendChild(report_infos)
 
-        with open(output_path, "w") as openvas_report_file:
+        with open(output_path, "w", errors="ignore") as openvas_report_file:
             self._xml_doc.writexml(openvas_report_file, addindent="   ", newl="\n")

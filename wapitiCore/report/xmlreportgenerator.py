@@ -275,5 +275,5 @@ class XMLReportGenerator(ReportGenerator):
         report.appendChild(anomalies)
         report.appendChild(additionals)
 
-        with open(output_path, "w") as xml_report_file:
+        with open(output_path, "w", errors="ignore") as xml_report_file:
             self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")

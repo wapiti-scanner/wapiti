@@ -19,12 +19,6 @@
         <className>TXTReportGenerator</className>
     </reportGenerator>
     <reportGenerator>
-        <description>VulneraNET format</description>
-        <reportTypeKey>vulneranet</reportTypeKey>
-        <classModule>vulneranetxmlreportgenerator</classModule>
-        <className>VulneraNetXMLReportGenerator</className>
-    </reportGenerator>
-    <reportGenerator>
         <description>JSON format</description>
         <reportTypeKey>json</reportTypeKey>
         <classModule>jsonreportgenerator</classModule>
