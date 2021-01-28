@@ -72,7 +72,7 @@ OUTPUT OPTIONS:
 
 REPORT OPTIONS:
 
-  * `-f` {json,html,txt,openvas,xml}
+  * `-f` {json,html,txt,xml}
   * `-o` <OUPUT_PATH>
 
 OTHER OPTIONS:
@@ -267,7 +267,7 @@ Wapiti prints its status to standard output. The two following options allow to 
 Wapiti will generate a report at the end of the attack process. Several formats of reports are available.
 
   * `-f`, `--format` <FORMAT>  
-    Set the format of the report. Valid choices are json, html, txt, openvas and xml.  
+    Set the format of the report. Valid choices are json, html, txt and xml.  
     Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.
     
   * `-o`, `--output` <OUTPUT_PATH>  

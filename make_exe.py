@@ -118,7 +118,6 @@ if a script is vulnerable.""",
                 "wapitiCore.report.reportgenerator",
                 "wapitiCore.report.htmlreportgenerator",
                 "wapitiCore.report.jsonreportgenerator",
-                "wapitiCore.report.openvasreportgenerator",
                 "wapitiCore.report.txtreportgenerator",
                 "wapitiCore.report.xmlreportgenerator"
             ]

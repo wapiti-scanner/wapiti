@@ -24,10 +24,4 @@
         <classModule>jsonreportgenerator</classModule>
         <className>JSONReportGenerator</className>
     </reportGenerator>
-    <reportGenerator>
-        <description>OpenVAS XML format</description>
-        <reportTypeKey>openvas</reportTypeKey>
-        <classModule>openvasreportgenerator</classModule>
-        <className>OpenVASReportGenerator</className>
-    </reportGenerator>
 </reportGenerators>

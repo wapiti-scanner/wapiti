@@ -951,9 +951,9 @@ def wapiti_main():
     parser.add_argument(
         "-f", "--format",
         metavar="FORMAT",
-        help=_("Set output format. Supported: json, html (default), txt, openvas, xml"),
+        help=_("Set output format. Supported: json, html (default), txt, xml"),
         default="html",
-        choices=["json", "html", "txt", "openvas", "xml"]
+        choices=["json", "html", "txt", "xml"]
     )
 
     parser.add_argument(

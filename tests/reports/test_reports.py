@@ -95,9 +95,6 @@ def test_reports():
 
         if rep_gen_info.name == "html":
             output = report_gen.final_path
-        elif rep_gen_info.name == "openvas":
-            # Fix it later
-            continue
 
         with open(output) as fd:
             report = fd.read()

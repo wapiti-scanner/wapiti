@@ -718,8 +718,8 @@ msgstr "使用颜色美化输出"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "设置详细度 (0: quiet, 1: normal, 2: verbose)"
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
-msgstr "设置输出格式。支持：json, html (default), txt, openvas, xml"
+msgid "Set output format. Supported: json, html (default), txt, xml"
+msgstr "设置输出格式。支持：json, html (default), txt, xml"
 
 msgid "Output file or folder"
 msgstr "输出文件或目录"

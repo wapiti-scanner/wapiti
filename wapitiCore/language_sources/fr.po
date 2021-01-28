@@ -796,8 +796,8 @@ msgstr "Colorier l'affichage"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Définir le niveau de verbosité (0: silencieux, 1: normal, 2: bavard)"
 
-msgid "Set output format. Supported: json, html (default), txt, openvas, xml"
-msgstr "Définir le format du rapport. Formats supportés: json, html (par défaut), txt, openvas, xml"
+msgid "Set output format. Supported: json, html (default), txt, xml"
+msgstr "Définir le format du rapport. Formats supportés: json, html (par défaut), txt, xml"
 
 msgid "Output file or folder"
 msgstr "Fichier ou dossier de destination"
