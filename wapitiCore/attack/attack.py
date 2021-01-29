@@ -147,7 +147,11 @@ class Attack:
     require = []
 
     BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-    CONFIG_DIR = os.path.join(BASE_DIR, "config", "attacks")
+    DATA_DIR = os.path.join(BASE_DIR, "data", "attacks")
+
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    CONFIG_DIR = os.path.join(HOME_DIR, ".wapiti", "config")
+
     PAYLOADS_FILE = None
 
     # Color codes
@@ -214,7 +218,7 @@ class Attack:
     def payloads(self):
         """Load the payloads from the specified file"""
         if self.PAYLOADS_FILE:
-            return self.payload_reader.read_payloads(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE))
+            return self.payload_reader.read_payloads(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
         return []
 
     def load_require(self, dependencies: list = None):

@@ -46,7 +46,7 @@ class mod_xss(Attack):
     # key = taint code, value = (payload, flags)
     successful_xss = {}
 
-    PAYLOADS_FILE = path_join(Attack.CONFIG_DIR, "xssPayloads.ini")
+    PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
 
     MSG_VULN = _("XSS vulnerability")
 
@@ -218,7 +218,7 @@ class mod_xss(Attack):
 
     def check_payload(self, response, flags, taint):
         config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.CONFIG_DIR, self.PAYLOADS_FILE)))
+        config_reader.read_file(open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)))
 
         for section in config_reader.sections():
             if section == flags.section:

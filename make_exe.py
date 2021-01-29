@@ -30,7 +30,7 @@ data_files = [
 ]
 
 build_file_list(data_files, "data", "doc", src="")
-build_file_list(data_files, "data", "config", src="wapitiCore")
+build_file_list(data_files, "data", "data", src="wapitiCore")
 build_file_list(data_files, "data", "report_template", src="wapitiCore")
 build_file_list(data_files, "data", "language_sources", src="wapitiCore")
 

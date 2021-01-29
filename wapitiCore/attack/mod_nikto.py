@@ -64,7 +64,7 @@ class mod_nikto(Attack):
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        user_config_dir = self.persister.CRAWLER_DATA_DIR
+        user_config_dir = self.CONFIG_DIR
 
         if not os.path.isdir(user_config_dir):
             os.makedirs(user_config_dir)
@@ -88,7 +88,7 @@ class mod_nikto(Attack):
             self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
             with open(
-                    os.path.join(self.persister.CRAWLER_DATA_DIR, self.NIKTO_DB),
+                    os.path.join(self.CONFIG_DIR, self.NIKTO_DB),
                     "w", errors="ignore"
             ) as nikto_db_file:
                 writer = csv.writer(nikto_db_file)
@@ -212,7 +212,7 @@ class mod_nikto(Attack):
 
                 refs = []
                 if osv_id != "0":
-                    refs.append("http://osvdb.org/show/osvdb/" + osv_id)
+                    refs.append("https://vulners.com/osvdb/OSVDB:" + osv_id)
 
                 # CERT
                 cert_advisory = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)

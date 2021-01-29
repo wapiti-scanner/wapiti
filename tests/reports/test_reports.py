@@ -14,7 +14,7 @@ from wapitiCore.net.web import Request
 def test_reports():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     xml_rep_gen_parser = ReportGeneratorsXMLParser()
-    xml_rep_gen_parser.parse(os.path.join(base_dir, "config", "reports", "generators.xml"))
+    xml_rep_gen_parser.parse(os.path.join(base_dir, "data", "reports", "generators.xml"))
 
     for rep_gen_info in xml_rep_gen_parser.get_report_generators():
         report_gen = rep_gen_info.create_instance()
@@ -27,7 +27,7 @@ def test_reports():
         )
 
         vuln_xml_parser = VulnerabilityXMLParser()
-        vuln_xml_parser.parse(os.path.join(base_dir, "config", "vulnerabilities", "vulnerabilities.xml"))
+        vuln_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "vulnerabilities.xml"))
         for vul in vuln_xml_parser.get_vulnerabilities():
             report_gen.add_vulnerability_type(
                 _(vul.get_name()),
@@ -36,7 +36,7 @@ def test_reports():
                 vul.get_references())
 
         anom_xml_parser = AnomalyXMLParser()
-        anom_xml_parser.parse(os.path.join(base_dir, "config", "vulnerabilities", "anomalies.xml"))
+        anom_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "anomalies.xml"))
         for anomaly in anom_xml_parser.get_anomalies():
             report_gen.add_anomaly_type(
                 _(anomaly.get_name()),
@@ -46,7 +46,7 @@ def test_reports():
             )
 
         addition_xml_parser = AdditionalXMLParser()
-        addition_xml_parser.parse(os.path.join(base_dir, "config", "vulnerabilities", "additionals.xml"))
+        addition_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "additionals.xml"))
         for additional in addition_xml_parser.get_additionals():
             report_gen.add_additional_type(
                 _(additional.get_name()),

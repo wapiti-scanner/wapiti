@@ -57,7 +57,7 @@ elif lang not in AVAILABLE_LANGS:
     lang = "en"
 
 BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-LANG_PATH = os.path.join(BASE_DIR, "config", "language")
+LANG_PATH = os.path.join(BASE_DIR, "data", "language")
 
 lan = gettext.translation(
     "wapiti",

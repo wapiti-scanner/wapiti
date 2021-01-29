@@ -108,7 +108,7 @@ class Wapiti:
         self.report_gen = None
         self.report_generator_type = "html"
         self.xml_rep_gen_parser = ReportGeneratorsXMLParser()
-        self.xml_rep_gen_parser.parse(os.path.join(CONF_DIR, "config", "reports", "generators.xml"))
+        self.xml_rep_gen_parser.parse(os.path.join(CONF_DIR, "data", "reports", "generators.xml"))
         self.output_file = ""
 
         self.urls = []
@@ -160,7 +160,7 @@ class Wapiti:
                 break
 
         vuln_xml_parser = VulnerabilityXMLParser()
-        vuln_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "vulnerabilities.xml"))
+        vuln_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "vulnerabilities.xml"))
         for vul in vuln_xml_parser.get_vulnerabilities():
             self.report_gen.add_vulnerability_type(
                 _(vul.get_name()),
@@ -169,7 +169,7 @@ class Wapiti:
                 vul.get_references())
 
         anom_xml_parser = AnomalyXMLParser()
-        anom_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "anomalies.xml"))
+        anom_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "anomalies.xml"))
         for anomaly in anom_xml_parser.get_anomalies():
             self.report_gen.add_anomaly_type(
                 _(anomaly.get_name()),
@@ -179,7 +179,7 @@ class Wapiti:
             )
 
         addition_xml_parser = AdditionalXMLParser()
-        addition_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "additionals.xml"))
+        addition_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "additionals.xml"))
         for additional in addition_xml_parser.get_additionals():
             self.report_gen.add_additional_type(
                 _(additional.get_name()),
