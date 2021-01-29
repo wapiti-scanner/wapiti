@@ -32,7 +32,7 @@ from wapitiCore.net import web
 
 class mod_backup(Attack):
     """
-    This class implements a "backup attack"
+    Uncover backup files on the web server.
     """
 
     PAYLOADS_FILE = "backupPayloads.txt"

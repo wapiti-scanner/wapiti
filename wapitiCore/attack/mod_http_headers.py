@@ -20,7 +20,7 @@ from wapitiCore.language.vulnerability import Additional, _
 
 
 class mod_http_headers(Attack):
-    """This class check the recommendations of security parameters in HTTP headers"""
+    """Evaluate the security of HTTP headers."""
     name = "http_headers"
     check_list_xframe = ['deny', 'sameorigin', 'allow-from']
     check_list_xss = ['1']

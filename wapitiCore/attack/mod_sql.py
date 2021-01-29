@@ -27,7 +27,7 @@ from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 class mod_sql(Attack):
     """
-    This class implements an error-based SQL Injection attack
+    Detect SQL injection vulnerabilities by triggering errors (error-based technique).
     """
 
     time_to_sleep = 6

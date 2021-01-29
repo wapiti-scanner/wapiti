@@ -26,7 +26,7 @@ from wapitiCore.net.web import Request
 
 class mod_wapp(Attack):
     """
-    This class implements a web technology detection based on Wappalyzer
+    Identify web technologies used by the web server using Wappalyzer database.
     """
 
     name = "wapp"

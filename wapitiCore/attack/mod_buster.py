@@ -25,7 +25,7 @@ from wapitiCore.net import web
 
 class mod_buster(Attack):
     """
-    This class implements a file and directory buster"
+    Brute force paths on the web-server to discover hidden files and directories.
     """
 
     PAYLOADS_FILE = "busterPayloads.txt"

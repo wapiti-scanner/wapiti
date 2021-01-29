@@ -28,7 +28,7 @@ from wapitiCore.net.crawler import Page
 
 class mod_csrf(Attack):
     """
-    This class implements a CSRF/XSRF attack
+    Detect forms missing Cross-Site Request Forgery protections (CSRF tokens).
     """
 
     name = "csrf"

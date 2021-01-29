@@ -22,6 +22,7 @@ from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_
 
 # This module check the basics recommendations of CSP
 class mod_csp(Attack):
+    """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 
     def attack(self):

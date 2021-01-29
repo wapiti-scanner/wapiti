@@ -26,7 +26,7 @@ from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 class mod_exec(Attack):
     """
-    This class implements a command execution attack
+    Detect scripts vulnerable to command and/or code execution.
     """
 
     PAYLOADS_FILE = "execPayloads.txt"

@@ -25,7 +25,7 @@ from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
 
 
 class mod_crlf(Attack):
-    """This class implements a CRLF attack"""
+    """Detect Carriage Return Line Feed (CRLF) injection vulnerabilities."""
     # Won't work with PHP >= 4.4.2
 
     name = "crlf"

@@ -20,6 +20,7 @@ from wapitiCore.language.vulnerability import Additional, _
 
 
 class mod_cookieflags(Attack):
+    """Evaluate the security of cookies on the website."""
     name = "cookieflags"
 
     @staticmethod

@@ -29,7 +29,7 @@ from wapitiCore.net import web
 
 class mod_shellshock(Attack):
     """
-    This class implements a "bash shellshock" vulnerability tester"
+    Detects scripts vulnerable to the infamous ShellShock vulnerability.
     """
 
     name = "shellshock"

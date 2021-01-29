@@ -23,7 +23,7 @@ from wapitiCore.language.vulnerability import Vulnerability, _
 
 
 class mod_redirect(Attack):
-    """This class implements an open-redirect attack"""
+    """Detect Open Redirect vulnerabilities."""
     # Won't work with PHP >= 4.4.2
 
     name = "redirect"

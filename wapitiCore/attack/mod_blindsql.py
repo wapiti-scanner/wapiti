@@ -25,7 +25,7 @@ from requests.exceptions import ReadTimeout, RequestException
 
 class mod_blindsql(Attack):
     """
-    This class implements an SQL Injection attack
+    Detect SQL injection vulnerabilities using blind time-based technique.
     """
 
     PAYLOADS_FILE = "blindSQLPayloads.txt"

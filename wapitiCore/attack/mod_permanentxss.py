@@ -31,7 +31,7 @@ from wapitiCore.net.csp_utils import has_strong_csp
 
 class mod_permanentxss(Attack):
     """
-    This class detects permanent (stored) XSS vulnerabilities.
+    Detect stored (aka permanent) Cross-Site Scripting vulnerabilities on the web server.
     """
 
     name = "permanentxss"

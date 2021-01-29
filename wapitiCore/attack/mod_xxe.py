@@ -38,7 +38,7 @@ def search_pattern(content: str, patterns: list) -> str:
 
 
 class mod_xxe(Attack):
-    """This class implements a file handling attack"""
+    """Detect scripts vulnerable to XML external entity injection (also known as XXE)."""
 
     name = "xxe"
     do_get = True

@@ -25,7 +25,7 @@ from requests.exceptions import RequestException
 
 class mod_methods(Attack):
     """
-    This class detects interesting HTTP methods
+    Detect uncommon HTTP methods (like PUT) that may be allowed by a script.
     """
 
     name = "methods"

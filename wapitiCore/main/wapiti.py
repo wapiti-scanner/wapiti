@@ -32,6 +32,7 @@ from sqlite3 import OperationalError
 from hashlib import md5
 from random import choice
 import codecs
+from inspect import getdoc
 
 import requests
 from requests.exceptions import RequestException, ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError
@@ -1006,8 +1007,11 @@ def wapiti_main():
         print(_("[*] Available modules:"))
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
         for module_name in modules_list:
-            is_common = " (default)" if module_name in attack.commons else ""
-            print("  {}{}".format(module_name, is_common))
+            mod = import_module("wapitiCore.attack.mod_" + module_name)
+            is_common = " (used by default)" if module_name in attack.commons else ""
+            print("\t{}{}".format(module_name, is_common))
+            print("\t\t" + getdoc(getattr(mod, "mod_" + module_name)))
+            print('')
         sys.exit()
 
     url = args.base_url

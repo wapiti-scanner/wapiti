@@ -30,7 +30,7 @@ from wapitiCore.net import web
 
 class mod_htaccess(Attack):
     """
-    This class implements a htaccess attack
+    Attempt to bypass access controls to a resource by using a custom HTTP method.
     """
 
     name = "htaccess"

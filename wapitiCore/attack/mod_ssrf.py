@@ -147,7 +147,7 @@ class SsrfMutator(Mutator):
 
 class mod_ssrf(Attack):
     """
-    This class implements an SSRF vulnerability check
+    Detect Server-Side Request Forgery vulnerabilities.
     """
 
     name = "ssrf"

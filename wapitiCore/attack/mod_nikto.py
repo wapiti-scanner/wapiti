@@ -50,7 +50,7 @@ from wapitiCore.net import web
 
 class mod_nikto(Attack):
     """
-    This class implements a Nikto attack
+    Perform a brute-force attack to uncover known and potentially dangerous scripts on the web server.
     """
 
     nikto_db = []

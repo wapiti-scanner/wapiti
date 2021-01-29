@@ -30,7 +30,7 @@ from wapitiCore.net import web
 
 
 class mod_brute_login_form(Attack):
-    """Performs brute force attack on login forms, testing for known weak usernames and passwords."""
+    """Attempt to login on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
     PAYLOADS_FILE = "passwords.txt"
     PAYLOADS_FILE_USER = "users.txt"
