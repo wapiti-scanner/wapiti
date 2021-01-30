@@ -111,7 +111,10 @@ def test_true_positive():
     responses.add(
         responses.GET,
         url=re.compile(r"http://perdu.com/\?foo=.*"),
-        body="You have an error in your SQL syntax"
+        body=(
+            "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version "
+            "for the right syntax to use near '\\\"\\'' at line 1"
+        )
     )
 
     persister = FakePersister()
