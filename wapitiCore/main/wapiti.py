@@ -215,6 +215,10 @@ class Wapiti:
 
         for attack_module in self.attacks:
             attack_module.set_verbose(self.verbose)
+            if attack_module.name not in attack.commons:
+                attack_module.do_get = False
+                attack_module.do_post = False
+
             if self.color == 1:
                 attack_module.set_color()
 

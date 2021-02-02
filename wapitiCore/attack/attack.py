@@ -31,7 +31,7 @@ from requests.exceptions import RequestException, ReadTimeout
 
 from wapitiCore.net.web import Request
 
-
+# All Wapiti attack modules
 modules = [
     "mod_crlf",
     "mod_csp",
@@ -57,7 +57,20 @@ modules = [
     "mod_wapp"
 ]
 
-commons = ["blindsql", "exec", "file", "permanentxss", "redirect", "sql", "xss", "ssrf"]
+# Modules that will be used if option -m isn't used
+commons = [
+    "blindsql",
+    "cookieflags",
+    "csp",
+    "exec",
+    "file",
+    "http_headers",
+    "permanentxss",
+    "redirect",
+    "sql",
+    "ssrf",
+    "xss"
+]
 
 
 class PayloadType(Enum):

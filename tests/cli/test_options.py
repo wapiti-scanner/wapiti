@@ -38,3 +38,15 @@ def test_options():
     cli._init_attacks()
     activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
     assert len(activated_modules) == 1
+
+    # Empty module list: no modules will be used
+    cli.set_modules("")
+    cli._init_attacks()
+    activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+    assert not activated_modules
+
+    # Use default settings: onload use "commons" modules
+    cli.set_modules(None)
+    cli._init_attacks()
+    activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+    assert activated_modules == set(commons)
