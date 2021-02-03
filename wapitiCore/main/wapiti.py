@@ -581,8 +581,8 @@ class Wapiti:
     def set_scan_force(self, force: str):
         self._scan_force = force
 
-    def set_max_scan_time(self, minutes: float):
-        self._max_scan_time = minutes * 60
+    def set_max_scan_time(self, seconds: float):
+        self._max_scan_time = seconds
 
     def set_color(self):
         """Put colors in the console output (terminal must support colors)"""
@@ -881,8 +881,10 @@ def wapiti_main():
 
     parser.add_argument(
         "--max-scan-time",
-        metavar="MINUTES",
-        help=_("Set how many minutes you want the scan to last (floats accepted)"),
+        metavar="SECONDS",
+        help=_("Set how many seconds you want the scan to last (floats accepted)"),
+        type=float, default=0
+    )
         type=float, default=0
     )
 
