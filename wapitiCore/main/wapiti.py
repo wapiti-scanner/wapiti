@@ -128,6 +128,7 @@ class Wapiti:
         self._max_files_per_dir = 0
         self._scan_force = "normal"
         self._max_scan_time = 0
+        self._max_attack_time = 0
         self._bug_report = True
 
         if session_dir:
@@ -362,6 +363,7 @@ class Wapiti:
         self._init_attacks()
 
         for attack_module in self.attacks:
+            start = datetime.utcnow()
             if attack_module.do_get is False and attack_module.do_post is False:
                 continue
 
@@ -397,6 +399,10 @@ class Wapiti:
                     original_request_or_exception = next(generator)
                     if isinstance(original_request_or_exception, BaseException):
                         raise original_request_or_exception
+                    if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
+                        print(_("Max attack time was reached for module {0}, stopping."
+                        .format(attack_module.name)))
+                        break
                 except KeyboardInterrupt as exception:
                     print('')
                     print(_("Attack process was interrupted. Do you want to:"))
@@ -583,6 +589,9 @@ class Wapiti:
 
     def set_max_scan_time(self, seconds: float):
         self._max_scan_time = seconds
+
+    def set_max_attack_time(self, seconds: float):
+        self._max_attack_time = seconds
 
     def set_color(self):
         """Put colors in the console output (terminal must support colors)"""
@@ -885,6 +894,11 @@ def wapiti_main():
         help=_("Set how many seconds you want the scan to last (floats accepted)"),
         type=float, default=0
     )
+
+    parser.add_argument(
+        "--max-attack-time",
+        metavar="SECONDS",
+        help=_("Set how many seconds you want each attack module to last (floats accepted)"),
         type=float, default=0
     )
 
@@ -1099,6 +1113,7 @@ def wapiti_main():
         wap.set_max_links_per_page(args.max_links_per_page)
         wap.set_scan_force(args.scan_force)
         wap.set_max_scan_time(args.max_scan_time)
+        wap.set_max_attack_time(args.max_attack_time)
 
         # should be a setter
         wap.verbosity(args.verbosity)
