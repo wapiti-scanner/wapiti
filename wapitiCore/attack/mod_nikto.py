@@ -57,7 +57,7 @@ class mod_nikto(Attack):
 
     name = "nikto"
     NIKTO_DB = "nikto_db"
-    NIKTO_DB_URL = "https://raw.githubusercontent.com/sullo/nikto/master/program/databases/db_tests"
+    NIKTO_DB_URL = "https://raw.githubusercontent.com/wapiti-scanner/nikto/master/program/databases/db_tests"
 
     do_get = False
     do_post = False
