@@ -22,7 +22,7 @@ class ApplicationDataException(Exception):
 class ApplicationData:
     """
     Store application database.
-    For instance https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies.json.
+    For instance https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json.
     """
 
     def __init__(self, data_filename=None):

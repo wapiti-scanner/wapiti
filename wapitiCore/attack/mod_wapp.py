@@ -31,7 +31,7 @@ class mod_wapp(Attack):
 
     name = "wapp"
     WAPP_DB = "apps.json"
-    WAPP_DB_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies.json"
+    WAPP_DB_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json"
 
     do_get = False
     do_post = False

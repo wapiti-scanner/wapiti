@@ -35,7 +35,7 @@ class FakePersister:
 @responses.activate
 def test_false_positive():
     # Test for false positive
-    responses.add_passthru("https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies.json")
+    responses.add_passthru("https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json")
 
     responses.add(
         responses.GET,
