@@ -111,12 +111,18 @@ class ApplicationData:
                 ]
 
             for dict_field in ["meta", "cookies", "headers"]:
-                for (key, pattern) in self.applications[application_name][dict_field].items():
+                for (key, patterns) in self.applications[application_name][dict_field].items():
                     # Sometimes key is provided but pattern is empty
                     # However looking for key seems to be interesting
-                    if pattern == "":
-                        pattern = key
-                    self.applications[application_name][dict_field][key] = self.normalize_regex(pattern)
+                    if patterns == "":
+                        patterns = key
+                    
+                    # {meta: {generator: "abc"}} --> {meta: {generator: ["abc"]}}
+                    if not isinstance(patterns, list):
+                        self.applications[application_name][dict_field][key] = [patterns]
+
+                    for i, pattern in enumerate(self.applications[application_name][dict_field][key]):
+                        self.applications[application_name][dict_field][key][i] = self.normalize_regex(pattern)
 
             for string_field in ["url"]:
                 regex = self.applications[application_name][string_field]
@@ -231,9 +237,11 @@ class Wappalyzer:
         is_detected = False
         for (key, regex_params) in application[content_type].items():
             if key in contents:
-                if re.search(regex_params['regex'], contents[key]):
-                    is_detected = True
-                    self.update_version_detected(application, regex_params, contents[key])
+                # regex_params is a list : [{"application_pattern": "..", "regex": "re.compile(..)"}, ...]
+                for i, _ in enumerate(regex_params):
+                    if re.search(regex_params[i]['regex'], contents[key]):
+                        is_detected = True
+                        self.update_version_detected(application, regex_params[i], contents[key])
 
         return is_detected
 
