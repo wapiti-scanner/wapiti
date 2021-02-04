@@ -651,16 +651,25 @@ class Wapiti:
         return self.persister.have_attacks_started()
 
 
-def is_valid_endpoint(url):
+def fix_url_path(url):
+    """Fix the url path if its not defined"""
+    return url if urlparse(url).path else url + '/'
+
+
+def is_valid_endpoint(url_type, url):
+    """Verify if the url provided has the right format"""
     try:
         parts = urlparse(url)
     except ValueError:
+        print('ValueError')
         return False
     else:
         if parts.params or parts.query or parts.fragment:
+            print(_("Error: {} must not contain params, query or fragment!").format(url_type))
             return False
-        if parts.scheme in ("http", "https") and parts.netloc and parts.path:
+        if parts.scheme in ("http", "https") and parts.netloc:
             return True
+    print(_("Error: {} must contain scheme and host").format(url_type))
     return False
 
 
@@ -1044,13 +1053,9 @@ def wapiti_main():
             print('')
         sys.exit()
 
-    url = args.base_url
+    url = fix_url_path(args.base_url)
 
     parts = urlparse(url)
-    # Set path to '/' if path is Null
-    if not parts.path:
-        url += '/'
-
     if not parts.scheme or not parts.netloc:
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
@@ -1163,27 +1168,31 @@ def wapiti_main():
             "timeout": args.timeout
         }
 
-        if is_valid_endpoint(args.endpoint):
-            attack_options["external_endpoint"] = args.endpoint
-            attack_options["internal_endpoint"] = args.endpoint
+        if "endpoint" in args:
+            endpoint = fix_url_path(args.endpoint)
+            if is_valid_endpoint('ENDPOINT', endpoint):
+                attack_options["external_endpoint"] = endpoint
+                attack_options["internal_endpoint"] = endpoint
+            else:
+                raise InvalidOptionValue("--endpoint", args.endpoint)
 
         if "external_endpoint" in args:
-            if is_valid_endpoint(args.external_endpoint):
-                attack_options["external_endpoint"] = args.external_endpoint
+            external_endpoint = fix_url_path(args.external_endpoint)
+            if is_valid_endpoint('EXTERNAL ENDPOINT', external_endpoint):
+                attack_options["external_endpoint"] = external_endpoint
             else:
-                print(_("Error: Endpoint URL must contain scheme, host and path with trailing slash!"))
-                raise InvalidOptionValue("--external-endpoint", args.external_endpoint)
+                raise InvalidOptionValue("--external-endpoint", external_endpoint)
 
         if "internal_endpoint" in args:
-            if is_valid_endpoint(args.internal_endpoint):
-                if ping(args.internal_endpoint):
-                    attack_options["internal_endpoint"] = args.internal_endpoint
+            internal_endpoint = fix_url_path(args.internal_endpoint)
+            if is_valid_endpoint('INTERNAL ENDPOINT', internal_endpoint):
+                if ping(internal_endpoint):
+                    attack_options["internal_endpoint"] = internal_endpoint
                 else:
                     print(_("Error: Internal endpoint URL must be accessible from Wapiti!"))
-                    raise InvalidOptionValue("--internal-endpoint", args.internal_endpoint)
+                    raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
             else:
-                print(_("Error: Endpoint URL must contain scheme, host and path with trailing slash!"))
-                raise InvalidOptionValue("--internal-endpoint", args.internal_endpoint)
+                raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)
