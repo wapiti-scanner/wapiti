@@ -35,7 +35,7 @@ PROXY AND AUTHENTICATION OPTIONS:
 
   * `-p` <PROXY_URL>
   * `-a` <CREDENTIALS>
-  * `--auth-type` {basic,digest,kerberos,ntlm}
+  * `--auth-type` {basic,digest,kerberos,ntlm,post}
   * `-c` <COOKIE_FILE>
 
 SESSION OPTIONS:
@@ -44,6 +44,8 @@ SESSION OPTIONS:
   * `--resume-crawl`
   * `--flush-attacks`
   * `--flush-session`
+  * `--store-session` <PATH>
+  * `--store-config` <PATH>
 
 SCAN AND ATTACKS TUNING:
 
@@ -80,6 +82,7 @@ OTHER OPTIONS:
 
   * `--no-bugreport`
   * `--version`
+  * `--update`
   * `-h`
 
 ## TARGET SPECIFICATION
@@ -126,12 +129,13 @@ OTHER OPTIONS:
     Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    Set credentials to use for HTTP authentication on the target.  
+    Set credentials to use for authentication on the target.  
     Given value should be in the form login%password (% is used as a separator)
     
   * `--auth-type` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.  
+    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post.  
     Kerberos and NTLM authentication may require you to install additionnal Python modules.
+    Post authentication could be combined with `-s` to specify where to find the login form.
 
   * `-c`, `--cookie` <COOKIE_FILE>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more informations.
@@ -157,8 +161,11 @@ Following options allows you to bypass this behavior/
   * `--flush-session`  
     Forget everything about the target for the given scope.
     
-  * `--store-session`
-    Specify an alternative path for storing session (.db and .pkl) files
+  * `--store-session` <PATH>
+    Specify an alternative path for storing session (.db and .pkl) files.
+
+  * `--store-config` <PATH>
+    Specify an alternative path for storing particular module (apps.json and nikto_db) files.
 
 ## SCAN AND ATTACKS TUNING
 
@@ -167,6 +174,7 @@ Following options allows you to bypass this behavior/
     Those URLs will be given a depth of 0, just like the base URL.  
     This option can be called several times.  
     You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.
+    Combined with `--auth-type=post`, Wapiti will try to find a login form on the first URL provided and to authenticate with the given credentials.
     
   * `-x`, `--exclude` <URL>  
     Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).  
@@ -286,6 +294,10 @@ Wapiti will generate a report at the end of the attack process. Several formats 
   * `--no-bugreport`  
     If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.  
     You can still prevent reports from being sent using that option.
+
+  * `--update`
+    Update particular Wapiti modules (download a fresh version of the apps.json and nikto_db files) then exit. 
+    You can combine it with `--store-config` to specify where to store downloaded files.
 
   * `-h`, `--help`  
     Show detailed options description. More details are available in this manpage though.
