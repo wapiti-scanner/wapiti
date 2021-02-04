@@ -55,6 +55,7 @@ SCAN AND ATTACKS TUNING:
   * `--max-links-per-page` <MAX_LINKS_PER_PAGE>
   * `--max-files-per-dir` <MAX_FILES_PER_DIR>
   * `--max-scan-time` <MAX_SCAN_TIME>
+  * `--max-attack-time` <MAX_ATTACK_TIME>
   * `--max-parameters` <MAX>
   * `-S`, `--scan-force` {paranoid,sneaky,polite,normal,aggressive,insane}
 
@@ -198,8 +199,12 @@ Following options allows you to bypass this behavior/
     Note that an URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.  
     Like the previous option it should be useful only in certain situations.
     
-  * `--max-scan-time` <MINUTES>  
-    Stop the scan after MINUTES minutes if it is still running.  
+  * `--max-scan-time` <SECONDS>
+    Stop the scan after SECONDS seconds if it is still running.
+    Should be useful to automatise scanning from another process (continuous testing).
+
+  * `--max-attack-time` <SECONDS>
+    Each attack module will stop after SECONDS seconds if it is still running.
     Should be useful to automatise scanning from another process (continuous testing).
     
   * `--max-parameters` <MAX>  
