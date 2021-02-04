@@ -38,7 +38,7 @@ class FakePersister:
 @responses.activate
 def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add_passthru("https://raw.githubusercontent.com/sullo/nikto/master/program/databases/db_tests")
+    responses.add_passthru("https://raw.githubusercontent.com/wapiti-scanner/nikto/master/program/databases/db_tests")
 
     responses.add(
         responses.GET,
