@@ -61,15 +61,16 @@ class mod_nikto(Attack):
 
     do_get = False
     do_post = False
+    user_config_dir = None
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        user_config_dir = self.CONFIG_DIR
+        self.user_config_dir = self.persister.CONFIG_DIR
 
-        if not os.path.isdir(user_config_dir):
-            os.makedirs(user_config_dir)
+        if not os.path.isdir(self.user_config_dir):
+            os.makedirs(self.user_config_dir)
         try:
-            with open(os.path.join(user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+            with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
                 reader = csv.reader(nikto_db_file)
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
@@ -88,7 +89,7 @@ class mod_nikto(Attack):
             self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
             with open(
-                    os.path.join(self.CONFIG_DIR, self.NIKTO_DB),
+                    os.path.join(self.user_config_dir, self.NIKTO_DB),
                     "w", errors="ignore"
             ) as nikto_db_file:
                 writer = csv.writer(nikto_db_file)

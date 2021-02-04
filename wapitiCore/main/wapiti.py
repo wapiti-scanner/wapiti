@@ -89,7 +89,7 @@ class Wapiti:
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
-    def __init__(self, root_url, scope="folder", session_dir=None):
+    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None):
         self.target_url = root_url
         self.server = urlparse(root_url).netloc
         self.crawler = crawler.Crawler(root_url)
@@ -132,6 +132,9 @@ class Wapiti:
 
         if session_dir:
             SqlitePersister.CRAWLER_DATA_DIR = session_dir
+
+        if config_dir:
+            SqlitePersister.CONFIG_DIR = config_dir
 
         self._history_file = os.path.join(
             SqlitePersister.CRAWLER_DATA_DIR,
@@ -824,6 +827,13 @@ def wapiti_main():
     )
 
     parser.add_argument(
+        "--store-config",
+        help=_("Directory where to store configuration databases."),
+        default=None,
+        metavar="PATH",
+    )
+
+    parser.add_argument(
         "-s", "--start",
         action="append",
         default=[],
@@ -1029,7 +1039,7 @@ def wapiti_main():
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
 
-    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session)
+    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     if args.update:
         print(_("[*] Updating modules"))

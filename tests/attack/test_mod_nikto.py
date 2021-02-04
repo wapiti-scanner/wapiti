@@ -11,6 +11,11 @@ from wapitiCore.attack.mod_nikto import mod_nikto
 
 class FakePersister:
 
+    CONFIG_DIR_NAME = "config"
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
+    CONFIG_DIR = os.path.join(BASE_DIR, CONFIG_DIR_NAME)
+
     def __init__(self):
         self.requests = []
         self.additionals = set()
