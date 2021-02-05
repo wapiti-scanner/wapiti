@@ -77,6 +77,10 @@ Supported attacks
 + Server Side Request Forgery (through use of an external Wapiti website)
 + Open Redirects
 + Detection of uncommon HTTP methods (like PUT)
++ Basic CSP Evaluator 
++ Brute Force login form (using a dictionary list)
++ Cheking HTTP security headers
++ Checking cookie security flags (secure and httponly flags)
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -105,6 +109,10 @@ The aforementioned attacks are tied to the following module names :
 + ssrf (Server Side Request Forgery)
 + xss (XSS injection module)
 + xxe (XML External Entity attack)
++ csp (Basic CSP Evaluator)
++ brute_login_form (Brute Force login form using a dictionary list)
++ http_header (Check HTTP security headers)
++ cookieflags (Check Secure and HttpOnly flags)
 
 Module names can be given as comma separated list using the "-m" or "--module" option.
 
