@@ -163,7 +163,6 @@ class Attack:
     DATA_DIR = os.path.join(BASE_DIR, "data", "attacks")
 
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
-    CONFIG_DIR = os.path.join(HOME_DIR, ".wapiti", "config")
 
     PAYLOADS_FILE = None
 

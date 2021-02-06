@@ -1,7 +1,9 @@
-                                WAPITI - VERSION 3.0.3
-                    Wapiti is a web application security auditor.
-                           http://wapiti.sourceforge.io/
+WAPITI - VERSION 3.0.3
+===========
 
+Wapiti is a web application security auditor.
+
+http://wapiti-scanner.github.io/
 
 Requirements
 ============
@@ -42,7 +44,7 @@ Browsing features
 =================
 
 + Support HTTP, HTTPS and SOCKS5 proxies.
-+ Authentication on the target via several methods : Basic, Digest, Kerberos or NTLM.
++ Authentication on the target via several methods : Basic, Digest, Kerberos, NTLM or GET/POST on login forms.
 + Ability to restrain the scope of the scan (domain, folder, page, url).
 + Automatic removal of one or more parameters in URLs.
 + Multiple safeguards against scan endless-loops (for example, limit of values for a parameter).
@@ -77,6 +79,11 @@ Supported attacks
 + Server Side Request Forgery (through use of an external Wapiti website)
 + Open Redirects
 + Detection of uncommon HTTP methods (like PUT)
++ Basic CSP Evaluator 
++ Brute Force login form (using a dictionary list)
++ Cheking HTTP security headers
++ Checking cookie security flags (secure and httponly flags)
++ Cross Site Request Forgery (CSRF) basic detection
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -105,6 +112,12 @@ The aforementioned attacks are tied to the following module names :
 + ssrf (Server Side Request Forgery)
 + xss (XSS injection module)
 + xxe (XML External Entity attack)
++ csp (Basic CSP Evaluator)
++ brute_login_form (Brute Force login form using a dictionary list)
++ http_header (Check HTTP security headers)
++ cookieflags (Check Secure and HttpOnly flags)
++ csrf (CSRF basic detection)
++ wapp (Not an attack module, retrieves web technologies with versions and categories in use on the target)
 
 Module names can be given as comma separated list using the "-m" or "--module" option.
 

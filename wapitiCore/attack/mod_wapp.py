@@ -35,15 +35,16 @@ class mod_wapp(Attack):
 
     do_get = False
     do_post = False
+    user_config_dir = None
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-        user_config_dir = self.CONFIG_DIR
+        self.user_config_dir = self.persister.CONFIG_DIR
 
-        if not os.path.isdir(user_config_dir):
-            os.makedirs(user_config_dir)
+        if not os.path.isdir(self.user_config_dir):
+            os.makedirs(self.user_config_dir)
         try:
-            with open(os.path.join(user_config_dir, self.WAPP_DB)) as wapp_db_file:
+            with open(os.path.join(self.user_config_dir, self.WAPP_DB)) as wapp_db_file:
                 json.load(wapp_db_file)
 
         except IOError:
@@ -56,7 +57,7 @@ class mod_wapp(Attack):
             request = Request(self.WAPP_DB_URL)
             response = self.crawler.send(request)
 
-            with open(os.path.join(self.CONFIG_DIR, self.WAPP_DB), 'w') as wapp_db_file:
+            with open(os.path.join(self.user_config_dir, self.WAPP_DB), 'w') as wapp_db_file:
                 json.dump(response.json, wapp_db_file)
 
         except IOError:
@@ -69,7 +70,7 @@ class mod_wapp(Attack):
             print("[+] {}".format(request))
 
         try:
-            application_data = ApplicationData(os.path.join(self.CONFIG_DIR, self.WAPP_DB))
+            application_data = ApplicationData(os.path.join(self.user_config_dir, self.WAPP_DB))
         except FileNotFoundError as exception:
             print(exception)
             print(_("Try using --store-session option, or update apps.json using --update option."))
