@@ -21,7 +21,7 @@ import math
 from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, MEDIUM_LEVEL, Anomaly, _
+from wapitiCore.language.vulnerability import HIGH_LEVEL, MEDIUM_LEVEL, Messages, _
 from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
@@ -136,16 +136,16 @@ class mod_csrf(Attack):
         except ReadTimeout:
 
             self.log_orange("---")
-            self.log_orange(Anomaly.MSG_TIMEOUT, original_request.path)
-            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+            self.log_orange(Messages.MSG_TIMEOUT, original_request.path)
+            self.log_orange(Messages.MSG_EVIL_REQUEST)
             self.log_orange(mutated_request.http_repr())
             self.log_orange("---")
 
-            anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(self.csrf_string)
+            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(self.csrf_string)
 
             self.add_anom(
                 request_id=original_request.path_id,
-                category=Anomaly.RES_CONSUMPTION,
+                category=Messages.RES_CONSUMPTION,
                 level=MEDIUM_LEVEL,
                 request=mutated_request,
                 info=anom_msg,

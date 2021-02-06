@@ -21,7 +21,7 @@ from urllib.parse import quote
 from requests.exceptions import ReadTimeout, HTTPError, RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, _
 from wapitiCore.definitions.crlf import NAME
 
 
@@ -53,16 +53,16 @@ class mod_crlf(Attack):
                     except ReadTimeout:
                         self.add_anom(
                             request_id=http_res.path_id,
-                            category=Anomaly.RES_CONSUMPTION,
-                            level=Anomaly.MEDIUM_LEVEL,
+                            category=Messages.RES_CONSUMPTION,
+                            level=MEDIUM_LEVEL,
                             request=mutated_request,
                             parameter=parameter,
                             info="Timeout (" + parameter + ")"
                         )
 
                         self.log_orange("---")
-                        self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                        self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                        self.log_orange(Messages.MSG_TIMEOUT, page)
+                        self.log_orange(Messages.MSG_EVIL_REQUEST)
                         self.log_orange(mutated_request.http_repr())
                         self.log_orange("---")
 

@@ -120,7 +120,7 @@ class mod_exec(Attack):
 
                             vuln_info = _("Blind command execution")
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(vuln_info, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                             else:
                                 vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
 

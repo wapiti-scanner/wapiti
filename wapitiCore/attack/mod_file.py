@@ -194,19 +194,19 @@ class mod_file(Attack):
                             continue
 
                         self.log_orange("---")
-                        self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                        self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                        self.log_orange(Messages.MSG_TIMEOUT, page)
+                        self.log_orange(Messages.MSG_EVIL_REQUEST)
                         self.log_orange(mutated_request.http_repr())
                         self.log_orange("---")
 
                         if parameter == "QUERY_STRING":
-                            anom_msg = Anomaly.MSG_QS_TIMEOUT
+                            anom_msg = Messages.MSG_QS_TIMEOUT
                         else:
-                            anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(parameter)
+                            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
                         self.add_anom(
                             request_id=original_request.path_id,
-                            category=Anomaly.RES_CONSUMPTION,
+                            category=Messages.RES_CONSUMPTION,
                             level=MEDIUM_LEVEL,
                             request=mutated_request,
                             info=anom_msg,
@@ -248,7 +248,7 @@ class mod_file(Attack):
 
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(vulnerable_method, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(vulnerable_method, page)
                             else:
                                 vuln_message = _("{0} via injection in the parameter {1}").format(
                                     vulnerable_method, parameter
