@@ -19,7 +19,8 @@
 from itertools import chain
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.definitions.blindsql import NAME
 from requests.exceptions import ReadTimeout, RequestException
 
 
@@ -74,16 +75,16 @@ class mod_blindsql(Attack):
                             break
 
                         if parameter == "QUERY_STRING":
-                            vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
-                            log_message = Vulnerability.MSG_QS_INJECT
+                            vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                            log_message = Messages.MSG_QS_INJECT
                         else:
                             vuln_message = _("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
-                            log_message = Vulnerability.MSG_PARAM_INJECT
+                            log_message = Messages.MSG_PARAM_INJECT
 
                         self.add_vuln(
                             request_id=original_request.path_id,
-                            category=Vulnerability.BLIND_SQL_INJECTION,
-                            level=Vulnerability.HIGH_LEVEL,
+                            category=NAME,
+                            level=HIGH_LEVEL,
                             request=mutated_request,
                             info=vuln_message,
                             parameter=parameter
@@ -96,7 +97,7 @@ class mod_blindsql(Attack):
                             page,
                             parameter
                         )
-                        self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                        self.log_red(Messages.MSG_EVIL_REQUEST)
                         self.log_red(mutated_request.http_repr())
                         self.log_red("---")
 
@@ -108,22 +109,22 @@ class mod_blindsql(Attack):
                         if response.status == 500 and not saw_internal_error:
                             saw_internal_error = True
                             if parameter == "QUERY_STRING":
-                                anom_msg = Anomaly.MSG_QS_500
+                                anom_msg = Messages.MSG_QS_500
                             else:
-                                anom_msg = Anomaly.MSG_PARAM_500.format(parameter)
+                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
                             self.add_anom(
                                 request_id=original_request.path_id,
-                                category=Anomaly.ERROR_500,
-                                level=Anomaly.HIGH_LEVEL,
+                                category=Messages.ERROR_500,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=anom_msg,
                                 parameter=parameter
                             )
 
                             self.log_orange("---")
-                            self.log_orange(Anomaly.MSG_500, page)
-                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                            self.log_orange(Messages.MSG_500, page)
+                            self.log_orange(Messages.MSG_EVIL_REQUEST)
                             self.log_orange(mutated_request.http_repr())
                             self.log_orange("---")
                 except (KeyboardInterrupt, RequestException) as exception:

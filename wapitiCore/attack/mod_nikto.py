@@ -24,7 +24,8 @@ import random
 from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, _
+from wapitiCore.language.vulnerability import HIGH_LEVEL, _
+from wapitiCore.definitions.dangerous_resource import NAME
 from wapitiCore.net import web
 
 
@@ -251,8 +252,8 @@ class mod_nikto(Attack):
                 self.log_red("---")
 
                 self.add_vuln(
-                    category=Vulnerability.NIKTO,
-                    level=Vulnerability.HIGH_LEVEL,
+                    category=NAME,
+                    level=HIGH_LEVEL,
                     request=evil_request,
                     info=info
                 )

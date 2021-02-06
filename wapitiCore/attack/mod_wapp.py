@@ -20,8 +20,11 @@ import os
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
-from wapitiCore.language.vulnerability import Additional, _
+from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 from wapitiCore.net.web import Request
+
+MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 
 
 class mod_wapp(Attack):
@@ -87,12 +90,15 @@ class mod_wapp(Attack):
             self.log_blue("---")
 
         for application_name in sorted(detected_applications, key=lambda x: x.lower()):
-                self.log_blue(Additional.MSG_TECHNO_VERSIONED, application_name,
-                              detected_applications[application_name]["versions"])
-                self.add_addition(
-                    category=Additional.TECHNO_DETECTED,
-                    level=Additional.LOW_LEVEL,
-                    request=request,
-                    info=json.dumps(detected_applications[application_name])
-                    )
+            self.log_blue(
+                MSG_TECHNO_VERSIONED,
+                application_name,
+                detected_applications[application_name]["versions"]
+            )
+            self.add_addition(
+                category=TECHNO_DETECTED,
+                level=LOW_LEVEL,
+                request=request,
+                info=json.dumps(detected_applications[application_name])
+            )
         yield

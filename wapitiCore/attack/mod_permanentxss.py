@@ -23,7 +23,8 @@ from os.path import join as path_join
 from requests.exceptions import Timeout, ReadTimeout
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
+from wapitiCore.definitions.xss import NAME
 from wapitiCore.net import web
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
 from wapitiCore.net.csp_utils import has_strong_csp
@@ -157,17 +158,17 @@ class mod_permanentxss(Attack):
 
                                     self.add_vuln(
                                         request_id=original_request.path_id,
-                                        category=Vulnerability.XSS,
-                                        level=Vulnerability.HIGH_LEVEL,
+                                        category=NAME,
+                                        level=HIGH_LEVEL,
                                         request=evil_request,
                                         parameter=parameter,
                                         info=description
                                     )
 
                                     if parameter == "QUERY_STRING":
-                                        injection_msg = Vulnerability.MSG_QS_INJECT
+                                        injection_msg = Messages.MSG_QS_INJECT
                                     else:
-                                        injection_msg = Vulnerability.MSG_PARAM_INJECT
+                                        injection_msg = Messages.MSG_PARAM_INJECT
 
                                     self.log_red("---")
                                     self.log_red(
@@ -180,7 +181,7 @@ class mod_permanentxss(Attack):
                                     if has_strong_csp(response):
                                         self.log_red(_("Warning: Content-Security-Policy is present!"))
 
-                                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                                    self.log_red(Messages.MSG_EVIL_REQUEST)
                                     self.log_red(evil_request.http_repr())
                                     self.log_red("---")
                                     # FIX: search for the next code in the webpage
@@ -235,20 +236,20 @@ class mod_permanentxss(Attack):
                     continue
 
                 self.log_orange("---")
-                self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                self.log_orange(Messages.MSG_TIMEOUT, page)
+                self.log_orange(Messages.MSG_EVIL_REQUEST)
                 self.log_orange(evil_request.http_repr())
                 self.log_orange("---")
 
                 if xss_param == "QUERY_STRING":
-                    anom_msg = Anomaly.MSG_QS_TIMEOUT
+                    anom_msg = Messages.MSG_QS_TIMEOUT
                 else:
-                    anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(xss_param)
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
 
                 self.add_anom(
                     request_id=injection_request.path_id,
-                    category=Anomaly.RES_CONSUMPTION,
-                    level=Anomaly.MEDIUM_LEVEL,
+                    category=Messages.RES_CONSUMPTION,
+                    level=MEDIUM_LEVEL,
                     request=evil_request,
                     info=anom_msg,
                     parameter=xss_param
@@ -286,17 +287,17 @@ class mod_permanentxss(Attack):
 
                     self.add_vuln(
                         request_id=injection_request.path_id,
-                        category=Vulnerability.XSS,
-                        level=Vulnerability.HIGH_LEVEL,
+                        category=NAME,
+                        level=HIGH_LEVEL,
                         request=evil_request,
                         parameter=xss_param,
                         info=description
                     )
 
                     if xss_param == "QUERY_STRING":
-                        injection_msg = Vulnerability.MSG_QS_INJECT
+                        injection_msg = Messages.MSG_QS_INJECT
                     else:
-                        injection_msg = Vulnerability.MSG_PARAM_INJECT
+                        injection_msg = Messages.MSG_PARAM_INJECT
 
                     self.log_red("---")
                     # TODO: a last parameter should give URL used to pass the vulnerable parameter
@@ -310,7 +311,7 @@ class mod_permanentxss(Attack):
                     if has_strong_csp(response):
                         self.log_red(_("Warning: Content-Security-Policy is present!"))
 
-                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
                     self.log_red(evil_request.http_repr())
                     self.log_red("---")
 
@@ -318,22 +319,22 @@ class mod_permanentxss(Attack):
                     break
                 elif response.status == 500 and not saw_internal_error:
                     if xss_param == "QUERY_STRING":
-                        anom_msg = Anomaly.MSG_QS_500
+                        anom_msg = Messages.MSG_QS_500
                     else:
-                        anom_msg = Anomaly.MSG_PARAM_500.format(xss_param)
+                        anom_msg = Messages.MSG_PARAM_500.format(xss_param)
 
                     self.add_anom(
                         request_id=injection_request.path_id,
-                        category=Anomaly.ERROR_500,
-                        level=Anomaly.HIGH_LEVEL,
+                        category=Messages.ERROR_500,
+                        level=HIGH_LEVEL,
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param
                     )
 
                     self.log_orange("---")
-                    self.log_orange(Anomaly.MSG_500, page)
-                    self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                    self.log_orange(Messages.MSG_500, page)
+                    self.log_orange(Messages.MSG_EVIL_REQUEST)
                     self.log_orange(evil_request.http_repr())
                     self.log_orange("---")
                     saw_internal_error = True

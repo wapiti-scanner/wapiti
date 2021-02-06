@@ -21,7 +21,8 @@ import math
 from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import HIGH_LEVEL, MEDIUM_LEVEL, Anomaly, _
+from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
 
@@ -145,7 +146,7 @@ class mod_csrf(Attack):
             self.add_anom(
                 request_id=original_request.path_id,
                 category=Anomaly.RES_CONSUMPTION,
-                level=Anomaly.MEDIUM_LEVEL,
+                level=MEDIUM_LEVEL,
                 request=mutated_request,
                 info=anom_msg,
             )
@@ -190,8 +191,8 @@ class mod_csrf(Attack):
 
             self.add_vuln(
                 request_id=original_request.path_id,
-                category=Vulnerability.CSRF,
-                level=Vulnerability.HIGH_LEVEL,
+                category=NAME,
+                level=HIGH_LEVEL,
                 request=original_request,
                 info=vuln_message,
             )

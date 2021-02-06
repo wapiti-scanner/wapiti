@@ -4,11 +4,9 @@ from time import gmtime
 import tempfile
 
 from wapitiCore.file.reportgeneratorsxmlparser import ReportGeneratorsXMLParser
-from wapitiCore.file.vulnerabilityxmlparser import VulnerabilityXMLParser
-from wapitiCore.file.anomalyxmlparser import AnomalyXMLParser
-from wapitiCore.file.additionalxmlparser import AdditionalXMLParser
 from wapitiCore.language.language import _
 from wapitiCore.net.web import Request
+from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
 
 
 def test_reports():
@@ -26,33 +24,28 @@ def test_reports():
             "WAPITI_VERSION"
         )
 
-        vuln_xml_parser = VulnerabilityXMLParser()
-        vuln_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "vulnerabilities.xml"))
-        for vul in vuln_xml_parser.get_vulnerabilities():
+        for vul in vulnerabilities:
             report_gen.add_vulnerability_type(
-                _(vul.get_name()),
-                _(vul.get_description()),
-                _(vul.get_solution()),
-                vul.get_references())
-
-        anom_xml_parser = AnomalyXMLParser()
-        anom_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "anomalies.xml"))
-        for anomaly in anom_xml_parser.get_anomalies():
-            report_gen.add_anomaly_type(
-                _(anomaly.get_name()),
-                (anomaly.get_description()),
-                _(anomaly.get_solution()),
-                anomaly.get_references()
+                vul.NAME,
+                vul.DESCRIPTION,
+                vul.SOLUTION,
+                flatten_references(vul.REFERENCES)
             )
 
-        addition_xml_parser = AdditionalXMLParser()
-        addition_xml_parser.parse(os.path.join(base_dir, "data", "vulnerabilities", "additionals.xml"))
-        for additional in addition_xml_parser.get_additionals():
+        for anomaly in anomalies:
+            report_gen.add_anomaly_type(
+                anomaly.NAME,
+                anomaly.DESCRIPTION,
+                anomaly.SOLUTION,
+                flatten_references(anomaly.REFERENCES)
+            )
+
+        for additional in additionals:
             report_gen.add_additional_type(
-                _(additional.get_name()),
-                (additional.get_description()),
-                _(additional.get_solution()),
-                additional.get_references()
+                additional.NAME,
+                additional.DESCRIPTION,
+                additional.SOLUTION,
+                flatten_references(additional.REFERENCES)
             )
 
         if rep_gen_info.name == "html":

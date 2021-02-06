@@ -22,7 +22,8 @@ from itertools import chain
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
+from wapitiCore.definitions.sql import NAME
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
 DBMS_ERROR_PATTERNS = {
@@ -310,20 +311,20 @@ class mod_sql(Attack):
                             continue
 
                         self.log_orange("---")
-                        self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                        self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                        self.log_orange(Messages.MSG_TIMEOUT, page)
+                        self.log_orange(Messages.MSG_EVIL_REQUEST)
                         self.log_orange(mutated_request.http_repr())
                         self.log_orange("---")
 
                         if parameter == "QUERY_STRING":
-                            anom_msg = Anomaly.MSG_QS_TIMEOUT
+                            anom_msg = Messages.MSG_QS_TIMEOUT
                         else:
-                            anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(parameter)
+                            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
                         self.add_anom(
                             request_id=original_request.path_id,
-                            category=Anomaly.RES_CONSUMPTION,
-                            level=Anomaly.MEDIUM_LEVEL,
+                            category=Messages.RES_CONSUMPTION,
+                            level=MEDIUM_LEVEL,
                             request=mutated_request,
                             info=anom_msg,
                             parameter=parameter
@@ -335,14 +336,14 @@ class mod_sql(Attack):
                             # An error message implies that a vulnerability may exists
 
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(vuln_info, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                             else:
                                 vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
-                                category=Vulnerability.SQL_INJECTION,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -350,12 +351,12 @@ class mod_sql(Attack):
 
                             self.log_red("---")
                             self.log_red(
-                                Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING" else Vulnerability.MSG_PARAM_INJECT,
+                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                                 vuln_info,
                                 page,
                                 parameter
                             )
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 
@@ -366,22 +367,22 @@ class mod_sql(Attack):
                         elif response.status == 500 and not saw_internal_error:
                             saw_internal_error = True
                             if parameter == "QUERY_STRING":
-                                anom_msg = Anomaly.MSG_QS_500
+                                anom_msg = Messages.MSG_QS_500
                             else:
-                                anom_msg = Anomaly.MSG_PARAM_500.format(parameter)
+                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
                             self.add_anom(
                                 request_id=original_request.path_id,
-                                category=Anomaly.ERROR_500,
-                                level=Anomaly.HIGH_LEVEL,
+                                category=Messages.ERROR_500,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=anom_msg,
                                 parameter=parameter
                             )
 
                             self.log_orange("---")
-                            self.log_orange(Anomaly.MSG_500, page)
-                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                            self.log_orange(Messages.MSG_500, page)
+                            self.log_orange(Messages.MSG_EVIL_REQUEST)
                             self.log_orange(mutated_request.http_repr())
                             self.log_orange("---")
                 except (KeyboardInterrupt, RequestException) as exception:

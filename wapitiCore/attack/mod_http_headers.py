@@ -16,7 +16,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import Additional, _
+from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.definitions.http_headers import NAME
+
+INFO_HSTS = _("Strict-Transport-Security is not set")
+INFO_XCONTENT_TYPE = _("X-Content-Type-Options is not set")
+INFO_XSS_PROTECTION = _("X-XSS-Protection is not set")
+INFO_XFRAME_OPTIONS = _("X-Frame-Options is not set")
 
 
 class mod_http_headers(Attack):
@@ -40,48 +46,48 @@ class mod_http_headers(Attack):
 
         self.log_blue(_("Checking X-Frame-Options :"))
         if not self.is_set(response, "X-Frame-Options", self.check_list_xframe):
-            self.log_red(Additional.INFO_XFRAME_OPTIONS)
+            self.log_red(INFO_XFRAME_OPTIONS)
             self.add_addition(
-                category=Additional.MSG_HTTP_HEADERS,
-                level=Additional.LOW_LEVEL,
+                category=NAME,
+                level=LOW_LEVEL,
                 request=request,
-                info=Additional.INFO_XFRAME_OPTIONS
+                info=INFO_XFRAME_OPTIONS
             )
         else:
             self.log_green("OK")
 
         self.log_blue(_("Checking X-XSS-Protection :"))
         if not self.is_set(response, "X-XSS-Protection", self.check_list_xss):
-            self.log_red(Additional.INFO_XSS_PROTECTION)
+            self.log_red(INFO_XSS_PROTECTION)
             self.add_addition(
-                category=Additional.MSG_HTTP_HEADERS,
-                level=Additional.LOW_LEVEL,
+                category=NAME,
+                level=LOW_LEVEL,
                 request=request,
-                info=Additional.INFO_XSS_PROTECTION
+                info=INFO_XSS_PROTECTION
             )
         else:
             self.log_green("OK")
 
         self.log_blue(_("Checking X-Content-Type-Options :"))
         if not self.is_set(response, "X-Content-Type-Options", self.check_list_xcontent):
-            self.log_red(Additional.INFO_XCONTENT_TYPE)
+            self.log_red(INFO_XCONTENT_TYPE)
             self.add_addition(
-                category=Additional.MSG_HTTP_HEADERS,
-                level=Additional.LOW_LEVEL,
+                category=NAME,
+                level=LOW_LEVEL,
                 request=request,
-                info=Additional.INFO_XCONTENT_TYPE
+                info=INFO_XCONTENT_TYPE
             )
         else:
             self.log_green("OK")
 
         self.log_blue(_("Checking Strict-Transport-Security :"))
         if not self.is_set(response, "Strict-Transport-Security", self.check_list_hsts):
-            self.log_red(Additional.INFO_HSTS)
+            self.log_red(INFO_HSTS)
             self.add_addition(
-                category=Additional.MSG_HTTP_HEADERS,
-                level=Additional.LOW_LEVEL,
+                category=NAME,
+                level=LOW_LEVEL,
                 request=request,
-                info=Additional.INFO_HSTS
+                info=INFO_HSTS
             )
         else:
             self.log_green("OK")
