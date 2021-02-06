@@ -21,7 +21,8 @@ from urllib.parse import quote
 from requests.exceptions import ReadTimeout, HTTPError, RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.definitions.crlf import NAME
 
 
 class mod_crlf(Attack):
@@ -71,17 +72,17 @@ class mod_crlf(Attack):
                         if "wapiti" in response.headers:
                             self.add_vuln(
                                 request_id=http_res.path_id,
-                                category=Vulnerability.CRLF,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 parameter=parameter,
                                 info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
                             )
 
                             if parameter == "QUERY_STRING":
-                                injection_msg = Vulnerability.MSG_QS_INJECT
+                                injection_msg = Messages.MSG_QS_INJECT
                             else:
-                                injection_msg = Vulnerability.MSG_PARAM_INJECT
+                                injection_msg = Messages.MSG_PARAM_INJECT
 
                             self.log_red("---")
                             self.log_red(
@@ -90,7 +91,7 @@ class mod_crlf(Attack):
                                 page,
                                 parameter
                             )
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 

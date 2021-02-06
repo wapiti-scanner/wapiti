@@ -16,8 +16,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import Additional, _
+from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
+from wapitiCore.definitions.csp import NAME
+
+MSG_NO_CSP = _("CSP is not set")
+MSG_CSP_MISSING = _("CSP attribute \"{0}\" is missing")
+MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
 
 
 # This module check the basics recommendations of CSP
@@ -31,12 +36,12 @@ class mod_csp(Attack):
         response = self.crawler.get(request, follow_redirects=True)
 
         if "Content-Security-Policy" not in response.headers:
-            self.log_red(Additional.MSG_NO_CSP)
+            self.log_red(MSG_NO_CSP)
             self.add_addition(
-                category=Additional.INFO_CSP,
-                level=Additional.LOW_LEVEL,
+                category=NAME,
+                level=LOW_LEVEL,
                 request=request,
-                info=Additional.MSG_NO_CSP
+                info=MSG_NO_CSP
             )
         else:
             csp_dict = csp_header_to_dict(response.headers["Content-Security-Policy"])
@@ -45,20 +50,20 @@ class mod_csp(Attack):
                 result = check_policy_values(policy_name, csp_dict)
 
                 if result == -1:
-                    self.log_red(Additional.MSG_CSP_MISSING.format(policy_name))
+                    self.log_red(MSG_CSP_MISSING.format(policy_name))
                     self.add_addition(
-                        category=Additional.INFO_CSP,
-                        level=Additional.LOW_LEVEL,
+                        category=NAME,
+                        level=LOW_LEVEL,
                         request=request,
-                        info=Additional.MSG_CSP_MISSING.format(policy_name)
+                        info=MSG_CSP_MISSING.format(policy_name)
                     )
                 elif result == 0:
-                    self.log_red(Additional.MSG_CSP_UNSAFE.format(policy_name))
+                    self.log_red(MSG_CSP_UNSAFE.format(policy_name))
                     self.add_addition(
-                        category=Additional.INFO_CSP,
-                        level=Additional.LOW_LEVEL,
+                        category=NAME,
+                        level=LOW_LEVEL,
                         request=request,
-                        info=Additional.MSG_CSP_UNSAFE.format(policy_name)
+                        info=MSG_CSP_UNSAFE.format(policy_name)
                     )
 
         yield

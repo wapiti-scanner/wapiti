@@ -26,7 +26,8 @@ from os.path import join as path_join
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
+from wapitiCore.definitions.xxe import NAME
 from wapitiCore.net.web import Request
 
 
@@ -154,20 +155,20 @@ class mod_xxe(Attack):
                             continue
 
                         self.log_orange("---")
-                        self.log_orange(Anomaly.MSG_TIMEOUT, page)
-                        self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                        self.log_orange(Messages.MSG_TIMEOUT, page)
+                        self.log_orange(Messages.MSG_EVIL_REQUEST)
                         self.log_orange(mutated_request.http_repr())
                         self.log_orange("---")
 
                         if parameter == "QUERY_STRING":
-                            anom_msg = Anomaly.MSG_QS_TIMEOUT
+                            anom_msg = Messages.MSG_QS_TIMEOUT
                         else:
-                            anom_msg = Anomaly.MSG_PARAM_TIMEOUT.format(parameter)
+                            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
                         self.add_anom(
                             request_id=original_request.path_id,
-                            category=Anomaly.RES_CONSUMPTION,
-                            level=Anomaly.MEDIUM_LEVEL,
+                            category=Messages.RES_CONSUMPTION,
+                            level=MEDIUM_LEVEL,
                             request=mutated_request,
                             info=anom_msg,
                             parameter=parameter
@@ -178,15 +179,15 @@ class mod_xxe(Attack):
                         if pattern and not self.false_positive(original_request, pattern):
                             # An error message implies that a vulnerability may exists
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                             else:
                                 vuln_message = _("{0} via injection in the parameter {1}").format(
                                     self.MSG_VULN, parameter)
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
-                                category=Vulnerability.XXE,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -194,12 +195,12 @@ class mod_xxe(Attack):
 
                             self.log_red("---")
                             self.log_red(
-                                Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING" else Vulnerability.MSG_PARAM_INJECT,
+                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                                 self.MSG_VULN,
                                 page,
                                 parameter
                             )
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 
@@ -210,22 +211,22 @@ class mod_xxe(Attack):
                         elif response.status == 500 and not saw_internal_error:
                             saw_internal_error = True
                             if parameter == "QUERY_STRING":
-                                anom_msg = Anomaly.MSG_QS_500
+                                anom_msg = Messages.MSG_QS_500
                             else:
-                                anom_msg = Anomaly.MSG_PARAM_500.format(parameter)
+                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
                             self.add_anom(
                                 request_id=original_request.path_id,
-                                category=Anomaly.ERROR_500,
-                                level=Anomaly.HIGH_LEVEL,
+                                category=Messages.ERROR_500,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=anom_msg,
                                 parameter=parameter
                             )
 
                             self.log_orange("---")
-                            self.log_orange(Anomaly.MSG_500, page)
-                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                            self.log_orange(Messages.MSG_500, page)
+                            self.log_orange(Messages.MSG_EVIL_REQUEST)
                             self.log_orange(mutated_request.http_repr())
                             self.log_orange("---")
                 except (KeyboardInterrupt, RequestException) as exception:
@@ -252,8 +253,8 @@ class mod_xxe(Attack):
                 if pattern and not self.false_positive(original_request, pattern):
                     self.add_vuln(
                         request_id=original_request.path_id,
-                        category=Vulnerability.XXE,
-                        level=Vulnerability.HIGH_LEVEL,
+                        category=NAME,
+                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
                         parameter="raw body"
@@ -265,7 +266,7 @@ class mod_xxe(Attack):
                         self.MSG_VULN,
                         original_request.url
                     )
-                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
                     self.log_red(mutated_request.http_repr())
                     self.log_red("---")
                     self.vulnerables.add(original_request.path_id)
@@ -299,8 +300,8 @@ class mod_xxe(Attack):
                     if pattern and not self.false_positive(original_request, pattern):
                         self.add_vuln(
                             request_id=original_request.path_id,
-                            category=Vulnerability.XXE,
-                            level=Vulnerability.HIGH_LEVEL,
+                            category=NAME,
+                            level=HIGH_LEVEL,
                             request=mutated_request,
                             info="XXE vulnerability leading to file disclosure",
                             parameter=parameter
@@ -308,12 +309,12 @@ class mod_xxe(Attack):
 
                         self.log_red("---")
                         self.log_red(
-                            Vulnerability.MSG_PARAM_INJECT,
+                            Messages.MSG_PARAM_INJECT,
                             self.MSG_VULN,
                             original_request.url,
                             parameter
                         )
-                        self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                        self.log_red(Messages.MSG_EVIL_REQUEST)
                         self.log_red(mutated_request.http_repr())
                         self.log_red("---")
                         vulnerable_parameter = True
@@ -353,7 +354,7 @@ class mod_xxe(Attack):
                             payload_name = infos["payload"]
 
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                             elif parameter == "raw body":
                                 vuln_message = _(
                                     "Out-Of-Band {0} by sending raw XML in request body"
@@ -425,8 +426,8 @@ class mod_xxe(Attack):
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
-                                category=Vulnerability.XXE,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -434,6 +435,6 @@ class mod_xxe(Attack):
 
                             self.log_red("---")
                             self.log_red(vuln_message)
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")

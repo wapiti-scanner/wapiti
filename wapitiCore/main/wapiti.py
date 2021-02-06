@@ -40,13 +40,11 @@ from requests.packages.urllib3 import disable_warnings
 
 from wapitiCore.language.language import _
 from wapitiCore.language.logger import ConsoleLogger
+from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flatten_references
 
 from wapitiCore.net import crawler, jsoncookie
 from wapitiCore.net.web import Request
 from wapitiCore.file.reportgeneratorsxmlparser import ReportGeneratorsXMLParser
-from wapitiCore.file.vulnerabilityxmlparser import VulnerabilityXMLParser
-from wapitiCore.file.anomalyxmlparser import AnomalyXMLParser
-from wapitiCore.file.additionalxmlparser import AdditionalXMLParser
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.moon import phase
 
@@ -164,33 +162,28 @@ class Wapiti:
                 )
                 break
 
-        vuln_xml_parser = VulnerabilityXMLParser()
-        vuln_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "vulnerabilities.xml"))
-        for vul in vuln_xml_parser.get_vulnerabilities():
+        for vul in vulnerabilities:
             self.report_gen.add_vulnerability_type(
-                _(vul.get_name()),
-                _(vul.get_description()),
-                _(vul.get_solution()),
-                vul.get_references())
-
-        anom_xml_parser = AnomalyXMLParser()
-        anom_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "anomalies.xml"))
-        for anomaly in anom_xml_parser.get_anomalies():
-            self.report_gen.add_anomaly_type(
-                _(anomaly.get_name()),
-                (anomaly.get_description()),
-                _(anomaly.get_solution()),
-                anomaly.get_references()
+                vul.NAME,
+                vul.DESCRIPTION,
+                vul.SOLUTION,
+                flatten_references(vul.REFERENCES)
             )
 
-        addition_xml_parser = AdditionalXMLParser()
-        addition_xml_parser.parse(os.path.join(CONF_DIR, "data", "vulnerabilities", "additionals.xml"))
-        for additional in addition_xml_parser.get_additionals():
+        for anomaly in anomalies:
+            self.report_gen.add_anomaly_type(
+                anomaly.NAME,
+                anomaly.DESCRIPTION,
+                anomaly.SOLUTION,
+                flatten_references(anomaly.REFERENCES)
+            )
+
+        for additional in additionals:
             self.report_gen.add_additional_type(
-                _(additional.get_name()),
-                (additional.get_description()),
-                _(additional.get_solution()),
-                additional.get_references()
+                additional.NAME,
+                additional.DESCRIPTION,
+                additional.SOLUTION,
+                flatten_references(additional.REFERENCES)
             )
 
     def _init_attacks(self):

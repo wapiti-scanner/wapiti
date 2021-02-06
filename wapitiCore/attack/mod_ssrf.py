@@ -24,7 +24,8 @@ from binascii import hexlify, unhexlify
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
-from wapitiCore.language.vulnerability import Vulnerability, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.definitions.ssrf import NAME
 from wapitiCore.net.web import Request
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
@@ -222,7 +223,7 @@ class mod_ssrf(Attack):
                             # request_size = infos["size"]
 
                             if parameter == "QUERY_STRING":
-                                vuln_message = Vulnerability.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                                vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                             else:
                                 vuln_message = _(
                                     "{0} via injection in the parameter {1}.\n"
@@ -249,8 +250,8 @@ class mod_ssrf(Attack):
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
-                                category=Vulnerability.SSRF,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -258,12 +259,12 @@ class mod_ssrf(Attack):
 
                             self.log_red("---")
                             self.log_red(
-                                Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING"
-                                else Vulnerability.MSG_PARAM_INJECT,
+                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING"
+                                else Messages.MSG_PARAM_INJECT,
                                 self.MSG_VULN,
                                 page,
                                 parameter
                             )
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")

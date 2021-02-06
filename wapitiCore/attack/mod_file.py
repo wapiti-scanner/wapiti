@@ -25,7 +25,8 @@ import re
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadReader
-from wapitiCore.language.vulnerability import Vulnerability, Anomaly, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.definitions.file import NAME
 
 
 PHP_WARNING_REGEXES = [
@@ -206,7 +207,7 @@ class mod_file(Attack):
                         self.add_anom(
                             request_id=original_request.path_id,
                             category=Anomaly.RES_CONSUMPTION,
-                            level=Anomaly.MEDIUM_LEVEL,
+                            level=MEDIUM_LEVEL,
                             request=mutated_request,
                             info=anom_msg,
                             parameter=parameter
@@ -262,8 +263,8 @@ class mod_file(Attack):
 
                             self.add_vuln(
                                 request_id=original_request.path_id,
-                                category=Vulnerability.FILE_HANDLING,
-                                level=Vulnerability.HIGH_LEVEL,
+                                category=NAME,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -271,7 +272,7 @@ class mod_file(Attack):
 
                             self.log_red("---")
                             self.log_red(
-                                Vulnerability.MSG_QS_INJECT if parameter == "QUERY_STRING" else Vulnerability.MSG_PARAM_INJECT,
+                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                                 vulnerable_method,
                                 page,
                                 parameter
@@ -280,7 +281,7 @@ class mod_file(Attack):
                             if constraint_message:
                                 self.log_red(constraint_message)
 
-                            self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
                             self.log_red(mutated_request.http_repr())
                             self.log_red("---")
 
@@ -292,22 +293,22 @@ class mod_file(Attack):
                         elif response.status == 500 and not saw_internal_error:
                             saw_internal_error = True
                             if parameter == "QUERY_STRING":
-                                anom_msg = Anomaly.MSG_QS_500
+                                anom_msg = Messages.MSG_QS_500
                             else:
-                                anom_msg = Anomaly.MSG_PARAM_500.format(parameter)
+                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
                             self.add_anom(
                                 request_id=original_request.path_id,
-                                category=Anomaly.ERROR_500,
-                                level=Anomaly.HIGH_LEVEL,
+                                category=Messages.ERROR_500,
+                                level=HIGH_LEVEL,
                                 request=mutated_request,
                                 info=anom_msg,
                                 parameter=parameter
                             )
 
                             self.log_orange("---")
-                            self.log_orange(Anomaly.MSG_500, page)
-                            self.log_orange(Anomaly.MSG_EVIL_REQUEST)
+                            self.log_orange(Messages.MSG_500, page)
+                            self.log_orange(Messages.MSG_EVIL_REQUEST)
                             self.log_orange(mutated_request.http_repr())
                             self.log_orange("---")
                 except (KeyboardInterrupt, RequestException) as exception:

@@ -25,7 +25,8 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Vulnerability, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.definitions.credentials import NAME
 from wapitiCore.net import web
 
 
@@ -161,15 +162,15 @@ class mod_brute_login_form(Attack):
 
                     self.add_vuln(
                         request_id=original_request.path_id,
-                        category=Vulnerability.WEAK_CREDENTIALS,
-                        level=Vulnerability.HIGH_LEVEL,
+                        category=NAME,
+                        level=HIGH_LEVEL,
                         request=evil_request,
                         info=vuln_message
                     )
 
                     self.log_red("---")
                     self.log_red(vuln_message),
-                    self.log_red(Vulnerability.MSG_EVIL_REQUEST)
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
                     self.log_red(evil_request.http_repr())
                     self.log_red("---")
 
