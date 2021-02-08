@@ -44,7 +44,7 @@ from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flat
 
 from wapitiCore.net import crawler, jsoncookie
 from wapitiCore.net.web import Request
-from wapitiCore.file.reportgeneratorsxmlparser import ReportGeneratorsXMLParser
+from wapitiCore.report import get_report_generator_instance, GENERATORS
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.moon import phase
 
@@ -106,8 +106,6 @@ class Wapiti:
 
         self.report_gen = None
         self.report_generator_type = "html"
-        self.xml_rep_gen_parser = ReportGeneratorsXMLParser()
-        self.xml_rep_gen_parser.parse(os.path.join(CONF_DIR, "data", "reports", "generators.xml"))
         self.output_file = ""
 
         self.urls = []
@@ -150,17 +148,14 @@ class Wapiti:
         self.persister = SqlitePersister(self._history_file)
 
     def _init_report(self):
-        for rep_gen_info in self.xml_rep_gen_parser.get_report_generators():
-            if self.report_generator_type.lower() == rep_gen_info.get_key():
-                self.report_gen = rep_gen_info.create_instance()
+        self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
-                self.report_gen.set_report_info(
-                    self.target_url,
-                    self.target_scope,
-                    gmtime(),
-                    WAPITI_VERSION
-                )
-                break
+        self.report_gen.set_report_info(
+            self.target_url,
+            self.target_scope,
+            gmtime(),
+            WAPITI_VERSION
+        )
 
         for vul in vulnerabilities:
             self.report_gen.add_vulnerability_type(
@@ -1145,14 +1140,10 @@ def wapiti_main():
             wap.set_output_file(args.output)
 
         found_generator = False
-        for report_generator_info in wap.xml_rep_gen_parser.get_report_generators():
-            if args.format == report_generator_info.get_key():
-                wap.set_report_generator_type(args.format)
-                found_generator = True
-                break
-
-        if not found_generator:
+        if args.format not in GENERATORS:
             raise InvalidOptionValue("-f", args.format)
+
+        wap.set_report_generator_type(args.format)
 
         wap.set_verify_ssl(bool(args.check_ssl))
 

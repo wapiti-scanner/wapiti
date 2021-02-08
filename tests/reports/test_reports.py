@@ -1,21 +1,15 @@
-import os
-import sys
 from time import gmtime
 import tempfile
 
-from wapitiCore.file.reportgeneratorsxmlparser import ReportGeneratorsXMLParser
+from wapitiCore.report import GENERATORS
 from wapitiCore.language.language import _
 from wapitiCore.net.web import Request
 from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
 
 
 def test_reports():
-    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
-    xml_rep_gen_parser = ReportGeneratorsXMLParser()
-    xml_rep_gen_parser.parse(os.path.join(base_dir, "data", "reports", "generators.xml"))
-
-    for rep_gen_info in xml_rep_gen_parser.get_report_generators():
-        report_gen = rep_gen_info.create_instance()
+    for report_format, report_class in GENERATORS.items():
+        report_gen = report_class()
 
         report_gen.set_report_info(
             "http://perdu.com",
@@ -48,7 +42,7 @@ def test_reports():
                 flatten_references(additional.REFERENCES)
             )
 
-        if rep_gen_info.name == "html":
+        if report_format == "html":
             temp_obj = tempfile.TemporaryDirectory()
 
         else:
@@ -56,7 +50,7 @@ def test_reports():
 
         output = temp_obj.name
 
-        print("Using report type '{}'".format(rep_gen_info.name))
+        print("Using report type '{}'".format(report_format))
         request = Request("http://perdu.com/riri?foo=bar")
         report_gen.add_vulnerability(
             category=_("Cross Site Scripting"),
@@ -86,7 +80,7 @@ def test_reports():
 
         report_gen.generate_report(output)
 
-        if rep_gen_info.name == "html":
+        if report_format == "html":
             output = report_gen.final_path
 
         with open(output) as fd:
