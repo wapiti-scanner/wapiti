@@ -17,6 +17,693 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Found backup file {}"
+msgstr "Ficher de sauvegarde {} trouvé"
+
+#, python-brace-format
+msgid "Backup file {0} found for {1}"
+msgstr "Copie de sauvegarde {0} trouvée pour {1}"
+
+msgid "Credentials found for URL {} : {} / {}"
+msgstr "Identifiants trouvés pour l'URL {} : {} / {}"
+
+msgid "Blind SQL vulnerability"
+msgstr "Vulnérabilité d'injection SQL en aveugle"
+
+#, python-brace-format
+msgid "{0} via injection in the parameter {1}"
+msgstr "{0} via une injection dans le paramètre {1}"
+
+#, python-brace-format
+msgid "HttpOnly flag is not set in the cookie : {0}"
+msgstr "L'indicateur HttpOnly n'est pas défini dans le cookie : {0}"
+
+#, python-brace-format
+msgid "Secure flag is not set in the cookie : {0}"
+msgstr "L'indicateur Secure n'est pas défini dans le cookie : {0}"
+
+msgid "Checking cookie : {}"
+msgstr "Vérification du cookie"
+
+msgid "CRLF Injection"
+msgstr "Injection CRLF"
+
+msgid "Error: The server did not understand this request"
+msgstr "Erreur : Le serveur n'a pas compris la requête"
+
+msgid "CSP is not set"
+msgstr "CSP n'est pas défini"
+
+#, python-brace-format
+msgid "CSP attribute \"{0}\" is missing"
+msgstr "L'attribut CSP \"{0}\" est manquant"
+
+#, python-brace-format
+msgid "CSP \"{0}\" value is not safe"
+msgstr "La valeur de CSP \"{0}\" n'est pas sûre"
+
+msgid "Lack of anti CSRF token"
+msgstr "Absence de jeton anti CSRF"
+
+msgid "CSRF token '{}' is not properly checked in backend"
+msgstr "Le jeton CSRF '{}' n'est pas correctement vérifié par l'application"
+
+msgid "CSRF token '{}' might be easy to predict"
+msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
+
+msgid "Warning eval()"
+msgstr "Avertissement eval()"
+
+msgid "Command execution"
+msgstr "Exécution de commande"
+
+msgid "PHP evaluation"
+msgstr "Interprétation de code PHP"
+
+msgid "Warning exec"
+msgstr "Avertissement exec"
+
+msgid "preg_replace injection"
+msgstr "Injection via preg_replace"
+
+msgid "Warning usort()"
+msgstr "Avertissement usort()"
+
+msgid "Warning assert"
+msgstr "Avertissement assert"
+
+msgid "Evaluation warning"
+msgstr "Avertissement d'évaluation"
+
+msgid "Blind command execution"
+msgstr "Exécution de commande en aveugle"
+
+#, python-brace-format
+msgid "Possible {0} vulnerability"
+msgstr "Eventuelle Vulnérabilité de type {0}"
+
+msgid "Constraints: {}"
+msgstr "Contraintes: {}"
+
+#, python-brace-format
+msgid "{0} bypassable weak restriction"
+msgstr "Restriction d'accès bypassable sur {0}"
+
+#, python-brace-format
+msgid "Weak restriction bypass vulnerability: {0}"
+msgstr "Bypass d'une restriction d'accès faible: {0}"
+
+#, python-brace-format
+msgid "HTTP status code changed from {0} to {1}"
+msgstr "Le code de statut HTTP a changé de {0} à {1}"
+
+msgid "Source code:"
+msgstr "Code source :"
+
+msgid "Strict-Transport-Security is not set"
+msgstr "L'entête Strict-Transport-Security n'est pas défini"
+
+msgid "X-Content-Type-Options is not set"
+msgstr "L'entête X-Content-Type-Options n'est pas défini"
+
+msgid "X-XSS-Protection is not set"
+msgstr "L'entête X-XSS-Protection n'est pas défini"
+
+msgid "X-Frame-Options is not set"
+msgstr "L'entête X-Frame-Options n'est pas défini"
+
+msgid "Checking X-Frame-Options :"
+msgstr "Vérification de X-Frame-Options :"
+
+msgid "Checking X-XSS-Protection :"
+msgstr "Vérification de X-XSS-Protection :"
+
+msgid "Checking X-Content-Type-Options :"
+msgstr "Vérification de X-Content-Type-Options :"
+
+msgid "Checking Strict-Transport-Security :"
+msgstr "Vérification de Strict-Transport-Security :"
+
+msgid "Problem with local nikto database."
+msgstr "Un problème est survenu avec la base de données nikto locale"
+
+msgid "Downloading from the web..."
+msgstr "Téléchargement depuis le web..."
+
+msgid "Error downloading nikto database."
+msgstr "Echec du téléchargement de la base de données Nikto"
+
+msgid "References:"
+msgstr "Références"
+
+msgid "Stored XSS vulnerability"
+msgstr "Vulnérabilité XSS permanent"
+
+#, python-brace-format
+msgid "error: {0} while attacking {1}"
+msgstr "erreur : {0} lors de l'attaque de {1}"
+
+#, python-brace-format
+msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
+msgstr ""
+"Vulnérabilité de XSS permanent trouvée via une injection dans la paramètre "
+"{0}"
+
+#, python-brace-format
+msgid ""
+"Permanent XSS vulnerability found in {0} by injecting the parameter {1} of "
+"{2}"
+msgstr ""
+"Vulnérabilité de XSS permanent trouvée dans {0} via une injection dans la "
+"paramètre {1} de {2}"
+
+msgid "Warning: Content-Security-Policy is present!"
+msgstr "Avertissement: L'entête Content-Security-Policy est présent!"
+
+msgid "Open Redirect"
+msgstr ""
+
+#, python-brace-format
+msgid "URL {0} seems vulnerable to Shellshock attack!"
+msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock !"
+
+#, python-brace-format
+msgid "URL {0} seems vulnerable to Shellshock attack"
+msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock"
+
+msgid "SQL Injection"
+msgstr "Injection SQL"
+
+msgid ".NET SQL Injection"
+msgstr "Injection SQL .NET"
+
+msgid "Spring JDBC Injection"
+msgstr ""
+
+msgid "XPath Injection"
+msgstr "Injection XPath"
+
+msgid "LDAP Injection"
+msgstr "Injection LDAP"
+
+msgid "SSRF vulnerability"
+msgstr "Vulnérabilité SSRF"
+
+msgid "[*] Asking endpoint URL {} for results, please wait..."
+msgstr "[*] Requête du endpoint à l'URL {}, en attente des résultats..."
+
+msgid "[!] Unable to request endpoint URL '{}'"
+msgstr "[!] Impossible de questionner l'URL du endpoint '{}'"
+
+#, python-brace-format
+msgid ""
+"{0} via injection in the parameter {1}.\n"
+"The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
+"Full request can be seen at {5}"
+msgstr ""
+"{0} via une injection dans le paramètre {1}.\n"
+"La cible a effectuée une requête HTTP {2} sortante à {3} avec l'adresse IP "
+"{4}.\n"
+"Les données reccueillies peut être vues à {5}"
+
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr "{0} {1} détecté"
+
+msgid "Problem with local wapp database."
+msgstr "Un problème est survenu avec la base de données wapp locale"
+
+msgid "Error downloading wapp database."
+msgstr "Erreur de téléchargement de la base de données Wappalizer"
+
+msgid ""
+"Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+"Essayez avec l'option --store-session, ou mettez à jour apps.json avec "
+"l'option --update."
+
+msgid "XSS vulnerability"
+msgstr "Vulnérabilité XSS"
+
+#, python-brace-format
+msgid "XSS vulnerability found via injection in the parameter {0}"
+msgstr "Vulnérabilité XSS trouvée via l'injection dans le paramètre {0}"
+
+msgid "XXE vulnerability"
+msgstr "Vulnérabilité XXE"
+
+#, python-brace-format
+msgid "Out-Of-Band {0} by sending raw XML in request body"
+msgstr "{0} Out-Of-Band via l'envoi de données XML dans le corps de la requête"
+
+#, python-brace-format
+msgid "Out-Of-Band {0} via injection in the parameter {1}"
+msgstr "{0} Out-Of-Band via l'envoi de données XML dans le paramètre {1}"
+
+#, python-brace-format
+msgid ""
+"The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
+"Received data can be seen at {3}."
+msgstr ""
+"La cible a envoyé {0} octets de données au endpoint à {1} avec l'adresse IP "
+"{2}.\n"
+"Les données reccueillies peuvent être visualisées à {3}."
+
+msgid "Backup file"
+msgstr "Copie de sauvegarde"
+
+msgid ""
+"It may be possible to find backup files of scripts on the webserver that the "
+"web-admin put here to save a previous version or backup files that are "
+"automatically generated by the software editor used (like for example Emacs)."
+msgstr ""
+"Il se peut que des copies de sauvegarde de scripts soient accessibles sur le "
+"serveur. L'administrateur web a du placer volontairement une sauvegarde dans "
+"l'idée de revenir à une précédente version ou involontairement en utilisant "
+"un éditeur configuré pour sauver automatiquement une copie après une "
+"certaine durée."
+
+msgid ""
+"These copies may reveal interesting information like source code or "
+"credentials."
+msgstr ""
+"Ces fichiers peuvent révéler des informations intéressantes comme du code "
+"source ou encore des identifiants (accès à la base de données)."
+
+msgid ""
+"The webadmin must manually delete the backup files or remove it from the web "
+"root."
+msgstr ""
+"L'administrateur web doit supprimer manuellement les sauvegardes présentes "
+"sous la racine web."
+
+msgid "He should also reconfigure its editor to deactivate automatic backups."
+msgstr ""
+"Il devrait aussi reconfigurer l'éditeur qu'il utilise pour désactiver les "
+"sauvegardes automatiques."
+
+msgid "Blind SQL Injection"
+msgstr "Injection SQL en aveugle"
+
+msgid "Blind SQLI"
+msgstr "Injection SQL en aveugle"
+
+msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+"Tout comme les Vulnérabilités d'injection SQL classiques, les injections SQL "
+"en aveugle permettent à un attaquant d'altérer les requêtes normalement "
+"exécutées sur la base de données."
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+msgstr ""
+"Ce type de vulnérabilité est plus difficile à détecter en raison de "
+"l'absence de messages d'erreur renvoyés par l'application web."
+
+msgid ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
+msgstr ""
+"Pour se protéger des injections SQL, les données fournies par les "
+"utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes "
+"SQL."
+
+msgid ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
+msgstr ""
+"A la place elles doivent faire l'objet de vérifications (filtres, "
+"échappements) approfondies."
+
+msgid "Weak credentials"
+msgstr "Identifiants faibles"
+
+msgid ""
+"The web application is using either default credentials or weak passwords "
+"that can be found in well-known passwords lists."
+msgstr ""
+"L'application Web utilise des informations d'identification par défaut ou "
+"des mots de passe faibles qui peuvent être trouvés dans des listes de mots "
+"de passe bien connus."
+
+msgid ""
+"Do not ship or deploy with any default credentials, particularly for admin "
+"users."
+msgstr ""
+"Ne pas définir de mots de passe par défaut, en particulier pour les comptes "
+"administrateur."
+
+msgid ""
+"Implement weak-password checks, such as testing new or changed passwords "
+"against a list of the top 10000 worst passwords."
+msgstr ""
+"Mettez en œuvre des vérifications de mots de passe faibles, comme tester les "
+"mots de passe nouveaux ou modifiés par rapport à une liste des 10000 pires "
+"mots de passe."
+
+msgid ""
+"The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, "
+"\\n)."
+msgstr ""
+"Le terme CRLF fait référence à Carriage Return (ASCII 13, \\r) Line Feed "
+"(ASCII 10, \\n)."
+
+msgid ""
+"A CRLF Injection attack occurs when a user manages to submit a CRLF into an "
+"application."
+msgstr ""
+"Ce type d'attaque a lieu quand un utilisateur parvient à injecter une suite "
+"CRLF dans l'application."
+
+msgid "This is most commonly done by modifying an HTTP parameter or URL."
+msgstr ""
+"Cela est généralement effectué par la modificiation d'un paramètre de l'URL."
+
+msgid ""
+"Check the submitted parameters and do not allow CRLF to be injected when it "
+"is not expected."
+msgstr ""
+"Vérifiez et supprimez la présence des CRLF dans les données reçues quand "
+"elles ne sont pas explicitement autorisées."
+
+msgid "Content Security Policy Configuration"
+msgstr "Configuration de la stratégie de securité du contenu (CSP)"
+
+msgid "CSP Configuration"
+msgstr "Configuration de la CSP"
+
+msgid ""
+"Content Security Policy (CSP) is an added layer of security that helps to "
+"detect and mitigate certain types of attacks, including Cross Site Scripting "
+"(XSS) and data injection attacks."
+msgstr ""
+"Une Content Security Policy (CSP) ou stratégie de sécurité du contenu permet "
+"d'améliorer la sécurité des sites web en permettant de détecter et réduire "
+"certains types d'attaques, dont les attaques XSS (Cross Site Scripting) et "
+"les injections de contenu."
+
+msgid ""
+"Configuring Content Security Policy involves adding the Content-Security-"
+"Policy HTTP header to a web page and giving it values to control what "
+"resources the user agent is allowed to load for that page."
+msgstr ""
+"Configurer une stratégie CSP nécessite d'utiliser un en-tête HTTP Content-"
+"Security-Policy pour une page web et de spécifier une valeur pour contrôler "
+"les ressources que le navigateur est autorisé à charger pour cette page."
+
+msgid "Cross Site Request Forgery"
+msgstr ""
+
+msgid "CSRF"
+msgstr ""
+
+msgid ""
+"Cross-Site Request Forgery (CSRF) is an attack that forces an end user to "
+"execute unwanted actions on a web application in which they're currently "
+"authenticated."
+msgstr ""
+
+msgid "Check if your framework has built-in CSRF protection and use it."
+msgstr ""
+"Vérifier que le framework utilisé implémente nativement une protection anti-"
+"CSRF et utiliser la."
+
+msgid ""
+"If framework does not have built-in CSRF protection add CSRF tokens to all "
+"state changing requests (requests that cause actions on the site) and "
+"validate them on backend."
+msgstr ""
+"Si le framework ne fournit pas de protection anti-CSRF, ajouter un jeton "
+"anti-CSRF à toutes les requêtes qui modifient l'état d'un élément de "
+"l'application, et vérifier la validité des jetons côté serveur."
+
+msgid "This attack consists in executing system commands on the server."
+msgstr ""
+"Ce type d'attaque consiste à faire exécuter des commandes sur le serveur."
+
+msgid "The attacker tries to inject this commands in the request parameters."
+msgstr ""
+"L'attaquant tente d'injecter les commandes dans les paramêtres de requêtes "
+"qui lui sont accessibles."
+
+msgid "Prefer working without user input when using file system calls."
+msgstr ""
+"Ce type de vulnérabilité résulte souvent d'un manque de vérifications sur "
+"les données soumises par le visiteur. Pour les opérations sur les accès "
+"fichiers il est préférable d'utiliser des appels systèmes spécialisés au "
+"lieu de tenter de faire exécuter des commandes shell."
+
+msgid "Path Traversal"
+msgstr "Traversée de dossiers"
+
+msgid "This attack is known as Path or Directory Traversal."
+msgstr ""
+"Cette attacque est connue sous le nom de traversée de fichiers ou traversée "
+"de dossiers."
+
+msgid ""
+"Its aim is the access to files and directories that are stored outside the "
+"web root folder."
+msgstr ""
+"Ces techniques permettent à l'attaquant d'accèder à des fichiers auxquels il "
+"n'est pas sensé accèder car en dehors de la racine du serveur web."
+
+msgid "The attacker tries to explore the directories stored in the web server."
+msgstr ""
+"En utilisant certaines séquences comme '../', il peut remonter dans "
+"l'arborescence pour ainsi lister des répertoires ou obtenir le contenu de "
+"fichiers."
+
+msgid ""
+"Use indexes rather than actual portions of file names when templating or "
+"using language files (eg: value 5 from the user submission = "
+"Czechoslovakian, rather than expecting the user to return 'Czechoslovakian')."
+msgstr ""
+"Chaque fois que vous le pouvez, ne passez pas directement des paths à vos "
+"scripts, utilisez à la place des correspondances numériques (ex: la valeur 5 "
+"signifiera d'aller prendre les fichiers dans le dossier /path1 et évitera de "
+"faire apparaître le path sur le site)."
+
+msgid ""
+"Ensure the user cannot supply all parts of the path - surround it with your "
+"path code."
+msgstr ""
+"Assurez vous que l'utilisateur n'a pas le contrôle sur la totalité du path - "
+"ajoutez préfixe et suffixe autour du chemin récupéré."
+
+msgid ""
+"Validate the user's input by only accepting known good - do not sanitize the "
+"data."
+msgstr ""
+"Privilégiez un mécanisme de liste blanche pour valider les données soumises "
+"au lieu de tenter de nottoyer ces données."
+
+msgid ""
+"Use chrooted jails and code access policies to restrict where the files can "
+"be obtained or saved to."
+msgstr ""
+"Utilisez des jails chroot et des restrictions d'accès pour limiter le nombre "
+"de fichiers accessibles par le serveur."
+
+msgid "Fingerprint web technology"
+msgstr "Technologie web identifiée"
+
+msgid ""
+"The use of a web technology can be deducted due to the presence of its "
+"specific fingerprints."
+msgstr ""
+"L'utilisation d'une technologie web peut être déduite à cause des traces qui "
+"lui sont spécifiques."
+
+msgid "This is only for informational purposes."
+msgstr "A titre d'information seulement."
+
+msgid "Htaccess Bypass"
+msgstr "Contournement de htaccess"
+
+msgid ""
+"Htaccess files are used to restrict access to some files or HTTP method."
+msgstr ""
+"Les fichiers htaccess permettent de restreindre l'accès a des fichiers ou "
+"répertoires en fonction d'identifiants ou méthode HTTP utilisées."
+
+msgid ""
+"In some case it may be possible to bypass this restriction and access the "
+"files."
+msgstr ""
+"Si la configuration a été mal faite il peut être possible de contourner la "
+"restriction."
+
+msgid "Make sure every HTTP method is forbidden if the credentials are bad."
+msgstr ""
+"La configuration du htaccess doit être minutieusement vérifiée pour ne pas "
+"laisser une porte d'entrée à un éventuel attaquant."
+
+msgid "Potentially dangerous file"
+msgstr "Fichier potentiellement dangereux"
+
+msgid "A file with potential vulnerabilities has been found on the website."
+msgstr ""
+"Certains scripts sont connus pour être potentiellement vulnérables et "
+"dangereux. Des listes de tels fichiers existent et sont fréquemment "
+"utilisées par des attaquants pour scanner des sites Internet à la recherche "
+"de ces vulnérabilitées."
+
+msgid ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+msgstr ""
+"L'administrateur devrait vérifier régulièrement si des mises à jour sont "
+"disponibles pour les scripts et logiciels utilisés sur le serveur. Il est "
+"aussi conseillé de se tenir informé sur les nouvelles vulnérabilités "
+"trouvées en s'abonnant à des listes de sécurité ou en suivant des flux RSS "
+"spécialisés."
+
+msgid ""
+"Unvalidated redirects and forwards are possible when a web application "
+"accepts untrusted input that could cause the web application to redirect the "
+"request to a URL contained within untrusted input."
+msgstr ""
+"L'application reçoit en entrée des URLs reprises directement pour effectuer "
+"une redirection HTTP."
+
+msgid ""
+"By modifying untrusted URL input to a malicious site, an attacker may "
+"successfully launch a phishing scam and steal user credentials."
+msgstr ""
+"Un attaquant peut profiter de l'absence de vérifications pour une campagne "
+"de phishing."
+
+msgid ""
+"Force all redirects to first go through a page notifying users that they are "
+"going off of your site, and have them click a link to confirm."
+msgstr ""
+"La page chargée de la redirection devrait avertir l'utilisateur de la "
+"redirection et demander sa confirmation via un bouton."
+
+msgid "SQLI"
+msgstr ""
+
+msgid ""
+"SQL injection vulnerabilities allow an attacker to alter the queries "
+"executed on the backend database."
+msgstr ""
+"Les Vulnérabilités d'injection SQL permettent à un attaquant de modifier les "
+"requêtes qui sont normalement exécutées sur le système de base de données."
+
+msgid ""
+"An attacker may then be able to extract or modify information stored in the "
+"database or even escalate his privileges on the system."
+msgstr ""
+"Un attaquant peut alors parvenir à extraire où à modifier des informations "
+"en base. Cela peut aussi potentiellement permettre à l'attaquant d'augmenter "
+"ses privilèges sur le système."
+
+msgid "Server Side Request Forgery"
+msgstr ""
+
+msgid "SSRF"
+msgstr ""
+
+msgid ""
+"The target application may have functionality for importing data from a URL, "
+"publishing data to a URL or otherwise reading data from a URL that can be "
+"tampered with."
+msgstr ""
+"L'application web dispose d'une fonctionnalité permettant d'aller lire une "
+"URL ou d'envoyer des données à une URL qui peut être détournée."
+
+msgid ""
+"Every URI received by the web application should be checked, especially "
+"scheme and hostname. A whitelist should be used."
+msgstr ""
+"Toutes les URI reçues en entrées devraient être correctement vérifiées, en "
+"particulier le protocole et le nom d'hôte. L'utilisation d'une whitelist est "
+"conseillée."
+
+msgid "Cross Site Scripting"
+msgstr "Cross Site Scripting"
+
+msgid "XSS"
+msgstr ""
+
+msgid ""
+"Cross-site scripting (XSS) is a type of computer security vulnerability "
+"typically found in web applications which allow code injection by malicious "
+"web users into the web pages viewed by other users."
+msgstr ""
+"Le Cross-site scripting (XSS) est une catégorie de vulnérabilités web qui "
+"permet d'exécuter du code dans le navigateur des visiteurs du site."
+
+msgid "Examples of such code include HTML code and client-side scripts."
+msgstr ""
+"Ce type de code peut être du code HTML ou du code exécuté par le navigateur "
+"(généralement Javascript)."
+
+msgid ""
+"The best way to protect a web application from XSS attacks is ensure that "
+"the application performs validation of all headers, cookies, query strings, "
+"form fields, and hidden fields."
+msgstr ""
+"Afin de se prémunir au mieu de ce type d'attaque il faut valider "
+"minutieusement toutes les données reçues via paramètres, champs de "
+"formulaires, cookies, entête etc."
+
+msgid ""
+"Encoding user supplied output in the server side can also defeat XSS "
+"vulnerabilities by preventing inserted scripts from being transmitted to "
+"users in an executable form."
+msgstr ""
+"Les données destinées à être affichées dans la navigateur des utilisateurs "
+"doivent être systématiquement encodées pour empècher leur interprétation par "
+"le navigateur."
+
+msgid ""
+"Applications can gain significant protection from javascript based attacks "
+"by converting the following characters in all generated output to the "
+"appropriate HTML entity encoding:"
+msgstr ""
+"Les caractères ayant une signification particulière en HTML doivent être "
+"remplacés par leur code d'entité HTML."
+
+msgid "XML External Entity"
+msgstr ""
+
+msgid "XXE"
+msgstr ""
+
+msgid ""
+"An XML External Entity attack is a type of attack against an application "
+"that parses XML input."
+msgstr ""
+"Les attaques XML External Entity ciblent l'application en charge de "
+"l'analyse du format XML."
+
+msgid ""
+"This attack occurs when XML input containing a reference to an external "
+"entity is processed by a weakly configured XML parser."
+msgstr ""
+"Cela survient quand un parseur XML malconfiguré doit traiter des références "
+"à des entitées externes."
+
+msgid ""
+"This attack may lead to the disclosure of confidential data, denial of "
+"service, server side request forgery, port scanning from the perspective of "
+"the machine where the parser is located, and other system impacts."
+msgstr ""
+"Cette attaque peut permettre de récupérer des données confidentielles, "
+"provoquer des dénis de service, des SSRF, effectuer des scans de ports "
+"depuis la machine cible, etc."
+
+msgid ""
+"The safest way to prevent XXE is always to disable DTDs (External Entities) "
+"completely."
+msgstr ""
+"La méthode la plus efficace pour se protéger des XXE est de désactiver "
+"complétement l'utilisation des entitées externes."
+
 #, python-brace-format
 msgid "  Evil url: {0}"
 msgstr "  Evil url: {0}"
@@ -44,30 +731,6 @@ msgstr "Paramètre en cause : {0}"
 msgid "Evil request:"
 msgstr "Evil request:"
 
-msgid "SQL Injection"
-msgstr "Injection SQL"
-
-msgid "Blind SQL Injection"
-msgstr "Injection SQL en aveugle"
-
-msgid "File Handling"
-msgstr "Divulgation de fichier"
-
-msgid "Cross Site Scripting"
-msgstr "Cross Site Scripting"
-
-msgid "Commands execution"
-msgstr "Exécution de commandes"
-
-msgid "Htaccess Bypass"
-msgstr "Contournement de htaccess"
-
-msgid "Backup file"
-msgstr "Copie de sauvegarde"
-
-msgid "Potentially dangerous file"
-msgstr "Fichier potentiellement dangereux"
-
 msgid "Internal Server Error"
 msgstr "Erreur interne au serveur"
 
@@ -78,61 +741,172 @@ msgstr "Consommation anormale de ressource"
 msgid "Received a HTTP 500 error in {0}"
 msgstr "Une erreur HTTP 500 a été obtenue avec {0}"
 
-msgid "Timeout occured in {0}"
-msgstr "Un délais d'attente dépassé a eu lieu avec {0}"
+#, python-brace-format
+msgid "Timeout occurred in {0}"
+msgstr "Une erreur timeout est survenu sur {0}"
 
-msgid "The request timed out while attempting to inject a payload in the query string"
-msgstr "La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload dans la query string"
+msgid ""
+"The request timed out while attempting to inject a payload in the query "
+"string"
+msgstr ""
+"La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload "
+"dans la query string"
 
-msgid "The request timed out while attempting to inject a payload in the resource path"
-msgstr "La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload dans le chemin de la ressource"
+msgid ""
+"The request timed out while attempting to inject a payload in the resource "
+"path"
+msgstr ""
+"La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload "
+"dans le chemin de la ressource"
 
 #, python-brace-format
-msgid "The request timed out while attempting to inject a payload in the parameter {0}"
-msgstr "La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload dans le paramètre {0}"
+msgid ""
+"The request timed out while attempting to inject a payload in the parameter "
+"{0}"
+msgstr ""
+"La requête n'a pas aboutie (délais dépassé) lors de l'injection d'un payload "
+"dans le paramètre {0}"
 
-msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the query string"
-msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un payload dans la query string"
+msgid ""
+"The server responded with a 500 HTTP error code while attempting to inject a "
+"payload in the query string"
+msgstr ""
+"Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un "
+"payload dans la query string"
 
-msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the resource path"
-msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un payload dans le chemin de la ressource"
+msgid ""
+"The server responded with a 500 HTTP error code while attempting to inject a "
+"payload in the resource path"
+msgstr ""
+"Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un "
+"payload dans le chemin de la ressource"
 
 #, python-brace-format
-msgid "The server responded with a 500 HTTP error code while attempting to inject a payload in the parameter {0}"
-msgstr "Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un payload dans le paramètre {0}"
-
-msgid "Fingerprint web technology"
-msgstr "Technologie web identifiée"
-
-#, python-brace-format
-msgid "{0} {1} detected"
-msgstr "{0} {1} détecté"
-
-#, python-brace-format
-msgid "{0} detected (version not found)"
-msgstr "{0} détecté (version non identifiée)"
+msgid ""
+"The server responded with a 500 HTTP error code while attempting to inject a "
+"payload in the parameter {0}"
+msgstr ""
+"Le serveur a répondu par une erreur HTTP 500 lors de l'injection d'un "
+"payload dans le paramètre {0}"
 
 #, python-brace-format
 msgid "Invalid argument for option {0} : {1}"
 msgstr "Argument invalide pour l'option {0} : {1}"
 
+msgid "Use Tor listener (127.0.0.1:9050)"
+msgstr "Utiliser le relais Tor local (127.0.0.1:9050)"
+
+msgid "Set HTTP authentication credentials"
+msgstr "Définir les identifiants pour l'authentification HTTP"
+
+msgid "Set the authentication type to use"
+msgstr "Définir le type d'authentification à utiliser"
+
+msgid "Set a custom user-agent to use for every requests"
+msgstr "Définir un user-agent spécifique à utiliser pour toutes les requêtes"
+
+msgid "Set a custom header to use for every requests"
+msgstr "Définir un entête HTTP à utiliser pour toutes les requêtes"
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme and slash after the domain name."
+msgstr ""
+"Une URL de base invalide a été donnée, veuillez fournir une URL complète "
+"avec protocole et slash après le domaine."
+
+msgid "Choose the form you want to use or enter 'q' to leave :"
+msgstr "Sélectionnez le formulaire de votre choix ou entrez 'q' pour quitter :"
+
+msgid "Enter a number : "
+msgstr "Entrez un numéro : "
+
+msgid "Please enter values for the following form: "
+msgstr "Veuillez renseigner les champs pour le formulaire suivant : "
+
+#, python-brace-format
+msgid "url = {0}"
+msgstr "url = {0}"
+
 msgid "[*] Loading modules:"
 msgstr "[*] Chargement des modules :"
 
-msgid "No links or forms found in this page !"
-msgstr "Aucun lien ni formulaire trouvé dans cette page !"
+#, python-brace-format
+msgid "[!] Could not find module {0}"
+msgstr "[!] Impossible de trouver le module {0}"
 
-msgid "Make sure the url is correct."
-msgstr "Assurez-vous que l'URL est correcte."
+#, python-brace-format
+msgid "[!] Unable to find a module named {0}"
+msgstr "[!] Impossible de trouver le module {0}"
 
-msgid "[!] Missing dependecies for module {0}:"
-msgstr "[!] Dépendances manquantes pour le module {0} :"
+#, python-brace-format
+msgid "Updating module {0}"
+msgstr "Mise à jour du module {0}"
 
-msgid "[+] Launching module {0}"
-msgstr "[+] Lancement du module {0}"
+msgid "Update done."
+msgstr "Mise à jour effectuée."
 
-msgid "Upload scripts found:"
-msgstr "Scripts d'upload trouvés :"
+msgid "Max scan time was reached, stopping."
+msgstr "Le temps maximum de scan a été atteint, arrêt en cours."
+
+msgid "[*] Saving scan state, please wait..."
+msgstr "[*] Enregistrement de l'état du scan, veuillez patienter..."
+
+msgid " Note"
+msgstr " Note"
+
+#, python-brace-format
+msgid "This scan has been saved in the file {0}"
+msgstr "Ce scan a été sauvé dans le fichier {0}"
+
+msgid ""
+"The scan will be resumed next time unless you pass the --skip-crawl option."
+msgstr ""
+"Ce scan sera repris la prochaine fois à moins que vous ne passiez l'option --"
+"skip-crawl."
+
+#, python-brace-format
+msgid "[!] Missing dependencies for module {0}:"
+msgstr "[!] Dépendances manquantes pour le module {0}:"
+
+#, python-brace-format
+msgid "[*] Launching module {0}"
+msgstr "[*] Lancement du module {0}"
+
+#, python-brace-format
+msgid "[*] {0} pages were previously attacked and will be skipped"
+msgstr "[*] {0} pages ont été précédemment attaquées et seront ignorées"
+
+#, python-brace-format
+msgid "Max attack time was reached for module {0}, stopping."
+msgstr "Le temps maximum d'attaque a été atteint pour le module {0}, arrêt."
+
+msgid "Attack process was interrupted. Do you want to:"
+msgstr "Le processus d'attaque a été interrompu. Voulez-vous:"
+
+msgid "\tr) stop everything here and generate the (R)eport"
+msgstr "\tr) Tout arrêter ici et générer le (R)apport"
+
+msgid "\tn) move to the (N)ext attack module (if any)"
+msgstr "\tn) Sauter au module d'attaque suivant (Next)"
+
+msgid "\tq) (Q)uit without generating the report"
+msgstr "\tq) (Q)uitter ici sans générer de rapport"
+
+msgid "\tc) (C)ontinue the current attack"
+msgstr "\tc) (C)ontinuer l'attaque en cours"
+
+msgid "Invalid choice. Valid choices are r, n, q and c."
+msgstr "Choix invalide. Les choix valides sont r, n, q et c."
+
+msgid "Sending crash report {} ... {}"
+msgstr "Envoi du rapport d'erreur {} ... {}"
+
+msgid "Error sending crash report"
+msgstr "Erreur lors de l'envoi du rapport d'erreur"
+
+msgid "{} requests were skipped due to network issues"
+msgstr "{} requêtes ont été abandonnées en raison d'erreurs réseau"
 
 msgid "Report"
 msgstr "Rapport"
@@ -145,304 +919,261 @@ msgstr "Un rapport a été généré dans le fichier {0}"
 msgid "Open {0} with a browser to see this report."
 msgstr "Ouvrez {0} dans un navigateur pour voir ce rapport."
 
-msgid "Wapiti-3.0.0 (wapiti.sourceforge.io)"
-msgstr "Wapiti-3.0.0 (wapiti.sourceforge.io)"
+msgid "Error: {} must not contain params, query or fragment!"
+msgstr ""
+"Erreur: {} ne doit pas contenir de paramètres, query string ni fragments!"
 
-msgid "File {0} loaded. Wapiti will use it to perform the attack"
-msgstr "Fichier {0} chargé. Wapiti va s'en servir pour effectuer l'attaque"
+msgid "Error: {} must contain scheme and host"
+msgstr "Erreur: {} doit contenir un protocole ainsi qu'un nom d'hôte"
 
-msgid "+ attack_get {0}"
-msgstr "+ attack_get {0}"
+msgid "[*] You are lucky! Full moon tonight."
+msgstr "[*] Vous êtes chanceux ! C'est la pleine lune ce soir."
+
+msgid "[*] Be careful! New moon tonight."
+msgstr "[*] Soyez prudent ! Nouvelle lune ce soir."
+
+msgid "[*] Watch out! Bad things can happen on Friday the 13th."
+msgstr ""
+"[*] Faites attention ! De vilaines choses peuvent survenir un vendredi 13."
+
+msgid "[*] Today is International Beer Day!"
+msgstr "[*] Aujourd'hui est la journée internationale de la bière!"
+
+msgid "[*] May the force be with you!"
+msgstr "[*] Que la force soit avec vous!"
+
+msgid "[*] Happy new year!"
+msgstr "[*] Bonne année!"
+
+msgid "[*] Merry christmas!"
+msgstr "[*] Joyeux noël!"
+
+msgid "[*] Today is world backup day! Is your data safe?"
+msgstr ""
+"[*] Aujourd'hui est la journée mondiale de la sauvegarde! Avez-vous pensé à "
+"sauvegarder vos données?"
+
+msgid "The base URL used to define the scan scope (default scope is folder)"
+msgstr ""
+"L'URL de base utilisée pour définir le périmètre de scan (le périmètre par "
+"défaut est folder)"
+
+msgid "Set scan scope"
+msgstr "Définir le périmètre de scan"
+
+msgid "List of modules to load"
+msgstr "La liste des modules à utiliser"
+
+msgid "List Wapiti attack modules and exit"
+msgstr "Lister les modules d'attaque de Wapiti et quitter"
+
+msgid "Update Wapiti attack modules and exit"
+msgstr "Mettre à jour les modules d'attaque de Wapiti et quitter"
+
+msgid "Set attack level"
+msgstr "Définir le niveau d'attaque"
+
+msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
+msgstr ""
+"Définir le proxy HTTP(S) à utiliser. Les proxies http(s) et socks sont "
+"supportés."
+
+msgid "Set a JSON cookie file to use"
+msgstr "Définir un fichier cookie JSON à utiliser"
+
+msgid ""
+"Don't resume the scanning process, attack URLs scanned during a previous "
+"session"
+msgstr ""
+"Ne pas résumer le scan, directement attaquer les URLs scannées lors d'une "
+"précédente session"
+
+msgid ""
+"Resume the scanning process (if stopped) even if some attacks were "
+"previously performed"
+msgstr ""
+"Reprendre le scan (si précédemment stoppé) même si les attaques avaient "
+"débuté"
+
+msgid "Flush attack history and vulnerabilities for the current session"
+msgstr ""
+"Effacer l'historique des attaques et vulnérabilitiées de la session en cours"
+
+msgid ""
+"Flush everything that was previously found for this target (crawled URLs, "
+"vulns, etc)"
+msgstr ""
+"Effacer tout l'historique de la session (URLs trouvées, vulnérabilités, etc)"
+
+msgid "Directory where to store attack history and session data."
+msgstr "Dossier où stocker les fichiers de session de Wapiti."
+
+msgid "Directory where to store configuration databases."
+msgstr ""
+"Répertoire dans lequel seront stockées les fichiers de configuration (bases "
+"de données)"
+
+msgid "Adds an url to start scan with"
+msgstr "Utiliser une URL supplémentaire pour débuter le scan"
+
+msgid "Adds an url to exclude from the scan"
+msgstr "Ajouter une URL à exclure du scan"
+
+msgid "Remove this parameter from urls"
+msgstr "Retirer ce paramètre des URLs"
+
+msgid "Skip attacking given parameter(s)"
+msgstr "Ne pas attaquer un paramètre"
+
+msgid "Set how deep the scanner should explore the website"
+msgstr "Définir la profondeur d'exploration du site"
+
+msgid "Set how many (in-scope) links the scanner should extract for each page"
+msgstr ""
+"Définir combien de lien (dans la périmètre) le scanneur doit extraire pour "
+"chaque page"
+
+msgid "Set how many pages the scanner should explore per directory"
+msgstr ""
+"Définir combien de pages d'un dossier le scanner doit traiter pour chaque "
+"dossier"
+
+msgid "Set how many seconds you want the scan to last (floats accepted)"
+msgstr ""
+"Définir combien de temps (en secondes) la phase d'exploration doit durer"
+
+msgid ""
+"Set how many seconds you want each attack module to last (floats accepted)"
+msgstr ""
+"Définir combien de secondes chaque module d'attaque doit durer au maximum "
+"(nombres à virgule acceptés)"
+
+msgid ""
+"URLs and forms having more than MAX input parameters will be erased before "
+"attack."
+msgstr ""
+"Les URLs et les formulaires ayant plus de MAX entrées seront supprimés avant "
+"l'attaque"
+
+msgid ""
+"Easy way to reduce the number of scanned and attacked URLs.\n"
+"Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
+msgstr ""
+"Une option simple pour réduire la quantité d'URLs scannées et donc "
+"attaquées.\n"
+"Les valeurs possibles sont: paranoid, sneaky, polite, normal, aggresive, "
+"insane"
+
+msgid "Set timeout for requests"
+msgstr "Définir le temps d'attente pour les requêtes"
+
+msgid "Set SSL check (default is no check)"
+msgstr "Activer ou désactiver la validation SSL (désactivée par défaut)"
+
+msgid "Colorize output"
+msgstr "Colorier l'affichage"
+
+msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
+msgstr "Définir le niveau de verbosité (0: silencieux, 1: normal, 2: bavard)"
+
+msgid "Set output format. Supported: json, html (default), txt, xml"
+msgstr ""
+"Définir le format du rapport. Formats supportés: json, html (par défaut), "
+"txt, xml"
+
+msgid "Output file or folder"
+msgstr "Fichier ou dossier de destination"
+
+msgid "Url serving as endpoint for target"
+msgstr "Url servant d'enpoint côté cible"
+
+msgid "Url serving as endpoint for attacker"
+msgstr "Url servant d'enpoint côté attaquant"
+
+msgid "Url serving as endpoint for both attacker and target"
+msgstr "Url servant d'enpoint à la fois pour l'attaquant et la cible"
+
+msgid "Don't send automatic bug report when an attack module fails"
+msgstr "Ne pas envoyer de rapport de bugs quand un module d'attaque échoue"
+
+msgid "Show program's version number and exit"
+msgstr "Afficher la version du programme et quitter"
+
+msgid "[*] Do you feel lucky punk?"
+msgstr "[*] Est-ce que tu tentes ta chance punk ?"
+
+msgid "[*] Available modules:"
+msgstr "[*] Modules disponibles :"
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+msgstr ""
+"URL de base spécifiée invalide, perci de fournir une URL disposant d'un "
+"protocole."
+
+msgid "[*] Updating modules"
+msgstr "[*] Mise à jour des modules"
+
+msgid "Error: File given with the -s option must be UTF-8 encoded !"
+msgstr ""
+"Erreur: les fichiers passés via le paramètre -s doivent être encodés en UTF-8"
+
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
+msgstr "Erreur: l'URL endpoint interne doit pouvoir être accédée par Wapiti!"
+
+msgid "[*] Resuming scan from previous session, please wait"
+msgstr "[*] Reprise du scan depuis la session enregistrée, veuillez patienter"
 
 #, python-brace-format
-msgid "error: {0} while attacking {1}"
-msgstr "erreur : {0} lors de l'attaque de {1}"
-
-msgid "error: timeout while attacking {0}"
-msgstr "erreur: délais d'attente dépassé lors de l'attaque de {0}"
-
-msgid "+ attack_post {0} from {1}"
-msgstr "+ attack_post {0} en provenance de {1}"
-
-msgid "Found backup file !"
-msgstr "Copie de sauvegarde trouvée !"
+msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
+msgstr ""
+"[*] {0} URLs et formulaires avec plus de {1} paramètres ont été supprimés"
 
 #, python-brace-format
-msgid "Backup file {0} found for {1}"
-msgstr "Copie de sauvegarde {0} trouvée pour {1}"
+msgid "[*] Wapiti found {0} URLs and forms during the scan"
+msgstr "[*] Wapiti a trouvé {0} URLs et formulaires lors du scan"
 
-msgid "Blind SQL vulnerability"
-msgstr "Faille d'injection SQL en aveugle"
+msgid ""
+"Attack process interrupted. Scan will be resumed next time unless you "
+"specify \"--flush-attacks\" or \"--flush-session\"."
+msgstr ""
+"Processus d'attaque interrompu. Le scan sera repris la prochaine fois à "
+"moins que vous ne passiez \"--flush-attacks\" ou \"--flush-session\"."
 
-msgid "{0} via injection in the query string"
-msgstr "{0} via une injection dans la query string"
+msgid ""
+"[!] Can't store informations in persister. SQLite database must have been "
+"locked by another process"
+msgstr ""
+"[!] Impossible de stocker des informations dans le persisteur. La base de "
+"données SQLite est certainement ouverte par un autre processus."
 
-msgid "Checking X-Frame-Options :"
-msgstr "Vérification de X-Frame-Options :"
+msgid "[!] You should unlock and launch Wapiti again."
+msgstr "[!] Veuillez libérer l'accès et relancer Wapiti."
 
-msgid "Checking X-XSS-Protection :"
-msgstr "Vérification de X-XSS-Protection :"
+msgid "Login failed"
+msgstr "Authentification échouée"
 
-msgid "Checking X-Content-Type-Options :"
-msgstr "Vérification de X-Content-Type-Options :"
+msgid "Invalid credentials format"
+msgstr "Format d'identifiants invalide"
 
-msgid "Checking Strict-Transport-Security :"
-msgstr "Vérification de Strict-Transport-Security :"
+msgid "Login success"
+msgstr "Authentification réussie"
 
-#, python-brace-format
-msgid "{0} via injection in the parameter {1}"
-msgstr "{0} via une injection dans le paramètre {1}"
+msgid "Credentials might be invalid"
+msgstr "Les identifiants semblent invalides"
 
-msgid "CRLF Injection"
-msgstr "Injection CRLF"
+msgid "No login form detected"
+msgstr "Aucun formulaire de connexion n'a été détecté"
 
-msgid "(QUERY_STRING)"
-msgstr "(QUERY_STRING)"
+msgid "[!] Connection error with URL"
+msgstr "[!] Impossible de se connecter à l'URL"
 
-msgid "Error: The server did not understand this request"
-msgstr "Erreur : Le serveur n'a pas compris la requête"
+msgid "[!] {} with url {}"
+msgstr "[!] {} avec l'URL {}"
 
-msgid "Command execution"
-msgstr "Exécution de commande"
-
-msgid "PHP evaluation"
-msgstr "Interprétation de code PHP"
-
-msgid "Warning exec"
-msgstr "Avertissement exec"
-
-msgid "preg_replace injection"
-msgstr "Injection via preg_replace"
-
-msgid "Warning usort()"
-msgstr "Avertissement usort()"
-
-msgid "Warning assert"
-msgstr "Avertissement assert"
-
-msgid "Evalutation warning"
-msgstr "Avertissement d'une évaluation"
-
-msgid "Remote inclusion vulnerability"
-msgstr "Faille d'inclusion distante"
-
-msgid "Linux local file disclosure vulnerability"
-msgstr "Divulgation de fichiers sur un système Linux"
-
-msgid "BSD local file disclosure vulnerability"
-msgstr "Divulgation de fichiers sur un système BSD"
-
-msgid "Windows local file disclosure vulnerability"
-msgstr "Divulgation de fichiers sur un système Window"
-
-msgid "File disclosure vulnerability in include_path"
-msgstr "Divulgation de fichier présent dans le include_path"
-
-msgid "highlight_file() vulnerability in basedir"
-msgstr "Divulgation de fichier présent dans basedur vie highlight_file()"
-
-msgid "include() of file in include_path"
-msgstr "Inclusion d'un fichier présent dans le include_path"
-
-#, python-brace-format
-msgid "Possible {0} vulnerability"
-msgstr "Eventuelle faille de type {0}"
-
-msgid "HtAccess protection found: {0}"
-msgstr "Protection par htaccess trouvée : {0}"
-
-msgid "|HTTP Code: {0} : {1}"
-msgstr "| Code HTTP : {0} : {1}"
-
-msgid "Source code:"
-msgstr "Code source :"
-
-msgid "{0} HtAccess"
-msgstr "{0} HtAccess"
-
-msgid "  .htaccess bypass vulnerability: {0}"
-msgstr "Disfonctionnement dans la protection .htaccess : {0}"
-
-msgid "|HTTP Code: {0}"
-msgstr "| Code HTTP : {0}"
-
-msgid "Problem with local nikto database."
-msgstr "Un problème est survenu avec la base de données nikto locale"
-
-msgid "Problem with local wapp database."
-msgstr "Un problème est survenu avec la base de données wapp locale"
-
-msgid "Downloading from the web..."
-msgstr "Téléchargement depuis le web..."
-
-msgid "Error downloading nikto database"
-msgstr "Erreur de téléchargement de la base nikto"
-
-msgid "Error downloading wapp database"
-msgstr "Erreur de téléchargement de la base wapp"
-
-msgid "Try using --store-session option, or update apps.json using --update option."
-msgstr "Essayez avec l'option --store-session, ou mettez à jour apps.json avec l'option --update."
-
-msgid "References:"
-msgstr "Références"
-
-msgid "Stored XSS vulnerability"
-msgstr "Faille XSS permanent"
-
-#, python-brace-format
-msgid "Found permanent XSS in {0} with {1}"
-msgstr "Un XSS permanent a été trouvé dans {0} avec {1}"
-
-#, python-brace-format
-msgid "Found permanent XSS attacked by {0} with fields {1}"
-msgstr "Un XSS permanent a été trouvé en envoyant les champs {1} depuis {0}"
-
-msgid "MySQL Injection"
-msgstr "Injection MySQL"
-
-msgid "MSAccess-Based SQL Injection"
-msgstr "Injection SQL sur système MS-Access"
-
-msgid "MSSQL-Based Injection"
-msgstr "Injection MSSQL"
-
-msgid "Java.SQL Injection"
-msgstr "Injection SQL Java"
-
-msgid "PostgreSQL Injection"
-msgstr "Injection PostgreSQL"
-
-msgid "XPath Injection"
-msgstr "Injection XPath"
-
-msgid "LDAP Injection"
-msgstr "Injection LDAP"
-
-msgid "DB2 Injection"
-msgstr "Injection SQL DB2"
-
-msgid "Interbase Injection"
-msgstr "Injection SQL Interbase"
-
-msgid "Sybase Injection"
-msgstr "Injection SQL Sybase"
-
-msgid ".NET SQL Injection"
-msgstr "Injection SQL .NET"
-
-msgid "Oracle Injection"
-msgstr "Injection SQL Oracle"
-
-msgid "XSS vulnerability"
-msgstr "Faille XSS"
-
-msgid "XSS vulnerability found via injection in the resource path"
-msgstr "Faille XSS trouvée via l'injection dans le chemin de la ressource"
-
-msgid "XSS vulnerability found via injection in the query string"
-msgstr "Faille XSS trouvée via l'injection dans la query string"
-
-#, python-brace-format
-msgid "XSS vulnerability found via injection in the parameter {0}"
-msgstr "Faille XSS trouvée via l'injection dans le paramètre {0}"
-
-msgid "No forms found in this page !"
-msgstr "Aucun formulaire n'a été trouvé dans cette page !"
-
-msgid "Choose the form you want to use :"
-msgstr "Sélectionnez le formulaire que vous souhaitez utiliser :"
-
-msgid "Enter a number : "
-msgstr "Entrez un numéro : "
-
-msgid "Please enter values for the following form: "
-msgstr "Veuillez renseigner les champs pour le formulaire suivant : "
-
-#, python-brace-format
-msgid "url = {0}"
-msgstr "url = {0}"
-
-msgid "Error getting url {0}"
-msgstr "Impossible d'atteindre l'URL {0}"
-
-msgid "First argument must be the root url !"
-msgstr "Le premier argument doit être l'URL racine !"
-
-msgid "Invalid protocol: {0}"
-msgstr "Protocole invalide : {0}"
-
-msgid "Invalid link argument: {0}"
-msgstr "Cet argument n'est pas un lien valide : {0}"
-
-msgid "Connection refused!"
-msgstr "Connexion refusée !"
-
-msgid "Exception in lswww.browse: {0}"
-msgstr "Exception reçue dans lswww.browse : {0}"
-
-msgid "File {0} loaded, the scan continues:"
-msgstr "Fichier {0} chargé, le scan continue :"
-
-msgid " * URLs to browse"
-msgstr " * URLs à explorer"
-
-msgid " * URLs browsed"
-msgstr " * URLs explorées"
-
-msgid "File {0} not found, Wapiti will scan again the web site"
-msgstr "Le Fichier {0} n'a pas été trouvé, Wapiti va recommencer le scan du site"
-
-msgid " Note"
-msgstr " Note"
-
-msgid "This scan has been saved in the file {0}/{1}.xml"
-msgstr "Le scan a été sauvegardé dans le fichier {0}/{1}.xml"
-
-msgid "You can use it to perform attacks without scanning again the web site with the \"-k\" parameter"
-msgstr "Vous pouvez l'utiliser pour lancer de futures attaques sans avoir à relancer le scan via le paramètre \"-k\""
-
-msgid "Scan stopped, the data has been saved in the file {0}/{1}.xml"
-msgstr "Scan interrompu, les données ont été sauvegardées dans le fichier {0}/{1}.xml"
-
-msgid "To continue this scan, you should launch Wapiti with the \"-i\" parameter"
-msgstr "Pour reprendre ce scan, vous pouvez lancer wapiti avec l'option \"-i\""
-
-msgid "URLs"
-msgstr "URLs"
-
-msgid "Forms Info"
-msgstr "Formulaires"
-
-msgid "From: {0}"
-msgstr "Depuis: {0}"
-
-msgid "To: {0}"
-msgstr "Vers: {0}"
-
-msgid "Upload Scripts"
-msgstr "Scripts d'upload"
-
-msgid "Forms"
-msgstr "Formulaires"
-
-msgid "Form {0}"
-msgstr "Formulaire {0}"
-
-msgid " * Method:  {0}"
-msgstr " * Méthode : {0}"
-
-msgid " * Intputs:"
-msgstr " * Intputs:"
-
-msgid " * Selects:"
-msgstr " * Selects:"
-
-msgid " * TextAreas:"
-msgstr " * TextAreas:"
-
-msgid "URLS"
-msgstr "URLS"
+msgid "[!] SSL/TLS error occurred with URL"
+msgstr "[!] Une erreur SSL/TLS s'est produite avec l'URL"
 
 #, python-brace-format
 msgid "Report for {0}\n"
@@ -470,627 +1201,9 @@ msgstr "Evil request:\n"
 msgid "cURL command PoC : \"{0}\""
 msgstr "PoC en commande cURL : \"{0}\""
 
-msgid "Anomalies found:"
-msgstr "Anomalies rencontrées :"
-
-msgid "Attack process interrupted. To perform again the attack, lauch Wapiti with \"-i\" or \"-k\" parameter."
-msgstr "Le processus d'attaque a été interrompu. Pour relancer l'attaque, lancez Wapiti avec les options \"-i\" ou \"-k\""
-
-msgid "File {0} not found. Wapiti will scan the web site again"
-msgstr "Le fichier {0} n'a pas été trouvé. Wapiti va scanner le site à nouveau"
-
-#, python-brace-format
-msgid "[!] Unable to find a module named {0}"
-msgstr "[!] Impossible de trouver le module {0}"
-
-#, python-brace-format
-msgid "Updating module {0}"
-msgstr "Mise à jour du module {0}"
-
-msgid "Update done."
-msgstr "Mise à jour effectuée."
-
-msgid "Weak credentials"
-msgstr "Identifiants faibles"
-
-msgid "Weak credentials description"
-msgstr "L'application Web utilise des informations d'identification par défaut ou des mots de passe faibles qui peuvent être trouvés dans des listes de mots de passe bien connus."
-
-msgid "Weak credentials solution"
-msgstr "Ne pas définir de mots de passe par défaut, en particulier pour les comptes administrateur. Mettez en œuvre des vérifications de mots de passe faibles, comme tester les mots de passe nouveaux ou modifiés par rapport à une liste des 10000 pires mots de passe."
-
-msgid "Backup file description"
-msgstr "Il se peut que des copies de sauvegarde de scripts soient accessibles sur le serveur. L'administrateur web a du placer volontairement une sauvegarde dans l'idée de revenir à une précédente version ou involontairement en utilisant un éditeur configuré pour sauver automatiquement une copie après une certaine durée.Ces fichiers peuvent révéler des informations intéressantes comme du code source ou encore des identifiants (accès à la base de données)."
-
-msgid "Backup file solution"
-msgstr "L'administrateur web doit supprimer manuellement les sauvegardes présentes sous la racine web et reconfigurer l'éditeur qu'il utilise pour désactiver les sauvegardes automatiques."
-
-msgid "Blind SQL Injection description"
-msgstr "Tout comme les failles d'injection SQL classiques, les injections SQL en aveugle permettent à un attaquant d'altérer les requêtes normalement exécutées sur la base de données. Ce type de vulnérabilité est plus difficile à détecter en raison de l'absence de messages d'erreur renvoyés par l'application web."
-
-msgid "Blind SQL Injection solution"
-msgstr "Pour se protéger des injections SQL, les données fournies par les utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes SQL mais doivent faire l'objet de vérifications (filtres, échappements) approfondies."
-
-msgid "Commands execution description"
-msgstr "Ce type d'attaque consiste à faire exécuter des commandes sur le serveur. L'attaquant tente d'injecter les commandes dans les paramêtres de requêtes qui lui sont accessibles."
-
-msgid "Commands execution solution"
-msgstr "Ce type de vulnérabilité résulte souvent d'un manque de vérifications sur les données soumises par le visiteur. Pour les opérations sur les accès fichiers il est préférable d'utiliser des appels systèmes spécialisés au lieu de tenter de faire exécuter des commandes shell."
-
-msgid "CRLF description"
-msgstr "Le terme CRLF fait référence à Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, \\n). Dans le protocole HTTP, ces deux caractères à la suite permettent entre autres de passer à la ligne d'entête suivante.Un script qui insère directement dans ses entêtes des données fournies par l'utilisateur peut alors se voir injecter des lignes d'entêtes qui seront interprétées par le navigateur de la victime."
-
-msgid "CRLF solution"
-msgstr "Vérifiez que les couples nom / valeur retournés dans les entêtes HTTP ne contiennent pas la suite de caractères CRLF."
-
-msgid "Cross Site Request Forgery description"
-msgstr "La falsification de requête inter-site (CSRF) est une attaque qui force un utilisateur à exécuter des actions non désirées sur une application web sur laquelle il est actuellement authentifié."
-
-msgid "Cross Site Request Forgery solution"
-msgstr "Vérifier que le framework utilisé implémente nativement une protection anti-CSRF et utiliser la. Si le framework ne fournit pas de protection anti-CSRF, ajouter un jeton anti-CSRF à toutes les requêtes qui modifient l'état d'un élément de l'application, et vérifier la validité des jetons côté serveur."
-
-msgid "Cross Site Scripting description"
-msgstr "Le Cross-site scripting (XSS) est une catégorie de vulnérabilités web qui permet d'exécuter du code dans le navigateur des visiteurs du site. Leur exploitation peut par exemple permettre le détournement d'une session qui a été ouverte sur un site par un utilisateur valide."
-
-msgid "Cross Site Scripting solution"
-msgstr "Afin de se protéger des attaques XSS, il faut s'assurer que les données retournées dans une page ne contiennent pas certains caractères interprétés par le navigateur.Certains caractères considérés dangereux peuvent être remplacés par leur code d'entité HTML."
-
-msgid "File Handling description"
-msgstr "Ces techniques permet à l'attaquant d'accèder à des fichiers auxquels il n'est pas sensé accèder car en dehors de la racine du serveur web. En utilisant certaines séquences comme '../', il peut remonter dans l'arborescence pour ainsi lister des répertoires ou obtenir le contenu de fichiers."
-
-msgid "File Handling solution"
-msgstr "Ne laissez pas aux utilisateurs la possibilité de choisir une ou plusieurs parties du nom d'un fichier ou d'un répertoire. Générez vous même des noms aléatoire en cas de création ou utilisez des correspondances en cas de templates (un ID numérique correspondant à une chaine de caractères. Utilisez des jails chroot et des restrictions d'accès pour limiter le nombre de fichiers accessibles par le serveur."
-
-msgid "Htaccess bypass description"
-msgstr "Les fichiers htaccess permettent de restreindre l'accès a des fichiers ou répertoires en fonction d'identifiants ou méthode HTTP utilisés. Si la configuration a été mal faite il peut être possible de contourner la restriction."
-
-msgid "Htaccess bypass solution"
-msgstr "La configuration du htaccess doit être minutieusement vérifiée pour ne pas laisser une porte d'entrée à un éventuel attaquant."
-
-msgid "Internal server error description"
-msgstr "Erreur interne au serveur. Le serveur a fait face à une situation inattendue qui l'a empêché de traiter convenablement la requête. Cela peut être le signe de la présence d'une vulnérabilité."
-
-msgid "Internal server error solution"
-msgstr "Les logs de votre serveur HTTP ou de l'application web concernée devraient vous renseigner sur la nature exacte du problème."
-
-msgid "Potentially dangerous file description"
-msgstr "Certains scripts sont connus pour être potentiellement vulnérables et dangereux. Des listes de tels fichiers existent et sont fréquemment utilisées par des attaquants pour scanner des sites Internet à la recherche de ces vulnérabilitées."
-
-msgid "Potentially dangerous file solution"
-msgstr "L'administrateur devrait vérifier régulièrement si des mises à jour sont disponibles pour les scripts et logiciels utilisés sur le serveur. Il est aussi conseillé de se tenir informé sur les nouvelles vulnérabilités trouvées en s'abonnant à des listes de sécurité ou en suivant des flux RSS spécialisés."
-
-msgid "Resource consumption description"
-msgstr "Il a fallu un temps anormallement long au serveur pour traiter la reqêquete. Un attaquant pourrait exploiter ce type de faiblesse pour surcharger le serveur."
-
-msgid "Resource consumption solution"
-msgstr "Le script en cause utilise probablement certaines ressources système (CPU, mémoire, accès disque etc) de façon inneficace. Son améliorations devrait être étudiée."
-
-msgid "SQL Injection description"
-msgstr "Les failles d'injection SQL permettent à un attaquant de modifier les requêtes qui sont normalement exécutées sur le système de base de données. Un attaquant peut alors parvenir à extraire où à modifier des informations en base. Cela peut aussi potentiellement permettre à l'attaquant d'augmenter ses privilèges sur le système."
-
-msgid "SQL Injection solution"
-msgstr "Pour se protéger des injections SQL, les données fournies par les utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes SQL mais doivent faire l'objet de vérifications (filtres, échappements) approfondies."
-
-msgid "Fingerprint web technology description"
-msgstr "L'utilisation d'une technologie web peut être déduite à cause des traces qui lui sont spécifiques."
-
-msgid "Fingerprint web technology solution"
-msgstr "A titre d'information seulement."
-
-msgid "HTTP Secure Headers"
-msgstr "Entêtes HTTP liés à la sécurité"
-
-msgid "HTTP Headers Secure Configuration"
-msgstr "Utilisez les recommandations pour renforcer vos en-têtes HTTP de sécurité"
-
-msgid "CSP  is not set"
-msgstr "CSP n'est pas configuré"
-
-msgid "Content Security Policy description"
-msgstr "Une Content Security Policy (CSP) ou stratégie de sécurité du contenu permet d'améliorer la sécurité des sites web en permettant de détecter et réduire certains types d'attaques, dont les attaques XSS (Cross Site Scripting) et les injections de contenu"
-
-msgid "Content Security Policy solution"
-msgstr "Configurer une stratégie CSP nécessite d'utiliser un en-tête HTTP Content-Security-Policy pour une page web et de spécifier une valeur pour contrôler les ressources que le navigateur est autorisé à charger pour cette page"
-
-msgid "Found backup file {}"
-msgstr "Ficher de sauvegarde {} trouvé"
-
-msgid "Credentials found on {}"
-msgstr "Identifiants trouvés sur {}"
-
-msgid "Brute force authentication success !"
-msgstr "Succès de l'authentification par force brute !"
-
-msgid "Checking cookie : {}"
-msgstr "Vérification du cookie"
-
-msgid "Slowest resources found on the web server:"
-msgstr "Ressources les plus lentes trouvées sur ce serveur web:"
-
-#, python-brace-format
-msgid "With a download speed of {0} bps:"
-msgstr "Avec une vitesse de téléchargement de {0} o/s:"
-
-msgid "Warning eval()"
-msgstr "Avertissement eval()"
-
-msgid "Evaluation warning"
-msgstr "Avertissement d'évaluation"
-
-msgid "Blind command execution"
-msgstr "Exécution de commande en aveugle"
-
-msgid "Unix local file disclosure vulnerability"
-msgstr "Faille de divulgation de fichier Unix local"
-
-#, python-brace-format
-msgid "{0} bypassable weak restriction"
-msgstr "Restriction d'accès bypassable sur {0}"
-
-#, python-brace-format
-msgid "Weak restriction bypass vulnerability: {0}"
-msgstr "Bypass d'une restriction d'accès faible: {0}"
-
-#, python-brace-format
-msgid "HTTP status code changed from {0} to {1}"
-msgstr "Le code de statut HTTP a changé de {0} à {1}"
-
-#, python-brace-format
-msgid "URL {0} seems vulnerable to Shellshock attack!"
-msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock !"
-
-#, python-brace-format
-msgid "URL {0} seems vulnerable to Shellshock attack"
-msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock"
-
-msgid "File not found message"
-msgstr "Message fichier non trouvé"
-
-#, python-brace-format
-msgid "Timeout occurred in {0}"
-msgstr "Une erreur timeout est survenu sur {0}"
-
-msgid "Invalid base URL was specified, please give a complete URL with protocol scheme and slash after the domain name."
-msgstr "Une URL de base invalide a été donnée, veuillez fournir une URL complète avec protocole et slash après le domaine."
-
-msgid "Choose the form you want to use or enter 'q' to leave :"
-msgstr "Sélectionnez le formulaire de votre choix ou entrez 'q' pour quitter :"
-
-msgid "[!] Keyword 'all' was removed for activation. Use 'common' and modules names instead."
-msgstr "[!] Le mot clé 'all' a été retiré. Veuillez utiliser 'common' et/ou les noms des modules à la place."
-
-msgid "Max scan time was reached, stopping."
-msgstr "Le temps maximum de scan a été atteint, arrêt en cours."
-
-msgid "[*] Saving scan state, please wait..."
-msgstr "[*] Enregistrement de l'état du scan, veuillez patienter..."
-
-#, python-brace-format
-msgid "This scan has been saved in the file {0}"
-msgstr "Ce scan a été sauvé dans le fichier {0}"
-
-msgid "The scan will be resumed next time unless you pass the --skip-crawl option."
-msgstr "Ce scan sera repris la prochaine fois à moins que vous ne passiez l'option --skip-crawl."
-
-#, python-brace-format
-msgid "[!] Missing dependencies for module {0}:"
-msgstr "[!] Dépendances manquantes pour le module {0}:"
-
-#, python-brace-format
-msgid "[*] Launching module {0}"
-msgstr "[*] Lancement du module {0}"
-
-#, python-brace-format
-msgid "[*] {0} pages were previously attacked and will be skipped"
-msgstr "[*] {0} pages ont été précédemment attaquées et seront ignorées"
-
-msgid "Attack process was interrupted. Do you want to:"
-msgstr "Le processus d'attaque a été interrompu. Voulez-vous:"
-
-msgid "\t1) stop everything here and generate the report"
-msgstr "\t1) Tout arrêter ici et générer le rapport"
-
-msgid "\t2) move to the next attack module (if any)"
-msgstr "\t2) passer au module d'attaque suivant (si présent)"
-
-msgid "\t3) stop everything here without generating the report"
-msgstr "\t3) Tout arrêter ici sans générer le rapport"
-
-msgid "\t4) continue the current attack"
-msgstr "\t4) continuer l'attaque en cours"
-
-msgid "Invalid choice. Valid choices are 1, 2, 3 and 4."
-msgstr "Choix invalide. Les choix valides sont 1, 2, 3 et 4"
-
-msgid "Sending crash report {} ... {}"
-msgstr "Envoi du rapport d'erreur {} ... {}"
-
-msgid "Error sending crash report"
-msgstr "Erreur lors de l'envoi du rapport d'erreur"
-
-msgid "{} requests were skipped due to network issues"
-msgstr "{} requêtes ont été abandonnées en raison d'erreurs réseau"
-
-msgid "The base URL used to define the scan scope (default scope is folder)"
-msgstr "L'URL de base utilisée pour définir le périmètre de scan (le périmètre par défaut est folder)"
-
-msgid "Set scan scope"
-msgstr "Définir le périmètre de scan"
-
-msgid "List of modules to load"
-msgstr "La liste des modules à utiliser"
-
-msgid "Set attack level"
-msgstr "Définir le niveau d'attaque"
-
-msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
-msgstr "Définir le proxy HTTP(S) à utiliser. Les proxies http(s) et socks sont supportés."
-
-msgid "Set HTTP authentication credentials"
-msgstr "Définir les identifiants pour l'authentification HTTP"
-
-msgid "Set the authentication type to use"
-msgstr "Définir le type d'authentification à utiliser"
-
-msgid "Set a JSON cookie file to use"
-msgstr "Définir un fichier cookie JSON à utiliser"
-
-msgid "Don't resume the scanning process, attack URLs scanned during a previous session"
-msgstr "Ne pas résumer le scan, directement attaquer les URLs scannées lors d'une précédente session"
-
-msgid "Flush attack history and vulnerabilities for the current session"
-msgstr "Effacer l'historique des attaques et vulnérabilitiées de la session en cours"
-
-msgid "Flush everything that was previously found for this target (crawled URLs, vulns, etc)"
-msgstr "Effacer tout l'historique de la session (URLs trouvées, vulnérabilités, etc)"
-
-msgid "Adds an url to start scan with"
-msgstr "Utiliser une URL supplémentaire pour débuter le scan"
-
-msgid "Adds an url to exclude from the scan"
-msgstr "Ajouter une URL à exclure du scan"
-
-msgid "Remove this parameter from urls"
-msgstr "Retirer ce paramètre des URLs"
-
-msgid "Skip attacking given parameter(s)"
-msgstr "Ne pas attaquer un paramètre"
-
-msgid "Set how deep the scanner should explore the website"
-msgstr "Définir la profondeur d'exploration du site"
-
-msgid "Set how many (in-scope) links the scanner should extract for each page"
-msgstr "Définir combien de lien (dans la périmètre) le scanneur doit extraire pour chaque page"
-
-msgid "Set how many pages the scanner should explore per directory"
-msgstr "Définir combien de pages d'un dossier le scanner doit traiter pour chaque dossier"
-
-msgid "Set how many minutes you want the scan to last (floats accepted)"
-msgstr "Limiter la durée du scan en minutes (chiffres à virgule acceptés)"
-
-msgid "URLs and forms having more than MAX input parameters will be erased before attack."
-msgstr "Les URLs et les formulaires ayant plus de MAX entrées seront supprimés avant l'attaque"
-
-msgid ""
-"Easy way to reduce the number of scanned and attacked URLs.\n"
-"Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
-msgstr ""
-"Une option simple pour réduire la quantité d'URLs scannées et donc attaquées.\n"
-"Les valeurs possibles sont: paranoid, sneaky, polite, normal, aggresive, insane"
-
-msgid "Set timeout for requests"
-msgstr "Définir le temps d'attente pour les requêtes"
-
-msgid "Set a custom header to use for every requests"
-msgstr "Définir un entête HTTP à utiliser pour toutes les requêtes"
-
-msgid "Set a custom user-agent to use for every requests"
-msgstr "Définir un user-agent spécifique à utiliser pour toutes les requêtes"
-
-msgid "Set SSL check (default is no check)"
-msgstr "Activer ou désactiver la validation SSL (désactivée par défaut)"
-
-msgid "Colorize output"
-msgstr "Colorier l'affichage"
-
-msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
-msgstr "Définir le niveau de verbosité (0: silencieux, 1: normal, 2: bavard)"
-
-msgid "Set output format. Supported: json, html (default), txt, xml"
-msgstr "Définir le format du rapport. Formats supportés: json, html (par défaut), txt, xml"
-
-msgid "Output file or folder"
-msgstr "Fichier ou dossier de destination"
-
-msgid "Don't send automatic bug report when an attack module fails"
-msgstr "Ne pas envoyer de rapport de bugs quand un module d'attaque échoue"
-
-msgid "Error: File given with the -s option must be UTF-8 encoded !"
-msgstr "Erreur: les fichiers passés via le paramètre -s doivent être encodés en UTF-8"
-
-msgid "[*] Resuming scan from previous session, please wait"
-msgstr "[*] Reprise du scan depuis la session enregistrée, veuillez patienter"
-
-#, python-brace-format
-msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
-msgstr "[*] {0} URLs et formulaires avec plus de {1} paramètres ont été supprimés"
-
-#, python-brace-format
-msgid "[*] Wapiti found {0} URLs and forms during the scan"
-msgstr "[*] Wapiti a trouvé {0} URLs et formulaires lors du scan"
-
-msgid "Attack process interrupted. Scan will be resumed next time unless you specify \"--flush-attacks\" or \"--flush-session\"."
-msgstr "Processus d'attaque interrompu. Le scan sera repris la prochaine fois à moins que vous ne passiez \"--flush-attacks\" ou \"--flush-session\"."
-
-msgid "[!] Can't store informations in persister. SQLite database must have been locked by another process"
-msgstr "[!] Impossible de stocker des informations dans le persisteur. La base de données SQLite est certainement ouverte par un autre processus."
-
-msgid "[!] You should unlock and launch Wapiti again."
-msgstr "[!] Veuillez libérer l'accès et relancer Wapiti."
-
-msgid "[!] SSL/TLS error occurred with URL"
-msgstr "[!] Une erreur SSL/TLS s'est produite avec l'URL"
-
-msgid "[!] Connection error with URL"
-msgstr "[!] Impossible de se connecter à l'URL"
-
-msgid "[!] {} with url {}"
-msgstr "[!] {} avec l'URL {}"
-
-msgid "No login form detected"
-msgstr "Aucun formulaire de connexion n'a été détecté"
-
-msgid "Invalid credentials format"
-msgstr "Format d'identifiants invalide"
-
-msgid "Credentials might be invalid"
-msgstr "Les identifiants semblent invalides"
-
-msgid "Login success"
-msgstr "Authentification réussie"
-
-msgid "Login failed"
-msgstr "Authentification échouée"
-
 msgid "Summary of anomalies :"
 msgstr "Résumé des anomalies :"
 
 msgid "Summary of additionals :"
 msgstr "Résumé des informations complémentaires :"
 
-msgid "Show program's version number and exit"
-msgstr "Afficher la version du programme et quitter"
-
-msgid "[*] You are lucky! Full moon tonight."
-msgstr "[*] Vous êtes chanceux ! C'est la pleine lune ce soir."
-
-msgid "[*] Be careful! New moon tonight."
-msgstr "[*] Soyez prudent ! Nouvelle lune ce soir."
-
-msgid "[*] Watch out! Bad things can happen on Friday the 13th."
-msgstr "[*] Faites attention ! De vilaines choses peuvent survenir un vendredi 13."
-
-msgid "List Wapiti attack modules and exit"
-msgstr "Lister les modules d'attaque de Wapiti et quitter"
-
-msgid "Update Wapiti attack modules and exit"
-msgstr "Mettre à jour les modules d'attaque de Wapiti et quitter"
-
-msgid "Resume the scanning process (if stopped) even if some attacks were previously performed"
-msgstr "Reprendre le scan (si précédemment stoppé) même si les attaques avaient débuté"
-
-msgid "[*] Available modules:"
-msgstr "[*] Modules disponibles :"
-
-msgid "[*] Updating modules"
-msgstr "[*] Mise à jour des modules"
-
-msgid "Remote file disclosure vulnerability"
-msgstr ""
-
-#, python-brace-format
-msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
-msgstr "Faille de XSS permanent trouvée via une injection dans la paramètre {0}"
-
-#, python-brace-format
-msgid "Permanent XSS vulnerability found in {0} by injecting the parameter {1} of {2}"
-msgstr "Faille de XSS permanent trouvée dans {0} via une injection dans la paramètre {1} de {2}"
-
-msgid "Open Redirect"
-msgstr ""
-
-msgid "Spring JDBC Injection"
-msgstr ""
-
-msgid "SSRF vulnerability"
-msgstr ""
-
-#, python-brace-format
-msgid ""
-"{0} via injection in the parameter {1}.\n"
-"The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
-"Full request can be seen at {5}"
-msgstr ""
-
-msgid "Server Side Request Forgery"
-msgstr ""
-
-msgid "Server Side Request Forgery description"
-msgstr "L'application web dispose d'une fonctionnalité permettant d'aller lire une URL ou d'envoyer des données à une URL qui peut être détournée."
-
-msgid "Server Side Request Forgery solution"
-msgstr "Toutes les URI reçues en entrées devraient être correctement vérifiées, en particulier le protocole et le nom d'hôte. L'utilisation d'une whitelist est conseillée."
-
-msgid "Open Redirect description"
-msgstr "L'application reçoit en entrée des URLs reprises directement pour effectuer une redirection HTTP. Un attaquant peut profiter de l'absence de vérifications pour une campagne de phishing."
-
-msgid "Open Redirect solution"
-msgstr "La page chargée de la redirection devrait avertir l'utilisateur de la redirection et demander sa confirmation via un bouton."
-
-msgid "[*] Today is International Beer Day!"
-msgstr ""
-
-msgid "[*] May the force be with you!"
-msgstr "[*] Que la force soit avec vous!"
-
-msgid "[*] Happy new year!"
-msgstr ""
-
-msgid "[*] Merry christmas!"
-msgstr ""
-
-msgid "[*] Today is world backup day! Is your data safe?"
-msgstr ""
-
-msgid "Directory where to store attack history and session data."
-msgstr "Dossier où stocker les fichiers de session de Wapiti."
-
-msgid "[*] Do you feel lucky punk?"
-msgstr "[*] Est-ce que tu tentes ta chance punk ?"
-
-msgid "XXE"
-msgstr ""
-
-msgid "XXE description"
-msgstr "Les attaques XML External Entity ciblent l'application en charge de l'analyse du format XML. Cela survient quand un parseur XML malconfiguré doit traiter des références à des entitées externes. Cetta attaque peut permettre de récupérer des données confidentielles, provoquer des dénis de service, des SSRF, effectuer des scans de ports depuis la machine cible, etc."
-
-msgid "XXE solution"
-msgstr "La méthode la plus efficace pour se protéger des XXE est de désactiver complétement l'utilisation des entitées externes."
-
-msgid "\tr) stop everything here and generate the (R)eport"
-msgstr "\tr) Tout arrêter ici et générer le (R)apport"
-
-msgid "\tn) move to the (N)ext attack module (if any)"
-msgstr "\tn) Sauter au module d'attaque suivant (Next)"
-
-msgid "\tq) (Q)uit without generating the report"
-msgstr "\tq) (Q)uitter ici sans générer de rapport"
-
-msgid "\tc) (C)ontinue the current attack"
-msgstr "\tc) (C)ontinuer l'attaque en cours"
-
-msgid "Invalid choice. Valid choices are r, n, q and c."
-msgstr "Choix invalide. Les choix valides sont r, n, q et c."
-
-msgid "[*] Asking endpoint URL {} for results, please wait..."
-msgstr ""
-
-msgid "[!] Unable to request endpoint URL '{}'"
-msgstr ""
-
-msgid "Use Tor listener (127.0.0.1:9050)"
-msgstr "Utiliser le relais Tor local (127.0.0.1:9050)"
-
-msgid "Url serving as endpoint for target"
-msgstr ""
-
-msgid "Url serving as endpoint for attacker"
-msgstr ""
-
-msgid "Url serving as endpoint for both attacker and target"
-msgstr ""
-
-msgid "Error: Endpoint URL must contain scheme, host and path with trailing slash!"
-msgstr ""
-
-msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
-msgstr ""
-
-msgid "HttpOnly Flag cookie description"
-msgstr "HttpOnly est un indicateur supplémentaire inclus dans un en-tête de réponse HTTP Set-Cookie. L'utilisation de l'indicateur HttpOnly lors de la génération d'un cookie permet d'atténuer le risque que le script côté client accède au cookie protégé"
-
-msgid "HttpOnly Flag cookie solution"
-msgstr "A la création de cookie, assurez vous d'activer le drapeau 'HttpOnly' avec la fonction 'set-cookie'"
-
-#, python-brace-format
-msgid "HttpOnly flag is not set in the cookie : {0}"
-msgstr "L'indicateur HttpOnly n'est pas défini dans le cookie : {0}"
-
-msgid "Secure Flag cookie description"
-msgstr "Le flag Secure permet de laisser la décision d’envoi ou non du cookie au navigateur. Il signifie que le cookie  est uniquement envoyé au serveur avec les requêtes chiffrées, via le protocole HTTPS"
-
-msgid "Secure Flag cookie solution"
-msgstr "A la création de cookie, assurez vous d'activer le drapeau 'Secure' avec la fonction 'set-cookie'"
-
-#, python-brace-format
-msgid "Secure flag is not set in the cookie : {0}"
-msgstr "L'indicateur Secure n'est pas défini dans le cookie : {0}"
-
-msgid "Constraints: {}"
-msgstr "Contraintes: {}"
-
-msgid "Error downloading nikto database."
-msgstr "Echec du téléchargement de la base de données Nikto"
-
-msgid "Warning: Content-Security-Policy is present!"
-msgstr ""
-
-msgid "Cross Site Request Forgery"
-msgstr ""
-
-msgid "CSP is not set"
-msgstr ""
-
-#, python-brace-format
-msgid "CSP attribute \"{0}\" is missing"
-msgstr ""
-
-msgid "HttpOnly Flag cookie"
-msgstr ""
-
-msgid "Secure Flag cookie"
-msgstr ""
-
-msgid "X-Frame-Options is not set"
-msgstr ""
-
-msgid "X-XSS-Protection is not set"
-msgstr ""
-
-msgid "X-Content-Type-Options is not set"
-msgstr ""
-
-msgid "Strict-Transport-Security is not set"
-msgstr ""
-
-msgid "Lack of anti CSRF token"
-msgstr "Absence de jeton anti CSRF"
-
-msgid "CSRF token '{}' is not properly checked in backend"
-msgstr "Le jeton CSRF '{}' n'est pas correctement vérifié par l'application"
-
-msgid "CSRF token '{}' might be easy to predict"
-msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
-
-msgid "Error downloading wapp database."
-msgstr "Erreur de téléchargement de la base de données Wappalizer"
-
-msgid "XXE vulnerability"
-msgstr "Faille XXE"
-
-#, python-brace-format
-msgid "Out-Of-Band {0} by sending raw XML in request body"
-msgstr ""
-
-#, python-brace-format
-msgid "Out-Of-Band {0} via injection in the parameter {1}"
-msgstr ""
-
-#, python-brace-format
-msgid ""
-"The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
-"Received data can be seen at {3}."
-msgstr ""
-
-msgid "Brute force attack success"
-msgstr ""
-
-msgid "Credentials found for URL {} : {} / {}"
-msgstr ""
-
-msgid "CSP Configuration"
-msgstr ""
-
-#, python-brace-format
-msgid "CSP \"{0}\" value is not safe"
-msgstr ""

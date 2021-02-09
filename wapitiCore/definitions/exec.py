@@ -27,7 +27,7 @@ SHORT_NAME = NAME
 DESCRIPTION = _(
     "This attack consists in executing system commands on the server."
 ) + " " + _(
-    "The attacker tries to inject this commands in the request parameters"
+    "The attacker tries to inject this commands in the request parameters."
 )
 
 SOLUTION = _(
