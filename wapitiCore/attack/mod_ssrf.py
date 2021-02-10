@@ -166,7 +166,8 @@ class mod_ssrf(Attack):
             methods=methods,
             payloads=self.payloads,
             qs_inject=self.must_attack_query_string,
-            skip=self.options.get("skipped_parameters")
+            skip=self.options.get("skipped_parameters"),
+            endpoint=self.external_endpoint
         )
 
         http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
