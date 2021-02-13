@@ -13,7 +13,7 @@ It  performs  "black-box" scans, i.e. it does not study the source code of the a
 
 Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see if a script is vulnerable.
 
-Wapiti is useful only to discover vulnerabilities : it is not an exploitation tools.  Some well known applications can be used for the exploitation part like the recommanded sqlmap.
+Wapiti is useful only to discover vulnerabilities: it is not an exploitation tools. Some well known applications can be used for the exploitation part like the recommended sqlmap.
 
 ## OPTIONS SUMMARY
 
@@ -23,7 +23,7 @@ More detail on each option can be found in the following sections.
 TARGET SPECIFICATION:
 
   * `-u` <URL>
-  * `--scope` {page,folder,domain,url}
+  * `--scope` {page,folder,domain,url,punk}
 
 ATTACK SPECIFICATION:
 
@@ -111,7 +111,7 @@ OTHER OPTIONS:
     You can filter on http methods too (only get or post). For example -m "xss:get,exec:post".
     
   * `--list-modules`  
-    Print the list of available Wapiti modules and exit.
+    Print the list of available Wapiti modules along with a short description then exit.
     
   * `-l`, `--level` <LEVEL>  
     In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL.  
@@ -133,12 +133,12 @@ OTHER OPTIONS:
     Given value should be in the form login%password (% is used as a separator)
     
   * `--auth-type` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post.  
-    Kerberos and NTLM authentication may require you to install additionnal Python modules.
-    Post authentication could be combined with `-s` to specify where to find the login form.
+    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post (web login form).  
+    Kerberos and NTLM authentication may require you to install additional Python modules.
+    "Post" authentication could be combined with `-s` to specify where to find the login form.
 
   * `-c`, `--cookie` <COOKIE_FILE>  
-    Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more informations.
+    Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.
     
 ## SESSION OPTIONS
 
@@ -156,7 +156,7 @@ Following options allows you to bypass this behavior/
     
   * `--flush-attacks`  
     Forget everything about discovered vulnerabilities and which URL was attacked by which module.  
-    Only the scan (crawling) informations will be kept.
+    Only the scan (crawling) information will be kept.
     
   * `--flush-session`  
     Forget everything about the target for the given scope.
@@ -165,7 +165,7 @@ Following options allows you to bypass this behavior/
     Specify an alternative path for storing session (.db and .pkl) files.
 
   * `--store-config` <PATH>
-    Specify an alternative path for storing particular module (apps.json and nikto_db) files.
+    Specify an alternative path for storing particular module (`apps.json` and `nikto_db`) files.
 
 ## SCAN AND ATTACKS TUNING
 
@@ -220,14 +220,14 @@ Following options allows you to bypass this behavior/
     
   * `-S`, `--scan-force` <FORCE>  
     The more input parameters an URL or form have, the more requests Wapiti will send.  
-    The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge ammount of time.  
+    The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge amount of time.  
     Wapiti use a mathematical formula to reduce the numbers of URLs scanned for a given pattern (same variables names) when
     the number of parameters grows.  
     The formula is `maximum_allowed_patterns = 220 / (math.exp(number_of_parameters * factor) ** 2)`
     where factor is an internal value controller by the <FORCE> value you give as an option.  
-    Availables choices are : paranoid, sneaky, polite, normal, aggressive, insane.  
+    Available choices are : paranoid, sneaky, polite, normal, aggressive, insane.  
     Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).  
-    Insane mode just remove the calculation of thoses limits, every URL will be attacked.  
+    Insane mode just remove the calculation of those limits, every URL will be attacked.  
     Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
     
   * `--endpoint` <URL>
@@ -296,7 +296,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
     You can still prevent reports from being sent using that option.
 
   * `--update`
-    Update particular Wapiti modules (download a fresh version of the apps.json and nikto_db files) then exit. 
+    Update particular Wapiti modules (download a fresh version of the `apps.json` and `nikto_db` files) then exit. 
     You can combine it with `--store-config` to specify where to store downloaded files.
 
   * `-h`, `--help`  
@@ -309,7 +309,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2020 Nicolas Surribas.
+Copyright (c) 2006-2021 Nicolas Surribas.
 
 ## AUTHORS
 
@@ -317,11 +317,11 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WEBSITE
 
-http://wapiti.sourceforge.io/
+https://wapiti.sourceforge.io/
 
 ## BUG REPORTS
 
-If you find a bug in Wapiti please report it to https://sourceforge.net/p/wapiti/bugs/
+If you find a bug in Wapiti please report it to https://github.com/wapiti-scanner/wapiti/issues
 
 ## SEE ALSO
 

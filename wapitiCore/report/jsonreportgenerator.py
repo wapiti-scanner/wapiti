@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JSON Report Generator Module for Wapiti Project
-# Wapiti Project (http://wapiti.sourceforge.io)
+# Wapiti Project (https://wapiti.sourceforge.io)
 #
 # Copyright (C) 2014-2021 Nicolas SURRIBAS
 #

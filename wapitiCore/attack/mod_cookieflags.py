@@ -1,4 +1,4 @@
-# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
+# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
 # Copyright (C) 2020-2021 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (http://wapiti.sourceforge.io)
+# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
 # Copyright (C) 2008-2021 Nicolas Surribas
 #
 # Original author :

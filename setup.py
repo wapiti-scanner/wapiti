@@ -39,12 +39,14 @@ doc_and_conf_files = [
             "doc/ChangeLog_Wapiti",
             "doc/ChangeLog_lswww",
             "LICENSE",
+            "doc/endpoints.md",
             "doc/example.txt",
             "doc/FAQ.md",
             "doc/wapiti.1.html",
             "doc/wapiti.ronn",
             "doc/wapiti-getcookie.1.html",
             "doc/wapiti-getcookie.ronn",
+            "doc/xxe_module.md",
             "INSTALL.md",
             "README.md",
             "VERSION"
@@ -73,7 +75,7 @@ application but will scans the webpages of the deployed webapp, looking for
 scripts and forms where it can inject data.
 Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see
 if a script is vulnerable.""",
-    url="http://wapiti.sourceforge.io/",
+    url="https://wapiti.sourceforge.io/",
     author="Nicolas Surribas",
     author_email="nicolas.surribas@gmail.com",
     license="GPLv2",

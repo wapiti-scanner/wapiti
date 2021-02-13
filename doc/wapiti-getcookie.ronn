@@ -7,9 +7,9 @@ wapiti-getcookie(1) -- A Wapiti utility to fetch cookies from a webpage and stor
 
 ## DESCRIPTION
 
-wapiti-getcookie is a user-friendly interractive console utility that can be used to fill a web-form or fetch an URL 
+wapiti-getcookie is a user-friendly interactive console utility that can be used to fill a web-form or fetch an URL 
 and extract the cookies sent by the remote server.  
-Cookie informations are stored in the JSON cookie file you have to specify with the -c option.  
+Cookie information are stored in the JSON cookie file you have to specify with the -c option.  
 Those cookies can be loaded by Wapiti using the same -c option.
    
 ## OPTIONS
@@ -28,7 +28,7 @@ Those cookies can be loaded by Wapiti using the same -c option.
     
   * `--auth-type` <TYPE>  
     Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.  
-    Kerberos and NTLM authentication may require you to install additionnal Python modules.
+    Kerberos and NTLM authentication may require you to install additional Python modules.
 
   * `-H`, `--header` <HEADER>  
     Set a custom HTTM header to inject in every request sent by Wapiti.
@@ -51,7 +51,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2020 Nicolas Surribas.
+Copyright (c) 2006-2021 Nicolas Surribas.
 
 ## AUTHORS
 
@@ -59,8 +59,8 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WWW
 
-http://wapiti.sourceforge.io/
+https://wapiti.sourceforge.io/
 
 ## BUG REPORTS
 
-If you find a bug in Wapiti please report it to https://sourceforge.net/p/wapiti/bugs/
+If you find a bug in Wapiti please report it to https://github.com/wapiti-scanner/wapiti/issues
