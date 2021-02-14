@@ -31,7 +31,7 @@ On Windows you will have to specify the interpreter (`python wapiti`).
 
 ### Where can I get some help about options ? ###
 
-The manpage (Linux or HTML version) is the best way to have detailed informations about the options.  
+The manpage (Linux or HTML version) is the best way to have detailed information about the options.  
 If you are really lost, feel free to contact me.
 
 ### I have some UnicodeDecodeError as soon as I launch Wapiti ! ###

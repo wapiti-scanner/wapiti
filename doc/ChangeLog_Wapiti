@@ -1,3 +1,24 @@
+
+    XSS: improved context awareness of HTML webpage, payloads can now use the existing HTML tags without closing them
+    XSS: greatly reduced number of false negatives while slightly reducing false positives
+    XSS: the module will also check for the CSP header and warn if reflection was found while a strong CSP seems present
+    XSS: reduced memory and CPU consumption
+    XSS: added more payloads to bypass filters and WAF
+    Exec: added a few more payloads
+    SQL: more heuristics to detect DBMS used on the target
+    Wappalyzer module allows to detect software used by a website, along with versions
+    New module to check the security settings of Cookies (HttpOnly, secure, etc)
+    New module to check the security settings for HTTP headers (Strict-Transport-Security, X-Frame-Options, etc)
+    New module to check the security settings for Content-Security-Policy
+    New module to check for forms vulnerable to CSRF (either no anti-CSRF token is present or it is not well implemented)
+    New module to brute-force found login forms with known default credentials (admin/admin, demo/demo, etc)
+    New --update option allows to get last updates for detections databases (Wappalyzer and Nikto)
+    New --max-attack-time options allows to limit the execution time of each attack module
+    New --store-config options allows to set the path for Wapiti configuration files (detection databases)
+    Combining the new "-a post" authentication option along with -s allows to login on the target without using wapiti-getcookie
+    Removed jQuery dependency
+    Fixed several issues with endpoints
+
 20/02/2020
     Wapiti 3.0.3
     An important work was made to reduce false positives in XSS detections.
