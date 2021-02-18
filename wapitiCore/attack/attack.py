@@ -54,7 +54,8 @@ modules = [
     "mod_ssrf",
     "mod_redirect",
     "mod_xxe",
-    "mod_wapp"
+    "mod_wapp",
+    "mod_wp_enum"
 ]
 
 # Modules that will be used if option -m isn't used

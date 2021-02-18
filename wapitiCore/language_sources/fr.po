@@ -54,6 +54,15 @@ msgstr "Erreur : Le serveur n'a pas compris la requête"
 msgid "CSP is not set"
 msgstr "CSP n'est pas défini"
 
+msgid "No WordPress detected"
+msgstr "Pas de WordPress détecté"
+
+msgid "Enumeration of WordPress Plugins :"
+msgstr "Enumération des extensions WordPress"
+
+msgid "Enumeration of WordPress Themes :"
+msgstr "Enumération des thèmes WordPress"
+
 #, python-brace-format
 msgid "CSP attribute \"{0}\" is missing"
 msgstr "L'attribut CSP \"{0}\" est manquant"
