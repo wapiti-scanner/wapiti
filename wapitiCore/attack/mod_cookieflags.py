@@ -44,7 +44,7 @@ class mod_cookieflags(Attack):
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 self.log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
-                self.add_addition(
+                self.add_vuln(
                     category=COOKIE_HTTPONLY_DISABLED,
                     level=LOW_LEVEL,
                     request=request,
@@ -53,7 +53,7 @@ class mod_cookieflags(Attack):
 
             if not self.check_secure_flag(cookie):
                 self.log_red(INFO_COOKIE_SECURE.format(cookie.name))
-                self.add_addition(
+                self.add_vuln(
                     category=COOKIE_SECURE_DISABLED,
                     level=LOW_LEVEL,
                     request=request,
