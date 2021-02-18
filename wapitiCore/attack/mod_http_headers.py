@@ -47,7 +47,7 @@ class mod_http_headers(Attack):
         self.log_blue(_("Checking X-Frame-Options :"))
         if not self.is_set(response, "X-Frame-Options", self.check_list_xframe):
             self.log_red(INFO_XFRAME_OPTIONS)
-            self.add_addition(
+            self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
                 request=request,
@@ -59,7 +59,7 @@ class mod_http_headers(Attack):
         self.log_blue(_("Checking X-XSS-Protection :"))
         if not self.is_set(response, "X-XSS-Protection", self.check_list_xss):
             self.log_red(INFO_XSS_PROTECTION)
-            self.add_addition(
+            self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
                 request=request,
@@ -71,7 +71,7 @@ class mod_http_headers(Attack):
         self.log_blue(_("Checking X-Content-Type-Options :"))
         if not self.is_set(response, "X-Content-Type-Options", self.check_list_xcontent):
             self.log_red(INFO_XCONTENT_TYPE)
-            self.add_addition(
+            self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
                 request=request,
@@ -83,7 +83,7 @@ class mod_http_headers(Attack):
         self.log_blue(_("Checking Strict-Transport-Security :"))
         if not self.is_set(response, "Strict-Transport-Security", self.check_list_hsts):
             self.log_red(INFO_HSTS)
-            self.add_addition(
+            self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
                 request=request,

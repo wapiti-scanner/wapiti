@@ -37,7 +37,7 @@ class mod_csp(Attack):
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)
-            self.add_addition(
+            self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
                 request=request,
@@ -51,7 +51,7 @@ class mod_csp(Attack):
 
                 if result == -1:
                     self.log_red(MSG_CSP_MISSING.format(policy_name))
-                    self.add_addition(
+                    self.add_vuln(
                         category=NAME,
                         level=LOW_LEVEL,
                         request=request,
@@ -59,7 +59,7 @@ class mod_csp(Attack):
                     )
                 elif result == 0:
                     self.log_red(MSG_CSP_UNSAFE.format(policy_name))
-                    self.add_addition(
+                    self.add_vuln(
                         category=NAME,
                         level=LOW_LEVEL,
                         request=request,

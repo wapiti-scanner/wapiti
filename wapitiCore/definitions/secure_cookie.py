@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from wapitiCore.language.language import _
 
-TYPE = "additional"
+TYPE = "vulnerability"
 
 NAME = _("Secure Flag cookie")
 SHORT_NAME = NAME

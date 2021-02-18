@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from wapitiCore.language.language import _
 
-TYPE = "additional"
+TYPE = "vulnerability"
 
 NAME = _("Content Security Policy Configuration")
 SHORT_NAME = _("CSP Configuration")
