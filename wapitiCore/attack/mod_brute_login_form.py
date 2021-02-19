@@ -25,7 +25,7 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
 from wapitiCore.definitions.credentials import NAME
 from wapitiCore.net import web
 
@@ -163,7 +163,7 @@ class mod_brute_login_form(Attack):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
+                        level=LOW_LEVEL,
                         request=evil_request,
                         info=vuln_message
                     )

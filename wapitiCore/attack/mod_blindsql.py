@@ -18,10 +18,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from itertools import chain
 
-from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, _
-from wapitiCore.definitions.blindsql import NAME
 from requests.exceptions import ReadTimeout, RequestException
+from wapitiCore.attack.attack import Attack
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, CRITICAL_LEVEL, _
+from wapitiCore.definitions.blindsql import NAME
 
 
 class mod_blindsql(Attack):
@@ -84,7 +84,7 @@ class mod_blindsql(Attack):
                         self.add_vuln(
                             request_id=original_request.path_id,
                             category=NAME,
-                            level=HIGH_LEVEL,
+                            level=CRITICAL_LEVEL,
                             request=mutated_request,
                             info=vuln_message,
                             parameter=parameter

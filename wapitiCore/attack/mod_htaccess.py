@@ -24,7 +24,7 @@
 from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
 from wapitiCore.definitions.htaccess import NAME
 from wapitiCore.net import web
 
@@ -64,7 +64,7 @@ class mod_htaccess(Attack):
                             self.add_vuln(
                                 request_id=original_request.path_id,
                                 category=NAME,
-                                level=HIGH_LEVEL,
+                                level=MEDIUM_LEVEL,
                                 request=evil_req,
                                 info=_("{0} bypassable weak restriction").format(evil_req.url)
                             )

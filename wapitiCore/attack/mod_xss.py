@@ -167,7 +167,7 @@ class mod_xss(Attack):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
+                        level=MEDIUM_LEVEL,
                         request=evil_request,
                         parameter=xss_param,
                         info=message
