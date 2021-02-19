@@ -26,7 +26,7 @@ from os.path import splitext
 from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.definitions.backup import NAME
 from wapitiCore.net import web
 
@@ -85,7 +85,7 @@ class mod_backup(Attack):
                             self.add_vuln(
                                 request_id=original_request.path_id,
                                 category=NAME,
-                                level=HIGH_LEVEL,
+                                level=LOW_LEVEL,
                                 request=evil_req,
                                 info=_("Backup file {0} found for {1}").format(url, page)
                             )

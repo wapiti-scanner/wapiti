@@ -21,7 +21,7 @@ from itertools import chain
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadType
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, CRITICAL_LEVEL, _
 from wapitiCore.definitions.exec import NAME
 
 
@@ -127,7 +127,7 @@ class mod_exec(Attack):
                             self.add_vuln(
                                 request_id=original_request.path_id,
                                 category=NAME,
-                                level=HIGH_LEVEL,
+                                level=CRITICAL_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter
@@ -186,7 +186,7 @@ class mod_exec(Attack):
                             self.add_vuln(
                                 request_id=original_request.path_id,
                                 category=NAME,
-                                level=HIGH_LEVEL,
+                                level=CRITICAL_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter

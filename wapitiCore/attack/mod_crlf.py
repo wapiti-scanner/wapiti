@@ -21,7 +21,7 @@ from urllib.parse import quote
 from requests.exceptions import ReadTimeout, HTTPError, RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL,LOW_LEVEL, _
 from wapitiCore.definitions.crlf import NAME
 
 
@@ -73,7 +73,7 @@ class mod_crlf(Attack):
                             self.add_vuln(
                                 request_id=http_res.path_id,
                                 category=NAME,
-                                level=HIGH_LEVEL,
+                                level=LOW_LEVEL,
                                 request=mutated_request,
                                 parameter=parameter,
                                 info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)

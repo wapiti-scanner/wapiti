@@ -19,7 +19,7 @@
 from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
 from wapitiCore.definitions.redirect import NAME
 
 
@@ -52,7 +52,7 @@ class mod_redirect(Attack):
                         self.add_vuln(
                             request_id=http_res.path_id,
                             category=NAME,
-                            level=MEDIUM_LEVEL,
+                            level=LOW_LEVEL,
                             request=mutated_request,
                             parameter=parameter,
                             info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)

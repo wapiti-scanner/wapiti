@@ -21,7 +21,7 @@ import math
 from requests.exceptions import ReadTimeout
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, MEDIUM_LEVEL, Messages, _
+from wapitiCore.language.vulnerability import MEDIUM_LEVEL, Messages, _
 from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
@@ -192,7 +192,7 @@ class mod_csrf(Attack):
             self.add_vuln(
                 request_id=original_request.path_id,
                 category=NAME,
-                level=HIGH_LEVEL,
+                level=MEDIUM_LEVEL,
                 request=original_request,
                 info=vuln_message,
             )
