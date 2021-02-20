@@ -264,6 +264,40 @@ def test_meta_detection():
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
 
+@responses.activate
+def test_multi_detection():
+    # Test if application is detected using several ways
+    responses.add(
+        responses.GET,
+        url="http://perdu.com/",
+        body="<html><head><title>Vous Etes Perdu ?</title> \
+        <meta name=\"generator\" content=\"WordPress 5.6.1\">    \
+        </head><body><h1>Perdu sur l'Internet ?</h1> \
+        <h2>Pas de panique, on va vous aider</h2> \
+        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+        <script type=\"text/javascript\" src=\"https://perdu.com/wp-includes/js/wp-embed.min.js\" ></script> \
+        </body></html>",
+        headers={"link": "<http://perdu.com/wp-json/>; rel=\"https://api.w.org/\""}
+    )
+
+    persister = FakePersister()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    persister.requests.append(request)
+
+    crawler = Crawler("http://perdu.com/")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_wapp(crawler, persister, logger, options)
+    module.verbose = 2
+
+    for __ in module.attack():
+        pass
+
+    assert persister.additionals
+    assert persister.additionals[-1] == '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
 
 @responses.activate
 def test_implies_detection():
