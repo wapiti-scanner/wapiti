@@ -30,7 +30,7 @@ class FakePersister:
     def add_anomaly(self, _request_id, _category, _level, _request, parameter, _info):
         self.anomalies.add(parameter)
 
-    def add_vulnerability(self, _request_id, _category, _level, _request, parameter, _info):
+    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
         self.vulnerabilities.add(parameter)
 
     def get_root_url(self):
