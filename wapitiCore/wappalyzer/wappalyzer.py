@@ -117,7 +117,7 @@ class ApplicationData:
                     # However looking for key seems to be interesting
                     if patterns == "":
                         patterns = key
-                    
+
                     # {meta: {generator: "abc"}} --> {meta: {generator: ["abc"]}}
                     if not isinstance(patterns, list):
                         self.applications[application_name][dict_field][key] = [patterns]
@@ -188,13 +188,15 @@ class Wappalyzer:
         """
         Determine whether the web content matches the application regex.
         """
+        url_detected = self.is_application_detected_normalize_string(application, 'url', self._url)
+        html_detected = self.is_application_detected_normalize_list(application, 'html', self._html)
+        scripts_detected = self.is_application_detected_normalize_list(application, 'scripts', self._scripts)
+        cookies_detected = self.is_application_detected_normalize_dict(application, 'cookies', self._cookies)
+        headers_detected = self.is_application_detected_normalize_dict(application, 'headers', self._headers)
+        meta_detected = self.is_application_detected_normalize_dict(application, 'meta', self._metas)
+
         is_detected = (
-            self.is_application_detected_normalize_string(application, 'url', self._url) or
-            self.is_application_detected_normalize_list(application, 'html', self._html) or
-            self.is_application_detected_normalize_list(application, 'scripts', self._scripts) or
-            self.is_application_detected_normalize_dict(application, 'cookies', self._cookies) or
-            self.is_application_detected_normalize_dict(application, 'headers', self._headers) or
-            self.is_application_detected_normalize_dict(application, 'meta', self._metas)
+            url_detected or html_detected or scripts_detected or cookies_detected or headers_detected or meta_detected
         )
 
         return is_detected
