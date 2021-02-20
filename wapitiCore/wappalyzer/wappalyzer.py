@@ -11,6 +11,7 @@ from wapitiCore.net.crawler import Page
 logger = logging.getLogger(name=__name__)
 BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
+
 class ApplicationDataException(Exception):
     """Raised when application data file is not properly formatted"""
 

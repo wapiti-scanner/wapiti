@@ -1,5 +1,6 @@
 include README.md
 include INSTALL.md
+include LICENSE
 include VERSION
 
 recursive-include wapitiCore/data *

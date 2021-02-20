@@ -5,7 +5,7 @@ from multiprocessing import cpu_count
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-VERSION = "3.0.3"
+VERSION = "3.0.4"
 DOC_DIR = "share/doc/wapiti"
 
 
@@ -38,7 +38,6 @@ doc_and_conf_files = [
             "doc/AUTHORS",
             "doc/ChangeLog_Wapiti",
             "doc/ChangeLog_lswww",
-            "LICENSE",
             "doc/endpoints.md",
             "doc/example.txt",
             "doc/FAQ.md",
@@ -47,6 +46,7 @@ doc_and_conf_files = [
             "doc/wapiti-getcookie.1.html",
             "doc/wapiti-getcookie.ronn",
             "doc/xxe_module.md",
+            "LICENSE",
             "INSTALL.md",
             "README.md",
             "VERSION"

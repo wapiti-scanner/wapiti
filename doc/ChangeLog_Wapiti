@@ -1,4 +1,5 @@
-
+20/02/2021
+    Wapiti 3.0.4
     XSS: improved context awareness of HTML webpage, payloads can now use the existing HTML tags without closing them
     XSS: greatly reduced number of false negatives while slightly reducing false positives
     XSS: the module will also check for the CSP header and warn if reflection was found while a strong CSP seems present

@@ -1,4 +1,4 @@
-WAPITI - VERSION 3.0.3
+WAPITI - VERSION 3.0.4
 ===========
 
 Wapiti is a web application security auditor.

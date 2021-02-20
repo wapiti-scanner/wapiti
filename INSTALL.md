@@ -78,7 +78,7 @@ pip install wapiti3
 You can pull latest dev version from Git :
 
 ```sh
-git clone https://git.code.sf.net/p/wapiti/git wapiti-git
+git clone git@github.com:wapiti-scanner/wapiti.git
 ```
 
 Then use setup.py for installation. Remember that dev version may contain unknown bugs.

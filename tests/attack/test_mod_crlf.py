@@ -46,7 +46,7 @@ def test_whole_stuff():
         responses.GET,
         re.compile(r"http://perdu.com/\?a=b*&foo=.*wapiti.*"),
         body="Hello there",
-        headers={"wapiti": "3.0.3 version"}
+        headers={"wapiti": "3.0.4 version"}
     )
 
     persister = FakePersister()
