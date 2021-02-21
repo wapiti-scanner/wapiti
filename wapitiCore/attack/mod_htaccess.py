@@ -21,12 +21,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import RequestException
-
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
 from wapitiCore.definitions.htaccess import NAME
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 
 
 class mod_htaccess(Attack):
@@ -39,48 +37,46 @@ class mod_htaccess(Attack):
     do_get = False
     do_post = False
 
-    def attack(self):
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+    def must_attack(self, request: Request):
+        if request.path in self.attacked_get:
+            return False
 
-        for original_request in http_resources:
-            url = original_request.path
-            referer = original_request.referer
-            headers = {}
-            if referer:
-                headers["referer"] = referer
+        if request.status not in (401, 402, 403, 407):
+            return False
 
-            if url not in self.attacked_get:
-                if original_request.status in (401, 402, 403, 407):
-                    # The ressource is forbidden
-                    try:
-                        evil_req = web.Request(url, method="ABC")
-                        response = self.crawler.send(evil_req, headers=headers)
-                        unblocked_content = response.content
+        return True
 
-                        if response.status == 404 or response.status < 400 or response.status >= 500:
-                            # Every 4xx status should be uninteresting (specially bad request in our case)
+    def attack(self, request: Request):
+        url = request.path
+        referer = request.referer
+        headers = {}
+        if referer:
+            headers["referer"] = referer
 
-                            self.log_red("---")
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=NAME,
-                                level=MEDIUM_LEVEL,
-                                request=evil_req,
-                                info=_("{0} bypassable weak restriction").format(evil_req.url)
-                            )
-                            self.log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
-                            self.log_red(_("HTTP status code changed from {0} to {1}").format(
-                                original_request.status,
-                                response.status
-                            ))
+        evil_req = Request(url, method="ABC")
+        response = self.crawler.send(evil_req, headers=headers)
+        unblocked_content = response.content
 
-                            if self.verbose == 2:
-                                self.log_red(_("Source code:"))
-                                self.log_red(unblocked_content)
-                            self.log_red("---")
+        if response.status == 404 or response.status < 400 or response.status >= 500:
+            # Every 4xx status should be uninteresting (specially bad request in our case)
 
-                        self.attacked_get.append(url)
-                    except (RequestException, KeyboardInterrupt) as exception:
-                        yield exception
+            self.log_red("---")
+            self.add_vuln(
+                request_id=request.path_id,
+                category=NAME,
+                level=MEDIUM_LEVEL,
+                request=evil_req,
+                info=_("{0} bypassable weak restriction").format(evil_req.url)
+            )
+            self.log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
+            self.log_red(_("HTTP status code changed from {0} to {1}").format(
+                request.status,
+                response.status
+            ))
 
-            yield original_request
+            if self.verbose == 2:
+                self.log_red(_("Source code:"))
+                self.log_red(unblocked_content)
+            self.log_red("---")
+
+        self.attacked_get.append(url)

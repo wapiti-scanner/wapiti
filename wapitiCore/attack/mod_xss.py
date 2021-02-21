@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
 from os.path import join as path_join
 from configparser import ConfigParser
 
@@ -27,6 +26,7 @@ from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
 from wapitiCore.net.csp_utils import has_strong_csp
+from wapitiCore.net.web import Request
 
 
 class mod_xss(Attack):
@@ -53,61 +53,48 @@ class mod_xss(Attack):
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
-
-    def attack(self):
         methods = ""
         if self.do_get:
             methods += "G"
         if self.do_post:
             methods += "PF"
 
-        mutator = Mutator(
+        self.mutator = Mutator(
             methods=methods,
             payloads=random_string_with_flags,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters")
         )
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+    def attack(self, request: Request):
+        for mutated_request, parameter, taint, flags in self.mutator.mutate(request):
+            # We don't display the mutated request here as the payload is not interesting
+            try:
+                response = self.crawler.send(mutated_request)
+            except ReadTimeout:
+                # We just inserted harmless characters, if we get a timeout here, it's not interesting
+                continue
+            else:
+                # We keep a history of taint values we sent because in case of stored value, the taint code
+                # may be found in another webpage by the permanentxss module.
+                self.tried_xss[taint] = (mutated_request, parameter, flags)
 
-        for original_request in chain(http_resources, forms):
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+                # Reminder: valid_xss_content_type is not called before before content is not necessary
+                # reflected here, may be found in another webpage so we have to inject tainted values
+                # even if the Content-Type seems uninteresting.
+                if taint.lower() in response.content.lower() and valid_xss_content_type(mutated_request):
+                    # Simple text injection worked in HTML response, let's try with JS code
+                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
 
-            for mutated_request, parameter, taint, flags in mutator.mutate(original_request):
-                try:
-                    # We don't display the mutated request here as the payload is not interesting
-                    try:
-                        response = self.crawler.send(mutated_request)
-                    except ReadTimeout:
-                        # We just inserted harmless characters, if we get a timeout here, it's not interesting
-                        continue
+                    # TODO: check that and make it better
+                    if flags.method == PayloadType.get:
+                        method = "G"
+                    elif flags.method == PayloadType.file:
+                        method = "F"
                     else:
-                        # We keep a history of taint values we sent because in case of stored value, the taint code
-                        # may be found in another webpage by the permanentxss module.
-                        self.tried_xss[taint] = (mutated_request, parameter, flags)
+                        method = "P"
 
-                        # Reminder: valid_xss_content_type is not called before before content is not necessary
-                        # reflected here, may be found in another webpage so we have to inject tainted values
-                        # even if the Content-Type seems uninteresting.
-                        if taint.lower() in response.content.lower() and valid_xss_content_type(mutated_request):
-                            # Simple text injection worked in HTML response, let's try with JS code
-                            payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
-
-                            # TODO: check that and make it better
-                            if flags.method == PayloadType.get:
-                                method = "G"
-                            elif flags.method == PayloadType.file:
-                                method = "F"
-                            else:
-                                method = "P"
-
-                            self.attempt_exploit(method, payloads, original_request, parameter, taint)
-                except KeyboardInterrupt as exception:
-                    yield exception
-
-            yield original_request
+                    self.attempt_exploit(method, payloads, request, parameter, taint)
 
     def attempt_exploit(self, method, payloads, original_request, parameter, taint):
         timeouted = False

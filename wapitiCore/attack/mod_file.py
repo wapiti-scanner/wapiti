@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
 from configparser import ConfigParser
 from os.path import join as path_join
 from collections import defaultdict, namedtuple
@@ -25,8 +24,9 @@ import re
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadReader
-from wapitiCore.language.vulnerability import Messages,MEDIUM_LEVEL, HIGH_LEVEL,CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL,CRITICAL_LEVEL, _
 from wapitiCore.definitions.file import NAME
+from wapitiCore.net.web import Request
 
 
 PHP_WARNING_REGEXES = [
@@ -108,6 +108,7 @@ class mod_file(Attack):
         self.rules_to_messages = {}
         self.payload_to_rules = {}
         self.known_false_positives = defaultdict(set)
+        self.mutator = self.get_mutator()
 
     @property
     def payloads(self):
@@ -157,161 +158,147 @@ class mod_file(Attack):
 
         return False
 
-    def attack(self):
-        mutator = self.get_mutator()
+    def attack(self, request: Request):
+        warned = False
+        timeouted = False
+        page = request.path
+        saw_internal_error = False
+        current_parameter = None
+        vulnerable_parameter = False
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+            if current_parameter != parameter:
+                # Forget what we know about current parameter
+                current_parameter = parameter
+                vulnerable_parameter = False
+            elif vulnerable_parameter:
+                # If parameter is vulnerable, just skip till next parameter
+                continue
 
-        for original_request in chain(http_resources, forms):
-            warned = False
-            timeouted = False
-            page = original_request.path
-            saw_internal_error = False
-            current_parameter = None
-            vulnerable_parameter = False
+            if self.verbose == 2:
+                print("[¨] {0}".format(mutated_request))
 
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+            try:
+                response = self.crawler.send(mutated_request)
+            except ReadTimeout:
+                if timeouted:
+                    continue
 
-            for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
-                try:
-                    if current_parameter != parameter:
-                        # Forget what we know about current parameter
-                        current_parameter = parameter
-                        vulnerable_parameter = False
-                    elif vulnerable_parameter:
-                        # If parameter is vulnerable, just skip till next parameter
+                self.log_orange("---")
+                self.log_orange(Messages.MSG_TIMEOUT, page)
+                self.log_orange(Messages.MSG_EVIL_REQUEST)
+                self.log_orange(mutated_request.http_repr())
+                self.log_orange("---")
+
+                if parameter == "QUERY_STRING":
+                    anom_msg = Messages.MSG_QS_TIMEOUT
+                else:
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
+
+                self.add_anom(
+                    request_id=request.path_id,
+                    category=Messages.RES_CONSUMPTION,
+                    level=MEDIUM_LEVEL,
+                    request=mutated_request,
+                    info=anom_msg,
+                    parameter=parameter
+                )
+                timeouted = True
+            else:
+                file_warning = None
+                # original_payload = self.payload_to_rules[flags.section]
+                for rule in self.payload_to_rules[flags.section]:
+                    if rule in response.content:
+                        found_pattern = rule
+                        vulnerable_method = self.rules_to_messages[rule]
+                        inclusion_succeed = True
+                        break
+                else:
+                    # No successful inclusion or directory traversal but perhaps we can control something
+                    inclusion_succeed = False
+                    file_warning = find_warning_message(response.content, payload)
+                    if file_warning:
+                        found_pattern = file_warning.pattern
+                        vulnerable_method = file_warning.function
+                    else:
+                        found_pattern = vulnerable_method = None
+
+                if found_pattern:
+                    # Interesting pattern found, either inclusion or error message
+                    if self.is_false_positive(request, found_pattern):
                         continue
 
-                    if self.verbose == 2:
-                        print("[¨] {0}".format(mutated_request))
-
-                    try:
-                        response = self.crawler.send(mutated_request)
-                    except ReadTimeout:
-                        if timeouted:
+                    if not inclusion_succeed:
+                        if warned:
+                            # No need to warn more than once
                             continue
 
-                        self.log_orange("---")
-                        self.log_orange(Messages.MSG_TIMEOUT, page)
-                        self.log_orange(Messages.MSG_EVIL_REQUEST)
-                        self.log_orange(mutated_request.http_repr())
-                        self.log_orange("---")
+                        # Mark as eventuality
+                        vulnerable_method = _("Possible {0} vulnerability").format(vulnerable_method)
+                        warned = True
 
-                        if parameter == "QUERY_STRING":
-                            anom_msg = Messages.MSG_QS_TIMEOUT
-                        else:
-                            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
-
-                        self.add_anom(
-                            request_id=original_request.path_id,
-                            category=Messages.RES_CONSUMPTION,
-                            level=MEDIUM_LEVEL,
-                            request=mutated_request,
-                            info=anom_msg,
-                            parameter=parameter
-                        )
-                        timeouted = True
+                    # An error message implies that a vulnerability may exists
+                    if parameter == "QUERY_STRING":
+                        vuln_message = Messages.MSG_QS_INJECT.format(vulnerable_method, page)
                     else:
-                        file_warning = None
-                        # original_payload = self.payload_to_rules[flags.section]
-                        for rule in self.payload_to_rules[flags.section]:
-                            if rule in response.content:
-                                found_pattern = rule
-                                vulnerable_method = self.rules_to_messages[rule]
-                                inclusion_succeed = True
-                                break
-                        else:
-                            # No successful inclusion or directory traversal but perhaps we can control something
-                            inclusion_succeed = False
-                            file_warning = find_warning_message(response.content, payload)
-                            if file_warning:
-                                found_pattern = file_warning.pattern
-                                vulnerable_method = file_warning.function
-                            else:
-                                found_pattern = vulnerable_method = None
+                        vuln_message = _("{0} via injection in the parameter {1}").format(
+                            vulnerable_method, parameter
+                        )
 
-                        if found_pattern:
-                            # Interesting pattern found, either inclusion or error message
-                            if self.is_false_positive(original_request, found_pattern):
-                                continue
+                    constraint_message = ""
+                    if file_warning and file_warning.uri:
+                        constraints = has_prefix_or_suffix(payload, file_warning.uri)
+                        if constraints:
+                            constraint_message += _("Constraints: {}").format(", ".join(constraints))
+                            vuln_message += " (" + constraint_message + ")"
 
-                            if not inclusion_succeed:
-                                if warned:
-                                    # No need to warn more than once
-                                    continue
+                    self.add_vuln(
+                        request_id=request.path_id,
+                        category=NAME,
+                        level=CRITICAL_LEVEL,
+                        request=mutated_request,
+                        info=vuln_message,
+                        parameter=parameter
+                    )
 
-                                # Mark as eventuality
-                                vulnerable_method = _("Possible {0} vulnerability").format(vulnerable_method)
-                                warned = True
+                    self.log_red("---")
+                    self.log_red(
+                        Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
+                        vulnerable_method,
+                        page,
+                        parameter
+                    )
 
-                            # An error message implies that a vulnerability may exists
-                            if parameter == "QUERY_STRING":
-                                vuln_message = Messages.MSG_QS_INJECT.format(vulnerable_method, page)
-                            else:
-                                vuln_message = _("{0} via injection in the parameter {1}").format(
-                                    vulnerable_method, parameter
-                                )
+                    if constraint_message:
+                        self.log_red(constraint_message)
 
-                            constraint_message = ""
-                            if file_warning and file_warning.uri:
-                                constraints = has_prefix_or_suffix(payload, file_warning.uri)
-                                if constraints:
-                                    constraint_message += _("Constraints: {}").format(", ".join(constraints))
-                                    vuln_message += " (" + constraint_message + ")"
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
+                    self.log_red(mutated_request.http_repr())
+                    self.log_red("---")
 
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=NAME,
-                                level=CRITICAL_LEVEL,
-                                request=mutated_request,
-                                info=vuln_message,
-                                parameter=parameter
-                            )
+                    if inclusion_succeed:
+                        # We reached maximum exploitation for this parameter, don't send more payloads
+                        vulnerable_parameter = True
+                        continue
 
-                            self.log_red("---")
-                            self.log_red(
-                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
-                                vulnerable_method,
-                                page,
-                                parameter
-                            )
+                elif response.status == 500 and not saw_internal_error:
+                    saw_internal_error = True
+                    if parameter == "QUERY_STRING":
+                        anom_msg = Messages.MSG_QS_500
+                    else:
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                            if constraint_message:
-                                self.log_red(constraint_message)
+                    self.add_anom(
+                        request_id=request.path_id,
+                        category=Messages.ERROR_500,
+                        level=HIGH_LEVEL,
+                        request=mutated_request,
+                        info=anom_msg,
+                        parameter=parameter
+                    )
 
-                            self.log_red(Messages.MSG_EVIL_REQUEST)
-                            self.log_red(mutated_request.http_repr())
-                            self.log_red("---")
-
-                            if inclusion_succeed:
-                                # We reached maximum exploitation for this parameter, don't send more payloads
-                                vulnerable_parameter = True
-                                continue
-
-                        elif response.status == 500 and not saw_internal_error:
-                            saw_internal_error = True
-                            if parameter == "QUERY_STRING":
-                                anom_msg = Messages.MSG_QS_500
-                            else:
-                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
-
-                            self.add_anom(
-                                request_id=original_request.path_id,
-                                category=Messages.ERROR_500,
-                                level=HIGH_LEVEL,
-                                request=mutated_request,
-                                info=anom_msg,
-                                parameter=parameter
-                            )
-
-                            self.log_orange("---")
-                            self.log_orange(Messages.MSG_500, page)
-                            self.log_orange(Messages.MSG_EVIL_REQUEST)
-                            self.log_orange(mutated_request.http_repr())
-                            self.log_orange("---")
-                except (KeyboardInterrupt, RequestException) as exception:
-                    yield exception
-
-            yield original_request
+                    self.log_orange("---")
+                    self.log_orange(Messages.MSG_500, page)
+                    self.log_orange(Messages.MSG_EVIL_REQUEST)
+                    self.log_orange(mutated_request.http_repr())
+                    self.log_orange("---")
