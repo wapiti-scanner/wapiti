@@ -21,8 +21,9 @@ from urllib.parse import quote
 from requests.exceptions import ReadTimeout, HTTPError, RequestException
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL,LOW_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, LOW_LEVEL, _
 from wapitiCore.definitions.crlf import NAME
+from wapitiCore.net.web import Request
 
 
 class mod_crlf(Attack):
@@ -35,67 +36,60 @@ class mod_crlf(Attack):
     do_post = False
     payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.4 version"), Flags())
 
-    def attack(self):
-        mutator = self.get_mutator()
+    def __init__(self, crawler, persister, logger, attack_options):
+        super().__init__(crawler, persister, logger, attack_options)
+        self.mutator = self.get_mutator()
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+    def attack(self, request: Request):
+        page = request.path
 
-        for http_res in http_resources:
-            page = http_res.path
+        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+            if self.verbose == 2:
+                print("+ {0}".format(mutated_request.url))
+            try:
+                response = self.crawler.send(mutated_request)
 
-            for mutated_request, parameter, payload, flags in mutator.mutate(http_res):
-                try:
-                    if self.verbose == 2:
-                        print("+ {0}".format(mutated_request.url))
-                    try:
-                        response = self.crawler.send(mutated_request)
+            except ReadTimeout:
+                self.add_anom(
+                    request_id=request.path_id,
+                    category=Messages.RES_CONSUMPTION,
+                    level=MEDIUM_LEVEL,
+                    request=mutated_request,
+                    parameter=parameter,
+                    info="Timeout (" + parameter + ")"
+                )
 
-                    except ReadTimeout:
-                        self.add_anom(
-                            request_id=http_res.path_id,
-                            category=Messages.RES_CONSUMPTION,
-                            level=MEDIUM_LEVEL,
-                            request=mutated_request,
-                            parameter=parameter,
-                            info="Timeout (" + parameter + ")"
-                        )
+                self.log_orange("---")
+                self.log_orange(Messages.MSG_TIMEOUT, page)
+                self.log_orange(Messages.MSG_EVIL_REQUEST)
+                self.log_orange(mutated_request.http_repr())
+                self.log_orange("---")
 
-                        self.log_orange("---")
-                        self.log_orange(Messages.MSG_TIMEOUT, page)
-                        self.log_orange(Messages.MSG_EVIL_REQUEST)
-                        self.log_orange(mutated_request.http_repr())
-                        self.log_orange("---")
+            except HTTPError:
+                self.log(_("Error: The server did not understand this request"))
+            else:
+                if "wapiti" in response.headers:
+                    self.add_vuln(
+                        request_id=request.path_id,
+                        category=NAME,
+                        level=LOW_LEVEL,
+                        request=mutated_request,
+                        parameter=parameter,
+                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                    )
 
-                    except HTTPError:
-                        self.log(_("Error: The server did not understand this request"))
+                    if parameter == "QUERY_STRING":
+                        injection_msg = Messages.MSG_QS_INJECT
                     else:
-                        if "wapiti" in response.headers:
-                            self.add_vuln(
-                                request_id=http_res.path_id,
-                                category=NAME,
-                                level=LOW_LEVEL,
-                                request=mutated_request,
-                                parameter=parameter,
-                                info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
-                            )
+                        injection_msg = Messages.MSG_PARAM_INJECT
 
-                            if parameter == "QUERY_STRING":
-                                injection_msg = Messages.MSG_QS_INJECT
-                            else:
-                                injection_msg = Messages.MSG_PARAM_INJECT
-
-                            self.log_red("---")
-                            self.log_red(
-                                injection_msg,
-                                self.MSG_VULN,
-                                page,
-                                parameter
-                            )
-                            self.log_red(Messages.MSG_EVIL_REQUEST)
-                            self.log_red(mutated_request.http_repr())
-                            self.log_red("---")
-
-                except (RequestException, KeyboardInterrupt) as exception:
-                    yield exception
-
-            yield http_res
+                    self.log_red("---")
+                    self.log_red(
+                        injection_msg,
+                        self.MSG_VULN,
+                        page,
+                        parameter
+                    )
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
+                    self.log_red(mutated_request.http_repr())
+                    self.log_red("---")

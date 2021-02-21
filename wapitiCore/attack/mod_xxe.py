@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
 from binascii import unhexlify
 from time import sleep
 from urllib.parse import quote
@@ -53,6 +52,7 @@ class mod_xxe(Attack):
         self.vulnerables = set()
         self.attacked_urls = set()
         self.payload_to_rules = {}
+        self.mutator = self.get_mutator()
 
     @property
     def payloads(self):
@@ -107,132 +107,118 @@ class mod_xxe(Attack):
         except AttributeError:
             return []
 
-    def attack(self):
-        mutator = self.get_mutator()
+    def attack(self, request: Request):
+        timeouted = False
+        page = request.path
+        saw_internal_error = False
+        current_parameter = None
+        vulnerable_parameter = False
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+        if request.url not in self.attacked_urls:
+            yield from self.attack_body(request)
+            self.attacked_urls.add(request.url)
 
-        for original_request in chain(http_resources, forms):
-            timeouted = False
-            page = original_request.path
-            saw_internal_error = False
-            current_parameter = None
-            vulnerable_parameter = False
+        if request.path_id in self.vulnerables:
+            return
 
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+        if request.is_multipart:
+            yield from self.attack_upload(request)
+            if request.path_id in self.vulnerables:
+                return
 
-            if original_request.url not in self.attacked_urls:
-                yield from self.attack_body(original_request)
-                self.attacked_urls.add(original_request.url)
-
-            if original_request.path_id in self.vulnerables:
+        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+            if current_parameter != parameter:
+                # Forget what we know about current parameter
+                current_parameter = parameter
+                vulnerable_parameter = False
+            elif vulnerable_parameter:
+                # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            if original_request.is_multipart:
-                yield from self.attack_upload(original_request)
-                if original_request.path_id in self.vulnerables:
+            if self.verbose == 2:
+                print("[¨] {0}".format(mutated_request))
+
+            try:
+                response = self.crawler.send(mutated_request)
+            except ReadTimeout:
+                if timeouted:
                     continue
 
-            for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
-                try:
-                    if current_parameter != parameter:
-                        # Forget what we know about current parameter
-                        current_parameter = parameter
-                        vulnerable_parameter = False
-                    elif vulnerable_parameter:
-                        # If parameter is vulnerable, just skip till next parameter
-                        continue
+                self.log_orange("---")
+                self.log_orange(Messages.MSG_TIMEOUT, page)
+                self.log_orange(Messages.MSG_EVIL_REQUEST)
+                self.log_orange(mutated_request.http_repr())
+                self.log_orange("---")
 
-                    if self.verbose == 2:
-                        print("[¨] {0}".format(mutated_request))
+                if parameter == "QUERY_STRING":
+                    anom_msg = Messages.MSG_QS_TIMEOUT
+                else:
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
-                    try:
-                        response = self.crawler.send(mutated_request)
-                    except ReadTimeout:
-                        if timeouted:
-                            continue
-
-                        self.log_orange("---")
-                        self.log_orange(Messages.MSG_TIMEOUT, page)
-                        self.log_orange(Messages.MSG_EVIL_REQUEST)
-                        self.log_orange(mutated_request.http_repr())
-                        self.log_orange("---")
-
-                        if parameter == "QUERY_STRING":
-                            anom_msg = Messages.MSG_QS_TIMEOUT
-                        else:
-                            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
-
-                        self.add_anom(
-                            request_id=original_request.path_id,
-                            category=Messages.RES_CONSUMPTION,
-                            level=MEDIUM_LEVEL,
-                            request=mutated_request,
-                            info=anom_msg,
-                            parameter=parameter
-                        )
-                        timeouted = True
+                self.add_anom(
+                    request_id=request.path_id,
+                    category=Messages.RES_CONSUMPTION,
+                    level=MEDIUM_LEVEL,
+                    request=mutated_request,
+                    info=anom_msg,
+                    parameter=parameter
+                )
+                timeouted = True
+            else:
+                pattern = search_pattern(response.content, self.flag_to_patterns(flags))
+                if pattern and not self.false_positive(request, pattern):
+                    # An error message implies that a vulnerability may exists
+                    if parameter == "QUERY_STRING":
+                        vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                     else:
-                        pattern = search_pattern(response.content, self.flag_to_patterns(flags))
-                        if pattern and not self.false_positive(original_request, pattern):
-                            # An error message implies that a vulnerability may exists
-                            if parameter == "QUERY_STRING":
-                                vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
-                            else:
-                                vuln_message = _("{0} via injection in the parameter {1}").format(
-                                    self.MSG_VULN, parameter)
+                        vuln_message = _("{0} via injection in the parameter {1}").format(
+                            self.MSG_VULN, parameter)
 
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=NAME,
-                                level=HIGH_LEVEL,
-                                request=mutated_request,
-                                info=vuln_message,
-                                parameter=parameter
-                            )
+                    self.add_vuln(
+                        request_id=request.path_id,
+                        category=NAME,
+                        level=HIGH_LEVEL,
+                        request=mutated_request,
+                        info=vuln_message,
+                        parameter=parameter
+                    )
 
-                            self.log_red("---")
-                            self.log_red(
-                                Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
-                                self.MSG_VULN,
-                                page,
-                                parameter
-                            )
-                            self.log_red(Messages.MSG_EVIL_REQUEST)
-                            self.log_red(mutated_request.http_repr())
-                            self.log_red("---")
+                    self.log_red("---")
+                    self.log_red(
+                        Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
+                        self.MSG_VULN,
+                        page,
+                        parameter
+                    )
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
+                    self.log_red(mutated_request.http_repr())
+                    self.log_red("---")
 
-                            # We reached maximum exploitation for this parameter, don't send more payloads
-                            vulnerable_parameter = True
-                            continue
+                    # We reached maximum exploitation for this parameter, don't send more payloads
+                    vulnerable_parameter = True
+                    continue
 
-                        elif response.status == 500 and not saw_internal_error:
-                            saw_internal_error = True
-                            if parameter == "QUERY_STRING":
-                                anom_msg = Messages.MSG_QS_500
-                            else:
-                                anom_msg = Messages.MSG_PARAM_500.format(parameter)
+                elif response.status == 500 and not saw_internal_error:
+                    saw_internal_error = True
+                    if parameter == "QUERY_STRING":
+                        anom_msg = Messages.MSG_QS_500
+                    else:
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                            self.add_anom(
-                                request_id=original_request.path_id,
-                                category=Messages.ERROR_500,
-                                level=HIGH_LEVEL,
-                                request=mutated_request,
-                                info=anom_msg,
-                                parameter=parameter
-                            )
+                    self.add_anom(
+                        request_id=request.path_id,
+                        category=Messages.ERROR_500,
+                        level=HIGH_LEVEL,
+                        request=mutated_request,
+                        info=anom_msg,
+                        parameter=parameter
+                    )
 
-                            self.log_orange("---")
-                            self.log_orange(Messages.MSG_500, page)
-                            self.log_orange(Messages.MSG_EVIL_REQUEST)
-                            self.log_orange(mutated_request.http_repr())
-                            self.log_orange("---")
-                except (KeyboardInterrupt, RequestException) as exception:
-                    yield exception
-
-            yield original_request
+                    self.log_orange("---")
+                    self.log_orange(Messages.MSG_500, page)
+                    self.log_orange(Messages.MSG_EVIL_REQUEST)
+                    self.log_orange(mutated_request.http_repr())
+                    self.log_orange("---")
 
     def attack_body(self, original_request) -> bool:
         # Should not yield request as it will mark it as attacked
