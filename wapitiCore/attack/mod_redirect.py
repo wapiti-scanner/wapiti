@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import RequestException
-
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
 from wapitiCore.definitions.redirect import NAME
+from wapitiCore.net.web import Request
 
 
 class mod_redirect(Attack):
@@ -33,48 +32,41 @@ class mod_redirect(Attack):
     do_post = False
     payloads = ("https://openbugbounty.org/", Flags())
 
-    def attack(self):
-        mutator = self.get_mutator()
+    def __init__(self, crawler, persister, logger, attack_options):
+        super().__init__(crawler, persister, logger, attack_options)
+        self.mutator = self.get_mutator()
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+    def attack(self, request: Request):
+        page = request.path
 
-        for http_res in http_resources:
-            page = http_res.path
+        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+            if self.verbose == 2:
+                print("+ {0}".format(mutated_request.url))
 
-            for mutated_request, parameter, payload, flags in mutator.mutate(http_res):
-                try:
-                    if self.verbose == 2:
-                        print("+ {0}".format(mutated_request.url))
+            response = self.crawler.send(mutated_request)
 
-                    response = self.crawler.send(mutated_request)
+            if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=LOW_LEVEL,
+                    request=mutated_request,
+                    parameter=parameter,
+                    info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                )
 
-                    if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
-                        self.add_vuln(
-                            request_id=http_res.path_id,
-                            category=NAME,
-                            level=LOW_LEVEL,
-                            request=mutated_request,
-                            parameter=parameter,
-                            info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
-                        )
+                if parameter == "QUERY_STRING":
+                    injection_msg = Messages.MSG_QS_INJECT
+                else:
+                    injection_msg = Messages.MSG_PARAM_INJECT
 
-                        if parameter == "QUERY_STRING":
-                            injection_msg = Messages.MSG_QS_INJECT
-                        else:
-                            injection_msg = Messages.MSG_PARAM_INJECT
-
-                        self.log_red("---")
-                        self.log_red(
-                            injection_msg,
-                            self.MSG_VULN,
-                            page,
-                            parameter
-                        )
-                        self.log_red(Messages.MSG_EVIL_REQUEST)
-                        self.log_red(mutated_request.http_repr())
-                        self.log_red("---")
-
-                except (RequestException, KeyboardInterrupt) as exception:
-                    yield exception
-
-            yield http_res
+                self.log_red("---")
+                self.log_red(
+                    injection_msg,
+                    self.MSG_VULN,
+                    page,
+                    parameter
+                )
+                self.log_red(Messages.MSG_EVIL_REQUEST)
+                self.log_red(mutated_request.http_repr())
+                self.log_red("---")

@@ -26,7 +26,7 @@ from requests.exceptions import RequestException
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import HIGH_LEVEL, _
 from wapitiCore.definitions.dangerous_resource import NAME
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 
 
 # Nikto databases are csv files with the following fields (in order) :
@@ -63,6 +63,7 @@ class mod_nikto(Attack):
     do_get = False
     do_post = False
     user_config_dir = None
+    finished = False
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
@@ -82,7 +83,7 @@ class mod_nikto(Attack):
 
     def update(self):
         try:
-            request = web.Request(self.NIKTO_DB_URL)
+            request = Request(self.NIKTO_DB_URL)
             response = self.crawler.send(request)
 
             csv.register_dialect("nikto", quoting=csv.QUOTE_ALL, doublequote=False, escapechar="\\")
@@ -99,7 +100,10 @@ class mod_nikto(Attack):
         except IOError:
             print(_("Error downloading nikto database."))
 
-    def attack(self):
+    def must_attack(self, request: Request):
+        return not self.finished
+
+    def attack(self, request: Request):
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
         server = next(urls).hostname
@@ -132,11 +136,11 @@ class mod_nikto(Attack):
                 continue
 
             if method == "GET":
-                evil_request = web.Request(url)
+                evil_request = Request(url)
             elif method == "POST":
-                evil_request = web.Request(url, post_params=post_data, method=method)
+                evil_request = Request(url, post_params=post_data, method=method)
             else:
-                evil_request = web.Request(url, post_params=post_data, method=method)
+                evil_request = Request(url, post_params=post_data, method=method)
 
             if self.verbose == 2:
                 if method == "GET":

@@ -53,6 +53,11 @@ class mod_csrf(Attack):
         "anti-csrf-token", "x-csrf-header", "x-xsrf-header", "x-csrf-protection"
     ]
 
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
+        self.already_vulnerable = []
+
     @staticmethod
     def entropy(string: str):
         # Shannon entropy calculation
@@ -156,45 +161,36 @@ class mod_csrf(Attack):
 
         return True
 
-    def attack(self):
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
-        # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
-        already_vulnerable = []
+    def must_attack(self, request: Request):
+        if (request.url, request.post_keys) in self.already_vulnerable:
+            return False
 
-        for original_request in forms:
-            if (original_request.url, original_request.post_keys) in already_vulnerable:
-                yield original_request
-                continue
+        return True
 
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+    def attack(self, request: Request):
+        csrf_value = self.is_csrf_present(request)
 
-            csrf_value = self.is_csrf_present(original_request)
+        # check if token is present
+        if not csrf_value:
+            vuln_message = _("Lack of anti CSRF token")
+        elif not self.is_csrf_verified(request):
+            vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
+        elif not self.is_csrf_robust(csrf_value):
+            vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
+        else:
+            return
 
-            # check if token is present
-            if not csrf_value:
-                vuln_message = _("Lack of anti CSRF token")
-            elif not self.is_csrf_verified(original_request):
-                vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
-            elif not self.is_csrf_robust(csrf_value):
-                vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
-            else:
-                yield original_request
-                continue
+        self.already_vulnerable.append((request.url, request.post_keys))
 
-            already_vulnerable.append((original_request.url, original_request.post_keys))
+        self.log_red("---")
+        self.log_red(vuln_message)
+        self.log_red(request.http_repr())
+        self.log_red("---")
 
-            self.log_red("---")
-            self.log_red(vuln_message)
-            self.log_red(original_request.http_repr())
-            self.log_red("---")
-
-            self.add_vuln(
-                request_id=original_request.path_id,
-                category=NAME,
-                level=MEDIUM_LEVEL,
-                request=original_request,
-                info=vuln_message,
-            )
-
-            yield original_request
+        self.add_vuln(
+            request_id=request.path_id,
+            category=NAME,
+            level=MEDIUM_LEVEL,
+            request=request,
+            info=vuln_message,
+        )

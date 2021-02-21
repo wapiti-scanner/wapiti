@@ -39,6 +39,7 @@ class mod_wapp(Attack):
     do_get = False
     do_post = False
     user_config_dir = None
+    finished = False
 
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
@@ -66,11 +67,21 @@ class mod_wapp(Attack):
         except IOError:
             print(_("Error downloading wapp database."))
 
-    def attack(self):
-        url = self.persister.get_root_url()
-        request = Request(url)
-        if self.verbose >= 1:
-            print("[+] {}".format(request))
+    def must_attack(self, request: Request):
+        if self.finished:
+            return False
+
+        if request.method == "POST":
+            return False
+
+        if request.url == self.persister.get_root_url():
+            return True
+
+        return True
+
+    def attack(self, request: Request):
+        self.finished = True
+        request_to_root = Request(request.url)
 
         try:
             application_data = ApplicationData(os.path.join(self.user_config_dir, self.WAPP_DB))
@@ -82,7 +93,7 @@ class mod_wapp(Attack):
             print(exception)
             return
 
-        response = self.crawler.send(request, follow_redirects=True)
+        response = self.crawler.send(request_to_root, follow_redirects=True)
         wappalyzer = Wappalyzer(application_data, response)
         detected_applications = wappalyzer.detect_with_versions_and_categories()
 
@@ -98,7 +109,6 @@ class mod_wapp(Attack):
             self.add_addition(
                 category=TECHNO_DETECTED,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=json.dumps(detected_applications[application_name])
             )
-        yield

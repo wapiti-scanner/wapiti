@@ -36,9 +36,16 @@ class mod_cookieflags(Attack):
     def check_httponly_flag(cookie: object):
         return "HttpOnly" in cookie._rest
 
-    def attack(self):
-        url = self.persister.get_root_url()
-        request = Request(url)
+    def must_attack(self, request: Request):
+        if request.method == "POST":
+            return False
+
+        if request.url == self.persister.get_root_url():
+            return True
+
+        return True
+
+    def attack(self, request: Request):
         cookies = self.crawler.session_cookies
         for cookie in cookies:
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
@@ -59,5 +66,3 @@ class mod_cookieflags(Attack):
                     request=request,
                     info=INFO_COOKIE_SECURE.format(cookie.name)
                 )
-
-        yield
