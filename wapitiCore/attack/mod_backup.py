@@ -22,6 +22,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import splitext
+from urllib.parse import urljoin
 
 from requests.exceptions import RequestException
 
@@ -44,11 +45,11 @@ class mod_backup(Attack):
     do_post = False
 
     def must_attack(self, request: Request):
-        if request.file_name == "":
-            return False
-
         page = request.path
         headers = request.headers
+
+        if page in self.attacked_get:
+            return False
 
         # Do not attack application-type files
         if "content-type" not in headers:
@@ -64,30 +65,38 @@ class mod_backup(Attack):
         page = request.path
 
         for payload, flags in self.payloads:
-            payload = payload.replace("[FILE_NAME]", request.file_name)
-            payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
-            url = page.replace(request.file_name, payload)
+            if request.file_name:
+                if "[FILE_" not in payload:
+                    continue
+
+                payload = payload.replace("[FILE_NAME]", request.file_name)
+                payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                url = page.replace(request.file_name, payload)
+            else:
+                if "[FILE_" in payload:
+                    continue
+
+                url = urljoin(request.path, payload)
 
             if self.verbose == 2:
                 print("[¨] {0}".format(url))
 
-            if url not in self.attacked_get:
-                self.attacked_get.append(url)
-                evil_req = Request(url)
+            self.attacked_get.append(page)
+            evil_req = Request(url)
 
-                try:
-                    response = self.crawler.send(evil_req)
-                except RequestException:
-                    self.network_errors += 1
-                    continue
+            try:
+                response = self.crawler.send(evil_req)
+            except RequestException:
+                self.network_errors += 1
+                continue
 
-                if response and response.status == 200:
-                    self.log_red(_("Found backup file {}".format(evil_req.url)))
+            if response and response.status == 200:
+                self.log_red(_("Found backup file {}".format(evil_req.url)))
 
-                    self.add_vuln(
-                        request_id=request.path_id,
-                        category=NAME,
-                        level=LOW_LEVEL,
-                        request=evil_req,
-                        info=_("Backup file {0} found for {1}").format(url, page)
-                    )
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=LOW_LEVEL,
+                    request=evil_req,
+                    info=_("Backup file {0} found for {1}").format(url, page)
+                )

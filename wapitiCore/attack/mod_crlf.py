@@ -32,8 +32,8 @@ class mod_crlf(Attack):
 
     name = "crlf"
     MSG_VULN = _("CRLF Injection")
-    do_get = False
-    do_post = False
+    do_get = True
+    do_post = True
     payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.4 version"), Flags())
 
     def __init__(self, crawler, persister, logger, attack_options):
@@ -45,7 +45,8 @@ class mod_crlf(Attack):
 
         for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
             if self.verbose == 2:
-                print("+ {0}".format(mutated_request.url))
+                print("[¨] {0}".format(mutated_request.url))
+
             try:
                 response = self.crawler.send(mutated_request)
             except ReadTimeout:

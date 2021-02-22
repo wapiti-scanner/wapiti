@@ -49,9 +49,6 @@ class mod_blindsql(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
-        if self.verbose >= 1:
-            print("[+] {}".format(request))
-
         for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
             if current_parameter != parameter:
                 # Forget what we know about current parameter

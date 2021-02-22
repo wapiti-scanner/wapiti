@@ -43,10 +43,7 @@ class mod_htaccess(Attack):
         if request.path in self.attacked_get:
             return False
 
-        if request.status not in (401, 402, 403, 407):
-            return False
-
-        return True
+        return request.status in (401, 402, 403, 407)
 
     def attack(self, request: Request):
         url = request.path
