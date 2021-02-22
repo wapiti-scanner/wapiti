@@ -20,7 +20,7 @@ from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
 
-from requests.exceptions import Timeout, ReadTimeout
+from requests.exceptions import Timeout, ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
@@ -76,14 +76,8 @@ class mod_permanentxss(Attack):
         try:
             response = self.crawler.send(target_req, headers=headers)
             data = response.content
-        except Timeout:
-            return
-        except OSError as exception:
-            # TODO: those error messages are useless, don't give any valuable information
-            print(_("error: {0} while attacking {1}").format(exception.strerror, url))
-            return
-        except Exception as exception:
-            print(_("error: {0} while attacking {1}").format(exception, url))
+        except RequestException:
+            self.network_errors += 1
             return
 
         # Should we look for taint codes sent with GET in the webpages?
@@ -230,6 +224,7 @@ class mod_permanentxss(Attack):
             try:
                 self.crawler.send(evil_request)
             except ReadTimeout:
+                self.network_errors += 1
                 if timeouted:
                     continue
 
@@ -253,11 +248,14 @@ class mod_permanentxss(Attack):
                     parameter=xss_param
                 )
                 timeouted = True
-
+            except RequestException:
+                self.network_errors += 1
+                continue
             else:
                 try:
                     response = self.crawler.send(output_request)
-                except ReadTimeout:
+                except RequestException:
+                    self.network_errors += 1
                     continue
 
                 if (

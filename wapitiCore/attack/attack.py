@@ -201,6 +201,7 @@ class Attack:
         # List of attack urls already launched in the current module
         self.attacked_get = []
         self.attacked_post = []
+        self.network_errors = 0
 
         self.verbose = 0
         self.color = 0

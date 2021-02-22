@@ -48,8 +48,8 @@ class mod_crlf(Attack):
                 print("+ {0}".format(mutated_request.url))
             try:
                 response = self.crawler.send(mutated_request)
-
             except ReadTimeout:
+                self.network_errors += 1
                 self.add_anom(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
@@ -64,9 +64,11 @@ class mod_crlf(Attack):
                 self.log_orange(Messages.MSG_EVIL_REQUEST)
                 self.log_orange(mutated_request.http_repr())
                 self.log_orange("---")
-
             except HTTPError:
+                self.network_errors += 1
                 self.log(_("Error: The server did not understand this request"))
+            except RequestException:
+                self.network_errors += 1
             else:
                 if "wapiti" in response.headers:
                     self.add_vuln(
