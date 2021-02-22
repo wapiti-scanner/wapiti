@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import Timeout, ConnectionError
+from requests.exceptions import Timeout, ConnectionError, RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
@@ -41,6 +41,7 @@ class mod_buster(Attack):
         self.known_pages = []
         self.new_resources = []
         self.finished = False
+        self.network_errors = 0
 
     def must_attack(self, request: Request):
         return not self.finished
@@ -52,42 +53,42 @@ class mod_buster(Attack):
         test_page = Request(path + "does_n0t_exist.htm")
         try:
             response = self.crawler.send(test_page)
-            if response.status not in [403, 404]:
-                # we don't want to deal with this at the moment
-                return
+        except RequestException:
+            self.network_errors += 1
+            return
 
-            for candidate, flags in self.payloads:
-                url = path + candidate
-                if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
-                    page = Request(path + candidate)
-                    try:
-                        response = self.crawler.send(page)
-                        if response.redirection_url:
-                            loc = response.redirection_url
-                            # if loc in self.known_dirs or loc in self.known_pages:
-                            #     continue
-                            if response.is_directory_redirection:
-                                self.log_red("Found webpage {0}", loc)
-                                self.new_resources.append(loc)
-                            else:
-                                self.log_red("Found webpage {0}", page.path)
-                                self.new_resources.append(page.path)
-                        elif response.status not in [403, 404]:
+        if response.status not in [403, 404]:
+            # we don't want to deal with this at the moment
+            return
+
+        for candidate, flags in self.payloads:
+            url = path + candidate
+            if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
+                page = Request(path + candidate)
+                try:
+                    response = self.crawler.send(page)
+                    if response.redirection_url:
+                        loc = response.redirection_url
+                        # if loc in self.known_dirs or loc in self.known_pages:
+                        #     continue
+                        if response.is_directory_redirection:
+                            self.log_red("Found webpage {0}", loc)
+                            self.new_resources.append(loc)
+                        else:
                             self.log_red("Found webpage {0}", page.path)
                             self.new_resources.append(page.path)
-                    except Timeout:
-                        continue
-                    except ConnectionError:
-                        continue
-
-        except Timeout:
-            pass
+                    elif response.status not in [403, 404]:
+                        self.log_red("Found webpage {0}", page.path)
+                        self.new_resources.append(page.path)
+                except RequestException:
+                    self.network_errors += 1
+                    continue
 
     def attack(self, request: Request):
         self.finished = True
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
 
-        # First we make a list of uniq webdirs and webpages without parameters
+        # First we make a list of unique webdirs and webpages without parameters
         for resource in urls:
             path = resource.path
             if path.endswith("/"):
@@ -100,7 +101,6 @@ class mod_buster(Attack):
         # Then for each known webdirs we look for unknown webpages inside
         for current_dir in self.known_dirs:
             self.test_directory(current_dir)
-            yield
 
         # Finally, for each discovered webdirs we look for more webpages
         while self.new_resources:
@@ -109,6 +109,5 @@ class mod_buster(Attack):
                 # Mark as known then explore
                 self.known_dirs.append(current_res)
                 self.test_directory(current_res)
-                yield
             else:
                 self.known_pages.append(current_res)

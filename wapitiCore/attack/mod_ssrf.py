@@ -180,7 +180,8 @@ class mod_ssrf(Attack):
 
             try:
                 self.crawler.send(mutated_request)
-            except ReadTimeout:
+            except RequestException:
+                self.network_errors += 1
                 continue
 
     def finish(self):
@@ -192,6 +193,7 @@ class mod_ssrf(Attack):
         try:
             response = self.crawler.send(endpoint_request)
         except RequestException:
+            self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:
             data = response.json

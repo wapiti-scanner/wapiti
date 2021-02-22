@@ -391,7 +391,6 @@ class Wapiti:
             generator = chain.from_iterable(resources_to_attack)
 
             answer = "0"
-            skipped = 0
             while True:
                 try:
                     original_request = next(generator)
@@ -431,9 +430,9 @@ class Wapiti:
 
                     # if answer is q, raise KeyboardInterrupt and it will stop cleanly
                     raise exception
-                except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
+                except RequestException:
+                    # Hmmm it should be caught inside the module
                     sleep(1)
-                    skipped += 1
                     continue
                 except StopIteration:
                     break
@@ -468,8 +467,8 @@ class Wapiti:
             if hasattr(attack_module, "finish"):
                 attack_module.finish()
 
-            if skipped:
-                print(_("{} requests were skipped due to network issues").format(skipped))
+            if attack_module.network_errors:
+                print(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
 
             if answer == "1":
                 break

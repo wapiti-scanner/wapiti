@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from collections import Counter
 import math
-from requests.exceptions import ReadTimeout
+from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, Messages, _
@@ -68,7 +68,6 @@ class mod_csrf(Attack):
 
     def is_csrf_present(self, original_request: Request):
         """Check whether anti-csrf token is present"""
-
         # Look for anti-csrf token in form params
         for param in original_request.post_params:
             if param[0].lower() in self.TOKEN_FORM_STRINGS:
@@ -133,13 +132,17 @@ class mod_csrf(Attack):
             link_depth=original_request.link_depth
         )
 
-        original_response = self.crawler.send(original_request, follow_redirects=True)
+        try:
+            original_response = self.crawler.send(original_request, follow_redirects=True)
+        except RequestException:
+            # We can't compare so act like it is secure
+            self.network_errors += 1
+            return True
 
         try:
             mutated_response = self.crawler.send(mutated_request, headers=special_headers, follow_redirects=True)
-
         except ReadTimeout:
-
+            self.network_errors += 1
             self.log_orange("---")
             self.log_orange(Messages.MSG_TIMEOUT, original_request.path)
             self.log_orange(Messages.MSG_EVIL_REQUEST)
@@ -155,7 +158,8 @@ class mod_csrf(Attack):
                 request=mutated_request,
                 info=anom_msg,
             )
-
+        except RequestException:
+            self.network_errors += 1
         else:
             return not self.is_same_response(original_response, mutated_response)
 

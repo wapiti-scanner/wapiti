@@ -23,6 +23,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import splitext
 
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.definitions.backup import NAME
@@ -73,7 +75,12 @@ class mod_backup(Attack):
                 self.attacked_get.append(url)
                 evil_req = Request(url)
 
-                response = self.crawler.send(evil_req)
+                try:
+                    response = self.crawler.send(evil_req)
+                except RequestException:
+                    self.network_errors += 1
+                    continue
+
                 if response and response.status == 200:
                     self.log_red(_("Found backup file {}".format(evil_req.url)))
 

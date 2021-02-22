@@ -148,6 +148,7 @@ class mod_file(Attack):
         try:
             response = self.crawler.send(request)
         except RequestException:
+            self.network_errors += 1
             # Can't check out, avoid false negative
             return False
         else:
@@ -181,6 +182,7 @@ class mod_file(Attack):
             try:
                 response = self.crawler.send(mutated_request)
             except ReadTimeout:
+                self.network_errors += 1
                 if timeouted:
                     continue
 
@@ -204,6 +206,9 @@ class mod_file(Attack):
                     parameter=parameter
                 )
                 timeouted = True
+            except RequestException:
+                self.network_errors += 1
+                continue
             else:
                 file_warning = None
                 # original_payload = self.payload_to_rules[flags.section]
