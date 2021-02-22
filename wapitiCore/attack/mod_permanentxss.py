@@ -20,7 +20,7 @@ from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
 
-from requests.exceptions import Timeout, ReadTimeout, RequestException
+from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
@@ -70,8 +70,6 @@ class mod_permanentxss(Attack):
 
         if referer:
             headers["referer"] = referer
-        if self.verbose >= 1:
-            print("[+] {}".format(url))
 
         try:
             response = self.crawler.send(target_req, headers=headers)

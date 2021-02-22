@@ -43,7 +43,7 @@ class mod_redirect(Attack):
 
         for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
             if self.verbose == 2:
-                print("+ {0}".format(mutated_request.url))
+                print("[¨] {0}".format(mutated_request.url))
 
             try:
                 response = self.crawler.send(mutated_request)

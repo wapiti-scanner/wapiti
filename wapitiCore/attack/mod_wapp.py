@@ -76,10 +76,7 @@ class mod_wapp(Attack):
         if request.method == "POST":
             return False
 
-        if request.url == self.persister.get_root_url():
-            return True
-
-        return True
+        return request.url == self.persister.get_root_url()
 
     def attack(self, request: Request):
         self.finished = True
