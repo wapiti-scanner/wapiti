@@ -20,7 +20,7 @@ from time import sleep
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
-from requests.exceptions import ReadTimeout, RequestException
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, CRITICAL_LEVEL, _

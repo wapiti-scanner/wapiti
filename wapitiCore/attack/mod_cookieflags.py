@@ -40,10 +40,7 @@ class mod_cookieflags(Attack):
         if request.method == "POST":
             return False
 
-        if request.url == self.persister.get_root_url():
-            return True
-
-        return True
+        return request.url == self.persister.get_root_url()
 
     def attack(self, request: Request):
         cookies = self.crawler.session_cookies

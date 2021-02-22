@@ -59,8 +59,7 @@ class mod_shellshock(Attack):
     def attack(self, request: Request):
         url = request.path
 
-        if self.verbose == 2:
-            print("[¨] {0}".format(url))
+        # We can't see anything by printing requests because payload is in headers so let's print nothing :)
 
         if url not in self.attacked_get:
             self.attacked_get.append(url)

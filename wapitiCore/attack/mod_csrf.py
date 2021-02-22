@@ -166,6 +166,9 @@ class mod_csrf(Attack):
         return True
 
     def must_attack(self, request: Request):
+        if request.method != "POST":
+            return False
+
         if (request.url, request.post_keys) in self.already_vulnerable:
             return False
 
