@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
 from wapitiCore.definitions.redirect import NAME
@@ -43,7 +45,11 @@ class mod_redirect(Attack):
             if self.verbose == 2:
                 print("+ {0}".format(mutated_request.url))
 
-            response = self.crawler.send(mutated_request)
+            try:
+                response = self.crawler.send(mutated_request)
+            except RequestException:
+                self.network_errors += 1
+                continue
 
             if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
                 self.add_vuln(

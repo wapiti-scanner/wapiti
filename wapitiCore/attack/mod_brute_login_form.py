@@ -21,7 +21,7 @@
 from os.path import join as path_join
 from itertools import product
 
-from requests.exceptions import ReadTimeout
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
@@ -82,13 +82,10 @@ class mod_brute_login_form(Attack):
             link_depth=login_form.link_depth
         )
 
-        try:
-            login_response = self.crawler.send(
-                login_request,
-                follow_redirects=True
-            )
-        except ReadTimeout:
-            return ""
+        login_response = self.crawler.send(
+            login_request,
+            follow_redirects=True
+        )
 
         return login_response.content
 
@@ -110,22 +107,29 @@ class mod_brute_login_form(Attack):
         if not login_form:
             return
 
-        failure_text = self.test_credentials(
-            login_form,
-            username_field_idx, password_field_idx,
-            "invalid", "invalid"
-        )
+        try:
+            failure_text = self.test_credentials(
+                login_form,
+                username_field_idx, password_field_idx,
+                "invalid", "invalid"
+            )
 
-        if self.check_success_auth(failure_text):
-            # Ignore this case as it raise false positives
+            if self.check_success_auth(failure_text):
+                # Ignore this case as it raises false positives
+                return
+        except RequestException:
             return
 
         for username, password in product(self.get_usernames(), self.get_passwords()):
-            response = self.test_credentials(
-                login_form,
-                username_field_idx, password_field_idx,
-                username, password
-            )
+            try:
+                response = self.test_credentials(
+                    login_form,
+                    username_field_idx, password_field_idx,
+                    username, password
+                )
+            except RequestException:
+                self.network_errors += 1
+                continue
 
             if self.check_success_auth(response) and failure_text != response:
                 vuln_message = _("Credentials found for URL {} : {} / {}").format(
@@ -167,5 +171,4 @@ class mod_brute_login_form(Attack):
                 self.log_red(Messages.MSG_EVIL_REQUEST)
                 self.log_red(evil_request.http_repr())
                 self.log_red("---")
-
                 break

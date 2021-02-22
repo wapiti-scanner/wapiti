@@ -18,6 +18,8 @@
 import json
 import os
 
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
@@ -93,7 +95,12 @@ class mod_wapp(Attack):
             print(exception)
             return
 
-        response = self.crawler.send(request_to_root, follow_redirects=True)
+        try:
+            response = self.crawler.send(request_to_root, follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
+
         wappalyzer = Wappalyzer(application_data, response)
         detected_applications = wappalyzer.detect_with_versions_and_categories()
 

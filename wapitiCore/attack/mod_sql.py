@@ -271,7 +271,7 @@ class mod_sql(Attack):
         try:
             response = self.crawler.send(request)
         except RequestException:
-            pass
+            self.network_errors += 1
         else:
             if self._find_pattern_in_response(response.content):
                 return True
@@ -302,6 +302,7 @@ class mod_sql(Attack):
             try:
                 response = self.crawler.send(mutated_request)
             except ReadTimeout:
+                self.network_errors += 1
                 if timeouted:
                     continue
 
@@ -325,6 +326,8 @@ class mod_sql(Attack):
                     parameter=parameter
                 )
                 timeouted = True
+            except RequestException:
+                self.network_errors += 1
             else:
                 vuln_info = self._find_pattern_in_response(response.content)
                 if vuln_info and not self.is_false_positive(request):

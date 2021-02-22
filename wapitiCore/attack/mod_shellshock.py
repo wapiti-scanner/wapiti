@@ -20,6 +20,8 @@ import random
 import string
 from binascii import hexlify
 
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import HIGH_LEVEL, _
 from wapitiCore.net.web import Request
@@ -65,7 +67,12 @@ class mod_shellshock(Attack):
 
             evil_req = Request(url)
 
-            resp = self.crawler.send(evil_req, headers=self.hdrs)
+            try:
+                resp = self.crawler.send(evil_req, headers=self.hdrs)
+            except RequestException:
+                self.network_errors += 1
+                return
+
             if resp:
                 data = resp.content
                 if self.rand_string in data:

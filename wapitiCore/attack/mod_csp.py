@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
@@ -48,7 +50,11 @@ class mod_csp(Attack):
 
     def attack(self, request: Request):
         request_to_root = Request(request.url)
-        response = self.crawler.get(request_to_root, follow_redirects=True)
+        try:
+            response = self.crawler.get(request_to_root, follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)

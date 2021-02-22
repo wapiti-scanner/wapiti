@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from requests.exceptions import RequestException
 
 
 class mod_methods(Attack):
@@ -55,20 +54,21 @@ class mod_methods(Attack):
         try:
             response = self.crawler.send(option_request)
         except RequestException:
+            self.network_errors += 1
             return
-        else:
-            if 200 <= response.status < 400:
-                methods = response.headers.get("allow", '').upper().split(',')
-                methods = {method.strip() for method in methods if method.strip()}
-                interesting_methods = sorted(methods - self.KNOWN_METHODS)
 
-                if interesting_methods:
-                    self.log_orange("---")
-                    self.log_orange(
-                        "Interesting methods allowed on {}: {}".format(
-                            page,
-                            ", ".join(interesting_methods)
-                        )
+        if 200 <= response.status < 400:
+            methods = response.headers.get("allow", '').upper().split(',')
+            methods = {method.strip() for method in methods if method.strip()}
+            interesting_methods = sorted(methods - self.KNOWN_METHODS)
+
+            if interesting_methods:
+                self.log_orange("---")
+                self.log_orange(
+                    "Interesting methods allowed on {}: {}".format(
+                        page,
+                        ", ".join(interesting_methods)
                     )
-                    self.log_orange("---")
+                )
+                self.log_orange("---")
 

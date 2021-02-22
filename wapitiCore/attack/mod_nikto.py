@@ -150,15 +150,12 @@ class mod_nikto(Attack):
 
             try:
                 response = self.crawler.send(evil_request)
-            except RequestException as exception:
-                # requests bug
-                yield exception
+            except RequestException:
+                self.network_errors += 1
                 continue
             except ValueError:
                 # ValueError raised by urllib3 (Method cannot contain non-token characters), we don't want to raise
-                yield
-            else:
-                yield
+                continue
 
             page = response.content
             code = response.status
