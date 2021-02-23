@@ -71,4 +71,3 @@ class mod_methods(Attack):
                     )
                 )
                 self.log_orange("---")
-

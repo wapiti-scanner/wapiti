@@ -544,7 +544,7 @@ class SqlitePersister:
 
         path_ids = set()
         for row in cursor.fetchall():
-            path_id, count = row
+            path_id, __ = row
             path_ids.add(path_id)
 
         return list(path_ids)

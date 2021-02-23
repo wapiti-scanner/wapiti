@@ -61,7 +61,7 @@ class mod_buster(Attack):
             # we don't want to deal with this at the moment
             return
 
-        for candidate, flags in self.payloads:
+        for candidate, __ in self.payloads:
             url = path + candidate
             if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
                 page = Request(path + candidate)

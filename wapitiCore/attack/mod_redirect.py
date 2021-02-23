@@ -41,7 +41,7 @@ class mod_redirect(Attack):
     def attack(self, request: Request):
         page = request.path
 
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, __, __ in self.mutator.mutate(request):
             if self.verbose == 2:
                 print("[¨] {0}".format(mutated_request.url))
 

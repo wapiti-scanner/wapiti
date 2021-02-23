@@ -127,7 +127,7 @@ class mod_xxe(Attack):
             if request.path_id in self.vulnerables:
                 return
 
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, __, flags in self.mutator.mutate(request):
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
