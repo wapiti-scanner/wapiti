@@ -46,14 +46,13 @@ def run_around_tests():
 
 def test_redirect_detection():
     persister = FakePersister()
-    persister.requests.append(Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto"))
+    request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
     crawler = Crawler("http://127.0.0.1:65080/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
     module = mod_redirect(crawler, persister, logger, options)
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities == {"url"}
 
@@ -92,7 +91,7 @@ def test_whole_stuff():
     module = mod_redirect(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert True

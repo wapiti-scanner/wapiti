@@ -71,15 +71,13 @@ def test_direct_body():
         post_params=[["placeholder", "yolo"]]
     )
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
     module = mod_xxe(crawler, persister, logger, options)
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "raw body"
@@ -91,15 +89,13 @@ def test_direct_param():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65084/xxe/direct/param.php?foo=bar&vuln=yolo")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
     module = mod_xxe(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "vuln"
@@ -109,42 +105,16 @@ def test_direct_query_string():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65084/xxe/direct/qs.php")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
     module = mod_xxe(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "QUERY_STRING"
-
-
-def test_direct_upload():
-    persister = FakePersister()
-    request = Request(
-        "http://127.0.0.1:65084/xxe/direct/upload.php",
-        file_params=[
-            ["foo", ["bar.xml", "<xml>test</xml>"]],
-            ["calendar", ["calendar.xml", "<xml>test</xml>"]]
-        ]
-    )
-    request.path_id = 42
-    persister.requests.append(request)
-    crawler = Crawler("http://127.0.0.1:65084/")
-    options = {"timeout": 10, "level": 1}
-    logger = Mock()
-
-    module = mod_xxe(crawler, persister, logger, options)
-
-    for __ in module.attack():
-        pass
-
-    assert len(persister.vulnerabilities)
-    assert persister.vulnerabilities[0][0] == "calendar"
 
 
 @responses.activate
@@ -187,8 +157,7 @@ def test_out_of_band_body():
     )
 
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert not persister.vulnerabilities
     module.finish()
@@ -233,8 +202,7 @@ def test_out_of_band_param():
     )
 
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert not persister.vulnerabilities
     module.finish()
@@ -260,8 +228,7 @@ def test_out_of_band_query_string():
 
     module = mod_xxe(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     responses.add(
         responses.GET,
@@ -311,8 +278,7 @@ def test_direct_upload():
 
     module = mod_xxe(crawler, persister, logger, options)
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     responses.add(
         responses.GET,

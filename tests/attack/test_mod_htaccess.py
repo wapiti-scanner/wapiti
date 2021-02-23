@@ -73,8 +73,11 @@ def test_whole_stuff():
     module = mod_htaccess(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        if module.must_attack(request):
+            module.attack(request)
+        else:
+            assert request.path_id == 1
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0].url == "http://perdu.com/admin/"

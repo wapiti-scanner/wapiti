@@ -57,7 +57,6 @@ def test_whole_stuff():
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -66,8 +65,7 @@ def test_whole_stuff():
     module = mod_backup(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0].url == "http://perdu.com/config.php.bak"
