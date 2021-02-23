@@ -64,7 +64,7 @@ class mod_backup(Attack):
     def attack(self, request: Request):
         page = request.path
 
-        for payload, flags in self.payloads:
+        for payload, __ in self.payloads:
             if request.file_name:
                 if "[FILE_" not in payload:
                     continue
