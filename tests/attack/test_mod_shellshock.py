@@ -78,8 +78,8 @@ def test_whole_stuff():
     module = mod_shellshock(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert len(persister.vulnerabilities) == 1
     assert persister.vulnerabilities[0][0].url == (

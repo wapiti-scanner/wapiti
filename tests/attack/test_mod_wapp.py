@@ -54,7 +54,6 @@ def test_false_positive():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -63,8 +62,7 @@ def test_false_positive():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert not persister.additionals
 
@@ -84,7 +82,6 @@ def test_url_detection():
 
     request = Request("http://perdu.com/owa/auth/logon.aspx")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -93,8 +90,7 @@ def test_url_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[2] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
@@ -116,7 +112,6 @@ def test_html_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -125,8 +120,7 @@ def test_html_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
@@ -149,7 +143,6 @@ def test_script_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -158,8 +151,7 @@ def test_script_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
@@ -182,7 +174,6 @@ def test_cookies_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -191,8 +182,7 @@ def test_cookies_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
@@ -215,7 +205,6 @@ def test_headers_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -224,8 +213,7 @@ def test_headers_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
@@ -249,7 +237,6 @@ def test_meta_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -258,11 +245,11 @@ def test_meta_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
+
 
 @responses.activate
 def test_multi_detection():
@@ -284,7 +271,6 @@ def test_multi_detection():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
@@ -293,11 +279,11 @@ def test_multi_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[-1] == '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
+
 
 @responses.activate
 def test_implies_detection():
@@ -316,7 +302,6 @@ def test_implies_detection():
 
     request = Request("http://perdu.com")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
@@ -325,8 +310,7 @@ def test_implies_detection():
     module = mod_wapp(crawler, persister, logger, options)
     module.verbose = 2
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.additionals
     assert '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}' == persister.additionals[0]

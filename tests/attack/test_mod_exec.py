@@ -84,8 +84,8 @@ def test_whole_stuff():
     module = mod_exec(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert True
 
@@ -116,8 +116,7 @@ def test_detection():
 
     module = mod_exec(crawler, persister, logger, options)
     module.verbose = 2
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"
@@ -142,7 +141,6 @@ def test_blind_detection():
 
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 2
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
@@ -158,8 +156,7 @@ def test_blind_detection():
             break
         payloads_until_sleep += 1
 
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"
