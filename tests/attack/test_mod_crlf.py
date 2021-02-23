@@ -53,7 +53,6 @@ def test_whole_stuff():
 
     request = Request("http://perdu.com/?a=b&foo=bar")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -62,8 +61,7 @@ def test_whole_stuff():
     module = mod_crlf(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "foo"

@@ -88,8 +88,8 @@ def test_whole_stuff():
         }
     )
 
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert not persister.vulnerabilities
     # We must trigger finish(à normally called by wapiti.py

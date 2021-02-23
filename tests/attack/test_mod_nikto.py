@@ -10,7 +10,6 @@ from wapitiCore.attack.mod_nikto import mod_nikto
 
 
 class FakePersister:
-
     CONFIG_DIR_NAME = "config"
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
@@ -73,8 +72,7 @@ def test_whole_stuff():
     module = mod_nikto(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert len(persister.vulnerabilities) == 1
     assert persister.vulnerabilities[0][0].url == (

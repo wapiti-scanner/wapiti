@@ -53,15 +53,13 @@ def test_blindsql_detection():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
     module = mod_blindsql(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln1"
@@ -72,15 +70,13 @@ def test_blindsql_false_positive():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
     module = mod_blindsql(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert not persister.vulnerabilities
 
@@ -103,7 +99,6 @@ def test_false_positive_request_count():
     persister = FakePersister()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
@@ -111,8 +106,7 @@ def test_false_positive_request_count():
     module = mod_blindsql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     # Due to the retry decorator we should have 6 requests here
     # First three to make sure the payload generate timeouts each time
@@ -137,7 +131,6 @@ def test_true_positive_request_count():
     persister = FakePersister()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
@@ -145,8 +138,7 @@ def test_true_positive_request_count():
     module = mod_blindsql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     # Four requests should be made there:
     # Three ones due to time-based SQL injection (one for injection, two to be sure)

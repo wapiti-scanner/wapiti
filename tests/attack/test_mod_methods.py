@@ -77,7 +77,7 @@ def test_whole_stuff():
     module = mod_methods(crawler, persister, logger, options)
     module.verbose = 2
     module.do_get = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert "http://perdu.com/dav/" in logger.message
