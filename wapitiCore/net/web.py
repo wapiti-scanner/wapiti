@@ -71,7 +71,7 @@ def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote_plus):
         else:
             try:
                 # Is this a sufficient test for sequence-ness?
-                length = len(arg_value)
+                len(arg_value)
             except TypeError:
                 # not a sequence
                 arg_value = quote_via(str(arg_value), safe, encoding, errors)
