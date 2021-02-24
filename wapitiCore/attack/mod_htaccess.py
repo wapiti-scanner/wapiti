@@ -59,10 +59,10 @@ class mod_htaccess(Attack):
             self.network_errors += 1
             return
 
-        unblocked_content = response.content
-
         if response.status == 404 or response.status < 400 or response.status >= 500:
             # Every 4xx status should be uninteresting (specially bad request in our case)
+
+            unblocked_content = response.content
 
             self.log_red("---")
             self.add_vuln(

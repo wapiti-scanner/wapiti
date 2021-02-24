@@ -141,24 +141,8 @@ class mod_csrf(Attack):
 
         try:
             mutated_response = self.crawler.send(mutated_request, headers=special_headers, follow_redirects=True)
-        except ReadTimeout:
-            self.network_errors += 1
-            self.log_orange("---")
-            self.log_orange(Messages.MSG_TIMEOUT, original_request.path)
-            self.log_orange(Messages.MSG_EVIL_REQUEST)
-            self.log_orange(mutated_request.http_repr())
-            self.log_orange("---")
-
-            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(self.csrf_string)
-
-            self.add_anom(
-                request_id=original_request.path_id,
-                category=Messages.RES_CONSUMPTION,
-                level=MEDIUM_LEVEL,
-                request=mutated_request,
-                info=anom_msg,
-            )
         except RequestException:
+            # Do not log anything: the payload is not harmful enough for such behavior
             self.network_errors += 1
         else:
             return not self.is_same_response(original_response, mutated_response)
