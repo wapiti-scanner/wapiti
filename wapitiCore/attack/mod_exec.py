@@ -140,7 +140,8 @@ class mod_exec(Attack):
                     vulnerable_parameter = True
                     continue
 
-                elif timeouted:
+                self.network_errors += 1
+                if timeouted:
                     continue
 
                 self.log_orange("---")

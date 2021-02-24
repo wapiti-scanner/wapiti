@@ -101,7 +101,11 @@ class mod_brute_login_form(Attack):
         return True
 
     def attack(self, request: Request):
-        page = self.crawler.get(Request(request.referer), follow_redirects=True)
+        try:
+            page = self.crawler.get(Request(request.referer), follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
 
         login_form, username_field_idx, password_field_idx = page.find_login_form()
         if not login_form:
