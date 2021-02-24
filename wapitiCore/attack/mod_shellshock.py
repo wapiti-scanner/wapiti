@@ -56,31 +56,32 @@ class mod_shellshock(Attack):
             "cookie": empty_func + cmd
         }
 
+    def must_attack(self, request: Request):
+        # We attempt to attach each script once whatever the method
+        return request.path not in self.attacked_get
+
     def attack(self, request: Request):
         url = request.path
+        self.attacked_get.append(url)
 
         # We can't see anything by printing requests because payload is in headers so let's print nothing :)
+        evil_req = Request(url)
 
-        if url not in self.attacked_get:
-            self.attacked_get.append(url)
+        try:
+            resp = self.crawler.send(evil_req, headers=self.hdrs)
+        except RequestException:
+            self.network_errors += 1
+            return
 
-            evil_req = Request(url)
+        if resp:
+            data = resp.content
+            if self.rand_string in data:
+                self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
 
-            try:
-                resp = self.crawler.send(evil_req, headers=self.hdrs)
-            except RequestException:
-                self.network_errors += 1
-                return
-
-            if resp:
-                data = resp.content
-                if self.rand_string in data:
-                    self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
-
-                    self.add_vuln(
-                        request_id=request.path_id,
-                        category=NAME,
-                        level=HIGH_LEVEL,
-                        request=evil_req,
-                        info=_("URL {0} seems vulnerable to Shellshock attack").format(url)
-                    )
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=HIGH_LEVEL,
+                    request=evil_req,
+                    info=_("URL {0} seems vulnerable to Shellshock attack").format(url)
+                )

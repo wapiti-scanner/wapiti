@@ -64,9 +64,9 @@ class mod_blindsql(Attack):
             try:
                 response = self.crawler.send(mutated_request)
             except ReadTimeout:
-                self.network_errors += 1
                 # The request with time based payload did timeout, what about a regular request?
                 if self.does_timeout(request):
+                    self.network_errors += 1
                     print("[!] Too much lag from website, can't reliably test time-based blind SQL")
                     break
 
