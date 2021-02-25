@@ -20,12 +20,12 @@ from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
 
-from requests.exceptions import Timeout, ReadTimeout
+from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
 from wapitiCore.definitions.xss import NAME
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
 from wapitiCore.net.csp_utils import has_strong_csp
 
@@ -53,156 +53,146 @@ class mod_permanentxss(Attack):
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
 
-    def attack(self):
+    def must_attack(self, request: Request):
+        if not valid_xss_content_type(request) or request.status in (301, 302, 303):
+            # If that content-type can't be interpreted as HTML by browsers then it is useless
+            # Same goes for redirections
+            return False
+
+        return True
+
+    def attack(self, request: Request):
         """This method searches XSS which could be permanently stored in the web application"""
-        get_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+        url = request.url
+        target_req = Request(url)
+        referer = request.referer
+        headers = {}
 
-        for original_request in get_resources:
-            if not valid_xss_content_type(original_request) or original_request.status in (301, 302, 303):
-                # If that content-type can't be interpreted as HTML by browsers then it is useless
-                # Same goes for redirections
+        if referer:
+            headers["referer"] = referer
+
+        try:
+            response = self.crawler.send(target_req, headers=headers)
+            data = response.content
+        except RequestException:
+            self.network_errors += 1
+            return
+
+        # Should we look for taint codes sent with GET in the webpages?
+        # Exploiting those may imply sending more GET requests
+
+        # Search in the page source for every taint code used by mod_xss
+        for taint in self.tried_xss:
+            input_request = self.tried_xss[taint][0]
+
+            # Such situations should not occur as it would be stupid to block POST (or GET) requests for mod_xss
+            # and not mod_permanentxss, but it is possible so let's filter that.
+            if not self.do_get and input_request.method == "GET":
                 continue
 
-            url = original_request.url
-            target_req = web.Request(url)
-            referer = original_request.referer
-            headers = {}
-
-            if referer:
-                headers["referer"] = referer
-            if self.verbose >= 1:
-                print("[+] {}".format(url))
-
-            try:
-                response = self.crawler.send(target_req, headers=headers)
-                data = response.content
-            except Timeout:
-                continue
-            except OSError as exception:
-                # TODO: those error messages are useless, don't give any valuable information
-                print(_("error: {0} while attacking {1}").format(exception.strerror, url))
-                continue
-            except Exception as exception:
-                print(_("error: {0} while attacking {1}").format(exception, url))
+            if not self.do_post and input_request.method == "POST":
                 continue
 
-            # Should we look for taint codes sent with GET in the webpages?
-            # Exploiting those may imply sending more GET requests
+            if taint.lower() in data.lower():
+                # Code found in the webpage !
+                # Did mod_xss saw this as a reflected XSS ?
+                if taint in self.successful_xss:
+                    # Yes, it means XSS payloads were injected, not just tainted code.
+                    payload, flags = self.successful_xss[taint]
 
-            # Search in the page source for every taint code used by mod_xss
-            for taint in self.tried_xss:
-                input_request = self.tried_xss[taint][0]
+                    if self.check_payload(response, flags, taint):
+                        # If we can find the payload again, this is in fact a stored XSS
+                        get_params = input_request.get_params
+                        post_params = input_request.post_params
+                        file_params = input_request.file_params
+                        referer = input_request.referer
 
-                # Such situations should not occur as it would be stupid to block POST (or GET) requests for mod_xss
-                # and not mod_permanentxss, but it is possible so let's filter that.
-                if not self.do_get and input_request.method == "GET":
-                    continue
+                        # The following trick may seems dirty but it allows to treat GET and POST requests
+                        # the same way.
+                        for params_list in [get_params, post_params, file_params]:
+                            for i in range(len(params_list)):
+                                parameter, value = params_list[i]
+                                parameter = quote(parameter)
+                                if value != taint:
+                                    continue
 
-                if not self.do_post and input_request.method == "POST":
-                    continue
+                                if params_list is file_params:
+                                    params_list[i][1][0] = payload
+                                else:
+                                    params_list[i][1] = payload
 
-                if taint.lower() in data.lower():
-                    # Code found in the webpage !
-                    # Did mod_xss saw this as a reflected XSS ?
-                    if taint in self.successful_xss:
-                        # Yes, it means XSS payloads were injected, not just tainted code.
-                        payload, flags = self.successful_xss[taint]
+                                # we found the xss payload again -> stored xss vuln
+                                evil_request = Request(
+                                    input_request.path,
+                                    method=input_request.method,
+                                    get_params=get_params,
+                                    post_params=post_params,
+                                    file_params=file_params,
+                                    referer=referer
+                                )
 
-                        if self.check_payload(response, flags, taint):
-                            # If we can find the payload again, this is in fact a stored XSS
-                            get_params = input_request.get_params
-                            post_params = input_request.post_params
-                            file_params = input_request.file_params
-                            referer = input_request.referer
-
-                            # The following trick may seems dirty but it allows to treat GET and POST requests
-                            # the same way.
-                            for params_list in [get_params, post_params, file_params]:
-                                for i in range(len(params_list)):
-                                    parameter, value = params_list[i]
-                                    parameter = quote(parameter)
-                                    if value != taint:
-                                        continue
-
-                                    if params_list is file_params:
-                                        params_list[i][1][0] = payload
-                                    else:
-                                        params_list[i][1] = payload
-
-                                    # we found the xss payload again -> stored xss vuln
-                                    evil_request = web.Request(
-                                        input_request.path,
-                                        method=input_request.method,
-                                        get_params=get_params,
-                                        post_params=post_params,
-                                        file_params=file_params,
-                                        referer=referer
+                                if request.path == input_request.path:
+                                    description = _(
+                                        "Permanent XSS vulnerability found via injection in the parameter {0}"
+                                    ).format(parameter)
+                                else:
+                                    description = _(
+                                        "Permanent XSS vulnerability found in {0} by injecting"
+                                        " the parameter {1} of {2}"
+                                    ).format(
+                                        request.url,
+                                        parameter,
+                                        input_request.path
                                     )
 
-                                    if original_request.path == input_request.path:
-                                        description = _(
-                                            "Permanent XSS vulnerability found via injection in the parameter {0}"
-                                        ).format(parameter)
-                                    else:
-                                        description = _(
-                                            "Permanent XSS vulnerability found in {0} by injecting"
-                                            " the parameter {1} of {2}"
-                                        ).format(
-                                            original_request.url,
-                                            parameter,
-                                            input_request.path
-                                        )
+                                if has_strong_csp(response):
+                                    description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                                    if has_strong_csp(response):
-                                        description += ".\n" + _("Warning: Content-Security-Policy is present!")
+                                self.add_vuln(
+                                    request_id=request.path_id,
+                                    category=NAME,
+                                    level=HIGH_LEVEL,
+                                    request=evil_request,
+                                    parameter=parameter,
+                                    info=description
+                                )
 
-                                    self.add_vuln(
-                                        request_id=original_request.path_id,
-                                        category=NAME,
-                                        level=HIGH_LEVEL,
-                                        request=evil_request,
-                                        parameter=parameter,
-                                        info=description
-                                    )
+                                if parameter == "QUERY_STRING":
+                                    injection_msg = Messages.MSG_QS_INJECT
+                                else:
+                                    injection_msg = Messages.MSG_PARAM_INJECT
 
-                                    if parameter == "QUERY_STRING":
-                                        injection_msg = Messages.MSG_QS_INJECT
-                                    else:
-                                        injection_msg = Messages.MSG_PARAM_INJECT
+                                self.log_red("---")
+                                self.log_red(
+                                    injection_msg,
+                                    self.MSG_VULN,
+                                    request.path,
+                                    parameter
+                                )
 
-                                    self.log_red("---")
-                                    self.log_red(
-                                        injection_msg,
-                                        self.MSG_VULN,
-                                        original_request.path,
-                                        parameter
-                                    )
+                                if has_strong_csp(response):
+                                    self.log_red(_("Warning: Content-Security-Policy is present!"))
 
-                                    if has_strong_csp(response):
-                                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+                                self.log_red(Messages.MSG_EVIL_REQUEST)
+                                self.log_red(evil_request.http_repr())
+                                self.log_red("---")
+                                # FIX: search for the next code in the webpage
 
-                                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                                    self.log_red(evil_request.http_repr())
-                                    self.log_red("---")
-                                    # FIX: search for the next code in the webpage
+                # Ok the content is stored, but will we be able to inject javascript?
+                else:
+                    parameter = self.tried_xss[taint][1]
+                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
+                    flags = self.tried_xss[taint][2]
 
-                    # Ok the content is stored, but will we be able to inject javascript?
+                    # TODO: check that and make it better
+                    if flags.method == PayloadType.get:
+                        method = "G"
+                    elif flags.method == PayloadType.file:
+                        method = "F"
                     else:
-                        parameter = self.tried_xss[taint][1]
-                        payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
-                        flags = self.tried_xss[taint][2]
+                        method = "P"
 
-                        # TODO: check that and make it better
-                        if flags.method == PayloadType.get:
-                            method = "G"
-                        elif flags.method == PayloadType.file:
-                            method = "F"
-                        else:
-                            method = "P"
-
-                        self.attempt_exploit(method, payloads, input_request, parameter, taint, original_request)
-
-            yield original_request
+                    self.attempt_exploit(method, payloads, input_request, parameter, taint, request)
 
     def load_require(self, dependencies: list = None):
         if dependencies:
@@ -232,6 +222,7 @@ class mod_permanentxss(Attack):
             try:
                 self.crawler.send(evil_request)
             except ReadTimeout:
+                self.network_errors += 1
                 if timeouted:
                     continue
 
@@ -255,11 +246,14 @@ class mod_permanentxss(Attack):
                     parameter=xss_param
                 )
                 timeouted = True
-
+            except RequestException:
+                self.network_errors += 1
+                continue
             else:
                 try:
                     response = self.crawler.send(output_request)
-                except ReadTimeout:
+                except RequestException:
+                    self.network_errors += 1
                     continue
 
                 if (

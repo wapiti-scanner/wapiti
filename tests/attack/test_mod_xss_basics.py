@@ -73,7 +73,7 @@ def test_whole_stuff():
     module = mod_xss(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert True

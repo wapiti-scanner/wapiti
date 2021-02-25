@@ -78,6 +78,7 @@ def test_whole_stuff():
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
+    # Buster module will get requests from the persister
     persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
@@ -91,8 +92,7 @@ def test_whole_stuff():
         module = mod_buster(crawler, persister, logger, options)
         module.verbose = 2
         module.do_get = True
-        for __ in module.attack():
-            pass
+        module.attack(request)
 
         assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
         assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]

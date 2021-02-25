@@ -201,6 +201,7 @@ class Attack:
         # List of attack urls already launched in the current module
         self.attacked_get = []
         self.attacked_post = []
+        self.network_errors = 0
 
         self.verbose = 0
         self.color = 0
@@ -248,11 +249,14 @@ class Attack:
     def external_endpoint(self):
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
 
+    def must_attack(self, request: Request):
+        return True
+
     @property
     def must_attack_query_string(self):
         return self.attack_level == 2
 
-    def attack(self):
+    def attack(self, request: Request):
         raise NotImplementedError("Override me bro")
 
     def get_mutator(self):

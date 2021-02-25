@@ -49,15 +49,13 @@ def test_inclusion_detection():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
     module = mod_file(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
 
@@ -66,15 +64,13 @@ def test_warning_false_positive():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
-    persister.requests.append(request)
     crawler = Crawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
     module = mod_file(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
 
@@ -100,8 +96,8 @@ def test_no_crash():
 
     module = mod_file(crawler, persister, logger, options)
     module.do_post = False
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert True
 

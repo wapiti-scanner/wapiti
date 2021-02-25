@@ -22,13 +22,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import splitext
+from urllib.parse import urljoin
 
 from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.definitions.backup import NAME
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 
 
 class mod_backup(Attack):
@@ -43,54 +44,59 @@ class mod_backup(Attack):
     do_get = False
     do_post = False
 
-    def attack(self):
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+    def must_attack(self, request: Request):
+        page = request.path
+        headers = request.headers
 
-        for original_request in http_resources:
+        if page in self.attacked_get:
+            return False
 
-            if original_request.file_name == "":
-                yield original_request
-                continue
+        # Do not attack application-type files
+        if "content-type" not in headers:
+            # Sometimes there's no content-type... so we rely on the document extension
+            if (page.split(".")[-1] not in self.allowed) and page[-1] != "/":
+                return False
+        elif "text" not in headers["content-type"]:
+            return False
 
-            page = original_request.path
-            headers = original_request.headers
+        return True
 
-            # Do not attack application-type files
-            if "content-type" not in headers:
-                # Sometimes there's no content-type... so we rely on the document extension
-                if (page.split(".")[-1] not in self.allowed) and page[-1] != "/":
-                    yield original_request
+    def attack(self, request: Request):
+        page = request.path
+
+        for payload, __ in self.payloads:
+            if request.file_name:
+                if "[FILE_" not in payload:
                     continue
-            elif "text" not in headers["content-type"]:
-                yield original_request
+
+                payload = payload.replace("[FILE_NAME]", request.file_name)
+                payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                url = page.replace(request.file_name, payload)
+            else:
+                if "[FILE_" in payload:
+                    continue
+
+                url = urljoin(request.path, payload)
+
+            if self.verbose == 2:
+                print("[¨] {0}".format(url))
+
+            self.attacked_get.append(page)
+            evil_req = Request(url)
+
+            try:
+                response = self.crawler.send(evil_req)
+            except RequestException:
+                self.network_errors += 1
                 continue
 
-            for payload, flags in self.payloads:
-                try:
-                    payload = payload.replace("[FILE_NAME]", original_request.file_name)
-                    payload = payload.replace("[FILE_NOEXT]", splitext(original_request.file_name)[0])
-                    url = page.replace(original_request.file_name, payload)
+            if response and response.status == 200:
+                self.log_red(_("Found backup file {}".format(evil_req.url)))
 
-                    if self.verbose == 2:
-                        print("[¨] {0}".format(url))
-
-                    if url not in self.attacked_get:
-                        self.attacked_get.append(url)
-                        evil_req = web.Request(url)
-
-                        response = self.crawler.send(evil_req)
-                        if response and response.status == 200:
-                            self.log_red(_("Found backup file {}".format(evil_req.url)))
-
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=NAME,
-                                level=LOW_LEVEL,
-                                request=evil_req,
-                                info=_("Backup file {0} found for {1}").format(url, page)
-                            )
-
-                except (KeyboardInterrupt, RequestException) as exception:
-                    yield exception
-
-            yield original_request
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=LOW_LEVEL,
+                    request=evil_req,
+                    info=_("Backup file {0} found for {1}").format(url, page)
+                )

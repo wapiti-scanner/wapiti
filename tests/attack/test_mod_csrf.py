@@ -84,8 +84,12 @@ def test_csrf_cases():
     module = mod_csrf(crawler, persister, logger, options)
     module.do_post = True
     module.verbose = 2
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        if module.must_attack(request):
+            module.attack(request)
+        else:
+            # Not attacked because of GET verb
+            assert request.path_id == 1
 
     assert set(persister.vulnerabilities) == {
         (2, _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")),

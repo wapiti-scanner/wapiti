@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from collections import Counter
 import math
-from requests.exceptions import ReadTimeout
+from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, Messages, _
@@ -53,6 +53,11 @@ class mod_csrf(Attack):
         "anti-csrf-token", "x-csrf-header", "x-xsrf-header", "x-csrf-protection"
     ]
 
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
+        self.already_vulnerable = []
+
     @staticmethod
     def entropy(string: str):
         # Shannon entropy calculation
@@ -63,7 +68,6 @@ class mod_csrf(Attack):
 
     def is_csrf_present(self, original_request: Request):
         """Check whether anti-csrf token is present"""
-
         # Look for anti-csrf token in form params
         for param in original_request.post_params:
             if param[0].lower() in self.TOKEN_FORM_STRINGS:
@@ -128,73 +132,56 @@ class mod_csrf(Attack):
             link_depth=original_request.link_depth
         )
 
-        original_response = self.crawler.send(original_request, follow_redirects=True)
+        try:
+            original_response = self.crawler.send(original_request, follow_redirects=True)
+        except RequestException:
+            # We can't compare so act like it is secure
+            self.network_errors += 1
+            return True
 
         try:
             mutated_response = self.crawler.send(mutated_request, headers=special_headers, follow_redirects=True)
-
-        except ReadTimeout:
-
-            self.log_orange("---")
-            self.log_orange(Messages.MSG_TIMEOUT, original_request.path)
-            self.log_orange(Messages.MSG_EVIL_REQUEST)
-            self.log_orange(mutated_request.http_repr())
-            self.log_orange("---")
-
-            anom_msg = Messages.MSG_PARAM_TIMEOUT.format(self.csrf_string)
-
-            self.add_anom(
-                request_id=original_request.path_id,
-                category=Messages.RES_CONSUMPTION,
-                level=MEDIUM_LEVEL,
-                request=mutated_request,
-                info=anom_msg,
-            )
-
+        except RequestException:
+            # Do not log anything: the payload is not harmful enough for such behavior
+            self.network_errors += 1
         else:
             return not self.is_same_response(original_response, mutated_response)
 
         return True
 
-    def attack(self):
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
-        # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
-        already_vulnerable = []
+    def must_attack(self, request: Request):
+        if request.method != "POST":
+            return False
 
-        for original_request in forms:
-            if (original_request.url, original_request.post_keys) in already_vulnerable:
-                yield original_request
-                continue
+        if (request.url, request.post_keys) in self.already_vulnerable:
+            return False
 
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+        return True
 
-            csrf_value = self.is_csrf_present(original_request)
+    def attack(self, request: Request):
+        csrf_value = self.is_csrf_present(request)
 
-            # check if token is present
-            if not csrf_value:
-                vuln_message = _("Lack of anti CSRF token")
-            elif not self.is_csrf_verified(original_request):
-                vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
-            elif not self.is_csrf_robust(csrf_value):
-                vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
-            else:
-                yield original_request
-                continue
+        # check if token is present
+        if not csrf_value:
+            vuln_message = _("Lack of anti CSRF token")
+        elif not self.is_csrf_verified(request):
+            vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
+        elif not self.is_csrf_robust(csrf_value):
+            vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
+        else:
+            return
 
-            already_vulnerable.append((original_request.url, original_request.post_keys))
+        self.already_vulnerable.append((request.url, request.post_keys))
 
-            self.log_red("---")
-            self.log_red(vuln_message)
-            self.log_red(original_request.http_repr())
-            self.log_red("---")
+        self.log_red("---")
+        self.log_red(vuln_message)
+        self.log_red(request.http_repr())
+        self.log_red("---")
 
-            self.add_vuln(
-                request_id=original_request.path_id,
-                category=NAME,
-                level=MEDIUM_LEVEL,
-                request=original_request,
-                info=vuln_message,
-            )
-
-            yield original_request
+        self.add_vuln(
+            request_id=request.path_id,
+            category=NAME,
+            level=MEDIUM_LEVEL,
+            request=request,
+            info=vuln_message,
+        )

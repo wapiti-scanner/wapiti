@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 from time import strftime, gmtime, sleep
 from importlib import import_module
 from operator import attrgetter
+from itertools import chain
 from traceback import print_tb
 from collections import deque
 from datetime import datetime
@@ -381,18 +382,26 @@ class Wapiti:
                     already_attacked
                 )
 
-            generator = attack_module.attack()
+            resources_to_attack = []
+            if attack_module.do_get:
+                resources_to_attack.append(self.persister.get_links(attack_module=attack_module.name))
+            if attack_module.do_post:
+                resources_to_attack.append(self.persister.get_forms(attack_module=attack_module.name))
+
+            generator = chain.from_iterable(resources_to_attack)
 
             answer = "0"
-            skipped = 0
             while True:
                 try:
-                    original_request_or_exception = next(generator)
-                    if isinstance(original_request_or_exception, BaseException):
-                        raise original_request_or_exception
+                    original_request = next(generator)
+                    if attack_module.must_attack(original_request):
+                        if self.verbose >= 1:
+                            print("[+] {}".format(original_request))
+
+                        attack_module.attack(original_request)
+
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
-                        print(_("Max attack time was reached for module {0}, stopping."
-                        .format(attack_module.name)))
+                        print(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
                         break
                 except KeyboardInterrupt as exception:
                     print('')
@@ -421,9 +430,9 @@ class Wapiti:
 
                     # if answer is q, raise KeyboardInterrupt and it will stop cleanly
                     raise exception
-                except (ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError):
+                except RequestException:
+                    # Hmmm it should be caught inside the module
                     sleep(1)
-                    skipped += 1
                     continue
                 except StopIteration:
                     break
@@ -452,14 +461,14 @@ class Wapiti:
                             print(_("Error sending crash report"))
                         os.unlink(traceback_file)
                 else:
-                    if original_request_or_exception and original_request_or_exception.path_id is not None:
-                        self.persister.set_attacked(original_request_or_exception.path_id, attack_module.name)
+                    if original_request.path_id is not None:
+                        self.persister.set_attacked(original_request.path_id, attack_module.name)
 
             if hasattr(attack_module, "finish"):
                 attack_module.finish()
 
-            if skipped:
-                print(_("{} requests were skipped due to network issues").format(skipped))
+            if attack_module.network_errors:
+                print(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
 
             if answer == "1":
                 break

@@ -24,7 +24,7 @@ from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import HIGH_LEVEL, _
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 from wapitiCore.definitions.exec import NAME
 
 
@@ -56,35 +56,32 @@ class mod_shellshock(Attack):
             "cookie": empty_func + cmd
         }
 
-    def attack(self):
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
+    def must_attack(self, request: Request):
+        # We attempt to attach each script once whatever the method
+        return request.path not in self.attacked_get
 
-        for original_request in http_resources:
-            try:
-                url = original_request.path
+    def attack(self, request: Request):
+        url = request.path
+        self.attacked_get.append(url)
 
-                if self.verbose == 2:
-                    print("[¨] {0}".format(url))
+        # We can't see anything by printing requests because payload is in headers so let's print nothing :)
+        evil_req = Request(url)
 
-                if url not in self.attacked_get:
-                    self.attacked_get.append(url)
+        try:
+            resp = self.crawler.send(evil_req, headers=self.hdrs)
+        except RequestException:
+            self.network_errors += 1
+            return
 
-                    evil_req = web.Request(url)
+        if resp:
+            data = resp.content
+            if self.rand_string in data:
+                self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
 
-                    resp = self.crawler.send(evil_req, headers=self.hdrs)
-                    if resp:
-                        data = resp.content
-                        if self.rand_string in data:
-                            self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
-
-                            self.add_vuln(
-                                request_id=original_request.path_id,
-                                category=NAME,
-                                level=HIGH_LEVEL,
-                                request=evil_req,
-                                info=_("URL {0} seems vulnerable to Shellshock attack").format(url)
-                            )
-            except (RequestException, KeyboardInterrupt) as exception:
-                yield exception
-
-            yield original_request
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=HIGH_LEVEL,
+                    request=evil_req,
+                    info=_("URL {0} seems vulnerable to Shellshock attack").format(url)
+                )

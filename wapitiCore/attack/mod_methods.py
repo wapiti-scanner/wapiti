@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from requests.exceptions import RequestException
 
 
 class mod_methods(Attack):
@@ -33,50 +32,42 @@ class mod_methods(Attack):
     KNOWN_METHODS = {"GET", "POST", "OPTIONS", "HEAD", "TRACE"}
     do_get = False
     do_post = False
+    excluded_path = set()
 
-    def attack(self):
-        excluded_path = set()
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+    def must_attack(self, request: Request):
+        return request.path not in self.excluded_path
 
-        for original_request in chain(http_resources, forms):
-            try:
-                page = original_request.path
-                if page in excluded_path:
-                    continue
+    def attack(self, request: Request):
+        page = request.path
+        self.excluded_path.add(page)
 
-                excluded_path.add(page)
+        option_request = Request(
+            page,
+            "OPTIONS",
+            referer=request.referer,
+            link_depth=request.link_depth
+        )
 
-                option_request = Request(
-                    page,
-                    "OPTIONS",
-                    referer=original_request.referer,
-                    link_depth=original_request.link_depth
+        if self.verbose == 2:
+            print("[+] {}".format(option_request))
+
+        try:
+            response = self.crawler.send(option_request)
+        except RequestException:
+            self.network_errors += 1
+            return
+
+        if 200 <= response.status < 400:
+            methods = response.headers.get("allow", '').upper().split(',')
+            methods = {method.strip() for method in methods if method.strip()}
+            interesting_methods = sorted(methods - self.KNOWN_METHODS)
+
+            if interesting_methods:
+                self.log_orange("---")
+                self.log_orange(
+                    "Interesting methods allowed on {}: {}".format(
+                        page,
+                        ", ".join(interesting_methods)
+                    )
                 )
-
-                if self.verbose == 2:
-                    print("[+] {}".format(option_request))
-
-                try:
-                    response = self.crawler.send(option_request)
-                except RequestException:
-                    continue
-                else:
-                    if 200 <= response.status < 400:
-                        methods = response.headers.get("allow", '').upper().split(',')
-                        methods = {method.strip() for method in methods if method.strip()}
-                        interesting_methods = sorted(methods - self.KNOWN_METHODS)
-
-                        if interesting_methods:
-                            self.log_orange("---")
-                            self.log_orange(
-                                "Interesting methods allowed on {}: {}".format(
-                                    page,
-                                    ", ".join(interesting_methods)
-                                )
-                            )
-                            self.log_orange("---")
-            except (KeyboardInterrupt, RequestException) as exception:
-                yield exception
-
-            yield original_request
+                self.log_orange("---")

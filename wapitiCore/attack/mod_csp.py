@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
@@ -30,17 +32,35 @@ class mod_csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 
-    def attack(self):
-        url = self.persister.get_root_url()
-        request = Request(url)
-        response = self.crawler.get(request, follow_redirects=True)
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        self.finished = False
+
+    def must_attack(self, request: Request):
+        if self.finished:
+            return False
+
+        if request.method == "POST":
+            return False
+
+        return request.url == self.persister.get_root_url()
+
+    def attack(self, request: Request):
+        self.finished = True
+        request_to_root = Request(request.url)
+
+        try:
+            response = self.crawler.get(request_to_root, follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)
             self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=MSG_NO_CSP
             )
         else:
@@ -54,7 +74,7 @@ class mod_csp(Attack):
                     self.add_vuln(
                         category=NAME,
                         level=LOW_LEVEL,
-                        request=request,
+                        request=request_to_root,
                         info=MSG_CSP_MISSING.format(policy_name)
                     )
                 elif result == 0:
@@ -62,8 +82,6 @@ class mod_csp(Attack):
                     self.add_vuln(
                         category=NAME,
                         level=LOW_LEVEL,
-                        request=request,
+                        request=request_to_root,
                         info=MSG_CSP_UNSAFE.format(policy_name)
                     )
-
-        yield

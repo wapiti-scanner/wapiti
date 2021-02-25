@@ -16,12 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from itertools import chain
 from time import sleep
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
-from requests.exceptions import ReadTimeout, RequestException
+from requests.exceptions import RequestException
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, CRITICAL_LEVEL, _
@@ -154,14 +153,16 @@ class mod_ssrf(Attack):
     name = "ssrf"
     MSG_VULN = _("SSRF vulnerability")
 
-    def attack(self):
+    def __init__(self, crawler, persister, logger, attack_options):
+        super().__init__(crawler, persister, logger, attack_options)
+
         methods = ""
         if self.do_get:
             methods += "G"
         if self.do_post:
             methods += "PF"
 
-        mutator = SsrfMutator(
+        self.mutator = SsrfMutator(
             session_id=self._session_id,
             methods=methods,
             payloads=self.payloads,
@@ -170,28 +171,18 @@ class mod_ssrf(Attack):
             endpoint=self.external_endpoint
         )
 
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+    def attack(self, request: Request):
+        # Let's just send payloads, we don't care of the response as what we want to know is if the target
+        # contacted the endpoint.
+        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+            if self.verbose == 2:
+                print("[¨] {0}".format(mutated_request))
 
-        for original_request in chain(http_resources, forms):
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
-
-            # Let's just send payloads, we don't care of the response as what we want to know is if the target
-            # contacted the endpoint.
-            for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
-                try:
-                    if self.verbose == 2:
-                        print("[¨] {0}".format(mutated_request))
-
-                    try:
-                        self.crawler.send(mutated_request)
-                    except ReadTimeout:
-                        continue
-                except (KeyboardInterrupt, RequestException) as exception:
-                    yield exception
-
-            yield original_request
+            try:
+                self.crawler.send(mutated_request)
+            except RequestException:
+                self.network_errors += 1
+                continue
 
     def finish(self):
         endpoint_url = "{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id)
@@ -202,6 +193,7 @@ class mod_ssrf(Attack):
         try:
             response = self.crawler.send(endpoint_request)
         except RequestException:
+            self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:
             data = response.json

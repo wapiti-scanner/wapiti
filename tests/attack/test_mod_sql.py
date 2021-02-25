@@ -67,8 +67,8 @@ def test_whole_stuff():
     module = mod_sql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    for request in persister.requests:
+        module.attack(request)
 
     assert True
 
@@ -85,7 +85,6 @@ def test_false_positive():
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
@@ -94,8 +93,7 @@ def test_false_positive():
     module = mod_sql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert not persister.vulnerabilities
 
@@ -121,7 +119,6 @@ def test_true_positive():
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = Crawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
@@ -130,7 +127,6 @@ def test_true_positive():
     module = mod_sql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = True
-    for __ in module.attack():
-        pass
+    module.attack(request)
 
     assert persister.vulnerabilities

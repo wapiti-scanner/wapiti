@@ -19,15 +19,14 @@
 # Using well-known tools like Hydra, Patator, Wfuzz or other tools supporting parallelism is recommended.
 # This module may be handy for CTF though.
 from os.path import join as path_join
-from itertools import product, chain
+from itertools import product
 
-from requests.exceptions import ReadTimeout
+from requests.exceptions import RequestException
 
-from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
 from wapitiCore.definitions.credentials import NAME
-from wapitiCore.net import web
+from wapitiCore.net.web import Request
 
 
 class mod_brute_login_form(Attack):
@@ -74,7 +73,7 @@ class mod_brute_login_form(Attack):
             get_params[username_index][1] = username
             get_params[password_index][1] = password
 
-        login_request = web.Request(
+        login_request = Request(
             path=login_form.url,
             method=login_form.method,
             post_params=post_params,
@@ -83,39 +82,36 @@ class mod_brute_login_form(Attack):
             link_depth=login_form.link_depth
         )
 
-        try:
-            login_response = self.crawler.send(
-                login_request,
-                follow_redirects=True
-            )
-        except ReadTimeout:
-            return ""
+        login_response = self.crawler.send(
+            login_request,
+            follow_redirects=True
+        )
 
         return login_response.content
 
-    def attack(self):
-        http_resources = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        forms = self.persister.get_forms(attack_module=self.name) if self.do_post else []
+    def must_attack(self, request: Request):
+        # We leverage the fact that the crawler will fill password entries with a known placeholder
+        if "Letm3in_" not in (request.encoded_data + request.encoded_params):
+            return False
 
-        for original_request in chain(http_resources, forms):
-            # We leverage the fact that the crawler will fill password entries with a known placeholder
-            if "Letm3in_" not in (original_request.encoded_data + original_request.encoded_params):
-                continue
+        # We may want to remove this but if not available fallback to target URL
+        if not request.referer:
+            return False
 
-            # We may want to remove this but if not available fallback to target URL
-            if not original_request.referer:
-                continue
+        return True
 
-            if self.verbose >= 1:
-                print("[+] {}".format(original_request))
+    def attack(self, request: Request):
+        try:
+            page = self.crawler.get(Request(request.referer), follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
 
-            request = Request(original_request.referer)
-            page = self.crawler.get(request, follow_redirects=True)
+        login_form, username_field_idx, password_field_idx = page.find_login_form()
+        if not login_form:
+            return
 
-            login_form, username_field_idx, password_field_idx = page.find_login_form()
-            if not login_form:
-                continue
-
+        try:
             failure_text = self.test_credentials(
                 login_form,
                 username_field_idx, password_field_idx,
@@ -123,57 +119,61 @@ class mod_brute_login_form(Attack):
             )
 
             if self.check_success_auth(failure_text):
-                # Ignore this case as it raise false positives
-                continue
+                # Ignore this case as it raises false positives
+                return
+        except RequestException:
+            self.network_errors += 1
+            return
 
-            for username, password in product(self.get_usernames(), self.get_passwords()):
+        for username, password in product(self.get_usernames(), self.get_passwords()):
+            try:
                 response = self.test_credentials(
                     login_form,
                     username_field_idx, password_field_idx,
                     username, password
                 )
+            except RequestException:
+                self.network_errors += 1
+                continue
 
-                if self.check_success_auth(response) and failure_text != response:
-                    vuln_message = _("Credentials found for URL {} : {} / {}").format(
-                        original_request.referer,
-                        username,
-                        password
-                    )
+            if self.check_success_auth(response) and failure_text != response:
+                vuln_message = _("Credentials found for URL {} : {} / {}").format(
+                    request.referer,
+                    username,
+                    password
+                )
 
-                    # Recreate the request that succeed in order to print and store it
-                    post_params = login_form.post_params
-                    get_params = login_form.get_params
+                # Recreate the request that succeed in order to print and store it
+                post_params = login_form.post_params
+                get_params = login_form.get_params
 
-                    if login_form.method == "POST":
-                        post_params[username_field_idx][1] = username
-                        post_params[password_field_idx][1] = password
-                    else:
-                        get_params[username_field_idx][1] = username
-                        get_params[password_field_idx][1] = password
+                if login_form.method == "POST":
+                    post_params[username_field_idx][1] = username
+                    post_params[password_field_idx][1] = password
+                else:
+                    get_params[username_field_idx][1] = username
+                    get_params[password_field_idx][1] = password
 
-                    evil_request = web.Request(
-                        path=login_form.url,
-                        method=login_form.method,
-                        post_params=post_params,
-                        get_params=get_params,
-                        referer=login_form.referer,
-                        link_depth=login_form.link_depth
-                    )
+                evil_request = Request(
+                    path=login_form.url,
+                    method=login_form.method,
+                    post_params=post_params,
+                    get_params=get_params,
+                    referer=login_form.referer,
+                    link_depth=login_form.link_depth
+                )
 
-                    self.add_vuln(
-                        request_id=original_request.path_id,
-                        category=NAME,
-                        level=LOW_LEVEL,
-                        request=evil_request,
-                        info=vuln_message
-                    )
+                self.add_vuln(
+                    request_id=request.path_id,
+                    category=NAME,
+                    level=LOW_LEVEL,
+                    request=evil_request,
+                    info=vuln_message
+                )
 
-                    self.log_red("---")
-                    self.log_red(vuln_message),
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(evil_request.http_repr())
-                    self.log_red("---")
-
-                    break
-
-            yield original_request
+                self.log_red("---")
+                self.log_red(vuln_message),
+                self.log_red(Messages.MSG_EVIL_REQUEST)
+                self.log_red(evil_request.http_repr())
+                self.log_red("---")
+                break

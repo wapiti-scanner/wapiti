@@ -14,10 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from requests.exceptions import RequestException
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.definitions.http_headers import NAME
+from wapitiCore.net.page import Page
 
 INFO_HSTS = _("Strict-Transport-Security is not set")
 INFO_XCONTENT_TYPE = _("X-Content-Type-Options is not set")
@@ -33,16 +36,34 @@ class mod_http_headers(Attack):
     check_list_xcontent = ['nosniff']
     check_list_hsts = ['max-age=']
 
-    def is_set(self, response: object, header_name, check_list):
+    def __init__(self, crawler, persister, logger, attack_options):
+        Attack.__init__(self, crawler, persister, logger, attack_options)
+        self.finished = False
+
+    def is_set(self, response: Page, header_name, check_list):
         if header_name not in response.headers:
             return False
         else:
             return any(element in response.headers[header_name].lower() for element in check_list)
 
-    def attack(self):
-        url = self.persister.get_root_url()
-        request = Request(url)
-        response = self.crawler.get(request, follow_redirects=True)
+    def must_attack(self, request: Request):
+        if self.finished:
+            return False
+
+        if request.method == "POST":
+            return False
+
+        return request.url == self.persister.get_root_url()
+
+    def attack(self, request: Request):
+        request_to_root = Request(request.url)
+        self.finished = True
+
+        try:
+            response = self.crawler.get(request_to_root, follow_redirects=True)
+        except RequestException:
+            self.network_errors += 1
+            return
 
         self.log_blue(_("Checking X-Frame-Options :"))
         if not self.is_set(response, "X-Frame-Options", self.check_list_xframe):
@@ -50,7 +71,7 @@ class mod_http_headers(Attack):
             self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=INFO_XFRAME_OPTIONS
             )
         else:
@@ -62,7 +83,7 @@ class mod_http_headers(Attack):
             self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=INFO_XSS_PROTECTION
             )
         else:
@@ -74,7 +95,7 @@ class mod_http_headers(Attack):
             self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=INFO_XCONTENT_TYPE
             )
         else:
@@ -86,10 +107,8 @@ class mod_http_headers(Attack):
             self.add_vuln(
                 category=NAME,
                 level=LOW_LEVEL,
-                request=request,
+                request=request_to_root,
                 info=INFO_HSTS
             )
         else:
             self.log_green("OK")
-
-        yield
