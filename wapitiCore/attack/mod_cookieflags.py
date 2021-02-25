@@ -27,6 +27,7 @@ INFO_COOKIE_SECURE = _("Secure flag is not set in the cookie : {0}")
 class mod_cookieflags(Attack):
     """Evaluate the security of cookies on the website."""
     name = "cookieflags"
+    finished = False
 
     @staticmethod
     def check_secure_flag(cookie: object):
@@ -37,13 +38,18 @@ class mod_cookieflags(Attack):
         return "HttpOnly" in cookie._rest
 
     def must_attack(self, request: Request):
+        if self.finished:
+            return False
+
         if request.method == "POST":
             return False
 
         return request.url == self.persister.get_root_url()
 
     def attack(self, request: Request):
+        self.finished = True
         cookies = self.crawler.session_cookies
+
         for cookie in cookies:
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):

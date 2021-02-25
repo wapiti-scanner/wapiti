@@ -46,7 +46,9 @@ class mod_csp(Attack):
         return request.url == self.persister.get_root_url()
 
     def attack(self, request: Request):
+        self.finished = True
         request_to_root = Request(request.url)
+
         try:
             response = self.crawler.get(request_to_root, follow_redirects=True)
         except RequestException:

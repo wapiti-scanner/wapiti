@@ -122,6 +122,7 @@ class mod_brute_login_form(Attack):
                 # Ignore this case as it raises false positives
                 return
         except RequestException:
+            self.network_errors += 1
             return
 
         for username, password in product(self.get_usernames(), self.get_passwords()):

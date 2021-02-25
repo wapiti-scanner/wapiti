@@ -104,6 +104,7 @@ class mod_nikto(Attack):
         return not self.finished
 
     def attack(self, request: Request):
+        self.finished = True
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
         server = next(urls).hostname
