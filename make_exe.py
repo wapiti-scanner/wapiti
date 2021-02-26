@@ -97,7 +97,7 @@ if a script is vulnerable.""",
             "includes": [
                 "wapitiCore.attack.mod_backup",
                 "wapitiCore.attack.mod_brute_login_form",
-                "wapitiCore.attack.mod_blindsql",
+                "wapitiCore.attack.mod_timesql",
                 "wapitiCore.attack.mod_buster",
                 "wapitiCore.attack.mod_cookieflags",
                 "wapitiCore.attack.mod_crlf",

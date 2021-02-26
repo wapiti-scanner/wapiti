@@ -45,7 +45,7 @@ modules = [
     "mod_backup",
     "mod_brute_login_form",
     "mod_htaccess",
-    "mod_blindsql",
+    "mod_timesql",
     "mod_permanentxss",
     "mod_nikto",
     "mod_buster",
@@ -59,7 +59,6 @@ modules = [
 
 # Modules that will be used if option -m isn't used
 commons = [
-    "blindsql",
     "cookieflags",
     "csp",
     "exec",

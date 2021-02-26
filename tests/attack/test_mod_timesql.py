@@ -11,7 +11,7 @@ from requests.exceptions import ReadTimeout
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Crawler
-from wapitiCore.attack.mod_blindsql import mod_blindsql
+from wapitiCore.attack.mod_timesql import mod_timesql
 
 
 class FakePersister:
@@ -47,7 +47,7 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_blindsql_detection():
+def test_timesql_detection():
     # It looks like php -S has serious limitations
     # so PHP script should wait a minimum amount of time for the test to succeed
     persister = FakePersister()
@@ -57,7 +57,7 @@ def test_blindsql_detection():
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_blindsql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options)
     module.do_post = False
     module.attack(request)
 
@@ -66,7 +66,7 @@ def test_blindsql_detection():
     assert "sleep" in persister.vulnerabilities[0][1]
 
 
-def test_blindsql_false_positive():
+def test_timesql_false_positive():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
@@ -74,7 +74,7 @@ def test_blindsql_false_positive():
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_blindsql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options)
     module.do_post = False
     module.attack(request)
 
@@ -103,7 +103,7 @@ def test_false_positive_request_count():
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_blindsql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = False
     module.attack(request)
@@ -135,7 +135,7 @@ def test_true_positive_request_count():
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_blindsql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options)
     module.verbose = 2
     module.do_post = False
     module.attack(request)
