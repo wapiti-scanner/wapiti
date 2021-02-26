@@ -433,7 +433,7 @@ class mod_sql(Attack):
             good_status = good_response.status
             good_redirect = good_response.redirection_url
             # good_title = response.title
-            good_hash = good_response.md5
+            good_hash = good_response.text_only_md5
         except ReadTimeout:
             self.network_errors += 1
             return
@@ -517,9 +517,9 @@ class mod_sql(Attack):
                 continue
 
             comparison = (
-                response.status == good_status and
-                response.redirection_url == good_redirect and
-                response.md5 == good_hash
+                    response.status == good_status and
+                    response.redirection_url == good_redirect and
+                    response.text_only_md5 == good_hash
             )
 
             test_results.append(comparison == (flags.section == "True"))
