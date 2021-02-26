@@ -569,6 +569,10 @@ class Page:
             return text
         return ""
 
+    @property
+    def text_only_md5(self) -> str:
+        return md5(self.text_only.encode(errors="ignore")).hexdigest()
+
     def empty(self):
         """Modify the current Page object to make it appears as if the content-length was 0."""
         self._is_empty = True

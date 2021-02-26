@@ -22,7 +22,7 @@ from copy import deepcopy
 import sys
 
 
-def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote_plus):
+def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
     """Encode a dict or sequence of two-element tuples into a URL query string.
 
     If the query arg is a sequence of two-element tuples, the order of the
