@@ -24,14 +24,14 @@ from wapitiCore.definitions.blindsql import NAME
 from wapitiCore.net.web import Request
 
 
-class mod_blindsql(Attack):
+class mod_timesql(Attack):
     """
     Detect SQL injection vulnerabilities using blind time-based technique.
     """
 
     PAYLOADS_FILE = "blindSQLPayloads.txt"
     time_to_sleep = 6
-    name = "blindsql"
+    name = "timesql"
     PRIORITY = 6
 
     MSG_VULN = _("Blind SQL vulnerability")

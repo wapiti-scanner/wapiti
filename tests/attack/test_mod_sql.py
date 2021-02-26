@@ -1,5 +1,8 @@
 from unittest.mock import Mock
 import re
+from urllib.parse import urlparse, parse_qs
+from tempfile import NamedTemporaryFile
+import sqlite3
 
 import responses
 
@@ -38,6 +41,12 @@ def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
+        re.compile(r"http://perdu.com/"),
+        body="Hello there"
+    )
+
+    responses.add(
+        responses.POST,
         re.compile(r"http://perdu.com/"),
         body="Hello there"
     )
@@ -130,3 +139,64 @@ def test_true_positive():
     module.attack(request)
 
     assert persister.vulnerabilities
+
+
+@responses.activate
+def test_blind_detection():
+    with NamedTemporaryFile() as database_fd:
+        conn = sqlite3.connect(database_fd.name)
+        cursor = conn.cursor()
+        cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
+        conn.commit()
+        cursor.execute("INSERT INTO users (id, username, password) VALUES (1, \"admin\", \"123456\")")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        def process(http_request):
+            try:
+                user_id = parse_qs(urlparse(http_request.url).query)["user_id"][0]
+            except (IndexError, KeyError):
+                return 200, {}, "Unknown user"
+            else:
+                conn = sqlite3.connect(database_fd.name)
+                cursor = conn.cursor()
+                try:
+                    # Will you spot the SQLi vulnerability? :D
+                    cursor.execute("SELECT username FROM users WHERE id = {}".format(user_id))
+                    row = cursor.fetchone()
+                except sqlite3.OperationalError:
+                    cursor.close()
+                    conn.close()
+                    return 200, {}, "Unknown user"
+                else:
+                    cursor.close()
+                    conn.close()
+                    if row:
+                        return 200, {}, "Welcome {}".format(row[0])
+                    else:
+                        return 200, {}, "Unknown user"
+
+        responses.add_callback(
+            responses.GET,
+            re.compile(r"http://perdu.com/\?user_id=.*"),
+            callback=process
+        )
+
+        persister = FakePersister()
+
+        request = Request("http://perdu.com/?user_id=1")
+        request.path_id = 1
+
+        crawler = Crawler("http://perdu.com/", timeout=1)
+        options = {"timeout": 10, "level": 1}
+        logger = Mock()
+
+        module = mod_sql(crawler, persister, logger, options)
+        module.verbose = 2
+        module.do_post = True
+        module.attack(request)
+
+        assert persister.vulnerabilities
+        # One request for error-based, one to get normal response, four to test boolean-based attack
+        assert len(responses.calls) == 6

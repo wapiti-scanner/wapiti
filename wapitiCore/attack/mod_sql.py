@@ -17,10 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
+from random import randint
 
 from requests.exceptions import ReadTimeout, RequestException
 
-from wapitiCore.attack.attack import Attack, Flags
+from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, CRITICAL_LEVEL, _
 from wapitiCore.definitions.sql import NAME
 from wapitiCore.net.web import Request
@@ -230,6 +231,41 @@ DBMS_ERROR_PATTERNS = {
 }
 
 
+def generate_boolean_payloads():
+    payloads = []
+    for use_parenthesis in (False, True):
+        for separator in ("", "'", "\""):
+            for payload in generate_boolean_test_values(separator, use_parenthesis):
+                payloads.append(payload)
+    return payloads
+
+
+def generate_boolean_test_values(separator: str, parenthesis: bool):
+    fmt_string = (
+        "[VALUE]{sep} AND {left_value}={right_value} AND {sep}{padding_value}{sep}={sep}{padding_value}",
+        "[VALUE]{sep}) AND {left_value}={right_value} AND ({sep}{padding_value}{sep}={sep}{padding_value}"
+    )[parenthesis]
+
+    # Generate two couple of payloads, first couple to test, second one to check for false-positives
+    for __ in range(2):
+        value1 = randint(10, 99)
+        value2 = randint(10, 99) + value1
+        padding_value = randint(10, 99)
+
+        # First payload of the couple gives negative test
+        # Due to Mutator limitations we leverage some Flags attributes to put our indicators
+        yield (
+            fmt_string.format(left_value=value1, right_value=value2, padding_value=padding_value, sep=separator),
+            Flags(section="False", platform="{}_{}".format("p" if parenthesis else "", separator))
+        )
+
+        # Second payload of the couple gives positive test
+        yield (
+            fmt_string.format(left_value=value1, right_value=value1, padding_value=padding_value, sep=separator),
+            Flags(section="True", platform="{}_{}".format("p" if parenthesis else "", separator))
+        )
+
+
 class mod_sql(Attack):
     """
     Detect SQL (but also LDAP and XPath) injection vulnerabilities by triggering errors (error-based technique).
@@ -280,11 +316,16 @@ class mod_sql(Attack):
         self.time_to_sleep = str(1 + int(timeout))
 
     def attack(self, request: Request):
+        vulnerable_parameters = self.error_based_attack(request)
+        self.boolean_based_attack(request, vulnerable_parameters)
+
+    def error_based_attack(self, request: Request):
         timeouted = False
         page = request.path
         saw_internal_error = False
         current_parameter = None
         vulnerable_parameter = False
+        vulnerable_parameters = set()
 
         for mutated_request, parameter, __, __ in self.mutator.mutate(request):
             if current_parameter != parameter:
@@ -359,6 +400,7 @@ class mod_sql(Attack):
 
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
+                    vulnerable_parameters.add(parameter)
                     continue
 
                 elif response.status == 500 and not saw_internal_error:
@@ -382,3 +424,103 @@ class mod_sql(Attack):
                     self.log_orange(Messages.MSG_EVIL_REQUEST)
                     self.log_orange(mutated_request.http_repr())
                     self.log_orange("---")
+
+        return vulnerable_parameters
+
+    def boolean_based_attack(self, request: Request, parameters_to_skip: set):
+        try:
+            good_response = self.crawler.send(request)
+            good_status = good_response.status
+            good_redirect = good_response.redirection_url
+            # good_title = response.title
+            good_hash = good_response.md5
+        except ReadTimeout:
+            self.network_errors += 1
+            return
+
+        methods = ""
+        if self.do_get:
+            methods += "G"
+        if self.do_post:
+            methods += "PF"
+
+        mutator = Mutator(
+            methods=methods,
+            payloads=generate_boolean_payloads(),
+            qs_inject=self.must_attack_query_string,
+            skip=self.options.get("skipped_parameters", set()) | parameters_to_skip
+        )
+
+        page = request.path
+
+        current_parameter = None
+        skip_till_next_parameter = False
+        current_session = None
+        test_results = []
+        last_mutated_request = None
+
+        for mutated_request, parameter, __, flags in mutator.mutate(request):
+            # Make sure we always pass through the following block to see changes of payloads formats
+            if current_session != flags.platform:
+                # We start a new set of payloads, let's analyse results for previous ones
+                if test_results and all(test_results):
+                    # We got a winner
+                    skip_till_next_parameter = True
+                    vuln_info = _("SQL Injection")
+
+                    if current_parameter == "QUERY_STRING":
+                        vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
+                    else:
+                        vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, current_parameter)
+
+                    self.add_vuln(
+                        request_id=request.path_id,
+                        category=NAME,
+                        level=CRITICAL_LEVEL,
+                        request=last_mutated_request,
+                        info=vuln_message,
+                        parameter=current_parameter
+                    )
+
+                    self.log_red("---")
+                    self.log_red(
+                        Messages.MSG_QS_INJECT if current_parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
+                        vuln_info,
+                        page,
+                        current_parameter
+                    )
+                    self.log_red(Messages.MSG_EVIL_REQUEST)
+                    self.log_red(last_mutated_request.http_repr())
+                    self.log_red("---")
+
+                # Don't forget to reset session and results
+                current_session = flags.platform
+                test_results = []
+
+            if current_parameter != parameter:
+                # Start attacking a new parameter, forget every state we kept
+                current_parameter = parameter
+                skip_till_next_parameter = False
+            elif skip_till_next_parameter:
+                # If parameter is vulnerable, just skip till next parameter
+                continue
+
+            if self.verbose == 2:
+                print("[¨] {0}".format(mutated_request))
+
+            try:
+                response = self.crawler.send(mutated_request)
+            except RequestException:
+                self.network_errors += 1
+                # We need all cases to make sure SQLi is there
+                skip_till_next_parameter = True
+                continue
+
+            comparison = (
+                response.status == good_status and
+                response.redirection_url == good_redirect and
+                response.md5 == good_hash
+            )
+
+            test_results.append(comparison == (flags.section == "True"))
+            last_mutated_request = mutated_request
