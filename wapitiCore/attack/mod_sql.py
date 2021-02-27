@@ -320,7 +320,6 @@ class mod_sql(Attack):
         self.boolean_based_attack(request, vulnerable_parameters)
 
     def error_based_attack(self, request: Request):
-        timeouted = False
         page = request.path
         saw_internal_error = False
         current_parameter = None
@@ -341,31 +340,6 @@ class mod_sql(Attack):
 
             try:
                 response = self.crawler.send(mutated_request)
-            except ReadTimeout:
-                self.network_errors += 1
-                if timeouted:
-                    continue
-
-                self.log_orange("---")
-                self.log_orange(Messages.MSG_TIMEOUT, page)
-                self.log_orange(Messages.MSG_EVIL_REQUEST)
-                self.log_orange(mutated_request.http_repr())
-                self.log_orange("---")
-
-                if parameter == "QUERY_STRING":
-                    anom_msg = Messages.MSG_QS_TIMEOUT
-                else:
-                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
-
-                self.add_anom(
-                    request_id=request.path_id,
-                    category=Messages.RES_CONSUMPTION,
-                    level=MEDIUM_LEVEL,
-                    request=mutated_request,
-                    info=anom_msg,
-                    parameter=parameter
-                )
-                timeouted = True
             except RequestException:
                 self.network_errors += 1
             else:
