@@ -34,7 +34,7 @@ from requests.models import Response
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
-from bs4.element import Comment
+from bs4.element import Comment, Doctype
 
 # Internal libraries
 from wapitiCore import parser_name
@@ -554,14 +554,14 @@ class Page:
     def text_only(self):
         """Returns the displayed text of a webpage (without HTML tags)"""
         if "text" in self.type and self.size:
-            texts = self.soup.findAll(text=True)
+            texts = self.soup.find_all(text=True)
 
             def is_visible(element):
                 if len(element.strip()) == 0:
                     return False
-                if isinstance(element, Comment):
+                if isinstance(element, (Comment, Doctype)):
                     return False
-                if element.parent.name in ["style", "script", "[document]", "head", "title"]:
+                if element.parent.name in ["style", "script", "head"]:
                     return False
                 return True
 
