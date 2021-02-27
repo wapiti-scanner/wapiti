@@ -1148,7 +1148,6 @@ def wapiti_main():
         if "output" in args:
             wap.set_output_file(args.output)
 
-        found_generator = False
         if args.format not in GENERATORS:
             raise InvalidOptionValue("-f", args.format)
 
