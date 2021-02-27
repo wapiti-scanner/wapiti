@@ -200,3 +200,32 @@ def test_blind_detection():
         assert persister.vulnerabilities
         # One request for error-based, one to get normal response, four to test boolean-based attack
         assert len(responses.calls) == 6
+
+
+@responses.activate
+def test_negative_blind():
+    responses.add(
+        responses.GET,
+        url="http://perdu.com/",
+        body="Hello there"
+    )
+
+    persister = FakePersister()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 1
+
+    crawler = Crawler("http://perdu.com/", timeout=1)
+    options = {"timeout": 10, "level": 1}
+    logger = Mock()
+
+    module = mod_sql(crawler, persister, logger, options)
+    module.verbose = 2
+    module.attack(request)
+
+    assert not persister.vulnerabilities
+    # We have:
+    # - 1 request for error-based test
+    # - 1 request to get normal response
+    # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
+    assert len(responses.calls) == 8
