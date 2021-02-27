@@ -487,7 +487,7 @@ class mod_sql(Attack):
             except RequestException:
                 self.network_errors += 1
                 # We need all cases to make sure SQLi is there
-                skip_till_next_parameter = True
+                test_results.append(False)
                 continue
 
             comparison = (
