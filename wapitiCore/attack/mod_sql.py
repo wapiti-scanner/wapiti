@@ -479,6 +479,10 @@ class mod_sql(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
+            if test_results and not all(test_results):
+                # No need to go further: one of the tests was wrong
+                continue
+
             if self.verbose == 2:
                 print("[¨] {0}".format(mutated_request))
 
