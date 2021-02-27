@@ -156,7 +156,7 @@ def test_meta():
         assert page.description == "Meta page"
         assert page.keywords == ["this", "is", " dope"]
         assert page.generator == "YoloCMS 1.0"
-        assert page.text_only == "This is dope"
+        assert page.text_only == "  -  Title :)  This is dope"
         assert page.favicon_url == "http://perdu.com/custom.ico"
         assert page.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
 
