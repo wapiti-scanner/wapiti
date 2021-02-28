@@ -229,3 +229,64 @@ def test_negative_blind():
     # - 1 request to get normal response
     # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
     assert len(responses.calls) == 8
+
+
+@responses.activate
+def test_blind_detection_parenthesis():
+    with NamedTemporaryFile() as database_fd:
+        conn = sqlite3.connect(database_fd.name)
+        cursor = conn.cursor()
+        cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
+        conn.commit()
+        cursor.execute("INSERT INTO users (id, username, password) VALUES (1, \"admin\", \"123456\")")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        def process(http_request):
+            try:
+                username = parse_qs(urlparse(http_request.url).query)["username"][0]
+            except (IndexError, KeyError):
+                return 200, {}, "Unknown user"
+            else:
+                conn = sqlite3.connect(database_fd.name)
+                cursor = conn.cursor()
+                try:
+                    # Will you spot the SQLi vulnerability? :D
+                    cursor.execute("SELECT id FROM users WHERE username = '{}'".format(username))
+                    row = cursor.fetchone()
+                except sqlite3.OperationalError:
+                    cursor.close()
+                    conn.close()
+                    return 200, {}, "Unknown user"
+                else:
+                    cursor.close()
+                    conn.close()
+                    if row:
+                        return 200, {}, "Welcome, your user ID is {}".format(row[0])
+                    else:
+                        return 200, {}, "Unknown user"
+
+        responses.add_callback(
+            responses.GET,
+            re.compile(r"http://perdu.com/\?username=.*"),
+            callback=process
+        )
+
+        persister = FakePersister()
+
+        request = Request("http://perdu.com/?username=admin")
+        request.path_id = 1
+
+        crawler = Crawler("http://perdu.com/", timeout=1)
+        options = {"timeout": 10, "level": 1}
+        logger = Mock()
+
+        module = mod_sql(crawler, persister, logger, options)
+        module.verbose = 2
+        module.do_post = True
+        module.attack(request)
+
+        assert persister.vulnerabilities
+        # This is the same test as the previous blind except we have to put single quotes
+        assert len(responses.calls) == 8
