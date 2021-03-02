@@ -114,7 +114,8 @@ if a script is vulnerable.""",
         "PySocks>=1.7.1",
         "markupsafe==1.1.1",
         "six>=1.15.0",
-        "importlib_metadata==2.0.0"
+        "importlib_metadata==2.0.0",
+        "browser-cookie3==0.11.4"
     ],
     extras_require={
         "NTLM": ["requests_ntlm"],
