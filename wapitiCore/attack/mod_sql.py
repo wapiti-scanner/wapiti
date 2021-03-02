@@ -268,7 +268,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool):
 
 class mod_sql(Attack):
     """
-    Detect SQL (but also LDAP and XPath) injection vulnerabilities by triggering errors (error-based technique).
+    Detect SQL (also LDAP and XPath) injection vulnerabilities using error-based or boolean-based (blind) techniques.
     """
 
     time_to_sleep = 6
