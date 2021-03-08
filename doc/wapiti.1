@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "February 2021" "" ""
+.TH "WAPITI" "1" "March 2021" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -63,6 +63,9 @@ PROXY AND AUTHENTICATION OPTIONS:
 .
 .IP "\(bu" 4
 \fB\-c\fR \fICOOKIE_FILE\fR
+.
+.IP "\(bu" 4
+\fB\-\-drop\-set\-cookie\fR
 .
 .IP "" 0
 .
@@ -305,10 +308,19 @@ Set the authentication mechanism to use\. Valid choices are basic, digest, kerbe
 Kerberos and NTLM authentication may require you to install additional Python modules\. "Post" authentication could be combined with \fB\-s\fR to specify where to find the login form\.
 .
 .IP "\(bu" 4
-\fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE\fR
+\fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
 .
 .br
 Load cookies from a Wapiti JSON cookie file\. See wapiti\-getcookie(1) for more information\.
+.
+.br
+You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported)\.
+.
+.IP "\(bu" 4
+\fB\-\-drop\-set\-cookie\fR
+.
+.br
+Ignore cookies given in HTTP responses\. Cookies that have been loaded using \fB\-c\fR will be kept\.
 .
 .IP "" 0
 .
@@ -410,7 +422,7 @@ Useful if you already know non\-vulnerable parameters\.
 When Wapiti crawls a website it gives each found URL a depth value\.
 .
 .br
-The base URL, and additional starting URLs (\-s) are given a depth of 0\.
+The base URL, and additionnal starting URLs (\-s) are given a depth of 0\.
 .
 .br
 Each link found in thoses URLs got a depth of 1, and so on\.
@@ -557,7 +569,7 @@ Wapiti doesn\'t care of certificates validation by default\. That behavior can b
 .IP "" 0
 .
 .SH "OUTPUT OPTIONS"
-Wapiti prints its status to standard output\. The two following options allow one to tune the output\.
+Wapiti prints its status to standard output\. The two following options allow to tune the output\.
 .
 .IP "\(bu" 4
 \fB\-\-color\fR
@@ -631,7 +643,7 @@ Copyright (c) 2006\-2021 Nicolas Surribas\.
 Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file\.
 .
 .SH "WEBSITE"
-http://wapiti\.sourceforge\.io/
+https://wapiti\-scanner\.github\.io/
 .
 .SH "BUG REPORTS"
 If you find a bug in Wapiti please report it to https://github\.com/wapiti\-scanner/wapiti/issues

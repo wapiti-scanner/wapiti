@@ -128,6 +128,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>-a</code> <var>CREDENTIALS</var></li>
 <li><code>--auth-type</code> {basic,digest,kerberos,ntlm,post}</li>
 <li><code>-c</code> <var>COOKIE_FILE</var></li>
+<li><code>--drop-set-cookie</code></li>
 </ul>
 
 
@@ -252,8 +253,11 @@ Given value should be in the form login%password (% is used as a separator)</p><
 Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post (web login form).<br />
 Kerberos and NTLM authentication may require you to install additional Python modules.
 "Post" authentication could be combined with <code>-s</code> to specify where to find the login form.</p></li>
-<li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE</var><br />
-Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.</p></li>
+<li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
+Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
+You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
+<li><p><code>--drop-set-cookie</code><br />
+Ignore cookies given in HTTP responses. Cookies that have been loaded using <code>-c</code> will be kept.</p></li>
 </ul>
 
 
@@ -425,7 +429,7 @@ Please read the LICENSE file for more information.</p>
 
 <h2 id="WEBSITE">WEBSITE</h2>
 
-<p>https://wapiti.sourceforge.io/</p>
+<p>https://wapiti-scanner.github.io/</p>
 
 <h2 id="BUG-REPORTS">BUG REPORTS</h2>
 
@@ -438,7 +442,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>February 2021</li>
+    <li class='tc'>March 2021</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

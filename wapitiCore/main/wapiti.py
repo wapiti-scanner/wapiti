@@ -570,13 +570,13 @@ class Wapiti:
             self.crawler.session_cookies = cookiejar
         elif browser_name == "chrome":
             cookiejar = browser_cookie3.chrome()
-            # There is a bug with this version of browser_cookie3 and we have to overwrite expiration date
+            # There is a bug with version 0.11.4 of browser_cookie3 and we have to overwrite expiration date
             # Upgrading to latest version gave more errors so let's keep an eye on future releases
             for cookie in cookiejar:
                 cookie.expires = None
             self.crawler.session_cookies = cookiejar
         else:
-            raise InvalidOptionValue('--cookies', browser_name)
+            raise InvalidOptionValue('--cookie', browser_name)
 
     def set_drop_cookies(self):
         self.crawler.set_drop_cookies()
@@ -825,15 +825,17 @@ def wapiti_main():
 
     parser.add_argument(
         "-c", "--cookie",
-        help=_("Set a JSON cookie file to use"),
+        help=_("Set a JSON cookie file to use.") + " " + _(
+            "You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+        ),
         default=argparse.SUPPRESS,
         metavar="COOKIE_FILE"
     )
 
     parser.add_argument(
-        "--drop-cookies",
+        "--drop-set-cookie",
         action="store_true",
-        help=_("Refuse cookies from the webserver")
+        help=_("Ignore Set-Cookie header from HTTP responses")
     )
 
     parser.add_argument(
@@ -1179,7 +1181,6 @@ def wapiti_main():
         if "output" in args:
             wap.set_output_file(args.output)
 
-        found_generator = False
         if args.format not in GENERATORS:
             raise InvalidOptionValue("-f", args.format)
 

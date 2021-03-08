@@ -37,6 +37,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `-a` <CREDENTIALS>
   * `--auth-type` {basic,digest,kerberos,ntlm,post}
   * `-c` <COOKIE_FILE>
+  * `--drop-set-cookie`
 
 SESSION OPTIONS:
 
@@ -137,8 +138,12 @@ OTHER OPTIONS:
     Kerberos and NTLM authentication may require you to install additional Python modules.
     "Post" authentication could be combined with `-s` to specify where to find the login form.
 
-  * `-c`, `--cookie` <COOKIE_FILE>  
-    Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.
+  * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
+    Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  
+    You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).
+    
+  * `--drop-set-cookie`  
+    Ignore cookies given in HTTP responses. Cookies that have been loaded using `-c` will be kept.
     
 ## SESSION OPTIONS
 
@@ -317,7 +322,7 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WEBSITE
 
-https://wapiti.sourceforge.io/
+https://wapiti-scanner.github.io/
 
 ## BUG REPORTS
 

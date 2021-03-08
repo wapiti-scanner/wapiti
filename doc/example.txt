@@ -21,7 +21,7 @@ username: wanda
 password: wanda
 <Cookie PHPSESSID=aofe1utktsh6q4blip8nr9820lksehjf0tr3019vm6bq8v1ca6d1 for wackopicko/>
 
-It can also be done with wapiti-getcookie this way (if you have all necessary informations about the form) :
+It can also be done with wapiti-getcookie this way (if you have all necessary information about the form) :
 wapiti-getcookie -u http://wackopicko/users/login.php -c cookies.json -d "username=wanda&password=wanda"
 
 Then, I scan the vulnerable website using the cookie and excluding the logout script :
@@ -147,3 +147,9 @@ Report
 ------
 A report has been generated in the file /home/devloop/.wapiti/generated_report
 Open /home/devloop/.wapiti/generated_report/wackopicko_12292017_1342.html with a browser to see this report.
+
+
+Alternatively you can pass your browser name to the -c option and Wapiti will reuse cookies from the browser :
+bash-4.2$ wapiti -u http://wackopicko/ -x http://wackopicko/users/logout.php -c firefox
+
+Only "chrome" and "firefox" are supported values.
