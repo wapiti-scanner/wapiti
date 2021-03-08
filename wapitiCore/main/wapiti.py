@@ -1135,7 +1135,7 @@ def wapiti_main():
             else:
                 raise InvalidOptionValue("-c", args.cookie)
 
-        if args.drop_cookies:
+        if args.drop_set_cookie:
             wap.set_drop_cookies()
 
         if "credentials" in args:
