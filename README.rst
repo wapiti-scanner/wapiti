@@ -111,7 +111,7 @@ The aforementioned attacks are tied to the following module names :
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
 + redirect (Open Redirects)
-+ shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__) )
++ shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
 + sql (Error-based SQL injection detection)
 + ssrf (Server Side Request Forgery)
 + xss (XSS injection module)
@@ -133,6 +133,8 @@ To find more vulnerabilities (as some attacks are error-based), you can modify
 your webserver configurations.
 
 For example, you can set the following values in your PHP configuration :
+
+.. code-block::
 
     safe_mode = Off
     display_errors = On (recommended)
