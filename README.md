@@ -1,5 +1,9 @@
-WAPITI - VERSION 3.0.4
-===========
+WAPITI
+======
+
+.. image:: https://img.shields.io/pypi/v/wapiti3?label=PyPI&logo=PyPI&logoColor=white&color=blue
+    :target: https://pypi.python.org/pypi/wapiti3
+    :alt: PyPI version
 
 Wapiti is a web application security auditor.
 
