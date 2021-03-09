@@ -17,12 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from .reportgenerator import ReportGenerator
+from .csvreportgenerator import CSVReportGenerator
 from .htmlreportgenerator import HTMLReportGenerator
 from .jsonreportgenerator import JSONReportGenerator
 from .txtreportgenerator import TXTReportGenerator
 from .xmlreportgenerator import XMLReportGenerator
 
 GENERATORS = {
+        "csv": CSVReportGenerator,
         "html": HTMLReportGenerator,
         "json": JSONReportGenerator,
         "txt": TXTReportGenerator,

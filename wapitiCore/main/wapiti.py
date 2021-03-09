@@ -488,13 +488,7 @@ class Wapiti:
                     self.server.replace(":", "_"),
                     strftime("%m%d%Y_%H%M", self.report_gen.scan_date)
                 )
-                if self.report_generator_type == "txt":
-                    extension = ".txt"
-                elif self.report_generator_type == "json":
-                    extension = ".json"
-                else:
-                    extension = ".xml"
-                self.output_file = filename + extension
+                self.output_file = filename + "." + self.report_generator_type
 
         for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":
@@ -1016,9 +1010,9 @@ def wapiti_main():
     parser.add_argument(
         "-f", "--format",
         metavar="FORMAT",
-        help=_("Set output format. Supported: json, html (default), txt, xml"),
+        help=_("Set output format. Supported:") + " " + ", ".join(sorted(GENERATORS)) + ". " + _("Default is html."),
         default="html",
-        choices=["json", "html", "txt", "xml"]
+        choices=GENERATORS.keys()
     )
 
     parser.add_argument(
