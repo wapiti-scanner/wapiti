@@ -35,8 +35,9 @@ from random import choice
 import codecs
 from inspect import getdoc
 
+import browser_cookie3
 import requests
-from requests.exceptions import RequestException, ConnectionError, Timeout, ChunkedEncodingError, ContentDecodingError
+from requests.exceptions import RequestException
 from requests.packages.urllib3 import disable_warnings
 
 from wapitiCore.language.language import _
@@ -82,7 +83,7 @@ class InvalidOptionValue(Exception):
 
 class Wapiti:
     """This class parse the options from the command line and set the modules and the HTTP engine accordingly.
-    Launch wapiti without arguments or with the "-h" option for more informations."""
+    Launch wapiti without arguments or with the "-h" option for more information."""
 
     REPORT_DIR = "report"
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
@@ -547,13 +548,32 @@ class Wapiti:
         self._excluded_urls.append(url_or_pattern)
 
     def set_cookie_file(self, cookie: str):
-        """Load session data from a cookie file"""
+        """Load session cookies from a cookie file"""
         if os.path.isfile(cookie):
             json_cookie = jsoncookie.JsonCookie()
             json_cookie.open(cookie)
             cookiejar = json_cookie.cookiejar(self.server)
             json_cookie.close()
             self.crawler.session_cookies = cookiejar
+
+    def load_browser_cookies(self, browser_name: str):
+        """Load session cookies from a browser"""
+        browser_name = browser_name.lower()
+        if browser_name == "firefox":
+            cookiejar = browser_cookie3.firefox()
+            self.crawler.session_cookies = cookiejar
+        elif browser_name == "chrome":
+            cookiejar = browser_cookie3.chrome()
+            # There is a bug with version 0.11.4 of browser_cookie3 and we have to overwrite expiration date
+            # Upgrading to latest version gave more errors so let's keep an eye on future releases
+            for cookie in cookiejar:
+                cookie.expires = None
+            self.crawler.session_cookies = cookiejar
+        else:
+            raise InvalidOptionValue('--cookie', browser_name)
+
+    def set_drop_cookies(self):
+        self.crawler.set_drop_cookies()
 
     def set_auth_credentials(self, auth_basic: tuple):
         """Set credentials to use if the website require an authentication."""
@@ -799,9 +819,17 @@ def wapiti_main():
 
     parser.add_argument(
         "-c", "--cookie",
-        help=_("Set a JSON cookie file to use"),
+        help=_("Set a JSON cookie file to use.") + " " + _(
+            "You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+        ),
         default=argparse.SUPPRESS,
         metavar="COOKIE_FILE"
+    )
+
+    parser.add_argument(
+        "--drop-set-cookie",
+        action="store_true",
+        help=_("Ignore Set-Cookie header from HTTP responses")
     )
 
     parser.add_argument(
@@ -1096,8 +1124,13 @@ def wapiti_main():
         if "cookie" in args:
             if os.path.isfile(args.cookie):
                 wap.set_cookie_file(args.cookie)
+            elif args.cookie.lower() in ("chrome", "firefox"):
+                wap.load_browser_cookies(args.cookie)
             else:
                 raise InvalidOptionValue("-c", args.cookie)
+
+        if args.drop_set_cookie:
+            wap.set_drop_cookies()
 
         if "credentials" in args:
             if "%" in args.credentials:
@@ -1224,7 +1257,7 @@ def wapiti_main():
             print('')
             pass
     except OperationalError:
-        print(_("[!] Can't store informations in persister. SQLite database must have been locked by another process"))
+        print(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
         print(_("[!] You should unlock and launch Wapiti again."))
     except SystemExit:
         pass

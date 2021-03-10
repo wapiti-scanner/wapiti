@@ -3,10 +3,13 @@ import os
 import sys
 from time import sleep
 from collections import deque
+import json
 
 import pytest
+import responses
 
 from wapitiCore.net.crawler import Crawler, Explorer
+from wapitiCore.net.web import Request
 
 
 @pytest.fixture(autouse=True)
@@ -47,3 +50,54 @@ def test_explorer_filtering():
     # We should have current URL and JS URL but without query string.
     # CSS URL should be excluded
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
+
+
+@responses.activate
+def test_cookies():
+    responses.add(
+        responses.GET,
+        "http://perdu.com/",
+        body="Hello there!",
+        headers={"Set-Cookie": "foo=bar; Path=/"}
+    )
+
+    def print_headers_callback(request):
+        return 200, {}, json.dumps(dict(request.headers), indent=2)
+
+    responses.add_callback(
+        responses.GET,
+        "http://perdu.com/cookies",
+        callback=print_headers_callback
+    )
+
+    crawler = Crawler("http://perdu.com/")
+    response = crawler.get(Request("http://perdu.com/"))
+    assert "foo=bar" in response.headers["set-cookie"]
+    response = crawler.get(Request("http://perdu.com/cookies"))
+    assert "foo=bar" in response.content
+
+
+@responses.activate
+def test_drop_cookies():
+    responses.add(
+        responses.GET,
+        "http://perdu.com/",
+        body="Hello there!",
+        headers={"Set-Cookie": "foo=bar; Path=/"}
+    )
+
+    def print_headers_callback(request):
+        return 200, {}, json.dumps(dict(request.headers), indent=2)
+
+    responses.add_callback(
+        responses.GET,
+        "http://perdu.com/cookies",
+        callback=print_headers_callback
+    )
+
+    crawler = Crawler("http://perdu.com/")
+    crawler.set_drop_cookies()
+    response = crawler.get(Request("http://perdu.com/"))
+    assert "foo=bar" in response.headers["set-cookie"]
+    response = crawler.get(Request("http://perdu.com/cookies"))
+    assert "foo=bar" not in response.content

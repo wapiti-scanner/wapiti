@@ -109,16 +109,16 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "requests>=2.25.0",
+        "requests>=2.25.1",
         "beautifulsoup4>=4.9.3",
-        # parser_name,
-        "tld>=0.12.2",
+        "tld>=0.12.5",
         "yaswfp>=0.9.3",
-        "mako>=1.1.2",
+        "mako>=1.1.4",
         "PySocks>=1.7.1",
         "markupsafe==1.1.1",
         "six>=1.15.0",
-        "importlib_metadata==2.0.0"
+        "importlib_metadata==3.7.2",
+        "browser-cookie3==0.11.4"
     ],
     extras_require={
         "NTLM": ["requests_ntlm"],

@@ -29,6 +29,7 @@ import pickle
 import math
 import functools
 from time import sleep
+from http import cookiejar
 
 # Third-parties
 import requests
@@ -130,6 +131,12 @@ def retry(delay=1, times=3):
         return inner_wrapper
 
     return outer_wrapper
+
+
+class BlockAll(cookiejar.CookiePolicy):
+    return_ok = set_ok = domain_return_ok = path_return_ok = lambda self, *args, **kwargs: False
+    netscape = True
+    rfc2965 = hide_cookie2 = False
 
 
 class Crawler:
@@ -272,6 +279,9 @@ class Crawler:
     def session_cookies(self, value):
         """Setter for session cookies (value may be a dict or RequestsCookieJar object)"""
         self._session.cookies = value
+
+    def set_drop_cookies(self):
+        self._session.cookies.set_policy(BlockAll())
 
     @property
     def credentials(self):
