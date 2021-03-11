@@ -335,7 +335,8 @@ class Request:
             return self.encoded_data >= other.encoded_data
         return False
 
-    def __len__(self):
+    @property
+    def parameters_count(self):
         if isinstance(self._post_params, list):
             return len(self.get_params) + len(self._post_params) + len(self._file_params)
         else:

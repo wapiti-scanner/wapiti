@@ -580,12 +580,8 @@ class Explorer:
     def qs_limit(self, value: int):
         self._qs_limit = value
 
-    def load_saved_state(self, pickle_file: str):
+    def save_state(self, pickle_file: str):
         with open(pickle_file, "wb") as file_data:
-            self._custom_404_codes = {}
-            self._file_counts = defaultdict(int)
-            self._pattern_counts = defaultdict(int)
-            self._hostnames = set()
             pickle.dump(
                 {
                     "custom_404_codes": self._custom_404_codes,
@@ -597,7 +593,7 @@ class Explorer:
                 pickle.HIGHEST_PROTOCOL
             )
 
-    def save_state(self, pickle_file: str):
+    def load_saved_state(self, pickle_file: str):
         try:
             with open(pickle_file, "rb") as file_data:
                 data = pickle.load(file_data)
@@ -610,20 +606,18 @@ class Explorer:
 
     def explore(
             self,
-            urls: deque,
+            to_explore: deque,
             excluded_urls: list = None
     ):
         """Explore a single TLD or the whole Web starting with an URL
 
-        @param urls: A list of URL to scan the scan with.
-        @type urls: list
+        @param to_explore: A list of URL to scan the scan with.
+        @type to_explore: list
         @param excluded_urls: A list of URLs to skip. Request objects or strings which may contain wildcards.
         @type excluded_urls: list
 
         @rtype: generator
         """
-        # explored_urls = []
-        to_explore = deque()
         invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
 
         # Common params used for tracking or other stuff
@@ -633,50 +627,39 @@ class Explorer:
             ]
         )
 
-        while True:
-            try:
-                start_url = urls.popleft()
-                if isinstance(start_url, web.Request):
-                    to_explore.append(start_url)
+        regexes = []
+        bad_requests_list = []
+
+        if isinstance(excluded_urls, list):
+            while True:
+                try:
+                    bad_request = excluded_urls.pop()
+                except IndexError:
+                    break
                 else:
-                    # We treat start_urls as if they are all valid URLs (ie in scope)
-                    to_explore.append(web.Request(start_url, link_depth=0))
-            except IndexError:
-                break
+                    if isinstance(bad_request, str):
+                        regexes.append(wildcard_translate(bad_request))
+                    elif isinstance(bad_request, web.Request):
+                        bad_requests_list.append(bad_request)
 
-        for request in to_explore:
-            urls.append(request)
-
-        # This is only for semantic
-        to_explore = urls
+        def is_forbidden(candidate_url):
+            return any(regex.match(candidate_url) for regex in regexes)
 
         self._crawler._session.stream = True
 
         if self._max_depth < 0:
             raise StopIteration
 
-        regexes = []
-        excluded_requests = []
-
-        if isinstance(excluded_urls, list):
-            while True:
-                try:
-                    excluded_url = excluded_urls.pop()
-                except IndexError:
-                    break
-                else:
-                    if isinstance(excluded_url, str):
-                        regexes.append(wildcard_translate(excluded_url))
-                    elif isinstance(excluded_url, web.Request):
-                        excluded_requests.append(excluded_requests)
-
-        def is_forbidden(candidate_url):
-            return any(regex.match(candidate_url) for regex in regexes)
-
         while to_explore:
             request = to_explore.popleft()
+            if not isinstance(request, web.Request):
+                # We treat start_urls as if they are all valid URLs (ie in scope)
+                request = web.Request(request, link_depth=0)
+
+            if request in bad_requests_list:
+                continue
+
             resource_url = request.url
-            is_excluded = False
 
             if request.link_depth > self._max_depth:
                 continue
@@ -687,11 +670,11 @@ class Explorer:
 
             # Won't enter if qs_limit is 0 (aka insane mode)
             if self._qs_limit:
-                if len(request):
+                if request.parameters_count:
                     try:
                         if self._pattern_counts[
                             request.pattern
-                        ] >= 220 / (math.exp(len(request) * self._qs_limit) ** 2):
+                        ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
                             continue
                     except OverflowError:
                         # Oh boy... that's not good to try to attack a form with more than 600 input fields
@@ -699,14 +682,6 @@ class Explorer:
                         continue
 
             if is_forbidden(resource_url):
-                continue
-
-            for known_resource in excluded_requests:
-                if known_resource == request:
-                    is_excluded = True
-                    break
-
-            if is_excluded:
                 continue
 
             if self._log:
@@ -741,7 +716,7 @@ class Explorer:
             if self._max_files_per_dir:
                 self._file_counts[dir_name] += 1
 
-            if self._qs_limit and len(request):
+            if self._qs_limit and request.parameters_count:
                 self._pattern_counts[request.pattern] += 1
 
             excluded_urls.append(request)

@@ -348,8 +348,8 @@ class Wapiti:
         print("========")
 
         print(_("This scan has been saved in the file {0}").format(self.persister.output_file))
-        if stopped:
-            print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
+        if stopped and self._start_urls:
+            print(_("The scan won't be resumed next time unless you pass the --resume-crawl option."))
 
     def attack(self):
         """Launch the attacks based on the preferences set by the command line"""
