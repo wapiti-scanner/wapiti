@@ -4,6 +4,7 @@ import sys
 from time import sleep
 from collections import deque
 import json
+from tempfile import NamedTemporaryFile
 
 import pytest
 import responses
@@ -101,3 +102,27 @@ def test_drop_cookies():
     assert "foo=bar" in response.headers["set-cookie"]
     response = crawler.get(Request("http://perdu.com/cookies"))
     assert "foo=bar" not in response.content
+
+
+def test_save_and_restore_state():
+    # Create a temporary file
+    temp_file = NamedTemporaryFile(suffix=".pkl")
+    # Get its names
+    filename = temp_file.name
+    # Delete it
+    temp_file.close()
+    explorer = Explorer(None)
+    # Load on unexisting file
+    explorer.load_saved_state(filename)
+    assert not explorer._hostnames
+    # Modify state, save it
+    explorer._hostnames = {"perdu.com"}
+    explorer.save_state(filename)
+    # State is the same after saving
+    assert explorer._hostnames == {"perdu.com"}
+
+    # New tempty explorer
+    explorer = Explorer(None)
+    # Load previous state
+    explorer.load_saved_state(filename)
+    assert explorer._hostnames == {"perdu.com"}

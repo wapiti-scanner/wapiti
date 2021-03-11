@@ -104,10 +104,15 @@ def test_request_object():
     assert res1.encoded_get_keys == res8.encoded_get_keys
     assert res17.encoded_get_keys == "x"
     assert res16.encoded_get_keys == ""
-    assert len(res12) == 5
+    assert res12.parameters_count == 5
     assert res12.encoded_get_keys == "qs1"
     assert res5.hash_params == res8.hash_params
     assert res7.hash_params != res8.hash_params
+
+    assert res6 in [res6, res11]
+    assert res6 not in [res11, None]
+    assert res11 in [res6, res11]
+    assert res11 not in [None, res6]
 
     print("Tests were successful, now launching representations")
     print("=== Basic representation follows ===")

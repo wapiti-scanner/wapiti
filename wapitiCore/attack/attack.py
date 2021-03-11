@@ -313,26 +313,11 @@ class Mutator:
             else:
                 yield result
 
-    def estimate_requests_count(self, request: Request):
-        estimation = len(request) if isinstance(self._payloads, tuple) else len(request) * len(self._payloads)
-        if self._qs_inject and request.method == "GET" and len(request) == 0:
-            # Injection directly in query string is made only on GET requests with no parameters in URL
-            estimation += len(self._payloads)
-        return estimation
-
     def mutate(self, request: Request):
         get_params = request.get_params
         post_params = request.post_params
         file_params = request.file_params
         referer = request.referer
-
-        # estimation = self.estimate_requests_count(request)
-        #
-        # if self._attacks_per_url_pattern[request.hash_params] + estimation > self._max_queries_per_pattern:
-        #     # Otherwise (pattern already attacked), make sure we don't exceed maximum allowed
-        #     return
-        #
-        # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
             if params_list is get_params and not self._mutate_get:
