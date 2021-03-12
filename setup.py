@@ -61,8 +61,6 @@ doc_and_conf_files = [
     )
 ]
 
-# parser_name = "html5lib"
-
 # Main
 setup(
     name="wapiti3",
@@ -131,7 +129,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=6.1.2", "responses==0.12.1"],
+    tests_require=["pytest>=6.2.2", "responses==0.12.1", "pytest-cov>=2.11.1"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )
