@@ -349,7 +349,7 @@ class Wapiti:
 
         print(_("This scan has been saved in the file {0}").format(self.persister.output_file))
         if stopped and self._start_urls:
-            print(_("The scan won't be resumed next time unless you pass the --resume-crawl option."))
+            print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
     def attack(self):
         """Launch the attacks based on the preferences set by the command line"""
@@ -523,9 +523,6 @@ class Wapiti:
         print(_("A report has been generated in the file {0}").format(self.output_file))
         if self.report_generator_type == "html":
             print(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
-        # if self.http_engine.sslErrorOccured:
-        #     print('')
-        #     print(_("Warning: Wapiti came across some SSL errors during the scan, it maybe missed some webpages."))
 
     def set_timeout(self, timeout: float = 6.0):
         """Set the timeout for the time waiting for a HTTP response"""

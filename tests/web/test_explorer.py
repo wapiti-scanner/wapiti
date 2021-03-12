@@ -126,3 +126,4 @@ def test_save_and_restore_state():
     # Load previous state
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
+    os.unlink(filename)
