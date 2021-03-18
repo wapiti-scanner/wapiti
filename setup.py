@@ -48,7 +48,7 @@ doc_and_conf_files = [
             "doc/xxe_module.md",
             "LICENSE",
             "INSTALL.md",
-            "README.md",
+            "README.rst",
             "VERSION"
         ]
     ),
