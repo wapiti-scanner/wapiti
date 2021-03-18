@@ -1,7 +1,11 @@
-FROM python:3.6
+FROM ubuntu:latest
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
-RUN apt-get install php7.3-cli php7.3-xml -y
+RUN apt-get install python3 python3-pip ca-certificates -y
+RUN apt-get install php7.4-cli php7.4-xml -y
+RUN python3 -c "import sys; print(sys.version)"
+RUN python3 -m pip install --upgrade pip
+RUN pip3 install -U setuptools
 RUN mkdir /usr/src/app
 
 ENV LANG en_US.UTF-8
@@ -12,4 +16,4 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-CMD ["python", "setup.py", "test", "-vv"]
+CMD ["python3", "setup.py", "test", "-vv"]
