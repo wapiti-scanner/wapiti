@@ -39,7 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install php7.4-cli php7.4-xml -y
+        sudo apt-get install php7.4-cli php7.4-xml -y --no-install-recommends
         python -m pip install --upgrade pip
         pip install -U setuptools
     - name: Test project

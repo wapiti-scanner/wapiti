@@ -524,6 +524,9 @@ class Explorer:
         self._pattern_counts = defaultdict(int)
         self._hostnames = set()
 
+        self._regexes = []
+        self._excluded_requests = []
+
     @property
     def max_depth(self) -> int:
         return self._max_depth
@@ -604,6 +607,91 @@ class Explorer:
         except FileNotFoundError:
             pass
 
+    def is_forbidden(self, candidate_url: str):
+        return any(regex.match(candidate_url) for regex in self._regexes)
+
+    def extract_links(self, page, request):
+        swf_links = []
+        js_links = []
+        allowed_links = []
+
+        if "application/x-shockwave-flash" in page.type or request.file_ext == "swf":
+            try:
+                swf_links = swf.extract_links_from_swf(page.raw)
+            except Exception:
+                pass
+        elif "/x-javascript" in page.type or "/x-js" in page.type or "/javascript" in page.type:
+            js_links = lamejs.LameJs(page.content).get_links()
+        elif page.type.startswith(MIME_TEXT_TYPES):
+            allowed_links.extend(filter(self._crawler.is_in_scope, page.links))
+            allowed_links.extend(filter(self._crawler.is_in_scope, page.js_redirections + page.html_redirections))
+
+            for extra_url in filter(self._crawler.is_in_scope, page.extra_urls):
+                parts = urlparse(extra_url)
+                # There are often css and js URLs with useless parameters like version or random number
+                # used to prevent caching in browser. So let's exclude those extensions
+                if parts.path.endswith(".css"):
+                    continue
+
+                if parts.path.endswith(".js") and parts.query:
+                    # For JS script, allow to process them but remove parameters
+                    allowed_links.append(extra_url.split("?")[0])
+                    continue
+
+                allowed_links.append(extra_url)
+
+            for form in page.iter_forms():
+                # TODO: apply bad_params filtering in form URLs
+                if self._crawler.is_in_scope(form):
+                    if form.hostname not in self._hostnames:
+                        form.link_depth = 0
+                    else:
+                        form.link_depth = request.link_depth + 1
+
+                    yield form
+
+        for url in swf_links + js_links:
+            if url:
+                url = page.make_absolute(url)
+                if url and self._crawler.is_in_scope(url):
+                    allowed_links.append(url)
+
+        for new_url in allowed_links:
+            if "?" in new_url:
+                path_only = new_url.split("?")[0]
+                if path_only not in allowed_links and self._crawler.is_in_scope(path_only):
+                    allowed_links.append(path_only)
+
+        for new_url in set(allowed_links):
+            if new_url == "":
+                continue
+
+            if self.is_forbidden(new_url):
+                continue
+
+            if "?" in new_url:
+                path, query_string = new_url.split("?", 1)
+                # TODO: encoding parameter ?
+                get_params = [
+                    list(t) for t in filter(
+                        lambda param_tuple: param_tuple[0] not in self._bad_params,
+                        web.parse_qsl(query_string)
+                    )
+                ]
+            elif new_url.endswith(EXCLUDED_MEDIA_EXTENSIONS):
+                # exclude static media files
+                continue
+            else:
+                path = new_url
+                get_params = []
+
+            if page.is_directory_redirection and new_url == page.redirection_url:
+                depth = request.link_depth
+            else:
+                depth = request.link_depth + 1
+
+            yield web.Request(path, get_params=get_params, link_depth=depth)
+
     def explore(
             self,
             to_explore: deque,
@@ -620,16 +708,6 @@ class Explorer:
         """
         invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
 
-        # Common params used for tracking or other stuff
-        self._bad_params.update(
-            [
-                "g-recaptcha-response"
-            ]
-        )
-
-        regexes = []
-        bad_requests_list = []
-
         if isinstance(excluded_urls, list):
             while True:
                 try:
@@ -638,12 +716,9 @@ class Explorer:
                     break
                 else:
                     if isinstance(bad_request, str):
-                        regexes.append(wildcard_translate(bad_request))
+                        self._regexes.append(wildcard_translate(bad_request))
                     elif isinstance(bad_request, web.Request):
-                        bad_requests_list.append(bad_request)
-
-        def is_forbidden(candidate_url):
-            return any(regex.match(candidate_url) for regex in regexes)
+                        self._excluded_requests.append(bad_request)
 
         self._crawler._session.stream = True
 
@@ -656,7 +731,7 @@ class Explorer:
                 # We treat start_urls as if they are all valid URLs (ie in scope)
                 request = web.Request(request, link_depth=0)
 
-            if request in bad_requests_list:
+            if request in self._excluded_requests:
                 continue
 
             resource_url = request.url
@@ -681,7 +756,7 @@ class Explorer:
                         # but I guess insane mode can do it as it is insane
                         continue
 
-            if is_forbidden(resource_url):
+            if self.is_forbidden(resource_url):
                 continue
 
             if self._log:
@@ -719,7 +794,7 @@ class Explorer:
             if self._qs_limit and request.parameters_count:
                 self._pattern_counts[request.pattern] += 1
 
-            excluded_urls.append(request)
+            self._excluded_requests.append(request)
 
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
@@ -735,102 +810,24 @@ class Explorer:
                 # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
                 continue
 
-            swf_links = []
-            js_links = []
-            allowed_links = []
-
-            if "application/x-shockwave-flash" in page.type or request.file_ext == "swf":
-                try:
-                    swf_links = swf.extract_links_from_swf(page.raw)
-                except Exception:
-                    pass
-            elif "/x-javascript" in page.type or "/x-js" in page.type or "/javascript" in page.type:
-                js_links = lamejs.LameJs(page.content).get_links()
-            elif page.type.startswith(MIME_TEXT_TYPES):
-                allowed_links.extend(filter(self._crawler.is_in_scope, page.links))
-                allowed_links.extend(filter(self._crawler.is_in_scope, page.js_redirections + page.html_redirections))
-
-                for extra_url in filter(self._crawler.is_in_scope, page.extra_urls):
-                    parts = urlparse(extra_url)
-                    # There are often css and js URLs with useless parameters like version or random number
-                    # used to prevent caching in browser. So let's exclude those extensions
-                    if parts.path.endswith(".css"):
-                        continue
-                    if parts.path.endswith(".js") and parts.query:
-                        # For JS script, allow to process them but remove parameters
-                        allowed_links.append(extra_url.split("?")[0])
-                        continue
-                    allowed_links.append(extra_url)
-
-                for form in page.iter_forms():
-                    # TODO: apply bad_params filtering in form URLs
-                    if self._crawler.is_in_scope(form):
-                        if form.hostname not in self._hostnames:
-                            form.link_depth = 0
-                        else:
-                            form.link_depth = request.link_depth + 1
-
-                        if form not in excluded_urls and form not in to_explore:
-                            to_explore.append(form)
-
-            for url in swf_links + js_links:
-                if url:
-                    url = page.make_absolute(url)
-                    if url and self._crawler.is_in_scope(url):
-                        allowed_links.append(url)
-
-            for new_url in allowed_links:
-                if "?" in new_url:
-                    path_only = new_url.split("?")[0]
-                    if path_only not in allowed_links and self._crawler.is_in_scope(path_only):
-                        allowed_links.append(path_only)
-
             accepted_urls = 0
-            for new_url in set(allowed_links):
-                if new_url == "":
-                    continue
-
-                if is_forbidden(new_url):
-                    continue
-
-                if "?" in new_url:
-                    path, query_string = new_url.split("?", 1)
-                    # TODO: encoding parameter ?
-                    get_params = [
-                        list(t) for t in filter(
-                            lambda param_tuple: param_tuple[0] not in self._bad_params,
-                            web.parse_qsl(query_string)
-                        )
-                    ]
-                elif new_url.endswith(EXCLUDED_MEDIA_EXTENSIONS):
-                    # exclude static media files
-                    continue
-                else:
-                    path = new_url
-                    get_params = []
-
-                if page.is_directory_redirection and new_url == page.redirection_url:
-                    depth = request.link_depth
-                else:
-                    depth = request.link_depth + 1
-
-                new_url = web.Request(path, get_params=get_params, link_depth=depth)
-
-                if BAD_URL_REGEX.search(new_url.file_path):
+            for unfiltered_request in self.extract_links(page, request):
+                if BAD_URL_REGEX.search(unfiltered_request.file_path):
                     # Malformed link due to HTML issues
                     continue
 
-                if not self._crawler.is_in_scope(new_url):
+                if not self._crawler.is_in_scope(unfiltered_request):
                     continue
 
-                if new_url.hostname not in self._hostnames:
-                    new_url.link_depth = 0
+                if unfiltered_request.hostname not in self._hostnames:
+                    unfiltered_request.link_depth = 0
 
-                if new_url not in excluded_urls and new_url not in to_explore:
-                    to_explore.append(new_url)
+                if unfiltered_request not in self._excluded_requests and unfiltered_request not in to_explore:
+                    to_explore.append(unfiltered_request)
                     accepted_urls += 1
 
-                if self._max_per_depth and accepted_urls >= self._max_per_depth:
-                    break
+                # TODO: fix this, it doesn't looks valid
+                # if self._max_per_depth and accepted_urls >= self._max_per_depth:
+                #     break
 
         self._crawler._session.stream = False
