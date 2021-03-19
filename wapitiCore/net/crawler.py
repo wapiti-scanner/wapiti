@@ -30,6 +30,8 @@ import math
 import functools
 from time import sleep
 from http import cookiejar
+import concurrent.futures
+from typing import Tuple, List
 
 # Third-parties
 import requests
@@ -610,10 +612,12 @@ class Explorer:
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)
 
-    def extract_links(self, page, request):
+    def extract_links(self, page, request) -> List:
         swf_links = []
         js_links = []
         allowed_links = []
+
+        new_requests = []
 
         if "application/x-shockwave-flash" in page.type or request.file_ext == "swf":
             try:
@@ -648,7 +652,7 @@ class Explorer:
                     else:
                         form.link_depth = request.link_depth + 1
 
-                    yield form
+                    new_requests.append(form)
 
         for url in swf_links + js_links:
             if url:
@@ -690,7 +694,68 @@ class Explorer:
             else:
                 depth = request.link_depth + 1
 
-            yield web.Request(path, get_params=get_params, link_depth=depth)
+            new_requests.append(web.Request(path, get_params=get_params, link_depth=depth))
+
+        return new_requests
+
+    def analyse(self, request) -> Tuple[bool, List]:
+        if self._log:
+            print("[+] {0}".format(request))
+
+        dir_name = request.dir_name
+        if dir_name not in self._custom_404_codes:
+            invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
+            invalid_resource = web.Request(dir_name + invalid_page)
+            try:
+                page = self._crawler.get(invalid_resource)
+                self._custom_404_codes[dir_name] = page.status
+            except RequestException:
+                pass
+
+        self._hostnames.add(request.hostname)
+
+        resource_url = request.url
+
+        try:
+            page = self._crawler.send(request)
+        except (TypeError, UnicodeDecodeError) as exception:
+            print("{} with url {}".format(exception, resource_url))  # debug
+            return False, []
+        except SSLError:
+            print(_("[!] SSL/TLS error occurred with URL"), resource_url)
+            return False, []
+        # TODO: what to do of connection errors ? sleep a while before retrying ?
+        except ConnectionError:
+            print(_("[!] Connection error with URL"), resource_url)
+            return False, []
+        except RequestException as error:
+            print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
+            return False, []
+
+        if self._max_files_per_dir:
+            self._file_counts[dir_name] += 1
+
+        if self._qs_limit and request.parameters_count:
+            self._pattern_counts[request.pattern] += 1
+
+        self._excluded_requests.append(request)  # thread safe
+
+        # Sur les ressources statiques le content-length est généralement indiqué
+        if self._max_page_size > 0:
+            if page.raw_size > self._max_page_size:
+                page.clean()
+                return False, []
+
+        if request.link_depth == self._max_depth:
+            # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
+            return True, []
+
+        resources = self.extract_links(page, request)
+        # TODO: there's more situations where we would not want to attack the resource... must check this
+        if page.is_directory_redirection:
+            return False, resources
+
+        return True, resources
 
     def explore(
             self,
@@ -706,8 +771,6 @@ class Explorer:
 
         @rtype: generator
         """
-        invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-
         if isinstance(excluded_urls, list):
             while True:
                 try:
@@ -725,109 +788,86 @@ class Explorer:
         if self._max_depth < 0:
             raise StopIteration
 
-        while to_explore:
-            request = to_explore.popleft()
-            if not isinstance(request, web.Request):
-                # We treat start_urls as if they are all valid URLs (ie in scope)
-                request = web.Request(request, link_depth=0)
+        future_to_url = {}
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            while True:
+                while to_explore:
+                    request = to_explore.popleft()
+                    if not isinstance(request, web.Request):
+                        # We treat start_urls as if they are all valid URLs (ie in scope)
+                        request = web.Request(request, link_depth=0)
 
-            if request in self._excluded_requests:
-                continue
-
-            resource_url = request.url
-
-            if request.link_depth > self._max_depth:
-                continue
-
-            dir_name = request.dir_name
-            if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
-                continue
-
-            # Won't enter if qs_limit is 0 (aka insane mode)
-            if self._qs_limit:
-                if request.parameters_count:
-                    try:
-                        if self._pattern_counts[
-                            request.pattern
-                        ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
-                            continue
-                    except OverflowError:
-                        # Oh boy... that's not good to try to attack a form with more than 600 input fields
-                        # but I guess insane mode can do it as it is insane
+                    if request in self._excluded_requests:
                         continue
 
-            if self.is_forbidden(resource_url):
-                continue
+                    resource_url = request.url
 
-            if self._log:
-                print("[+] {0}".format(request))
+                    if request.link_depth > self._max_depth:
+                        continue
 
-            if dir_name not in self._custom_404_codes:
-                invalid_resource = web.Request(dir_name + invalid_page)
-                try:
-                    page = self._crawler.get(invalid_resource)
-                    self._custom_404_codes[dir_name] = page.status
-                except RequestException:
-                    pass
+                    dir_name = request.dir_name
+                    if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
+                        continue
 
-            self._hostnames.add(request.hostname)
+                    # Won't enter if qs_limit is 0 (aka insane mode)
+                    if self._qs_limit:
+                        if request.parameters_count:
+                            try:
+                                if self._pattern_counts[
+                                    request.pattern
+                                ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
+                                    continue
+                            except OverflowError:
+                                # Oh boy... that's not good to try to attack a form with more than 600 input fields
+                                # but I guess insane mode can do it as it is insane
+                                continue
 
-            try:
-                page = self._crawler.send(request)
-            except (TypeError, UnicodeDecodeError) as exception:
-                print("{} with url {}".format(exception, resource_url))  # debug
-                continue
-            except SSLError:
-                print(_("[!] SSL/TLS error occurred with URL"), resource_url)
-                continue
-            # TODO: what to do of connection errors ? sleep a while before retrying ?
-            except ConnectionError:
-                print(_("[!] Connection error with URL"), resource_url)
-                continue
-            except RequestException as error:
-                print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
-                continue
+                    if self.is_forbidden(resource_url):
+                        continue
 
-            if self._max_files_per_dir:
-                self._file_counts[dir_name] += 1
+                    future_to_url[executor.submit(self.analyse, request)] = request
 
-            if self._qs_limit and request.parameters_count:
-                self._pattern_counts[request.pattern] += 1
+                done, not_done = concurrent.futures.wait(
+                    future_to_url,
+                    timeout=0.25,
+                    return_when=concurrent.futures.FIRST_COMPLETED
+                )
 
-            self._excluded_requests.append(request)
+                # process any completed futures
+                for future in done:
+                    request = future_to_url[future]
+                    try:
+                        success, resources = future.result()
+                    except Exception as exc:
+                        print('%r generated an exception: %s' % (request, exc))
+                    else:
+                        if success:
+                            yield request
 
-            # Sur les ressources statiques le content-length est généralement indiqué
-            if self._max_page_size > 0:
-                if page.raw_size > self._max_page_size:
-                    page.clean()
-                    continue
+                        accepted_urls = 0
+                        for unfiltered_request in resources:
+                            if BAD_URL_REGEX.search(unfiltered_request.file_path):
+                                # Malformed link due to HTML issues
+                                continue
 
-            # TODO: there's more situations where we would not want to attack the resource... must check this
-            if not page.is_directory_redirection:
-                yield request
+                            if not self._crawler.is_in_scope(unfiltered_request):
+                                continue
 
-            if request.link_depth == self._max_depth:
-                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-                continue
+                            if unfiltered_request.hostname not in self._hostnames:
+                                unfiltered_request.link_depth = 0
 
-            accepted_urls = 0
-            for unfiltered_request in self.extract_links(page, request):
-                if BAD_URL_REGEX.search(unfiltered_request.file_path):
-                    # Malformed link due to HTML issues
-                    continue
+                            if unfiltered_request not in self._excluded_requests and unfiltered_request not in to_explore:
+                                to_explore.append(unfiltered_request)
+                                accepted_urls += 1
 
-                if not self._crawler.is_in_scope(unfiltered_request):
-                    continue
+                            # TODO: fix this, it doesn't looks valid
+                            # if self._max_per_depth and accepted_urls >= self._max_per_depth:
+                            #     break
 
-                if unfiltered_request.hostname not in self._hostnames:
-                    unfiltered_request.link_depth = 0
+                    # remove the now completed future
+                    del future_to_url[future]
 
-                if unfiltered_request not in self._excluded_requests and unfiltered_request not in to_explore:
-                    to_explore.append(unfiltered_request)
-                    accepted_urls += 1
-
-                # TODO: fix this, it doesn't looks valid
-                # if self._max_per_depth and accepted_urls >= self._max_per_depth:
-                #     break
+                if not future_to_url and not to_explore:
+                    break
 
         self._crawler._session.stream = False
