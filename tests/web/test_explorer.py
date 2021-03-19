@@ -127,3 +127,33 @@ def test_save_and_restore_state():
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
     os.unlink(filename)
+
+
+@responses.activate
+def test_explorer_extract_links():
+    crawler = Crawler("http://perdu.com/")
+    explorer = Explorer(crawler)
+    responses.add(
+        responses.GET,
+        "http://perdu.com/",
+        body="""<html><body>
+        <a href="http://perdu.com/index.html"></a>
+        <a href="https://perdu.com/secure_index.html"></a>
+        <a href="//perdu.com/protocol_relative.html"></a>
+        <a href="//lol.com/protocol_relative.html"></a>
+        <a href="http://perdu.com:8000/other_port.html"></a>
+        <a href="http://microsoft.com/other_domain.html"></a>
+        <a href="welcome.html"></a>
+        <a href="/about.html"></a>
+        <form method="POST" action="http://perdu.com/valid_form.html">
+        <input name="field" type="hidden" value="hello"/></form>
+        <form method="POST" action="http://external.com/external_form.html">
+        <input name="field" type="hidden" value="hello"/></form>
+        """
+    )
+
+    request = Request("http://perdu.com/")
+    page = crawler.send(request)
+    results = list(explorer.extract_links(page, request))
+    # We should get 6 resources as the âth from the form will also be used as url
+    assert len(results) == 6
