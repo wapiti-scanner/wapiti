@@ -488,6 +488,9 @@ msgstr "Fingerprint web technology"
 msgid "Fingerprint web server"
 msgstr "Fingerprint web server"
 
+msgid "Fingerprint web application framework"
+msgstr "Fingerprint web application framework"
+
 msgid ""
 "The use of a web technology can be deducted due to the presence of its "
 "specific fingerprints."
@@ -501,6 +504,13 @@ msgid ""
 msgstr ""
 "The version of a web server can be identified due to the presence of its "
 "specific fingerprints."
+
+msgid ""
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
+msgstr ""
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
 
 msgid "This is only for informational purposes."
 msgstr "This is only for informational purposes."
