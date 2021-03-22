@@ -34,6 +34,7 @@ from hashlib import sha256
 from random import choice
 import codecs
 from inspect import getdoc
+import asyncio
 
 import browser_cookie3
 import requests
@@ -303,7 +304,7 @@ class Wapiti:
                 mod_instance.update()
         print(_("Update done."))
 
-    def browse(self):
+    async def browse(self):
         """Extract hyperlinks and forms from the webpages found on the website"""
         for resource in self.persister.get_to_browse():
             self._start_urls.append(resource)
@@ -327,7 +328,7 @@ class Wapiti:
         start = datetime.utcnow()
 
         try:
-            for resource in explorer.explore(self._start_urls, self._excluded_urls):
+            async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
                 # Browsed URLs are saved one at a time
                 self.persister.add_request(resource)
                 if (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
@@ -1239,7 +1240,7 @@ def wapiti_main():
 
                 if "auth_type" in args and args.auth_type == "post":
                     wap.crawler.try_login(wap.crawler.auth_url)
-                wap.browse()
+                asyncio.run(wap.browse())
 
         if args.max_parameters:
             count = wap.persister.remove_big_requests(args.max_parameters)
