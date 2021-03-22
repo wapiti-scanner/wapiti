@@ -19,7 +19,7 @@ class FakePersister:
         self.requests = []
         self.additionals = []
         self.anomalies = set()
-        self.vulnerabilities = set()
+        self.vulnerabilities = []
 
     def get_links(self, _path, _attack_module):
         return self.requests
@@ -31,7 +31,7 @@ class FakePersister:
         self.anomalies.add(parameter)
 
     def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.add(parameter)
+        self.vulnerabilities.append((info, category))
 
     def get_root_url(self):
         return self.requests[0].url
@@ -123,7 +123,8 @@ def test_html_detection():
     module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+    assert persister.additionals[0] == \
+        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
 
 
 @responses.activate
@@ -154,7 +155,8 @@ def test_script_detection():
     module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+    assert persister.additionals[0] == \
+        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
 
 
 @responses.activate
@@ -313,5 +315,40 @@ def test_implies_detection():
     module.attack(request)
 
     assert persister.additionals
-    assert '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}' == persister.additionals[0]
-    assert '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}' == persister.additionals[1]
+    assert persister.additionals[0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    assert persister.additionals[1] == '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
+
+
+@responses.activate
+def test_vulnerabilities():
+    # Test for vulnerabilties detected
+    responses.add(
+        responses.GET,
+        url="http://perdu.com/",
+        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+        <h2>Pas de panique, on va vous aider</h2> \
+        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+        </body></html>",
+        headers={"X-Generator": "Backdrop CMS 4.5", "Server": "Cherokee/1.3.4"}
+    )
+
+    persister = FakePersister()
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler = Crawler("http://perdu.com")
+    options = {"timeout": 10, "level": 2}
+    logger = Mock()
+
+    module = mod_wapp(crawler, persister, logger, options)
+    module.verbose = 2
+
+    module.attack(request)
+
+    assert persister.vulnerabilities
+    assert persister.vulnerabilities[0][0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    assert persister.vulnerabilities[0][1] == 'Fingerprint web application framework'
+    assert persister.vulnerabilities[1][0] == \
+        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+    assert persister.vulnerabilities[1][1] == 'Fingerprint web server'

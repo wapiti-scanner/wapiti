@@ -25,6 +25,7 @@ from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, Applic
 from wapitiCore.language.vulnerability import LOW_LEVEL, INFO_LEVEL, _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED
+from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -106,7 +107,7 @@ class mod_wapp(Attack):
             self.log_blue("---")
 
         for application_name in sorted(detected_applications, key=lambda x: x.lower()):
-            
+
             versions = detected_applications[application_name]["versions"]
             categories = detected_applications[application_name]["categories"]
 
@@ -122,10 +123,18 @@ class mod_wapp(Attack):
                 info=json.dumps(detected_applications[application_name])
             )
 
-            if versions and "Web servers" in categories:
-                self.add_vuln(
-                    category=WEB_SERVER_VERSIONED,
-                    level=INFO_LEVEL,
-                    request=request,
-                    info=json.dumps(detected_applications[application_name])
-                )
+            if versions:
+                if "Web servers" in categories:
+                    self.add_vuln(
+                        category=WEB_SERVER_VERSIONED,
+                        level=INFO_LEVEL,
+                        request=request_to_root,
+                        info=json.dumps(detected_applications[application_name])
+                    )
+                else:
+                    self.add_vuln(
+                        category=WEB_APP_VERSIONED,
+                        level=INFO_LEVEL,
+                        request=request_to_root,
+                        info=json.dumps(detected_applications[application_name])
+                    )
