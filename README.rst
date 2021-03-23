@@ -1,5 +1,6 @@
-WAPITI
-======
+=========================================
+Wapiti - Web Application Security Auditor
+=========================================
 
 .. image:: https://img.shields.io/pypi/v/wapiti3?label=PyPI&logo=PyPI&logoColor=white&color=blue
     :target: https://pypi.python.org/pypi/wapiti3
@@ -189,3 +190,5 @@ Licensing
 
 Wapiti is released under the GNU General Public License version 2 (the GPL).
 Source code is available on `Github <https://github.com/wapiti-scanner/wapiti>`__.
+
+Created by Nicolas SURRIBAS. Sponsored by Cyberwatch https://cyberwatch.fr.
