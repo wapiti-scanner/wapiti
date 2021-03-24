@@ -92,7 +92,7 @@ class mod_wp_enum(Attack):
                     version = version.group(1)
                 else :
                     #print ("Readme.txt is not in a valid format")
-                    version = [""]
+                    version = ""
                 theme_detected = {
                     "name": theme,
                     "versions": [version],
@@ -143,14 +143,14 @@ class mod_wp_enum(Attack):
     def attack(self, request: Request):
 
         self.finished = True
-        url = self.persister.get_root_url()
-        request = Request(url)
-        response = self.crawler.get(request, follow_redirects=True)
+        request_to_root = Request(request.url)
+
+        response = self.crawler.send(request_to_root, follow_redirects=True)
         if self.check_wordpress(response):
             self.log_blue(_("Enumeration of WordPress Plugins :"))
-            self.detect_plugin(url)
+            self.detect_plugin(request_to_root.url)
             self.log_blue("----")
             self.log_blue(_("Enumeration of WordPress Themes :"))
-            self.detect_theme(url)
+            self.detect_theme(request_to_root.url)
         else:
             self.log_blue(MSG_NO_WP)
