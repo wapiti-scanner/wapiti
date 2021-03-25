@@ -103,7 +103,8 @@ class SqlitePersister:
                      http_status INTEGER,
                      headers TEXT,
                      referer TEXT,
-                     evil INTEGER
+                     evil INTEGER,
+                     UNIQUE(path, method)
                 )"""
             )
 
@@ -162,7 +163,7 @@ class SqlitePersister:
         cursor = self._conn.cursor()
         for http_resource in paths:
             cursor.execute(
-                """INSERT INTO paths VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT OR IGNORE INTO paths VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """,
                 (
                     None,
                     http_resource.path,
@@ -177,6 +178,9 @@ class SqlitePersister:
                 )
             )
             path_id = cursor.lastrowid
+            if path_id == 0:
+                ValueError("Url is already stored. Skipping...")
+
             for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",

@@ -1,0 +1,4 @@
+#!"/home/marquez/Desktop/Untitled Folder/wapiti/wapiti3/bin/python"
+# EASY-INSTALL-SCRIPT: 'yaswfp==0.9.3','swfparser'
+__requires__ = 'yaswfp==0.9.3'
+__import__('pkg_resources').run_script('yaswfp==0.9.3', 'swfparser')
