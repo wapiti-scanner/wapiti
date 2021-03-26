@@ -44,6 +44,7 @@ from wapitiCore.language.language import _
 from wapitiCore.net import web
 from wapitiCore.net import swf
 from wapitiCore.net import lamejs
+from wapitiCore.net import jsparser_angular
 from wapitiCore.net.page import Page
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
@@ -695,6 +696,8 @@ class Explorer:
                 pass
         elif "/x-javascript" in page.type or "/x-js" in page.type or "/javascript" in page.type:
             js_links = lamejs.LameJs(page.content).get_links()
+            js_links += jsparser_angular.JsParserAngular(page.url, page.content).get_links()
+
         elif page.type.startswith(MIME_TEXT_TYPES):
             allowed_links.extend(filter(self._crawler.is_in_scope, page.links))
             allowed_links.extend(filter(self._crawler.is_in_scope, page.js_redirections + page.html_redirections))

@@ -157,3 +157,55 @@ async def test_explorer_extract_links():
     # We should get 6 resources as the âth from the form will also be used as url
     assert len(results) == 6
     await crawler.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_explorer_extract_links_from_js():
+    crawler = AsyncCrawler("http://perdu.com/")
+    explorer = Explorer(crawler, Event())
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="""Hello there!
+        <a href="http://perdu.com/index.html"></a>
+        <script src="main-es5.1211ab72babef8.js"></script>
+        """
+        )
+    )
+
+    respx.get("http://perdu.com/main-es5.1211ab72babef8.js").mock(
+        return_value=httpx.Response(
+            200,
+            text="""
+            AytR: function (e, t, n) {
+                'use strict';n.d(t, 'a', (function () {return r}));
+                const r = {
+                    web: "http://perdu.com/",
+                    host: "http://host.perdu.com/",
+                    api: "http://perdu.com/api",
+                }
+            };
+            const Ke = [{path: "/admin",submenu: [{path: "/admin/profile",submenu: []},{path: "/admin/users/add",submenu: []}]}],
+            Ye = [{path: "/dashboard",submenu: [{path: "/dashboard/results",submenu: []},{path: "/dashboard/result.json",submenu: []}]}];
+            router.navigate(["secret", "path"]); router.createUrlTree(["this", "is", "my" + "_path"]);
+            router.navigateByUrl(this.url + "/api/admin"); router.parseUrl(this.url + "/test");
+            """,
+            headers={"content-type": "application/javascript"}
+        )
+    )
+
+    request = Request("http://perdu.com/")
+    page = await crawler.async_send(request)
+    results = list(explorer.extract_links(page, request))
+    assert len(results) == 2
+
+    request = Request("http://perdu.com/main-es5.1211ab72babef8.js")
+    page = await crawler.async_send(request)
+
+    results = list(explorer.extract_links(page, request))
+    # http://host.perdu.com is out of scope since by default scope is folder
+    assert len(results) == 12
+    assert Request("http://perdu.com/secret/path", "GET", link_depth=1) in results
+    await crawler.close()

@@ -117,7 +117,8 @@ if a script is vulnerable.""",
         "six>=1.15.0",
         "importlib_metadata==3.7.2",
         "browser-cookie3==0.11.4",
-        "cryptography==3.3.2"
+        "cryptography==3.3.2",
+        "brotli>=1.0.9"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
