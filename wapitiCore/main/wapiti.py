@@ -35,6 +35,7 @@ from random import choice
 import codecs
 from inspect import getdoc
 import asyncio
+import signal
 
 import browser_cookie3
 import requests
@@ -80,6 +81,14 @@ class InvalidOptionValue(Exception):
 
     def __str__(self):
         return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
+
+
+stop_event = asyncio.Event()
+
+
+def inner_ctrl_c_signal_handler(sig, frame):  # pylint: disable=unused-argument
+    print(_("Processing current HTTP requests, please wait."))
+    stop_event.set()
 
 
 class Wapiti:
@@ -304,8 +313,7 @@ class Wapiti:
                 mod_instance.update()
         print(_("Update done."))
 
-    async def browse(self):
-        """Extract hyperlinks and forms from the webpages found on the website"""
+    def load_scan_state(self):
         for resource in self.persister.get_to_browse():
             self._start_urls.append(resource)
         for resource in self.persister.get_links():
@@ -313,9 +321,24 @@ class Wapiti:
         for resource in self.persister.get_forms():
             self._excluded_urls.append(resource)
 
-        stopped = False
+        self.persister.set_root_url(self.target_url)
 
-        explorer = crawler.Explorer(self.crawler)
+    def save_scan_state(self):
+        print(_("[*] Saving scan state, please wait..."))
+        # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
+        self.persister.set_to_browse(self._start_urls)
+
+        print('')
+        print(_(" Note"))
+        print("========")
+
+        print(_("This scan has been saved in the file {0}").format(self.persister.output_file))
+        # if stopped and self._start_urls:
+        #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
+
+    async def browse(self, stop_event, parallelism: int = 8):
+        """Extract hyperlinks and forms from the webpages found on the website"""
+        explorer = crawler.Explorer(self.crawler, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
         explorer.max_requests_per_depth = self._max_links_per_page
@@ -324,33 +347,17 @@ class Wapiti:
         explorer.verbose = (self.verbose > 0)
         explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
 
-        self.persister.set_root_url(self.target_url)
         start = datetime.utcnow()
 
-        try:
-            async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
-                # Browsed URLs are saved one at a time
-                self.persister.add_request(resource)
-                if (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
-                    print(_("Max scan time was reached, stopping."))
-                    break
-        except KeyboardInterrupt:
-            stopped = True
+        async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
+            # Browsed URLs are saved one at a time
+            self.persister.add_request(resource)
+            if (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
+                print(_("Max scan time was reached, stopping."))
+                break
 
-        print(_("[*] Saving scan state, please wait..."))
-
-        # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
-        self.persister.set_to_browse(self._start_urls)
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
-
-        print('')
-        print(_(" Note"))
-        print("========")
-
-        print(_("This scan has been saved in the file {0}").format(self.persister.output_file))
-        if stopped and self._start_urls:
-            print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
     def attack(self):
         """Launch the attacks based on the preferences set by the command line"""
@@ -961,6 +968,13 @@ def wapiti_main():
     )
 
     parser.add_argument(
+        "--threads",
+        metavar="THREADS",
+        help=_("Number of concurrent tasks to use for the exploration of the target."),
+        type=int, default=8
+    )
+
+    parser.add_argument(
         "-t", "--timeout",
         type=float, default=6.0,
         help=_("Set timeout for requests"),
@@ -1059,6 +1073,10 @@ def wapiti_main():
     )
 
     args = parser.parse_args()
+
+    if args.threads < 1:
+        print(_("Number of threads must be 1 or above!"))
+        sys.exit(2)
 
     if args.scope == "punk":
         print(_("[*] Do you feel lucky punk?"))
@@ -1240,7 +1258,14 @@ def wapiti_main():
 
                 if "auth_type" in args and args.auth_type == "post":
                     wap.crawler.try_login(wap.crawler.auth_url)
-                asyncio.run(wap.browse())
+
+                wap.load_scan_state()
+                original_sigint_handler = signal.getsignal(signal.SIGINT)
+                signal.signal(signal.SIGINT, inner_ctrl_c_signal_handler)
+                asyncio.run(wap.browse(stop_event, parallelism=args.threads))
+                # Restore Python builtin signal handler for KeyboardInterrupt to work
+                signal.signal(signal.SIGINT, original_sigint_handler)
+                wap.save_scan_state()
 
         if args.max_parameters:
             count = wap.persister.remove_big_requests(args.max_parameters)
