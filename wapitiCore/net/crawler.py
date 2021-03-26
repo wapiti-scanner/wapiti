@@ -663,7 +663,7 @@ class Crawler:
 
 
 class Explorer:
-    def __init__(self, crawler_instance: Crawler):
+    def __init__(self, crawler_instance: Crawler, stop_event: asyncio.Event, parallelism: int = 8):
         self._crawler = crawler_instance
         self._max_depth = 20
         self._max_page_size = MAX_PAGE_SIZE
@@ -678,7 +678,10 @@ class Explorer:
         self._hostnames = set()
 
         self._regexes = []
-        self._excluded_requests = []
+        self._processed_requests = []
+        self._sem = asyncio.Semaphore(parallelism)
+        self._stopped = stop_event
+        self._max_taks = parallelism + round(parallelism / 2)  # To make sure a task will always have work available
 
     @property
     def max_depth(self) -> int:
@@ -849,213 +852,65 @@ class Explorer:
 
         return new_requests
 
-    def analyze(self, request) -> Tuple[bool, List]:
-        if self._log:
-            print("[+] {0}".format(request))
-
-        dir_name = request.dir_name
-        if dir_name not in self._custom_404_codes:
-            invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-            invalid_resource = web.Request(dir_name + invalid_page)
-            try:
-                page = self._crawler.get(invalid_resource)
-                self._custom_404_codes[dir_name] = page.status
-            except RequestException:
-                pass
-
-        self._hostnames.add(request.hostname)
-
-        resource_url = request.url
-
-        try:
-            page = self._crawler.send(request)
-        except (TypeError, UnicodeDecodeError) as exception:
-            print("{} with url {}".format(exception, resource_url))  # debug
-            return False, []
-        except SSLError:
-            print(_("[!] SSL/TLS error occurred with URL"), resource_url)
-            return False, []
-        # TODO: what to do of connection errors ? sleep a while before retrying ?
-        except ConnectionError:
-            print(_("[!] Connection error with URL"), resource_url)
-            return False, []
-        except RequestException as error:
-            print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
-            return False, []
-
-        if self._max_files_per_dir:
-            self._file_counts[dir_name] += 1
-
-        if self._qs_limit and request.parameters_count:
-            self._pattern_counts[request.pattern] += 1
-
-        self._excluded_requests.append(request)  # thread safe
-
-        # Sur les ressources statiques le content-length est généralement indiqué
-        if self._max_page_size > 0:
-            if page.raw_size > self._max_page_size:
-                page.clean()
-                return False, []
-
-        if request.link_depth == self._max_depth:
-            # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-            return True, []
-
-        resources = self.extract_links(page, request)
-        # TODO: there's more situations where we would not want to attack the resource... must check this
-        if page.is_directory_redirection:
-            return False, resources
-
-        return True, resources
-
     async def async_analyze(self, request) -> Tuple[bool, List]:
-        if self._log:
-            print("[+] {0}".format(request))
+        async with self._sem:
+            self._processed_requests.append(request)  # thread safe
 
-        dir_name = request.dir_name
-        if dir_name not in self._custom_404_codes:
-            invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-            invalid_resource = web.Request(dir_name + invalid_page)
-            try:
-                page = await self._crawler.async_get(invalid_resource)
-                self._custom_404_codes[dir_name] = page.status
-            except RequestException:
-                pass
+            if self._log:
+                print("[+] {0}".format(request))
 
-        self._hostnames.add(request.hostname)
-
-        resource_url = request.url
-
-        try:
-            page = await self._crawler.async_send(request)
-        except (TypeError, UnicodeDecodeError) as exception:
-            print("{} with url {}".format(exception, resource_url))  # debug
-            return False, []
-        except SSLError:
-            print(_("[!] SSL/TLS error occurred with URL"), resource_url)
-            return False, []
-        # TODO: what to do of connection errors ? sleep a while before retrying ?
-        except ConnectionError:
-            print(_("[!] Connection error with URL"), resource_url)
-            return False, []
-        except RequestException as error:
-            print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
-            return False, []
-
-        if self._max_files_per_dir:
-            self._file_counts[dir_name] += 1
-
-        if self._qs_limit and request.parameters_count:
-            self._pattern_counts[request.pattern] += 1
-
-        self._excluded_requests.append(request)  # thread safe
-
-        # Sur les ressources statiques le content-length est généralement indiqué
-        if self._max_page_size > 0:
-            if page.raw_size > self._max_page_size:
-                page.clean()
-                return False, []
-
-        if request.link_depth == self._max_depth:
-            # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-            return True, []
-
-        resources = self.extract_links(page, request)
-        # TODO: there's more situations where we would not want to attack the resource... must check this
-        if page.is_directory_redirection:
-            return False, resources
-
-        return True, resources
-
-    def explore(
-            self,
-            to_explore: deque,
-            excluded_urls: list = None
-    ):
-        """Explore a single TLD or the whole Web starting with an URL
-
-        @param to_explore: A list of URL to scan the scan with.
-        @type to_explore: list
-        @param excluded_urls: A list of URLs to skip. Request objects or strings which may contain wildcards.
-        @type excluded_urls: list
-
-        @rtype: generator
-        """
-        invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-
-        if isinstance(excluded_urls, list):
-            while True:
+            dir_name = request.dir_name
+            if dir_name not in self._custom_404_codes:
+                invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
+                invalid_resource = web.Request(dir_name + invalid_page)
                 try:
-                    bad_request = excluded_urls.pop()
-                except IndexError:
-                    break
-                else:
-                    if isinstance(bad_request, str):
-                        self._regexes.append(wildcard_translate(bad_request))
-                    elif isinstance(bad_request, web.Request):
-                        self._excluded_requests.append(bad_request)
+                    page = await self._crawler.async_get(invalid_resource)
+                    self._custom_404_codes[dir_name] = page.status
+                except RequestException:
+                    pass
 
-        self._crawler._session.stream = True
-
-        if self._max_depth < 0:
-            raise StopIteration
-
-        while to_explore:
-            request = to_explore.popleft()
-            if not isinstance(request, web.Request):
-                # We treat start_urls as if they are all valid URLs (ie in scope)
-                request = web.Request(request, link_depth=0)
-
-            if request in self._excluded_requests:
-                continue
+            self._hostnames.add(request.hostname)
 
             resource_url = request.url
 
-            if request.link_depth > self._max_depth:
-                continue
+            try:
+                page = await self._crawler.async_send(request)
+            except (TypeError, UnicodeDecodeError) as exception:
+                print("{} with url {}".format(exception, resource_url))  # debug
+                return False, []
+            except SSLError:
+                print(_("[!] SSL/TLS error occurred with URL"), resource_url)
+                return False, []
+            # TODO: what to do of connection errors ? sleep a while before retrying ?
+            except ConnectionError:
+                print(_("[!] Connection error with URL"), resource_url)
+                return False, []
+            except RequestException as error:
+                print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
+                return False, []
 
-            dir_name = request.dir_name
-            if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
-                continue
+            if self._max_files_per_dir:
+                self._file_counts[dir_name] += 1
 
-            # Won't enter if qs_limit is 0 (aka insane mode)
-            if self._qs_limit:
-                if request.parameters_count:
-                    try:
-                        if self._pattern_counts[
-                            request.pattern
-                        ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
-                            continue
-                    except OverflowError:
-                        # Oh boy... that's not good to try to attack a form with more than 600 input fields
-                        # but I guess insane mode can do it as it is insane
-                        continue
+            if self._qs_limit and request.parameters_count:
+                self._pattern_counts[request.pattern] += 1
 
-            if self.is_forbidden(resource_url):
-                continue
+            # Sur les ressources statiques le content-length est généralement indiqué
+            if self._max_page_size > 0:
+                if page.raw_size > self._max_page_size:
+                    page.clean()
+                    return False, []
 
-            success, resources = self.analyze(request)
-            accepted_urls = 0
-            for unfiltered_request in resources:
-                if BAD_URL_REGEX.search(unfiltered_request.file_path):
-                    # Malformed link due to HTML issues
-                    continue
+            if request.link_depth == self._max_depth:
+                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
+                return True, []
 
-                if not self._crawler.is_in_scope(unfiltered_request):
-                    continue
+            resources = self.extract_links(page, request)
+            # TODO: there's more situations where we would not want to attack the resource... must check this
+            if page.is_directory_redirection:
+                return False, resources
 
-                if unfiltered_request.hostname not in self._hostnames:
-                    unfiltered_request.link_depth = 0
-
-                if unfiltered_request not in self._excluded_requests and unfiltered_request not in to_explore:
-                    to_explore.append(unfiltered_request)
-                    accepted_urls += 1
-
-                # TODO: fix this, it doesn't looks valid
-                # if self._max_per_depth and accepted_urls >= self._max_per_depth:
-                #     break
-
-        self._crawler._session.stream = False
+            return True, resources
 
     async def async_explore(
             self,
@@ -1081,7 +936,7 @@ class Explorer:
                     if isinstance(bad_request, str):
                         self._regexes.append(wildcard_translate(bad_request))
                     elif isinstance(bad_request, web.Request):
-                        self._excluded_requests.append(bad_request)
+                        self._processed_requests.append(bad_request)
 
         self._crawler._session.stream = True
 
@@ -1091,12 +946,22 @@ class Explorer:
         task_to_request = {}
         while True:
             while to_explore:
+                # Concurrent tasks are limited through the use of the semaphore BUT we don't want the to_explore
+                # queue to be empty everytime (as we may need to extract remainign URLs) and overload the event loop
+                # with pending tasks.
+                # There may be more suitable way to do this though.
+                if len(task_to_request) > self._max_taks:
+                    break
+
+                if self._stopped.is_set():
+                    break
+
                 request = to_explore.popleft()
                 if not isinstance(request, web.Request):
                     # We treat start_urls as if they are all valid URLs (ie in scope)
                     request = web.Request(request, link_depth=0)
 
-                if request in self._excluded_requests:
+                if request in self._processed_requests:
                     continue
 
                 resource_url = request.url
@@ -1156,7 +1021,7 @@ class Explorer:
                         if unfiltered_request.hostname not in self._hostnames:
                             unfiltered_request.link_depth = 0
 
-                        if unfiltered_request not in self._excluded_requests and unfiltered_request not in to_explore:
+                        if unfiltered_request not in self._processed_requests and unfiltered_request not in to_explore:
                             to_explore.append(unfiltered_request)
                             accepted_urls += 1
 
@@ -1167,7 +1032,7 @@ class Explorer:
                 # remove the now completed task
                 del task_to_request[task]
 
-            if not task_to_request and not to_explore:
+            if not task_to_request and (self._stopped.is_set() or not to_explore):
                 break
 
         self._crawler._session.stream = False
