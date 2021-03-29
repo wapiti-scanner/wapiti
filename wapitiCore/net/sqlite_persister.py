@@ -161,6 +161,19 @@ class SqlitePersister:
     def _set_paths(self, paths):
         cursor = self._conn.cursor()
         for http_resource in paths:
+            if http_resource.path_id:
+                # Request was already saved but not fetched, just update to set HTTP code and headers
+                cursor.execute(
+                    """UPDATE paths SET http_status = ?, headers = ? WHERE path_id = ?""",
+                    (
+                        http_resource.status if isinstance(http_resource.status, int) else None,
+                        None if http_resource.headers is None else json.dumps(dict(http_resource.headers)),
+                        http_resource.path_id
+                    )
+                )
+                continue
+
+            # Save the request along with its parameters
             cursor.execute(
                 """INSERT INTO paths VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
@@ -177,6 +190,7 @@ class SqlitePersister:
                 )
             )
             path_id = cursor.lastrowid
+
             for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
@@ -207,7 +221,9 @@ class SqlitePersister:
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (path_id, "FILE", i, file_param_key, file_param_value[0], file_param_value[1], meta)
                 )
+
         self._conn.commit()
+        cursor.close()
 
     def add_request(self, link):
         self._set_paths([link])
@@ -304,8 +320,8 @@ class SqlitePersister:
     def get_links(self, path=None, attack_module: str = ""):
         yield from self._get_paths(path=path, method="GET", crawled=True, attack_module=attack_module)
 
-    def get_forms(self, attack_module: str = ""):
-        yield from self._get_paths(method="POST", crawled=True, attack_module=attack_module)
+    def get_forms(self, path=None, attack_module: str = ""):
+        yield from self._get_paths(path=path, method="POST", crawled=True, attack_module=attack_module)
 
     def count_paths(self) -> int:
         cursor = self._conn.cursor()
