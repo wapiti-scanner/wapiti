@@ -38,6 +38,7 @@ modules = [
     "mod_http_headers",
     "mod_csrf",
     "mod_cookieflags",
+    "mod_drupal_enum",
     "mod_exec",
     "mod_file",
     "mod_sql",
