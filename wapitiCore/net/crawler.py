@@ -32,6 +32,7 @@ from time import sleep
 from http import cookiejar
 from typing import Tuple, List
 import asyncio
+from os import cpu_count
 
 # Third-parties
 import requests
@@ -681,7 +682,9 @@ class Explorer:
         self._processed_requests = []
         self._sem = asyncio.Semaphore(parallelism)
         self._stopped = stop_event
-        self._max_taks = parallelism + round(parallelism / 2)  # To make sure a task will always have work available
+        # CPU count + 4 is default concurrent tasks for CPython ThreadPoolExecutor with a high limit set at 32
+        self._max_tasks = min(parallelism, 32, (cpu_count() or 1) + 4)
+        self._max_tasks += round(self._max_tasks / 2)
 
     @property
     def max_depth(self) -> int:
@@ -947,10 +950,10 @@ class Explorer:
         while True:
             while to_explore:
                 # Concurrent tasks are limited through the use of the semaphore BUT we don't want the to_explore
-                # queue to be empty everytime (as we may need to extract remainign URLs) and overload the event loop
+                # queue to be empty everytime (as we may need to extract remaining URLs) and overload the event loop
                 # with pending tasks.
                 # There may be more suitable way to do this though.
-                if len(task_to_request) > self._max_taks:
+                if len(task_to_request) > self._max_tasks:
                     break
 
                 if self._stopped.is_set():
