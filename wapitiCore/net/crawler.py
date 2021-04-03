@@ -682,6 +682,7 @@ class Explorer:
         self._processed_requests = []
         self._sem = asyncio.Semaphore(parallelism)
         self._stopped = stop_event
+        self._shared_lock = asyncio.Lock()
         # CPU count + 4 is default concurrent tasks for CPython ThreadPoolExecutor with a high limit set at 32
         self._max_tasks = min(parallelism, 32, (cpu_count() or 1) + 4)
         self._max_tasks += round(self._max_tasks / 2)
@@ -863,14 +864,17 @@ class Explorer:
                 print("[+] {0}".format(request))
 
             dir_name = request.dir_name
-            if dir_name not in self._custom_404_codes:
-                invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-                invalid_resource = web.Request(dir_name + invalid_page)
-                try:
-                    page = await self._crawler.async_get(invalid_resource)
-                    self._custom_404_codes[dir_name] = page.status
-                except RequestException:
-                    pass
+            async with self._shared_lock:
+                # We don't necessarily care about concurrent access to some of our instance lists and counter
+                # but this one needs a lock to prevent launching duplicates requests that would otherwise waste time
+                if dir_name not in self._custom_404_codes:
+                    invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
+                    invalid_resource = web.Request(dir_name + invalid_page)
+                    try:
+                        page = await self._crawler.async_get(invalid_resource)
+                        self._custom_404_codes[dir_name] = page.status
+                    except RequestException:
+                        pass
 
             self._hostnames.add(request.hostname)
 

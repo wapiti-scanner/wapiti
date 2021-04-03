@@ -61,6 +61,7 @@ SCAN AND ATTACKS TUNING:
   * `--max-attack-time` <MAX_ATTACK_TIME>
   * `--max-parameters` <MAX>
   * `-S`, `--scan-force` {paranoid,sneaky,polite,normal,aggressive,insane}
+  * `--threads` <THREADS>
 
 HTTP AND NETWORK OPTIONS:
 
@@ -234,6 +235,11 @@ Following options allows you to bypass this behavior/
     Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).  
     Insane mode just remove the calculation of those limits, every URL will be attacked.  
     Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
+    
+  * `--threads` <THREADS>
+    Set how many concurrent tasks (threads) Wapiti should use to crawl the target.  
+    Wapiti leverages Python's asyncio module for this. If you go above the limit of possible threads, the CPython
+    interpreter will automatically reduce the value to something more appropriate.
     
   * `--endpoint` <URL>
     Some attack modules are using an HTTP endpoint to check for vulnerabilities.  

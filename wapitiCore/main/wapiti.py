@@ -87,7 +87,7 @@ stop_event = asyncio.Event()
 
 
 def inner_ctrl_c_signal_handler(sig, frame):  # pylint: disable=unused-argument
-    print(_("Processing current HTTP requests, please wait."))
+    print(_("Waiting for running crawler tasks to finish, please wait."))
     stop_event.set()
 
 
