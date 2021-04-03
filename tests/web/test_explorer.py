@@ -5,6 +5,7 @@ from time import sleep
 from collections import deque
 import json
 from tempfile import NamedTemporaryFile
+from asyncio import Event
 
 import pytest
 import responses
@@ -24,30 +25,32 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_qs_limit():
+@pytest.mark.asyncio
+async def test_qs_limit():
     crawler = Crawler("http://127.0.0.1:65080/")
-    explorer = Explorer(crawler)
+    explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/"])
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
-    assert len(list(explorer.explore(start_urls, excluded_urls))) == 4
+    assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
 
     crawler = Crawler("http://127.0.0.1:65080/")
-    explorer = Explorer(crawler)
+    explorer = Explorer(crawler, Event())
     # Exclude huge POST form with limit of parameters
     explorer.qs_limit = 500
     start_urls = deque(["http://127.0.0.1:65080/"])
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
-    assert len(list(explorer.explore(start_urls, excluded_urls))) == 3
+    assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 3
 
 
-def test_explorer_filtering():
+@pytest.mark.asyncio
+async def test_explorer_filtering():
     crawler = Crawler("http://127.0.0.1:65080/")
-    explorer = Explorer(crawler)
+    explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/filters.html"])
     excluded_urls = []
-    results = set([resource.url for resource in explorer.explore(start_urls, excluded_urls)])
+    results = set([resource.url async for resource in explorer.async_explore(start_urls, excluded_urls)])
     # We should have current URL and JS URL but without query string.
     # CSS URL should be excluded
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
@@ -111,7 +114,7 @@ def test_save_and_restore_state():
     filename = temp_file.name
     # Delete it
     temp_file.close()
-    explorer = Explorer(None)
+    explorer = Explorer(None, Event())
     # Load on unexisting file
     explorer.load_saved_state(filename)
     assert not explorer._hostnames
@@ -122,7 +125,7 @@ def test_save_and_restore_state():
     assert explorer._hostnames == {"perdu.com"}
 
     # New tempty explorer
-    explorer = Explorer(None)
+    explorer = Explorer(None, Event())
     # Load previous state
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
@@ -132,7 +135,7 @@ def test_save_and_restore_state():
 @responses.activate
 def test_explorer_extract_links():
     crawler = Crawler("http://perdu.com/")
-    explorer = Explorer(crawler)
+    explorer = Explorer(crawler, Event())
     responses.add(
         responses.GET,
         "http://perdu.com/",
