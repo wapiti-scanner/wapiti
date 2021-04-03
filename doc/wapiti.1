@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "March 2021" "" ""
+.TH "WAPITI" "1" "April 2021" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -127,6 +127,9 @@ SCAN AND ATTACKS TUNING:
 .
 .IP "\(bu" 4
 \fB\-S\fR, \fB\-\-scan\-force\fR {paranoid,sneaky,polite,normal,aggressive,insane}
+.
+.IP "\(bu" 4
+\fB\-\-threads\fR \fITHREADS\fR
 .
 .IP "" 0
 .
@@ -501,6 +504,12 @@ Insane mode just remove the calculation of those limits, every URL will be attac
 .
 .br
 Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more)\.
+.
+.IP "\(bu" 4
+\fB\-\-threads\fR \fITHREADS\fR Set how many concurrent tasks (threads) Wapiti should use to crawl the target\.
+.
+.br
+Wapiti leverages Python\'s asyncio module for this\. If you go above the limit of possible threads, the CPython interpreter will automatically reduce the value to something more appropriate\.
 .
 .IP "\(bu" 4
 \fB\-\-endpoint\fR \fIURL\fR Some attack modules are using an HTTP endpoint to check for vulnerabilities\.
