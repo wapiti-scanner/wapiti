@@ -8,8 +8,15 @@ import responses
 from wapitiCore.main.wapiti import Wapiti
 
 
-@responses.activate
-def test_resume_crawling():
+@pytest.fixture
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps
+
+
+@pytest.mark.asyncio
+async def test_resume_crawling(mocked_responses):
+    stop_event = Event()
 
     def process(http_request):
         try:
@@ -18,7 +25,7 @@ def test_resume_crawling():
             return 200, {}, "Invalid value"
 
         if page == 10:
-            raise KeyboardInterrupt("Stop here")
+            stop_event.set()
 
         if page > 20:
             return 200, {}, ""
@@ -28,13 +35,13 @@ def test_resume_crawling():
         body += "<a href='http://perdu.com/?page={0}'>{0}</a>\n".format(page + 2)
         return 200, {}, body
 
-    responses.add(
+    mocked_responses.add(
         responses.GET,
         re.compile(r"http://perdu\.com/$"),
         body="<html><body><a href='http://perdu.com/?page=0'>0</a>"
     )
 
-    responses.add_callback(
+    mocked_responses.add_callback(
         responses.GET,
         re.compile(r"http://perdu.com/\?page=\d+"),
         callback=process
@@ -42,21 +49,26 @@ def test_resume_crawling():
 
     temp_obj = TemporaryDirectory()
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
-    wapiti.browse()
+    wapiti.load_scan_state()
+    await wapiti.browse(stop_event, parallelism=1)
+    wapiti.save_scan_state()
     remaining_requests = set(wapiti.persister.get_to_browse())
     # Got root url + pages 0 to 9
     all_requests = set(wapiti.persister.get_links())
-    remaning_request = (remaining_requests - all_requests).pop()
-    # Page 10 gave error so the only one left should be 9 or 11 depending which one was taken first
-    assert remaning_request.url in ("http://perdu.com/?page=9", "http://perdu.com/?page=11")
+    remaining_urls = {request.url for request in (remaining_requests - all_requests)}
+    # Page 10 gave error, page 11 was in task queue so it was processed, it remains pages 12 and 13
+    assert remaining_urls == {"http://perdu.com/?page=12", "http://perdu.com/?page=13"}
 
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
-    wapiti.browse()
+    wapiti.load_scan_state()
+    stop_event.clear()
+    await wapiti.browse(stop_event)
+    wapiti.save_scan_state()
     remaining_requests = set(wapiti.persister.get_to_browse())
     all_requests = set(wapiti.persister.get_links())
     # We stop giving new links at page > 20 but page 20 will give urls for 21 and 22
-    # so we have 22 paginated pages + root url here
-    assert len(all_requests) == 23
+    # so we have 24 paginated pages (23 from 0 to 22) + root url here
+    assert len(all_requests) == 24
     # We are done as we scanned all the pages
     assert not (remaining_requests - all_requests)
     rmtree(temp_obj.name)
