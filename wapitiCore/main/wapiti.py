@@ -352,9 +352,9 @@ class Wapiti:
         async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
             # Browsed URLs are saved one at a time
             self.persister.add_request(resource)
-            if (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
+            if not stop_event.is_set() and (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
                 print(_("Max scan time was reached, stopping."))
-                break
+                stop_event.set()
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
