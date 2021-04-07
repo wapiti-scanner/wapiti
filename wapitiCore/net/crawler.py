@@ -673,16 +673,22 @@ class Explorer:
         self._max_per_depth = 0
         self._max_files_per_dir = 0
         self._qs_limit = 0
-        self._custom_404_codes = {}
-        self._file_counts = defaultdict(int)
-        self._pattern_counts = defaultdict(int)
         self._hostnames = set()
-
         self._regexes = []
         self._processed_requests = []
-        self._sem = asyncio.Semaphore(parallelism)
-        self._stopped = stop_event
+
+        # Locking required for writing to the following structures
+        self._file_counts = defaultdict(int)
+        self._pattern_counts = defaultdict(int)
+        self._custom_404_codes = {}
+        # Corresponding lock
         self._shared_lock = asyncio.Lock()
+
+        # Semaphore used to limit parallelism
+        self._sem = asyncio.Semaphore(parallelism)
+        # Event to stop processing tasks
+        self._stopped = stop_event
+
         # CPU count + 4 is default concurrent tasks for CPython ThreadPoolExecutor with a high limit set at 32
         self._max_tasks = min(parallelism, 32, (cpu_count() or 1) + 4)
         self._max_tasks += round(self._max_tasks / 2)
@@ -865,8 +871,7 @@ class Explorer:
 
             dir_name = request.dir_name
             async with self._shared_lock:
-                # We don't necessarily care about concurrent access to some of our instance lists and counter
-                # but this one needs a lock to prevent launching duplicates requests that would otherwise waste time
+                # lock to prevent launching duplicates requests that would otherwise waste time
                 if dir_name not in self._custom_404_codes:
                     invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
                     invalid_resource = web.Request(dir_name + invalid_page)
@@ -897,10 +902,12 @@ class Explorer:
                 return False, []
 
             if self._max_files_per_dir:
-                self._file_counts[dir_name] += 1
+                async with self._shared_lock:
+                    self._file_counts[dir_name] += 1
 
             if self._qs_limit and request.parameters_count:
-                self._pattern_counts[request.pattern] += 1
+                async with self._shared_lock:
+                    self._pattern_counts[request.pattern] += 1
 
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
