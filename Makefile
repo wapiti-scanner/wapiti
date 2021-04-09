@@ -6,4 +6,4 @@ test:
 	docker run --rm wapiti_test:latest
 
 clean:
-	rm -rf dist/ build/
+	rm -rf dist/ build/ wapiti3.egg-info/
