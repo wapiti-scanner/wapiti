@@ -30,7 +30,7 @@ from datetime import datetime
 import logging
 from uuid import uuid1
 from sqlite3 import OperationalError
-from hashlib import md5
+from hashlib import sha256
 from random import choice
 import codecs
 from inspect import getdoc
@@ -140,7 +140,7 @@ class Wapiti:
             "{}_{}_{}.db".format(
                 self.server.replace(':', '_'),
                 self.target_scope,
-                md5(root_url.encode(errors="replace")).hexdigest()[:8]
+                sha256(root_url.encode(errors="replace")).hexdigest()[:8]
             )
         )
 
