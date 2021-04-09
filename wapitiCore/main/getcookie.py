@@ -182,6 +182,8 @@ def getcookie_main():
                     field, value = post_param_tuple
                     if value:
                         new_value = input(field + " (" + value + ") : ")
+                        if not new_value:
+                            new_value = value
                     else:
                         new_value = input("{}: ".format(field))
                     post_params[i] = [field, new_value]
