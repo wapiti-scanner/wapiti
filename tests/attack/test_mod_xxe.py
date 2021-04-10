@@ -140,7 +140,7 @@ def test_out_of_band_body():
 
     responses.add(
         responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?id=" + module._session_id,
+        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
         json={
             "42": {
                 "72617720626f6479": [
@@ -185,7 +185,7 @@ def test_out_of_band_param():
 
     responses.add(
         responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?id=" + module._session_id,
+        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
         json={
             "7": {
                 "76756c6e": [
@@ -232,7 +232,7 @@ def test_out_of_band_query_string():
 
     responses.add(
         responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?id=" + module._session_id,
+        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
         json={
             "4": {
                 "51554552595f535452494e47": [
@@ -282,7 +282,7 @@ def test_direct_upload():
 
     responses.add(
         responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?id=" + module._session_id,
+        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
         json={
             "8": {
                 "63616c656e646172": [

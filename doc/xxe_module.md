@@ -31,7 +31,7 @@ The server receives the XML data and process it. It will fetch the DTD URL given
 
 The endpoint is using Apache mod_rewrite and will redirect the request to the following script on the external endpoint:
 
-/xxe_dtd.php?rand_id=**session id**&req_id=**path id**&hex_param=**injected parameter (as hex)**&payload=**payload name**
+/xxe_dtd.php?session_id=**session id**&path_id=**path id**&hex_param=**injected parameter (as hex)**&payload=**payload name**
 
 
 ## 3. The external endpoint reply with a DTD using an external XML entity (SYSTEM)
@@ -49,7 +49,7 @@ Here the payload was converted to a number because the shorter the URL is, the m
 
 Internally the real script (the target of the mod_rewrite rule) called on the external endpoint is the following :
 
-/xxe_store.php?rand_id=**session id**&req_id=**path id**&hex_param=**injected parameter (as hex)**&payload=**payload (as int)**&data=**exfiltrated data**
+/xxe_store.php?session_id=**session id**&path_id=**path id**&hex_param=**injected parameter (as hex)**&payload=**payload (as int)**&data=**exfiltrated data**
 
 
 ## 3. The external endpoint stores the exfiltrated data along with some metadata
@@ -67,7 +67,7 @@ The filename has the following format :
 When the XXE module has finished running, Wapiti call the `get_xxe.php` script on the internal endpoint and gives it
 the session ID:
 
-http://int-endpoint.tld/get_xxe.tld?id= **session id**
+http://int-endpoint.tld/get_xxe.tld?session_id= **session id**
 
 The session ID is long enough to prevent being brute-forced.
 

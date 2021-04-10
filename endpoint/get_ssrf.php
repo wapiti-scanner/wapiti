@@ -4,28 +4,28 @@ ini_set('display_errors', 'On');
 
 include("functions.php");
 
-$id = isset($_GET["id"]) ? $_GET["id"] : "";
-if (strlen($id) == 6 && ctype_alnum($id))
+$session_id = isset($_GET["session_id"]) ? $_GET["session_id"] : "";
+if (strlen($session_id) == 6 && ctype_alnum($session_id))
 {
     // this is the global final array
-    $by_req_id = array();
-    $directory = "./ssrf_data/$id";
+    $by_path_id = array();
+    $directory = "./ssrf_data/$session_id";
 
     foreach (glob("$directory/*/*/*.txt") as $filename) {
         $parts = explode("/", $filename);
         $time_and_ip = basename($filename, ".txt");
         list($time, $ip) = explode("-", $time_and_ip);
-        $req_id = $parts[3];
+        $path_id = $parts[3];
         $hex_param = $parts[4];
         $url = site_url() . substr($filename, 2);
         $size = filesize($filename);
 
-        if (!array_key_exists($req_id, $by_req_id)) {
-            $by_req_id[$req_id] = array();
+        if (!array_key_exists($path_id, $by_path_id)) {
+            $by_path_id[$path_id] = array();
         }
 
-        if (!array_key_exists($hex_param, $by_req_id[$req_id])) {
-            $by_req_id[$req_id][$hex_param] = array();
+        if (!array_key_exists($hex_param, $by_path_id[$path_id])) {
+            $by_path_id[$path_id][$hex_param] = array();
         }
 
         $handle = @fopen($filename, "r");
@@ -37,7 +37,7 @@ if (strlen($id) == 6 && ctype_alnum($id))
             fclose($handle);
         }
 
-        $by_req_id[$req_id][$hex_param][] = array(
+        $by_path_id[$path_id][$hex_param][] = array(
             "date" => date('c', $time),
             "url" => $url,
             "ip" => $ip,
@@ -45,8 +45,8 @@ if (strlen($id) == 6 && ctype_alnum($id))
             "method" => $method
         );
     }
-    echo json_encode($by_req_id, JSON_PRETTY_PRINT);
-    // var_dump($by_req_id);
+    echo json_encode($by_path_id, JSON_PRETTY_PRINT);
+    // var_dump($by_path_id);
 }
 
 ?>

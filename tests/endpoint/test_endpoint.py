@@ -36,12 +36,12 @@ def run_around_tests():
 
 def test_ssrf():
     response = requests.get(
-        "http://127.0.0.1:65080/ssrf_store.php?rand_id=wapiti&req_id=53&hex_param=76756c6e",
+        "http://127.0.0.1:65080/ssrf_store.php?session_id=wapiti&path_id=53&hex_param=76756c6e",
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
     response = requests.get(
-        "http://127.0.0.1:65080/get_ssrf.php?id=wapiti",
+        "http://127.0.0.1:65080/get_ssrf.php?session_id=wapiti",
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
@@ -54,34 +54,34 @@ def test_ssrf():
 
 
 def test_xxe_dtd():
-    random_id = rand_id()
+    session_id = rand_id()
     response = requests.get(
-        f"http://127.0.0.1:65080/xxe_dtd.php?rand_id={random_id}&req_id=53&hex_param=76756c6e&payload=linux2",
+        f"http://127.0.0.1:65080/xxe_dtd.php?session_id={session_id}&path_id=53&hex_param=76756c6e&payload=linux2",
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
     assert "text/xml" in response.headers["content-type"]
-    assert f"SYSTEM 'http://yolo.tld:65080/xoxo/{random_id}/53/76756c6e/0/" in response.text
+    assert f"SYSTEM 'http://yolo.tld:65080/xoxo/{session_id}/53/76756c6e/0/" in response.text
 
 
 def test_xxe_store():
-    random_id = rand_id()
+    session_id = rand_id()
     response = requests.get(
         (
-            f"http://127.0.0.1:65080/xxe_store.php?rand_id={random_id}"
-            f"&req_id=53&hex_param=76756c6e&payload=0&data=impwned"
+            f"http://127.0.0.1:65080/xxe_store.php?session_id={session_id}"
+            f"&path_id=53&hex_param=76756c6e&payload=0&data=impwned"
         ),
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
     response = requests.get(
-        f"http://127.0.0.1:65080/get_xxe.php?id={random_id}",
+        f"http://127.0.0.1:65080/get_xxe.php?session_id={session_id}",
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
     data = response.json()
     assert data["53"]["76756c6e"][0]["payload"] == "linux2"
-    assert data["53"]["76756c6e"][0]["url"].startswith(f"http://yolo.tld:65080/xxe_data/{random_id}/53/76756c6e/")
+    assert data["53"]["76756c6e"][0]["url"].startswith(f"http://yolo.tld:65080/xxe_data/{session_id}/53/76756c6e/")
     assert data["53"]["76756c6e"][0]["url"].endswith("-0-127.0.0.1.txt")
     assert data["53"]["76756c6e"][0]["size"] == 5
     assert data["53"]["76756c6e"][0]["ip"] == "127.0.0.1"

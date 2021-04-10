@@ -310,7 +310,7 @@ class mod_xxe(Attack):
                     self.vulnerables.add(original_request.path_id)
 
     def finish(self):
-        endpoint_url = "{}get_xxe.php?id={}".format(self.internal_endpoint, self._session_id)
+        endpoint_url = "{}get_xxe.php?session_id={}".format(self.internal_endpoint, self._session_id)
         print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté

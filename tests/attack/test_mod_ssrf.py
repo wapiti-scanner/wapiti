@@ -73,7 +73,7 @@ def test_whole_stuff():
 
     responses.add(
         responses.GET,
-        url="https://wapiti3.ovh/get_ssrf.php?id=" + module._session_id,
+        url="https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id,
         json={
             "3": {
                 "66696c65": [

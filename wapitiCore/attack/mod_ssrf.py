@@ -185,7 +185,7 @@ class mod_ssrf(Attack):
                 continue
 
     def finish(self):
-        endpoint_url = "{}get_ssrf.php?id={}".format(self.internal_endpoint, self._session_id)
+        endpoint_url = "{}get_ssrf.php?session_id={}".format(self.internal_endpoint, self._session_id)
         print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
