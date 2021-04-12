@@ -181,7 +181,7 @@ class mod_permanentxss(Attack):
                 # Ok the content is stored, but will we be able to inject javascript?
                 else:
                     parameter = self.tried_xss[taint][1]
-                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
+                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
                     flags = self.tried_xss[taint][2]
 
                     # TODO: check that and make it better

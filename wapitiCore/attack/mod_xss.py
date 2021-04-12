@@ -85,7 +85,7 @@ class mod_xss(Attack):
                 # even if the Content-Type seems uninteresting.
                 if taint.lower() in response.content.lower() and valid_xss_content_type(mutated_request):
                     # Simple text injection worked in HTML response, let's try with JS code
-                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE)
+                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
 
                     # TODO: check that and make it better
                     if flags.method == PayloadType.get:
