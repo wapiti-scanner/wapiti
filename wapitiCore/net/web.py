@@ -210,7 +210,7 @@ class Request:
                 if "urlencoded" in self.enctype or self.is_multipart:
                     # special case of multipart is dealt when sending request
                     self._post_params = []
-                    if len(post_params):
+                    if post_params:
                         for post_param in post_params.split("&"):
                             if post_param.find("=") > 0:
                                 self._post_params.append(post_param.split("=", 1))
@@ -551,19 +551,19 @@ class Request:
 
     @property
     def get_keys(self):
-        if len(self._get_params):
+        if self._get_params:
             return list(zip(*self._get_params))[0]
         return ()
 
     @property
     def post_keys(self):
-        if isinstance(self._post_params, list) and len(self._post_params):
+        if isinstance(self._post_params, list) and self._post_params:
             return list(zip(*self._post_params))[0]
         return ()
 
     @property
     def file_keys(self):
-        if len(self._file_params):
+        if self._file_params:
             return list(zip(*self._file_params))[0]
         return ()
 

@@ -49,19 +49,19 @@ class ReportGenerator:
     def add_vulnerability_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_vulnerability(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         raise NotImplementedError("Must be overridden")
 
     # Anomalies
     def add_anomaly_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_anomaly(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str,category=None, level=0, request=None, parameter="", info="", auth=None):
         raise NotImplementedError("Must be overridden")
 
     # Additionals
     def add_additional_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         raise NotImplementedError("Must be overridden")

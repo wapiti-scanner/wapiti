@@ -7,32 +7,11 @@ from asyncio import Event
 
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import mod_file, has_prefix_or_suffix, find_warning_message, FileWarning
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        for parameter_name, value in request.get_params:
-            if parameter_name == parameter:
-                self.vulnerabilities.append((parameter, value))
-
+from wapitiCore.language.vulnerability import _
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -59,7 +38,10 @@ async def test_inclusion_detection():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.vulnerabilities == [("f", "/etc/services")]
+    assert persister.module == "file"
+    assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Path Traversal")
+    assert persister.vulnerabilities[0]["request"].get_params[1] == ["f", "/etc/services"]
     await crawler.close()
 
 
@@ -76,7 +58,7 @@ async def test_warning_false_positive():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.vulnerabilities == [("f", "/etc/services")]
+    assert persister.vulnerabilities[0]["request"].get_params[1] == ["f", "/etc/services"]
     await crawler.close()
 
 

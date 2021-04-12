@@ -21,7 +21,7 @@ from urllib.parse import quote
 from httpx import ReadTimeout, HTTPStatusError, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, LOW_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.crlf import NAME
 from wapitiCore.net.web import Request
 
@@ -31,6 +31,7 @@ class mod_crlf(Attack):
     # Won't work with PHP >= 4.4.2
 
     name = "crlf"
+    category = NAME
     MSG_VULN = _("CRLF Injection")
     do_get = True
     do_post = True
@@ -51,13 +52,12 @@ class mod_crlf(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
-                self.add_anom(
+                self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
-                    level=MEDIUM_LEVEL,
                     request=mutated_request,
                     parameter=parameter,
-                    info="Timeout (" + parameter + ")"
+                    info="Timeout (" + parameter + ")",
                 )
 
                 self.log_orange("---")
@@ -72,13 +72,12 @@ class mod_crlf(Attack):
                 self.network_errors += 1
             else:
                 if "wapiti" in response.headers:
-                    self.add_vuln(
+                    self.add_vuln_low(
                         request_id=request.path_id,
-                        category=NAME,
-                        level=LOW_LEVEL,
+                        category=self.category,
                         request=mutated_request,
                         parameter=parameter,
-                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
                     )
 
                     if parameter == "QUERY_STRING":

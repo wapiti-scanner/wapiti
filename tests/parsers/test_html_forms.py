@@ -22,8 +22,8 @@ def test_forms():
                 assert form.url == "http://perdu.com/get_form?name=default"
                 assert form.referer == "http://perdu.com/"
                 assert len(form.get_params) == 1
-                assert not len(form.post_params)
-                assert not len(form.file_params)
+                assert not form.post_params
+                assert not form.file_params
                 assert not form.is_multipart
             elif form.file_path == "/post_select.php":
                 assert form.method == "POST"
@@ -31,7 +31,7 @@ def test_forms():
                 assert form.post_params == [["fname", "Smith"], ["csrf", "9877665"], ["carlist", "volvo"]]
                 assert form.url == "http://perdu.com/post_select.php?id=3"
                 assert not form.is_multipart
-                assert not len(form.file_params)
+                assert not form.file_params
             elif form.file_path == "/fields.php":
                 assert form.method == "POST"
                 assert not form.is_multipart

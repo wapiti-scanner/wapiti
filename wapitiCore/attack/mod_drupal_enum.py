@@ -4,7 +4,7 @@ from os.path import join as path_join
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -68,40 +68,22 @@ class mod_drupal_enum(Attack):
 
         if await self.check_drupal(request_to_root.url):
             await self.detect_version(request_to_root.url)
-            if self.versions:
-                self.versions = sorted(self.versions, key=lambda x: [i for i in x.split('.')])
-                drupal_detected = {
-                    "name": "Drupal",
-                    "versions": self.versions,
-                    "categories": ["CMS Drupal"]
-                }
-                self.log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    "Drupal",
-                    self.versions
-                )
-                self.add_addition(
-                    category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
-                    request=request_to_root,
-                    info=json.dumps(drupal_detected)
-                )
-            else:
-                drupal_detected = {
-                    "name": "Drupal",
-                    "versions": [""],
-                    "categories": ["CMS Drupal"]
-                }
-                self.log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    "Drupal",
-                    []
-                )
-                self.add_addition(
-                    category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
-                    request=request_to_root,
-                    info=json.dumps(drupal_detected)
-                )
+            self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else [""]
+            drupal_detected = {
+                "name": "Drupal",
+                "versions": self.versions,
+                "categories": ["CMS Drupal"]
+            }
+            self.log_blue(
+                MSG_TECHNO_VERSIONED,
+                "Drupal",
+                self.versions
+            )
+            self.add_addition(
+                category=TECHNO_DETECTED,
+                request=request_to_root,
+                info=json.dumps(drupal_detected),
+            )
+
         else:
             self.log_blue(MSG_NO_DRUPAL)

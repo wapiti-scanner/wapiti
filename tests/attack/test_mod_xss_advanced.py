@@ -7,33 +7,11 @@ from asyncio import Event
 
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xss import mod_xss
 from wapitiCore.language.vulnerability import _
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        for parameter_name, value in request.get_params:
-            if parameter_name == parameter:
-                self.vulnerabilities.append((parameter, value, info))
-
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -78,10 +56,12 @@ async def test_title_positive():
     module.do_post = False
     await module.attack(request)
 
+    assert persister.module == "xss"
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "title"
-    assert persister.vulnerabilities[0][1].startswith("</title>")
-    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
+    assert persister.vulnerabilities[0]["category"] == _("Cross Site Scripting")
+    assert persister.vulnerabilities[0]["parameter"] == "title"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].startswith("</title>")
+    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0]["info"]
     await crawler.close()
 
 
@@ -100,8 +80,8 @@ async def test_script_filter_bypass():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "name"
-    assert persister.vulnerabilities[0][1].lower().startswith("<svg")
+    assert persister.vulnerabilities[0]["parameter"] == "name"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("<svg")
     await crawler.close()
 
 
@@ -120,8 +100,8 @@ async def test_attr_quote_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "class"
-    assert persister.vulnerabilities[0][1].lower().startswith("'></pre>")
+    assert persister.vulnerabilities[0]["parameter"] == "class"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("'></pre>")
     await crawler.close()
 
 
@@ -140,8 +120,8 @@ async def test_attr_double_quote_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "class"
-    assert persister.vulnerabilities[0][1].lower().startswith("\"></pre>")
+    assert persister.vulnerabilities[0]["parameter"] == "class"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("\"></pre>")
     await crawler.close()
 
 
@@ -160,8 +140,8 @@ async def test_attr_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "state"
-    assert persister.vulnerabilities[0][1].lower().startswith("><script>")
+    assert persister.vulnerabilities[0]["parameter"] == "state"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("><script>")
     await crawler.close()
 
 
@@ -180,8 +160,8 @@ async def test_tag_name_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "tag"
-    assert persister.vulnerabilities[0][1].lower().startswith("script>")
+    assert persister.vulnerabilities[0]["parameter"] == "tag"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("script>")
     await crawler.close()
 
 
@@ -200,8 +180,8 @@ async def test_partial_tag_name_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "importance"
-    assert persister.vulnerabilities[0][1].lower().startswith("/><script>")
+    assert persister.vulnerabilities[0]["parameter"] == "importance"
+    assert persister.vulnerabilities[0]["request"].get_params[0][1].lower().startswith("/><script>")
     await crawler.close()
 
 
@@ -219,8 +199,8 @@ async def test_xss_inside_tag_input():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "uid"
-    used_payload = persister.vulnerabilities[0][1].lower()
+    assert persister.vulnerabilities[0]["parameter"] == "uid"
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert "<" not in used_payload and ">" not in used_payload and "autofocus/onfocus" in used_payload
     await crawler.close()
 
@@ -239,8 +219,8 @@ async def test_xss_inside_tag_link():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "url"
-    used_payload = persister.vulnerabilities[0][1].lower()
+    assert persister.vulnerabilities[0]["parameter"] == "url"
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert "<" not in used_payload and ">" not in used_payload and "autofocus href onfocus" in used_payload
     await crawler.close()
 
@@ -259,8 +239,8 @@ async def test_xss_uppercase_no_script():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "name"
-    used_payload = persister.vulnerabilities[0][1].lower()
+    assert persister.vulnerabilities[0]["parameter"] == "name"
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith("<svg onload=&")
     await crawler.close()
 
@@ -279,8 +259,8 @@ async def test_frame_src_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "url"
-    used_payload = persister.vulnerabilities[0][1].lower()
+    assert persister.vulnerabilities[0]["parameter"] == "url"
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith('"><frame src="javascript:alert(/w')
     await crawler.close()
 
@@ -299,8 +279,8 @@ async def test_frame_src_no_escape():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "url"
-    used_payload = persister.vulnerabilities[0][1].lower()
+    assert persister.vulnerabilities[0]["parameter"] == "url"
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith("javascript:alert(/w")
     await crawler.close()
 
@@ -319,7 +299,7 @@ async def test_bad_separator_used():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    used_payload = persister.vulnerabilities[0][1].lower()
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith("\">")
     await crawler.close()
 
@@ -338,7 +318,7 @@ async def test_escape_with_style():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    used_payload = persister.vulnerabilities[0][1].lower()
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith("</style>")
     await crawler.close()
 
@@ -357,7 +337,7 @@ async def test_rare_tag_and_event():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    used_payload = persister.vulnerabilities[0][1].lower()
+    used_payload = persister.vulnerabilities[0]["request"].get_params[0][1].lower()
     assert used_payload.startswith("<custom\nchecked\nonpointerenter=")
     await crawler.close()
 
@@ -376,7 +356,7 @@ async def test_xss_with_strong_csp():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert _("Warning: Content-Security-Policy is present!") in persister.vulnerabilities[0][2]
+    assert _("Warning: Content-Security-Policy is present!") in persister.vulnerabilities[0]["info"]
     await crawler.close()
 
 
@@ -394,5 +374,5 @@ async def test_xss_with_weak_csp():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
+    assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0]["info"]
     await crawler.close()

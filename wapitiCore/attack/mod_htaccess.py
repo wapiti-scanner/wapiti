@@ -24,7 +24,7 @@
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.htaccess import NAME
 from wapitiCore.net.web import Request
 
@@ -35,6 +35,7 @@ class mod_htaccess(Attack):
     """
 
     name = "htaccess"
+    category = NAME
 
     do_get = False
     do_post = False
@@ -65,10 +66,9 @@ class mod_htaccess(Attack):
             unblocked_content = response.content
 
             self.log_red("---")
-            self.add_vuln(
+            self.add_vuln_medium(
                 request_id=request.path_id,
-                category=NAME,
-                level=MEDIUM_LEVEL,
+                category=self.category,
                 request=evil_req,
                 info=_("{0} bypassable weak restriction").format(evil_req.url)
             )

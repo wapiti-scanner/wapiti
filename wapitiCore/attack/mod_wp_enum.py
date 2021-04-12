@@ -4,7 +4,7 @@ from os.path import join as path_join
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -63,7 +63,6 @@ class mod_wp_enum(Attack):
 
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=req,
                     info=json.dumps(plugin_detected)
                 )
@@ -80,7 +79,6 @@ class mod_wp_enum(Attack):
                 )
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=req,
                     info=json.dumps(plugin_detected)
                 )
@@ -111,7 +109,6 @@ class mod_wp_enum(Attack):
                 )
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=req,
                     info=json.dumps(theme_detected)
                 )
@@ -128,12 +125,12 @@ class mod_wp_enum(Attack):
                 )
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=req,
                     info=json.dumps(theme_detected)
                 )
 
-    def check_wordpress(self, response: object):
+    @staticmethod
+    def check_wordpress(response: object):
         if re.findall('WordPress.*', response.content):
             return True
         return False

@@ -18,7 +18,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
 from wapitiCore.definitions.csp import NAME
 
@@ -31,6 +31,7 @@ MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
 class mod_csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
+    category = NAME
 
     def must_attack(self, request: Request):
         if self.finished:
@@ -53,9 +54,8 @@ class mod_csp(Attack):
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)
-            self.add_vuln(
-                category=NAME,
-                level=LOW_LEVEL,
+            self.add_vuln_low(
+                category=self.category,
                 request=request_to_root,
                 info=MSG_NO_CSP
             )
@@ -64,20 +64,17 @@ class mod_csp(Attack):
 
             for policy_name in CSP_CHECK_LISTS:
                 result = check_policy_values(policy_name, csp_dict)
+                info = ""
+                if result <= 0:
+                    if result == -1:
+                        info = MSG_CSP_MISSING.format(policy_name)
 
-                if result == -1:
-                    self.log_red(MSG_CSP_MISSING.format(policy_name))
-                    self.add_vuln(
-                        category=NAME,
-                        level=LOW_LEVEL,
-                        request=request_to_root,
-                        info=MSG_CSP_MISSING.format(policy_name)
-                    )
-                elif result == 0:
-                    self.log_red(MSG_CSP_UNSAFE.format(policy_name))
-                    self.add_vuln(
-                        category=NAME,
-                        level=LOW_LEVEL,
-                        request=request_to_root,
-                        info=MSG_CSP_UNSAFE.format(policy_name)
+                    else: # result == 0
+                        info = MSG_CSP_UNSAFE.format(policy_name)
+
+                    self.log_red(info)
+                    self.add_vuln_low(
+                            category=self.category,
+                            request=request_to_root,
+                            info=info
                     )

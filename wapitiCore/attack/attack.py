@@ -26,9 +26,9 @@ from math import ceil
 import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
-
 from httpx import ReadTimeout, RequestError
 
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL, LOW_LEVEL, MEDIUM_LEVEL
 from wapitiCore.net.web import Request
 
 # All Wapiti attack modules
@@ -152,6 +152,7 @@ class Attack:
     """This class represents an attack, it must be extended	for any class which implements a new type of attack"""
 
     name = "attack"
+    category = "attack"
 
     do_get = True
     do_post = True
@@ -188,15 +189,16 @@ class Attack:
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
 
+    VULN = "vulnerability"
+    ANOM = "anomaly"
+    ADDITION = "additional"
+
     def __init__(self, crawler, persister, logger, attack_options, stop_event):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
         self.persister = persister
         self._stop_event = stop_event
-        self.add_vuln = persister.add_vulnerability
-        self.add_anom = persister.add_anomaly
-        self.add_addition = persister.add_additional
         self.payload_reader = PayloadReader(attack_options)
         self.options = attack_options
 
@@ -229,6 +231,51 @@ class Attack:
 
     def set_color(self):
         self.color = 1
+
+    def add_payload(self, request_id: int, payload_type: str, category: str,
+    level=0, request=None, parameter="", info=""):
+        self.persister.add_payload(request_id, payload_type, self.name, category, level, request, parameter, info)
+
+    def add_payload_critical(self, request_id: int, payload_type: str, category: str,
+    request=None, parameter="", info=""):
+        self.add_payload(request_id, payload_type, category, CRITICAL_LEVEL, request, parameter, info)
+
+    def add_payload_high(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
+        self.add_payload(request_id, payload_type, category, HIGH_LEVEL, request, parameter, info)
+
+    def add_payload_medium(self, request_id: int, payload_type: str, category: str,
+    request=None, parameter="", info=""):
+        self.add_payload(request_id, payload_type, category, MEDIUM_LEVEL, request, parameter, info)
+
+    def add_payload_low(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
+        self.add_payload(request_id, payload_type, category, LOW_LEVEL, request, parameter, info)
+
+    def add_payload_info(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
+        self.add_payload(request_id, payload_type, category, INFO_LEVEL, request, parameter, info)
+
+    def add_vuln_critical(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_critical(request_id, self.VULN, category, request, parameter, info)
+
+    def add_vuln_high(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_high(request_id, self.VULN, category, request, parameter, info)
+
+    def add_vuln_medium(self, category: str,request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_medium(request_id, self.VULN, category, request, parameter, info)
+
+    def add_vuln_low(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_low(request_id, self.VULN, category, request, parameter, info)
+
+    def add_vuln_info(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_low(request_id, self.VULN, category, request, parameter, info)
+
+    def add_anom_high(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_high(request_id, self.ANOM, category, request, parameter, info)
+
+    def add_anom_medium(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_medium(request_id, self.ANOM, category, request, parameter, info)
+
+    def add_addition(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
+        self.add_payload_low(request_id, self.ADDITION, category, request, parameter, info)
 
     @property
     def payloads(self):
@@ -333,7 +380,7 @@ class Mutator:
             if params_list is file_params and not self._mutate_file:
                 continue
 
-            for i in range(len(params_list)):
+            for i, _ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:

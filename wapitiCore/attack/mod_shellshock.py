@@ -23,7 +23,7 @@ from binascii import hexlify
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.net.web import Request
 from wapitiCore.definitions.exec import NAME
 
@@ -34,6 +34,7 @@ class mod_shellshock(Attack):
     """
 
     name = "shellshock"
+    category = NAME
 
     do_get = False
     do_post = False
@@ -78,10 +79,9 @@ class mod_shellshock(Attack):
             if self.rand_string in data:
                 self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
 
-                self.add_vuln(
+                self.add_vuln_high(
                     request_id=request.path_id,
-                    category=NAME,
-                    level=HIGH_LEVEL,
+                    category=self.category,
                     request=evil_req,
                     info=_("URL {0} seems vulnerable to Shellshock attack").format(url)
                 )

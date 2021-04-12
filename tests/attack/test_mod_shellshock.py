@@ -7,35 +7,11 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_shellshock import mod_shellshock
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        for request in self.requests:
-            if request.method == "GET":
-                yield request
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        pass
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append((request, info))
-
+from wapitiCore.language.vulnerability import _
 
 def shellshock_callback(request):
     if "user-agent" in request.headers:
@@ -77,8 +53,10 @@ async def test_whole_stuff():
     for request in persister.requests:
         await module.attack(request)
 
+    assert persister.module == "shellshock"
     assert len(persister.vulnerabilities) == 1
-    assert persister.vulnerabilities[0][0].url == (
+    assert persister.vulnerabilities[0]["category"] == _("Command execution")
+    assert persister.vulnerabilities[0]["request"].url == (
         "http://perdu.com/vuln/"
     )
     await crawler.close()

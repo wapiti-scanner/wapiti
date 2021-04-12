@@ -24,7 +24,7 @@ from itertools import product
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME
 from wapitiCore.net.web import Request
 
@@ -32,6 +32,7 @@ from wapitiCore.net.web import Request
 class mod_brute_login_form(Attack):
     """Attempt to login on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
+    category = NAME
     PAYLOADS_FILE = "passwords.txt"
     PAYLOADS_FILE_USER = "users.txt"
     PAYLOADS_SUCCESS = "successMessage.txt"
@@ -166,12 +167,11 @@ class mod_brute_login_form(Attack):
                     link_depth=login_form.link_depth
                 )
 
-                self.add_vuln(
+                self.add_vuln_low(
+                    category=self.category,
                     request_id=request.path_id,
-                    category=NAME,
-                    level=LOW_LEVEL,
                     request=evil_request,
-                    info=vuln_message
+                    info=vuln_message,
                 )
 
                 self.log_red("---")

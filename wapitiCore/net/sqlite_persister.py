@@ -24,7 +24,7 @@ from collections import namedtuple
 from wapitiCore.net import web
 
 
-Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type")
+Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,module")
 
 
 class SqlitePersister:
@@ -132,7 +132,8 @@ class SqlitePersister:
                     level INTEGER,
                     parameter TEXT,
                     info TEXT,
-                    type TEXT
+                    type TEXT,
+                    module TEXT
                 )"""
             )
 
@@ -204,7 +205,7 @@ class SqlitePersister:
                         """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                         (path_id, "POST", i, post_param_key, post_param_value, None, None)
                     )
-            elif len(post_params):
+            elif post_params:
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (path_id, "POST", 0, "__RAW__", post_params, None, None)
@@ -360,7 +361,8 @@ class SqlitePersister:
         return False
 
     def add_payload(
-            self, request_id: int, payload_type: str, category=None, level=0, request=None, parameter="", info=""):
+            self, request_id: int, payload_type: str, module: str,
+            category=None, level=0, request=None, parameter="", info=""):
         cursor = self._conn.cursor()
 
         cursor.execute(
@@ -394,7 +396,7 @@ class SqlitePersister:
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (path_id, "POST", i, post_param_key, post_param_value, None, None)
                 )
-        elif len(post_params):
+        elif post_params:
             cursor.execute(
                 """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (path_id, "POST", 0, "__RAW__", post_params, None, None)
@@ -413,15 +415,17 @@ class SqlitePersister:
 
         # request_id is the ID of the original (legit) request
         cursor.execute(
-            "INSERT INTO payloads VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (path_id, request_id, category, level, parameter, info, payload_type)
+            "INSERT INTO payloads VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (path_id, request_id, category, level, parameter, info, payload_type, module)
         )
         self._conn.commit()
 
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, request_id: int = -1,
+    category=None, level=0, request=None, parameter="", info=""):
         self.add_payload(
             request_id,
             "additional",
+            module,
             category,
             level,
             request,
@@ -429,10 +433,12 @@ class SqlitePersister:
             info
         )
 
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, request_id: int = -1,
+    category=None, level=0, request=None, parameter="", info=""):
         self.add_payload(
             request_id,
             "anomaly",
+            module,
             category,
             level,
             request,
@@ -440,10 +446,12 @@ class SqlitePersister:
             info
         )
 
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, request_id: int = -1,
+    category=None, level=0, request=None, parameter="", info=""):
         self.add_payload(
             request_id,
             "vulnerability",
+            module,
             category,
             level,
             request,
@@ -519,12 +527,12 @@ class SqlitePersister:
         cursor.execute("SELECT * FROM payloads")
 
         for row in cursor.fetchall():
-            evil_id, original_id, category, level, parameter, info, payload_type = row
+            evil_id, original_id, category, level, parameter, info, payload_type, module = row
 
             evil_request = self.get_path_by_id(evil_id)
             original_request = self.get_path_by_id(original_id)
 
-            yield Payload(evil_request, original_request, category, level, parameter, info, payload_type)
+            yield Payload(evil_request, original_request, category, level, parameter, info, payload_type, module)
 
     def flush_session(self):
         self.flush_attacks()

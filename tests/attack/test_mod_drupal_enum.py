@@ -8,34 +8,11 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import mod_drupal_enum
-
-
-class FakePersister:
-
-    def __init__(self):
-        self.requests = []
-        self.additionals = []
-        self.anomalies = set()
-        self.vulnerabilities = set()
-
-    def get_links(self, _path, _attack_module):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.append(info)
-
-    def add_anomaly(self, _request_id, _category, _level, _request, parameter, _info):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.add(parameter)
-
-    def get_root_url(self):
-        return self.requests[0].url
-
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 
 # Test no Drupal detected
 @pytest.mark.asyncio
@@ -105,8 +82,10 @@ async def test_version_detected():
 
     await module.attack(request)
 
+    assert persister.module == "drupal_enum"
     assert persister.additionals
-    assert persister.additionals[0] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
+    assert persister.additionals[0]["category"] == TECHNO_DETECTED
+    assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
     await crawler.close()
 
 
@@ -145,7 +124,8 @@ async def test_multi_versions_detected():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
     await crawler.close()
 
 
@@ -184,5 +164,5 @@ async def test_version_not_detected():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
+    assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
     await crawler.close()

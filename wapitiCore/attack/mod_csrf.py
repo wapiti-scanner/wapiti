@@ -21,7 +21,7 @@ import math
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
@@ -33,6 +33,7 @@ class mod_csrf(Attack):
     """
 
     name = "csrf"
+    category = NAME
 
     do_get = False
     do_post = False
@@ -182,10 +183,9 @@ class mod_csrf(Attack):
         self.log_red(request.http_repr())
         self.log_red("---")
 
-        self.add_vuln(
+        self.add_vuln_medium(
             request_id=request.path_id,
-            category=NAME,
-            level=MEDIUM_LEVEL,
+            category=self.category,
             request=request,
-            info=vuln_message,
+            info=vuln_message
         )

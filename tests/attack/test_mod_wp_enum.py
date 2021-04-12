@@ -5,34 +5,11 @@ import respx
 import httpx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wp_enum import mod_wp_enum
-
-
-class FakePersister:
-
-    def __init__(self):
-        self.requests = []
-        self.additionals = []
-        self.anomalies = set()
-        self.vulnerabilities = set()
-
-    def get_links(self, _path, _attack_module):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.append(info)
-
-    def add_anomaly(self, _request_id, _category, _level, _request, parameter, _info):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.add(parameter)
-
-    def get_root_url(self):
-        return self.requests[0].url
-
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 
 @pytest.mark.asyncio
 @respx.mock
@@ -134,10 +111,15 @@ async def test_plugin():
 
     await module.attack(request)
 
+    assert persister.module == "wp_enum"
     assert persister.additionals
-    assert persister.additionals[0] == '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
-    assert persister.additionals[1] == '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"]}'
-    assert persister.additionals[2] == '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"]}'
+    assert persister.additionals[0]["category"] == TECHNO_DETECTED
+    assert persister.additionals[0]["info"] == \
+        '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
+    assert persister.additionals[1]["info"] == \
+        '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"]}'
+    assert persister.additionals[2]["info"] == \
+        '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"]}'
     await crawler.close()
 
 
@@ -209,7 +191,10 @@ async def test_theme():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"]}'
-    assert persister.additionals[1] == '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"]}'
-    assert persister.additionals[2] == '{"name": "customify", "versions": [""], "categories": ["WordPress themes"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"]}'
+    assert persister.additionals[1]["info"] == \
+        '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"]}'
+    assert persister.additionals[2]["info"] == \
+        '{"name": "customify", "versions": [""], "categories": ["WordPress themes"]}'
     await crawler.close()

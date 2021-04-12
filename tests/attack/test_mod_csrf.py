@@ -7,34 +7,11 @@ from asyncio import Event
 
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_csrf import mod_csrf
 from wapitiCore.language.vulnerability import _
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "GET"]
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append((request_id, info))
-
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -93,9 +70,14 @@ async def test_csrf_cases():
             # Not attacked because of GET verb
             assert request.path_id == 1
 
-    assert set(persister.vulnerabilities) == {
-        (2, _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")),
-        (3, _("CSRF token '{}' might be easy to predict").format("xsrf_token")),
-        (4, _("Lack of anti CSRF token"))
-    }
+    assert persister.module == "csrf"
+    assert persister.vulnerabilities[0]["category"] == _("Cross Site Request Forgery")
+    assert persister.vulnerabilities[0]["request_id"] == 2
+    assert persister.vulnerabilities[0]["info"] == \
+        _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")
+    assert persister.vulnerabilities[1]["request_id"] == 3
+    assert persister.vulnerabilities[1]["info"] == _("CSRF token '{}' might be easy to predict").format("xsrf_token")
+    assert persister.vulnerabilities[2]["request_id"] == 4
+    assert persister.vulnerabilities[2]["info"] == _("Lack of anti CSRF token")
+
     await crawler.close()

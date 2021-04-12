@@ -39,7 +39,10 @@ def test_js_false_positives():
         function yolo() {
           u='http://www.website.com/page.php?uid=1';
           t='Hi there';
-          window.open('http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
+          window.open(
+              'http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),
+              'sharer','toolbar=0,status=0,width=626,height=436'
+          );
           return false;
         }""",
 
@@ -51,7 +54,7 @@ def test_js_false_positives():
           options += "scrollbars=" + sb;
           var newWin = window.open(url, 'newWin', options);
         }
-    
+
         function openBrWindow(theURL,winName,features) { //v2.0
         window.open(theURL,winName,features);
         }""",

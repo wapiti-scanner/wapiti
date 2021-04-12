@@ -49,7 +49,7 @@ async def test_resume_crawling():
     remaining_requests = set(wapiti.persister.get_to_browse())
     # Got root url + pages 0 to 9
     all_requests = set(wapiti.persister.get_links())
-    remaining_urls = {request.url for request in (remaining_requests - all_requests)}
+    remaining_urls = {request.url for request in remaining_requests - all_requests}
     # Page 10 stops the crawling but gave links to pages 11 and 12 so they will be the remaining urls
     assert remaining_urls == {"http://perdu.com/?page=11", "http://perdu.com/?page=12"}
     await wapiti.crawler.close()
@@ -65,6 +65,6 @@ async def test_resume_crawling():
     # so we have 24 paginated pages (23 from 0 to 22) + root url here
     assert len(all_requests) == 24
     # We are done as we scanned all the pages
-    assert not (remaining_requests - all_requests)
+    assert not remaining_requests - all_requests
     rmtree(temp_obj.name)
     await wapiti.crawler.close()

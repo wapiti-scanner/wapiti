@@ -24,7 +24,7 @@ import random
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.dangerous_resource import NAME
 from wapitiCore.net.web import Request
 
@@ -57,6 +57,7 @@ class mod_nikto(Attack):
     nikto_db = []
 
     name = "nikto"
+    category = NAME
     NIKTO_DB = "nikto_db"
     NIKTO_DB_URL = "https://raw.githubusercontent.com/wapiti-scanner/nikto/master/program/databases/db_tests"
 
@@ -255,9 +256,8 @@ class mod_nikto(Attack):
 
                 self.log_red("---")
 
-                self.add_vuln(
-                    category=NAME,
-                    level=HIGH_LEVEL,
+                self.add_vuln_high(
+                    category=self.category,
                     request=evil_request,
                     info=info
                 )

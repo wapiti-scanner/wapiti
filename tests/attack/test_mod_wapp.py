@@ -1,43 +1,17 @@
 from unittest.mock import Mock
-import os
 from asyncio import Event
 
 import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wapp import mod_wapp
-
-
-class FakePersister:
-    CONFIG_DIR_NAME = "config"
-    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
-    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
-    CONFIG_DIR = os.path.join(BASE_DIR, CONFIG_DIR_NAME)
-
-    def __init__(self):
-        self.requests = []
-        self.additionals = []
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, _path, _attack_module):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.append(info)
-
-    def add_anomaly(self, _request_id, _category, _level, _request, parameter, _info):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append((info, category))
-
-    def get_root_url(self):
-        return self.requests[0].url
-
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
+from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED
+from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 
 @pytest.mark.asyncio
 @respx.mock
@@ -99,8 +73,10 @@ async def test_url_detection():
 
     await module.attack(request)
 
+    assert persister.module == "wapp"
     assert persister.additionals
-    assert persister.additionals[2] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
+    assert persister.additionals[2]["category"] == TECHNO_DETECTED
+    assert persister.additionals[2]["info"] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
     await crawler.close()
 
 
@@ -133,7 +109,7 @@ async def test_html_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == \
+    assert persister.additionals[0]["info"] == \
            '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
     await crawler.close()
 
@@ -168,7 +144,7 @@ async def test_script_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == \
+    assert persister.additionals[0]["info"] == \
            '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
     await crawler.close()
 
@@ -203,7 +179,8 @@ async def test_cookies_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
     await crawler.close()
 
 
@@ -237,7 +214,8 @@ async def test_headers_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
     await crawler.close()
 
 
@@ -272,7 +250,8 @@ async def test_meta_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
     await crawler.close()
 
 
@@ -309,7 +288,8 @@ async def test_multi_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[-1] == '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
+    assert persister.additionals[-1]["info"] == \
+        '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
     await crawler.close()
 
 
@@ -343,8 +323,9 @@ async def test_implies_detection():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
-    assert persister.additionals[1] == '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
+    assert persister.additionals[0]["info"] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    assert persister.additionals[1]["info"] == \
+        '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
     await crawler.close()
 
 
@@ -378,9 +359,9 @@ async def test_vulnerabilities():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
-    assert persister.vulnerabilities[0][1] == 'Fingerprint web application framework'
-    assert persister.vulnerabilities[1][0] == \
+    assert persister.vulnerabilities[0]["info"] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    assert persister.vulnerabilities[0]["category"] == WEB_APP_VERSIONED
+    assert persister.vulnerabilities[1]["info"] == \
            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
-    assert persister.vulnerabilities[1][1] == 'Fingerprint web server'
+    assert persister.vulnerabilities[1]["category"] == WEB_SERVER_VERSIONED
     await crawler.close()

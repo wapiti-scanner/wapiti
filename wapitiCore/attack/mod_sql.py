@@ -22,7 +22,7 @@ from random import randint
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags, Mutator
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME
 from wapitiCore.net.web import Request
 
@@ -273,6 +273,7 @@ class mod_sql(Attack):
 
     time_to_sleep = 6
     name = "sql"
+    category = NAME
     payloads = ("[VALUE]\xBF'\"(", Flags())
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
 
@@ -352,10 +353,9 @@ class mod_sql(Attack):
                     else:
                         vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
 
-                    self.add_vuln(
+                    self.add_vuln_critical(
                         request_id=request.path_id,
-                        category=NAME,
-                        level=CRITICAL_LEVEL,
+                        category=self.category,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter
@@ -383,10 +383,9 @@ class mod_sql(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                    self.add_anom(
+                    self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter
@@ -446,10 +445,9 @@ class mod_sql(Attack):
                     else:
                         vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, current_parameter)
 
-                    self.add_vuln(
+                    self.add_vuln_critical(
                         request_id=request.path_id,
-                        category=NAME,
-                        level=CRITICAL_LEVEL,
+                        category=self.category,
                         request=last_mutated_request,
                         info=vuln_message,
                         parameter=current_parameter

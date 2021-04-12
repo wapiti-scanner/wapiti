@@ -23,7 +23,7 @@ from binascii import hexlify, unhexlify
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
-from wapitiCore.language.vulnerability import Messages, CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.ssrf import NAME
 from wapitiCore.net.web import Request
 
@@ -58,7 +58,7 @@ class SsrfMutator(Mutator):
         # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
-            for i in range(len(params_list)):
+            for i, _ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:
@@ -151,6 +151,7 @@ class mod_ssrf(Attack):
     """
 
     name = "ssrf"
+    category = NAME
     MSG_VULN = _("SSRF vulnerability")
 
     def __init__(self, crawler, persister, logger, attack_options, stop_event):
@@ -241,10 +242,9 @@ class mod_ssrf(Attack):
 
                             mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                            self.add_vuln(
+                            self.add_vuln_critical(
                                 request_id=original_request.path_id,
-                                category=NAME,
-                                level=CRITICAL_LEVEL,
+                                category=self.category,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter

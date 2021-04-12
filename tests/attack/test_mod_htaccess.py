@@ -5,33 +5,11 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_htaccess import mod_htaccess
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "GET"]
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(request)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append(request)
-
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -72,6 +50,8 @@ async def test_whole_stuff():
         else:
             assert request.path_id == 1
 
+    assert persister.module == "htaccess"
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0].url == "http://perdu.com/admin/"
+    assert persister.vulnerabilities[0]["category"] == _("Htaccess Bypass")
+    assert persister.vulnerabilities[0]["request"].url == "http://perdu.com/admin/"
     await crawler.close()

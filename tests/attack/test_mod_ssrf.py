@@ -5,39 +5,11 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssrf import mod_ssrf
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return self.requests
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def get_path_by_id(self, path_id):
-        for request in self.requests:
-            if request.path_id == int(path_id):
-                return request
-        return None
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add((parameter, request))
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append((parameter, request))
-
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -96,8 +68,10 @@ async def test_whole_stuff():
     # We must trigger finish(à normally called by wapiti.py
     await module.finish()
 
+    assert persister.module == "ssrf"
     assert persister.vulnerabilities
-    assert persister.vulnerabilities[0][0] == "file"
-    file_params = persister.vulnerabilities[0][1].file_params
+    assert persister.vulnerabilities[0]["category"] == _("Server Side Request Forgery")
+    assert persister.vulnerabilities[0]["parameter"] == "file"
+    file_params = persister.vulnerabilities[0]["request"].file_params
     assert file_params[0][1][0] == "http://external.url/page"
     await crawler.close()
