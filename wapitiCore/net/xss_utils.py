@@ -17,6 +17,7 @@
 from configparser import ConfigParser
 from typing import Tuple, List
 from html.parser import attrfind_tolerant
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup, element
 
@@ -221,24 +222,33 @@ def get_context_list(html_code, original_keyword):
     return context_list
 
 
-def load_payloads_from_ini(filename):
+def load_payloads_from_ini(filename, external_endpoint):
     config_reader = ConfigParser(interpolation=None)
     config_reader.read_file(open(filename))
     payloads = []
+    external_endpoint = external_endpoint if external_endpoint.endswith('/') else external_endpoint + "/"
+    parts = urlparse(external_endpoint)
+    proto_endpoint = parts.netloc + parts.path
 
     for section in config_reader.sections():
         payload = config_reader[section]["payload"]
+        value = config_reader[section]["value"]
 
         clean_payload = payload.strip(" \n")
         clean_payload = clean_payload.replace("[TAB]", "\t")
         clean_payload = clean_payload.replace("[LF]", "\n")
+        clean_payload = clean_payload.replace("[EXTERNAL_ENDPOINT]", external_endpoint)
+        clean_payload = clean_payload.replace("[PROTO_ENDPOINT]", proto_endpoint)
+
+        clean_value = value.replace("[EXTERNAL_ENDPOINT]", external_endpoint)
+        clean_value = clean_value.replace("[PROTO_ENDPOINT]", proto_endpoint)
 
         infos = {
             "name": section,
             "payload": clean_payload,
             "tag": config_reader[section]["tag"].split(","),
             "attribute": config_reader[section]["attribute"],
-            "value": config_reader[section]["value"],
+            "value": clean_value,
             "case_sensitive": config_reader.getboolean(section, "case_sensitive", fallback=True),
             "close_tag": config_reader.getboolean(section, "close_tag", fallback=True)
         }
@@ -451,10 +461,10 @@ def apply_context(context, payloads, code):
 
 
 # generate a list of payloads based on where in the webpage the js-code will be injected
-def generate_payloads(html_code, code, payload_file):
+def generate_payloads(html_code, code, payload_file, external_endpoint="http://wapiti3.ovh/"):
     # We must keep the original source code because bs gives us something that may differ...
     context_list = get_context_list(html_code, code)
-    payload_list = load_payloads_from_ini(payload_file)
+    payload_list = load_payloads_from_ini(payload_file, external_endpoint)
 
     payloads_and_flags = []
 
