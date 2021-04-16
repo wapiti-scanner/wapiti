@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from time import sleep
+from asyncio import sleep
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
@@ -171,7 +171,7 @@ class mod_ssrf(Attack):
             endpoint=self.external_endpoint
         )
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
         for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
@@ -179,19 +179,19 @@ class mod_ssrf(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                self.crawler.send(mutated_request)
+                await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
                 continue
 
-    def finish(self):
+    async def finish(self):
         endpoint_url = "{}get_ssrf.php?session_id={}".format(self.internal_endpoint, self._session_id)
         print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
-        sleep(2)
+        await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
         try:
-            response = self.crawler.send(endpoint_request)
+            response = await self.crawler.async_send(endpoint_request)
         except RequestException:
             self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))

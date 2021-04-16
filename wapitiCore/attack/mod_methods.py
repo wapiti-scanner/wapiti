@@ -37,7 +37,7 @@ class mod_methods(Attack):
     def must_attack(self, request: Request):
         return request.path not in self.excluded_path
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         page = request.path
         self.excluded_path.add(page)
 
@@ -52,7 +52,7 @@ class mod_methods(Attack):
             print("[+] {}".format(option_request))
 
         try:
-            response = self.crawler.send(option_request)
+            response = await self.crawler.async_send(option_request)
         except RequestException:
             self.network_errors += 1
             return

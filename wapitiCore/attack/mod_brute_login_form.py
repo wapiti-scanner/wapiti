@@ -62,7 +62,7 @@ class mod_brute_login_form(Attack):
                 if password:
                     yield password
 
-    def test_credentials(self, login_form, username_index, password_index, username, password):
+    async def test_credentials(self, login_form, username_index, password_index, username, password):
         post_params = login_form.post_params
         get_params = login_form.get_params
 
@@ -82,7 +82,7 @@ class mod_brute_login_form(Attack):
             link_depth=login_form.link_depth
         )
 
-        login_response = self.crawler.send(
+        login_response = await self.crawler.async_send(
             login_request,
             follow_redirects=True
         )
@@ -100,9 +100,9 @@ class mod_brute_login_form(Attack):
 
         return True
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         try:
-            page = self.crawler.get(Request(request.referer), follow_redirects=True)
+            page = await self.crawler.async_get(Request(request.referer), follow_redirects=True)
         except RequestException:
             self.network_errors += 1
             return
@@ -112,7 +112,7 @@ class mod_brute_login_form(Attack):
             return
 
         try:
-            failure_text = self.test_credentials(
+            failure_text = await self.test_credentials(
                 login_form,
                 username_field_idx, password_field_idx,
                 "invalid", "invalid"
@@ -127,7 +127,7 @@ class mod_brute_login_form(Attack):
 
         for username, password in product(self.get_usernames(), self.get_passwords()):
             try:
-                response = self.test_credentials(
+                response = await self.test_credentials(
                     login_form,
                     username_field_idx, password_field_idx,
                     username, password

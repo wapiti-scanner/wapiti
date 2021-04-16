@@ -257,7 +257,7 @@ class Attack:
     def must_attack_query_string(self):
         return self.attack_level == 2
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         raise NotImplementedError("Override me bro")
 
     def get_mutator(self):
@@ -345,7 +345,7 @@ class Mutator:
                     saved_value = ""
 
                 if params_list is file_params:
-                    params_list[i][1] = ["__PAYLOAD__", params_list[i][1][1]]
+                    params_list[i][1] = ["__PAYLOAD__", params_list[i][1][1]]  # second entry is file content
                 else:
                     params_list[i][1] = "__PAYLOAD__"
 
@@ -384,9 +384,10 @@ class Mutator:
                                     continue
                                 payload = payload.replace("[EXTVALUE]", saved_value[0].rsplit(".", 1)[-1])
 
+                            # Injection takes place on the filename here
                             payload = payload.replace("[VALUE]", saved_value[0])
                             payload = payload.replace("[DIRVALUE]", saved_value[0].rsplit('/', 1)[0])
-                            params_list[i][1][0] = payload
+                            params_list[i][1] = (payload, saved_value[1], saved_value[2])
                             method = PayloadType.file
                         else:
                             if "[EXTVALUE]" in payload:

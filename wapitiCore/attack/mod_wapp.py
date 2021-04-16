@@ -57,13 +57,12 @@ class mod_wapp(Attack):
 
         except IOError:
             print(_("Problem with local wapp database."))
-            print(_("Downloading from the web..."))
-            self.update()
+            print(_("Please update the database with wapiti --update"))
 
-    def update(self):
+    async def update(self):
         try:
             request = Request(self.WAPP_DB_URL)
-            response = self.crawler.send(request)
+            response = await self.crawler.async_send(request)
 
             with open(os.path.join(self.user_config_dir, self.WAPP_DB), 'w') as wapp_db_file:
                 json.dump(response.json, wapp_db_file)
@@ -80,7 +79,7 @@ class mod_wapp(Attack):
 
         return request.url == self.persister.get_root_url()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         self.finished = True
         request_to_root = Request(request.url)
 
@@ -95,7 +94,7 @@ class mod_wapp(Attack):
             return
 
         try:
-            response = self.crawler.send(request_to_root, follow_redirects=True)
+            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         except RequestException:
             self.network_errors += 1
             return

@@ -40,7 +40,7 @@ class mod_crlf(Attack):
         super().__init__(crawler, persister, logger, attack_options)
         self.mutator = self.get_mutator()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         page = request.path
 
         for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
@@ -48,7 +48,7 @@ class mod_crlf(Attack):
                 print("[¨] {0}".format(mutated_request.url))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
                 self.add_anom(

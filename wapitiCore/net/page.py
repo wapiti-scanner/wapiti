@@ -31,6 +31,7 @@ from posixpath import normpath
 from requests.packages.urllib3 import disable_warnings
 from requests.exceptions import ConnectionError
 from requests.models import Response
+import httpx
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
@@ -77,7 +78,7 @@ def not_empty(original_function):
 
 
 class Page:
-    def __init__(self, response: Response, empty: bool = False):
+    def __init__(self, response: httpx.Response, empty: bool = False):
         """Create a new Page object.
 
         @type response: Response
@@ -90,9 +91,10 @@ class Page:
         self._soup = None
         self._is_empty = empty
         try:
-            self._fld = get_fld(response.url)
+            # TODO: httpx.URL is interesting, reuse that
+            self._fld = get_fld(str(response.url))
         except TldDomainNotFound:
-            self._fld = urlparse(response.url).netloc
+            self._fld = urlparse(str(response.url)).netloc
 
     @property
     def url(self) -> str:
@@ -100,7 +102,7 @@ class Page:
 
         @rtype: str
         """
-        return self._response.url
+        return str(self._response.url)
 
     @property
     def history(self) -> list:
@@ -173,9 +175,7 @@ class Page:
 
             return int(self._response.headers["content-length"])
         # permet de forcer le chargement du body
-        if self.bytes:
-            return self._response.raw.tell()
-        return 0
+        return len(self.bytes)
 
     @property
     @lru_cache(maxsize=2)
@@ -185,6 +185,9 @@ class Page:
         @rtype: float
         """
         return self._response.elapsed.total_seconds()
+
+    async def read(self):
+        await self._response.aread()
 
     @property
     def content(self) -> str:
@@ -203,14 +206,7 @@ class Page:
         if self._is_empty:
             return b""
 
-        try:
-            return self._response.content
-        except (ConnectionError, OSError, IncompleteRead):
-            return b""
-
-    @property
-    def raw(self):
-        return self._response.raw
+        return self._response.content
 
     @property
     def json(self):
@@ -223,7 +219,7 @@ class Page:
             pass
 
         try:
-            return literal_eval(self._response.content)
+            return literal_eval(self.content)
         except ValueError:
             pass
 
@@ -306,7 +302,7 @@ class Page:
         if self._soup is not None:
             self._soup.decompose()
             del self._soup
-        self._response.raw.close()
+        self._response.close()
 
     @property
     @lru_cache(maxsize=2)
@@ -330,7 +326,7 @@ class Page:
     @lru_cache(maxsize=2)
     def redirection_url(self):
         """Returns the fixed URL sent through the Location header if set otherwise returns None."""
-        if self._response.is_redirect or self._response.is_permanent_redirect:
+        if self._response.is_redirect:
             if "location" in self._response.headers:
                 return self.make_absolute(self._response.headers["location"])
         return ""
@@ -588,8 +584,8 @@ class Page:
     @property
     def apparent_encoding(self):
         """Return the detected encoding for the page."""
-        if self._response.apparent_encoding:
-            return self._response.apparent_encoding.upper()
+        if self._response.charset_encoding:
+            return self._response.charset_encoding.upper()
         return None
 
     @encoding.setter
@@ -752,7 +748,7 @@ class Page:
                 "datetime": "2019-03-03T20:35:34.32",
                 "datetime-local": "2019-03-03T22:41",
                 "email": "wapiti2021@mailinator.com",
-                "file": ["pix.gif", "GIF89a", "image/gif"],
+                "file": ("pix.gif", "GIF89a", "image/gif"),
                 "hidden": "default",
                 "month": "2019-03",
                 "number": "1337",

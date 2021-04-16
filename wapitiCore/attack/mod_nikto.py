@@ -20,6 +20,7 @@ import csv
 import re
 import os
 import random
+import asyncio
 
 from requests.exceptions import RequestException
 
@@ -78,13 +79,12 @@ class mod_nikto(Attack):
 
         except IOError:
             print(_("Problem with local nikto database."))
-            print(_("Downloading from the web..."))
-            self.update()
+            print(_("Please update the database with wapiti --update"))
 
-    def update(self):
+    async def update(self):
         try:
             request = Request(self.NIKTO_DB_URL)
-            response = self.crawler.send(request)
+            response = await self.crawler.async_send(request)
 
             csv.register_dialect("nikto", quoting=csv.QUOTE_ALL, doublequote=False, escapechar="\\")
             reader = csv.reader(response.content.split("\n"), "nikto")
@@ -103,7 +103,7 @@ class mod_nikto(Attack):
     def must_attack(self, request: Request):
         return not self.finished
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         self.finished = True
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
@@ -150,7 +150,7 @@ class mod_nikto(Attack):
                     print("[¨] {0}".format(evil_request.http_repr()))
 
             try:
-                response = self.crawler.send(evil_request)
+                response = await self.crawler.async_send(evil_request)
             except RequestException:
                 self.network_errors += 1
                 continue

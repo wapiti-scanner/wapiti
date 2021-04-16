@@ -61,7 +61,7 @@ class mod_backup(Attack):
 
         return True
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         page = request.path
 
         for payload, __ in self.payloads:
@@ -85,7 +85,7 @@ class mod_backup(Attack):
             evil_req = Request(url)
 
             try:
-                response = self.crawler.send(evil_req)
+                response = await self.crawler.async_send(evil_req)
             except RequestException:
                 self.network_errors += 1
                 continue

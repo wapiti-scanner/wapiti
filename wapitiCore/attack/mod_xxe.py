@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from binascii import unhexlify
-from time import sleep
+from asyncio import sleep
 from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
@@ -93,9 +93,9 @@ class mod_xxe(Attack):
             skip=self.options.get("skipped_parameters")
         )
 
-    def false_positive(self, request: Request, pattern: str) -> bool:
+    async def false_positive(self, request: Request, pattern: str) -> bool:
         try:
-            response = self.crawler.send(request)
+            response = await self.crawler.async_send(request)
         except RequestException:
             self.network_errors += 1
             return False
@@ -108,7 +108,7 @@ class mod_xxe(Attack):
         except AttributeError:
             return []
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         timeouted = False
         page = request.path
         saw_internal_error = False
@@ -116,14 +116,14 @@ class mod_xxe(Attack):
         vulnerable_parameter = False
 
         if request.url not in self.attacked_urls:
-            self.attack_body(request)
+            await self.attack_body(request)
             self.attacked_urls.add(request.url)
 
         if request.path_id in self.vulnerables:
             return
 
         if request.is_multipart:
-            self.attack_upload(request)
+            await self.attack_upload(request)
             if request.path_id in self.vulnerables:
                 return
 
@@ -140,7 +140,7 @@ class mod_xxe(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
@@ -171,7 +171,7 @@ class mod_xxe(Attack):
                 continue
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
-                if pattern and not self.false_positive(request, pattern):
+                if pattern and not await self.false_positive(request, pattern):
                     # An error message implies that a vulnerability may exists
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
@@ -225,7 +225,7 @@ class mod_xxe(Attack):
                     self.log_orange(mutated_request.http_repr())
                     self.log_orange("---")
 
-    def attack_body(self, original_request):
+    async def attack_body(self, original_request):
         for payload, tags in self.payloads:
             payload = payload.replace("[PATH_ID]", str(original_request.path_id))
             payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")  # raw body
@@ -235,13 +235,13 @@ class mod_xxe(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
                 continue
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(tags))
-                if pattern and not self.false_positive(original_request, pattern):
+                if pattern and not await self.false_positive(original_request, pattern):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=NAME,
@@ -263,7 +263,7 @@ class mod_xxe(Attack):
                     self.vulnerables.add(original_request.path_id)
                     break
 
-    def attack_upload(self, original_request):
+    async def attack_upload(self, original_request):
         mutator = FileMutator(payloads=self.payloads)
         current_parameter = None
         vulnerable_parameter = False
@@ -281,12 +281,12 @@ class mod_xxe(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
-                if pattern and not self.false_positive(original_request, pattern):
+                if pattern and not await self.false_positive(original_request, pattern):
                     self.add_vuln(
                         request_id=original_request.path_id,
                         category=NAME,
@@ -309,14 +309,14 @@ class mod_xxe(Attack):
                     vulnerable_parameter = True
                     self.vulnerables.add(original_request.path_id)
 
-    def finish(self):
+    async def finish(self):
         endpoint_url = "{}get_xxe.php?session_id={}".format(self.internal_endpoint, self._session_id)
         print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
-        sleep(2)
+        await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
         try:
-            response = self.crawler.send(endpoint_request)
+            response = await self.crawler.async_send(endpoint_request)
         except RequestException:
             self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
