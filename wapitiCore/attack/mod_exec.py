@@ -77,7 +77,7 @@ class mod_exec(Attack):
             warned = True
         return vuln_info, executed, warned
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         warned = False
         timeouted = False
         page = request.path
@@ -103,7 +103,7 @@ class mod_exec(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 if flags.type == PayloadType.time:
                     if self.does_timeout(request):

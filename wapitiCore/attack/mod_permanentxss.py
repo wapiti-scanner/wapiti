@@ -61,7 +61,7 @@ class mod_permanentxss(Attack):
 
         return True
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         """This method searches XSS which could be permanently stored in the web application"""
         url = request.url
         target_req = Request(url)
@@ -72,7 +72,7 @@ class mod_permanentxss(Attack):
             headers["referer"] = referer
 
         try:
-            response = self.crawler.send(target_req, headers=headers)
+            response = await self.crawler.async_send(target_req, headers=headers)
             data = response.content
         except RequestException:
             self.network_errors += 1
@@ -192,7 +192,7 @@ class mod_permanentxss(Attack):
                     else:
                         method = "P"
 
-                    self.attempt_exploit(method, payloads, input_request, parameter, taint, request)
+                    await self.attempt_exploit(method, payloads, input_request, parameter, taint, request)
 
     def load_require(self, dependencies: list = None):
         if dependencies:
@@ -201,7 +201,7 @@ class mod_permanentxss(Attack):
                     self.successful_xss = module.successful_xss
                     self.tried_xss = module.tried_xss
 
-    def attempt_exploit(self, method, payloads, injection_request, parameter, taint, output_request):
+    async def attempt_exploit(self, method, payloads, injection_request, parameter, taint, output_request):
         timeouted = False
         page = injection_request.path
         saw_internal_error = False
@@ -220,7 +220,7 @@ class mod_permanentxss(Attack):
                 print("[¨] {0}".format(evil_request))
 
             try:
-                self.crawler.send(evil_request)
+                await self.crawler.async_send(evil_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
@@ -251,7 +251,7 @@ class mod_permanentxss(Attack):
                 continue
             else:
                 try:
-                    response = self.crawler.send(output_request)
+                    response = await self.crawler.async_send(output_request)
                 except RequestException:
                     self.network_errors += 1
                     continue

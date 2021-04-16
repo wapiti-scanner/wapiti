@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import os
 import sys
+import asyncio
 
 if sys.version_info.major < 3:
     print("Wapiti needs Python 3, you are using {}.{}".format(sys.version_info.major, sys.version_info.minor))
@@ -30,4 +31,4 @@ if os.path.exists(os.path.join(parent_dir, "wapitiCore")):
 from wapitiCore.main.wapiti import wapiti_main
 
 if __name__ == "__main__":
-    wapiti_main()
+    asyncio.run(wapiti_main())

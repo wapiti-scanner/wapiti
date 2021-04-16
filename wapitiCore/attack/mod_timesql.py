@@ -43,7 +43,7 @@ class mod_timesql(Attack):
     def set_timeout(self, timeout):
         self.time_to_sleep = str(1 + int(timeout))
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         page = request.path
         saw_internal_error = False
         current_parameter = None
@@ -62,7 +62,7 @@ class mod_timesql(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 # The request with time based payload did timeout, what about a regular request?
                 if self.does_timeout(request):

@@ -45,7 +45,7 @@ class mod_htaccess(Attack):
 
         return request.status in (401, 402, 403, 407)
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         url = request.path
         referer = request.referer
         headers = {}
@@ -54,7 +54,7 @@ class mod_htaccess(Attack):
 
         evil_req = Request(url, method="ABC")
         try:
-            response = self.crawler.send(evil_req, headers=headers)
+            response = await self.crawler.async_send(evil_req, headers=headers)
         except RequestException:
             self.network_errors += 1
             return

@@ -302,9 +302,9 @@ class mod_sql(Attack):
 
         return ""
 
-    def is_false_positive(self, request):
+    async def is_false_positive(self, request):
         try:
-            response = self.crawler.send(request)
+            response = await self.crawler.async_send(request)
         except RequestException:
             self.network_errors += 1
         else:
@@ -315,11 +315,11 @@ class mod_sql(Attack):
     def set_timeout(self, timeout):
         self.time_to_sleep = str(1 + int(timeout))
 
-    def attack(self, request: Request):
-        vulnerable_parameters = self.error_based_attack(request)
-        self.boolean_based_attack(request, vulnerable_parameters)
+    async def attack(self, request: Request):
+        vulnerable_parameters = await self.error_based_attack(request)
+        await self.boolean_based_attack(request, vulnerable_parameters)
 
-    def error_based_attack(self, request: Request):
+    async def error_based_attack(self, request: Request):
         page = request.path
         saw_internal_error = False
         current_parameter = None
@@ -339,7 +339,7 @@ class mod_sql(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
             else:
@@ -401,9 +401,9 @@ class mod_sql(Attack):
 
         return vulnerable_parameters
 
-    def boolean_based_attack(self, request: Request, parameters_to_skip: set):
+    async def boolean_based_attack(self, request: Request, parameters_to_skip: set):
         try:
-            good_response = self.crawler.send(request)
+            good_response = await self.crawler.async_send(request)
             good_status = good_response.status
             good_redirect = good_response.redirection_url
             # good_title = response.title
@@ -487,7 +487,7 @@ class mod_sql(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
                 # We need all cases to make sure SQLi is there

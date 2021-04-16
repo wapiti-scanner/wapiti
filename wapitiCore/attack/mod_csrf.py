@@ -108,7 +108,7 @@ class mod_csrf(Attack):
 
         return True
 
-    def is_csrf_verified(self, original_request: Request):
+    async def is_csrf_verified(self, original_request: Request):
         """Check whether anti-csrf token is verified (backend) after submitting request"""
 
         # Replace anti-csrf token value from form with "wapiti"
@@ -133,14 +133,14 @@ class mod_csrf(Attack):
         )
 
         try:
-            original_response = self.crawler.send(original_request, follow_redirects=True)
+            original_response = await self.crawler.async_send(original_request, follow_redirects=True)
         except RequestException:
             # We can't compare so act like it is secure
             self.network_errors += 1
             return True
 
         try:
-            mutated_response = self.crawler.send(mutated_request, headers=special_headers, follow_redirects=True)
+            mutated_response = await self.crawler.async_send(mutated_request, headers=special_headers, follow_redirects=True)
         except RequestException:
             # Do not log anything: the payload is not harmful enough for such behavior
             self.network_errors += 1
@@ -158,13 +158,13 @@ class mod_csrf(Attack):
 
         return True
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         csrf_value = self.is_csrf_present(request)
 
         # check if token is present
         if not csrf_value:
             vuln_message = _("Lack of anti CSRF token")
-        elif not self.is_csrf_verified(request):
+        elif not await self.is_csrf_verified(request):
             vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
         elif not self.is_csrf_robust(csrf_value):
             vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)

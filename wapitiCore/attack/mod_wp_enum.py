@@ -35,28 +35,33 @@ class mod_wp_enum(Attack):
                 if theme:
                     yield theme
 
-    def detect_plugin(self, url):
+    async def detect_plugin(self, url):
         for plugin in self.get_plugin():
             req = Request('{}/wp-content/plugins/{}/readme.txt'.format(url, plugin))
-            rep = self.crawler.get(req)
+            rep = await self.crawler.async_get(req)
+
             if rep.status == 200:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
+
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
                 if version:
                     version = version.group(1)
                 else:
                     print("Readme.txt is not in a valid format")
                     version = ""
+
                 plugin_detected = {
                     "name": plugin,
                     "versions": [version],
                     "categories": ["WordPress plugins"]
                 }
+
                 self.log_blue(
                     MSG_TECHNO_VERSIONED,
                     plugin,
                     version
                 )
+
                 self.add_addition(
                     category=TECHNO_DETECTED,
                     level=LOW_LEVEL,
@@ -81,10 +86,10 @@ class mod_wp_enum(Attack):
                     info=json.dumps(plugin_detected)
                 )
 
-    def detect_theme(self, url):
+    async def detect_theme(self, url):
         for theme in self.get_theme():
             req = Request('{}/wp-content/themes/{}/readme.txt'.format(url, theme))
-            rep = self.crawler.get(req)
+            rep = await self.crawler.async_get(req)
             if rep.status == 200:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
@@ -139,17 +144,17 @@ class mod_wp_enum(Attack):
             return False
         return request.url == self.persister.get_root_url()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
 
         self.finished = True
         request_to_root = Request(request.url)
 
-        response = self.crawler.send(request_to_root, follow_redirects=True)
+        response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         if self.check_wordpress(response):
             self.log_blue(_("Enumeration of WordPress Plugins :"))
-            self.detect_plugin(request_to_root.url)
+            await self.detect_plugin(request_to_root.url)
             self.log_blue("----")
             self.log_blue(_("Enumeration of WordPress Themes :"))
-            self.detect_theme(request_to_root.url)
+            await self.detect_theme(request_to_root.url)
         else:
             self.log_blue(MSG_NO_WP)

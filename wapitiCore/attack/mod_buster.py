@@ -46,13 +46,13 @@ class mod_buster(Attack):
     def must_attack(self, request: Request):
         return not self.finished
 
-    def test_directory(self, path: str):
+    async def test_directory(self, path: str):
         if self.verbose == 2:
             print("[¨] Testing directory {0}".format(path))
 
         test_page = Request(path + "does_n0t_exist.htm")
         try:
-            response = self.crawler.send(test_page)
+            response = await self.crawler.async_send(test_page)
         except RequestException:
             self.network_errors += 1
             return
@@ -66,7 +66,7 @@ class mod_buster(Attack):
             if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
                 page = Request(path + candidate)
                 try:
-                    response = self.crawler.send(page)
+                    response = await self.crawler.async_send(page)
                     if response.redirection_url:
                         loc = response.redirection_url
                         # if loc in self.known_dirs or loc in self.known_pages:
@@ -84,7 +84,7 @@ class mod_buster(Attack):
                     self.network_errors += 1
                     continue
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         self.finished = True
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
 
@@ -100,7 +100,7 @@ class mod_buster(Attack):
 
         # Then for each known webdirs we look for unknown webpages inside
         for current_dir in self.known_dirs:
-            self.test_directory(current_dir)
+            await self.test_directory(current_dir)
 
         # Finally, for each discovered webdirs we look for more webpages
         while self.new_resources:
@@ -108,6 +108,6 @@ class mod_buster(Attack):
             if current_res.endswith("/"):
                 # Mark as known then explore
                 self.known_dirs.append(current_res)
-                self.test_directory(current_res)
+                await self.test_directory(current_res)
             else:
                 self.known_pages.append(current_res)

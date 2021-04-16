@@ -136,7 +136,7 @@ class mod_file(Attack):
 
         return payloads
 
-    def is_false_positive(self, request, pattern):
+    async def is_false_positive(self, request, pattern):
         """Check if the response for a given request contains an expected pattern."""
         if not pattern:
             # Should not happen
@@ -146,7 +146,7 @@ class mod_file(Attack):
             return True
 
         try:
-            response = self.crawler.send(request)
+            response = await self.crawler.async_send(request)
         except RequestException:
             self.network_errors += 1
             # Can't check out, avoid false negative
@@ -159,7 +159,7 @@ class mod_file(Attack):
 
         return False
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         warned = False
         timeouted = False
         page = request.path
@@ -180,7 +180,7 @@ class mod_file(Attack):
                 print("[¨] {0}".format(mutated_request))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
@@ -230,7 +230,7 @@ class mod_file(Attack):
 
                 if found_pattern:
                     # Interesting pattern found, either inclusion or error message
-                    if self.is_false_positive(request, found_pattern):
+                    if await self.is_false_positive(request, found_pattern):
                         continue
 
                     if not inclusion_succeed:

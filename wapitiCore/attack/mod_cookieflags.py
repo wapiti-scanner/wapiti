@@ -46,7 +46,7 @@ class mod_cookieflags(Attack):
 
         return request.url == self.persister.get_root_url()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         self.finished = True
         cookies = self.crawler.session_cookies
 

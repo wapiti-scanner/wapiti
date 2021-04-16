@@ -1,4 +1,3 @@
-import re
 import json
 import hashlib
 from os.path import join as path_join
@@ -29,12 +28,12 @@ class mod_drupal_enum(Attack):
             data = json.load(hashes)
             return data
 
-    def detect_version(self, url):
+    async def detect_version(self, url):
         vers = {}
         data = self.get_hash()
         for uri in data:
             req = Request('{}{}'.format(url, uri))
-            rep = self.crawler.get(req)
+            rep = await self.crawler.async_get(req)
             if rep.status != 200:
                 continue
 
@@ -47,11 +46,11 @@ class mod_drupal_enum(Attack):
         if vers:
             self.versions = set.intersection(*[set(versions) for versions in vers.values()])
 
-    def check_drupal(self, url):
+    async def check_drupal(self, url):
         check_list = ['sites/', 'core/misc/drupal.js', 'misc/drupal.js', 'misc/test/error/404/ispresent.html']
         for item in check_list:
             req = Request('{}{}'.format(url, item))
-            rep = self.crawler.get(req)
+            rep = await self.crawler.async_get(req)
             if rep.status != 404:
                 return True
         return False
@@ -64,13 +63,12 @@ class mod_drupal_enum(Attack):
             return False
         return request.url == self.persister.get_root_url()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         self.finished = True
         request_to_root = Request(request.url)
-        self.crawler.send(request_to_root, follow_redirects=True)
 
-        if self.check_drupal(request_to_root.url):
-            self.detect_version(request_to_root.url)
+        if await self.check_drupal(request_to_root.url):
+            await self.detect_version(request_to_root.url)
             if self.versions:
                 self.versions = sorted(self.versions, key=lambda x: [i for i in x.split('.')])
                 drupal_detected = {

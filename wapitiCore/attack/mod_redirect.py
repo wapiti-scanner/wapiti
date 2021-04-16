@@ -38,7 +38,7 @@ class mod_redirect(Attack):
         super().__init__(crawler, persister, logger, attack_options)
         self.mutator = self.get_mutator()
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         page = request.path
 
         for mutated_request, parameter, __, __ in self.mutator.mutate(request):
@@ -46,7 +46,7 @@ class mod_redirect(Attack):
                 print("[¨] {0}".format(mutated_request.url))
 
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
                 continue

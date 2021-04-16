@@ -60,7 +60,7 @@ class mod_shellshock(Attack):
         # We attempt to attach each script once whatever the method
         return request.path not in self.attacked_get
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         url = request.path
         self.attacked_get.append(url)
 
@@ -68,7 +68,7 @@ class mod_shellshock(Attack):
         evil_req = Request(url)
 
         try:
-            resp = self.crawler.send(evil_req, headers=self.hdrs)
+            resp = await self.crawler.async_send(evil_req, headers=self.hdrs)
         except RequestException:
             self.network_errors += 1
             return

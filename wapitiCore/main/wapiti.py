@@ -19,7 +19,7 @@
 import sys
 import argparse
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 from time import strftime, gmtime, sleep
 from importlib import import_module
 from operator import attrgetter
@@ -86,8 +86,12 @@ class InvalidOptionValue(Exception):
 stop_event = asyncio.Event()
 
 
-def inner_ctrl_c_signal_handler(sig, frame):  # pylint: disable=unused-argument
+def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
     print(_("Waiting for running crawler tasks to finish, please wait."))
+    stop_event.set()
+
+
+def stop_attack_process():  # pylint: disable=unused-argument
     stop_event.set()
 
 
@@ -99,10 +103,21 @@ class Wapiti:
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
-    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None):
+    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None, proxy: str = ""):
         self.target_url = root_url
         self.server = urlparse(root_url).netloc
-        self.crawler = crawler.Crawler(root_url)
+
+        proxies = {}
+        if proxy:
+            url_parts = urlparse(proxy)
+            protocol = url_parts.scheme.lower()
+
+            if protocol not in ("http", "https", "socks"):
+                raise ValueError("Unknown proxy type: {}".format(protocol))
+
+            proxies[protocol] = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
+
+        self.crawler = crawler.AsyncCrawler(root_url, proxies=proxies)
 
         self.target_scope = scope
         if scope == "page":
@@ -299,7 +314,7 @@ class Wapiti:
                         if not found:
                             print(_("[!] Unable to find a module named {0}").format(module_name))
 
-    def update(self):
+    async def update(self):
         """Update modules that implement an update method"""
         logger = ConsoleLogger()
         if self.color:
@@ -310,7 +325,7 @@ class Wapiti:
             mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options)
             if hasattr(mod_instance, "update"):
                 print(_("Updating module {0}").format(mod_name[4:]))
-                mod_instance.update()
+                await mod_instance.update()
         print(_("Update done."))
 
     def load_scan_state(self):
@@ -359,11 +374,15 @@ class Wapiti:
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
 
-    def attack(self):
+    async def attack(self, stop_event):
         """Launch the attacks based on the preferences set by the command line"""
         self._init_attacks()
+        answer = "0"
 
         for attack_module in self.attacks:
+            if stop_event.is_set():
+                break
+
             start = datetime.utcnow()
             if attack_module.do_get is False and attack_module.do_post is False:
                 continue
@@ -401,18 +420,7 @@ class Wapiti:
 
             answer = "0"
             while True:
-                try:
-                    original_request = next(generator)
-                    if attack_module.must_attack(original_request):
-                        if self.verbose >= 1:
-                            print("[+] {}".format(original_request))
-
-                        attack_module.attack(original_request)
-
-                    if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
-                        print(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
-                        break
-                except KeyboardInterrupt as exception:
+                if stop_event.is_set():
                     print('')
                     print(_("Attack process was interrupted. Do you want to:"))
                     print(_("\tr) stop everything here and generate the (R)eport"))
@@ -431,14 +439,26 @@ class Wapiti:
                         else:
                             break
 
-                    if answer in ("r", "n"):
+                    if answer in ("n", "c"):
+                        stop_event.clear()
+
+                    if answer in ("r", "n", "q"):
                         break
 
                     if answer == "c":
                         continue
 
-                    # if answer is q, raise KeyboardInterrupt and it will stop cleanly
-                    raise exception
+                try:
+                    original_request = next(generator)
+                    if attack_module.must_attack(original_request):
+                        if self.verbose >= 1:
+                            print("[+] {}".format(original_request))
+
+                        await attack_module.attack(original_request)
+
+                    if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
+                        print(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
+                        break
                 except RequestException:
                     # Hmmm it should be caught inside the module
                     sleep(1)
@@ -456,19 +476,17 @@ class Wapiti:
                         with open(traceback_file, "w") as traceback_fd:
                             print_tb(exception_traceback, file=traceback_fd)
                             print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
-                            print(
-                                "Occurred in {} on {}".format(
-                                    attack_module.name,
-                                    self.target_url),
-                                file=traceback_fd)
+                            print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
                             print("{}. Requests {}. OS {}".format(WAPITI_VERSION, requests.__version__, sys.platform))
 
                         try:
                             upload_request = Request(
                                 "https://wapiti3.ovh/upload.php",
-                                file_params=[["crash_report", [traceback_file, open(traceback_file, "rb").read()]]]
+                                file_params=[
+                                    ["crash_report", (traceback_file, open(traceback_file, "rb").read(), "text/plain")]
+                                ]
                             )
-                            page = self.crawler.send(upload_request)
+                            page = await self.crawler.async_send(upload_request)
                             print(_("Sending crash report {} ... {}").format(traceback_file, page.content))
                         except RequestException:
                             print(_("Error sending crash report"))
@@ -478,13 +496,17 @@ class Wapiti:
                         self.persister.set_attacked(original_request.path_id, attack_module.name)
 
             if hasattr(attack_module, "finish"):
-                attack_module.finish()
+                await attack_module.finish()
 
             if attack_module.network_errors:
                 print(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
 
             if answer == "1":
                 break
+
+        if answer == "q":
+            await self.crawler.close()
+            return
 
         # if self.crawler.get_uploads():
         #     print('')
@@ -536,6 +558,8 @@ class Wapiti:
         if self.report_generator_type == "html":
             print(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
 
+        await self.crawler.close()
+
     def set_timeout(self, timeout: float = 6.0):
         """Set the timeout for the time waiting for a HTTP response"""
         self.crawler.timeout = timeout
@@ -543,10 +567,6 @@ class Wapiti:
     def set_verify_ssl(self, verify: bool = False):
         """Set whether SSL must be verified."""
         self.crawler.secure = verify
-
-    def set_proxy(self, proxy: str = ""):
-        """Set a proxy to use for HTTP requests."""
-        self.crawler.set_proxy(proxy)
 
     def add_start_url(self, url: str):
         """Specify an URL to start the scan with. Can be called several times."""
@@ -701,7 +721,7 @@ def ping(url):
     return True
 
 
-def wapiti_main():
+async def wapiti_main():
     banners = [
         """
      __      __               .__  __  .__________
@@ -1099,13 +1119,23 @@ def wapiti_main():
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
 
-    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+    proxy_url = ""
+    # for proxy_url in args.proxies:
+    #     if proxy_url.startswith(("http://", "https://", "socks://")):
+    #         wap.set_proxy(proxy_url)
+    #     else:
+    #         raise InvalidOptionValue("-p", proxy_url)
+
+    if args.tor:
+        proxy_url = "socks://127.0.0.1:9050/"
+
+    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config, proxy=proxy_url)
 
     if args.update:
         print(_("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
-        wap.update()
+        await wap.update()
         sys.exit()
 
     try:
@@ -1131,15 +1161,6 @@ def wapiti_main():
                 wap.add_excluded_url(exclude_url)
             else:
                 raise InvalidOptionValue("-x", exclude_url)
-
-        for proxy_url in args.proxies:
-            if proxy_url.startswith(("http://", "https://", "socks://")):
-                wap.set_proxy(proxy_url)
-            else:
-                raise InvalidOptionValue("-p", proxy_url)
-
-        if args.tor:
-            wap.set_proxy("socks://127.0.0.1:9050/")
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):
@@ -1248,6 +1269,9 @@ def wapiti_main():
         print(msg)
         sys.exit(2)
 
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
+
     try:
         if not args.skip_crawl:
             if wap.have_attacks_started() and not args.resume_crawl:
@@ -1257,14 +1281,12 @@ def wapiti_main():
                     print(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args and args.auth_type == "post":
-                    wap.crawler.try_login(wap.crawler.auth_url)
+                    await wap.crawler.async_try_login(wap.crawler.auth_url)
 
                 wap.load_scan_state()
-                original_sigint_handler = signal.getsignal(signal.SIGINT)
-                signal.signal(signal.SIGINT, inner_ctrl_c_signal_handler)
-                asyncio.run(wap.browse(stop_event, parallelism=args.threads))
-                # Restore Python builtin signal handler for KeyboardInterrupt to work
-                signal.signal(signal.SIGINT, original_sigint_handler)
+                loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
+                await wap.browse(stop_event, parallelism=args.threads)
+                loop.remove_signal_handler(signal.SIGINT)
                 wap.save_scan_state()
 
         if args.max_parameters:
@@ -1275,13 +1297,10 @@ def wapiti_main():
             )))
 
         print(_("[*] Wapiti found {0} URLs and forms during the scan").format(wap.count_resources()))
-        try:
-            wap.attack()
-        except KeyboardInterrupt:
-            print('')
-            print(_("Attack process interrupted. Scan will be resumed next time "
-                    "unless you specify \"--flush-attacks\" or \"--flush-session\"."))
-            print('')
+        stop_event.clear()
+        loop.add_signal_handler(signal.SIGINT, stop_attack_process)
+        await wap.attack(stop_event)
+
     except OperationalError:
         print(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
         print(_("[!] You should unlock and launch Wapiti again."))

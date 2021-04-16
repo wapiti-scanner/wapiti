@@ -66,11 +66,11 @@ class mod_xss(Attack):
             skip=self.options.get("skipped_parameters")
         )
 
-    def attack(self, request: Request):
+    async def attack(self, request: Request):
         for mutated_request, parameter, taint, flags in self.mutator.mutate(request):
             # We don't display the mutated request here as the payload is not interesting
             try:
-                response = self.crawler.send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
             except RequestException:
                 self.network_errors += 1
                 # We just inserted harmless characters, if we get a timeout here, it's not interesting
@@ -95,9 +95,9 @@ class mod_xss(Attack):
                     else:
                         method = "P"
 
-                    self.attempt_exploit(method, payloads, request, parameter, taint)
+                    await self.attempt_exploit(method, payloads, request, parameter, taint)
 
-    def attempt_exploit(self, method, payloads, original_request, parameter, taint):
+    async def attempt_exploit(self, method, payloads, original_request, parameter, taint):
         timeouted = False
         page = original_request.path
         saw_internal_error = False
@@ -115,7 +115,7 @@ class mod_xss(Attack):
                 print("[¨] {0}".format(evil_request))
 
             try:
-                response = self.crawler.send(evil_request)
+                response = await self.crawler.async_send(evil_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
