@@ -47,8 +47,8 @@ def test_resume_crawling():
     # Got root url + pages 0 to 9
     all_requests = set(wapiti.persister.get_links())
     remaning_request = (remaining_requests - all_requests).pop()
-    # Page 10 gave error so the only one left should be 11
-    assert remaning_request.url == "http://perdu.com/?page=11"
+    # Page 10 gave error so the only one left should be 9 or 11 depending which one was taken first
+    assert remaning_request.url in ("http://perdu.com/?page=9", "http://perdu.com/?page=11")
 
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
     wapiti.browse()
