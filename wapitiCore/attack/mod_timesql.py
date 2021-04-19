@@ -36,8 +36,8 @@ class mod_timesql(Attack):
 
     MSG_VULN = _("Blind SQL vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
     def set_timeout(self, timeout):

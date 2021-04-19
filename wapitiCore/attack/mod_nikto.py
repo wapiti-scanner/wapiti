@@ -66,22 +66,15 @@ class mod_nikto(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
-        try:
-            with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
-                reader = csv.reader(nikto_db_file)
-                self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
-
-        except IOError:
-            print(_("Problem with local nikto database."))
-            print(_("Please update the database with wapiti --update"))
 
     async def update(self):
+        """Update the Nikto database from the web and load the patterns."""
         try:
             request = Request(self.NIKTO_DB_URL)
             response = await self.crawler.async_send(request)
@@ -100,16 +93,26 @@ class mod_nikto(Attack):
         except IOError:
             print(_("Error downloading nikto database."))
 
-    def must_attack(self, request: Request):
-        return not self.finished
-
     async def attack(self, request: Request):
+        try:
+            with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+                reader = csv.reader(nikto_db_file)
+                self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
+
+        except IOError:
+            print(_("Problem with local nikto database."))
+            print(_("Downloading from the web..."))
+            await self.update()
+
         self.finished = True
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
         urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
         server = next(urls).hostname
 
         for line in self.nikto_db:
+            if self._stop_event.is_set():
+                break
+
             match = match_or = match_and = False
             fail = fail_or = False
 

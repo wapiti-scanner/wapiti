@@ -34,8 +34,8 @@ class mod_redirect(Attack):
     do_post = False
     payloads = ("https://openbugbounty.org/", Flags())
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        super().__init__(crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        super().__init__(crawler, persister, logger, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
     async def attack(self, request: Request):

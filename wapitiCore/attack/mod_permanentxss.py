@@ -50,9 +50,6 @@ class mod_permanentxss(Attack):
 
     MSG_VULN = _("Stored XSS vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-
     def must_attack(self, request: Request):
         if not valid_xss_content_type(request) or request.status in (301, 302, 303):
             # If that content-type can't be interpreted as HTML by browsers then it is useless

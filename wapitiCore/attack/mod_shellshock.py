@@ -38,8 +38,8 @@ class mod_shellshock(Attack):
     do_get = False
     do_post = False
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         empty_func = "() { :;}; "
 
         self.rand_string = "".join([random.choice(string.hexdigits) for _ in range(32)])

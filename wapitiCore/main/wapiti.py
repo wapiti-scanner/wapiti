@@ -20,7 +20,7 @@ import sys
 import argparse
 import os
 from urllib.parse import urlparse, urlunparse
-from time import strftime, gmtime, sleep
+from time import strftime, gmtime
 from importlib import import_module
 from operator import attrgetter
 from itertools import chain
@@ -208,7 +208,7 @@ class Wapiti:
                 flatten_references(additional.REFERENCES)
             )
 
-    def _init_attacks(self):
+    def _init_attacks(self, stop_event):
         self._init_report()
 
         logger = ConsoleLogger()
@@ -225,7 +225,7 @@ class Wapiti:
                 print(_("[!] Could not find module {0}").format(mod_name))
                 continue
 
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options)
+            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options, stop_event)
             if hasattr(mod_instance, "set_timeout"):
                 mod_instance.set_timeout(self.crawler.timeout)
             self.attacks.append(mod_instance)
@@ -376,7 +376,7 @@ class Wapiti:
 
     async def attack(self, stop_event):
         """Launch the attacks based on the preferences set by the command line"""
-        self._init_attacks()
+        self._init_attacks(stop_event)
         answer = "0"
 
         for attack_module in self.attacks:
@@ -461,7 +461,7 @@ class Wapiti:
                         break
                 except RequestException:
                     # Hmmm it should be caught inside the module
-                    sleep(1)
+                    await asyncio.sleep(1)
                     continue
                 except StopIteration:
                     break
@@ -1270,7 +1270,6 @@ async def wapiti_main():
         sys.exit(2)
 
     loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
 
     try:
         if not args.skip_crawl:
@@ -1300,6 +1299,7 @@ async def wapiti_main():
         stop_event.clear()
         loop.add_signal_handler(signal.SIGINT, stop_attack_process)
         await wap.attack(stop_event)
+        loop.remove_signal_handler(signal.SIGINT)
 
     except OperationalError:
         print(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))

@@ -19,10 +19,6 @@ class mod_drupal_enum(Attack):
 
     versions = []
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.finished = False
-
     def get_hash(self):
         with open(path_join(self.DATA_DIR, self.PAYLOADS_HASH), errors="ignore") as hashes:
             data = json.load(hashes)
@@ -32,6 +28,9 @@ class mod_drupal_enum(Attack):
         vers = {}
         data = self.get_hash()
         for uri in data:
+            if self._stop_event.is_set():
+                break
+
             req = Request('{}{}'.format(url, uri))
             rep = await self.crawler.async_get(req)
             if rep.status != 200:

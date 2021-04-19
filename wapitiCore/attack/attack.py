@@ -188,11 +188,12 @@ class Attack:
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
 
-    def __init__(self, crawler, persister, logger, attack_options):
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
         self.persister = persister
+        self._stop_event = stop_event
         self.add_vuln = persister.add_vulnerability
         self.add_anom = persister.add_anomaly
         self.add_addition = persister.add_additional
@@ -206,6 +207,7 @@ class Attack:
 
         self.verbose = 0
         self.color = 0
+        self.finished = False
 
         # List of modules (objects) that must be launched before the current module
         # Must be left empty in the code
@@ -251,7 +253,7 @@ class Attack:
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
 
     def must_attack(self, request: Request):
-        return True
+        return not self.finished
 
     @property
     def must_attack_query_string(self):
