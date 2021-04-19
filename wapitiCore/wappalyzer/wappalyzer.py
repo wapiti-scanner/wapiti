@@ -180,7 +180,7 @@ class Wappalyzer:
         self._html = web_content.content
         # Copy some values to make sure they aren't processed more than once
         self._scripts = web_content.scripts[:]
-        self._cookies = web_content.cookies.get_dict()
+        self._cookies = dict(web_content.cookies)
         self._headers = web_content.headers
         self._metas = dict(web_content.metas)
 
