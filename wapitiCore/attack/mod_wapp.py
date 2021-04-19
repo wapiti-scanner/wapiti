@@ -45,21 +45,15 @@ class mod_wapp(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
-        try:
-            with open(os.path.join(self.user_config_dir, self.WAPP_DB)) as wapp_db_file:
-                json.load(wapp_db_file)
-
-        except IOError:
-            print(_("Problem with local wapp database."))
-            print(_("Please update the database with wapiti --update"))
 
     async def update(self):
+        """Update the Wappalizer database from the web and load the patterns."""
         try:
             request = Request(self.WAPP_DB_URL)
             response = await self.crawler.async_send(request)
@@ -82,6 +76,14 @@ class mod_wapp(Attack):
     async def attack(self, request: Request):
         self.finished = True
         request_to_root = Request(request.url)
+
+        try:
+            with open(os.path.join(self.user_config_dir, self.WAPP_DB)) as wapp_db_file:
+                json.load(wapp_db_file)
+        except IOError:
+            print(_("Problem with local wapp database."))
+            print(_("Downloading from the web..."))
+            await self.update()
 
         try:
             application_data = ApplicationData(os.path.join(self.user_config_dir, self.WAPP_DB))

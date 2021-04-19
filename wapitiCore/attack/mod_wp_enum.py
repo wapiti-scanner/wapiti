@@ -17,10 +17,6 @@ class mod_wp_enum(Attack):
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.finished = False
-
     def get_plugin(self):
         with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS), errors="ignore") as plugin_list:
             for line in plugin_list:
@@ -37,6 +33,9 @@ class mod_wp_enum(Attack):
 
     async def detect_plugin(self, url):
         for plugin in self.get_plugin():
+            if self._stop_event.is_set():
+                break
+
             req = Request('{}/wp-content/plugins/{}/readme.txt'.format(url, plugin))
             rep = await self.crawler.async_get(req)
 
@@ -88,6 +87,9 @@ class mod_wp_enum(Attack):
 
     async def detect_theme(self, url):
         for theme in self.get_theme():
+            if self._stop_event.is_set():
+                break
+
             req = Request('{}/wp-content/themes/{}/readme.txt'.format(url, theme))
             rep = await self.crawler.async_get(req)
             if rep.status == 200:

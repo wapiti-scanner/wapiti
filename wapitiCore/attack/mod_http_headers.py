@@ -36,10 +36,6 @@ class mod_http_headers(Attack):
     check_list_xcontent = ['nosniff']
     check_list_hsts = ['max-age=']
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.finished = False
-
     def is_set(self, response: Page, header_name, check_list):
         if header_name not in response.headers:
             return False

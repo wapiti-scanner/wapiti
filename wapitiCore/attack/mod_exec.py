@@ -33,8 +33,8 @@ class mod_exec(Attack):
 
     name = "exec"
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        super().__init__(crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        super().__init__(crawler, persister, logger, attack_options, stop_event)
         self.false_positive_timeouts = set()
         self.mutator = self.get_mutator()
 

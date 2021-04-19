@@ -35,16 +35,12 @@ class mod_buster(Attack):
     do_get = False
     do_post = False
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.known_dirs = []
         self.known_pages = []
         self.new_resources = []
-        self.finished = False
         self.network_errors = 0
-
-    def must_attack(self, request: Request):
-        return not self.finished
 
     async def test_directory(self, path: str):
         if self.verbose == 2:
@@ -62,6 +58,9 @@ class mod_buster(Attack):
             return
 
         for candidate, __ in self.payloads:
+            if self._stop_event.is_set():
+                break
+
             url = path + candidate
             if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
                 page = Request(path + candidate)
@@ -100,10 +99,12 @@ class mod_buster(Attack):
 
         # Then for each known webdirs we look for unknown webpages inside
         for current_dir in self.known_dirs:
+            if self._stop_event.is_set():
+                break
             await self.test_directory(current_dir)
 
         # Finally, for each discovered webdirs we look for more webpages
-        while self.new_resources:
+        while self.new_resources and not self._stop_event.is_set():
             current_res = self.new_resources.pop(0)
             if current_res.endswith("/"):
                 # Mark as known then explore

@@ -103,8 +103,8 @@ class mod_file(Attack):
 
     name = "file"
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.rules_to_messages = {}
         self.payload_to_rules = {}
         self.known_false_positives = defaultdict(set)

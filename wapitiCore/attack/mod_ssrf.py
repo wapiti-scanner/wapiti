@@ -153,8 +153,8 @@ class mod_ssrf(Attack):
     name = "ssrf"
     MSG_VULN = _("SSRF vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        super().__init__(crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        super().__init__(crawler, persister, logger, attack_options, stop_event)
 
         methods = ""
         if self.do_get:

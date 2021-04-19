@@ -47,8 +47,8 @@ class mod_xxe(Attack):
     PAYLOADS_FILE = "xxePayloads.ini"
     MSG_VULN = _("XXE vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
+    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
         self.vulnerables = set()
         self.attacked_urls = set()
         self.payload_to_rules = {}

@@ -32,10 +32,6 @@ class mod_csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 
-    def __init__(self, crawler, persister, logger, attack_options):
-        Attack.__init__(self, crawler, persister, logger, attack_options)
-        self.finished = False
-
     def must_attack(self, request: Request):
         if self.finished:
             return False
