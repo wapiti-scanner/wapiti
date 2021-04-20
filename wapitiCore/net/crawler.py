@@ -180,10 +180,12 @@ class AsyncCrawler:
         self._proxies = None
         self._transport = None
         self._drop_cookies = False
+        self._cookies = None
 
         self._client = None
         self._auth_credentials = {}
         self._auth_method = "basic"
+        self._auth = None
 
     def set_proxy(self, proxy: str):
         """Set a proxy to use for HTTP requests."""
@@ -208,16 +210,17 @@ class AsyncCrawler:
         # Construct or reconstruct an AsyncClient instance using parameters
         if self._client is None:
             self._client = httpx.AsyncClient(
-                transport=self._transport,
-                proxies=self._proxies,
-                verify=self._secure,
-                timeout=self._timeout,
+                auth=self._auth,
                 headers=self._headers,
-                event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None
+                cookies=self._cookies,
+                verify=self._secure,
+                proxies=self._proxies,
+                timeout=self._timeout,
+                event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None,
+                transport=self._transport
             )
 
             self._client.max_redirects = 5
-            self._client.verify = self._secure
 
         return self._client
 
@@ -238,8 +241,8 @@ class AsyncCrawler:
 
     @timeout.setter
     def timeout(self, value: float):
-        # AsyncClient supports timeout as a setter
-        self.client.timeout = self._timeout = value
+        # We don't care setting it on _client because timeout is used at each get/post/send call
+        self._timeout = value
 
     @property
     def scope(self):
@@ -297,11 +300,12 @@ class AsyncCrawler:
 
         if value != self._user_agent:
             self._headers["User-Agent"] = value
-            # We can update headers on the client this way
+            # We can update headers on the client this way. Will instantiate _client if it doesn't exist
             self.client.headers.update(self._headers)
 
     def add_custom_header(self, key: str, value: str):
         """Set a HTTP header to use for every requests"""
+        # We modify our own dict because if another setter rewrite the client we want to reuse the value.
         self._headers[key] = value
         # We can update headers on the client this way
         self.client.headers.update(self._headers)
@@ -309,12 +313,13 @@ class AsyncCrawler:
     @property
     def session_cookies(self):
         """Getter for session cookies (returns a RequestsCookieJar object)"""
-        return self._client.cookies
+        return self.client.cookies
 
     @session_cookies.setter
     def session_cookies(self, value):
         """Setter for session cookies (value may be a dict or CookieJar object)"""
-        self._client.cookies = value
+        self._client = None
+        self._cookies = value
 
     @property
     def drop_cookies(self) -> bool:
@@ -323,6 +328,7 @@ class AsyncCrawler:
     @drop_cookies.setter
     def drop_cookies(self, value: bool):
         if self._drop_cookies != value:
+            # Erase current ASyncClient instance as event_hooks must be set at init
             self._client = None
             self._drop_cookies = value
 
@@ -347,14 +353,18 @@ class AsyncCrawler:
         self._auth_method = value
         if len(self._auth_credentials) == 2:
             username, password = self._auth_credentials
+            self._auth = None
+
             if self._auth_method == "basic":
-                self._client.auth = httpx.BasicAuth(username, password)
+                self._auth = httpx.BasicAuth(username, password)
             elif self._auth_method == "digest":
-                self._client.auth = httpx.DigestAuth(username, password)
+                self._auth = httpx.DigestAuth(username, password)
             elif self._auth_method == "ntlm":
                 # https://github.com/ulodciv/httpx-ntlm
                 from httpx_ntlm import HttpNtlmAuth
-                self._client.auth = HttpNtlmAuth(username, password)  # username in the form domain\user
+                self._auth = HttpNtlmAuth(username, password)  # username in the form domain\user
+
+            self.client.auth = self._auth
 
     async def async_try_login(self, auth_url: str):
         """Try to authenticate with the provided url and credentials."""
