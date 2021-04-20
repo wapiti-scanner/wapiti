@@ -137,26 +137,14 @@ def retry(delay=1, times=3):
     return outer_wrapper
 
 
-class NoCookiesTransport(httpx.AsyncHTTPTransport):
-    """
-    Drop cookies by removing the Set-Cookie header from responses.
-    """
-
-    async def arequest(self, method, url, headers=None, stream=None, ext=None):
-        status, headers, stream, ext = await super().arequest(method, url, headers, stream, ext)
-        headers = [kv for kv in headers if not kv[0].lower() == b"set-cookie"]
-        return status, headers, stream, ext
-
-
-class SocksNoCookiesTransport(AsyncProxyTransport):
-    """
-    Drop cookies by removing the Set-Cookie header from responses.
-    """
-
-    async def arequest(self, method, url, headers=None, stream=None, ext=None):
-        status, headers, stream, ext = await super().arequest(method, url, headers, stream, ext)
-        headers = [kv for kv in headers if not kv[0].lower() == b"set-cookie"]
-        return status, headers, stream, ext
+async def drop_cookies_from_request(request):
+    """Removes the Cookie header from the request."""
+    # Would have been better to remove the cookie from the response but it doesn't seem to work.
+    # Result should be the same though.
+    try:
+        del request.headers["cookie"]
+    except KeyError:
+        pass
 
 
 class AsyncCrawler:
@@ -210,8 +198,7 @@ class AsyncCrawler:
             raise ValueError("Unknown proxy type: {}".format(protocol))
 
         if protocol == "socks":
-            transport_cls = SocksNoCookiesTransport if self._drop_cookies else AsyncProxyTransport
-            self._transport = transport_cls.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
+            self._transport = AsyncProxyTransport.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
         else:
             proxy_url = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
             self._proxies = {"http://": proxy_url, "https://": proxy_url}
@@ -220,13 +207,13 @@ class AsyncCrawler:
     def client(self):
         # Construct or reconstruct an AsyncClient instance using parameters
         if self._client is None:
-            # todo: _drop_cookies stuff here
             self._client = httpx.AsyncClient(
-                transport=self._transport or (NoCookiesTransport() if self._drop_cookies else None),
+                transport=self._transport,
                 proxies=self._proxies,
                 verify=self._secure,
                 timeout=self._timeout,
-                headers=self._headers
+                headers=self._headers,
+                event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None
             )
 
             self._client.max_redirects = 5
@@ -326,7 +313,7 @@ class AsyncCrawler:
 
     @session_cookies.setter
     def session_cookies(self, value):
-        """Setter for session cookies (value may be a dict or RequestsCookieJar object)"""
+        """Setter for session cookies (value may be a dict or CookieJar object)"""
         self._client.cookies = value
 
     @property
