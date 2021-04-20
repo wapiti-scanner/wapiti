@@ -103,21 +103,11 @@ class Wapiti:
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
-    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None, proxy: str = ""):
+    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None):
         self.target_url = root_url
         self.server = urlparse(root_url).netloc
 
-        proxies = {}
-        if proxy:
-            url_parts = urlparse(proxy)
-            protocol = url_parts.scheme.lower()
-
-            if protocol not in ("http", "https", "socks"):
-                raise ValueError("Unknown proxy type: {}".format(protocol))
-
-            proxies[protocol] = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
-
-        self.crawler = crawler.AsyncCrawler(root_url, proxies=proxies)
+        self.crawler = crawler.AsyncCrawler(root_url)
 
         self.target_scope = scope
         if scope == "page":
@@ -568,6 +558,10 @@ class Wapiti:
         """Set whether SSL must be verified."""
         self.crawler.secure = verify
 
+    def set_proxy(self, proxy: str):
+        """Set a proxy to use for HTTP requests."""
+        self.crawler.set_proxy(proxy)
+
     def add_start_url(self, url: str):
         """Specify an URL to start the scan with. Can be called several times."""
         self._start_urls.append(url)
@@ -602,7 +596,7 @@ class Wapiti:
             raise InvalidOptionValue('--cookie', browser_name)
 
     def set_drop_cookies(self):
-        self.crawler.set_drop_cookies()
+        self.crawler.drop_cookies = True
 
     def set_auth_credentials(self, auth_basic: tuple):
         """Set credentials to use if the website require an authentication."""
@@ -818,11 +812,10 @@ async def wapiti_main():
 
     parser.add_argument(
         "-p", "--proxy",
-        action="append",
-        default=[],
+        default=argparse.SUPPRESS,
         help=_("Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"),
         metavar="PROXY_URL",
-        dest="proxies"
+        dest="proxy"
     )
 
     parser.add_argument(
@@ -1119,17 +1112,7 @@ async def wapiti_main():
         print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
 
-    proxy_url = ""
-    # for proxy_url in args.proxies:
-    #     if proxy_url.startswith(("http://", "https://", "socks://")):
-    #         wap.set_proxy(proxy_url)
-    #     else:
-    #         raise InvalidOptionValue("-p", proxy_url)
-
-    if args.tor:
-        proxy_url = "socks://127.0.0.1:9050/"
-
-    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config, proxy=proxy_url)
+    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     if args.update:
         print(_("[*] Updating modules"))
@@ -1161,6 +1144,12 @@ async def wapiti_main():
                 wap.add_excluded_url(exclude_url)
             else:
                 raise InvalidOptionValue("-x", exclude_url)
+
+        if "proxy" in args:
+            wap.set_proxy(args.proxy)
+
+        if args.tor:
+            wap.set_proxy("socks://127.0.0.1:9050/")
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):
