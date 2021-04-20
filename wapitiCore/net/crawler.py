@@ -137,10 +137,26 @@ def retry(delay=1, times=3):
     return outer_wrapper
 
 
-class BlockAll(cookiejar.CookiePolicy):
-    return_ok = set_ok = domain_return_ok = path_return_ok = lambda self, *args, **kwargs: False
-    netscape = True
-    rfc2965 = hide_cookie2 = False
+class NoCookiesTransport(httpx.AsyncHTTPTransport):
+    """
+    Drop cookies by removing the Set-Cookie header from responses.
+    """
+
+    async def arequest(self, method, url, headers=None, stream=None, ext=None):
+        status, headers, stream, ext = await super().arequest(method, url, headers, stream, ext)
+        headers = [kv for kv in headers if not kv[0].lower() == b"set-cookie"]
+        return status, headers, stream, ext
+
+
+class SocksNoCookiesTransport(AsyncProxyTransport):
+    """
+    Drop cookies by removing the Set-Cookie header from responses.
+    """
+
+    async def arequest(self, method, url, headers=None, stream=None, ext=None):
+        status, headers, stream, ext = await super().arequest(method, url, headers, stream, ext)
+        headers = [kv for kv in headers if not kv[0].lower() == b"set-cookie"]
+        return status, headers, stream, ext
 
 
 class AsyncCrawler:
@@ -153,8 +169,7 @@ class AsyncCrawler:
     UNKNOWN_ERROR = 6
 
     def __init__(
-            self, base_url: str, timeout: float = 10.0, secure: bool = False, compression: bool = True,
-            proxies: Dict[str, str] = None, user_agent: str = None):
+            self, base_url: str, timeout: float = 10.0, secure: bool = False, compression: bool = True):
         self._timeout = timeout
 
         self.stream = False
@@ -162,51 +177,73 @@ class AsyncCrawler:
         self._base = web.Request(base_url)
         self.auth_url = self._base.url
         self.is_logged_in = False
+        self._user_agent = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+        self._headers = {
+            "User-Agent": self._user_agent,
+            "Accept-Language": "en-US",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+        }
 
-        valid_proxies = {}
-        transport = None
-        if isinstance(proxies, dict):
-            # ex: {'http': 'http://127.0.0.1:8080'}
-            for protocol in proxies:
-                if protocol not in ("http", "https", "socks"):
-                    raise ValueError("Unsupported proxy type: {}".format(protocol))
+        if not compression:
+            self._client.headers["Accept-Encoding"] = "identity"
 
-                url = proxies[protocol]
-                url_parts = urlparse(url)
-                if protocol == "socks":
-                    # socks5h proxy type won't leak DNS requests
-                    # proxy = urlunparse(("socks5h", url_parts.netloc, '/', '', '', ''))
-                    transport = AsyncProxyTransport.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
-                else:
-                    proxy_url = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
-                    valid_proxies[protocol] = proxy_url
+        self._secure = secure
+        self._proxies = None
+        self._transport = None
+        self._drop_cookies = False
 
-        self._client = httpx.AsyncClient(transport=transport, proxies=valid_proxies)
-
+        self._client = None
         self._auth_credentials = {}
         self._auth_method = "basic"
 
-        if user_agent:
-            self._client.headers["User-Agent"] = user_agent
+    def set_proxy(self, proxy: str):
+        """Set a proxy to use for HTTP requests."""
+        self._client = None
+        self._transport = None
+        self._proxies = None
+
+        url_parts = urlparse(proxy)
+        protocol = url_parts.scheme.lower()
+
+        if protocol not in ("http", "https", "socks"):
+            raise ValueError("Unknown proxy type: {}".format(protocol))
+
+        if protocol == "socks":
+            transport_cls = SocksNoCookiesTransport if self._drop_cookies else AsyncProxyTransport
+            self._transport = transport_cls.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
         else:
-            self._client.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
-        self._client.headers["Accept-Language"] = "en-US"
-        self._client.headers["Accept-Encoding"] = "gzip, deflate, br"
-        self._client.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            proxy_url = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
+            self._proxies = {"http://": proxy_url, "https://": proxy_url}
 
-        if not compression:
-            self._client.headers["accept-encoding"] = "identity"
+    @property
+    def client(self):
+        # Construct or reconstruct an AsyncClient instance using parameters
+        if self._client is None:
+            # todo: _drop_cookies stuff here
+            self._client = httpx.AsyncClient(
+                transport=self._transport or (NoCookiesTransport() if self._drop_cookies else None),
+                proxies=self._proxies,
+                verify=self._secure,
+                timeout=self._timeout,
+                headers=self._headers
+            )
 
-        self._client.max_redirects = 5
-        self._client.verify = secure
+            self._client.max_redirects = 5
+            self._client.verify = self._secure
+
+        return self._client
 
     @property
     def secure(self):
-        return self._client.verify
+        return self._secure
 
     @secure.setter
     def secure(self, value: bool):
-        self._client.verify = value
+        if value != self._secure:
+            # We can't set `verify` using a setter so AsyncClient must be created again
+            self._client = None
+            self._secure = value
 
     @property
     def timeout(self):
@@ -214,7 +251,8 @@ class AsyncCrawler:
 
     @timeout.setter
     def timeout(self, value: float):
-        self._timeout = value
+        # AsyncClient supports timeout as a setter
+        self.client.timeout = self._timeout = value
 
     @property
     def scope(self):
@@ -262,18 +300,24 @@ class AsyncCrawler:
     @property
     def user_agent(self):
         """Getter for user-agent property"""
-        return self._client.headers["User-Agent"]
+        return self._user_agent
 
     @user_agent.setter
     def user_agent(self, value: str):
         """Setter for user-agent property"""
         if not isinstance(value, str):
             raise TypeError("Invalid type for User-Agent. Type str required.")
-        self._client.headers["User-Agent"] = value
+
+        if value != self._user_agent:
+            self._headers["User-Agent"] = value
+            # We can update headers on the client this way
+            self.client.headers.update(self._headers)
 
     def add_custom_header(self, key: str, value: str):
         """Set a HTTP header to use for every requests"""
-        self._client.headers[key] = value
+        self._headers[key] = value
+        # We can update headers on the client this way
+        self.client.headers.update(self._headers)
 
     @property
     def session_cookies(self):
@@ -285,8 +329,15 @@ class AsyncCrawler:
         """Setter for session cookies (value may be a dict or RequestsCookieJar object)"""
         self._client.cookies = value
 
-    def set_drop_cookies(self):
-        self._client.cookies.set_policy(BlockAll())
+    @property
+    def drop_cookies(self) -> bool:
+        return self._drop_cookies
+
+    @drop_cookies.setter
+    def drop_cookies(self, value: bool):
+        if self._drop_cookies != value:
+            self._client = None
+            self._drop_cookies = value
 
     @property
     def credentials(self):
