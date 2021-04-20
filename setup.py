@@ -98,7 +98,6 @@ if a script is vulnerable.""",
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -108,6 +107,8 @@ if a script is vulnerable.""",
     ],
     install_requires=[
         "requests>=2.25.1",
+        "httpx==0.17.1",
+        "httpx-socks==0.3.1",
         "beautifulsoup4>=4.9.3",
         "tld>=0.12.5",
         "yaswfp>=0.9.3",
@@ -120,8 +121,7 @@ if a script is vulnerable.""",
         "cryptography==3.3.2"
     ],
     extras_require={
-        "NTLM": ["requests_ntlm"],
-        "Kerberos": ["requests_kerberos"],
+        "NTLM": ["httpx-ntlm"],
     },
     entry_points={
         "console_scripts": [

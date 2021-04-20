@@ -348,18 +348,13 @@ class AsyncCrawler:
         if len(self._auth_credentials) == 2:
             username, password = self._auth_credentials
             if self._auth_method == "basic":
-                from requests.auth import HTTPBasicAuth
-                self._client.auth = HTTPBasicAuth(username, password)
+                self._client.auth = httpx.BasicAuth(username, password)
             elif self._auth_method == "digest":
-                from requests.auth import HTTPDigestAuth
-                self._client.auth = HTTPDigestAuth(username, password)
+                self._client.auth = httpx.DigestAuth(username, password)
             elif self._auth_method == "ntlm":
-                from requests_ntlm import HttpNtlmAuth
-                self._client.auth = HttpNtlmAuth(username, password)
-        elif self._auth_method == "kerberos":
-            # On openSUSE, "zypper in krb5-devel" before installing the pip package
-            from requests_kerberos import HTTPKerberosAuth
-            self._client.auth = HTTPKerberosAuth()
+                # https://github.com/ulodciv/httpx-ntlm
+                from httpx_ntlm import HttpNtlmAuth
+                self._client.auth = HttpNtlmAuth(username, password)  # username in the form domain\user
 
     async def async_try_login(self, auth_url: str):
         """Try to authenticate with the provided url and credentials."""
