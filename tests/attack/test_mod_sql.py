@@ -3,11 +3,13 @@ import re
 from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_sql import mod_sql
 
 
@@ -36,8 +38,9 @@ class FakePersister:
                 self.vulnerabilities.append((parameter, value))
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -69,21 +72,22 @@ def test_whole_stuff():
     request.path_id = 3
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options)
+    module = mod_sql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
     for request in persister.requests:
-        module.attack(request)
+        await module.attack(request)
 
     assert True
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_false_positive():
+async def test_false_positive():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -95,20 +99,21 @@ def test_false_positive():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options)
+    module = mod_sql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.vulnerabilities
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_true_positive():
+async def test_true_positive():
     responses.add(
         responses.GET,
         url="http://perdu.com/?foo=bar",
@@ -129,20 +134,21 @@ def test_true_positive():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options)
+    module = mod_sql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_blind_detection():
+async def test_blind_detection():
     with NamedTemporaryFile() as database_fd:
         conn = sqlite3.connect(database_fd.name)
         cursor = conn.cursor()
@@ -188,22 +194,23 @@ def test_blind_detection():
         request = Request("http://perdu.com/?user_id=1")
         request.path_id = 1
 
-        crawler = Crawler("http://perdu.com/", timeout=1)
+        crawler = AsyncCrawler("http://perdu.com/", timeout=1)
         options = {"timeout": 10, "level": 1}
         logger = Mock()
 
-        module = mod_sql(crawler, persister, logger, options)
+        module = mod_sql(crawler, persister, logger, options, Event())
         module.verbose = 2
         module.do_post = True
-        module.attack(request)
+        await module.attack(request)
 
         assert persister.vulnerabilities
         # One request for error-based, one to get normal response, four to test boolean-based attack
         assert len(responses.calls) == 6
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_negative_blind():
+async def test_negative_blind():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -215,13 +222,13 @@ def test_negative_blind():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options)
+    module = mod_sql(crawler, persister, logger, options, Event())
     module.verbose = 2
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.vulnerabilities
     # We have:
@@ -231,8 +238,9 @@ def test_negative_blind():
     assert len(responses.calls) == 8
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_blind_detection_parenthesis():
+async def test_blind_detection_parenthesis():
     with NamedTemporaryFile() as database_fd:
         conn = sqlite3.connect(database_fd.name)
         cursor = conn.cursor()
@@ -278,14 +286,14 @@ def test_blind_detection_parenthesis():
         request = Request("http://perdu.com/?username=admin")
         request.path_id = 1
 
-        crawler = Crawler("http://perdu.com/", timeout=1)
+        crawler = AsyncCrawler("http://perdu.com/", timeout=1)
         options = {"timeout": 10, "level": 1}
         logger = Mock()
 
-        module = mod_sql(crawler, persister, logger, options)
+        module = mod_sql(crawler, persister, logger, options, Event())
         module.verbose = 2
         module.do_post = True
-        module.attack(request)
+        await module.attack(request)
 
         assert persister.vulnerabilities
         # This is the same test as the previous blind except we have to put single quotes

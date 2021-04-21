@@ -470,12 +470,25 @@ class AsyncCrawler:
             file_params = None
             post_params = form.post_params
 
+        content = None
+
+        if post_params:
+            if isinstance(post_params, str):
+                content = post_params
+                post_params = None
+            else:
+                content = None
+                post_params = dict(post_params)
+        else:
+            post_params = None
+
         request = self.client.build_request(
             "POST",
             form.path,
             params=form.get_params,
-            data=dict(post_params),  # httpx expects a dict, hope to see more types soon
-            files=file_params,
+            data=post_params,  # httpx expects a dict, hope to see more types soon
+            content=content,
+            files=file_params or None,
             headers=form_headers
         )
         try:
@@ -508,11 +521,25 @@ class AsyncCrawler:
         if form.referer:
             form_headers["referer"] = form.referer
 
+        post_params = form.post_params
+        content = None
+
+        if post_params:
+            if isinstance(post_params, str):
+                content = post_params
+                post_params = None
+            else:
+                content = None
+                post_params = dict(post_params)
+        else:
+            post_params = None
+
         request = self.client.build_request(
             method,
             form.url,
-            data=form.post_params,
-            files=form.file_params,
+            data=post_params,
+            content=content,
+            files=form.file_params or None,
             headers=form_headers,
         )
         try:

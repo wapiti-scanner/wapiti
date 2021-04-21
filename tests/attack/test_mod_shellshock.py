@@ -1,11 +1,13 @@
 from unittest.mock import Mock
 import re
 from binascii import unhexlify
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_shellshock import mod_shellshock
 
 
@@ -43,8 +45,9 @@ def shellshock_callback(request):
     return 200, {}, "yolo"
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -71,15 +74,15 @@ def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_shellshock(crawler, persister, logger, options)
+    module = mod_shellshock(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_get = True
     for request in persister.requests:
-        module.attack(request)
+        await module.attack(request)
 
     assert len(persister.vulnerabilities) == 1
     assert persister.vulnerabilities[0][0].url == (

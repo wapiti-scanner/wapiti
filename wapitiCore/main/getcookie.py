@@ -21,7 +21,7 @@ import argparse
 import sys
 
 from wapitiCore.net import jsoncookie
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.language import _
 from wapitiCore.net.web import Request
 
@@ -36,7 +36,7 @@ class InvalidOptionValue(Exception):
         return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
 
 
-def getcookie_main():
+async def getcookie_main():
     parser = argparse.ArgumentParser(description="Wapiti-getcookie: An utility to grab cookies from a webpage")
 
     parser.add_argument(
@@ -110,7 +110,7 @@ def getcookie_main():
     server = parts.netloc
     base = urlunparse((parts.scheme, parts.netloc, parts.path, '', '', ''))
 
-    crawler = Crawler(base)
+    crawler = AsyncCrawler(base)
 
     if args.proxy:
         proxy_parts = urlparse(args.proxy)
@@ -143,7 +143,7 @@ def getcookie_main():
     json_cookie.open(args.cookie)
     json_cookie.delete(server)
 
-    page = crawler.get(Request(args.url), follow_redirects=True)
+    page = await crawler.async_get(Request(args.url), follow_redirects=True)
 
     # A first crawl is sometimes necessary, so let's fetch the webpage
     json_cookie.addcookies(crawler.session_cookies)
@@ -189,12 +189,12 @@ def getcookie_main():
                     post_params[i] = [field, new_value]
 
                 request = Request(form.url, post_params=post_params)
-                crawler.send(request, follow_redirects=True)
+                await crawler.async_send(request, follow_redirects=True)
 
                 json_cookie.addcookies(crawler.session_cookies)
     else:
         request = Request(args.url, post_params=args.data)
-        crawler.send(request, follow_redirects=True)
+        await crawler.async_send(request, follow_redirects=True)
 
         json_cookie.addcookies(crawler.session_cookies)
 

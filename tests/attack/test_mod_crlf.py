@@ -1,10 +1,12 @@
 from unittest.mock import Mock
 import re
+import asyncio
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_crlf import mod_crlf
 
 
@@ -33,8 +35,9 @@ class FakePersister:
                 self.vulnerabilities.append((parameter, value))
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -54,14 +57,14 @@ def test_whole_stuff():
     request = Request("http://perdu.com/?a=b&foo=bar")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_crlf(crawler, persister, logger, options)
+    module = mod_crlf(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_get = True
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "foo"

@@ -1,12 +1,14 @@
 import json
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 
 
-def test_request_object():
+@pytest.mark.asyncio
+async def test_request_object():
     res1 = Request(
         "http://httpbin.org/post?var1=a&var2=b",
         post_params=[['post1', 'c'], ['post2', 'd']]
@@ -145,13 +147,13 @@ def test_request_object():
         enctype="application/json"
     )
 
-    crawler = Crawler("http://httpbin.org/")
-    page = crawler.send(json_req)
+    crawler = AsyncCrawler("http://httpbin.org/")
+    page = await crawler.async_send(json_req)
     assert page.json["json"] == {"z": 1, "a": 2}
     assert page.json["headers"]["Content-Type"] == "application/json"
     assert page.json["form"] == {}
 
-    page = crawler.send(res12)
+    page = await crawler.async_send(res12)
     assert page.json["files"]
 
     res19 = Request(
@@ -160,12 +162,13 @@ def test_request_object():
         file_params=[['file1', ['fname1', 'content']], ['file2', ['fname2', 'content']]],
         enctype="multipart/form-data"
     )
-    page = crawler.send(res19)
+    page = await crawler.async_send(res19)
     assert page.json["files"]
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_redirect():
+async def test_redirect():
     slyfx = "http://www.slyfx.com/"
     disney = "http://www.disney.com/"
 
@@ -183,11 +186,11 @@ def test_redirect():
         body="Hello there"
     )
 
-    crawler = Crawler(slyfx)
-    page = crawler.send(Request(slyfx))
+    crawler = AsyncCrawler(slyfx)
+    page = await crawler.async_send(Request(slyfx))
     assert page.url == slyfx
     assert not page.history
 
-    page = crawler.send(Request(slyfx), follow_redirects=True)
+    page = await crawler.async_send(Request(slyfx), follow_redirects=True)
     assert page.url == disney
     assert page.history[0].url == slyfx

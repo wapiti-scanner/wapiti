@@ -2,15 +2,17 @@ import os
 import json
 
 import responses
-import requests
+import pytest
+import httpx
 
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler, Page
+from wapitiCore.net.crawler import AsyncCrawler, Page
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_persister_basic():
+async def test_persister_basic():
     url = "http://httpbin.org/?k=v"
     responses.add(
         responses.GET,
@@ -18,7 +20,7 @@ def test_persister_basic():
         body="Hello world!"
     )
 
-    crawler = Crawler("http://httpbin.org/")
+    crawler = AsyncCrawler("http://httpbin.org/")
 
     try:
         os.unlink("/tmp/crawl.db")
@@ -53,7 +55,7 @@ def test_persister_basic():
 
     for req in stored_requests:
         if req == simple_get:
-            crawler.send(req)
+            await crawler.async_send(req)
             # Add the sent request
             persister.add_request(req)
             assert req.path_id == 1
@@ -89,8 +91,9 @@ def test_persister_basic():
     assert payload.parameter == "post2"
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_persister_upload():
+async def test_persister_upload():
     try:
         os.unlink("/tmp/crawl.db")
     except FileNotFoundError:
@@ -122,10 +125,10 @@ def test_persister_upload():
         "http://httpbin.org/post?qs1",
         body="Hello there"
     )
-    crawler = Crawler("http://httpbin.org/")
+    crawler = AsyncCrawler("http://httpbin.org/")
 
     for req in stored_requests:
-        crawler.send(req)
+        await crawler.async_send(req)
         persister.add_request(req)
 
         if req == simple_upload:
@@ -148,6 +151,7 @@ def test_persister_upload():
     assert len(list(persister.get_forms(path="http://httpbin.org/post"))) == 2
 
 
+@pytest.mark.asyncio
 @responses.activate
 def test_persister_forms():
     with open("tests/data/forms.html") as data_body:
@@ -158,7 +162,7 @@ def test_persister_forms():
             body=data_body.read()
         )
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         forms = list(page.iter_forms())

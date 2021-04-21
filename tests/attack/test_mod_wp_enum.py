@@ -1,9 +1,12 @@
 from unittest.mock import Mock
 import re
+from asyncio import Event
+
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wp_enum import mod_wp_enum
 
 
@@ -30,9 +33,10 @@ class FakePersister:
     def get_root_url(self):
         return self.requests[0].url
 
-@responses.activate
-def test_no_wordpress():
 
+@pytest.mark.asyncio
+@responses.activate
+async def test_no_wordpress():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -45,24 +49,25 @@ def test_no_wordpress():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    #persister.requests.append(request)
+    # persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options)
+    module = mod_wp_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.additionals
 
-@responses.activate
-def test_plugin():
 
-    #Response to tell that Wordpress is used
+@pytest.mark.asyncio
+@responses.activate
+async def test_plugin():
+    # Response to tell that Wordpress is used
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -71,7 +76,8 @@ def test_plugin():
         Wordpress wordpress WordPress\
         <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"   
     )
-    #Response for versioned plugin
+
+    # Response for versioned plugin
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/plugins/bbpress/readme.txt",
@@ -82,7 +88,7 @@ def test_plugin():
         <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
     )
 
-    #Response for plugin detected without version (403 forbiden response)
+    # Response for plugin detected without version (403 forbiden response)
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/plugins/wp-reset/readme.txt",
@@ -94,7 +100,7 @@ def test_plugin():
         status=403
     )
 
-    #Response for bad format readme.txt of plugin
+    # Response for bad format readme.txt of plugin
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/plugins/unyson/readme.txt",
@@ -121,24 +127,25 @@ def test_plugin():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com")
+    crawler = AsyncCrawler("http://perdu.com")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options)
+    module = mod_wp_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
     assert persister.additionals[1] == '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"]}'
     assert persister.additionals[2] == '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"]}'
 
-@responses.activate
-def test_theme():
 
+@pytest.mark.asyncio
+@responses.activate
+async def test_theme():
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -148,7 +155,7 @@ def test_theme():
         <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"   
     )
 
-    #Response for versioned theme
+    # Response for versioned theme
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/themes/twentynineteen/readme.txt",
@@ -159,7 +166,7 @@ def test_theme():
         <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
     )
 
-    #Response for theme detected without version (403 forbiden response)
+    # Response for theme detected without version (403 forbiden response)
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/themes/seedlet/readme.txt",
@@ -171,7 +178,7 @@ def test_theme():
         status=403
     )
 
-    #Response for bad format readme.txt of theme
+    # Response for bad format readme.txt of theme
     responses.add(
         responses.GET,
         url="http://perdu.com/wp-content/themes/customify/readme.txt",
@@ -198,15 +205,15 @@ def test_theme():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com")
+    crawler = AsyncCrawler("http://perdu.com")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options)
+    module = mod_wp_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"]}'
