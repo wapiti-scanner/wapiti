@@ -4,13 +4,14 @@ import os
 import sys
 from time import sleep
 import re
+from asyncio import Event
 
 import pytest
 import responses
-from requests.exceptions import ReadTimeout
+from httpx import ReadTimeout
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_exec import mod_exec
 
 
@@ -50,8 +51,9 @@ def run_around_tests():
     proc.terminate()
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -77,21 +79,22 @@ def test_whole_stuff():
     request.path_id = 3
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_exec(crawler, persister, logger, options)
+    module = mod_exec(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
     for request in persister.requests:
-        module.attack(request)
+        await module.attack(request)
 
     assert True
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_detection():
+async def test_detection():
     responses.add(
         responses.GET,
         re.compile(r"http://perdu.com/\?vuln=.*env.*"),
@@ -110,21 +113,22 @@ def test_detection():
     request.path_id = 1
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
-    module = mod_exec(crawler, persister, logger, options)
+    module = mod_exec(crawler, persister, logger, options, Event())
     module.verbose = 2
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"
     assert "env" in persister.vulnerabilities[0][1]
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_blind_detection():
+async def test_blind_detection():
 
     def timeout_callback(http_request):
         if "sleep" in http_request.url:
@@ -142,11 +146,11 @@ def test_blind_detection():
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 2
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_exec(crawler, persister, logger, options)
+    module = mod_exec(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = False
 
@@ -156,7 +160,7 @@ def test_blind_detection():
             break
         payloads_until_sleep += 1
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"

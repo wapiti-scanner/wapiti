@@ -19,7 +19,7 @@
 from os.path import join as path_join
 from configparser import ConfigParser
 
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
 from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, _
@@ -71,7 +71,7 @@ class mod_xss(Attack):
             # We don't display the mutated request here as the payload is not interesting
             try:
                 response = await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 # We just inserted harmless characters, if we get a timeout here, it's not interesting
                 continue
@@ -141,7 +141,7 @@ class mod_xss(Attack):
                     parameter=xss_param
                 )
                 timeouted = True
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
             else:
                 if (

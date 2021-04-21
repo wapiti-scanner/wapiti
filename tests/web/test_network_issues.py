@@ -4,9 +4,9 @@ import os
 from time import sleep
 
 import pytest
-from requests.exceptions import ReadTimeout
+from httpx import ReadTimeout
 
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.web import Request
 
 
@@ -21,21 +21,23 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_chunked_timeout():
+@pytest.mark.asyncio
+async def test_chunked_timeout():
     url = "http://127.0.0.1:65080/chunked_timeout.php"
 
-    crawler = Crawler(url, timeout=1)
+    crawler = AsyncCrawler(url, timeout=1)
     request = Request(url)
 
     with pytest.raises(ReadTimeout):
-        crawler.send(request)
+        await crawler.async_send(request)
 
 
-def test_timeout():
+@pytest.mark.asyncio
+async def test_timeout():
     url = "http://127.0.0.1:65080/timeout.php"
 
-    crawler = Crawler(url, timeout=1)
+    crawler = AsyncCrawler(url, timeout=1)
     request = Request(url)
 
     with pytest.raises(ReadTimeout):
-        crawler.send(request)
+        await crawler.async_send(request)

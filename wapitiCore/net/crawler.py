@@ -29,16 +29,11 @@ import pickle
 import math
 import functools
 from time import sleep
-from http import cookiejar
-from typing import Tuple, List, Dict
+from typing import Tuple, List
 import asyncio
 from os import cpu_count
 
 # Third-parties
-# import requests
-# from requests.packages.urllib3 import disable_warnings
-# from requests.packages.urllib3.exceptions import ReadTimeoutError
-# from requests.exceptions import ConnectionError, RequestException, ReadTimeout, SSLError
 import httpx
 from httpx_socks import AsyncProxyTransport
 from tld import get_fld
@@ -159,7 +154,6 @@ class AsyncCrawler:
     def __init__(
             self, base_url: str, timeout: float = 10.0, secure: bool = False, compression: bool = True):
         self._timeout = timeout
-
         self.stream = False
         self._scope = Scope.FOLDER
         self._base = web.Request(base_url)
@@ -432,9 +426,9 @@ class AsyncCrawler:
         @type headers: dict
         @rtype: Page
         """
-        request = self._client.build_request("GET", resource.url, headers=headers)
+        request = self.client.build_request("GET", resource.url, headers=headers)
         try:
-            response = await self._client.send(
+            response = await self.client.send(
                 request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
             )
         except httpx.TransportError as exception:
@@ -476,7 +470,7 @@ class AsyncCrawler:
             file_params = None
             post_params = form.post_params
 
-        request = self._client.build_request(
+        request = self.client.build_request(
             "POST",
             form.path,
             params=form.get_params,
@@ -485,7 +479,7 @@ class AsyncCrawler:
             headers=form_headers
         )
         try:
-            response = await self._client.send(
+            response = await self.client.send(
                 request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
             )
         except httpx.TransportError as exception:
@@ -514,7 +508,7 @@ class AsyncCrawler:
         if form.referer:
             form_headers["referer"] = form.referer
 
-        request = self._client.build_request(
+        request = self.client.build_request(
             method,
             form.url,
             data=form.post_params,
@@ -522,7 +516,7 @@ class AsyncCrawler:
             headers=form_headers,
         )
         try:
-            response = await self._client.send(
+            response = await self.client.send(
                 request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
             )
         except httpx.TransportError as exception:
@@ -548,7 +542,7 @@ class AsyncCrawler:
         return page
 
     async def close(self):
-        await self._client.aclose()
+        await self.client.aclose()
 
 
 class Explorer:
@@ -797,15 +791,18 @@ class Explorer:
                 async with self._shared_lock:
                     self._pattern_counts[request.pattern] += 1
 
+            if request.link_depth == self._max_depth:
+                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
+                return True, []
+
+            # Above this line we need the content of the page. As we are in stream mode we must force reading the body.
+            await page.read()
+
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
                 if page.raw_size > self._max_page_size:
                     page.clean()
                     return False, []
-
-            if request.link_depth == self._max_depth:
-                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-                return True, []
 
             resources = self.extract_links(page, request)
             # TODO: there's more situations where we would not want to attack the resource... must check this
@@ -840,7 +837,7 @@ class Explorer:
                     elif isinstance(bad_request, web.Request):
                         self._processed_requests.append(bad_request)
 
-        self._crawler._client.stream = True
+        self._crawler.stream = True
 
         if self._max_depth < 0:
             raise StopIteration
@@ -940,4 +937,4 @@ class Explorer:
             if not task_to_request and (self._stopped.is_set() or not to_explore):
                 break
 
-        self._crawler._client.stream = False
+        self._crawler.stream = False

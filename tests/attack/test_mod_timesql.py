@@ -4,13 +4,14 @@ import os
 import sys
 from time import sleep
 import re
+from asyncio import Event
 
 import pytest
 import responses
-from requests.exceptions import ReadTimeout
+from httpx import ReadTimeout
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_timesql import mod_timesql
 
 
@@ -47,42 +48,45 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_timesql_detection():
+@pytest.mark.asyncio
+async def test_timesql_detection():
     # It looks like php -S has serious limitations
     # so PHP script should wait a minimum amount of time for the test to succeed
     persister = FakePersister()
     request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
+    crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln1"
     assert "sleep" in persister.vulnerabilities[0][1]
 
 
-def test_timesql_false_positive():
+@pytest.mark.asyncio
+async def test_timesql_false_positive():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65082/", timeout=1)
+    crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.vulnerabilities
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_false_positive_request_count():
+async def test_false_positive_request_count():
     responses.add(
         responses.GET,
         # Beware! Responses seems to do a match on regex and not a search, give it full URL
@@ -99,14 +103,14 @@ def test_false_positive_request_count():
     persister = FakePersister()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     # Due to the retry decorator we should have 6 requests here
     # First three to make sure the payload generate timeouts each time
@@ -114,8 +118,9 @@ def test_false_positive_request_count():
     assert len(responses.calls) == 6
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_true_positive_request_count():
+async def test_true_positive_request_count():
     responses.add(
         responses.GET,
         re.compile(r"http://perdu.com/blind_sql.php\?vuln1=sleep"),
@@ -131,14 +136,14 @@ def test_true_positive_request_count():
     persister = FakePersister()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
     logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options)
+    module = mod_timesql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     # Four requests should be made there:
     # Three ones due to time-based SQL injection (one for injection, two to be sure)

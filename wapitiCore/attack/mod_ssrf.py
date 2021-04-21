@@ -20,7 +20,7 @@ from asyncio import sleep
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, CRITICAL_LEVEL, _
@@ -180,7 +180,7 @@ class mod_ssrf(Attack):
 
             try:
                 await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
 
@@ -192,7 +192,7 @@ class mod_ssrf(Attack):
         endpoint_request = Request(endpoint_url)
         try:
             response = await self.crawler.async_send(endpoint_request)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:

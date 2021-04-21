@@ -20,7 +20,7 @@ from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
 
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
@@ -243,13 +243,13 @@ class mod_permanentxss(Attack):
                     parameter=xss_param
                 )
                 timeouted = True
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             else:
                 try:
                     response = await self.crawler.async_send(output_request)
-                except RequestException:
+                except RequestError:
                     self.network_errors += 1
                     continue
 

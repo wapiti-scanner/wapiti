@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, PayloadType
 from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, CRITICAL_LEVEL, _
@@ -106,7 +106,7 @@ class mod_exec(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 if flags.type == PayloadType.time:
-                    if self.does_timeout(request):
+                    if await self.does_timeout(request):
                         self.network_errors += 1
                         self.false_positive_timeouts.add(request.path_id)
                         continue
@@ -164,7 +164,7 @@ class mod_exec(Attack):
                     parameter=parameter
                 )
                 timeouted = True
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
             else:
                 # No timeout raised

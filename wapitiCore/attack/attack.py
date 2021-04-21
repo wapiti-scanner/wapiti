@@ -27,7 +27,7 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 
-from requests.exceptions import RequestException, ReadTimeout
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.net.web import Request
 
@@ -276,12 +276,12 @@ class Attack:
             skip=self.options.get("skipped_parameters")
         )
 
-    def does_timeout(self, request):
+    async def does_timeout(self, request):
         try:
-            self.crawler.send(request)
+            await self.crawler.async_send(request)
         except ReadTimeout:
             return True
-        except RequestException:
+        except RequestError:
             pass
         return False
 

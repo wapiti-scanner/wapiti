@@ -19,10 +19,10 @@
 import re
 from random import randint
 
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags, Mutator
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, CRITICAL_LEVEL, _
 from wapitiCore.definitions.sql import NAME
 from wapitiCore.net.web import Request
 
@@ -305,7 +305,7 @@ class mod_sql(Attack):
     async def is_false_positive(self, request):
         try:
             response = await self.crawler.async_send(request)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
         else:
             if self._find_pattern_in_response(response.content):
@@ -340,11 +340,11 @@ class mod_sql(Attack):
 
             try:
                 response = await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
             else:
                 vuln_info = self._find_pattern_in_response(response.content)
-                if vuln_info and not self.is_false_positive(request):
+                if vuln_info and not await self.is_false_positive(request):
                     # An error message implies that a vulnerability may exists
 
                     if parameter == "QUERY_STRING":
@@ -488,7 +488,7 @@ class mod_sql(Attack):
 
             try:
                 response = await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 # We need all cases to make sure SQLi is there
                 test_results.append(False)
