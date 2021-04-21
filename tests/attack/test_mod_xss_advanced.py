@@ -3,11 +3,12 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
+from asyncio import Event
 
 import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xss import mod_xss
 from wapitiCore.language.vulnerability import _
 
@@ -45,34 +46,36 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_title_false_positive():
+@pytest.mark.asyncio
+async def test_title_false_positive():
     # We should fail at escaping the title tag and we should be aware of it
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo&fixed=yes")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities == []
 
 
-def test_title_positive():
+@pytest.mark.asyncio
+async def test_title_positive():
     # We should succeed at escaping the title tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "title"
@@ -80,125 +83,132 @@ def test_title_positive():
     assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
 
 
-def test_script_filter_bypass():
+@pytest.mark.asyncio
+async def test_script_filter_bypass():
     # We should succeed at bypass the <script filter
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/script_tag_filter.php?name=kenobi")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "name"
     assert persister.vulnerabilities[0][1].lower().startswith("<svg")
 
 
-def test_attr_quote_escape():
+@pytest.mark.asyncio
+async def test_attr_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/attr_quote_escape.php?class=custom")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "class"
     assert persister.vulnerabilities[0][1].lower().startswith("'></pre>")
 
 
-def test_attr_double_quote_escape():
+@pytest.mark.asyncio
+async def test_attr_double_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/attr_double_quote_escape.php?class=custom")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "class"
     assert persister.vulnerabilities[0][1].lower().startswith("\"></pre>")
 
 
-def test_attr_escape():
+@pytest.mark.asyncio
+async def test_attr_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/attr_escape.php?state=checked")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "state"
     assert persister.vulnerabilities[0][1].lower().startswith("><script>")
 
 
-def test_tag_name_escape():
+@pytest.mark.asyncio
+async def test_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/tag_name_escape.php?tag=textarea")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "tag"
     assert persister.vulnerabilities[0][1].lower().startswith("script>")
 
 
-def test_partial_tag_name_escape():
+@pytest.mark.asyncio
+async def test_partial_tag_name_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/partial_tag_name_escape.php?importance=2")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "importance"
     assert persister.vulnerabilities[0][1].lower().startswith("/><script>")
 
 
-def test_xss_inside_tag_input():
+@pytest.mark.asyncio
+async def test_xss_inside_tag_input():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/input_text_strip_tags.php?uid=5")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "uid"
@@ -206,17 +216,18 @@ def test_xss_inside_tag_input():
     assert "<" not in used_payload and ">" not in used_payload and "autofocus/onfocus" in used_payload
 
 
-def test_xss_inside_tag_link():
+@pytest.mark.asyncio
+async def test_xss_inside_tag_link():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/link_href_strip_tags.php?url=http://perdu.com/")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "url"
@@ -224,17 +235,18 @@ def test_xss_inside_tag_link():
     assert "<" not in used_payload and ">" not in used_payload and "autofocus href onfocus" in used_payload
 
 
-def test_xss_uppercase_no_script():
+@pytest.mark.asyncio
+async def test_xss_uppercase_no_script():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/uppercase_no_script.php?name=obiwan")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "name"
@@ -242,17 +254,18 @@ def test_xss_uppercase_no_script():
     assert used_payload.startswith("<svg onload=&")
 
 
-def test_frame_src_escape():
+@pytest.mark.asyncio
+async def test_frame_src_escape():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/frame_src_escape.php?url=https://wapiti.sourceforge.io/")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "url"
@@ -260,17 +273,18 @@ def test_frame_src_escape():
     assert used_payload.startswith('"><frame src="javascript:alert(/w')
 
 
-def test_frame_src_no_escape():
+@pytest.mark.asyncio
+async def test_frame_src_no_escape():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti.sourceforge.io/")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "url"
@@ -278,84 +292,89 @@ def test_frame_src_no_escape():
     assert used_payload.startswith("javascript:alert(/w")
 
 
-def test_bad_separator_used():
+@pytest.mark.asyncio
+async def test_bad_separator_used():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/confuse_separator.php?number=42")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("\">")
 
 
-def test_escape_with_style():
+@pytest.mark.asyncio
+async def test_escape_with_style():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/escape_with_style.php?color=green")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("</style>")
 
 
-def test_rare_tag_and_event():
+@pytest.mark.asyncio
+async def test_rare_tag_and_event():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/filter_common_keywords.php?msg=test")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("<custom\nchecked\nonpointerenter=")
 
 
-def test_xss_with_strong_csp():
+@pytest.mark.asyncio
+async def test_xss_with_strong_csp():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/strong_csp.php?content=Hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert _("Warning: Content-Security-Policy is present!") in persister.vulnerabilities[0][2]
 
 
-def test_xss_with_weak_csp():
+@pytest.mark.asyncio
+async def test_xss_with_weak_csp():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65081/weak_csp.php?content=Hello%20there")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options)
+    module = mod_xss(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]

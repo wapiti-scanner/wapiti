@@ -1,9 +1,11 @@
 from unittest.mock import Mock
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_htaccess import mod_htaccess
 
 
@@ -30,8 +32,9 @@ class FakePersister:
         self.vulnerabilities.append(request)
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -66,16 +69,16 @@ def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_htaccess(crawler, persister, logger, options)
+    module = mod_htaccess(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_get = True
     for request in persister.requests:
         if module.must_attack(request):
-            module.attack(request)
+            await module.attack(request)
         else:
             assert request.path_id == 1
 

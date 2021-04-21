@@ -10,7 +10,7 @@ from asyncio import Event
 import pytest
 import responses
 
-from wapitiCore.net.crawler import Crawler, Explorer
+from wapitiCore.net.crawler import AsyncCrawler, Explorer
 from wapitiCore.net.web import Request
 
 
@@ -27,14 +27,14 @@ def run_around_tests():
 
 @pytest.mark.asyncio
 async def test_qs_limit():
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler("http://127.0.0.1:65080/")
     explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/"])
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
 
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler("http://127.0.0.1:65080/")
     explorer = Explorer(crawler, Event())
     # Exclude huge POST form with limit of parameters
     explorer.qs_limit = 500
@@ -46,7 +46,7 @@ async def test_qs_limit():
 
 @pytest.mark.asyncio
 async def test_explorer_filtering():
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler("http://127.0.0.1:65080/")
     explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/filters.html"])
     excluded_urls = []
@@ -56,8 +56,9 @@ async def test_explorer_filtering():
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_cookies():
+async def test_cookies():
     responses.add(
         responses.GET,
         "http://perdu.com/",
@@ -74,15 +75,16 @@ def test_cookies():
         callback=print_headers_callback
     )
 
-    crawler = Crawler("http://perdu.com/")
-    response = crawler.get(Request("http://perdu.com/"))
+    crawler = AsyncCrawler("http://perdu.com/")
+    response = await crawler.async_get(Request("http://perdu.com/"))
     assert "foo=bar" in response.headers["set-cookie"]
-    response = crawler.get(Request("http://perdu.com/cookies"))
+    response = await crawler.async_get(Request("http://perdu.com/cookies"))
     assert "foo=bar" in response.content
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_drop_cookies():
+async def test_drop_cookies():
     responses.add(
         responses.GET,
         "http://perdu.com/",
@@ -99,11 +101,11 @@ def test_drop_cookies():
         callback=print_headers_callback
     )
 
-    crawler = Crawler("http://perdu.com/")
-    crawler.set_drop_cookies()
-    response = crawler.get(Request("http://perdu.com/"))
+    crawler = AsyncCrawler("http://perdu.com/")
+    crawler.drop_cookies = True
+    response = await crawler.async_get(Request("http://perdu.com/"))
     assert "foo=bar" in response.headers["set-cookie"]
-    response = crawler.get(Request("http://perdu.com/cookies"))
+    response = await crawler.async_get(Request("http://perdu.com/cookies"))
     assert "foo=bar" not in response.content
 
 
@@ -132,9 +134,10 @@ def test_save_and_restore_state():
     os.unlink(filename)
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_explorer_extract_links():
-    crawler = Crawler("http://perdu.com/")
+async def test_explorer_extract_links():
+    crawler = AsyncCrawler("http://perdu.com/")
     explorer = Explorer(crawler, Event())
     responses.add(
         responses.GET,
@@ -156,7 +159,7 @@ def test_explorer_extract_links():
     )
 
     request = Request("http://perdu.com/")
-    page = crawler.send(request)
+    page = await crawler.async_send(request)
     results = list(explorer.extract_links(page, request))
     # We should get 6 resources as the âth from the form will also be used as url
     assert len(results) == 6

@@ -3,11 +3,12 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
+from asyncio import Event
 
 import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import mod_file, has_prefix_or_suffix, find_warning_message, FileWarning
 
 
@@ -44,38 +45,41 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_inclusion_detection():
+@pytest.mark.asyncio
+async def test_inclusion_detection():
     # Will also test false positive detection
     persister = FakePersister()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options)
+    module = mod_file(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
 
 
-def test_warning_false_positive():
+@pytest.mark.asyncio
+async def test_warning_false_positive():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
-    crawler = Crawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options)
+    module = mod_file(crawler, persister, logger, options, Event())
     module.do_post = False
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
 
 
-def test_no_crash():
+@pytest.mark.asyncio
+async def test_no_crash():
     persister = FakePersister()
 
     request = Request("http://127.0.0.1:65085/empty.html")
@@ -90,14 +94,14 @@ def test_no_crash():
     request.path_id = 2
     persister.requests.append(request)
 
-    crawler = Crawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options)
+    module = mod_file(crawler, persister, logger, options, Event())
     module.do_post = False
     for request in persister.requests:
-        module.attack(request)
+        await module.attack(request)
 
     assert True
 

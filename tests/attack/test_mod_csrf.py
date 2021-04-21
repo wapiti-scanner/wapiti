@@ -3,11 +3,12 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
+from asyncio import Event
 
 import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_csrf import mod_csrf
 from wapitiCore.language.vulnerability import _
 
@@ -46,7 +47,8 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_csrf_cases():
+@pytest.mark.asyncio
+async def test_csrf_cases():
     persister = FakePersister()
 
     request = Request("http://127.0.0.1:65086/")
@@ -77,16 +79,16 @@ def test_csrf_cases():
     request.path_id = 4
     persister.requests.append(request)
 
-    crawler = Crawler("http://127.0.0.1:65086/", timeout=1)
+    crawler = AsyncCrawler("http://127.0.0.1:65086/", timeout=1)
     options = {"timeout": 10, "level": 1}
     logger = Mock()
 
-    module = mod_csrf(crawler, persister, logger, options)
+    module = mod_csrf(crawler, persister, logger, options, Event())
     module.do_post = True
     module.verbose = 2
     for request in persister.requests:
         if module.must_attack(request):
-            module.attack(request)
+            await module.attack(request)
         else:
             # Not attacked because of GET verb
             assert request.path_id == 1

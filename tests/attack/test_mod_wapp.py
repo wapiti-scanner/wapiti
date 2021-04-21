@@ -1,10 +1,12 @@
 from unittest.mock import Mock
-
 import os
+from asyncio import Event
+
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wapp import mod_wapp
 
 
@@ -37,8 +39,9 @@ class FakePersister:
         return self.requests[0].url
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_false_positive():
+async def test_false_positive():
     # Test for false positive
     responses.add_passthru("https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json")
 
@@ -55,20 +58,21 @@ def test_false_positive():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.additionals
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_url_detection():
+async def test_url_detection():
     # Test if application is detected using its url regex
     responses.add(
         responses.GET,
@@ -83,21 +87,22 @@ def test_url_detection():
     request = Request("http://perdu.com/owa/auth/logon.aspx")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[2] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_html_detection():
+async def test_html_detection():
     # Test if application is detected using its html regex
     responses.add(
         responses.GET,
@@ -113,22 +118,23 @@ def test_html_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == \
         '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_script_detection():
+async def test_script_detection():
     # Test if application is detected using its script regex
     responses.add(
         responses.GET,
@@ -145,22 +151,23 @@ def test_script_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == \
         '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_cookies_detection():
+async def test_cookies_detection():
     # Test if application is detected using its cookies regex
     responses.add(
         responses.GET,
@@ -177,21 +184,22 @@ def test_cookies_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_headers_detection():
+async def test_headers_detection():
     # Test if application is detected using its headers regex
     responses.add(
         responses.GET,
@@ -208,21 +216,22 @@ def test_headers_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_meta_detection():
+async def test_meta_detection():
     # Test if application is detected using its meta regex
     responses.add(
         responses.GET,
@@ -240,21 +249,22 @@ def test_meta_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_multi_detection():
+async def test_multi_detection():
     # Test if application is detected using several ways
     responses.add(
         responses.GET,
@@ -274,21 +284,22 @@ def test_multi_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[-1] == '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_implies_detection():
+async def test_implies_detection():
     # Test for implied applications
     responses.add(
         responses.GET,
@@ -305,23 +316,24 @@ def test_implies_detection():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com")
+    crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
     assert persister.additionals[1] == '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_vulnerabilities():
-    # Test for vulnerabilties detected
+async def test_vulnerabilities():
+    # Test for vulnerabilities detected
     responses.add(
         responses.GET,
         url="http://perdu.com/",
@@ -337,14 +349,14 @@ def test_vulnerabilities():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com")
+    crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options)
+    module = mod_wapp(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'

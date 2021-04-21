@@ -20,7 +20,7 @@ import json
 import re
 from http.cookiejar import Cookie, CookieJar
 
-from requests.cookies import RequestsCookieJar
+from httpx import Cookies
 
 # Regex to check whether the domain returned by CookieJar is an IP address
 # IPv6 addresses seems to have a ".local" suffix.
@@ -48,7 +48,7 @@ class JsonCookie:
 
     def addcookies(self, cookies):
         """Inject Cookies from a CookieJar into our JSON dictionary."""
-        if not isinstance(cookies, RequestsCookieJar):
+        if not isinstance(cookies, Cookies):
             return False
 
         for domain, pathdict in cookies._cookies.items():

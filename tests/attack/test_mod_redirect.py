@@ -4,12 +4,13 @@ import os
 import sys
 from time import sleep
 import re
+from asyncio import Event
 
 import pytest
 import responses
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_redirect import mod_redirect
 
 
@@ -44,21 +45,23 @@ def run_around_tests():
     proc.terminate()
 
 
-def test_redirect_detection():
+@pytest.mark.asyncio
+async def test_redirect_detection():
     persister = FakePersister()
     request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
-    crawler = Crawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler("http://127.0.0.1:65080/")
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_redirect(crawler, persister, logger, options)
-    module.attack(request)
+    module = mod_redirect(crawler, persister, logger, options, Event())
+    await module.attack(request)
 
     assert persister.vulnerabilities == {"url"}
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -84,14 +87,14 @@ def test_whole_stuff():
     request.path_id = 3
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_redirect(crawler, persister, logger, options)
+    module = mod_redirect(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
     for request in persister.requests:
-        module.attack(request)
+        await module.attack(request)
 
     assert True

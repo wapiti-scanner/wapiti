@@ -3,12 +3,15 @@ import re
 import os
 import sys
 from os.path import join as path_join
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import mod_drupal_enum
+
 
 class FakePersister:
 
@@ -33,9 +36,11 @@ class FakePersister:
     def get_root_url(self):
         return self.requests[0].url
 
-#Test no Drupal detected
+
+# Test no Drupal detected
+@pytest.mark.asyncio
 @responses.activate
-def test_no_drupal():
+async def test_no_drupal():
 
     responses.add(
         responses.GET,
@@ -51,26 +56,27 @@ def test_no_drupal():
         status=404
     )
 
-
     persister = FakePersister()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options)
+    module = mod_drupal_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert not persister.additionals
 
+
+@pytest.mark.asyncio
 @responses.activate
-def test_version_detected():
+async def test_version_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
@@ -79,13 +85,13 @@ def test_version_detected():
     with open(path_join(test_directory, changelog_file), errors="ignore") as changelog:
         data = changelog.read()
 
-    #Response to tell that Drupal is used
+    # Response to tell that Drupal is used
     responses.add(
         responses.GET,
         url="http://perdu.com/sites/",
         status=403
     )
-    #Response for changelog.txt
+    # Response for changelog.txt
     responses.add(
         responses.GET,
         url="http://perdu.com/CHANGELOG.txt",
@@ -103,21 +109,23 @@ def test_version_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options)
+    module = mod_drupal_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
 
+
+@pytest.mark.asyncio
 @responses.activate
-def test_multi_versions_detected():
+async def test_multi_versions_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
@@ -126,13 +134,13 @@ def test_multi_versions_detected():
     with open(path_join(test_directory, maintainers_file), errors="ignore") as maintainers:
         data = maintainers.read()
 
-    #Response to tell that Drupal is used
+    # Response to tell that Drupal is used
     responses.add(
         responses.GET,
         url="http://perdu.com/sites/",
         status=403
     )
-    #Response for  maintainers.txt
+    # Response for  maintainers.txt
     responses.add(
         responses.GET,
         url="http://perdu.com/core/MAINTAINERS.txt",
@@ -150,21 +158,23 @@ def test_multi_versions_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options)
+    module = mod_drupal_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
 
+
+@pytest.mark.asyncio
 @responses.activate
-def test_version_not_detected():
+async def test_version_not_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
@@ -173,13 +183,13 @@ def test_version_not_detected():
     with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
         data = changelog.read()
 
-    #Response to tell that Drupal is used
+    # Response to tell that Drupal is used
     responses.add(
         responses.GET,
         url="http://perdu.com/sites/",
         status=403
     )
-    #Response for edited changelog.txt
+    # Response for edited changelog.txt
     responses.add(
         responses.GET,
         url="http://perdu.com/CHANGELOG.txt",
@@ -197,15 +207,15 @@ def test_version_not_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = Crawler("http://perdu.com/")
+    crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options)
+    module = mod_drupal_enum(crawler, persister, logger, options, Event())
     module.verbose = 2
 
-    module.attack(request)
+    await module.attack(request)
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'

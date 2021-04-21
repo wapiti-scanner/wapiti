@@ -1,10 +1,12 @@
 from unittest.mock import Mock, patch
 import re
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Crawler
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_buster import mod_buster
 from wapitiCore.attack.attack import Flags
 
@@ -32,8 +34,9 @@ class FakePersister:
         self.vulnerabilities.append(request)
 
 
+@pytest.mark.asyncio
 @responses.activate
-def test_whole_stuff():
+async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     responses.add(
         responses.GET,
@@ -81,7 +84,7 @@ def test_whole_stuff():
     # Buster module will get requests from the persister
     persister.requests.append(request)
 
-    crawler = Crawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
     logger = Mock()
 
@@ -89,10 +92,10 @@ def test_whole_stuff():
             "wapitiCore.attack.mod_buster.mod_buster.payloads",
             [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
     ):
-        module = mod_buster(crawler, persister, logger, options)
+        module = mod_buster(crawler, persister, logger, options, Event())
         module.verbose = 2
         module.do_get = True
-        module.attack(request)
+        await module.attack(request)
 
         assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
         assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]

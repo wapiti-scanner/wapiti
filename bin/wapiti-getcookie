@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import sys
 import os
+import asyncio
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 if os.path.exists(os.path.join(parent_dir, "wapitiCore")):
@@ -26,4 +27,4 @@ if os.path.exists(os.path.join(parent_dir, "wapitiCore")):
 from wapitiCore.main.getcookie import getcookie_main
 
 if __name__ == "__main__":
-    getcookie_main()
+    asyncio.run(getcookie_main())
