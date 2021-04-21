@@ -20,7 +20,7 @@ import random
 import string
 from binascii import hexlify
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import HIGH_LEVEL, _
@@ -69,7 +69,7 @@ class mod_shellshock(Attack):
 
         try:
             resp = await self.crawler.async_send(evil_req, headers=self.hdrs)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 

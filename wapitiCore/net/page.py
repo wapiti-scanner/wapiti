@@ -28,9 +28,7 @@ from ast import literal_eval
 from posixpath import normpath
 
 # Third-parties
-from requests.packages.urllib3 import disable_warnings
-from requests.exceptions import ConnectionError
-from requests.models import Response
+from httpx import Response, ConnectError
 import httpx
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
@@ -42,7 +40,6 @@ from wapitiCore import parser_name
 from wapitiCore.net import web
 from wapitiCore.net import lamejs
 
-disable_warnings()
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 RE_JS_REDIR = re.compile(
     r"\b(window\.|document\.|top\.|self\.)?location(\.href)?\s*=\s*(\"|')(http[s]?://[^'\"]+\.[^'\"]+)\3\s*(;|}|$)"
@@ -197,7 +194,7 @@ class Page:
 
         try:
             return self._response.text
-        except (ConnectionError, OSError, IncompleteRead):
+        except (ConnectError, OSError, IncompleteRead):
             return ""
 
     @property

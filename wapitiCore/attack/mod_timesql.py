@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, CRITICAL_LEVEL, _
@@ -65,7 +65,7 @@ class mod_timesql(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 # The request with time based payload did timeout, what about a regular request?
-                if self.does_timeout(request):
+                if await self.does_timeout(request):
                     self.network_errors += 1
                     print("[!] Too much lag from website, can't reliably test time-based blind SQL")
                     break
@@ -100,7 +100,7 @@ class mod_timesql(Attack):
                 # We reached maximum exploitation for this parameter, don't send more payloads
                 vulnerable_parameter = True
                 continue
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             else:

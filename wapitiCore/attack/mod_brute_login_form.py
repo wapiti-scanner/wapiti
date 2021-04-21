@@ -21,7 +21,7 @@
 from os.path import join as path_join
 from itertools import product
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
@@ -103,7 +103,7 @@ class mod_brute_login_form(Attack):
     async def attack(self, request: Request):
         try:
             page = await self.crawler.async_get(Request(request.referer), follow_redirects=True)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 
@@ -121,7 +121,7 @@ class mod_brute_login_form(Attack):
             if self.check_success_auth(failure_text):
                 # Ignore this case as it raises false positives
                 return
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 
@@ -132,7 +132,7 @@ class mod_brute_login_form(Attack):
                     username_field_idx, password_field_idx,
                     username, password
                 )
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
 

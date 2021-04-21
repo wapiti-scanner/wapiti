@@ -21,7 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
@@ -55,7 +55,7 @@ class mod_htaccess(Attack):
         evil_req = Request(url, method="ABC")
         try:
             response = await self.crawler.async_send(evil_req, headers=headers)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 

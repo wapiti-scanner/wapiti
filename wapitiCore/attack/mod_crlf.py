@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from urllib.parse import quote
 
-from requests.exceptions import ReadTimeout, HTTPError, RequestException
+from httpx import ReadTimeout, HTTPStatusError, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, LOW_LEVEL, _
@@ -65,10 +65,10 @@ class mod_crlf(Attack):
                 self.log_orange(Messages.MSG_EVIL_REQUEST)
                 self.log_orange(mutated_request.http_repr())
                 self.log_orange("---")
-            except HTTPError:
+            except HTTPStatusError:
                 self.network_errors += 1
                 self.log(_("Error: The server did not understand this request"))
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
             else:
                 if "wapiti" in response.headers:

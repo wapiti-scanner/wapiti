@@ -21,7 +21,7 @@ from os.path import join as path_join
 from collections import defaultdict, namedtuple
 import re
 
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, CRITICAL_LEVEL, _
@@ -147,7 +147,7 @@ class mod_file(Attack):
 
         try:
             response = await self.crawler.async_send(request)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             # Can't check out, avoid false negative
             return False
@@ -206,7 +206,7 @@ class mod_file(Attack):
                     parameter=parameter
                 )
                 timeouted = True
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             else:

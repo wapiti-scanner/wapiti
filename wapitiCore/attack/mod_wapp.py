@@ -18,7 +18,7 @@
 import json
 import os
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
@@ -97,7 +97,7 @@ class mod_wapp(Attack):
 
         try:
             response = await self.crawler.async_send(request_to_root, follow_redirects=True)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 

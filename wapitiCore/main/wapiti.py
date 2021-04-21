@@ -19,7 +19,7 @@
 import sys
 import argparse
 import os
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 from time import strftime, gmtime
 from importlib import import_module
 from operator import attrgetter
@@ -27,7 +27,6 @@ from itertools import chain
 from traceback import print_tb
 from collections import deque
 from datetime import datetime
-import logging
 from uuid import uuid1
 from sqlite3 import OperationalError
 from hashlib import sha256
@@ -38,9 +37,8 @@ import asyncio
 import signal
 
 import browser_cookie3
-import requests
-from requests.exceptions import RequestException
-from requests.packages.urllib3 import disable_warnings
+import httpx
+from httpx import RequestError
 
 from wapitiCore.language.language import _
 from wapitiCore.language.logger import ConsoleLogger
@@ -54,14 +52,10 @@ from wapitiCore.moon import phase
 
 from wapitiCore.attack import attack
 
-logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.CRITICAL)
-logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
 BASE_DIR = None
 WAPITI_VERSION = "Wapiti 3.0.4"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-
-disable_warnings()
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
@@ -449,7 +443,7 @@ class Wapiti:
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
                         print(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
                         break
-                except RequestException:
+                except RequestError:
                     # Hmmm it should be caught inside the module
                     await asyncio.sleep(1)
                     continue
@@ -467,7 +461,7 @@ class Wapiti:
                             print_tb(exception_traceback, file=traceback_fd)
                             print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
                             print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
-                            print("{}. Requests {}. OS {}".format(WAPITI_VERSION, requests.__version__, sys.platform))
+                            print("{}. Requests {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
 
                         try:
                             upload_request = Request(
@@ -478,7 +472,7 @@ class Wapiti:
                             )
                             page = await self.crawler.async_send(upload_request)
                             print(_("Sending crash report {} ... {}").format(traceback_file, page.content))
-                        except RequestException:
+                        except RequestError:
                             print(_("Error sending crash report"))
                         os.unlink(traceback_file)
                 else:
@@ -709,8 +703,8 @@ def is_valid_endpoint(url_type, url):
 
 def ping(url):
     try:
-        requests.get(url, timeout=5)
-    except RequestException:
+        httpx.get(url, timeout=5)
+    except RequestError:
         return False
     return True
 

@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
@@ -49,7 +49,7 @@ class mod_buster(Attack):
         test_page = Request(path + "does_n0t_exist.htm")
         try:
             response = await self.crawler.async_send(test_page)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 
@@ -79,7 +79,7 @@ class mod_buster(Attack):
                     elif response.status not in [403, 404]:
                         self.log_red("Found webpage {0}", page.path)
                         self.new_resources.append(page.path)
-                except RequestException:
+                except RequestError:
                     self.network_errors += 1
                     continue
 

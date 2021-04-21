@@ -24,7 +24,7 @@
 from os.path import splitext
 from urllib.parse import urljoin
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
@@ -86,7 +86,7 @@ class mod_backup(Attack):
 
             try:
                 response = await self.crawler.async_send(evil_req)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
 

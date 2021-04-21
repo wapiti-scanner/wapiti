@@ -22,7 +22,7 @@ from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
 
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
 from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
@@ -96,7 +96,7 @@ class mod_xxe(Attack):
     async def false_positive(self, request: Request, pattern: str) -> bool:
         try:
             response = await self.crawler.async_send(request)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return False
         else:
@@ -166,7 +166,7 @@ class mod_xxe(Attack):
                     parameter=parameter
                 )
                 timeouted = True
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             else:
@@ -236,7 +236,7 @@ class mod_xxe(Attack):
 
             try:
                 response = await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             else:
@@ -282,7 +282,7 @@ class mod_xxe(Attack):
 
             try:
                 response = await self.crawler.async_send(mutated_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
@@ -317,7 +317,7 @@ class mod_xxe(Attack):
         endpoint_request = Request(endpoint_url)
         try:
             response = await self.crawler.async_send(endpoint_request)
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
             return

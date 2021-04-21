@@ -20,9 +20,8 @@ import csv
 import re
 import os
 import random
-import asyncio
 
-from requests.exceptions import RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import HIGH_LEVEL, _
@@ -154,7 +153,7 @@ class mod_nikto(Attack):
 
             try:
                 response = await self.crawler.async_send(evil_request)
-            except RequestException:
+            except RequestError:
                 self.network_errors += 1
                 continue
             except ValueError:

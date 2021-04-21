@@ -2,8 +2,10 @@ import re
 from urllib.parse import urlparse, parse_qs
 from tempfile import TemporaryDirectory
 from shutil import rmtree
+from asyncio import Event
 
 import responses
+import pytest
 
 from wapitiCore.main.wapiti import Wapiti
 

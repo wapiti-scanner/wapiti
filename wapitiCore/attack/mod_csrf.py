@@ -18,10 +18,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from collections import Counter
 import math
-from requests.exceptions import ReadTimeout, RequestException
+from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import MEDIUM_LEVEL, Messages, _
+from wapitiCore.language.vulnerability import MEDIUM_LEVEL, _
 from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
@@ -134,14 +134,18 @@ class mod_csrf(Attack):
 
         try:
             original_response = await self.crawler.async_send(original_request, follow_redirects=True)
-        except RequestException:
+        except RequestError:
             # We can't compare so act like it is secure
             self.network_errors += 1
             return True
 
         try:
-            mutated_response = await self.crawler.async_send(mutated_request, headers=special_headers, follow_redirects=True)
-        except RequestException:
+            mutated_response = await self.crawler.async_send(
+                mutated_request,
+                headers=special_headers,
+                follow_redirects=True
+            )
+        except RequestError:
             # Do not log anything: the payload is not harmful enough for such behavior
             self.network_errors += 1
         else:
