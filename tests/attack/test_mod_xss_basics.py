@@ -1,8 +1,8 @@
 from unittest.mock import Mock
-import re
 from asyncio import Event
 
-import responses
+import respx
+import httpx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -36,20 +36,11 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
-
-    responses.add(
-        responses.POST,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -64,7 +55,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     persister.requests.append(request)

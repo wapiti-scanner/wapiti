@@ -1,20 +1,16 @@
-import responses
-import requests
+import respx
+import httpx
 
 from wapitiCore.net.crawler import Page
 
 
-@responses.activate
+@respx.mock
 def test_forms():
     with open("tests/data/forms.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
         count = 0
         form_action = False
@@ -87,23 +83,21 @@ def test_forms():
         assert form_action
 
 
-@responses.activate
+@respx.mock
 def test_email_input():
     url = "http://perdu.com/"
-    responses.add(
-        responses.GET,
-        url,
-        body="""<html>
-        <body>
-        <form method="POST">
-        <input type="text" name="email_address" />
-        </form>
-        </body>
-        </html>
-        """
-    )
+    body = """<html>
+    <body>
+    <form method="POST">
+    <input type="text" name="email_address" />
+    </form>
+    </body>
+    </html>
+    """
 
-    resp = requests.get(url, allow_redirects=False)
+    respx.get(url).mock(return_value=httpx.Response(200, text=body))
+
+    resp = httpx.get(url, allow_redirects=False)
     page = Page(resp)
 
     form = next(page.iter_forms())
