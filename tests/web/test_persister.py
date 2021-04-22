@@ -101,13 +101,13 @@ async def test_persister_upload():
     simple_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["file1", ("'fname1", "content")], ["file2", ("fname2", "content")]]
+        file_params=[["file1", ("'fname1", "content", "text/plain")], ["file2", ("fname2", "content", "text/plain")]]
     )
 
     xml_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ("calendar.xml", "<xml>Hello there</xml")]]
+        file_params=[["calendar", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     persister.add_request(simple_upload)
     persister.add_request(xml_upload)
@@ -125,16 +125,16 @@ async def test_persister_upload():
 
         if req == simple_upload:
             assert req.file_params == simple_upload.file_params
-            assert req.file_params[0] == ["file1", ("'fname1", "content")]
-            assert req.file_params[1] == ["file2", ("fname2", "content")]
+            assert req.file_params[0] == ["file1", ("'fname1", "content", "text/plain")]
+            assert req.file_params[1] == ["file2", ("fname2", "content", "text/plain")]
         else:
             assert req.file_params == xml_upload.file_params
-            assert req.file_params[0] == ["calendar", ("calendar.xml", "<xml>Hello there</xml")]
+            assert req.file_params[0] == ["calendar", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]
 
     naughty_file = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ("calendar.xml", "<xml>XXE there</xml>")]]
+        file_params=[["calendar", ("calendar.xml", "<xml>XXE there</xml>", "application/xml")]]
     )
     persister.add_vulnerability(1, "Command Execution", 1, naughty_file, "calendar", "<xml>XXE there</xml>")
     payload = next(persister.get_payloads())

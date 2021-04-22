@@ -1,18 +1,15 @@
-import responses
+import httpx
+import respx
 import requests
 
 from wapitiCore.net.crawler import Page, AsyncCrawler, Scope
 from wapitiCore.net.web import Request
 
 
-@responses.activate
+@respx.mock
 def test_domain_scope():
     url = "http://perdu.com/"
-    responses.add(
-        responses.GET,
-        url,
-        body="Hello world!"
-    )
+    respx.get(url).mock(return_value=httpx.Response(200, text="Hello world!"))
 
     resp = requests.get(url)
     page = Page(resp)

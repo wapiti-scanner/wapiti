@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -33,26 +34,15 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="Default page"
-    )
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="Default page"))
 
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/admin/",
-        body="Private section",
-        status=401
-    )
+    respx.get("http://perdu.com/admin/").mock(return_value=httpx.Response(401, text="Private section"))
 
-    responses.add(
-        "ABC",
-        url="http://perdu.com/admin/",
-        body="Hello there"
+    respx.route(method="ABC", host="perdu.com", path="/admin/").mock(
+        return_value=httpx.Response(200, text="Hello there")
     )
 
     persister = FakePersister()

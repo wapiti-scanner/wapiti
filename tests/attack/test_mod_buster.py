@@ -1,8 +1,8 @@
 from unittest.mock import Mock, patch
-import re
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -35,46 +35,17 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="Default page"
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="Default page"))
+    respx.get("http://perdu.com/admin").mock(
+        return_value=httpx.Response(301, text="Hello there", headers={"Location": "/admin/"})
     )
-
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/admin",
-        body="Hello there",
-        headers={"Location": "/admin/"},
-        status=301
-    )
-
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/admin/",
-        body="Hello there"
-    )
-
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/config.inc",
-        body="pass = 123456"
-    )
-
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/admin/authconfig.php",
-        body="Hello there"
-    )
-
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/.*"),
-        status=404
-    )
+    respx.get("http://perdu.com/admin/").mock(return_value=httpx.Response(200, text="Hello there"))
+    respx.get("http://perdu.com/config.inc").mock(return_value=httpx.Response(200, text="pass = 123456"))
+    respx.get("http://perdu.com/admin/authconfig.php").mock(return_value=httpx.Response(200, text="Hello there"))
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(404))
 
     persister = FakePersister()
 
