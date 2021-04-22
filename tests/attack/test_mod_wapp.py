@@ -2,7 +2,8 @@ from unittest.mock import Mock
 import os
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -11,7 +12,6 @@ from wapitiCore.attack.mod_wapp import mod_wapp
 
 
 class FakePersister:
-
     CONFIG_DIR_NAME = "config"
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
@@ -40,17 +40,18 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_false_positive():
     # Test for false positive
-    responses.add_passthru("https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json")
+    respx.route(host="raw.githubusercontent.com").pass_through()
 
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
     )
 
     persister = FakePersister()
@@ -71,15 +72,16 @@ async def test_false_positive():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_url_detection():
     # Test if application is detected using its url regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/owa/auth/logon.aspx",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+    respx.get("http://perdu.com/owa/auth/logon.aspx").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
     )
 
     persister = FakePersister()
@@ -101,16 +103,17 @@ async def test_url_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_html_detection():
     # Test if application is detected using its html regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>FishEye 2.8.4</title> \
-        </head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        </body></html>"
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>FishEye 2.8.4</title> \
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            </body></html>"
+        )
     )
 
     persister = FakePersister()
@@ -129,21 +132,22 @@ async def test_html_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == \
-        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+           '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_script_detection():
     # Test if application is detected using its script regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        <script src=\"http://chartjs.org/dist/1.4.2/Chart.js\"></script>\
-        </body></html>"
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            <script src=\"http://chartjs.org/dist/1.4.2/Chart.js\"></script>\
+            </body></html>"
+        )
     )
 
     persister = FakePersister()
@@ -162,21 +166,22 @@ async def test_script_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == \
-        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+           '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_cookies_detection():
     # Test if application is detected using its cookies regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        </body></html>",
-        headers={"Set-Cookie": "ci_csrf_token=4.1"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"Set-Cookie": "ci_csrf_token=4.1"}
+        )
     )
 
     persister = FakePersister()
@@ -198,17 +203,18 @@ async def test_cookies_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_headers_detection():
     # Test if application is detected using its headers regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        </body></html>",
-        headers={"Server": "Cherokee/1.3.4"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                    <h2>Pas de panique, on va vous aider</h2> \
+                    <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+                    </body></html>",
+            headers={"Server": "Cherokee/1.3.4"}
+        )
     )
 
     persister = FakePersister()
@@ -230,18 +236,19 @@ async def test_headers_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_meta_detection():
     # Test if application is detected using its meta regex
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title> \
-        <meta name=\"generator\" content=\"Planet/1.6.2\">    \
-        </head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        </body></html>"
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title> \
+            <meta name=\"generator\" content=\"Planet/1.6.2\">    \
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>"
+        )
     )
 
     persister = FakePersister()
@@ -263,20 +270,21 @@ async def test_meta_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_multi_detection():
     # Test if application is detected using several ways
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title> \
-        <meta name=\"generator\" content=\"WordPress 5.6.1\">    \
-        </head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        <script type=\"text/javascript\" src=\"https://perdu.com/wp-includes/js/wp-embed.min.js\" ></script> \
-        </body></html>",
-        headers={"link": "<http://perdu.com/wp-json/>; rel=\"https://api.w.org/\""}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title> \
+            <meta name=\"generator\" content=\"WordPress 5.6.1\">    \
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            <script type=\"text/javascript\" src=\"https://perdu.com/wp-includes/js/wp-embed.min.js\" ></script> \
+            </body></html>",
+            headers={"link": "<http://perdu.com/wp-json/>; rel=\"https://api.w.org/\""}
+        )
     )
 
     persister = FakePersister()
@@ -298,17 +306,18 @@ async def test_multi_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_implies_detection():
     # Test for implied applications
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        </body></html>",
-        headers={"X-Generator": "Backdrop CMS 4.5"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"X-Generator": "Backdrop CMS 4.5"}
+        )
     )
 
     persister = FakePersister()
@@ -331,17 +340,18 @@ async def test_implies_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_vulnerabilities():
     # Test for vulnerabilities detected
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
-        </body></html>",
-        headers={"X-Generator": "Backdrop CMS 4.5", "Server": "Cherokee/1.3.4"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"X-Generator": "Backdrop CMS 4.5", "Server": "Cherokee/1.3.4"}
+        )
     )
 
     persister = FakePersister()
@@ -362,5 +372,5 @@ async def test_vulnerabilities():
     assert persister.vulnerabilities[0][0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
     assert persister.vulnerabilities[0][1] == 'Fingerprint web application framework'
     assert persister.vulnerabilities[1][0] == \
-        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+           '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
     assert persister.vulnerabilities[1][1] == 'Fingerprint web server'

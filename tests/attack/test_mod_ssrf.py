@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -39,14 +40,10 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="Hello there"
-    )
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -61,7 +58,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     persister.requests.append(request)
@@ -74,21 +71,22 @@ async def test_whole_stuff():
     module.verbose = 2
     module.do_post = True
 
-    responses.add(
-        responses.GET,
-        url="https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id,
-        json={
-            "3": {
-                "66696c65": [
-                    {
-                        "date": "2019-08-17T16:52:41+00:00",
-                        "url": "https://wapiti3.ovh/ssrf_data/yolo/3/66696c65/31337-0-192.168.2.1.txt",
-                        "ip": "192.168.2.1",
-                        "method": "GET"
-                    }
-                ]
+    respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "3": {
+                    "66696c65": [
+                        {
+                            "date": "2019-08-17T16:52:41+00:00",
+                            "url": "https://wapiti3.ovh/ssrf_data/yolo/3/66696c65/31337-0-192.168.2.1.txt",
+                            "ip": "192.168.2.1",
+                            "method": "GET"
+                        }
+                    ]
+                }
             }
-        }
+        )
     )
 
     for request in persister.requests:
