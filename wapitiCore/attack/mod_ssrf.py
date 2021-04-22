@@ -72,7 +72,7 @@ class SsrfMutator(Mutator):
                     saved_value = ""
 
                 if params_list is file_params:
-                    params_list[i][1] = ["__PAYLOAD__", params_list[i][1][1]]
+                    params_list[i][1] = ("__PAYLOAD__", saved_value[1], saved_value[2])
                 else:
                     params_list[i][1] = "__PAYLOAD__"
 
@@ -95,7 +95,7 @@ class SsrfMutator(Mutator):
                     )
 
                     if params_list is file_params:
-                        params_list[i][1][0] = payload
+                        params_list[i][1] = (payload, saved_value[1], saved_value[2])
                         method = PayloadType.file
                     else:
                         params_list[i][1] = payload

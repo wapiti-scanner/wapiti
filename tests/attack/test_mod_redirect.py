@@ -7,7 +7,8 @@ import re
 from asyncio import Event
 
 import pytest
-import responses
+import httpx
+import respx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -60,14 +61,10 @@ async def test_redirect_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
+    respx.route(url__regex=r"http://perdu.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -82,7 +79,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     persister.requests.append(request)
