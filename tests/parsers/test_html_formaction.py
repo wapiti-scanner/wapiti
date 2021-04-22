@@ -1,20 +1,16 @@
-import responses
-import requests
+import httpx
+import respx
 
 from wapitiCore.net.crawler import Page
 
 
-@responses.activate
+@respx.mock
 def test_formactions():
     with open("tests/data/formactions.html") as form_action:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=form_action.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=form_action.read()))
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
         count = 0
 

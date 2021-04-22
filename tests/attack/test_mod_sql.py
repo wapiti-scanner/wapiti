@@ -1,11 +1,11 @@
 from unittest.mock import Mock
-import re
 from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -39,20 +39,11 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
-
-    responses.add(
-        responses.POST,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -67,7 +58,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     persister.requests.append(request)
@@ -86,13 +77,9 @@ async def test_whole_stuff():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_false_positive():
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="You have an error in your SQL syntax"
-    )
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="You have an error in your SQL syntax"))
 
     persister = FakePersister()
 
@@ -112,20 +99,17 @@ async def test_false_positive():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_true_positive():
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/?foo=bar",
-        body="Hi there"
-    )
+    respx.get("http://perdu.com/?foo=bar").mock(return_value=httpx.Response(200, text="Hi there"))
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/\?foo=.*"),
-        body=(
-            "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version "
-            "for the right syntax to use near '\\\"\\'' at line 1"
+    respx.get(url__regex=r"http://perdu\.com/\?foo=.*").mock(
+        return_value=httpx.Response(
+            200,
+            text=(
+                "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version "
+                "for the right syntax to use near '\\\"\\'' at line 1"
+            )
         )
     )
 
@@ -147,7 +131,7 @@ async def test_true_positive():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_blind_detection():
     with NamedTemporaryFile() as database_fd:
         conn = sqlite3.connect(database_fd.name)
@@ -161,9 +145,9 @@ async def test_blind_detection():
 
         def process(http_request):
             try:
-                user_id = parse_qs(urlparse(http_request.url).query)["user_id"][0]
+                user_id = parse_qs(urlparse(str(http_request.url)).query)["user_id"][0]
             except (IndexError, KeyError):
-                return 200, {}, "Unknown user"
+                return httpx.Response(200, text="Unknown user")
             else:
                 conn = sqlite3.connect(database_fd.name)
                 cursor = conn.cursor()
@@ -174,20 +158,16 @@ async def test_blind_detection():
                 except sqlite3.OperationalError:
                     cursor.close()
                     conn.close()
-                    return 200, {}, "Unknown user"
+                    return httpx.Response(200, text="Unknown user")
                 else:
                     cursor.close()
                     conn.close()
                     if row:
-                        return 200, {}, "Welcome {}".format(row[0])
+                        return httpx.Response(200, text="Welcome {}".format(row[0]))
                     else:
-                        return 200, {}, "Unknown user"
+                        return httpx.Response(200, text="Unknown user")
 
-        responses.add_callback(
-            responses.GET,
-            re.compile(r"http://perdu.com/\?user_id=.*"),
-            callback=process
-        )
+        respx.get(url__regex=r"http://perdu\.com/\?user_id=.*").mock(side_effect=process)
 
         persister = FakePersister()
 
@@ -205,17 +185,13 @@ async def test_blind_detection():
 
         assert persister.vulnerabilities
         # One request for error-based, one to get normal response, four to test boolean-based attack
-        assert len(responses.calls) == 6
+        assert respx.calls.call_count == 6
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_negative_blind():
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="Hello there"
-    )
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -235,11 +211,11 @@ async def test_negative_blind():
     # - 1 request for error-based test
     # - 1 request to get normal response
     # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
-    assert len(responses.calls) == 8
+    assert respx.calls.call_count == 8
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_blind_detection_parenthesis():
     with NamedTemporaryFile() as database_fd:
         conn = sqlite3.connect(database_fd.name)
@@ -253,9 +229,9 @@ async def test_blind_detection_parenthesis():
 
         def process(http_request):
             try:
-                username = parse_qs(urlparse(http_request.url).query)["username"][0]
+                username = parse_qs(urlparse(str(http_request.url)).query)["username"][0]
             except (IndexError, KeyError):
-                return 200, {}, "Unknown user"
+                return httpx.Response(200, text="Unknown user")
             else:
                 conn = sqlite3.connect(database_fd.name)
                 cursor = conn.cursor()
@@ -266,20 +242,16 @@ async def test_blind_detection_parenthesis():
                 except sqlite3.OperationalError:
                     cursor.close()
                     conn.close()
-                    return 200, {}, "Unknown user"
+                    return httpx.Response(200, text="Unknown user")
                 else:
                     cursor.close()
                     conn.close()
                     if row:
-                        return 200, {}, "Welcome, your user ID is {}".format(row[0])
+                        return httpx.Response(200, text="Welcome, your user ID is {}".format(row[0]))
                     else:
-                        return 200, {}, "Unknown user"
+                        return httpx.Response(200, text="Unknown user")
 
-        responses.add_callback(
-            responses.GET,
-            re.compile(r"http://perdu.com/\?username=.*"),
-            callback=process
-        )
+        respx.get(url__regex=r"http://perdu\.com/\?username=.*").mock(side_effect=process)
 
         persister = FakePersister()
 
@@ -297,4 +269,4 @@ async def test_blind_detection_parenthesis():
 
         assert persister.vulnerabilities
         # This is the same test as the previous blind except we have to put single quotes
-        assert len(responses.calls) == 8
+        assert respx.calls.call_count == 8

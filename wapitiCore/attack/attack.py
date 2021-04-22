@@ -516,7 +516,7 @@ class FileMutator:
                     hexlify(param_name.encode("utf-8", errors="replace")).decode()
                 )
 
-                new_params[i][1] = ["content.xml", payload, "text/xml"]
+                new_params[i][1] = ("content.xml", payload, "text/xml")
 
                 evil_req = Request(
                     request.path,

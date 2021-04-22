@@ -7,7 +7,8 @@ import logging
 from asyncio import Event
 
 import pytest
-import responses
+import respx
+import httpx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -122,8 +123,10 @@ async def test_direct_query_string():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_out_of_band_body():
+    respx.route(host="127.0.0.1").pass_through()
+
     persister = FakePersister()
     request = Request(
         "http://127.0.0.1:65084/xxe/outofband/body.php",
@@ -143,22 +146,23 @@ async def test_out_of_band_body():
 
     module = mod_xxe(crawler, persister, logger, options, Event())
 
-    responses.add(
-        responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
-        json={
-            "42": {
-                "72617720626f6479": [
-                    {
-                        "date": "2019-08-17T16:52:41+00:00",
-                        "url": "https://wapiti3.ovh/xxe_data/yolo/3/72617720626f6479/31337-0-192.168.2.1.txt",
-                        "ip": "192.168.2.1",
-                        "size": 999,
-                        "payload": "linux2"
-                    }
-                ]
+    respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "42": {
+                    "72617720626f6479": [
+                        {
+                            "date": "2019-08-17T16:52:41+00:00",
+                            "url": "https://wapiti3.ovh/xxe_data/yolo/3/72617720626f6479/31337-0-192.168.2.1.txt",
+                            "ip": "192.168.2.1",
+                            "size": 999,
+                            "payload": "linux2"
+                        }
+                    ]
+                }
             }
-        }
+        )
     )
 
     module.do_post = False
@@ -172,8 +176,10 @@ async def test_out_of_band_body():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_out_of_band_param():
+    respx.route(host="127.0.0.1").pass_through()
+
     persister = FakePersister()
     request = Request("http://127.0.0.1:65084/xxe/outofband/param.php?foo=bar&vuln=yolo")
     request.path_id = 7
@@ -189,22 +195,23 @@ async def test_out_of_band_param():
 
     module = mod_xxe(crawler, persister, logger, options, Event())
 
-    responses.add(
-        responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
-        json={
-            "7": {
-                "76756c6e": [
-                    {
-                        "date": "2019-08-17T16:52:41+00:00",
-                        "url": "https://wapiti3.ovh/xxe_data/yolo/7/76756c6e/31337-0-192.168.2.1.txt",
-                        "ip": "192.168.2.1",
-                        "size": 999,
-                        "payload": "linux2"
-                    }
-                ]
+    respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "7": {
+                    "76756c6e": [
+                        {
+                            "date": "2019-08-17T16:52:41+00:00",
+                            "url": "https://wapiti3.ovh/xxe_data/yolo/7/76756c6e/31337-0-192.168.2.1.txt",
+                            "ip": "192.168.2.1",
+                            "size": 999,
+                            "payload": "linux2"
+                        }
+                    ]
+                }
             }
-        }
+        )
     )
 
     module.do_post = False
@@ -218,8 +225,10 @@ async def test_out_of_band_param():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_out_of_band_query_string():
+    respx.route(host="127.0.0.1").pass_through()
+
     persister = FakePersister()
     request = Request("http://127.0.0.1:65084/xxe/outofband/qs.php")
     request.path_id = 4
@@ -237,22 +246,23 @@ async def test_out_of_band_query_string():
     module.do_post = False
     await module.attack(request)
 
-    responses.add(
-        responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
-        json={
-            "4": {
-                "51554552595f535452494e47": [
-                    {
-                        "date": "2019-08-17T16:52:41+00:00",
-                        "url": "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
-                        "ip": "192.168.2.1",
-                        "size": 999,
-                        "payload": "linux2"
-                    }
-                ]
+    respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "4": {
+                    "51554552595f535452494e47": [
+                        {
+                            "date": "2019-08-17T16:52:41+00:00",
+                            "url": "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
+                            "ip": "192.168.2.1",
+                            "size": 999,
+                            "payload": "linux2"
+                        }
+                    ]
+                }
             }
-        }
+        )
     )
 
     assert not persister.vulnerabilities
@@ -263,14 +273,15 @@ async def test_out_of_band_query_string():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_direct_upload():
+    respx.route(host="127.0.0.1").pass_through()
     persister = FakePersister()
     request = Request(
         "http://127.0.0.1:65084/xxe/outofband/upload.php",
         file_params=[
-            ["foo", ["bar.xml", "<xml>test</xml>"]],
-            ["calendar", ["calendar.xml", "<xml>test</xml>"]]
+            ["foo", ("bar.xml", "<xml>test</xml>", "application/xml")],
+            ["calendar", ("calendar.xml", "<xml>test</xml>", "application/xml")]
         ]
     )
     request.path_id = 8
@@ -288,22 +299,23 @@ async def test_direct_upload():
 
     await module.attack(request)
 
-    responses.add(
-        responses.GET,
-        "http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id,
-        json={
-            "8": {
-                "63616c656e646172": [
-                    {
-                        "date": "2019-08-17T16:52:41+00:00",
-                        "url": "https://wapiti3.ovh/xxe_data/yolo/8/63616c656e646172/31337-0-192.168.2.1.txt",
-                        "ip": "192.168.2.1",
-                        "size": 999,
-                        "payload": "linux2"
-                    }
-                ]
+    respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "8": {
+                    "63616c656e646172": [
+                        {
+                            "date": "2019-08-17T16:52:41+00:00",
+                            "url": "https://wapiti3.ovh/xxe_data/yolo/8/63616c656e646172/31337-0-192.168.2.1.txt",
+                            "ip": "192.168.2.1",
+                            "size": 999,
+                            "payload": "linux2"
+                        }
+                    ]
+                }
             }
-        }
+        )
     )
 
     assert not persister.vulnerabilities
