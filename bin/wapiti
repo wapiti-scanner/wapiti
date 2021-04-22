@@ -28,7 +28,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file
 if os.path.exists(os.path.join(parent_dir, "wapitiCore")):
     sys.path.append(parent_dir)
 
-from wapitiCore.main.wapiti import wapiti_main
+from wapitiCore.main.wapiti import wapiti_asyncio_wrapper
 
 if __name__ == "__main__":
-    asyncio.run(wapiti_main())
+    wapiti_asyncio_wrapper()
