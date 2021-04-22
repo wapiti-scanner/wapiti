@@ -1,9 +1,9 @@
 import os
 import json
 
-import responses
 import pytest
 import httpx
+import respx
 
 from wapitiCore.net.sqlite_persister import SqlitePersister
 from wapitiCore.net.web import Request
@@ -11,14 +11,10 @@ from wapitiCore.net.crawler import AsyncCrawler, Page
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_persister_basic():
     url = "http://httpbin.org/?k=v"
-    responses.add(
-        responses.GET,
-        url,
-        body="Hello world!"
-    )
+    respx.get(url).mock(return_value=httpx.Response(200, text="Hello world!"))
 
     crawler = AsyncCrawler("http://httpbin.org/")
 
@@ -92,7 +88,7 @@ async def test_persister_basic():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_persister_upload():
     try:
         os.unlink("/tmp/crawl.db")
@@ -105,13 +101,13 @@ async def test_persister_upload():
     simple_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["file1", ["'fname1", "content"]], ["file2", ["fname2", "content"]]]
+        file_params=[["file1", ("'fname1", "content")], ["file2", ("fname2", "content")]]
     )
 
     xml_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["calendar", ("calendar.xml", "<xml>Hello there</xml")]]
     )
     persister.add_request(simple_upload)
     persister.add_request(xml_upload)
@@ -120,11 +116,7 @@ async def test_persister_upload():
     assert simple_upload in stored_requests
     assert xml_upload in stored_requests
 
-    responses.add(
-        responses.POST,
-        "http://httpbin.org/post?qs1",
-        body="Hello there"
-    )
+    respx.post("http://httpbin.org/post?qs1").mock(return_value=httpx.Response(200, text="Hello there"))
     crawler = AsyncCrawler("http://httpbin.org/")
 
     for req in stored_requests:
@@ -133,16 +125,16 @@ async def test_persister_upload():
 
         if req == simple_upload:
             assert req.file_params == simple_upload.file_params
-            assert req.file_params[0] == ["file1", ["'fname1", "content"]]
-            assert req.file_params[1] == ["file2", ["fname2", "content"]]
+            assert req.file_params[0] == ["file1", ("'fname1", "content")]
+            assert req.file_params[1] == ["file2", ("fname2", "content")]
         else:
             assert req.file_params == xml_upload.file_params
-            assert req.file_params[0] == ["calendar", ["calendar.xml", "<xml>Hello there</xml"]]
+            assert req.file_params[0] == ["calendar", ("calendar.xml", "<xml>Hello there</xml")]
 
     naughty_file = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ["calendar.xml", "<xml>XXE there</xml>"]]]
+        file_params=[["calendar", ("calendar.xml", "<xml>XXE there</xml>")]]
     )
     persister.add_vulnerability(1, "Command Execution", 1, naughty_file, "calendar", "<xml>XXE there</xml>")
     payload = next(persister.get_payloads())
@@ -152,15 +144,11 @@ async def test_persister_upload():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 def test_persister_forms():
     with open("tests/data/forms.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
@@ -184,7 +172,7 @@ def test_persister_forms():
 
         for form in extracted_forms:
             if form.file_path == "/upload.php":
-                assert form.file_params[0] == ["file", ["pix.gif", "GIF89a", "image/gif"]]
+                assert form.file_params[0] == ["file", ("pix.gif", "GIF89a", "image/gif")]
             elif form.file_path == "/fields.php":
                 assert ["file", "pix.gif"] in form.post_params
 

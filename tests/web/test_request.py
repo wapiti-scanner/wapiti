@@ -1,6 +1,7 @@
 import json
 
-import responses
+import respx
+import httpx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -62,7 +63,7 @@ async def test_request_object():
     res12 = Request(
         "http://httpbin.org/post?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
-        file_params=[['file1', ['fname1', 'content']], ['file2', ['fname2', 'content']]]
+        file_params=[['file1', ('fname1', 'content')], ['file2', ('fname2', 'content')]]
     )
 
     res13 = Request("https://www.youtube.com/user/OneMinuteSilenceBand/videos")
@@ -159,7 +160,7 @@ async def test_request_object():
     res19 = Request(
         "http://httpbin.org/post?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
-        file_params=[['file1', ['fname1', 'content']], ['file2', ['fname2', 'content']]],
+        file_params=[['file1', ('fname1', 'content')], ['file2', ('fname2', 'content')]],
         enctype="multipart/form-data"
     )
     page = await crawler.async_send(res19)
@@ -167,24 +168,13 @@ async def test_request_object():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_redirect():
     slyfx = "http://www.slyfx.com/"
     disney = "http://www.disney.com/"
 
-    responses.add(
-        responses.GET,
-        slyfx,
-        body="Back to disneyland",
-        status=301,
-        headers={"Location": disney}
-    )
-
-    responses.add(
-        responses.GET,
-        disney,
-        body="Hello there"
-    )
+    respx.get(slyfx).mock(return_value=httpx.Response(301, headers={"Location": disney}, text="Back to disneyland"))
+    respx.get(disney).mock(return_value=httpx.Response(200, text="Hello there"))
 
     crawler = AsyncCrawler(slyfx)
     page = await crawler.async_send(Request(slyfx))
