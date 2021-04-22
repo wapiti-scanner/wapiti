@@ -3,12 +3,12 @@ import os
 import sys
 from time import sleep
 from collections import deque
-import json
 from tempfile import NamedTemporaryFile
 from asyncio import Event
 
 import pytest
-import responses
+import respx
+import httpx
 
 from wapitiCore.net.crawler import AsyncCrawler, Explorer
 from wapitiCore.net.web import Request
@@ -57,23 +57,16 @@ async def test_explorer_filtering():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_cookies():
-    responses.add(
-        responses.GET,
-        "http://perdu.com/",
-        body="Hello there!",
-        headers={"Set-Cookie": "foo=bar; Path=/"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(200, text="Hello there!", headers={"Set-Cookie": "foo=bar; Path=/"})
     )
 
     def print_headers_callback(request):
-        return 200, {}, json.dumps(dict(request.headers), indent=2)
+        return httpx.Response(200, json=dict(request.headers))
 
-    responses.add_callback(
-        responses.GET,
-        "http://perdu.com/cookies",
-        callback=print_headers_callback
-    )
+    respx.get("http://perdu.com/cookies").mock(side_effect=print_headers_callback)
 
     crawler = AsyncCrawler("http://perdu.com/")
     response = await crawler.async_get(Request("http://perdu.com/"))
@@ -83,23 +76,16 @@ async def test_cookies():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_drop_cookies():
-    responses.add(
-        responses.GET,
-        "http://perdu.com/",
-        body="Hello there!",
-        headers={"Set-Cookie": "foo=bar; Path=/"}
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(200, text="Hello there!", headers={"Set-Cookie": "foo=bar; Path=/"})
     )
 
     def print_headers_callback(request):
-        return 200, {}, json.dumps(dict(request.headers), indent=2)
+        return httpx.Response(200, json=dict(request.headers))
 
-    responses.add_callback(
-        responses.GET,
-        "http://perdu.com/cookies",
-        callback=print_headers_callback
-    )
+    respx.get("http://perdu.com/cookies").mock(side_effect=print_headers_callback)
 
     crawler = AsyncCrawler("http://perdu.com/")
     crawler.drop_cookies = True
@@ -135,27 +121,29 @@ def test_save_and_restore_state():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_explorer_extract_links():
     crawler = AsyncCrawler("http://perdu.com/")
     explorer = Explorer(crawler, Event())
-    responses.add(
-        responses.GET,
-        "http://perdu.com/",
-        body="""<html><body>
-        <a href="http://perdu.com/index.html"></a>
-        <a href="https://perdu.com/secure_index.html"></a>
-        <a href="//perdu.com/protocol_relative.html"></a>
-        <a href="//lol.com/protocol_relative.html"></a>
-        <a href="http://perdu.com:8000/other_port.html"></a>
-        <a href="http://microsoft.com/other_domain.html"></a>
-        <a href="welcome.html"></a>
-        <a href="/about.html"></a>
-        <form method="POST" action="http://perdu.com/valid_form.html">
-        <input name="field" type="hidden" value="hello"/></form>
-        <form method="POST" action="http://external.com/external_form.html">
-        <input name="field" type="hidden" value="hello"/></form>
-        """
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="""<html><body>
+            <a href="http://perdu.com/index.html"></a>
+            <a href="https://perdu.com/secure_index.html"></a>
+            <a href="//perdu.com/protocol_relative.html"></a>
+            <a href="//lol.com/protocol_relative.html"></a>
+            <a href="http://perdu.com:8000/other_port.html"></a>
+            <a href="http://microsoft.com/other_domain.html"></a>
+            <a href="welcome.html"></a>
+            <a href="/about.html"></a>
+            <form method="POST" action="http://perdu.com/valid_form.html">
+            <input name="field" type="hidden" value="hello"/></form>
+            <form method="POST" action="http://external.com/external_form.html">
+            <input name="field" type="hidden" value="hello"/></form>
+            """
+        )
     )
 
     request = Request("http://perdu.com/")

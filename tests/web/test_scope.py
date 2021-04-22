@@ -1,7 +1,7 @@
 import responses
 import requests
 
-from wapitiCore.net.crawler import Page, Crawler, Scope
+from wapitiCore.net.crawler import Page, AsyncCrawler, Scope
 from wapitiCore.net.web import Request
 
 
@@ -40,7 +40,7 @@ def test_scopes():
         "http://external.tld/external.html"
     }
 
-    crawler = Crawler("http://perdu.com/subdir/")
+    crawler = AsyncCrawler("http://perdu.com/subdir/")
     crawler.scope = Scope.FOLDER
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -50,7 +50,7 @@ def test_scopes():
         "http://perdu.com/subdir/page.html",
     }
 
-    crawler = Crawler("http://perdu.com/subdir/page.html")
+    crawler = AsyncCrawler("http://perdu.com/subdir/page.html")
     crawler.scope = Scope.PAGE
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -58,14 +58,14 @@ def test_scopes():
         "http://perdu.com/subdir/page.html"
     }
 
-    crawler = Crawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
     crawler.scope = Scope.URL
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
         "http://perdu.com/subdir/page.html?k=v"
     }
 
-    crawler = Crawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
     crawler.scope = Scope.DOMAIN
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -79,7 +79,7 @@ def test_scopes():
         "http://perdu.com/subdir/page.html"
     }
 
-    crawler = Crawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
     crawler.scope = Scope.PUNK
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == links

@@ -289,9 +289,9 @@ class SqlitePersister:
                         post_params.append([name, value1])
                 elif param_row[0] == "FILE":
                     if param_row[4]:
-                        file_params.append([name, [value1, param_row[3], param_row[4]]])
+                        file_params.append([name, (value1, param_row[3], param_row[4])])
                     else:
-                        file_params.append([name, [value1, param_row[3]]])
+                        file_params.append([name, (value1, param_row[3])])
                 else:
                     raise ValueError("Unknown param type {}".format(param_row[0]))
 
