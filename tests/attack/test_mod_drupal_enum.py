@@ -1,11 +1,11 @@
 from unittest.mock import Mock
-import re
 import os
 import sys
 from os.path import join as path_join
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -39,22 +39,18 @@ class FakePersister:
 
 # Test no Drupal detected
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_no_drupal():
-
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/",
-        body="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-        <h2>Pas de panique, on va vous aider</h2> \
-        <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"   
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
     )
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/.*?"),
-        status=404
-    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = FakePersister()
 
@@ -75,7 +71,7 @@ async def test_no_drupal():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_version_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
@@ -86,23 +82,12 @@ async def test_version_detected():
         data = changelog.read()
 
     # Response to tell that Drupal is used
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/sites/",
-        status=403
-    )
-    # Response for changelog.txt
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/CHANGELOG.txt",
-        body=data
-    )
+    respx.get("http://perdu.com/sites/").mock(return_value=httpx.Response(403))
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/.*?"),
-        status=404
-    )
+    # Response for changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = FakePersister()
 
@@ -124,7 +109,7 @@ async def test_version_detected():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_multi_versions_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
@@ -135,23 +120,12 @@ async def test_multi_versions_detected():
         data = maintainers.read()
 
     # Response to tell that Drupal is used
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/sites/",
-        status=403
-    )
-    # Response for  maintainers.txt
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/core/MAINTAINERS.txt",
-        body=data
-    )
+    respx.get("http://perdu.com/sites/").mock(return_value=httpx.Response(403))
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/.*?"),
-        status=404
-    )
+    # Response for  maintainers.txt
+    respx.get("http://perdu.com/core/MAINTAINERS.txt").mock(return_value=httpx.Response(200, text=data))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = FakePersister()
 
@@ -173,7 +147,7 @@ async def test_multi_versions_detected():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_version_not_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
@@ -184,23 +158,12 @@ async def test_version_not_detected():
         data = changelog.read()
 
     # Response to tell that Drupal is used
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/sites/",
-        status=403
-    )
-    # Response for edited changelog.txt
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/CHANGELOG.txt",
-        body=data
-    )
+    respx.get("http://perdu.com/sites/").mock(return_value=httpx.Response(403))
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/.*?"),
-        status=404
-    )
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = FakePersister()
 

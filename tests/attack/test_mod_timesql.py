@@ -3,12 +3,11 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-import re
 from asyncio import Event
 
 import pytest
-import responses
-from httpx import ReadTimeout
+import respx
+import httpx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -85,20 +84,10 @@ async def test_timesql_false_positive():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_false_positive_request_count():
-    responses.add(
-        responses.GET,
-        # Beware! Responses seems to do a match on regex and not a search, give it full URL
-        re.compile(r"http://perdu.com/blind_sql.php\?vuln1=sleep"),
-        body=ReadTimeout("Read timed out")
-    )
-
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/blind_sql.php\?vuln1=hello"),
-        body=ReadTimeout("Read timed out")
-    )
+    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=sleep").mock(side_effect=httpx.ReadTimeout)
+    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=hello").mock(side_effect=httpx.ReadTimeout)
 
     persister = FakePersister()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
@@ -115,22 +104,15 @@ async def test_false_positive_request_count():
     # Due to the retry decorator we should have 6 requests here
     # First three to make sure the payload generate timeouts each time
     # then three more requests with timeouts to make sure the original request is a false positive
-    assert len(responses.calls) == 6
+    assert respx.calls.call_count == 6
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_true_positive_request_count():
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/blind_sql.php\?vuln1=sleep"),
-        body=ReadTimeout("Read timed out")
-    )
-
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/blind_sql.php\?vuln1=hello"),
-        body="Hello there!"
+    respx.get(url__regex=r"http://perdu.com/blind_sql\.php\?vuln1=sleep").mock(side_effect=httpx.ReadTimeout)
+    respx.get(url__regex=r"http://perdu.com/blind_sql\.php\?vuln1=hello").mock(
+        return_value=httpx.Response(200, text="Hello there!")
     )
 
     persister = FakePersister()
@@ -148,4 +130,4 @@ async def test_true_positive_request_count():
     # Four requests should be made there:
     # Three ones due to time-based SQL injection (one for injection, two to be sure)
     # Then one request to verify that the original request doesn't raise a timeout
-    assert len(responses.calls) == 4
+    assert respx.calls.call_count == 4

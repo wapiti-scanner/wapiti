@@ -3,12 +3,11 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-import re
 from asyncio import Event
 
 import pytest
-import responses
-from httpx import ReadTimeout
+import respx
+import httpx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -52,14 +51,11 @@ def run_around_tests():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/"),
-        body="Hello there"
-    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
 
     persister = FakePersister()
 
@@ -74,7 +70,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ["calendar.xml", "<xml>Hello there</xml"]]]
+        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     persister.requests.append(request)
@@ -93,18 +89,14 @@ async def test_whole_stuff():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_detection():
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/\?vuln=.*env.*"),
-        body="PATH=/bin:/usr/bin;PWD=/"
+    respx.get(url__regex=r"http://perdu\.com/\?vuln=.*env.*").mock(
+        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
     )
 
-    responses.add(
-        responses.GET,
-        re.compile(r"http://perdu.com/\?vuln=.*"),
-        body="Hello there"
+    respx.get(url__regex=r"http://perdu\.com/\?vuln=.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
     )
 
     persister = FakePersister()
@@ -127,19 +119,15 @@ async def test_detection():
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_blind_detection():
 
     def timeout_callback(http_request):
-        if "sleep" in http_request.url:
-            raise ReadTimeout("Read timed out")
-        return 200, {}, "Hello there"
+        if "sleep" in str(http_request.url):
+            raise httpx.ReadTimeout("Read timed out", request=http_request)
+        return httpx.Response(200, text="Hello there")
 
-    responses.add_callback(
-        responses.GET,
-        re.compile(r"http://perdu.com/\?vuln=.*"),
-        callback=timeout_callback
-    )
+    respx.get(url__regex=r"http://perdu.com/\?vuln=.*").mock(side_effect=timeout_callback)
 
     persister = FakePersister()
 
@@ -168,4 +156,4 @@ async def test_blind_detection():
     # We should have all payloads till "sleep" ones
     # then 3 requests for the sleep payload (first then two retries to check random lags)
     # then 1 request to check state of original request
-    assert len(responses.calls) == payloads_until_sleep + 3 + 1
+    assert respx.calls.call_count == payloads_until_sleep + 3 + 1

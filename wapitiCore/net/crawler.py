@@ -107,14 +107,14 @@ def retry(delay=1, times=3):
 
     def outer_wrapper(function):
         @functools.wraps(function)
-        def inner_wrapper(*args, **kwargs):
+        async def inner_wrapper(*args, **kwargs):
             final_excep = None
             for counter in range(times):
                 if counter > 0:
                     sleep(delay)
 
                 try:
-                    value = function(*args, **kwargs)
+                    value = await function(*args, **kwargs)
                     return value
                 except ConnectionError as exception:
                     if hasattr(exception.args[0], "reason") and isinstance(exception.args[0].reason, httpx.ReadTimeout):
