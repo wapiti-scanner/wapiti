@@ -3,7 +3,8 @@ import re
 import os
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -42,22 +43,17 @@ class FakePersister:
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add_passthru("https://raw.githubusercontent.com/wapiti-scanner/nikto/master/program/databases/db_tests")
+    respx.route(host="raw.githubusercontent.com").pass_through()
 
-    responses.add(
-        responses.GET,
-        url="http://perdu.com/cgi-bin/a1disp3.cgi?../../../../../../../../../../etc/passwd",
-        body="root:0:0:",
+    respx.get("http://perdu.com/cgi-bin/a1disp3.cgi?../../../../../../../../../../etc/passwd").mock(
+        return_value=httpx.Response(200, text="root:0:0:")
     )
 
-    responses.add(
-        responses.GET,
-        url=re.compile(r"http://perdu.com/*"),
-        body="Not found",
-        status=404
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(404, text="Not found")
     )
 
     persister = FakePersister()

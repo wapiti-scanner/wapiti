@@ -1,6 +1,7 @@
 from asyncio import Event
 
-import responses
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.web import Request
@@ -43,21 +44,15 @@ class FakeLogger(BaseLogger):
 
 
 @pytest.mark.asyncio
-@responses.activate
+@respx.mock
 async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
-    responses.add(
-        responses.OPTIONS,
-        url="http://perdu.com/",
-        body="Default page",
-        headers={"Allow": "GET,POST,HEAD"}
+    respx.options("http://perdu.com/").mock(
+        return_value=httpx.Response(200, text="Default page", headers={"Allow": "GET,POST,HEAD"})
     )
 
-    responses.add(
-        responses.OPTIONS,
-        url="http://perdu.com/dav/",
-        body="Private section",
-        headers={"Allow": "GET,POST,HEAD,PUT"}
+    respx.options("http://perdu.com/dav/").mock(
+        return_value=httpx.Response(200, text="Private section", headers={"Allow": "GET,POST,HEAD,PUT"})
     )
 
     persister = FakePersister()
