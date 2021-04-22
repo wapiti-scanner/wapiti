@@ -125,8 +125,8 @@ if a script is vulnerable.""",
     },
     entry_points={
         "console_scripts": [
-            "wapiti = wapitiCore.main.wapiti:wapiti_main",
-            "wapiti-getcookie = wapitiCore.main.getcookie:getcookie_main",
+            "wapiti = wapitiCore.main.wapiti:wapiti_asyncio_wrapper",
+            "wapiti-getcookie = wapitiCore.main.getcookie:getcookie_asyncio_wrapper",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf

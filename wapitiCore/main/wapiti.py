@@ -1289,3 +1289,7 @@ async def wapiti_main():
         print(_("[!] You should unlock and launch Wapiti again."))
     except SystemExit:
         pass
+
+
+def wapiti_asyncio_wrapper():
+    asyncio.run(wapiti_main())
