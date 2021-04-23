@@ -9,7 +9,7 @@ from wapitiCore.net.lamejs import LameJs
 def test_js_parser():
     with open("tests/data/js_links.html") as data_body:
         url = "http://perdu.com/"
-        respx.get(url).mock(return_value=httpx.Response(200, data_body.read()))
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
         page = Page(resp)
