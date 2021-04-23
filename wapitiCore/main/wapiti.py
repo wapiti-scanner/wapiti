@@ -304,9 +304,10 @@ class Wapiti:
         if self.color:
             logger.color = True
 
+        stop_event = asyncio.Event()
         for mod_name in attack.modules:
             mod = import_module("wapitiCore.attack." + mod_name)
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options)
+            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options, stop_event)
             if hasattr(mod_instance, "update"):
                 print(_("Updating module {0}").format(mod_name[4:]))
                 await mod_instance.update()
@@ -1113,6 +1114,7 @@ async def wapiti_main():
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
         await wap.update()
+        await wap.crawler.close()
         sys.exit()
 
     try:
