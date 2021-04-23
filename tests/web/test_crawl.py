@@ -1,53 +1,45 @@
-import re
 from urllib.parse import urlparse, parse_qs
 from tempfile import TemporaryDirectory
 from shutil import rmtree
 from asyncio import Event
 
-import responses
+import respx
+import httpx
 import pytest
 
 from wapitiCore.main.wapiti import Wapiti
 
 
-@pytest.fixture
-def mocked_responses():
-    with responses.RequestsMock() as rsps:
-        yield rsps
-
-
 @pytest.mark.asyncio
-async def test_resume_crawling(mocked_responses):
+@respx.mock
+async def test_resume_crawling():
     stop_event = Event()
 
     def process(http_request):
         try:
-            page = int(parse_qs(urlparse(http_request.url).query)["page"][0])
+            page = int(parse_qs(urlparse(str(http_request.url)).query)["page"][0])
         except (IndexError, KeyError, ValueError):
-            return 200, {}, "Invalid value"
+            return httpx.Response(200, text="Invalid value")
 
         if page == 10:
             stop_event.set()
 
         if page > 20:
-            return 200, {}, ""
+            return httpx.Response(200, text="")
 
         body = "<html><body>"
         body += "<a href='http://perdu.com/?page={0}'>{0}</a>\n".format(page + 1)
         body += "<a href='http://perdu.com/?page={0}'>{0}</a>\n".format(page + 2)
-        return 200, {}, body
+        return httpx.Response(200, text=body)
 
-    mocked_responses.add(
-        responses.GET,
-        re.compile(r"http://perdu\.com/$"),
-        body="<html><body><a href='http://perdu.com/?page=0'>0</a>"
+    respx.get(url__regex=r"http://perdu\.com/$").mock(
+        return_value=httpx.Response(200, text="<html><body><a href='http://perdu.com/?page=0'>0</a>")
     )
 
-    mocked_responses.add_callback(
-        responses.GET,
-        re.compile(r"http://perdu.com/\?page=\d+"),
-        callback=process
-    )
+    respx.get(url__regex=r"http://perdu\.com/\?page=\d+").mock(side_effect=process)
+
+    # Mock HTTP 404 behavior check
+    respx.get(url__regex=r"http://perdu\.com/z.*\.html$").mock(return_value=httpx.Response(404))
 
     temp_obj = TemporaryDirectory()
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
