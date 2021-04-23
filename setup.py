@@ -106,7 +106,6 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "requests>=2.25.1",
         "httpx==0.17.1",
         "httpx-socks==0.3.1",
         "beautifulsoup4>=4.9.3",

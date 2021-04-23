@@ -306,7 +306,7 @@ class AsyncCrawler:
 
     @property
     def session_cookies(self):
-        """Getter for session cookies (returns a RequestsCookieJar object)"""
+        """Getter for session cookies (returns a Cookies object)"""
         return self.client.cookies
 
     @session_cookies.setter
@@ -450,8 +450,6 @@ class AsyncCrawler:
         """
         form_headers = {}
         if not form.is_multipart:
-            # requests won't generate valid upload HTTP request if we give it a multipart/form-data content-type
-            # valid requests with boundary info or made if file_params is not empty.
             form_headers = {"Content-Type": form.enctype}
 
         if isinstance(headers, dict) and len(headers):

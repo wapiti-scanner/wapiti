@@ -1,5 +1,5 @@
-import responses
-import requests
+import respx
+import httpx
 import pytest
 
 from wapitiCore.net.xss_utils import get_context_list, valid_xss_content_type, meet_requirements, \
@@ -515,85 +515,65 @@ def test_get_context_bug_2():
     ]
 
 
-@responses.activate
+@respx.mock
 def test_csp_detection():
     url = "http://perdu.com/"
-    responses.add(
-        responses.GET,
-        url,
-        status=200,
-        adding_headers={
-            "Content-Type": "text/html"
-        }
-    )
+    respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
     assert not has_csp(page)
 
     url = "http://perdu.com/http_csp"
-    responses.add(
-        responses.GET,
-        url,
-        status=200,
-        adding_headers={
+    respx.get(url).mock(
+        return_value=httpx.Response(
+            200,
+            headers={
             "Content-Type": "text/html",
             "Content-Security-Policy": "blahblah;"
-        }
+            }
+        )
     )
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
     assert has_csp(page)
 
     url = "http://perdu.com/meta_csp"
-    responses.add(
-        responses.GET,
-        url,
-        status=200,
-        adding_headers={
-            "Content-Type": "text/html"
-        },
-        body="""<html>
-        <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*; child-src 'none';">
-        </head>
-        <body>Hello there</body>
-        </html>"""
+
+    respx.get(url).mock(
+        return_value=httpx.Response(
+            200,
+            headers={
+                "Content-Type": "text/html"
+            },
+            text="""<html>
+            <head>
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*; child-src 'none';">
+            </head>
+            <body>Hello there</body>
+            </html>"""
+        )
     )
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
     assert has_csp(page)
 
 
-@responses.activate
+@respx.mock
 def test_valid_content_type():
     url = "http://perdu.com/"
-    responses.add(
-        responses.GET,
-        url,
-        status=200,
-        adding_headers={
-            "Content-Type": "text/html"
-        }
-    )
+    respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
     assert valid_xss_content_type(page)
 
     url = "http://perdu.com/picture.png"
-    responses.add(
-        responses.GET,
-        url,
-        status=200,
-        adding_headers={
-            "Content-Type": "image/png"
-        }
-    )
+    respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "image/png"}))
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
     assert not valid_xss_content_type(page)
 
