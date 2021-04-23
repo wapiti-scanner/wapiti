@@ -51,32 +51,29 @@ class JsonCookie:
         if not isinstance(cookies, Cookies):
             return False
 
-        for domain, pathdict in cookies._cookies.items():
-            search_ip = IP_REGEX.match(domain)
+        for cookie in cookies.jar:
+            search_ip = IP_REGEX.match(cookie.domain)
             if search_ip:
                 # Match either an IPv4 address or an IPv6 address with a local suffix
                 domain_key = search_ip.group("ip")
             else:
-                domain_key = domain if domain[0] == '.' else '.' + domain
+                domain_key = cookie.domain if cookie.domain[0] == '.' else '.' + cookie.domain
 
             if domain_key not in self.cookiedict.keys():
                 self.cookiedict[domain_key] = {}
 
-            for path, keydict in pathdict.items():
-                if path not in self.cookiedict[domain_key].keys():
-                    self.cookiedict[domain_key][path] = {}
+            if cookie.path not in self.cookiedict[domain_key].keys():
+                self.cookiedict[domain_key][cookie.path] = {}
 
-                for key, cookieobj in keydict.items():
-                    if isinstance(cookieobj, Cookie):
-                        print(cookieobj)
-                        cookie_attrs = {
-                            "value": cookieobj.value,
-                            "expires": cookieobj.expires,
-                            "secure": cookieobj.secure,
-                            "port": cookieobj.port,
-                            "version": cookieobj.version
-                        }
-                        self.cookiedict[domain_key][path][key] = cookie_attrs
+            print(cookie)
+            cookie_attrs = {
+                "value": cookie.value,
+                "expires": cookie.expires,
+                "secure": cookie.secure,
+                "port": cookie.port,
+                "version": cookie.version
+            }
+            self.cookiedict[domain_key][cookie.path][cookie.name] = cookie_attrs
 
     def cookiejar(self, domain):
         """Returns a cookielib.CookieJar object containing cookies matching the given domain."""
