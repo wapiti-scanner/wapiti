@@ -67,11 +67,11 @@ def test_forms():
             elif form.file_path == "/upload.php":
                 assert form.is_multipart
                 assert not form.post_params
-                assert form.file_params == [["file", ["pix.gif", "GIF89a", "image/gif"]]]
+                assert form.file_params == [["file", ("pix.gif", "GIF89a", "image/gif")]]
             elif form.file_path == "/alt.php":
                 form_action = True
             elif form.file_path == "/upload_empty_value.php":
-                assert form.file_params == [["file", ["pix.gif", "GIF89a", "image/gif"]]]
+                assert form.file_params == [["file", ("pix.gif", "GIF89a", "image/gif")]]
             elif form.file_path == "/select_no_defaults.php":
                 items = dict(form.post_params)
                 assert items["choices"] == "3rd_choice"
