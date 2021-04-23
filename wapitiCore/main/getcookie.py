@@ -75,7 +75,7 @@ async def getcookie_main():
         "--auth-type",
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
-        choices=["basic", "digest", "kerberos", "ntlm"]
+        choices=["basic", "digest", "ntlm"]
     )
 
     parser.add_argument(
