@@ -831,7 +831,7 @@ async def wapiti_main():
         "--auth-type",
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
-        choices=["basic", "digest", "kerberos", "ntlm", "post"]
+        choices=["basic", "digest", "ntlm", "post"]
     )
 
     parser.add_argument(
