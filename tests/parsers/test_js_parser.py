@@ -1,21 +1,17 @@
-import responses
-import requests
+import respx
+import httpx
 
 from wapitiCore.net.crawler import Page
 from wapitiCore.net.lamejs import LameJs
 
 
-@responses.activate
+@respx.mock
 def test_js_parser():
     with open("tests/data/js_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, data_body.read()))
 
-        resp = requests.get(url)
+        resp = httpx.get(url)
         page = Page(resp)
 
         assert set(page.extra_urls) == {

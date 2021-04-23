@@ -8,7 +8,7 @@ import string
 from random import choice
 
 import pytest
-import requests
+import httpx
 
 
 def rand_id():
@@ -35,12 +35,12 @@ def run_around_tests():
 
 
 def test_ssrf():
-    response = requests.get(
+    response = httpx.get(
         "http://127.0.0.1:65080/ssrf_store.php?session_id=wapiti&path_id=53&hex_param=76756c6e",
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
-    response = requests.get(
+    response = httpx.get(
         "http://127.0.0.1:65080/get_ssrf.php?session_id=wapiti",
         headers={"Host": "yolo.tld:65080"}
     )
@@ -55,7 +55,7 @@ def test_ssrf():
 
 def test_xxe_dtd():
     session_id = rand_id()
-    response = requests.get(
+    response = httpx.get(
         f"http://127.0.0.1:65080/xxe_dtd.php?session_id={session_id}&path_id=53&hex_param=76756c6e&payload=linux2",
         headers={"Host": "yolo.tld:65080"}
     )
@@ -66,7 +66,7 @@ def test_xxe_dtd():
 
 def test_xxe_store():
     session_id = rand_id()
-    response = requests.get(
+    response = httpx.get(
         (
             f"http://127.0.0.1:65080/xxe_store.php?session_id={session_id}"
             f"&path_id=53&hex_param=76756c6e&payload=0&data=impwned"
@@ -74,7 +74,7 @@ def test_xxe_store():
         headers={"Host": "yolo.tld:65080"}
     )
     assert response.status_code == 200
-    response = requests.get(
+    response = httpx.get(
         f"http://127.0.0.1:65080/get_xxe.php?session_id={session_id}",
         headers={"Host": "yolo.tld:65080"}
     )

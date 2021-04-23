@@ -1,26 +1,26 @@
-import responses
-import requests
+import respx
+import httpx
 
 from wapitiCore.net.crawler import Page
 
 
-@responses.activate
+@respx.mock
 def test_http():
     url = "http://perdu.com/"
-    responses.add(
-        responses.GET,
-        url,
-        body="Hello world!",
-        adding_headers={
-            "X-Men": "Wolverine",
-            "Server": "nginx",
-            "Set-Cookie": "session_id=31337;",
-            "Content-Type": "text/html"
-        },
-        status=418
+    respx.get(url).mock(
+        return_value=httpx.Response(
+            418,
+            headers={
+                "X-Men": "Wolverine",
+                "Server": "nginx",
+                "Set-Cookie": "session_id=31337;",
+                "Content-Type": "text/html"
+            },
+            text="Hello world!"
+        )
     )
 
-    resp = requests.get(url)
+    resp = httpx.get(url)
     page = Page(resp)
 
     assert page.status == 418
@@ -36,19 +36,13 @@ def test_http():
     assert page.encoding == "ISO-8859-1"
 
 
-@responses.activate
+@respx.mock
 def test_http():
     url = "http://perdu.com/folder"
-    responses.add(
-        responses.GET,
-        url,
-        body="Hello world!",
-        adding_headers={
-            "Location": "http://perdu.com/folder/",
-        },
-        status=301
+    respx.get(url).mock(
+        return_value=httpx.Response(301, text="Hello world!", headers={"Location": "http://perdu.com/folder/"})
     )
 
-    resp = requests.get(url, allow_redirects=False)
+    resp = httpx.get(url, allow_redirects=False)
     page = Page(resp)
     assert page.is_directory_redirection

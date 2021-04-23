@@ -192,12 +192,3 @@ def extract_links_from_swf(file):
             if looks_like_an_url(text):
                 urls.add(text)
     return list(urls)
-
-
-if __name__ == "__main__":
-    import requests
-
-    # resp = requests.get("http://[::1]:8000/action.swf", stream=True)
-    resp = requests.get("http://127.0.0.1/wivet/pages/wivet1.swf", stream=True)
-    for link in extract_links_from_swf(resp.raw):
-        print(link)

@@ -1,53 +1,41 @@
-import responses
-import requests
+import respx
+import httpx
 
 from wapitiCore.net.crawler import Page
 
 
-@responses.activate
+@respx.mock
 def test_absolute_root():
     with open("tests/data/absolute_root_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url)
+        resp = httpx.get(url)
         page = Page(resp)
 
         assert page.links == [url]
 
 
-@responses.activate
+@respx.mock
 def test_relative_root():
     with open("tests/data/relative_root_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url)
+        resp = httpx.get(url)
         page = Page(resp)
 
         # We will get invalid hostnames with dots. Browsers do that too.
         assert set(page.links) == {url, "http://./", "http://../"}
 
 
-@responses.activate
+@respx.mock
 def test_relative_links():
     with open("tests/data/relative_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url)
+        resp = httpx.get(url)
         page = Page(resp)
 
         assert set(page.links) == {
@@ -67,21 +55,15 @@ def test_relative_links():
         }
 
 
-@responses.activate
+@respx.mock
 def test_other_links():
     with open("tests/data/other_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read(),
-            adding_headers={
-                "Location": "https://perdu.com/login"
-            },
-            status=301
+        respx.get(url).mock(
+            return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         assert sorted(page.iter_frames()) == [
@@ -101,17 +83,13 @@ def test_other_links():
         assert page.html_redirections == ["http://perdu.com/adblock.html"]
 
 
-@responses.activate
+@respx.mock
 def test_extra_links():
     with open("tests/data/extra_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         assert set(page.extra_urls) == {
@@ -139,17 +117,13 @@ def test_extra_links():
         }
 
 
-@responses.activate
+@respx.mock
 def test_meta():
     with open("tests/data/meta.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         assert page.title == "  -  Title :) "
@@ -161,17 +135,13 @@ def test_meta():
         assert page.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
 
 
-@responses.activate
+@respx.mock
 def test_base_relative_links():
     with open("tests/data/base_relative_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url)
+        resp = httpx.get(url)
         page = Page(resp)
 
         assert set(page.links) == {
@@ -195,17 +165,13 @@ def test_base_relative_links():
         }
 
 
-@responses.activate
+@respx.mock
 def test_base_extra_links():
     with open("tests/data/base_extra_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read()
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         assert set(page.extra_urls) == {
@@ -232,21 +198,15 @@ def test_base_extra_links():
         }
 
 
-@responses.activate
+@respx.mock
 def test_base_other_links():
     with open("tests/data/base_other_links.html") as data_body:
         url = "http://perdu.com/"
-        responses.add(
-            responses.GET,
-            url,
-            body=data_body.read(),
-            adding_headers={
-                "Location": "https://perdu.com/login"
-            },
-            status=301
+        respx.get(url).mock(
+            return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = requests.get(url, allow_redirects=False)
+        resp = httpx.get(url, allow_redirects=False)
         page = Page(resp)
 
         assert sorted(page.iter_frames()) == [
