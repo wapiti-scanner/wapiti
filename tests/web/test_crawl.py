@@ -50,8 +50,8 @@ async def test_resume_crawling():
     # Got root url + pages 0 to 9
     all_requests = set(wapiti.persister.get_links())
     remaining_urls = {request.url for request in (remaining_requests - all_requests)}
-    # Page 10 gave error, page 11 was in task queue so it was processed, it remains pages 12 and 13
-    assert remaining_urls == {"http://perdu.com/?page=12", "http://perdu.com/?page=13"}
+    # Page 10 stops the crawling but gave links to pages 11 and 12 so they will be the remaining urls
+    assert remaining_urls == {"http://perdu.com/?page=11", "http://perdu.com/?page=12"}
 
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
     wapiti.load_scan_state()
