@@ -199,6 +199,7 @@ async def getcookie_main():
 
         json_cookie.addcookies(crawler.session_cookies)
 
+    await crawler.close()
     json_cookie.dump()
     json_cookie.close()
 
