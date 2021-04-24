@@ -1,5 +1,3 @@
-from unittest.mock import patch
-import argparse
 from tempfile import NamedTemporaryFile
 import json
 
@@ -12,8 +10,7 @@ from wapitiCore.main.getcookie import getcookie_main
 
 @pytest.mark.asyncio
 @respx.mock
-@patch('argparse.ArgumentParser.parse_args')
-async def test_command(mock_args):
+async def test_command():
     with NamedTemporaryFile("w") as json_fd:
         url = "http://httpbin.org/welcome/"
         respx.get(url).mock(
@@ -26,15 +23,7 @@ async def test_command(mock_args):
             )
         )
 
-        mock_args.return_value = argparse.Namespace(
-            url="http://httpbin.org/welcome/",
-            cookie=json_fd.name,
-            proxy=None,
-            tor=None,
-            headers=[],
-            data=None
-        )
-        await getcookie_main()
+        await getcookie_main(["-u", "http://httpbin.org/welcome/", "-c", json_fd.name])
 
         data = json.load(open(json_fd.name))
         assert data == {
