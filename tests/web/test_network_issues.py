@@ -30,6 +30,7 @@ async def test_chunked_timeout():
 
     with pytest.raises(ReadTimeout):
         await crawler.async_send(request)
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -41,3 +42,4 @@ async def test_timeout():
 
     with pytest.raises(ReadTimeout):
         await crawler.async_send(request)
+    await crawler.close()
