@@ -27,8 +27,8 @@ Those cookies can be loaded by Wapiti using the same -c option.
     Given value should be in the form login%password (% is used as a separator)
     
   * `--auth-type` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos and ntlm.  
-    Kerberos and NTLM authentication may require you to install additional Python modules.
+    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.  
+    NTLM authentication may require you to install an additional Python module.
 
   * `-H`, `--header` <HEADER>  
     Set a custom HTTM header to inject in every request sent by Wapiti.

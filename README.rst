@@ -49,7 +49,7 @@ Browsing features
 =================
 
 + Support HTTP, HTTPS and SOCKS5 proxies.
-+ Authentication on the target via several methods : Basic, Digest, Kerberos, NTLM or GET/POST on login forms.
++ Authentication on the target via several methods : Basic, Digest, NTLM or GET/POST on login forms.
 + Ability to restrain the scope of the scan (domain, folder, page, url).
 + Automatic removal of one or more parameters in URLs.
 + Multiple safeguards against scan endless-loops (for example, limit of values for a parameter).
@@ -104,7 +104,6 @@ The aforementioned attacks are tied to the following module names :
 + blindsql (SQL injection vulnerabilities detected with time-based methodology)
 + buster (DirBuster like module)
 + crlf (CR-LF injection in HTTP headers)
-+ delay (Not an attack module, prints the 10 slowest to load webpages of the target)
 + exec (Code execution or command injection)
 + file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)

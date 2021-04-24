@@ -35,7 +35,7 @@ PROXY AND AUTHENTICATION OPTIONS:
 
   * `-p` <PROXY_URL>
   * `-a` <CREDENTIALS>
-  * `--auth-type` {basic,digest,kerberos,ntlm,post}
+  * `--auth-type` {basic,digest,ntlm,post}
   * `-c` <COOKIE_FILE>
   * `--drop-set-cookie`
 
@@ -61,7 +61,7 @@ SCAN AND ATTACKS TUNING:
   * `--max-attack-time` <MAX_ATTACK_TIME>
   * `--max-parameters` <MAX>
   * `-S`, `--scan-force` {paranoid,sneaky,polite,normal,aggressive,insane}
-  * `--threads` <THREADS>
+  * `--tasks` <TASKS>
 
 HTTP AND NETWORK OPTIONS:
 
@@ -135,8 +135,8 @@ OTHER OPTIONS:
     Given value should be in the form login%password (% is used as a separator)
     
   * `--auth-type` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post (web login form).  
-    Kerberos and NTLM authentication may require you to install additional Python modules.
+    Set the authentication mechanism to use. Valid choices are basic, digest, ntlm and post (web login form).  
+    NTLM authentication may require you to install an additional Python module.
     "Post" authentication could be combined with `-s` to specify where to find the login form.
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
@@ -236,10 +236,9 @@ Following options allows you to bypass this behavior/
     Insane mode just remove the calculation of those limits, every URL will be attacked.  
     Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
     
-  * `--threads` <THREADS>
-    Set how many concurrent tasks (threads) Wapiti should use to crawl the target.  
-    Wapiti leverages Python's asyncio module for this. If you go above the limit of possible threads, the CPython
-    interpreter will automatically reduce the value to something more appropriate.
+  * `--tasks` <TASKS>
+    Set how many concurrent tasks Wapiti should use to crawl the target.  
+    Wapiti leverages Python's asyncio framework for this.
     
   * `--endpoint` <URL>
     Some attack modules are using an HTTP endpoint to check for vulnerabilities.  
