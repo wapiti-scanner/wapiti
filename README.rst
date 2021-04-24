@@ -14,13 +14,13 @@ Requirements
 ============
 In order to work correctly, Wapiti needs :
 
-+ Python 3.x where x is >= 6 (3.6, 3.7, 3.8...)
-+ python-requests ( http://docs.python-requests.org/en/latest/ )
++ Python 3.x where x is >= 7 (3.7, 3.8, 3.9...)
++ httpx ( https://www.python-httpx.org/ )
 + BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
 + yaswfp ( https://github.com/facundobatista/yaswfp )
 + tld ( https://github.com/barseghyanartur/tld )
 + Mako ( https://www.makotemplates.org/ )
-+ PySocks ( https://github.com/Anorov/PySocks )
++ httpx-socks ( https://github.com/romis2012/httpx-socks )
 
 See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md>`__ for more details on installation.
 
