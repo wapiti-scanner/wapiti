@@ -37,7 +37,7 @@ class InvalidOptionValue(Exception):
         return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
 
 
-async def getcookie_main():
+async def getcookie_main(arguments):
     parser = argparse.ArgumentParser(description="Wapiti-getcookie: An utility to grab cookies from a webpage")
 
     parser.add_argument(
@@ -100,7 +100,7 @@ async def getcookie_main():
         dest="headers"
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(arguments)
 
     parts = urlparse(args.url)
     if not parts.scheme or not parts.netloc or not parts.path:
@@ -205,4 +205,4 @@ async def getcookie_main():
 
 
 def getcookie_asyncio_wrapper():
-    asyncio.run(getcookie_main())
+    asyncio.run(getcookie_main(sys.argv[1:]))
