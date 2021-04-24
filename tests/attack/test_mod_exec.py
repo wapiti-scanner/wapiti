@@ -86,6 +86,7 @@ async def test_whole_stuff():
         await module.attack(request)
 
     assert True
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -116,6 +117,7 @@ async def test_detection():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"
     assert "env" in persister.vulnerabilities[0][1]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -157,3 +159,4 @@ async def test_blind_detection():
     # then 3 requests for the sleep payload (first then two retries to check random lags)
     # then 1 request to check state of original request
     assert respx.calls.call_count == payloads_until_sleep + 3 + 1
+    await crawler.close()

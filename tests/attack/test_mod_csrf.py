@@ -98,3 +98,4 @@ async def test_csrf_cases():
         (3, _("CSRF token '{}' might be easy to predict").format("xsrf_token")),
         (4, _("Lack of anti CSRF token"))
     }
+    await crawler.close()

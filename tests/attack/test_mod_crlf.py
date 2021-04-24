@@ -60,3 +60,4 @@ async def test_whole_stuff():
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "foo"
+    await crawler.close()

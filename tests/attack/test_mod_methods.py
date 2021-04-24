@@ -80,3 +80,4 @@ async def test_whole_stuff():
         await module.attack(request)
 
     assert "http://perdu.com/dav/" in logger.message
+    await crawler.close()

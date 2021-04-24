@@ -68,6 +68,7 @@ async def test_no_drupal():
     await module.attack(request)
 
     assert not persister.additionals
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -106,6 +107,7 @@ async def test_version_detected():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -144,6 +146,7 @@ async def test_multi_versions_detected():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -182,3 +185,4 @@ async def test_version_not_detected():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
+    await crawler.close()

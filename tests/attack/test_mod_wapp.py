@@ -69,6 +69,7 @@ async def test_false_positive():
     await module.attack(request)
 
     assert not persister.additionals
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -100,6 +101,7 @@ async def test_url_detection():
 
     assert persister.additionals
     assert persister.additionals[2] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -133,6 +135,7 @@ async def test_html_detection():
     assert persister.additionals
     assert persister.additionals[0] == \
            '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -167,6 +170,7 @@ async def test_script_detection():
     assert persister.additionals
     assert persister.additionals[0] == \
            '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -200,6 +204,7 @@ async def test_cookies_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -233,6 +238,7 @@ async def test_headers_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -267,6 +273,7 @@ async def test_meta_detection():
 
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -303,6 +310,7 @@ async def test_multi_detection():
 
     assert persister.additionals
     assert persister.additionals[-1] == '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -337,6 +345,7 @@ async def test_implies_detection():
     assert persister.additionals
     assert persister.additionals[0] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
     assert persister.additionals[1] == '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -374,3 +383,4 @@ async def test_vulnerabilities():
     assert persister.vulnerabilities[1][0] == \
            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
     assert persister.vulnerabilities[1][1] == 'Fingerprint web server'
+    await crawler.close()

@@ -52,6 +52,7 @@ async def test_resume_crawling():
     remaining_urls = {request.url for request in (remaining_requests - all_requests)}
     # Page 10 stops the crawling but gave links to pages 11 and 12 so they will be the remaining urls
     assert remaining_urls == {"http://perdu.com/?page=11", "http://perdu.com/?page=12"}
+    await wapiti.crawler.close()
 
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
     wapiti.load_scan_state()
@@ -66,3 +67,4 @@ async def test_resume_crawling():
     # We are done as we scanned all the pages
     assert not (remaining_requests - all_requests)
     rmtree(temp_obj.name)
+    await wapiti.crawler.close()

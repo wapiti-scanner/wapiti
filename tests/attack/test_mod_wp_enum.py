@@ -63,6 +63,7 @@ async def test_no_wordpress():
     await module.attack(request)
 
     assert not persister.additionals
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -137,6 +138,7 @@ async def test_plugin():
     assert persister.additionals[0] == '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
     assert persister.additionals[1] == '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"]}'
     assert persister.additionals[2] == '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"]}'
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -210,3 +212,4 @@ async def test_theme():
     assert persister.additionals[0] == '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"]}'
     assert persister.additionals[1] == '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"]}'
     assert persister.additionals[2] == '{"name": "customify", "versions": [""], "categories": ["WordPress themes"]}'
+    await crawler.close()

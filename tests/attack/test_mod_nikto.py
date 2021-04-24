@@ -78,3 +78,4 @@ async def test_whole_stuff():
         "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
     )
     assert "This CGI allows attackers read arbitrary files on the host" in persister.vulnerabilities[0][1]
+    await crawler.close()

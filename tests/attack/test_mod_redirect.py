@@ -58,6 +58,7 @@ async def test_redirect_detection():
     await module.attack(request)
 
     assert persister.vulnerabilities == {"url"}
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -95,3 +96,4 @@ async def test_whole_stuff():
         await module.attack(request)
 
     assert True
+    await crawler.close()

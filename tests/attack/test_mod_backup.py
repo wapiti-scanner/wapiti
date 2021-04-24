@@ -58,3 +58,4 @@ async def test_whole_stuff():
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0].url == "http://perdu.com/config.php.bak"
+    await crawler.close()
