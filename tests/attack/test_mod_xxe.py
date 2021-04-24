@@ -85,6 +85,7 @@ async def test_direct_body():
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "raw body"
     assert "/etc/passwd" in persister.vulnerabilities[0][1]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
