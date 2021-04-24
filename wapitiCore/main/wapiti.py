@@ -462,7 +462,7 @@ class Wapiti:
                             print_tb(exception_traceback, file=traceback_fd)
                             print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
                             print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
-                            print("{}. Requests {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
+                            print("{}. httpx {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
 
                         try:
                             upload_request = Request(
