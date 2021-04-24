@@ -100,3 +100,4 @@ async def test_whole_stuff():
     assert persister.vulnerabilities[0][0] == "file"
     file_params = persister.vulnerabilities[0][1].file_params
     assert file_params[0][1][0] == "http://external.url/page"
+    await crawler.close()

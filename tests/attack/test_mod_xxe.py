@@ -103,6 +103,7 @@ async def test_direct_param():
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "vuln"
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -120,6 +121,7 @@ async def test_direct_query_string():
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "QUERY_STRING"
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -173,6 +175,7 @@ async def test_out_of_band_body():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "raw body"
     assert "linux2" in persister.vulnerabilities[0][1]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -222,6 +225,7 @@ async def test_out_of_band_param():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln"
     assert "linux2" in persister.vulnerabilities[0][1]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -270,6 +274,7 @@ async def test_out_of_band_query_string():
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "QUERY_STRING"
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -323,6 +328,7 @@ async def test_direct_upload():
 
     assert len(persister.vulnerabilities)
     assert persister.vulnerabilities[0][0] == "calendar"
+    await crawler.close()
 
 
 if __name__ == "__main__":

@@ -65,3 +65,4 @@ async def test_cookieflags():
     assert persister.vulnerabilities
     assert persister.vulnerabilities["foo"] == ["HttpOnly", "Secure"]
     assert persister.vulnerabilities["_octo"] == ["HttpOnly"]
+    await crawler.close()

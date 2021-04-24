@@ -74,6 +74,7 @@ async def test_whole_stuff():
         await module.attack(request)
 
     assert True
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -96,6 +97,7 @@ async def test_false_positive():
     await module.attack(request)
 
     assert not persister.vulnerabilities
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -128,6 +130,7 @@ async def test_true_positive():
     await module.attack(request)
 
     assert persister.vulnerabilities
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -186,6 +189,7 @@ async def test_blind_detection():
         assert persister.vulnerabilities
         # One request for error-based, one to get normal response, four to test boolean-based attack
         assert respx.calls.call_count == 6
+        await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -212,6 +216,7 @@ async def test_negative_blind():
     # - 1 request to get normal response
     # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
     assert respx.calls.call_count == 8
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -270,3 +275,4 @@ async def test_blind_detection_parenthesis():
         assert persister.vulnerabilities
         # This is the same test as the previous blind except we have to put single quotes
         assert respx.calls.call_count == 8
+        await crawler.close()

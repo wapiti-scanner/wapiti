@@ -70,3 +70,5 @@ async def test_whole_stuff():
 
         assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
         assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]
+
+    await crawler.close()

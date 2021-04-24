@@ -61,6 +61,7 @@ async def test_title_false_positive():
     await module.attack(request)
 
     assert persister.vulnerabilities == []
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -81,6 +82,7 @@ async def test_title_positive():
     assert persister.vulnerabilities[0][0] == "title"
     assert persister.vulnerabilities[0][1].startswith("</title>")
     assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -100,6 +102,7 @@ async def test_script_filter_bypass():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "name"
     assert persister.vulnerabilities[0][1].lower().startswith("<svg")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -119,6 +122,7 @@ async def test_attr_quote_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "class"
     assert persister.vulnerabilities[0][1].lower().startswith("'></pre>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -138,6 +142,7 @@ async def test_attr_double_quote_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "class"
     assert persister.vulnerabilities[0][1].lower().startswith("\"></pre>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -157,6 +162,7 @@ async def test_attr_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "state"
     assert persister.vulnerabilities[0][1].lower().startswith("><script>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -176,6 +182,7 @@ async def test_tag_name_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "tag"
     assert persister.vulnerabilities[0][1].lower().startswith("script>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -195,6 +202,7 @@ async def test_partial_tag_name_escape():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "importance"
     assert persister.vulnerabilities[0][1].lower().startswith("/><script>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -214,6 +222,7 @@ async def test_xss_inside_tag_input():
     assert persister.vulnerabilities[0][0] == "uid"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert "<" not in used_payload and ">" not in used_payload and "autofocus/onfocus" in used_payload
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -233,6 +242,7 @@ async def test_xss_inside_tag_link():
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert "<" not in used_payload and ">" not in used_payload and "autofocus href onfocus" in used_payload
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -252,6 +262,7 @@ async def test_xss_uppercase_no_script():
     assert persister.vulnerabilities[0][0] == "name"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("<svg onload=&")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -271,6 +282,7 @@ async def test_frame_src_escape():
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith('"><frame src="javascript:alert(/w')
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -290,6 +302,7 @@ async def test_frame_src_no_escape():
     assert persister.vulnerabilities[0][0] == "url"
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("javascript:alert(/w")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -308,6 +321,7 @@ async def test_bad_separator_used():
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("\">")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -326,6 +340,7 @@ async def test_escape_with_style():
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("</style>")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -344,6 +359,7 @@ async def test_rare_tag_and_event():
     assert persister.vulnerabilities
     used_payload = persister.vulnerabilities[0][1].lower()
     assert used_payload.startswith("<custom\nchecked\nonpointerenter=")
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -361,6 +377,7 @@ async def test_xss_with_strong_csp():
 
     assert persister.vulnerabilities
     assert _("Warning: Content-Security-Policy is present!") in persister.vulnerabilities[0][2]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -378,3 +395,4 @@ async def test_xss_with_weak_csp():
 
     assert persister.vulnerabilities
     assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0][2]
+    await crawler.close()

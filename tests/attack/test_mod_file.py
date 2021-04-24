@@ -60,6 +60,7 @@ async def test_inclusion_detection():
     await module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -76,6 +77,7 @@ async def test_warning_false_positive():
     await module.attack(request)
 
     assert persister.vulnerabilities == [("f", "/etc/services")]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -104,6 +106,7 @@ async def test_no_crash():
         await module.attack(request)
 
     assert True
+    await crawler.close()
 
 
 def test_prefix_and_suffix_detection():

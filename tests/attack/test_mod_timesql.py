@@ -65,6 +65,7 @@ async def test_timesql_detection():
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0][0] == "vuln1"
     assert "sleep" in persister.vulnerabilities[0][1]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -81,6 +82,7 @@ async def test_timesql_false_positive():
     await module.attack(request)
 
     assert not persister.vulnerabilities
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -105,6 +107,7 @@ async def test_false_positive_request_count():
     # First three to make sure the payload generate timeouts each time
     # then three more requests with timeouts to make sure the original request is a false positive
     assert respx.calls.call_count == 6
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -131,3 +134,4 @@ async def test_true_positive_request_count():
     # Three ones due to time-based SQL injection (one for injection, two to be sure)
     # Then one request to verify that the original request doesn't raise a timeout
     assert respx.calls.call_count == 4
+    await crawler.close()
