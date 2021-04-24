@@ -33,6 +33,7 @@ async def test_qs_limit():
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
+    await crawler.close()
 
     crawler = AsyncCrawler("http://127.0.0.1:65080/")
     explorer = Explorer(crawler, Event())
@@ -42,6 +43,7 @@ async def test_qs_limit():
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 3
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -54,6 +56,7 @@ async def test_explorer_filtering():
     # We should have current URL and JS URL but without query string.
     # CSS URL should be excluded
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -73,6 +76,7 @@ async def test_cookies():
     assert "foo=bar" in response.headers["set-cookie"]
     response = await crawler.async_get(Request("http://perdu.com/cookies"))
     assert "foo=bar" in response.content
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -93,6 +97,7 @@ async def test_drop_cookies():
     assert "foo=bar" in response.headers["set-cookie"]
     response = await crawler.async_get(Request("http://perdu.com/cookies"))
     assert "foo=bar" not in response.content
+    await crawler.close()
 
 
 def test_save_and_restore_state():
@@ -151,3 +156,4 @@ async def test_explorer_extract_links():
     results = list(explorer.extract_links(page, request))
     # We should get 6 resources as the âth from the form will also be used as url
     assert len(results) == 6
+    await crawler.close()

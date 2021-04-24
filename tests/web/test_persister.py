@@ -85,6 +85,7 @@ async def test_persister_basic():
     persister.close()
     assert naughty_post == payload.evil_request
     assert payload.parameter == "post2"
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -141,6 +142,7 @@ async def test_persister_upload():
     assert naughty_file == payload.evil_request
     assert payload.parameter == "calendar"
     assert len(list(persister.get_forms(path="http://httpbin.org/post"))) == 2
+    await crawler.close()
 
 
 @pytest.mark.asyncio

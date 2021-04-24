@@ -165,6 +165,7 @@ async def test_request_object():
     )
     page = await crawler.async_send(res19)
     assert page.json["files"]
+    await crawler.close()
 
 
 @pytest.mark.asyncio
@@ -184,3 +185,4 @@ async def test_redirect():
     page = await crawler.async_send(Request(slyfx), follow_redirects=True)
     assert page.url == disney
     assert page.history[0].url == slyfx
+    await crawler.close()
