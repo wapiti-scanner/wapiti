@@ -50,7 +50,7 @@ class mod_cookieflags(Attack):
         self.finished = True
         cookies = self.crawler.session_cookies
 
-        for cookie in cookies:
+        for cookie in cookies.jar:
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 self.log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
