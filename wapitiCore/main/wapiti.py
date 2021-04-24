@@ -336,7 +336,7 @@ class Wapiti:
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
-    async def browse(self, stop_event, parallelism: int = 8):
+    async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         explorer = crawler.Explorer(self.crawler, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
@@ -359,7 +359,7 @@ class Wapiti:
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
 
-    async def attack(self, stop_event):
+    async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
         self._init_attacks(stop_event)
         answer = "0"
@@ -976,9 +976,9 @@ async def wapiti_main():
     )
 
     parser.add_argument(
-        "--threads",
-        metavar="THREADS",
-        help=_("Number of concurrent tasks to use for the exploration of the target."),
+        "--tasks",
+        metavar="tasks",
+        help=_("Number of concurrent tasks to use for the exploration (crawling) of the target."),
         type=int, default=8
     )
 
@@ -1082,8 +1082,8 @@ async def wapiti_main():
 
     args = parser.parse_args()
 
-    if args.threads < 1:
-        print(_("Number of threads must be 1 or above!"))
+    if args.tasks < 1:
+        print(_("Number of concurrent tasks must be 1 or above!"))
         sys.exit(2)
 
     if args.scope == "punk":
@@ -1269,7 +1269,7 @@ async def wapiti_main():
 
                 wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
-                await wap.browse(stop_event, parallelism=args.threads)
+                await wap.browse(stop_event, parallelism=args.tasks)
                 loop.remove_signal_handler(signal.SIGINT)
                 wap.save_scan_state()
 

@@ -59,7 +59,7 @@ PROXY AND AUTHENTICATION OPTIONS:
 \fB\-a\fR \fICREDENTIALS\fR
 .
 .IP "\(bu" 4
-\fB\-\-auth\-type\fR {basic,digest,kerberos,ntlm,post}
+\fB\-\-auth\-type\fR {basic,digest,ntlm,post}
 .
 .IP "\(bu" 4
 \fB\-c\fR \fICOOKIE_FILE\fR
@@ -129,7 +129,7 @@ SCAN AND ATTACKS TUNING:
 \fB\-S\fR, \fB\-\-scan\-force\fR {paranoid,sneaky,polite,normal,aggressive,insane}
 .
 .IP "\(bu" 4
-\fB\-\-threads\fR \fITHREADS\fR
+\fB\-\-tasks\fR \fITASKS\fR
 .
 .IP "" 0
 .
@@ -305,10 +305,10 @@ Given value should be in the form login%password (% is used as a separator)
 \fB\-\-auth\-type\fR \fITYPE\fR
 .
 .br
-Set the authentication mechanism to use\. Valid choices are basic, digest, kerberos, ntlm and post (web login form)\.
+Set the authentication mechanism to use\. Valid choices are basic, digest, ntlm and post (web login form)\.
 .
 .br
-Kerberos and NTLM authentication may require you to install additional Python modules\. "Post" authentication could be combined with \fB\-s\fR to specify where to find the login form\.
+NTLM authentication may require you to install an additional Python module\. "Post" authentication could be combined with \fB\-s\fR to specify where to find the login form\.
 .
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
@@ -506,10 +506,10 @@ Insane mode just remove the calculation of those limits, every URL will be attac
 Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more)\.
 .
 .IP "\(bu" 4
-\fB\-\-threads\fR \fITHREADS\fR Set how many concurrent tasks (threads) Wapiti should use to crawl the target\.
+\fB\-\-tasks\fR \fITASKS\fR Set how many concurrent tasks Wapiti should use to crawl the target\.
 .
 .br
-Wapiti leverages Python\'s asyncio module for this\. If you go above the limit of possible threads, the CPython interpreter will automatically reduce the value to something more appropriate\.
+Wapiti leverages Python\'s asyncio framework for this\.
 .
 .IP "\(bu" 4
 \fB\-\-endpoint\fR \fIURL\fR Some attack modules are using an HTTP endpoint to check for vulnerabilities\.

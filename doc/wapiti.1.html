@@ -126,7 +126,7 @@ More detail on each option can be found in the following sections.</p>
 <ul>
 <li><code>-p</code> <var>PROXY_URL</var></li>
 <li><code>-a</code> <var>CREDENTIALS</var></li>
-<li><code>--auth-type</code> {basic,digest,kerberos,ntlm,post}</li>
+<li><code>--auth-type</code> {basic,digest,ntlm,post}</li>
 <li><code>-c</code> <var>COOKIE_FILE</var></li>
 <li><code>--drop-set-cookie</code></li>
 </ul>
@@ -158,7 +158,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--max-attack-time</code> <var>MAX_ATTACK_TIME</var></li>
 <li><code>--max-parameters</code> <var>MAX</var></li>
 <li><code>-S</code>, <code>--scan-force</code> {paranoid,sneaky,polite,normal,aggressive,insane}</li>
-<li><code>--threads</code> <var>THREADS</var></li>
+<li><code>--tasks</code> <var>TASKS</var></li>
 </ul>
 
 
@@ -251,8 +251,8 @@ Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li
 Set credentials to use for authentication on the target.<br />
 Given value should be in the form login%password (% is used as a separator)</p></li>
 <li><p><code>--auth-type</code> <var>TYPE</var><br />
-Set the authentication mechanism to use. Valid choices are basic, digest, kerberos, ntlm and post (web login form).<br />
-Kerberos and NTLM authentication may require you to install additional Python modules.
+Set the authentication mechanism to use. Valid choices are basic, digest, ntlm and post (web login form).<br />
+NTLM authentication may require you to install an additional Python module.
 "Post" authentication could be combined with <code>-s</code> to specify where to find the login form.</p></li>
 <li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
 Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
@@ -340,10 +340,9 @@ Available choices are : paranoid, sneaky, polite, normal, aggressive, insane.<br
 Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).<br />
 Insane mode just remove the calculation of those limits, every URL will be attacked.<br />
 Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).</p></li>
-<li><p><code>--threads</code> <var>THREADS</var>
-Set how many concurrent tasks (threads) Wapiti should use to crawl the target.<br />
-Wapiti leverages Python's asyncio module for this. If you go above the limit of possible threads, the CPython
-interpreter will automatically reduce the value to something more appropriate.</p></li>
+<li><p><code>--tasks</code> <var>TASKS</var>
+Set how many concurrent tasks Wapiti should use to crawl the target.<br />
+Wapiti leverages Python's asyncio framework for this.</p></li>
 <li><p><code>--endpoint</code> <var>URL</var>
 Some attack modules are using an HTTP endpoint to check for vulnerabilities.<br />
 For example the SSRF module inject the endpoint URL into webpage arguments to check if the target script try to fetch that URL.<br />
