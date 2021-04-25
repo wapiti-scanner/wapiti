@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /usr/src/app
 
 RUN apt update \
-  && apt install python3 python3-setuptools ca-certificates -y \
+  && apt install python3 python3-setuptools python3-pip ca-certificates -y \
   && apt clean -yq \
   && apt autoremove -yq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
@@ -23,7 +23,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
   PYTHONDONTWRITEBYTECODE=1
 
 RUN apt update \
-  && apt install python3 python3-setuptools -y \
+  && apt install python3 python3-setuptools python3-pip -y \
   && apt clean -yq \
   && apt autoremove -yq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
