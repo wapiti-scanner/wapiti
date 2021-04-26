@@ -35,7 +35,7 @@ class mod_cookieflags(Attack):
 
     @staticmethod
     def check_httponly_flag(cookie: object):
-        return "HttpOnly" in cookie._rest
+        return "HttpOnly" in cookie._rest or "httponly" in cookie._rest
 
     def must_attack(self, request: Request):
         if self.finished:
