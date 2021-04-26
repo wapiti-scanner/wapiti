@@ -213,7 +213,8 @@ class mod_xss(Attack):
 
         for section in config_reader.sections():
             if section == flags.section:
-                expected_value = config_reader[section]["value"].replace("__XSS__", taint)
+                expected_value = config_reader[section]["value"].replace('[EXTERNAL_ENDPOINT]', self.external_endpoint)
+                expected_value = expected_value.replace("__XSS__", taint)
                 tag_names = config_reader[section]["tag"].split(",")
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")
