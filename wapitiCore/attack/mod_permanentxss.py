@@ -215,7 +215,7 @@ class mod_permanentxss(Attack):
             skip=self.options.get("skipped_parameters")
         )
 
-        for evil_request, xss_param, xss_payload, xss_flags in attack_mutator.mutate(injection_request):
+        for evil_request, xss_param, _xss_payload, xss_flags in attack_mutator.mutate(injection_request):
             if self.verbose == 2:
                 print("[¨] {0}".format(evil_request))
 
@@ -364,12 +364,12 @@ class mod_permanentxss(Attack):
                         if case_sensitive:
                             if match_type == "exact" and expected_value == tag.string.strip():
                                 return True
-                            elif match_type == "starts_with" and tag.string.strip().startswith(expected_value):
+                            if match_type == "starts_with" and tag.string.strip().startswith(expected_value):
                                 return True
                         else:
                             if match_type == "exact" and expected_value.lower() == tag.string.strip().lower():
                                 return True
-                            elif match_type == "starts_with" and \
+                            if match_type == "starts_with" and \
                                     tag.string.strip().lower().startswith(expected_value.lower()):
                                 return True
                     else:
@@ -378,12 +378,12 @@ class mod_permanentxss(Attack):
                             if case_sensitive:
                                 if match_type == "exact" and tag[attribute] == expected_value:
                                     return True
-                                elif match_type == "starts_with" and tag[attribute].startswith(expected_value):
+                                if match_type == "starts_with" and tag[attribute].startswith(expected_value):
                                     return True
                             else:
                                 if match_type == "exact" and tag[attribute].lower() == expected_value.lower():
                                     return True
-                                elif match_type == "starts_with" and \
+                                if match_type == "starts_with" and \
                                         expected_value.lower().startswith(tag[attribute].lower()):
                                     return True
                 break

@@ -339,8 +339,8 @@ class Request:
     def parameters_count(self):
         if isinstance(self._post_params, list):
             return len(self.get_params) + len(self._post_params) + len(self._file_params)
-        else:
-            return len(self.get_params) + len(self._file_params)
+
+        return len(self.get_params) + len(self._file_params)
 
     @staticmethod
     def _encoded_keys(params):
@@ -356,6 +356,7 @@ class Request:
             buff += "\n\tdata: {}".format(self.encoded_data.replace("\n", "\n\t"))
         if self._file_params:
             buff += "\n\tfiles: {}".format(self.encoded_files)
+
         return buff
 
     def http_repr(self, left_margin="    "):

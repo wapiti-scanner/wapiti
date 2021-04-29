@@ -43,7 +43,7 @@ class mod_crlf(Attack):
     def attack(self, request: Request):
         page = request.path
 
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
             if self.verbose == 2:
                 print("[¨] {0}".format(mutated_request.url))
 

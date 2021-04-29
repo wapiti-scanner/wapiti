@@ -78,7 +78,7 @@ if a script is vulnerable.""",
     author_email="nicolas.surribas@gmail.com",
     license="GPLv2",
     platforms=["Any"],
-    packages=find_packages(exclude=["tests","tests.*"]),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     data_files=doc_and_conf_files,
     include_package_data=True,
     scripts=[

@@ -591,14 +591,14 @@ if __name__ == "__main__":
         print(flags)
 
     print('')
-    print("#"*50)
+    print("#" * 50)
     print('')
 
     for evil_request, param_name, payload, flags in mutator.mutate(res2):
         print(evil_request)
 
     print('')
-    print("#"*50)
+    print("#" * 50)
     print('')
 
     def iterator():
@@ -610,7 +610,7 @@ if __name__ == "__main__":
         print(evil_request)
 
     print('')
-    print("#"*50)
+    print("#" * 50)
     print('')
 
     mutator = Mutator(payloads=random_string_with_flags, qs_inject=True, max_queries_per_pattern=16)

@@ -323,9 +323,9 @@ def apply_attrval_context(context, payloads, code):
             # we must deal differently with self-closing tags
             # see https://developer.mozilla.org/en-US/docs/Glossary/empty_element for reference
             if context["tag"].lower() in [
-                "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
-                "source", "track", "wbr",
-                "frame"  # Not in Mozilla list but I guess it is because it is deprecated
+                    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
+                    "source", "track", "wbr",
+                    "frame"  # Not in Mozilla list but I guess it is because it is deprecated
             ]:
                 # We don't even need a slash to mark the end of the tag
                 js_code += ">"

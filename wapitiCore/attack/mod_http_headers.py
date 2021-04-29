@@ -43,8 +43,8 @@ class mod_http_headers(Attack):
     def is_set(self, response: Page, header_name, check_list):
         if header_name not in response.headers:
             return False
-        else:
-            return any(element in response.headers[header_name].lower() for element in check_list)
+
+        return any(element in response.headers[header_name].lower() for element in check_list)
 
     def must_attack(self, request: Request):
         if self.finished:

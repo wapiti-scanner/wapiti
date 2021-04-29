@@ -448,7 +448,11 @@ class Wapiti:
                         with open(traceback_file, "w") as traceback_fd:
                             print_tb(exception_traceback, file=traceback_fd)
                             print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
-                            print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
+                            print(
+                                "Occurred in {} on {}".format(
+                                    attack_module.name,
+                                    self.target_url),
+                                file=traceback_fd)
                             print("{}. Requests {}. OS {}".format(WAPITI_VERSION, requests.__version__, sys.platform))
 
                         try:
@@ -1252,7 +1256,6 @@ def wapiti_main():
             print(_("Attack process interrupted. Scan will be resumed next time "
                     "unless you specify \"--flush-attacks\" or \"--flush-session\"."))
             print('')
-            pass
     except OperationalError:
         print(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
         print(_("[!] You should unlock and launch Wapiti again."))

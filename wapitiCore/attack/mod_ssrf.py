@@ -174,7 +174,7 @@ class mod_ssrf(Attack):
     def attack(self, request: Request):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
             if self.verbose == 2:
                 print("[¨] {0}".format(mutated_request))
 

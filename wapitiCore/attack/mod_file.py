@@ -24,7 +24,7 @@ import re
 from requests.exceptions import ReadTimeout, RequestException
 
 from wapitiCore.attack.attack import Attack, PayloadReader
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL,CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, CRITICAL_LEVEL, _
 from wapitiCore.definitions.file import NAME
 from wapitiCore.net.web import Request
 
