@@ -24,12 +24,12 @@ from .txtreportgenerator import TXTReportGenerator
 from .xmlreportgenerator import XMLReportGenerator
 
 GENERATORS = {
-        "csv": CSVReportGenerator,
-        "html": HTMLReportGenerator,
-        "json": JSONReportGenerator,
-        "txt": TXTReportGenerator,
-        "xml": XMLReportGenerator
-    }
+    "csv": CSVReportGenerator,
+    "html": HTMLReportGenerator,
+    "json": JSONReportGenerator,
+    "txt": TXTReportGenerator,
+    "xml": XMLReportGenerator
+}
 
 
 def get_report_generator_instance(report_format: str = "html"):

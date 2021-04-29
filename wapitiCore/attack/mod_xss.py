@@ -185,7 +185,8 @@ class mod_xss(Attack):
 
                     # stop trying payloads and jump to the next parameter
                     break
-                elif response.status == 500 and not saw_internal_error:
+
+                if response.status == 500 and not saw_internal_error:
                     if xss_param == "QUERY_STRING":
                         anom_msg = Messages.MSG_QS_500
                     else:
@@ -239,12 +240,12 @@ class mod_xss(Attack):
                         if case_sensitive:
                             if match_type == "exact" and expected_value == tag.string.strip():
                                 return True
-                            elif match_type == "starts_with" and tag.string.strip().startswith(expected_value):
+                            if match_type == "starts_with" and tag.string.strip().startswith(expected_value):
                                 return True
                         else:
                             if match_type == "exact" and expected_value.lower() == tag.string.strip().lower():
                                 return True
-                            elif match_type == "starts_with" and \
+                            if match_type == "starts_with" and \
                                     tag.string.strip().lower().startswith(expected_value.lower()):
                                 return True
                     else:
@@ -253,12 +254,12 @@ class mod_xss(Attack):
                             if case_sensitive:
                                 if match_type == "exact" and tag[attribute] == expected_value:
                                     return True
-                                elif match_type == "starts_with" and tag[attribute].startswith(expected_value):
+                                if match_type == "starts_with" and tag[attribute].startswith(expected_value):
                                     return True
                             else:
                                 if match_type == "exact" and tag[attribute].lower() == expected_value.lower():
                                     return True
-                                elif match_type == "starts_with" and \
+                                if match_type == "starts_with" and \
                                         expected_value.lower().startswith(tag[attribute].lower()):
                                     return True
                 break

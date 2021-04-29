@@ -203,7 +203,7 @@ class mod_xxe(Attack):
                     vulnerable_parameter = True
                     continue
 
-                elif response.status == 500 and not saw_internal_error:
+                if response.status == 500 and not saw_internal_error:
                     saw_internal_error = True
                     if parameter == "QUERY_STRING":
                         anom_msg = Messages.MSG_QS_500
@@ -268,7 +268,7 @@ class mod_xxe(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
-        for mutated_request, parameter, payload, flags in mutator.mutate(original_request):
+        for mutated_request, parameter, _payload, flags in mutator.mutate(original_request):
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
@@ -379,7 +379,7 @@ class mod_xxe(Attack):
                         "</xml>"
                     )
 
-                    for payload, flags in self.payloads:
+                    for payload, _flags in self.payloads:
                         if "{}.dtd".format(payload_name) in payload:
                             payload = payload.replace("[PATH_ID]", str(original_request.path_id))
                             payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")

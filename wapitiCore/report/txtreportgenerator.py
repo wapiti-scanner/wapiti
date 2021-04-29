@@ -23,7 +23,6 @@ from wapitiCore.report.reportgenerator import ReportGenerator
 
 NB_COLUMNS = 80
 
-
 # TODO: should use more the python format mini-language
 # http://docs.python.org/2/library/string.html#format-specification-mini-language
 

@@ -49,7 +49,7 @@ class mod_timesql(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter

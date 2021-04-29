@@ -46,7 +46,7 @@ class mod_shellshock(Attack):
         hex_string = hexlify(self.rand_string.encode())
         bash_string = ""
         for i in range(0, 64, 2):
-            bash_string += "\\x" + hex_string[i:i+2].decode()
+            bash_string += "\\x" + hex_string[i:i + 2].decode()
 
         cmd = "echo; echo; echo -e '{0}';".format(bash_string)
 

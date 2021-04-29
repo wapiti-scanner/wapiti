@@ -91,7 +91,7 @@ class mod_brute_login_form(Attack):
 
     def must_attack(self, request: Request):
         # We leverage the fact that the crawler will fill password entries with a known placeholder
-        if "Letm3in_" not in (request.encoded_data + request.encoded_params):
+        if "Letm3in_" not in request.encoded_data + request.encoded_params:
             return False
 
         # We may want to remove this but if not available fallback to target URL
@@ -172,7 +172,7 @@ class mod_brute_login_form(Attack):
                 )
 
                 self.log_red("---")
-                self.log_red(vuln_message),
+                self.log_red(vuln_message)
                 self.log_red(Messages.MSG_EVIL_REQUEST)
                 self.log_red(evil_request.http_repr())
                 self.log_red("---")

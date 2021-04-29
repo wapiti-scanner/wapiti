@@ -10,6 +10,7 @@ from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_WP = _("No WordPress Detected")
 
+
 class mod_wp_enum(Attack):
     """Detect WordPress Plugins with version."""
     name = "wp_enum"
@@ -19,7 +20,6 @@ class mod_wp_enum(Attack):
     def __init__(self, crawler, persister, logger, attack_options):
         Attack.__init__(self, crawler, persister, logger, attack_options)
         self.finished = False
-
 
     def get_plugin(self):
         with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS), errors="ignore") as plugin_list:
@@ -41,11 +41,11 @@ class mod_wp_enum(Attack):
             rep = self.crawler.get(req)
             if rep.status == 200:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
-                #This check was added to detect invalid format of "Readme.txt" who can cause a crashe
-                if version :
+                # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
+                if version:
                     version = version.group(1)
-                else :
-                    print ("Readme.txt is not in a valid format")
+                else:
+                    print("Readme.txt is not in a valid format")
                     version = ""
                 plugin_detected = {
                     "name": plugin,
@@ -58,10 +58,10 @@ class mod_wp_enum(Attack):
                     version
                 )
                 self.add_addition(
-                    category = TECHNO_DETECTED,
-                    level = LOW_LEVEL,
-                    request = req,
-                    info = json.dumps(plugin_detected)
+                    category=TECHNO_DETECTED,
+                    level=LOW_LEVEL,
+                    request=req,
+                    info=json.dumps(plugin_detected)
                 )
             elif rep.status == 403:
                 plugin_detected = {
@@ -75,10 +75,10 @@ class mod_wp_enum(Attack):
                     [""]
                 )
                 self.add_addition(
-                    category = TECHNO_DETECTED,
-                    level = LOW_LEVEL,
-                    request = req,
-                    info = json.dumps(plugin_detected)
+                    category=TECHNO_DETECTED,
+                    level=LOW_LEVEL,
+                    request=req,
+                    info=json.dumps(plugin_detected)
                 )
 
     def detect_theme(self, url):
@@ -87,11 +87,10 @@ class mod_wp_enum(Attack):
             rep = self.crawler.get(req)
             if rep.status == 200:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
-                #This check was added to detect invalid format of "Readme.txt" who can cause a crashe
-                if version :
+                # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
+                if version:
                     version = version.group(1)
-                else :
-                    #print ("Readme.txt is not in a valid format")
+                else:
                     version = ""
                 theme_detected = {
                     "name": theme,
@@ -104,10 +103,10 @@ class mod_wp_enum(Attack):
                     version
                 )
                 self.add_addition(
-                    category = TECHNO_DETECTED,
-                    level = LOW_LEVEL,
-                    request = req,
-                    info = json.dumps(theme_detected)
+                    category=TECHNO_DETECTED,
+                    level=LOW_LEVEL,
+                    request=req,
+                    info=json.dumps(theme_detected)
                 )
             elif rep.status == 403:
                 theme_detected = {
@@ -121,13 +120,13 @@ class mod_wp_enum(Attack):
                     [""]
                 )
                 self.add_addition(
-                    category = TECHNO_DETECTED,
-                    level = LOW_LEVEL,
-                    request = req,
-                    info = json.dumps(theme_detected)
+                    category=TECHNO_DETECTED,
+                    level=LOW_LEVEL,
+                    request=req,
+                    info=json.dumps(theme_detected)
                 )
 
-    def check_wordpress(self, response :object):
+    def check_wordpress(self, response: object):
         if re.findall('WordPress.*', response.content):
             return True
         return False

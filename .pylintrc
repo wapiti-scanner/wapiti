@@ -3,6 +3,10 @@
 # Specify a configuration file.
 #rcfile=
 
+# Add files or directories matching the regex patterns to the blacklist. The
+# regex matches against base names, not paths.
+ignore-patterns=jsparser3.py
+
 [MESSAGES CONTROL]
 
 # Only show warnings with the listed confidence levels. Leave empty to show
@@ -24,19 +28,27 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=too-few-public-methods,too-many-instance-attributes,too-many-arguments,
-  too-many-locals,logging-format-interpolation,not-an-iterable,too-many-public-methods,
-  missing-function-docstring,missing-class-docstring,missing-module-docstring
+disable=too-few-public-methods,too-many-instance-attributes,too-many-arguments,import-error,
+  logging-format-interpolation,not-an-iterable,too-many-public-methods,fixme,
+  missing-function-docstring,missing-class-docstring,missing-module-docstring,invalid-name
 
 [FORMAT]
 
 # Maximum number of characters on a single line.
 max-line-length=120
 
+max-nested-blocks=10
+
+max-locals=25
+
+max-branches=40
+
+max-statements=100
+
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.
-min-similarity-lines=16
+min-similarity-lines=43
 
 # Ignore comments when computing similarities.
 ignore-comments=yes

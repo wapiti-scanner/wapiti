@@ -395,8 +395,8 @@ class Page:
 
         # a hack for auto-generated Apache directory index
         if query_string in [
-            "C=D;O=A", "C=D;O=D", "C=M;O=A", "C=M;O=D",
-            "C=N;O=A", "C=N;O=D", "C=S;O=A", "C=S;O=D"
+                "C=D;O=A", "C=D;O=D", "C=M;O=A", "C=M;O=D",
+                "C=N;O=A", "C=N;O=D", "C=S;O=A", "C=S;O=D"
         ]:
             query_string = ""
 

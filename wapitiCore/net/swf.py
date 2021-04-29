@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import struct
-
 from yaswfp import swfparser
 from bs4 import BeautifulSoup
 
@@ -86,7 +84,6 @@ def new_read_u30(stream):
 
 def read_abc(data):
     name_len = data.find(b'\0')
-    minor, major = struct.unpack("HH", data[name_len + 1: name_len + 5])
 
     i = name_len + 5
     read_value, read_size = read_u30(data[i:])

@@ -495,9 +495,9 @@ class mod_sql(Attack):
                 continue
 
             comparison = (
-                    response.status == good_status and
-                    response.redirection_url == good_redirect and
-                    response.text_only_md5 == good_hash
+                response.status == good_status and
+                response.redirection_url == good_redirect and
+                response.text_only_md5 == good_hash
             )
 
             test_results.append(comparison == (flags.section == "True"))
