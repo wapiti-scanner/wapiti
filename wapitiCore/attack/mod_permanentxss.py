@@ -71,7 +71,7 @@ class mod_permanentxss(Attack):
         try:
             response = await self.crawler.async_send(target_req, headers=headers)
             data = response.content
-        except RequestException:
+        except RequestError:
             self.network_errors += 1
             return
 
