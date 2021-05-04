@@ -375,7 +375,6 @@ class mod_sql(Attack):
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
                     vulnerable_parameters.add(parameter)
-                    continue
 
                 elif response.status == 500 and not saw_internal_error:
                     saw_internal_error = True

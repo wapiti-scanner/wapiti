@@ -116,12 +116,9 @@ def retry(delay=1, times=3):
                 try:
                     value = await function(*args, **kwargs)
                     return value
-                except ConnectionError as exception:
-                    if hasattr(exception.args[0], "reason") and isinstance(exception.args[0].reason, httpx.ReadTimeout):
-                        final_excep = httpx.ReadTimeout(exception.args[0], request=None)
-                    else:
-                        raise exception
-                except httpx.ReadTimeout as exception:
+                except httpx.NetworkError as exception:
+                    raise exception
+                except httpx.TimeoutException as exception:
                     final_excep = exception
 
             if final_excep is not None:
@@ -917,13 +914,13 @@ class Explorer:
                 task_to_request[task] = request
 
             if task_to_request:
-                done, not_done = await asyncio.wait(
+                done, __ = await asyncio.wait(
                     task_to_request,
                     timeout=0.25,
                     return_when=asyncio.FIRST_COMPLETED
                 )
             else:
-                done, not_done = [], []
+                done = []
 
             # process any completed task
             for task in done:

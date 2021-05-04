@@ -252,7 +252,7 @@ class Attack:
     def external_endpoint(self):
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
 
-    def must_attack(self, request: Request):
+    def must_attack(self, request: Request):  # pylint: disable=unused-argument
         return not self.finished
 
     @property
@@ -308,7 +308,7 @@ class Mutator:
         # raise tuples of (payloads, flags)
         if isinstance(self._payloads, tuple):
             yield self._payloads
-        elif isinstance(self._payloads, list) or isinstance(self._payloads, GeneratorType):
+        elif isinstance(self._payloads, (list, GeneratorType)):
             yield from self._payloads
         elif isinstance(self._payloads, FunctionType):
             result = self._payloads()
@@ -475,7 +475,7 @@ class FileMutator:
         # raise tuples of (payloads, flags)
         if isinstance(self._payloads, tuple):
             yield self._payloads
-        elif isinstance(self._payloads, list) or isinstance(self._payloads, GeneratorType):
+        elif isinstance(self._payloads, (list, GeneratorType)):
             yield from self._payloads
         elif isinstance(self._payloads, FunctionType):
             result = self._payloads()

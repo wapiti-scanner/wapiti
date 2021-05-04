@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from urllib.parse import urlparse, quote_plus, unquote, quote
+from urllib.parse import urlparse, unquote, quote
 import posixpath
 from copy import deepcopy
 import sys

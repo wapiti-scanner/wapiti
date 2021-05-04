@@ -28,7 +28,6 @@ from ast import literal_eval
 from posixpath import normpath
 
 # Third-parties
-from httpx import Response, ConnectError
 import httpx
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
@@ -194,7 +193,7 @@ class Page:
 
         try:
             return self._response.text
-        except (ConnectError, OSError, IncompleteRead):
+        except (httpx.ConnectError, OSError, IncompleteRead):
             return ""
 
     @property
