@@ -126,6 +126,9 @@ class mod_brute_login_form(Attack):
             return
 
         for username, password in product(self.get_usernames(), self.get_passwords()):
+            if self._stop_event.is_set():
+                break
+
             try:
                 response = await self.test_credentials(
                     login_form,
