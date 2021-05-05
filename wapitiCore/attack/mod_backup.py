@@ -65,6 +65,9 @@ class mod_backup(Attack):
         page = request.path
 
         for payload, __ in self.payloads:
+            if self._stop_event.is_set():
+                break
+
             if request.file_name:
                 if "[FILE_" not in payload:
                     continue
