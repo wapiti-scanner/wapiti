@@ -237,7 +237,7 @@ Following options allows you to bypass this behavior/
     Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
     
   * `--tasks` <TASKS>
-    Set how many concurrent tasks Wapiti should use to crawl the target.  
+    Set how many concurrent tasks Wapiti should use.  
     Wapiti leverages Python's asyncio framework for this.
     
   * `--endpoint` <URL>
