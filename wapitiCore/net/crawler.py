@@ -208,7 +208,8 @@ class AsyncCrawler:
                 proxies=self._proxies,
                 timeout=self._timeout,
                 event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None,
-                transport=self._transport
+                transport=self._transport,
+                limits=httpx.Limits(max_keepalive_connections=None, max_connections=None)
             )
 
             self._client.max_redirects = 5
