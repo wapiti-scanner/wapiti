@@ -36,7 +36,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `-p` <PROXY_URL>
   * `-a` <CREDENTIALS>
   * `--auth-type` {basic,digest,ntlm,post}
-  * `-c` <COOKIE_FILE>
+  * `-c` <COOKIE_FILE_OR_BROWSER_NAME>
   * `--drop-set-cookie`
 
 SESSION OPTIONS:
@@ -78,7 +78,7 @@ OUTPUT OPTIONS:
 REPORT OPTIONS:
 
   * `-f` {json,html,txt,xml}
-  * `-o` <OUPUT_PATH>
+  * `-o` <OUTPUT_PATH>
 
 OTHER OPTIONS:
 

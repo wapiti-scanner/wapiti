@@ -1,3 +1,15 @@
+13/05/2021
+    Wapiti 3.0.5
+    SQL: boolean based blind SQL injection support added
+    Report: added CSV as output format
+    Cookie: you can drop cookies from HTTP responses with --drop-set-cookie
+    Cookie: you can load cookies from your browser with -c <chrome or firefox>
+    Session: fixed an issue that might cause URLs being rescanned when resuming a session
+    CMS: New modules to detect versions and installed modules for Wordpress and Drupal
+    Fingerprinting: several issues fixed on mod_wapp
+    Crawler: HTTP requests are processed concurrently for faster crawling. Check the new --tasks option.
+
+
 20/02/2021
     Wapiti 3.0.4
     XSS: improved context awareness of HTML webpage, payloads can now use the existing HTML tags without closing them
