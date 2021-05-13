@@ -27,13 +27,6 @@ msgstr "Backup file {0} found for {1}"
 msgid "Credentials found for URL {} : {} / {}"
 msgstr "Credentials found for URL {} : {} / {}"
 
-msgid "Blind SQL vulnerability"
-msgstr "Blind SQL vulnerability"
-
-#, python-brace-format
-msgid "{0} via injection in the parameter {1}"
-msgstr "{0} via injection in the parameter {1}"
-
 #, python-brace-format
 msgid "HttpOnly flag is not set in the cookie : {0}"
 msgstr "HttpOnly flag is not set in the cookie : {0}"
@@ -51,17 +44,12 @@ msgstr "CRLF Injection"
 msgid "Error: The server did not understand this request"
 msgstr "Error: The server did not understand this request"
 
+#, python-brace-format
+msgid "{0} via injection in the parameter {1}"
+msgstr "{0} via injection in the parameter {1}"
+
 msgid "CSP is not set"
 msgstr "CSP is not set"
-
-msgid "No WordPress detected"
-msgstr "No WordPress detected"
-
-msgid "Enumeration of WordPress Plugins :"
-msgstr "Enumeration of WordPress Plugins :"
-
-msgid "Enumeration of WordPress Themes :"
-msgstr "Enumeration of WordPress Themes :"
 
 #, python-brace-format
 msgid "CSP attribute \"{0}\" is missing"
@@ -79,6 +67,13 @@ msgstr "CSRF token '{}' is not properly checked in backend"
 
 msgid "CSRF token '{}' might be easy to predict"
 msgstr "CSRF token '{}' might be easy to predict"
+
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr "{0} {1} detected"
+
+msgid "No Drupal Detected"
+msgstr "No Drupal Detected"
 
 msgid "Warning eval()"
 msgstr "Warning eval()"
@@ -153,24 +148,20 @@ msgstr "Checking X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Checking Strict-Transport-Security :"
 
+msgid "Error downloading nikto database."
+msgstr "Error downloading nikto database."
+
 msgid "Problem with local nikto database."
 msgstr "Problem with local nikto database."
 
 msgid "Downloading from the web..."
 msgstr "Downloading from the web..."
 
-msgid "Error downloading nikto database."
-msgstr "Error downloading nikto database."
-
 msgid "References:"
 msgstr "References:"
 
 msgid "Stored XSS vulnerability"
 msgstr "Stored XSS vulnerability"
-
-#, python-brace-format
-msgid "error: {0} while attacking {1}"
-msgstr "error: {0} while attacking {1}"
 
 #, python-brace-format
 msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
@@ -232,20 +223,28 @@ msgstr ""
 "The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
 "Full request can be seen at {5}"
 
-#, python-brace-format
-msgid "{0} {1} detected"
-msgstr "{0} {1} detected"
-
-msgid "Problem with local wapp database."
-msgstr "Problem with local wapp database."
+msgid "Blind SQL vulnerability"
+msgstr "Blind SQL vulnerability"
 
 msgid "Error downloading wapp database."
 msgstr "Error downloading wapp database."
+
+msgid "Problem with local wapp database."
+msgstr "Problem with local wapp database."
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
 msgstr ""
 "Try using --store-session option, or update apps.json using --update option."
+
+msgid "No WordPress Detected"
+msgstr "No WordPress Detected"
+
+msgid "Enumeration of WordPress Plugins :"
+msgstr "Enumeration of WordPress Plugins :"
+
+msgid "Enumeration of WordPress Themes :"
+msgstr "Enumeration of WordPress Themes :"
 
 msgid "XSS vulnerability"
 msgstr "XSS vulnerability"
@@ -301,40 +300,6 @@ msgstr ""
 
 msgid "He should also reconfigure its editor to deactivate automatic backups."
 msgstr "He should also reconfigure its editor to deactivate automatic backups."
-
-msgid "Blind SQL Injection"
-msgstr "Blind SQL Injection"
-
-msgid "Blind SQLI"
-msgstr "Blind SQLI"
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-
-msgid ""
-"To protect against SQL injection, user input must not directly be embedded "
-"in SQL statements."
-msgstr ""
-"To protect against SQL injection, user input must not directly be embedded "
-"in SQL statements."
-
-msgid ""
-"Instead, user input must be escaped or filtered or parameterized statements "
-"must be used."
-msgstr ""
-"Instead, user input must be escaped or filtered or parameterized statements "
-"must be used."
 
 msgid "Weak credentials"
 msgstr "Weak credentials"
@@ -435,6 +400,17 @@ msgstr ""
 "state changing requests (requests that cause actions on the site) and "
 "validate them on backend."
 
+msgid "Potentially dangerous file"
+msgstr "Potentially dangerous file"
+
+msgid "A file with potential vulnerabilities has been found on the website."
+msgstr "A file with potential vulnerabilities has been found on the website."
+
+msgid ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+msgstr ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+
 msgid "This attack consists in executing system commands on the server."
 msgstr "This attack consists in executing system commands on the server."
 
@@ -494,18 +470,28 @@ msgstr ""
 msgid "Fingerprint web technology"
 msgstr "Fingerprint web technology"
 
-msgid "Fingerprint web server"
-msgstr "Fingerprint web server"
+msgid ""
+"The use of a web technology can be deducted due to the presence of its "
+"specific fingerprints."
+msgstr ""
+"The use of a web technology can be deducted due to the presence of its "
+"specific fingerprints."
+
+msgid "This is only for informational purposes."
+msgstr "This is only for informational purposes."
 
 msgid "Fingerprint web application framework"
 msgstr "Fingerprint web application framework"
 
 msgid ""
-"The use of a web technology can be deducted due to the presence of its "
-"specific fingerprints."
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
 msgstr ""
-"The use of a web technology can be deducted due to the presence of its "
-"specific fingerprints."
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
+
+msgid "Fingerprint web server"
+msgstr "Fingerprint web server"
 
 msgid ""
 "The version of a web server can be identified due to the presence of its "
@@ -513,16 +499,6 @@ msgid ""
 msgstr ""
 "The version of a web server can be identified due to the presence of its "
 "specific fingerprints."
-
-msgid ""
-"The version of a web application framework can be identified due to the "
-"presence of its specific fingerprints."
-msgstr ""
-"The version of a web application framework can be identified due to the "
-"presence of its specific fingerprints."
-
-msgid "This is only for informational purposes."
-msgstr "This is only for informational purposes."
 
 msgid "Htaccess Bypass"
 msgstr "Htaccess Bypass"
@@ -542,16 +518,54 @@ msgstr ""
 msgid "Make sure every HTTP method is forbidden if the credentials are bad."
 msgstr "Make sure every HTTP method is forbidden if the credentials are bad."
 
-msgid "Potentially dangerous file"
-msgstr "Potentially dangerous file"
-
-msgid "A file with potential vulnerabilities has been found on the website."
-msgstr "A file with potential vulnerabilities has been found on the website."
+msgid "HTTP Secure Headers"
+msgstr "HTTP Secure Headers"
 
 msgid ""
-"Make sure the script is up-to-date and restrict access to it if possible."
+"HTTP security headers tell the browser how to behave when handling the "
+"website's content."
 msgstr ""
-"Make sure the script is up-to-date and restrict access to it if possible."
+"HTTP security headers tell the browser how to behave when handling the "
+"website's content."
+
+msgid "Use the recommendations for hardening your HTTP Security Headers."
+msgstr "Use the recommendations for hardening your HTTP Security Headers."
+
+msgid "HttpOnly Flag cookie"
+msgstr "HttpOnly Flag cookie"
+
+msgid ""
+"HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
+msgstr ""
+"HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
+
+msgid ""
+"Using the HttpOnly flag when generating a cookie helps mitigate the risk of "
+"client side script accessing the protected cookie (if the browser supports "
+"it)."
+msgstr ""
+"Using the HttpOnly flag when generating a cookie helps mitigate the risk of "
+"client side script accessing the protected cookie (if the browser supports "
+"it)."
+
+msgid ""
+"While creation of the cookie, make sure to set the HttpOnly Flag to True."
+msgstr ""
+"While creation of the cookie, make sure to set the HttpOnly Flag to True."
+
+msgid "Internal Server Error"
+msgstr "Internal Server Error"
+
+msgid ""
+"An error occurred on the server's side, preventing it to process the request."
+msgstr ""
+"An error occurred on the server's side, preventing it to process the request."
+
+msgid "It may be the sign of a vulnerability."
+msgstr "It may be the sign of a vulnerability."
+
+msgid "More information about the error should be found in the server logs."
+msgstr "More information about the error should be found in the server logs."
 
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "
@@ -575,6 +589,44 @@ msgid ""
 msgstr ""
 "Force all redirects to first go through a page notifying users that they are "
 "going off of your site, and have them click a link to confirm."
+
+msgid "Resource consumption"
+msgstr "Resource consumption"
+
+msgid "It took an abnormal time to the server to respond to a query."
+msgstr "It took an abnormal time to the server to respond to a query."
+
+msgid ""
+"An attacker might leverage this kind of weakness to overload the server."
+msgstr ""
+"An attacker might leverage this kind of weakness to overload the server."
+
+msgid ""
+"The involved script is maybe using the server resources (CPU, memory, "
+"network, file access...) in a non-efficient way."
+msgstr ""
+"The involved script is maybe using the server resources (CPU, memory, "
+"network, file access...) in a non-efficient way."
+
+msgid "Secure Flag cookie"
+msgstr "Secure Flag cookie"
+
+msgid ""
+"The secure flag is an option that can be set by the application server when "
+"sending a new cookie to the user within an HTTP Response."
+msgstr ""
+"The secure flag is an option that can be set by the application server when "
+"sending a new cookie to the user within an HTTP Response."
+
+msgid ""
+"The purpose of the secure flag is to prevent cookies from being observed by "
+"unauthorized parties due to the transmission of a the cookie in clear text."
+msgstr ""
+"The purpose of the secure flag is to prevent cookies from being observed by "
+"unauthorized parties due to the transmission of a the cookie in clear text."
+
+msgid "When generating the cookie, make sure to set the Secure Flag to True."
+msgstr "When generating the cookie, make sure to set the Secure Flag to True."
 
 msgid "SQLI"
 msgstr "SQLI"
@@ -592,6 +644,20 @@ msgid ""
 msgstr ""
 "An attacker may then be able to extract or modify information stored in the "
 "database or even escalate his privileges on the system."
+
+msgid ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
+msgstr ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
+
+msgid ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
+msgstr ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
 
 msgid "Server Side Request Forgery"
 msgstr "Server Side Request Forgery"
@@ -614,6 +680,26 @@ msgid ""
 msgstr ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
+
+msgid "Blind SQL Injection"
+msgstr "Blind SQL Injection"
+
+msgid "Blind SQLI"
+msgstr "Blind SQLI"
+
+msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+msgstr ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
 
 msgid "Cross Site Scripting"
 msgstr "Cross Site Scripting"
@@ -723,12 +809,6 @@ msgstr "Involved parameter: {0}"
 msgid "Evil request:"
 msgstr "Evil request:"
 
-msgid "Internal Server Error"
-msgstr "Internal Server Error"
-
-msgid "Resource consumption"
-msgstr "Resource consumption"
-
 #, python-brace-format
 msgid "Received a HTTP 500 error in {0}"
 msgstr "Received a HTTP 500 error in {0}"
@@ -820,6 +900,9 @@ msgstr "Please enter values for the following form: "
 msgid "url = {0}"
 msgstr "url = {0}"
 
+msgid "Waiting for running crawler tasks to finish, please wait."
+msgstr "Waiting for running crawler tasks to finish, please wait."
+
 msgid "[*] Loading modules:"
 msgstr "[*] Loading modules:"
 
@@ -838,9 +921,6 @@ msgstr "Updating module {0}"
 msgid "Update done."
 msgstr "Update done."
 
-msgid "Max scan time was reached, stopping."
-msgstr "Max scan time was reached, stopping."
-
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Saving scan state, please wait..."
 
@@ -851,10 +931,8 @@ msgstr " Note"
 msgid "This scan has been saved in the file {0}"
 msgstr "This scan has been saved in the file {0}"
 
-msgid ""
-"The scan will be resumed next time unless you pass the --skip-crawl option."
-msgstr ""
-"The scan will be resumed next time unless you pass the --skip-crawl option."
+msgid "Max scan time was reached, stopping."
+msgstr "Max scan time was reached, stopping."
 
 #, python-brace-format
 msgid "[!] Missing dependencies for module {0}:"
@@ -867,10 +945,6 @@ msgstr "[*] Launching module {0}"
 #, python-brace-format
 msgid "[*] {0} pages were previously attacked and will be skipped"
 msgstr "[*] {0} pages were previously attacked and will be skipped"
-
-#, python-brace-format
-msgid "Max attack time was reached for module {0}, stopping."
-msgstr "Max attack time was reached for module {0}, stopping."
 
 msgid "Attack process was interrupted. Do you want to:"
 msgstr "Attack process was interrupted. Do you want to:"
@@ -889,6 +963,10 @@ msgstr "\tc) (C)ontinue the current attack"
 
 msgid "Invalid choice. Valid choices are r, n, q and c."
 msgstr "Invalid choice. Valid choices are r, n, q and c."
+
+#, python-brace-format
+msgid "Max attack time was reached for module {0}, stopping."
+msgstr "Max attack time was reached for module {0}, stopping."
 
 msgid "Sending crash report {} ... {}"
 msgstr "Sending crash report {} ... {}"
@@ -961,8 +1039,16 @@ msgstr "Set attack level"
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 
-msgid "Set a JSON cookie file to use"
-msgstr "Set a JSON cookie file to use"
+msgid "Set a JSON cookie file to use."
+msgstr "Set a JSON cookie file to use."
+
+msgid ""
+"You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+msgstr ""
+"You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+
+msgid "Ignore Set-Cookie header from HTTP responses"
+msgstr "Ignore Set-Cookie header from HTTP responses"
 
 msgid ""
 "Don't resume the scanning process, attack URLs scanned during a previous "
@@ -1037,6 +1123,13 @@ msgstr ""
 "Easy way to reduce the number of scanned and attacked URLs.\n"
 "Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
 
+msgid ""
+"Number of concurrent tasks to use for the exploration (crawling) of the "
+"target."
+msgstr ""
+"Number of concurrent tasks to use for the exploration (crawling) of the "
+"target."
+
 msgid "Set timeout for requests"
 msgstr "Set timeout for requests"
 
@@ -1049,8 +1142,11 @@ msgstr "Colorize output"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 
-msgid "Set output format. Supported: json, html (default), txt, xml"
-msgstr "Set output format. Supported: json, html (default), txt, xml"
+msgid "Set output format. Supported:"
+msgstr "Set output format. Supported:"
+
+msgid "Default is html."
+msgstr "Default is html."
 
 msgid "Output file or folder"
 msgstr "Output file or folder"
@@ -1069,6 +1165,9 @@ msgstr "Don't send automatic bug report when an attack module fails"
 
 msgid "Show program's version number and exit"
 msgstr "Show program's version number and exit"
+
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr "Number of concurrent tasks must be 1 or above!"
 
 msgid "[*] Do you feel lucky punk?"
 msgstr "[*] Do you feel lucky punk?"
@@ -1104,17 +1203,10 @@ msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr "[*] Wapiti found {0} URLs and forms during the scan"
 
 msgid ""
-"Attack process interrupted. Scan will be resumed next time unless you "
-"specify \"--flush-attacks\" or \"--flush-session\"."
-msgstr ""
-"Attack process interrupted. Scan will be resumed next time unless you "
-"specify \"--flush-attacks\" or \"--flush-session\"."
-
-msgid ""
-"[!] Can't store informations in persister. SQLite database must have been "
+"[!] Can't store information in persister. SQLite database must have been "
 "locked by another process"
 msgstr ""
-"[!] Can't store informations in persister. SQLite database must have been "
+"[!] Can't store information in persister. SQLite database must have been "
 "locked by another process"
 
 msgid "[!] You should unlock and launch Wapiti again."
@@ -1140,9 +1232,6 @@ msgstr "[!] Connection error with URL"
 
 msgid "[!] {} with url {}"
 msgstr "[!] {} with url {}"
-
-msgid "[!] SSL/TLS error occurred with URL"
-msgstr "[!] SSL/TLS error occurred with URL"
 
 #, python-brace-format
 msgid "Report for {0}\n"

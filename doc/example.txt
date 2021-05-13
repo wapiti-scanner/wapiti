@@ -123,7 +123,7 @@ Evil request:
     Referer: http://wackopicko/
 ---
 
-[*] Launching module blindsql
+[*] Launching module timesql
 ---
 Received a HTTP 500 error in http://wackopicko/admin/index.php
 Evil request:

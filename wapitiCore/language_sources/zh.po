@@ -27,13 +27,6 @@ msgstr "发现 {1} 的备份文件 {0} "
 msgid "Credentials found for URL {} : {} / {}"
 msgstr ""
 
-msgid "Blind SQL vulnerability"
-msgstr "SQL盲注漏洞"
-
-#, python-brace-format
-msgid "{0} via injection in the parameter {1}"
-msgstr "{0} 通过参数 {1} 注入"
-
 #, python-brace-format
 msgid "HttpOnly flag is not set in the cookie : {0}"
 msgstr ""
@@ -50,6 +43,10 @@ msgstr "CRLF注入"
 
 msgid "Error: The server did not understand this request"
 msgstr "Error: 服务器未能正确解析请求"
+
+#, python-brace-format
+msgid "{0} via injection in the parameter {1}"
+msgstr "{0} 通过参数 {1} 注入"
 
 msgid "CSP is not set"
 msgstr ""
@@ -69,6 +66,13 @@ msgid "CSRF token '{}' is not properly checked in backend"
 msgstr ""
 
 msgid "CSRF token '{}' might be easy to predict"
+msgstr ""
+
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr ""
+
+msgid "No Drupal Detected"
 msgstr ""
 
 msgid "Warning eval()"
@@ -144,24 +148,20 @@ msgstr ""
 msgid "Checking Strict-Transport-Security :"
 msgstr ""
 
+msgid "Error downloading nikto database."
+msgstr ""
+
 msgid "Problem with local nikto database."
 msgstr "本地nikto数据库问题。"
 
 msgid "Downloading from the web..."
 msgstr "下载中..."
 
-msgid "Error downloading nikto database."
-msgstr ""
-
 msgid "References:"
 msgstr "参考:"
 
 msgid "Stored XSS vulnerability"
 msgstr "存储型XSS漏洞"
-
-#, python-brace-format
-msgid "error: {0} while attacking {1}"
-msgstr "error: {0} while attacking {1}"
 
 #, python-brace-format
 msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
@@ -218,18 +218,26 @@ msgid ""
 "Full request can be seen at {5}"
 msgstr ""
 
-#, python-brace-format
-msgid "{0} {1} detected"
+msgid "Blind SQL vulnerability"
+msgstr "SQL盲注漏洞"
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid "Problem with local wapp database."
 msgstr ""
 
-msgid "Error downloading wapp database."
-msgstr ""
-
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "No WordPress Detected"
+msgstr ""
+
+msgid "Enumeration of WordPress Plugins :"
+msgstr ""
+
+msgid "Enumeration of WordPress Themes :"
 msgstr ""
 
 msgid "XSS vulnerability"
@@ -276,32 +284,6 @@ msgid ""
 msgstr ""
 
 msgid "He should also reconfigure its editor to deactivate automatic backups."
-msgstr ""
-
-msgid "Blind SQL Injection"
-msgstr "SQL盲注"
-
-msgid "Blind SQLI"
-msgstr ""
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-
-msgid ""
-"To protect against SQL injection, user input must not directly be embedded "
-"in SQL statements."
-msgstr ""
-
-msgid ""
-"Instead, user input must be escaped or filtered or parameterized statements "
-"must be used."
 msgstr ""
 
 msgid "Weak credentials"
@@ -379,6 +361,16 @@ msgid ""
 "validate them on backend."
 msgstr ""
 
+msgid "Potentially dangerous file"
+msgstr "潜在危险文件"
+
+msgid "A file with potential vulnerabilities has been found on the website."
+msgstr ""
+
+msgid ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+msgstr ""
+
 msgid "This attack consists in executing system commands on the server."
 msgstr ""
 
@@ -434,6 +426,22 @@ msgstr ""
 msgid "This is only for informational purposes."
 msgstr ""
 
+msgid "Fingerprint web application framework"
+msgstr ""
+
+msgid ""
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
+msgstr ""
+
+msgid "Fingerprint web server"
+msgstr ""
+
+msgid ""
+"The version of a web server can be identified due to the presence of its "
+"specific fingerprints."
+msgstr ""
+
 msgid "Htaccess Bypass"
 msgstr "Htaccess绕过"
 
@@ -449,14 +457,45 @@ msgstr ""
 msgid "Make sure every HTTP method is forbidden if the credentials are bad."
 msgstr ""
 
-msgid "Potentially dangerous file"
-msgstr "潜在危险文件"
-
-msgid "A file with potential vulnerabilities has been found on the website."
+msgid "HTTP Secure Headers"
 msgstr ""
 
 msgid ""
-"Make sure the script is up-to-date and restrict access to it if possible."
+"HTTP security headers tell the browser how to behave when handling the "
+"website's content."
+msgstr ""
+
+msgid "Use the recommendations for hardening your HTTP Security Headers."
+msgstr ""
+
+msgid "HttpOnly Flag cookie"
+msgstr ""
+
+msgid ""
+"HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
+msgstr ""
+
+msgid ""
+"Using the HttpOnly flag when generating a cookie helps mitigate the risk of "
+"client side script accessing the protected cookie (if the browser supports "
+"it)."
+msgstr ""
+
+msgid ""
+"While creation of the cookie, make sure to set the HttpOnly Flag to True."
+msgstr ""
+
+msgid "Internal Server Error"
+msgstr "内部服务器错误"
+
+msgid ""
+"An error occurred on the server's side, preventing it to process the request."
+msgstr ""
+
+msgid "It may be the sign of a vulnerability."
+msgstr ""
+
+msgid "More information about the error should be found in the server logs."
 msgstr ""
 
 msgid ""
@@ -475,6 +514,37 @@ msgid ""
 "going off of your site, and have them click a link to confirm."
 msgstr ""
 
+msgid "Resource consumption"
+msgstr "资源消耗"
+
+msgid "It took an abnormal time to the server to respond to a query."
+msgstr ""
+
+msgid ""
+"An attacker might leverage this kind of weakness to overload the server."
+msgstr ""
+
+msgid ""
+"The involved script is maybe using the server resources (CPU, memory, "
+"network, file access...) in a non-efficient way."
+msgstr ""
+
+msgid "Secure Flag cookie"
+msgstr ""
+
+msgid ""
+"The secure flag is an option that can be set by the application server when "
+"sending a new cookie to the user within an HTTP Response."
+msgstr ""
+
+msgid ""
+"The purpose of the secure flag is to prevent cookies from being observed by "
+"unauthorized parties due to the transmission of a the cookie in clear text."
+msgstr ""
+
+msgid "When generating the cookie, make sure to set the Secure Flag to True."
+msgstr ""
+
 msgid "SQLI"
 msgstr ""
 
@@ -486,6 +556,16 @@ msgstr ""
 msgid ""
 "An attacker may then be able to extract or modify information stored in the "
 "database or even escalate his privileges on the system."
+msgstr ""
+
+msgid ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
+msgstr ""
+
+msgid ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
 msgstr ""
 
 msgid "Server Side Request Forgery"
@@ -503,6 +583,22 @@ msgstr ""
 msgid ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
+msgstr ""
+
+msgid "Blind SQL Injection"
+msgstr "SQL盲注"
+
+msgid "Blind SQLI"
+msgstr ""
+
+msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
 msgstr ""
 
 msgid "Cross Site Scripting"
@@ -592,12 +688,6 @@ msgstr "相关参数：{0}"
 msgid "Evil request:"
 msgstr "恶意请求"
 
-msgid "Internal Server Error"
-msgstr "内部服务器错误"
-
-msgid "Resource consumption"
-msgstr "资源消耗"
-
 #, python-brace-format
 msgid "Received a HTTP 500 error in {0}"
 msgstr "在{0}处出现HTTP 500错误"
@@ -675,6 +765,9 @@ msgstr "请在下列表单中输入相应的值："
 msgid "url = {0}"
 msgstr "url = {0}"
 
+msgid "Waiting for running crawler tasks to finish, please wait."
+msgstr ""
+
 msgid "[*] Loading modules:"
 msgstr "[*] 加载模块："
 
@@ -693,9 +786,6 @@ msgstr ""
 msgid "Update done."
 msgstr ""
 
-msgid "Max scan time was reached, stopping."
-msgstr "扫描时间达到最大值，停止扫描。"
-
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] 正在存储扫描状态，请稍等..."
 
@@ -706,9 +796,8 @@ msgstr " Note"
 msgid "This scan has been saved in the file {0}"
 msgstr "本次扫描已存储在 {0}"
 
-msgid ""
-"The scan will be resumed next time unless you pass the --skip-crawl option."
-msgstr "下次启动将恢复本次扫描，如果您不想恢复，可使用\"--skip-crawl\"选项。"
+msgid "Max scan time was reached, stopping."
+msgstr "扫描时间达到最大值，停止扫描。"
 
 #, python-brace-format
 msgid "[!] Missing dependencies for module {0}:"
@@ -721,10 +810,6 @@ msgstr "[*] 加载模块 {0}"
 #, python-brace-format
 msgid "[*] {0} pages were previously attacked and will be skipped"
 msgstr "[*] {0} 页面之前攻击过，跳过"
-
-#, python-brace-format
-msgid "Max attack time was reached for module {0}, stopping."
-msgstr ""
 
 msgid "Attack process was interrupted. Do you want to:"
 msgstr "攻击进程异常中止，您想："
@@ -742,6 +827,10 @@ msgid "\tc) (C)ontinue the current attack"
 msgstr ""
 
 msgid "Invalid choice. Valid choices are r, n, q and c."
+msgstr ""
+
+#, python-brace-format
+msgid "Max attack time was reached for module {0}, stopping."
 msgstr ""
 
 msgid "Sending crash report {} ... {}"
@@ -815,8 +904,15 @@ msgstr "设置攻击等级"
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "设置HTTP(S)代理，支持HTTP(S),SOCKS"
 
-msgid "Set a JSON cookie file to use"
-msgstr "设置cookie文件，要求json格式"
+msgid "Set a JSON cookie file to use."
+msgstr ""
+
+msgid ""
+"You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+msgstr ""
+
+msgid "Ignore Set-Cookie header from HTTP responses"
+msgstr ""
 
 msgid ""
 "Don't resume the scanning process, attack URLs scanned during a previous "
@@ -882,6 +978,11 @@ msgstr ""
 "减少扫描和攻击的URL的简单办法\n"
 "可选值：paranoid, sneaky, polite, normal, aggressive, insane"
 
+msgid ""
+"Number of concurrent tasks to use for the exploration (crawling) of the "
+"target."
+msgstr ""
+
 msgid "Set timeout for requests"
 msgstr "设置请求超时时间"
 
@@ -894,8 +995,11 @@ msgstr "使用颜色美化输出"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "设置详细度 (0: quiet, 1: normal, 2: verbose)"
 
-msgid "Set output format. Supported: json, html (default), txt, xml"
-msgstr "设置输出格式。支持：json, html (default), txt, xml"
+msgid "Set output format. Supported:"
+msgstr ""
+
+msgid "Default is html."
+msgstr ""
 
 msgid "Output file or folder"
 msgstr "输出文件或目录"
@@ -914,6 +1018,9 @@ msgstr "当攻击模块失败时不发送Bug报告"
 
 msgid "Show program's version number and exit"
 msgstr "打印程序版本号"
+
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr ""
 
 msgid "[*] Do you feel lucky punk?"
 msgstr ""
@@ -947,16 +1054,9 @@ msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr "[*] Wapiti 在扫描中共发现 {0} 条URL和表单"
 
 msgid ""
-"Attack process interrupted. Scan will be resumed next time unless you "
-"specify \"--flush-attacks\" or \"--flush-session\"."
-msgstr ""
-"攻击进行异常中止，下次启动将恢复扫描，如果你不想恢复，请使用\"--flush-attacks"
-"\" or \"--flush-session\"参数。"
-
-msgid ""
-"[!] Can't store informations in persister. SQLite database must have been "
+"[!] Can't store information in persister. SQLite database must have been "
 "locked by another process"
-msgstr "[!] 无法存储信息，SQLite数据库很可能被另一进程锁定"
+msgstr ""
 
 msgid "[!] You should unlock and launch Wapiti again."
 msgstr "[!] 您应该解锁并重启Wapiti。"
@@ -981,9 +1081,6 @@ msgstr "[!] URL连接错误"
 
 msgid "[!] {} with url {}"
 msgstr "[!] {} with url {}"
-
-msgid "[!] SSL/TLS error occurred with URL"
-msgstr "[!] SSL/TLS URL出错"
 
 #, python-brace-format
 msgid "Report for {0}\n"
@@ -1016,3 +1113,34 @@ msgstr "问题汇总："
 
 msgid "Summary of additionals :"
 msgstr ""
+
+#, python-brace-format
+#~ msgid "error: {0} while attacking {1}"
+#~ msgstr "error: {0} while attacking {1}"
+
+#~ msgid ""
+#~ "The scan will be resumed next time unless you pass the --skip-crawl "
+#~ "option."
+#~ msgstr ""
+#~ "下次启动将恢复本次扫描，如果您不想恢复，可使用\"--skip-crawl\"选项。"
+
+#~ msgid "Set a JSON cookie file to use"
+#~ msgstr "设置cookie文件，要求json格式"
+
+#~ msgid "Set output format. Supported: json, html (default), txt, xml"
+#~ msgstr "设置输出格式。支持：json, html (default), txt, xml"
+
+#~ msgid ""
+#~ "Attack process interrupted. Scan will be resumed next time unless you "
+#~ "specify \"--flush-attacks\" or \"--flush-session\"."
+#~ msgstr ""
+#~ "攻击进行异常中止，下次启动将恢复扫描，如果你不想恢复，请使用\"--flush-"
+#~ "attacks\" or \"--flush-session\"参数。"
+
+#~ msgid ""
+#~ "[!] Can't store informations in persister. SQLite database must have been "
+#~ "locked by another process"
+#~ msgstr "[!] 无法存储信息，SQLite数据库很可能被另一进程锁定"
+
+#~ msgid "[!] SSL/TLS error occurred with URL"
+#~ msgstr "[!] SSL/TLS URL出错"

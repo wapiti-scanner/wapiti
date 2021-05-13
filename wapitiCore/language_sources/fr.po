@@ -27,13 +27,6 @@ msgstr "Copie de sauvegarde {0} trouvée pour {1}"
 msgid "Credentials found for URL {} : {} / {}"
 msgstr "Identifiants trouvés pour l'URL {} : {} / {}"
 
-msgid "Blind SQL vulnerability"
-msgstr "Vulnérabilité d'injection SQL en aveugle"
-
-#, python-brace-format
-msgid "{0} via injection in the parameter {1}"
-msgstr "{0} via une injection dans le paramètre {1}"
-
 #, python-brace-format
 msgid "HttpOnly flag is not set in the cookie : {0}"
 msgstr "L'indicateur HttpOnly n'est pas défini dans le cookie : {0}"
@@ -51,17 +44,12 @@ msgstr "Injection CRLF"
 msgid "Error: The server did not understand this request"
 msgstr "Erreur : Le serveur n'a pas compris la requête"
 
+#, python-brace-format
+msgid "{0} via injection in the parameter {1}"
+msgstr "{0} via une injection dans le paramètre {1}"
+
 msgid "CSP is not set"
 msgstr "CSP n'est pas défini"
-
-msgid "No WordPress detected"
-msgstr "Pas de WordPress détecté"
-
-msgid "Enumeration of WordPress Plugins :"
-msgstr "Enumération des extensions WordPress"
-
-msgid "Enumeration of WordPress Themes :"
-msgstr "Enumération des thèmes WordPress"
 
 #, python-brace-format
 msgid "CSP attribute \"{0}\" is missing"
@@ -79,6 +67,13 @@ msgstr "Le jeton CSRF '{}' n'est pas correctement vérifié par l'application"
 
 msgid "CSRF token '{}' might be easy to predict"
 msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
+
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr "{0} {1} détecté"
+
+msgid "No Drupal Detected"
+msgstr "Drupal non détecté"
 
 msgid "Warning eval()"
 msgstr "Avertissement eval()"
@@ -153,24 +148,20 @@ msgstr "Vérification de X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Vérification de Strict-Transport-Security :"
 
+msgid "Error downloading nikto database."
+msgstr "Echec du téléchargement de la base de données Nikto."
+
 msgid "Problem with local nikto database."
 msgstr "Un problème est survenu avec la base de données nikto locale"
 
 msgid "Downloading from the web..."
 msgstr "Téléchargement depuis le web..."
 
-msgid "Error downloading nikto database."
-msgstr "Echec du téléchargement de la base de données Nikto"
-
 msgid "References:"
 msgstr "Références"
 
 msgid "Stored XSS vulnerability"
 msgstr "Vulnérabilité XSS permanent"
-
-#, python-brace-format
-msgid "error: {0} while attacking {1}"
-msgstr "erreur : {0} lors de l'attaque de {1}"
 
 #, python-brace-format
 msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
@@ -235,21 +226,29 @@ msgstr ""
 "{4}.\n"
 "Les données reccueillies peut être vues à {5}"
 
-#, python-brace-format
-msgid "{0} {1} detected"
-msgstr "{0} {1} détecté"
+msgid "Blind SQL vulnerability"
+msgstr "Vulnérabilité d'injection SQL en aveugle"
+
+msgid "Error downloading wapp database."
+msgstr "Erreur de téléchargement de la base de données Wappalizer."
 
 msgid "Problem with local wapp database."
 msgstr "Un problème est survenu avec la base de données wapp locale"
-
-msgid "Error downloading wapp database."
-msgstr "Erreur de téléchargement de la base de données Wappalizer"
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
 msgstr ""
 "Essayez avec l'option --store-session, ou mettez à jour apps.json avec "
 "l'option --update."
+
+msgid "No WordPress Detected"
+msgstr "WordPress non détecté"
+
+msgid "Enumeration of WordPress Plugins :"
+msgstr "Enumération des extensions WordPress :"
+
+msgid "Enumeration of WordPress Themes :"
+msgstr "Enumération des thèmes WordPress :"
 
 msgid "XSS vulnerability"
 msgstr "Vulnérabilité XSS"
@@ -310,42 +309,6 @@ msgid "He should also reconfigure its editor to deactivate automatic backups."
 msgstr ""
 "Il devrait aussi reconfigurer l'éditeur qu'il utilise pour désactiver les "
 "sauvegardes automatiques."
-
-msgid "Blind SQL Injection"
-msgstr "Injection SQL en aveugle"
-
-msgid "Blind SQLI"
-msgstr "Injection SQL en aveugle"
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-"Tout comme les Vulnérabilités d'injection SQL classiques, les injections SQL "
-"en aveugle permettent à un attaquant d'altérer les requêtes normalement "
-"exécutées sur la base de données."
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-"Ce type de vulnérabilité est plus difficile à détecter en raison de "
-"l'absence de messages d'erreur renvoyés par l'application web."
-
-msgid ""
-"To protect against SQL injection, user input must not directly be embedded "
-"in SQL statements."
-msgstr ""
-"Pour se protéger des injections SQL, les données fournies par les "
-"utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes "
-"SQL."
-
-msgid ""
-"Instead, user input must be escaped or filtered or parameterized statements "
-"must be used."
-msgstr ""
-"A la place elles doivent faire l'objet de vérifications (filtres, "
-"échappements) approfondies."
 
 msgid "Weak credentials"
 msgstr "Identifiants faibles"
@@ -424,16 +387,18 @@ msgstr ""
 "les ressources que le navigateur est autorisé à charger pour cette page."
 
 msgid "Cross Site Request Forgery"
-msgstr ""
+msgstr "Cross Site Request Forgery"
 
 msgid "CSRF"
-msgstr ""
+msgstr "CSRF"
 
 msgid ""
 "Cross-Site Request Forgery (CSRF) is an attack that forces an end user to "
 "execute unwanted actions on a web application in which they're currently "
 "authenticated."
 msgstr ""
+"Une attaque Cross-Site Request Forgery (CSRF) vise à faire exécuter dans le "
+"navigateur de la victime différentes actions via l'envoi de requêtes HTTP."
 
 msgid "Check if your framework has built-in CSRF protection and use it."
 msgstr ""
@@ -448,6 +413,25 @@ msgstr ""
 "Si le framework ne fournit pas de protection anti-CSRF, ajouter un jeton "
 "anti-CSRF à toutes les requêtes qui modifient l'état d'un élément de "
 "l'application, et vérifier la validité des jetons côté serveur."
+
+msgid "Potentially dangerous file"
+msgstr "Fichier potentiellement dangereux"
+
+msgid "A file with potential vulnerabilities has been found on the website."
+msgstr ""
+"Certains scripts sont connus pour être potentiellement vulnérables et "
+"dangereux. Des listes de tels fichiers existent et sont fréquemment "
+"utilisées par des attaquants pour scanner des sites Internet à la recherche "
+"de ces vulnérabilitées."
+
+msgid ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+msgstr ""
+"L'administrateur devrait vérifier régulièrement si des mises à jour sont "
+"disponibles pour les scripts et logiciels utilisés sur le serveur. Il est "
+"aussi conseillé de se tenir informé sur les nouvelles vulnérabilités "
+"trouvées en s'abonnant à des listes de sécurité ou en suivant des flux RSS "
+"spécialisés."
 
 msgid "This attack consists in executing system commands on the server."
 msgstr ""
@@ -520,12 +504,6 @@ msgstr ""
 msgid "Fingerprint web technology"
 msgstr "Technologie web identifiée"
 
-msgid "Fingerprint web server"
-msgstr "Serveur web identifié"
-
-msgid "Fingerprint web application framework"
-msgstr "Framework d'application web identifié"
-
 msgid ""
 "The use of a web technology can be deducted due to the presence of its "
 "specific fingerprints."
@@ -533,12 +511,11 @@ msgstr ""
 "L'utilisation d'une technologie web peut être déduite à cause des traces qui "
 "lui sont spécifiques."
 
-msgid ""
-"The version of a web server can be identified due to the presence of its "
-"specific fingerprints."
-msgstr ""
-"La version d'un serveur web peut être identifiée à cause des traces qui "
-"lui sont spécifiques."
+msgid "This is only for informational purposes."
+msgstr "A titre d'information seulement."
+
+msgid "Fingerprint web application framework"
+msgstr "Framework d'application web identifié"
 
 msgid ""
 "The version of a web application framework can be identified due to the "
@@ -547,8 +524,15 @@ msgstr ""
 "La version d'un framewor d'application web peut être identifiée à cause des "
 "traces qui lui sont spécifiques."
 
-msgid "This is only for informational purposes."
-msgstr "A titre d'information seulement."
+msgid "Fingerprint web server"
+msgstr "Serveur web identifié"
+
+msgid ""
+"The version of a web server can be identified due to the presence of its "
+"specific fingerprints."
+msgstr ""
+"La version d'un serveur web peut être identifiée à cause des traces qui lui "
+"sont spécifiques."
 
 msgid "Htaccess Bypass"
 msgstr "Contournement de htaccess"
@@ -571,24 +555,53 @@ msgstr ""
 "La configuration du htaccess doit être minutieusement vérifiée pour ne pas "
 "laisser une porte d'entrée à un éventuel attaquant."
 
-msgid "Potentially dangerous file"
-msgstr "Fichier potentiellement dangereux"
-
-msgid "A file with potential vulnerabilities has been found on the website."
-msgstr ""
-"Certains scripts sont connus pour être potentiellement vulnérables et "
-"dangereux. Des listes de tels fichiers existent et sont fréquemment "
-"utilisées par des attaquants pour scanner des sites Internet à la recherche "
-"de ces vulnérabilitées."
+msgid "HTTP Secure Headers"
+msgstr "Entête HTTP Secure"
 
 msgid ""
-"Make sure the script is up-to-date and restrict access to it if possible."
+"HTTP security headers tell the browser how to behave when handling the "
+"website's content."
 msgstr ""
-"L'administrateur devrait vérifier régulièrement si des mises à jour sont "
-"disponibles pour les scripts et logiciels utilisés sur le serveur. Il est "
-"aussi conseillé de se tenir informé sur les nouvelles vulnérabilités "
-"trouvées en s'abonnant à des listes de sécurité ou en suivant des flux RSS "
-"spécialisés."
+"Les entêtes HTTP de sécurité indiquent au navigateur les restrictions en place "
+"pour traiter le contenu du site."
+
+msgid "Use the recommendations for hardening your HTTP Security Headers."
+msgstr "Utilisez les recommandations de renforcement des entêtes HTTP de sécurité."
+
+msgid "HttpOnly Flag cookie"
+msgstr "Drapeau de cookie HttpOnly"
+
+msgid ""
+"HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
+msgstr ""
+"HttpOnly est un drapeau (flag) optionel passé dans les entête Set-Cookie de réponses HTTP."
+
+msgid ""
+"Using the HttpOnly flag when generating a cookie helps mitigate the risk of "
+"client side script accessing the protected cookie (if the browser supports "
+"it)."
+msgstr ""
+"L'utilisation du drapeau HttpOnly sur les cookies permet de bloquer l'accès "
+"au contenu des cookies par les scripts (si le navigateur le supporte)."
+
+msgid ""
+"While creation of the cookie, make sure to set the HttpOnly Flag to True."
+msgstr ""
+"Lors de l'émission d'un cookie, assurez-vous qu'il dispose du drapeau HttpOnly."
+
+msgid "Internal Server Error"
+msgstr "Erreur interne au serveur"
+
+msgid ""
+"An error occurred on the server's side, preventing it to process the request."
+msgstr ""
+"Le serveur a rencontré une erreur lors du traitement de la requête."
+
+msgid "It may be the sign of a vulnerability."
+msgstr "Cela peut être de signe d'une potentielle vulnérabilité."
+
+msgid "More information about the error should be found in the server logs."
+msgstr "Plus d'information sur cette erreur devrait se trouver dans les logs du serveur."
 
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "
@@ -612,8 +625,46 @@ msgstr ""
 "La page chargée de la redirection devrait avertir l'utilisateur de la "
 "redirection et demander sa confirmation via un bouton."
 
-msgid "SQLI"
+msgid "Resource consumption"
+msgstr "Consommation anormale de ressource"
+
+msgid "It took an abnormal time to the server to respond to a query."
+msgstr "Le server a mis un temps anormalement long à répondre à la requête."
+
+msgid ""
+"An attacker might leverage this kind of weakness to overload the server."
 msgstr ""
+"Un attaquant pourrait exploiter ce type de faiblesse pour surcharger le serveur."
+
+msgid ""
+"The involved script is maybe using the server resources (CPU, memory, "
+"network, file access...) in a non-efficient way."
+msgstr ""
+"Le script faillible utilise peut être les resources du serveur (CPU, mémoire, "
+"réseau, accès aux fichiers...) de façon peu efficiente."
+
+msgid "Secure Flag cookie"
+msgstr "Drapeau de cookie Secure"
+
+msgid ""
+"The secure flag is an option that can be set by the application server when "
+"sending a new cookie to the user within an HTTP Response."
+msgstr ""
+"Le drapeau de cookie Secure est un indicateur optionel qui peut être placé par l'application "
+"web lors de l'émission du cookie dans une réponse HTTP."
+
+msgid ""
+"The purpose of the secure flag is to prevent cookies from being observed by "
+"unauthorized parties due to the transmission of a the cookie in clear text."
+msgstr ""
+"L'objectif du drapeau Secure est d'empècher des tierses parties d'intercepter le cookie "
+"si ce dernier transite en clair sur le réseau."
+
+msgid "When generating the cookie, make sure to set the Secure Flag to True."
+msgstr "Lors de l'émission d'un cookie, assurez vous qu'il dispose du drapeau Secure."
+
+msgid "SQLI"
+msgstr "SQLI"
 
 msgid ""
 "SQL injection vulnerabilities allow an attacker to alter the queries "
@@ -630,11 +681,26 @@ msgstr ""
 "en base. Cela peut aussi potentiellement permettre à l'attaquant d'augmenter "
 "ses privilèges sur le système."
 
-msgid "Server Side Request Forgery"
+msgid ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
 msgstr ""
+"Pour se protéger des injections SQL, les données fournies par les "
+"utilisateurs ne doivent pas être utilisées telles-quelles dans les requêtes "
+"SQL."
+
+msgid ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
+msgstr ""
+"A la place elles doivent faire l'objet de vérifications (filtres, "
+"échappements) approfondies."
+
+msgid "Server Side Request Forgery"
+msgstr "Server Side Request Forgery"
 
 msgid "SSRF"
-msgstr ""
+msgstr "SSRF"
 
 msgid ""
 "The target application may have functionality for importing data from a URL, "
@@ -652,11 +718,32 @@ msgstr ""
 "particulier le protocole et le nom d'hôte. L'utilisation d'une whitelist est "
 "conseillée."
 
+msgid "Blind SQL Injection"
+msgstr "Injection SQL en aveugle"
+
+msgid "Blind SQLI"
+msgstr "Injection SQL en aveugle"
+
+msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+"Tout comme les Vulnérabilités d'injection SQL classiques, les injections SQL "
+"en aveugle permettent à un attaquant d'altérer les requêtes normalement "
+"exécutées sur la base de données."
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+msgstr ""
+"Ce type de vulnérabilité est plus difficile à détecter en raison de "
+"l'absence de messages d'erreur renvoyés par l'application web."
+
 msgid "Cross Site Scripting"
 msgstr "Cross Site Scripting"
 
 msgid "XSS"
-msgstr ""
+msgstr "XSS"
 
 msgid ""
 "Cross-site scripting (XSS) is a type of computer security vulnerability "
@@ -698,10 +785,10 @@ msgstr ""
 "remplacés par leur code d'entité HTML."
 
 msgid "XML External Entity"
-msgstr ""
+msgstr "XML External Entity"
 
 msgid "XXE"
-msgstr ""
+msgstr "XXE"
 
 msgid ""
 "An XML External Entity attack is a type of attack against an application "
@@ -759,12 +846,6 @@ msgstr "Paramètre en cause : {0}"
 
 msgid "Evil request:"
 msgstr "Evil request:"
-
-msgid "Internal Server Error"
-msgstr "Erreur interne au serveur"
-
-msgid "Resource consumption"
-msgstr "Consommation anormale de ressource"
 
 #, python-brace-format
 msgid "Received a HTTP 500 error in {0}"
@@ -857,6 +938,9 @@ msgstr "Veuillez renseigner les champs pour le formulaire suivant : "
 msgid "url = {0}"
 msgstr "url = {0}"
 
+msgid "Waiting for running crawler tasks to finish, please wait."
+msgstr "Veuillez patienter pendant que les taches en cours du crawler se terminent."
+
 msgid "[*] Loading modules:"
 msgstr "[*] Chargement des modules :"
 
@@ -875,9 +959,6 @@ msgstr "Mise à jour du module {0}"
 msgid "Update done."
 msgstr "Mise à jour effectuée."
 
-msgid "Max scan time was reached, stopping."
-msgstr "Le temps maximum de scan a été atteint, arrêt en cours."
-
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Enregistrement de l'état du scan, veuillez patienter..."
 
@@ -888,11 +969,8 @@ msgstr " Note"
 msgid "This scan has been saved in the file {0}"
 msgstr "Ce scan a été sauvé dans le fichier {0}"
 
-msgid ""
-"The scan will be resumed next time unless you pass the --skip-crawl option."
-msgstr ""
-"Ce scan sera repris la prochaine fois à moins que vous ne passiez l'option --"
-"skip-crawl."
+msgid "Max scan time was reached, stopping."
+msgstr "Le temps maximum de scan a été atteint, arrêt en cours."
 
 #, python-brace-format
 msgid "[!] Missing dependencies for module {0}:"
@@ -905,10 +983,6 @@ msgstr "[*] Lancement du module {0}"
 #, python-brace-format
 msgid "[*] {0} pages were previously attacked and will be skipped"
 msgstr "[*] {0} pages ont été précédemment attaquées et seront ignorées"
-
-#, python-brace-format
-msgid "Max attack time was reached for module {0}, stopping."
-msgstr "Le temps maximum d'attaque a été atteint pour le module {0}, arrêt."
 
 msgid "Attack process was interrupted. Do you want to:"
 msgstr "Le processus d'attaque a été interrompu. Voulez-vous:"
@@ -927,6 +1001,10 @@ msgstr "\tc) (C)ontinuer l'attaque en cours"
 
 msgid "Invalid choice. Valid choices are r, n, q and c."
 msgstr "Choix invalide. Les choix valides sont r, n, q et c."
+
+#, python-brace-format
+msgid "Max attack time was reached for module {0}, stopping."
+msgstr "Le temps maximum d'attaque a été atteint pour le module {0}, arrêt."
 
 msgid "Sending crash report {} ... {}"
 msgstr "Envoi du rapport d'erreur {} ... {}"
@@ -1007,8 +1085,16 @@ msgstr ""
 "Définir le proxy HTTP(S) à utiliser. Les proxies http(s) et socks sont "
 "supportés."
 
-msgid "Set a JSON cookie file to use"
-msgstr "Définir un fichier cookie JSON à utiliser"
+msgid "Set a JSON cookie file to use."
+msgstr "Définir le fichier JSON de cookie à utiliser."
+
+msgid ""
+"You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+msgstr ""
+"Vous pouvez aussi passer 'firefox' ou 'chrome' pour charger les cookies depuis le navigateur correspondant."
+
+msgid "Ignore Set-Cookie header from HTTP responses"
+msgstr "Ignorer les entêtes Set-Cookie présents dans les réponses HTTP"
 
 msgid ""
 "Don't resume the scanning process, attack URLs scanned during a previous "
@@ -1093,6 +1179,12 @@ msgstr ""
 "Les valeurs possibles sont: paranoid, sneaky, polite, normal, aggresive, "
 "insane"
 
+msgid ""
+"Number of concurrent tasks to use for the exploration (crawling) of the "
+"target."
+msgstr ""
+"Nombre de taches concurrentes à utiliser pour l'exploration (crawling) du site web."
+
 msgid "Set timeout for requests"
 msgstr "Définir le temps d'attente pour les requêtes"
 
@@ -1105,10 +1197,11 @@ msgstr "Colorier l'affichage"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Définir le niveau de verbosité (0: silencieux, 1: normal, 2: bavard)"
 
-msgid "Set output format. Supported: json, html (default), txt, xml"
-msgstr ""
-"Définir le format du rapport. Formats supportés: json, html (par défaut), "
-"txt, xml"
+msgid "Set output format. Supported:"
+msgstr "Définir le format de sortie. Formats supportés:"
+
+msgid "Default is html."
+msgstr "Html est le format par défaut."
 
 msgid "Output file or folder"
 msgstr "Fichier ou dossier de destination"
@@ -1127,6 +1220,9 @@ msgstr "Ne pas envoyer de rapport de bugs quand un module d'attaque échoue"
 
 msgid "Show program's version number and exit"
 msgstr "Afficher la version du programme et quitter"
+
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr "Le nombre de taches concurrentes doit être supérieur ou égal à 1!"
 
 msgid "[*] Do you feel lucky punk?"
 msgstr "[*] Est-ce que tu tentes ta chance punk ?"
@@ -1164,18 +1260,11 @@ msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr "[*] Wapiti a trouvé {0} URLs et formulaires lors du scan"
 
 msgid ""
-"Attack process interrupted. Scan will be resumed next time unless you "
-"specify \"--flush-attacks\" or \"--flush-session\"."
-msgstr ""
-"Processus d'attaque interrompu. Le scan sera repris la prochaine fois à "
-"moins que vous ne passiez \"--flush-attacks\" ou \"--flush-session\"."
-
-msgid ""
-"[!] Can't store informations in persister. SQLite database must have been "
+"[!] Can't store information in persister. SQLite database must have been "
 "locked by another process"
 msgstr ""
-"[!] Impossible de stocker des informations dans le persisteur. La base de "
-"données SQLite est certainement ouverte par un autre processus."
+"[!] Erreur lors du stockage des informations. La base de données SQLite "
+"doit être vérouillée par un autre processus"
 
 msgid "[!] You should unlock and launch Wapiti again."
 msgstr "[!] Veuillez libérer l'accès et relancer Wapiti."
@@ -1200,9 +1289,6 @@ msgstr "[!] Impossible de se connecter à l'URL"
 
 msgid "[!] {} with url {}"
 msgstr "[!] {} avec l'URL {}"
-
-msgid "[!] SSL/TLS error occurred with URL"
-msgstr "[!] Une erreur SSL/TLS s'est produite avec l'URL"
 
 #, python-brace-format
 msgid "Report for {0}\n"
@@ -1235,4 +1321,3 @@ msgstr "Résumé des anomalies :"
 
 msgid "Summary of additionals :"
 msgstr "Résumé des informations complémentaires :"
-

@@ -27,13 +27,6 @@ msgstr "Sicherungsdatei {0} gefunden für {1}"
 msgid "Credentials found for URL {} : {} / {}"
 msgstr ""
 
-msgid "Blind SQL vulnerability"
-msgstr "Blinde SQL-Injektion"
-
-#, python-brace-format
-msgid "{0} via injection in the parameter {1}"
-msgstr "{0} durch Injektion in den Parameter {1}"
-
 #, python-brace-format
 msgid "HttpOnly flag is not set in the cookie : {0}"
 msgstr ""
@@ -50,6 +43,10 @@ msgstr "CRLF-Injektion"
 
 msgid "Error: The server did not understand this request"
 msgstr "Fehler: Der Server hat die Anfrage nicht verstanden"
+
+#, python-brace-format
+msgid "{0} via injection in the parameter {1}"
+msgstr "{0} durch Injektion in den Parameter {1}"
 
 msgid "CSP is not set"
 msgstr ""
@@ -69,6 +66,13 @@ msgid "CSRF token '{}' is not properly checked in backend"
 msgstr ""
 
 msgid "CSRF token '{}' might be easy to predict"
+msgstr ""
+
+#, python-brace-format
+msgid "{0} {1} detected"
+msgstr ""
+
+msgid "No Drupal Detected"
 msgstr ""
 
 msgid "Warning eval()"
@@ -144,24 +148,20 @@ msgstr ""
 msgid "Checking Strict-Transport-Security :"
 msgstr ""
 
+msgid "Error downloading nikto database."
+msgstr ""
+
 msgid "Problem with local nikto database."
 msgstr "Problem mit der lokalen nikto-Datenbank."
 
 msgid "Downloading from the web..."
 msgstr "Lade aus dem Web herunter..."
 
-msgid "Error downloading nikto database."
-msgstr ""
-
 msgid "References:"
 msgstr "Referenzen:"
 
 msgid "Stored XSS vulnerability"
 msgstr "Persistente XSS-Schwachstelle"
-
-#, python-brace-format
-msgid "error: {0} while attacking {1}"
-msgstr "Fehler: {0} während des Angriffs auf {1}"
 
 #, python-brace-format
 msgid "Permanent XSS vulnerability found via injection in the parameter {0}"
@@ -218,18 +218,26 @@ msgid ""
 "Full request can be seen at {5}"
 msgstr ""
 
-#, python-brace-format
-msgid "{0} {1} detected"
+msgid "Blind SQL vulnerability"
+msgstr "Blinde SQL-Injektion"
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid "Problem with local wapp database."
 msgstr ""
 
-msgid "Error downloading wapp database."
-msgstr ""
-
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "No WordPress Detected"
+msgstr ""
+
+msgid "Enumeration of WordPress Plugins :"
+msgstr ""
+
+msgid "Enumeration of WordPress Themes :"
 msgstr ""
 
 msgid "XSS vulnerability"
@@ -276,32 +284,6 @@ msgid ""
 msgstr ""
 
 msgid "He should also reconfigure its editor to deactivate automatic backups."
-msgstr ""
-
-msgid "Blind SQL Injection"
-msgstr "Blinde SQL Injektion"
-
-msgid "Blind SQLI"
-msgstr ""
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-
-msgid ""
-"To protect against SQL injection, user input must not directly be embedded "
-"in SQL statements."
-msgstr ""
-
-msgid ""
-"Instead, user input must be escaped or filtered or parameterized statements "
-"must be used."
 msgstr ""
 
 msgid "Weak credentials"
@@ -379,6 +361,16 @@ msgid ""
 "validate them on backend."
 msgstr ""
 
+msgid "Potentially dangerous file"
+msgstr "Möglicherweise gefährliche Datei"
+
+msgid "A file with potential vulnerabilities has been found on the website."
+msgstr ""
+
+msgid ""
+"Make sure the script is up-to-date and restrict access to it if possible."
+msgstr ""
+
 msgid "This attack consists in executing system commands on the server."
 msgstr ""
 
@@ -434,6 +426,22 @@ msgstr ""
 msgid "This is only for informational purposes."
 msgstr ""
 
+msgid "Fingerprint web application framework"
+msgstr ""
+
+msgid ""
+"The version of a web application framework can be identified due to the "
+"presence of its specific fingerprints."
+msgstr ""
+
+msgid "Fingerprint web server"
+msgstr ""
+
+msgid ""
+"The version of a web server can be identified due to the presence of its "
+"specific fingerprints."
+msgstr ""
+
 msgid "Htaccess Bypass"
 msgstr "Htaccess Überwindung"
 
@@ -449,14 +457,45 @@ msgstr ""
 msgid "Make sure every HTTP method is forbidden if the credentials are bad."
 msgstr ""
 
-msgid "Potentially dangerous file"
-msgstr "Möglicherweise gefährliche Datei"
-
-msgid "A file with potential vulnerabilities has been found on the website."
+msgid "HTTP Secure Headers"
 msgstr ""
 
 msgid ""
-"Make sure the script is up-to-date and restrict access to it if possible."
+"HTTP security headers tell the browser how to behave when handling the "
+"website's content."
+msgstr ""
+
+msgid "Use the recommendations for hardening your HTTP Security Headers."
+msgstr ""
+
+msgid "HttpOnly Flag cookie"
+msgstr ""
+
+msgid ""
+"HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
+msgstr ""
+
+msgid ""
+"Using the HttpOnly flag when generating a cookie helps mitigate the risk of "
+"client side script accessing the protected cookie (if the browser supports "
+"it)."
+msgstr ""
+
+msgid ""
+"While creation of the cookie, make sure to set the HttpOnly Flag to True."
+msgstr ""
+
+msgid "Internal Server Error"
+msgstr "Interner Server Fehler"
+
+msgid ""
+"An error occurred on the server's side, preventing it to process the request."
+msgstr ""
+
+msgid "It may be the sign of a vulnerability."
+msgstr ""
+
+msgid "More information about the error should be found in the server logs."
 msgstr ""
 
 msgid ""
@@ -475,6 +514,37 @@ msgid ""
 "going off of your site, and have them click a link to confirm."
 msgstr ""
 
+msgid "Resource consumption"
+msgstr "Ressourcenverbrauch"
+
+msgid "It took an abnormal time to the server to respond to a query."
+msgstr ""
+
+msgid ""
+"An attacker might leverage this kind of weakness to overload the server."
+msgstr ""
+
+msgid ""
+"The involved script is maybe using the server resources (CPU, memory, "
+"network, file access...) in a non-efficient way."
+msgstr ""
+
+msgid "Secure Flag cookie"
+msgstr ""
+
+msgid ""
+"The secure flag is an option that can be set by the application server when "
+"sending a new cookie to the user within an HTTP Response."
+msgstr ""
+
+msgid ""
+"The purpose of the secure flag is to prevent cookies from being observed by "
+"unauthorized parties due to the transmission of a the cookie in clear text."
+msgstr ""
+
+msgid "When generating the cookie, make sure to set the Secure Flag to True."
+msgstr ""
+
 msgid "SQLI"
 msgstr ""
 
@@ -486,6 +556,16 @@ msgstr ""
 msgid ""
 "An attacker may then be able to extract or modify information stored in the "
 "database or even escalate his privileges on the system."
+msgstr ""
+
+msgid ""
+"To protect against SQL injection, user input must not directly be embedded "
+"in SQL statements."
+msgstr ""
+
+msgid ""
+"Instead, user input must be escaped or filtered or parameterized statements "
+"must be used."
 msgstr ""
 
 msgid "Server Side Request Forgery"
@@ -503,6 +583,22 @@ msgstr ""
 msgid ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
+msgstr ""
+
+msgid "Blind SQL Injection"
+msgstr "Blinde SQL Injektion"
+
+msgid "Blind SQLI"
+msgstr ""
+
+msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
 msgstr ""
 
 msgid "Cross Site Scripting"
@@ -591,12 +687,6 @@ msgstr "Betreffender Parameter: {0}"
 
 msgid "Evil request:"
 msgstr "Böse Anfrage:"
-
-msgid "Internal Server Error"
-msgstr "Interner Server Fehler"
-
-msgid "Resource consumption"
-msgstr "Ressourcenverbrauch"
 
 #, python-brace-format
 msgid "Received a HTTP 500 error in {0}"
@@ -687,6 +777,9 @@ msgstr "Bitte geben Sie Werte für das folgende Formular ein: "
 msgid "url = {0}"
 msgstr "URL = {0}"
 
+msgid "Waiting for running crawler tasks to finish, please wait."
+msgstr ""
+
 msgid "[*] Loading modules:"
 msgstr "[*] Lade Module:"
 
@@ -705,9 +798,6 @@ msgstr ""
 msgid "Update done."
 msgstr ""
 
-msgid "Max scan time was reached, stopping."
-msgstr ""
-
 msgid "[*] Saving scan state, please wait..."
 msgstr ""
 
@@ -718,8 +808,7 @@ msgstr ""
 msgid "This scan has been saved in the file {0}"
 msgstr ""
 
-msgid ""
-"The scan will be resumed next time unless you pass the --skip-crawl option."
+msgid "Max scan time was reached, stopping."
 msgstr ""
 
 #, python-brace-format
@@ -732,10 +821,6 @@ msgstr ""
 
 #, python-brace-format
 msgid "[*] {0} pages were previously attacked and will be skipped"
-msgstr ""
-
-#, python-brace-format
-msgid "Max attack time was reached for module {0}, stopping."
 msgstr ""
 
 msgid "Attack process was interrupted. Do you want to:"
@@ -754,6 +839,10 @@ msgid "\tc) (C)ontinue the current attack"
 msgstr ""
 
 msgid "Invalid choice. Valid choices are r, n, q and c."
+msgstr ""
+
+#, python-brace-format
+msgid "Max attack time was reached for module {0}, stopping."
 msgstr ""
 
 msgid "Sending crash report {} ... {}"
@@ -827,7 +916,14 @@ msgstr ""
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr ""
 
-msgid "Set a JSON cookie file to use"
+msgid "Set a JSON cookie file to use."
+msgstr ""
+
+msgid ""
+"You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+msgstr ""
+
+msgid "Ignore Set-Cookie header from HTTP responses"
 msgstr ""
 
 msgid ""
@@ -892,6 +988,11 @@ msgid ""
 "Possible values: paranoid, sneaky, polite, normal, aggressive, insane"
 msgstr ""
 
+msgid ""
+"Number of concurrent tasks to use for the exploration (crawling) of the "
+"target."
+msgstr ""
+
 msgid "Set timeout for requests"
 msgstr ""
 
@@ -904,7 +1005,10 @@ msgstr ""
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr ""
 
-msgid "Set output format. Supported: json, html (default), txt, xml"
+msgid "Set output format. Supported:"
+msgstr ""
+
+msgid "Default is html."
 msgstr ""
 
 msgid "Output file or folder"
@@ -923,6 +1027,9 @@ msgid "Don't send automatic bug report when an attack module fails"
 msgstr ""
 
 msgid "Show program's version number and exit"
+msgstr ""
+
+msgid "Number of concurrent tasks must be 1 or above!"
 msgstr ""
 
 msgid "[*] Do you feel lucky punk?"
@@ -957,12 +1064,7 @@ msgid "[*] Wapiti found {0} URLs and forms during the scan"
 msgstr ""
 
 msgid ""
-"Attack process interrupted. Scan will be resumed next time unless you "
-"specify \"--flush-attacks\" or \"--flush-session\"."
-msgstr ""
-
-msgid ""
-"[!] Can't store informations in persister. SQLite database must have been "
+"[!] Can't store information in persister. SQLite database must have been "
 "locked by another process"
 msgstr ""
 
@@ -988,9 +1090,6 @@ msgid "[!] Connection error with URL"
 msgstr ""
 
 msgid "[!] {} with url {}"
-msgstr ""
-
-msgid "[!] SSL/TLS error occurred with URL"
 msgstr ""
 
 #, python-brace-format
@@ -1024,3 +1123,7 @@ msgstr ""
 
 msgid "Summary of additionals :"
 msgstr ""
+
+#, python-brace-format
+#~ msgid "error: {0} while attacking {1}"
+#~ msgstr "Fehler: {0} während des Angriffs auf {1}"

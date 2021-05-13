@@ -20,7 +20,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, CRITICAL_LEVEL, _
-from wapitiCore.definitions.blindsql import NAME
+from wapitiCore.definitions.timesql import NAME
 from wapitiCore.net.web import Request
 
 
