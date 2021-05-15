@@ -6,6 +6,15 @@ Wapiti - Web Application Security Auditor
     :target: https://pypi.python.org/pypi/wapiti3
     :alt: PyPI version
 
+.. image:: https://img.shields.io/pypi/pyversions/wapiti3
+    :alt: Supported Python versions
+
+.. image:: https://img.shields.io/github/license/wapiti-scanner/wapiti
+    :alt: License: GPL-2.0
+
+.. image:: https://img.shields.io/pypi/dd/wapiti3
+    :alt: Downloads per day on PyPi
+
 Wapiti is a web application security auditor.
 
 http://wapiti-scanner.github.io/
