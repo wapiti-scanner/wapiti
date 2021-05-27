@@ -14,6 +14,8 @@ Wapiti - Web Application Security Auditor
 .. image:: https://img.shields.io/pypi/dd/wapiti3
     :alt: Downloads per day on PyPi
     :target: https://pypi.python.org/pypi/wapiti3
+.. image:: https://codecov.io/gh/wapiti-scanner/wapiti/branch/master/graph/badge.svg?token=GFEIORAFB8
+    :target: https://codecov.io/gh/wapiti-scanner/wapiti
 
 Wapiti is a web application security auditor.
 
