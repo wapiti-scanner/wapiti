@@ -1,6 +1,6 @@
-=========================================
-Wapiti - Web Application Security Auditor
-=========================================
+==================================
+Wapiti - Web Vulnerability Scanner
+==================================
 
 .. image:: https://img.shields.io/pypi/v/wapiti3?label=PyPI&logo=PyPI&logoColor=white&color=blue
     :alt: PyPI version
@@ -17,7 +17,7 @@ Wapiti - Web Application Security Auditor
 .. image:: https://codecov.io/gh/wapiti-scanner/wapiti/branch/master/graph/badge.svg?token=GFEIORAFB8
     :target: https://codecov.io/gh/wapiti-scanner/wapiti
 
-Wapiti is a web application security auditor.
+Wapiti is a web vulnerability scanner written in Python.
 
 http://wapiti-scanner.github.io/
 
