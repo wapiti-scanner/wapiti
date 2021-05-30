@@ -50,7 +50,7 @@ class mod_permanentxss(Attack):
 
     MSG_VULN = _("Stored XSS vulnerability")
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if not valid_xss_content_type(request) or request.status in (301, 302, 303):
             # If that content-type can't be interpreted as HTML by browsers then it is useless
             # Same goes for redirections
@@ -107,7 +107,7 @@ class mod_permanentxss(Attack):
                         # The following trick may seems dirty but it allows to treat GET and POST requests
                         # the same way.
                         for params_list in [get_params, post_params, file_params]:
-                            for i, _ in enumerate(params_list):
+                            for i, __ in enumerate(params_list):
                                 parameter, value = params_list[i]
                                 parameter = quote(parameter)
                                 if value != taint:
@@ -145,7 +145,7 @@ class mod_permanentxss(Attack):
                                 if has_strong_csp(response):
                                     description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                                self.add_vuln_high(
+                                await self.add_vuln_high(
                                     request_id=request.path_id,
                                     category=NAME,
                                     request=evil_request,
@@ -233,7 +233,7 @@ class mod_permanentxss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
 
-                self.add_anom_medium(
+                await self.add_anom_medium(
                     request_id=injection_request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=evil_request,
@@ -274,7 +274,7 @@ class mod_permanentxss(Attack):
                     if has_strong_csp(response):
                         description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                    self.add_vuln_high(
+                    await self.add_vuln_high(
                         request_id=injection_request.path_id,
                         category=NAME,
                         request=evil_request,
@@ -311,7 +311,7 @@ class mod_permanentxss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param)
 
-                    self.add_anom_high(
+                    await self.add_anom_high(
                         request_id=injection_request.path_id,
                         category=Messages.ERROR_500,
                         request=evil_request,

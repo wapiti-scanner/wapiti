@@ -8,11 +8,12 @@ import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_sql import mod_sql
 from wapitiCore.language.vulnerability import _
+from wapitiCore.attack.mod_sql import mod_sql
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -21,15 +22,16 @@ async def test_whole_stuff():
     respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
     respx.post(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 2
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request(
         "http://perdu.com/?foo=bar",
@@ -37,7 +39,7 @@ async def test_whole_stuff():
         file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
-    persister.requests.append(request)
+    all_requests.append(request)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -46,7 +48,7 @@ async def test_whole_stuff():
     module = mod_sql(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
-    for request in persister.requests:
+    for request in all_requests:
         await module.attack(request)
 
     assert True
@@ -58,7 +60,7 @@ async def test_whole_stuff():
 async def test_false_positive():
     respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="You have an error in your SQL syntax"))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
@@ -72,7 +74,7 @@ async def test_false_positive():
     module.do_post = True
     await module.attack(request)
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await crawler.close()
 
 
@@ -91,7 +93,7 @@ async def test_true_positive():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
@@ -105,9 +107,9 @@ async def test_true_positive():
     module.do_post = True
     await module.attack(request)
 
-    assert persister.module == "sql"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("SQL Injection")
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["module"] == "sql"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("SQL Injection")
     await crawler.close()
 
 
@@ -150,7 +152,7 @@ async def test_blind_detection():
 
         respx.get(url__regex=r"http://perdu\.com/\?user_id=.*").mock(side_effect=process)
 
-        persister = FakePersister()
+        persister = AsyncMock()
 
         request = Request("http://perdu.com/?user_id=1")
         request.path_id = 1
@@ -164,7 +166,7 @@ async def test_blind_detection():
         module.do_post = True
         await module.attack(request)
 
-        assert persister.vulnerabilities
+        assert persister.add_payload.call_count
         # One request for error-based, one to get normal response, four to test boolean-based attack
         assert respx.calls.call_count == 6
         await crawler.close()
@@ -175,7 +177,7 @@ async def test_blind_detection():
 async def test_negative_blind():
     respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
@@ -188,7 +190,7 @@ async def test_negative_blind():
     module.verbose = 2
     await module.attack(request)
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     # We have:
     # - 1 request for error-based test
     # - 1 request to get normal response
@@ -236,7 +238,7 @@ async def test_blind_detection_parenthesis():
 
         respx.get(url__regex=r"http://perdu\.com/\?username=.*").mock(side_effect=process)
 
-        persister = FakePersister()
+        persister = AsyncMock()
 
         request = Request("http://perdu.com/?username=admin")
         request.path_id = 1
@@ -250,7 +252,7 @@ async def test_blind_detection_parenthesis():
         module.do_post = True
         await module.attack(request)
 
-        assert persister.vulnerabilities
+        assert persister.add_payload.call_count
         # This is the same test as the previous blind except we have to put single quotes
         assert respx.calls.call_count == 8
         await crawler.close()

@@ -58,7 +58,7 @@ class SsrfMutator(Mutator):
         # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
-            for i, _ in enumerate(params_list):
+            for i, __ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:
@@ -199,7 +199,7 @@ class mod_ssrf(Attack):
             data = response.json
             if isinstance(data, dict):
                 for request_id in data:
-                    original_request = self.persister.get_path_by_id(request_id)
+                    original_request = await self.persister.get_path_by_id(request_id)
                     if original_request is None:
                         raise ValueError("Could not find the original request with that ID")
 
@@ -241,7 +241,7 @@ class mod_ssrf(Attack):
 
                             mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                            self.add_vuln_critical(
+                            await self.add_vuln_critical(
                                 request_id=original_request.path_id,
                                 category=NAME,
                                 request=mutated_request,

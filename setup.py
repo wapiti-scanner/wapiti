@@ -118,7 +118,10 @@ if a script is vulnerable.""",
         "importlib_metadata==3.7.2",
         "browser-cookie3==0.11.4",
         "cryptography==3.3.2",
-        "brotli>=1.0.9"
+        "brotli>=1.0.9",
+        "sqlalchemy>=1.4.17",
+        "aiocache==0.11.1",
+        "aiosqlite==0.17.0"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],

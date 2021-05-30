@@ -52,7 +52,7 @@ class mod_redirect(Attack):
                 continue
 
             if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
-                self.add_vuln_low(
+                await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
                     request=mutated_request,

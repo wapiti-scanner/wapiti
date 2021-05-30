@@ -26,6 +26,7 @@ from math import ceil
 import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
+from functools import partialmethod
 
 from httpx import ReadTimeout, RequestError
 
@@ -73,6 +74,10 @@ commons = [
     "ssrf",
     "xss"
 ]
+
+VULN = "vulnerability"
+ANOM = "anomaly"
+ADDITION = "additional"
 
 
 class PayloadType(Enum):
@@ -189,16 +194,15 @@ class Attack:
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
 
-    VULN = "vulnerability"
-    ANOM = "anomaly"
-    ADDITION = "additional"
-
     def __init__(self, crawler, persister, logger, attack_options, stop_event):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
         self.persister = persister
         self._stop_event = stop_event
+        # self.add_vuln = persister.add_vulnerability
+        # self.add_anom = persister.add_anomaly
+        # self.add_addition = persister.add_additional
         self.payload_reader = PayloadReader(attack_options)
         self.options = attack_options
 
@@ -232,50 +236,29 @@ class Attack:
     def set_color(self):
         self.color = 1
 
-    def add_payload(self, request_id: int, payload_type: str, category: str,
-    level=0, request=None, parameter="", info=""):
-        self.persister.add_payload(request_id, payload_type, self.name, category, level, request, parameter, info)
+    async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
+                          level=0, request=None, parameter="", info=""):
+        await self.persister.add_payload(
+            request_id=request_id,
+            payload_type=payload_type,
+            module=self.name,
+            category=category,
+            level=level,
+            request=request,
+            parameter=parameter,
+            info=info
+        )
 
-    def add_payload_critical(self, request_id: int, payload_type: str, category: str,
-    request=None, parameter="", info=""):
-        self.add_payload(request_id, payload_type, category, CRITICAL_LEVEL, request, parameter, info)
+    add_vuln_critical = partialmethod(add_payload, payload_type=VULN, level=CRITICAL_LEVEL)
+    add_vuln_high = partialmethod(add_payload, payload_type=VULN, level=HIGH_LEVEL)
+    add_vuln_medium = partialmethod(add_payload, payload_type=VULN, level=MEDIUM_LEVEL)
+    add_vuln_low = partialmethod(add_payload, payload_type=VULN, level=LOW_LEVEL)
+    add_vuln_info = partialmethod(add_payload, payload_type=VULN, level=INFO_LEVEL)
 
-    def add_payload_high(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
-        self.add_payload(request_id, payload_type, category, HIGH_LEVEL, request, parameter, info)
+    add_anom_high = partialmethod(add_payload, payload_type=ANOM, level=HIGH_LEVEL)
+    add_anom_medium = partialmethod(add_payload, payload_type=ANOM, level=MEDIUM_LEVEL)
 
-    def add_payload_medium(self, request_id: int, payload_type: str, category: str,
-    request=None, parameter="", info=""):
-        self.add_payload(request_id, payload_type, category, MEDIUM_LEVEL, request, parameter, info)
-
-    def add_payload_low(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
-        self.add_payload(request_id, payload_type, category, LOW_LEVEL, request, parameter, info)
-
-    def add_payload_info(self, request_id: int, payload_type: str, category: str, request=None, parameter="", info=""):
-        self.add_payload(request_id, payload_type, category, INFO_LEVEL, request, parameter, info)
-
-    def add_vuln_critical(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_critical(request_id, self.VULN, category, request, parameter, info)
-
-    def add_vuln_high(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_high(request_id, self.VULN, category, request, parameter, info)
-
-    def add_vuln_medium(self, category: str,request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_medium(request_id, self.VULN, category, request, parameter, info)
-
-    def add_vuln_low(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_low(request_id, self.VULN, category, request, parameter, info)
-
-    def add_vuln_info(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_low(request_id, self.VULN, category, request, parameter, info)
-
-    def add_anom_high(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_high(request_id, self.ANOM, category, request, parameter, info)
-
-    def add_anom_medium(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_medium(request_id, self.ANOM, category, request, parameter, info)
-
-    def add_addition(self, category: str, request_id: int=-1, request=None, parameter="", info=""):
-        self.add_payload_low(request_id, self.ADDITION, category, request, parameter, info)
+    add_addition = partialmethod(add_payload, payload_type=ADDITION, level=LOW_LEVEL)
 
     @property
     def payloads(self):
@@ -299,7 +282,7 @@ class Attack:
     def external_endpoint(self):
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
 
-    def must_attack(self, request: Request):  # pylint: disable=unused-argument
+    async def must_attack(self, request: Request):  # pylint: disable=unused-argument
         return not self.finished
 
     @property
@@ -380,7 +363,7 @@ class Mutator:
             if params_list is file_params and not self._mutate_file:
                 continue
 
-            for i, _ in enumerate(params_list):
+            for i, __ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:

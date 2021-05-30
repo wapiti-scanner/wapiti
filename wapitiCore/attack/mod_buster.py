@@ -85,10 +85,11 @@ class mod_buster(Attack):
 
     async def attack(self, request: Request):
         self.finished = True
-        urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
+        if not self.do_get:
+            return
 
         # First we make a list of unique webdirs and webpages without parameters
-        for resource in urls:
+        async for resource in self.persister.get_links(attack_module=self.name):
             path = resource.path
             if path.endswith("/"):
                 if path not in self.known_dirs:

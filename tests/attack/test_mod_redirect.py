@@ -9,11 +9,12 @@ import pytest
 import httpx
 import respx
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_redirect import mod_redirect
 from wapitiCore.language.vulnerability import _
+from wapitiCore.attack.mod_redirect import mod_redirect
+from tests import AsyncMock
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -28,7 +29,7 @@ def run_around_tests():
 
 @pytest.mark.asyncio
 async def test_redirect_detection():
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
     crawler = AsyncCrawler("http://127.0.0.1:65080/")
     options = {"timeout": 10, "level": 2}
@@ -37,9 +38,12 @@ async def test_redirect_detection():
     module = mod_redirect(crawler, persister, logger, options, Event())
     await module.attack(request)
 
-    assert persister.module == "redirect"
-    assert persister.vulnerabilities[0]["category"] == _("Open Redirect")
-    assert persister.vulnerabilities[0]["parameter"] == "url"
+    assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Open Redirect")
+    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
+        ['yolo', 'nawak'],
+        ['url', 'https://openbugbounty.org/']
+    ]
     await crawler.close()
 
 
@@ -49,15 +53,16 @@ async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     respx.route(url__regex=r"http://perdu.com/.*").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 2
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request(
         "http://perdu.com/?foo=bar",
@@ -65,7 +70,7 @@ async def test_whole_stuff():
         file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
-    persister.requests.append(request)
+    all_requests.append(request)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -74,7 +79,7 @@ async def test_whole_stuff():
     module = mod_redirect(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
-    for request in persister.requests:
+    for request in all_requests:
         await module.attack(request)
 
     assert True

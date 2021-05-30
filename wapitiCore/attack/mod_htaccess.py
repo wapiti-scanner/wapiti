@@ -39,7 +39,7 @@ class mod_htaccess(Attack):
     do_get = False
     do_post = False
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if request.path in self.attacked_get:
             return False
 
@@ -65,7 +65,7 @@ class mod_htaccess(Attack):
             unblocked_content = response.content
 
             self.log_red("---")
-            self.add_vuln_medium(
+            await self.add_vuln_medium(
                 request_id=request.path_id,
                 category=NAME,
                 request=evil_req,

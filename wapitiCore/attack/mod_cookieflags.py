@@ -37,14 +37,14 @@ class mod_cookieflags(Attack):
     def check_httponly_flag(cookie: object):
         return "HttpOnly" in cookie._rest or "httponly" in cookie._rest
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
 
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
         self.finished = True
@@ -54,7 +54,7 @@ class mod_cookieflags(Attack):
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 self.log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
-                self.add_vuln_low(
+                await self.add_vuln_low(
                     category=COOKIE_HTTPONLY_DISABLED,
                     request=request,
                     info=INFO_COOKIE_HTTPONLY.format(cookie.name)
@@ -62,7 +62,7 @@ class mod_cookieflags(Attack):
 
             if not self.check_secure_flag(cookie):
                 self.log_red(INFO_COOKIE_SECURE.format(cookie.name))
-                self.add_vuln_low(
+                await self.add_vuln_low(
                     category=COOKIE_SECURE_DISABLED,
                     request=request,
                     info=INFO_COOKIE_SECURE.format(cookie.name)

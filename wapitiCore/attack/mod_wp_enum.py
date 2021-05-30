@@ -61,7 +61,7 @@ class mod_wp_enum(Attack):
                     version
                 )
 
-                self.add_addition(
+                await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
                     info=json.dumps(plugin_detected)
@@ -77,7 +77,7 @@ class mod_wp_enum(Attack):
                     plugin,
                     [""]
                 )
-                self.add_addition(
+                await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
                     info=json.dumps(plugin_detected)
@@ -107,7 +107,7 @@ class mod_wp_enum(Attack):
                     theme,
                     version
                 )
-                self.add_addition(
+                await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
                     info=json.dumps(theme_detected)
@@ -123,7 +123,7 @@ class mod_wp_enum(Attack):
                     theme,
                     [""]
                 )
-                self.add_addition(
+                await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
                     info=json.dumps(theme_detected)
@@ -135,13 +135,13 @@ class mod_wp_enum(Attack):
             return True
         return False
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
 

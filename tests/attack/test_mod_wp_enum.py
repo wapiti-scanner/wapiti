@@ -5,11 +5,12 @@ import respx
 import httpx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wp_enum import mod_wp_enum
 from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -23,7 +24,7 @@ async def test_no_wordpress():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -39,7 +40,7 @@ async def test_no_wordpress():
 
     await module.attack(request)
 
-    assert not persister.additionals
+    assert not persister.add_payload.call_count
     await crawler.close()
 
 
@@ -96,7 +97,7 @@ async def test_plugin():
     respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(404))
     respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com")
     request.path_id = 1
@@ -111,15 +112,18 @@ async def test_plugin():
 
     await module.attack(request)
 
-    assert persister.module == "wp_enum"
-    assert persister.additionals
-    assert persister.additionals[0]["category"] == _("Fingerprint web technology")
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["module"] == "wp_enum"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
-    assert persister.additionals[1]["info"] == \
+    )
+    assert persister.add_payload.call_args_list[1][1]["info"] == (
         '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"]}'
-    assert persister.additionals[2]["info"] == \
+    )
+    assert persister.add_payload.call_args_list[2][1]["info"] == (
         '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"]}'
+    )
     await crawler.close()
 
 
@@ -175,7 +179,7 @@ async def test_theme():
     respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(404))
     respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com")
     request.path_id = 1
@@ -190,11 +194,15 @@ async def test_theme():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"]}'
-    assert persister.additionals[1]["info"] == \
+    )
+    assert persister.add_payload.call_args_list[1][1]["info"] == (
         '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"]}'
-    assert persister.additionals[2]["info"] == \
+    )
+    assert persister.add_payload.call_args_list[2][1]["info"] == (
         '{"name": "customify", "versions": [""], "categories": ["WordPress themes"]}'
+    )
+
     await crawler.close()

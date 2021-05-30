@@ -197,7 +197,7 @@ class mod_file(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
-                self.add_anom_medium(
+                await self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
@@ -256,7 +256,7 @@ class mod_file(Attack):
                             constraint_message += _("Constraints: {}").format(", ".join(constraints))
                             vuln_message += " (" + constraint_message + ")"
 
-                    self.add_vuln_critical(
+                    await self.add_vuln_critical(
                         request_id=request.path_id,
                         category=NAME,
                         request=mutated_request,
@@ -291,7 +291,7 @@ class mod_file(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                    self.add_anom_high(
+                    await self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
                         request=mutated_request,

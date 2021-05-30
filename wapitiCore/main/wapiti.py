@@ -23,7 +23,6 @@ from urllib.parse import urlparse
 from time import strftime, gmtime
 from importlib import import_module
 from operator import attrgetter
-from itertools import chain
 from traceback import print_tb
 from collections import deque
 from datetime import datetime
@@ -86,6 +85,7 @@ def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
 
 
 def stop_attack_process():  # pylint: disable=unused-argument
+    print(_("Waiting for all payload tasks to finish for current resource, please wait."))
     stop_event.set()
 
 
@@ -157,6 +157,9 @@ class Wapiti:
             os.makedirs(SqlitePersister.CRAWLER_DATA_DIR)
 
         self.persister = SqlitePersister(self._history_file)
+
+    async def init_persister(self):
+        await self.persister.create()
 
     def _init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
@@ -313,20 +316,21 @@ class Wapiti:
                 await mod_instance.update()
         print(_("Update done."))
 
-    def load_scan_state(self):
-        for resource in self.persister.get_to_browse():
+    async def load_scan_state(self):
+        await self.persister.create()
+        async for resource in self.persister.get_to_browse():
             self._start_urls.append(resource)
-        for resource in self.persister.get_links():
+        async for resource in self.persister.get_links():
             self._excluded_urls.append(resource)
-        for resource in self.persister.get_forms():
+        async for resource in self.persister.get_forms():
             self._excluded_urls.append(resource)
 
-        self.persister.set_root_url(self.target_url)
+        await self.persister.set_root_url(self.target_url)
 
-    def save_scan_state(self):
+    async def save_scan_state(self):
         print(_("[*] Saving scan state, please wait..."))
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
-        self.persister.set_to_browse(self._start_urls)
+        await self.persister.set_to_browse(self._start_urls)
 
         print('')
         print(_(" Note"))
@@ -351,13 +355,21 @@ class Wapiti:
 
         async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
             # Browsed URLs are saved one at a time
-            self.persister.add_request(resource)
+            await self.persister.add_request(resource)
             if not stop_event.is_set() and (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
                 print(_("Max scan time was reached, stopping."))
                 stop_event.set()
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
+
+    async def load_resources_for_module(self, module: attack.Attack):
+        if module.do_get:
+            async for resource in self.persister.get_links(attack_module=module.name):
+                yield resource
+        if module.do_post:
+            async for resource in self.persister.get_forms(attack_module=module.name):
+                yield resource
 
     async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
@@ -388,23 +400,16 @@ class Wapiti:
 
             attack_module.log_green(_("[*] Launching module {0}"), attack_module.name)
 
-            already_attacked = self.persister.count_attacked(attack_module.name)
+            already_attacked = await self.persister.count_attacked(attack_module.name)
             if already_attacked:
                 attack_module.log_green(
                     _("[*] {0} pages were previously attacked and will be skipped"),
                     already_attacked
                 )
 
-            resources_to_attack = []
-            if attack_module.do_get:
-                resources_to_attack.append(self.persister.get_links(attack_module=attack_module.name))
-            if attack_module.do_post:
-                resources_to_attack.append(self.persister.get_forms(attack_module=attack_module.name))
-
-            generator = chain.from_iterable(resources_to_attack)
-
             answer = "0"
-            while True:
+            attacked_ids = set()
+            async for original_request in self.load_resources_for_module(attack_module):
                 if stop_event.is_set():
                     print('')
                     print(_("Attack process was interrupted. Do you want to:"))
@@ -434,8 +439,7 @@ class Wapiti:
                         continue
 
                 try:
-                    original_request = next(generator)
-                    if attack_module.must_attack(original_request):
+                    if await attack_module.must_attack(original_request):
                         if self.verbose >= 1:
                             print("[+] {}".format(original_request))
 
@@ -448,8 +452,6 @@ class Wapiti:
                     # Hmmm it should be caught inside the module
                     await asyncio.sleep(1)
                     continue
-                except StopIteration:
-                    break
                 except Exception as exception:
                     # Catch every possible exceptions and print it
                     exception_traceback = sys.exc_info()[2]
@@ -478,7 +480,9 @@ class Wapiti:
                         os.unlink(traceback_file)
                 else:
                     if original_request.path_id is not None:
-                        self.persister.set_attacked(original_request.path_id, attack_module.name)
+                        attacked_ids.add(original_request.path_id)
+
+            await self.persister.set_attacked(attacked_ids, attack_module.name)
 
             if hasattr(attack_module, "finish"):
                 await attack_module.finish()
@@ -486,11 +490,13 @@ class Wapiti:
             if attack_module.network_errors:
                 print(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
 
-            if answer == "1":
+            if answer == "r":
+                # Do not process remaining modules
                 break
 
         if answer == "q":
             await self.crawler.close()
+            await self.persister.close()
             return
 
         # if self.crawler.get_uploads():
@@ -520,7 +526,7 @@ class Wapiti:
                 "url": auth_url
             }
 
-        for payload in self.persister.get_payloads():
+        async for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":
                 self.report_gen.add_vulnerability(
                     category=payload.category,
@@ -561,6 +567,7 @@ class Wapiti:
             print(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
 
         await self.crawler.close()
+        await self.persister.close()
 
     def set_timeout(self, timeout: float = 6.0):
         """Set the timeout for the time waiting for a HTTP response"""
@@ -671,11 +678,11 @@ class Wapiti:
     def add_custom_header(self, key: str, value: str):
         self.crawler.add_custom_header(key, value)
 
-    def flush_attacks(self):
-        self.persister.flush_attacks()
+    async def flush_attacks(self):
+        await self.persister.flush_attacks()
 
-    def flush_session(self):
-        self.persister.close()
+    async def flush_session(self):
+        await self.persister.close()
         try:
             os.unlink(self._history_file)
         except FileNotFoundError:
@@ -686,15 +693,16 @@ class Wapiti:
         except FileNotFoundError:
             pass
         self.persister = SqlitePersister(self._history_file)
+        await self.persister.create()
 
-    def count_resources(self) -> int:
-        return self.persister.count_paths()
+    async def count_resources(self) -> int:
+        return await self.persister.count_paths()
 
-    def has_scan_started(self) -> bool:
-        return self.persister.has_scan_started()
+    async def has_scan_started(self) -> bool:
+        return await self.persister.has_scan_started()
 
-    def have_attacks_started(self) -> bool:
-        return self.persister.have_attacks_started()
+    async def have_attacks_started(self) -> bool:
+        return await self.persister.have_attacks_started()
 
 
 def fix_url_path(url):
@@ -1260,11 +1268,12 @@ async def wapiti_main():
 
         wap.set_attack_options(attack_options)
 
+        await wap.init_persister()
         if args.flush_attacks:
-            wap.flush_attacks()
+            await wap.flush_attacks()
 
         if args.flush_session:
-            wap.flush_session()
+            await wap.flush_session()
 
     except InvalidOptionValue as msg:
         print(msg)
@@ -1274,29 +1283,29 @@ async def wapiti_main():
 
     try:
         if not args.skip_crawl:
-            if wap.have_attacks_started() and not args.resume_crawl:
+            if await wap.have_attacks_started() and not args.resume_crawl:
                 pass
             else:
-                if wap.has_scan_started():
+                if await wap.has_scan_started():
                     print(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args and args.auth_type == "post":
                     await wap.crawler.async_try_login(wap.crawler.auth_url)
 
-                wap.load_scan_state()
+                await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
                 await wap.browse(stop_event, parallelism=args.tasks)
                 loop.remove_signal_handler(signal.SIGINT)
-                wap.save_scan_state()
+                await wap.save_scan_state()
 
         if args.max_parameters:
-            count = wap.persister.remove_big_requests(args.max_parameters)
+            count = await wap.persister.remove_big_requests(args.max_parameters)
             print(_("[*] {0} URLs and forms having more than {1} parameters were removed.".format(
                 count,
                 args.max_parameters
             )))
 
-        print(_("[*] Wapiti found {0} URLs and forms during the scan").format(wap.count_resources()))
+        print(_("[*] Wapiti found {0} URLs and forms during the scan").format(await wap.count_resources()))
         stop_event.clear()
         loop.add_signal_handler(signal.SIGINT, stop_attack_process)
         await wap.attack(stop_event)

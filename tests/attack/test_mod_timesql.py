@@ -9,11 +9,12 @@ import pytest
 import respx
 import httpx
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_timesql import mod_timesql
 from wapitiCore.language.vulnerability import _
+from wapitiCore.attack.mod_timesql import mod_timesql
+from tests import AsyncMock
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -30,7 +31,7 @@ def run_around_tests():
 async def test_timesql_detection():
     # It looks like php -S has serious limitations
     # so PHP script should wait a minimum amount of time for the test to succeed
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
@@ -41,17 +42,19 @@ async def test_timesql_detection():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.module == "timesql"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("Blind SQL Injection")
-    assert persister.vulnerabilities[0]["parameter"] == "vuln1"
-    assert "sleep" in persister.vulnerabilities[0]["request"].get_params[1][1]
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["module"] == "timesql"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Blind SQL Injection")
+    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
+        ['foo', 'bar'],
+        ['vuln1', 'sleep(2)#1']
+    ]
     await crawler.close()
 
 
 @pytest.mark.asyncio
 async def test_timesql_false_positive():
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
@@ -62,7 +65,7 @@ async def test_timesql_false_positive():
     module.do_post = False
     await module.attack(request)
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await crawler.close()
 
 
@@ -72,7 +75,7 @@ async def test_false_positive_request_count():
     respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=sleep").mock(side_effect=httpx.ReadTimeout)
     respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=hello").mock(side_effect=httpx.ReadTimeout)
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
@@ -99,7 +102,7 @@ async def test_true_positive_request_count():
         return_value=httpx.Response(200, text="Hello there!")
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)

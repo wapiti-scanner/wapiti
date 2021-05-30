@@ -827,6 +827,7 @@ class Explorer:
                     page.clean()
                     return False, []
 
+            await asyncio.sleep(0)
             resources = self.extract_links(page, request)
             # TODO: there's more situations where we would not want to attack the resource... must check this
             if page.is_directory_redirection:

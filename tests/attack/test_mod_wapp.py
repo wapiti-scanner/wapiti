@@ -1,15 +1,17 @@
 from unittest.mock import Mock
+import os
 from asyncio import Event
 
 import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wapp import mod_wapp
-from wapitiCore.language.vulnerability import _
+from wapitiCore.language.language import _
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -26,7 +28,10 @@ async def test_false_positive():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -40,7 +45,7 @@ async def test_false_positive():
 
     await module.attack(request)
 
-    assert not persister.additionals
+    assert not persister.add_payload.call_count
     await crawler.close()
 
 
@@ -57,7 +62,10 @@ async def test_url_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/owa/auth/logon.aspx")
     request.path_id = 1
@@ -71,10 +79,12 @@ async def test_url_detection():
 
     await module.attack(request)
 
-    assert persister.module == "wapp"
-    assert persister.additionals
-    assert persister.additionals[2]["category"] == _("Fingerprint web technology")
-    assert persister.additionals[2]["info"] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["module"] == "wapp"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+    assert persister.add_payload.call_args_list[2][1]["info"] == (
+        '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
+    )
     await crawler.close()
 
 
@@ -92,7 +102,10 @@ async def test_html_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -106,9 +119,10 @@ async def test_html_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
-           '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+    )
     await crawler.close()
 
 
@@ -127,7 +141,10 @@ async def test_script_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -141,9 +158,10 @@ async def test_script_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
-           '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+    )
     await crawler.close()
 
 
@@ -162,7 +180,10 @@ async def test_cookies_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -176,9 +197,10 @@ async def test_cookies_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
+    )
     await crawler.close()
 
 
@@ -197,7 +219,10 @@ async def test_headers_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -211,9 +236,10 @@ async def test_headers_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+    )
     await crawler.close()
 
 
@@ -233,7 +259,10 @@ async def test_meta_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -247,9 +276,10 @@ async def test_meta_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
+    )
     await crawler.close()
 
 
@@ -271,7 +301,10 @@ async def test_multi_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -285,9 +318,10 @@ async def test_multi_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[-1]["info"] == \
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[-1][1]["info"] == (
         '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
+    )
     await crawler.close()
 
 
@@ -306,7 +340,10 @@ async def test_implies_detection():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com")
     request.path_id = 1
@@ -320,10 +357,13 @@ async def test_implies_detection():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
-    assert persister.additionals[1]["info"] == \
+    assert persister.add_payload.call_count == 3
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    )
+    assert persister.add_payload.call_args_list[-1][1]["info"] == (
         '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
+    )
     await crawler.close()
 
 
@@ -342,7 +382,10 @@ async def test_vulnerabilities():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     request = Request("http://perdu.com")
     request.path_id = 1
@@ -356,10 +399,15 @@ async def test_vulnerabilities():
 
     await module.attack(request)
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["info"] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
-    assert persister.vulnerabilities[0]["category"] == _("Fingerprint web application framework")
-    assert persister.vulnerabilities[1]["info"] == \
-           '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
-    assert persister.vulnerabilities[1]["category"] == _("Fingerprint web server")
+    assert persister.add_payload.call_count == 5
+    # FIrst one is an additional
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+    )
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+
+    assert persister.add_payload.call_args_list[3][1]["info"] == (
+        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+    )
+    assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
     await crawler.close()

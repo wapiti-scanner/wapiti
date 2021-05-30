@@ -20,6 +20,7 @@ import csv
 import re
 import os
 import random
+from urllib.parse import urlparse
 
 from httpx import RequestError
 
@@ -92,6 +93,12 @@ class mod_nikto(Attack):
         except IOError:
             print(_("Error downloading nikto database."))
 
+    async def must_attack(self, request: Request):
+        if self.finished:
+            return False
+
+        return request.url == await self.persister.get_root_url()
+
     async def attack(self, request: Request):
         try:
             with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
@@ -105,8 +112,8 @@ class mod_nikto(Attack):
 
         self.finished = True
         junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
-        urls = self.persister.get_links(attack_module=self.name) if self.do_get else []
-        server = next(urls).hostname
+        root_url = request.url
+        parts = urlparse(root_url)
 
         for line in self.nikto_db:
             if self._stop_event.is_set():
@@ -134,7 +141,7 @@ class mod_nikto(Attack):
                 path = "/" + path
 
             try:
-                url = "http://" + server + path
+                url = f"{parts.scheme}://{parts.netloc}{path}"
             except UnicodeDecodeError:
                 continue
 
@@ -255,7 +262,7 @@ class mod_nikto(Attack):
 
                 self.log_red("---")
 
-                self.add_vuln_high(
+                await self.add_vuln_high(
                     category=NAME,
                     request=evil_request,
                     info=info
