@@ -153,7 +153,7 @@ class mod_csrf(Attack):
 
         return True
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if request.method != "POST":
             return False
 
@@ -182,7 +182,7 @@ class mod_csrf(Attack):
         self.log_red(request.http_repr())
         self.log_red("---")
 
-        self.add_vuln_medium(
+        await self.add_vuln_medium(
             request_id=request.path_id,
             category=NAME,
             request=request,

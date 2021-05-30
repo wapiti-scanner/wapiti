@@ -32,14 +32,14 @@ class mod_csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
 
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
         self.finished = True
@@ -53,7 +53,7 @@ class mod_csp(Attack):
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)
-            self.add_vuln_low(
+            await self.add_vuln_low(
                 category=NAME,
                 request=request_to_root,
                 info=MSG_NO_CSP
@@ -64,16 +64,14 @@ class mod_csp(Attack):
             for policy_name in CSP_CHECK_LISTS:
                 result = check_policy_values(policy_name, csp_dict)
 
-                info = ""
                 if result <= 0:
                     if result == -1:
                         info = MSG_CSP_MISSING.format(policy_name)
-
-                    else: # result == 0
+                    else:  # result == 0
                         info = MSG_CSP_UNSAFE.format(policy_name)
 
                     self.log_red(info)
-                    self.add_vuln_low(
+                    await self.add_vuln_low(
                         category=NAME,
                         request=request_to_root,
                         info=info

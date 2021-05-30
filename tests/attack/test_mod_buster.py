@@ -5,11 +5,12 @@ import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_buster import mod_buster
 from wapitiCore.attack.attack import Flags
+from tests import AsyncIterator
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -24,13 +25,13 @@ async def test_whole_stuff():
     respx.get("http://perdu.com/admin/authconfig.php").mock(return_value=httpx.Response(200, text="Hello there"))
     respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = Mock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
     # Buster module will get requests from the persister
-    persister.requests.append(request)
+    persister.get_links.return_value = AsyncIterator([request])
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}

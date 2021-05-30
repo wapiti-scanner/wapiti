@@ -54,13 +54,13 @@ class mod_drupal_enum(Attack):
                 return True
         return False
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
         self.finished = True
@@ -79,7 +79,7 @@ class mod_drupal_enum(Attack):
                 "Drupal",
                 self.versions
             )
-            self.add_addition(
+            await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
                 info=json.dumps(drupal_detected),

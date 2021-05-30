@@ -7,11 +7,12 @@ import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_shellshock import mod_shellshock
 from wapitiCore.language.vulnerability import _
+from wapitiCore.attack.mod_shellshock import mod_shellshock
+from tests import AsyncMock
+
 
 def shellshock_callback(request):
     if "user-agent" in request.headers:
@@ -29,19 +30,20 @@ async def test_whole_stuff():
 
     respx.get(url__regex=r"http://perdu.com/.*").mock(side_effect=shellshock_callback)
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.status = 200
     request.set_headers({"content-type": "text/html"})
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request("http://perdu.com/vuln/")
     request.path_id = 2
     request.status = 200
     request.set_headers({"content-type": "text/html"})
-    persister.requests.append(request)
+    all_requests.append(request)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -50,13 +52,11 @@ async def test_whole_stuff():
     module = mod_shellshock(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_get = True
-    for request in persister.requests:
+    for request in all_requests:
         await module.attack(request)
 
-    assert persister.module == "shellshock"
-    assert len(persister.vulnerabilities) == 1
-    assert persister.vulnerabilities[0]["category"] == _("Command execution")
-    assert persister.vulnerabilities[0]["request"].url == (
-        "http://perdu.com/vuln/"
-    )
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["module"] == "shellshock"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+    assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/vuln/"
     await crawler.close()

@@ -1,15 +1,15 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from asyncio import Event
 
 import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_backup import mod_backup
-from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -19,7 +19,7 @@ async def test_whole_stuff():
     respx.get("http://perdu.com/config.php").mock(return_value=httpx.Response(200, text="Hello there"))
     respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
@@ -34,8 +34,7 @@ async def test_whole_stuff():
     module.do_get = True
     await module.attack(request)
 
-    assert persister.module == "backup"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("Backup file")
-    assert persister.vulnerabilities[0]["request"].url == "http://perdu.com/config.php.bak"
+    assert persister.add_payload.call_args_list[0][1]["module"] == "backup"
+    assert persister.add_payload.call_args_list[0][1]["payload_type"] == "vulnerability"
+    assert persister.add_payload.call_args_list[0][1]["request"].url == 'http://perdu.com/config.php.bak'
     await crawler.close()

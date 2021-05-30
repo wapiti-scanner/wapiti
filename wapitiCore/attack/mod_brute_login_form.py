@@ -89,7 +89,7 @@ class mod_brute_login_form(Attack):
 
         return login_response.content
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         # We leverage the fact that the crawler will fill password entries with a known placeholder
         if "Letm3in_" not in request.encoded_data + request.encoded_params:
             return False
@@ -166,7 +166,7 @@ class mod_brute_login_form(Attack):
                     link_depth=login_form.link_depth
                 )
 
-                self.add_vuln_low(
+                await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_request,

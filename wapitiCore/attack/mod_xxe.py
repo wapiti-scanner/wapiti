@@ -157,7 +157,7 @@ class mod_xxe(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
-                self.add_anom_medium(
+                await self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
@@ -178,7 +178,7 @@ class mod_xxe(Attack):
                         vuln_message = _("{0} via injection in the parameter {1}").format(
                             self.MSG_VULN, parameter)
 
-                    self.add_vuln_high(
+                    await self.add_vuln_high(
                         request_id=request.path_id,
                         category=NAME,
                         request=mutated_request,
@@ -208,7 +208,7 @@ class mod_xxe(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                    self.add_anom_high(
+                    await self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
                         request=mutated_request,
@@ -239,7 +239,7 @@ class mod_xxe(Attack):
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(tags))
                 if pattern and not await self.false_positive(original_request, pattern):
-                    self.add_vuln_high(
+                    await self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
                         request=mutated_request,
@@ -283,7 +283,7 @@ class mod_xxe(Attack):
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
                 if pattern and not await self.false_positive(original_request, pattern):
-                    self.add_vuln_high(
+                    await self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
                         request=mutated_request,
@@ -322,7 +322,7 @@ class mod_xxe(Attack):
             return
 
         for request_id in data:
-            original_request = self.persister.get_path_by_id(request_id)
+            original_request = await self.persister.get_path_by_id(request_id)
             if original_request is None:
                 continue
                 # raise ValueError("Could not find the original request with ID {}".format(request_id))
@@ -410,7 +410,7 @@ class mod_xxe(Attack):
                         )
                         mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                    self.add_vuln_high(
+                    await self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
                         request=mutated_request,

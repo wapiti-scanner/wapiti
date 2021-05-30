@@ -34,7 +34,7 @@ class mod_methods(Attack):
     do_post = False
     excluded_path = set()
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         return request.path not in self.excluded_path
 
     async def attack(self, request: Request):

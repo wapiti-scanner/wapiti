@@ -9,11 +9,12 @@ import pytest
 import respx
 import httpx
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
+from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_exec import mod_exec
-from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -33,15 +34,16 @@ async def test_whole_stuff():
     respx.get(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
     respx.post(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
 
-    persister = FakePersister()
+    persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 2
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request(
         "http://perdu.com/?foo=bar",
@@ -49,7 +51,7 @@ async def test_whole_stuff():
         file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
-    persister.requests.append(request)
+    all_requests.append(request)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
@@ -58,7 +60,7 @@ async def test_whole_stuff():
     module = mod_exec(crawler, persister, logger, options, Event())
     module.verbose = 2
     module.do_post = True
-    for request in persister.requests:
+    for request in all_requests:
         await module.attack(request)
 
     assert True
@@ -76,11 +78,10 @@ async def test_detection():
         return_value=httpx.Response(200, text="Hello there")
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 1
-    persister.requests.append(request)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
@@ -90,11 +91,10 @@ async def test_detection():
     module.verbose = 2
     await module.attack(request)
 
-    assert persister.module == "exec"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("Command execution")
-    assert persister.vulnerabilities[0]["parameter"] == "vuln"
-    assert "env" in persister.vulnerabilities[0]["request"].get_params[0][1]
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
     await crawler.close()
 
 
@@ -109,7 +109,7 @@ async def test_blind_detection():
 
     respx.get(url__regex=r"http://perdu.com/\?vuln=.*").mock(side_effect=timeout_callback)
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 2
@@ -123,16 +123,15 @@ async def test_blind_detection():
     module.do_post = False
 
     payloads_until_sleep = 0
-    for payload, _ in module.payloads:
+    for payload, __ in module.payloads:
         if "sleep" in payload:
             break
         payloads_until_sleep += 1
 
     await module.attack(request)
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "vuln"
-    assert "sleep" in persister.vulnerabilities[0]["request"].get_params[0][1]
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [['vuln', 'a`sleep 60`']]
     # We should have all payloads till "sleep" ones
     # then 3 requests for the sleep payload (first then two retries to check random lags)
     # then 1 request to check state of original request

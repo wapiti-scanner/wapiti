@@ -8,11 +8,11 @@ import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import mod_drupal_enum
-from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 # Test no Drupal detected
 @pytest.mark.asyncio
@@ -29,7 +29,7 @@ async def test_no_drupal():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -44,7 +44,7 @@ async def test_no_drupal():
 
     await module.attack(request)
 
-    assert not persister.additionals
+    assert not persister.add_payload.call_count
     await crawler.close()
 
 
@@ -67,7 +67,7 @@ async def test_version_detected():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -82,10 +82,11 @@ async def test_version_detected():
 
     await module.attack(request)
 
-    assert persister.module == "drupal_enum"
-    assert persister.additionals
-    assert persister.additionals[0]["category"] == _("Fingerprint web technology")
-    assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["module"] == "drupal_enum"
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
+    )
     await crawler.close()
 
 
@@ -108,7 +109,7 @@ async def test_multi_versions_detected():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -123,9 +124,10 @@ async def test_multi_versions_detected():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == \
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
         '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
+    )
     await crawler.close()
 
 
@@ -148,7 +150,7 @@ async def test_version_not_detected():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/")
     request.path_id = 1
@@ -163,6 +165,8 @@ async def test_version_not_detected():
 
     await module.attack(request)
 
-    assert persister.additionals
-    assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["info"] == (
+        '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
+    )
     await crawler.close()

@@ -51,7 +51,7 @@ class mod_crlf(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
-                self.add_anom_medium(
+                await self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
@@ -71,7 +71,7 @@ class mod_crlf(Attack):
                 self.network_errors += 1
             else:
                 if "wapiti" in response.headers:
-                    self.add_vuln_low(
+                    await self.add_vuln_low(
                         request_id=request.path_id,
                         category=NAME,
                         request=mutated_request,

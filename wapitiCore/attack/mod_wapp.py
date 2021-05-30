@@ -64,14 +64,14 @@ class mod_wapp(Attack):
         except IOError:
             print(_("Error downloading wapp database."))
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
 
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
         self.finished = True
@@ -117,7 +117,8 @@ class mod_wapp(Attack):
                 application_name,
                 versions
             )
-            self.add_addition(
+
+            await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
                 info=json.dumps(detected_applications[application_name])
@@ -125,13 +126,13 @@ class mod_wapp(Attack):
 
             if versions:
                 if "Web servers" in categories:
-                    self.add_vuln_info(
+                    await self.add_vuln_info(
                         category=WEB_SERVER_VERSIONED,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])
                     )
                 else:
-                    self.add_vuln_info(
+                    await self.add_vuln_info(
                         category=WEB_APP_VERSIONED,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])

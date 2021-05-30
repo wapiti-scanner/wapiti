@@ -27,7 +27,7 @@ from urllib.parse import urljoin
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
+from wapitiCore.language.vulnerability import LOW_LEVEL, _
 from wapitiCore.definitions.backup import NAME
 from wapitiCore.net.web import Request
 
@@ -44,7 +44,7 @@ class mod_backup(Attack):
     do_get = False
     do_post = False
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         page = request.path
         headers = request.headers
 
@@ -96,7 +96,7 @@ class mod_backup(Attack):
             if response and response.status == 200:
                 self.log_red(_("Found backup file {}".format(evil_req.url)))
 
-                self.add_vuln_low(
+                await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_req,

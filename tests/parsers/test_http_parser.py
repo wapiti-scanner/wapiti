@@ -33,7 +33,7 @@ def test_http():
     assert page.delay > 0
     assert isinstance(page.bytes, bytes) and page.bytes
     assert page.type == "text/html; charset=iso-8859-1"
-    assert page.encoding == "ISO-8859-1" # see https://github.com/encode/httpx/pull/1269
+    assert page.encoding == "ISO-8859-1"  # see https://github.com/encode/httpx/pull/1269
 
 
 @respx.mock

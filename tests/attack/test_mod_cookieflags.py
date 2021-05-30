@@ -1,15 +1,16 @@
 import asyncio
 from unittest.mock import Mock
+import re
 
 import httpx
 import respx
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_cookieflags import mod_cookieflags
-from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -25,7 +26,7 @@ async def test_cookieflags():
         )
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("https://github.com/")
     request.path_id = 1
 
@@ -37,11 +38,16 @@ async def test_cookieflags():
     module = mod_cookieflags(crawler, persister, logger, options, asyncio.Event())
     await module.attack(request)
 
-    assert persister.module == "cookieflags"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("HttpOnly Flag cookie")
-    assert persister.vulnerabilities[2]["category"] == _("Secure Flag cookie")
-    assert persister.vulnerabilities[0]["info"] == "HttpOnly flag is not set in the cookie : _octo"
-    assert persister.vulnerabilities[1]["info"] == "HttpOnly flag is not set in the cookie : foo"
-    assert persister.vulnerabilities[2]["info"] == "Secure flag is not set in the cookie : foo"
+    cookie_flags = []
+    assert persister.add_payload.call_count == 3
+    assert persister.add_payload.call_args_list[0][1]["module"] == "cookieflags"
+    for call in persister.add_payload.call_args_list:
+        description, cookie_name = call[1]["info"].split(":")
+        cookie_flags.append((cookie_name.strip(), re.search(r"(HttpOnly|Secure)", description).group()))
+
+    assert cookie_flags == [
+        ('_octo', 'HttpOnly'),
+        ('foo', 'HttpOnly'),
+        ('foo', 'Secure')
+    ]
     await crawler.close()

@@ -7,11 +7,12 @@ from asyncio import Event
 
 import pytest
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
+from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import mod_file, has_prefix_or_suffix, find_warning_message, FileWarning
-from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -27,7 +28,7 @@ def run_around_tests():
 @pytest.mark.asyncio
 async def test_inclusion_detection():
     # Will also test false positive detection
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
@@ -38,15 +39,16 @@ async def test_inclusion_detection():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.module == "file"
-    assert persister.vulnerabilities[0]["category"] == _("Path Traversal")
-    assert persister.vulnerabilities[0]["request"].get_params[1] == ["f", "/etc/services"]
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["module"] == "file"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Path Traversal")
+    assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
     await crawler.close()
 
 
 @pytest.mark.asyncio
 async def test_warning_false_positive():
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
@@ -57,17 +59,19 @@ async def test_warning_false_positive():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.vulnerabilities[0]["request"].get_params[1] == ["f", "/etc/services"]
+    assert persister.add_payload.call_count == 1
+    assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
     await crawler.close()
 
 
 @pytest.mark.asyncio
 async def test_no_crash():
-    persister = FakePersister()
+    persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://127.0.0.1:65085/empty.html")
     request.path_id = 1
-    persister.requests.append(request)
+    all_requests.append(request)
 
     request = Request(
         "http://127.0.0.1:65085/empty.html?foo=bar",
@@ -75,7 +79,7 @@ async def test_no_crash():
         file_params=[["file", ("fname", "content", "text/plain")]]
     )
     request.path_id = 2
-    persister.requests.append(request)
+    all_requests.append(request)
 
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
@@ -83,7 +87,7 @@ async def test_no_crash():
 
     module = mod_file(crawler, persister, logger, options, Event())
     module.do_post = False
-    for request in persister.requests:
+    for request in all_requests:
         await module.attack(request)
 
     assert True

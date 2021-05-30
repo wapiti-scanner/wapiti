@@ -56,7 +56,7 @@ class mod_shellshock(Attack):
             "cookie": empty_func + cmd
         }
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         # We attempt to attach each script once whatever the method
         return request.path not in self.attacked_get
 
@@ -78,7 +78,7 @@ class mod_shellshock(Attack):
             if self.rand_string in data:
                 self.log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
 
-                self.add_vuln_high(
+                await self.add_vuln_high(
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_req,

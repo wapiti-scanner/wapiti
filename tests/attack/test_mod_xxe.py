@@ -10,13 +10,15 @@ import pytest
 import respx
 import httpx
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xxe import mod_xxe
 from wapitiCore.language.vulnerability import _
+from tests import AsyncMock
+
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -31,7 +33,7 @@ def run_around_tests():
 
 @pytest.mark.asyncio
 async def test_direct_body():
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request(
         "http://127.0.0.1:65084/xxe/direct/body.php",
         method="POST",
@@ -46,18 +48,18 @@ async def test_direct_body():
 
     await module.attack(request)
 
-    assert persister.module == "xxe"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("XML External Entity")
-    assert persister.vulnerabilities[0]["parameter"] == "raw body"
-    assert "/etc/passwd" in persister.vulnerabilities[0]["request"].post_params
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["module"] == "xxe"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("XML External Entity")
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "raw body"
+    assert "/etc/passwd" in persister.add_payload.call_args_list[0][1]["request"].post_params
     await crawler.close()
 
 
 @pytest.mark.asyncio
 async def test_direct_param():
     # check for false positives too
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/direct/param.php?foo=bar&vuln=yolo")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
@@ -68,14 +70,14 @@ async def test_direct_param():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "vuln"
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "vuln"
     await crawler.close()
 
 
 @pytest.mark.asyncio
 async def test_direct_query_string():
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/direct/qs.php")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
@@ -86,8 +88,8 @@ async def test_direct_query_string():
     module.do_post = False
     await module.attack(request)
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "QUERY_STRING"
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "QUERY_STRING"
     await crawler.close()
 
 
@@ -96,13 +98,15 @@ async def test_direct_query_string():
 async def test_out_of_band_body():
     respx.route(host="127.0.0.1").pass_through()
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request(
         "http://127.0.0.1:65084/xxe/outofband/body.php",
         method="POST",
         post_params=[["placeholder", "yolo"]]
     )
     request.path_id = 42
+    persister.get_path_by_id.return_value = request
+
     persister.requests.append(request)
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {
@@ -137,11 +141,11 @@ async def test_out_of_band_body():
     module.do_post = False
     await module.attack(request)
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await module.finish()
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "raw body"
-    assert "linux2" in persister.vulnerabilities[0]["request"].post_params
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "raw body"
+    assert "linux2" in persister.add_payload.call_args_list[0][1]["request"].post_params
     await crawler.close()
 
 
@@ -150,10 +154,10 @@ async def test_out_of_band_body():
 async def test_out_of_band_param():
     respx.route(host="127.0.0.1").pass_through()
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/outofband/param.php?foo=bar&vuln=yolo")
     request.path_id = 7
-    persister.requests.append(request)
+    persister.get_path_by_id.return_value = request
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
@@ -187,11 +191,11 @@ async def test_out_of_band_param():
     module.do_post = False
     await module.attack(request)
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await module.finish()
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "vuln"
-    assert "linux2" in persister.vulnerabilities[0]["request"].get_params[1][1]
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "vuln"
+    assert "linux2" in dict(persister.add_payload.call_args_list[0][1]["request"].get_params)["vuln"]
     await crawler.close()
 
 
@@ -200,10 +204,10 @@ async def test_out_of_band_param():
 async def test_out_of_band_query_string():
     respx.route(host="127.0.0.1").pass_through()
 
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/outofband/qs.php")
     request.path_id = 4
-    persister.requests.append(request)
+    persister.get_path_by_id.return_value = request
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
@@ -225,8 +229,7 @@ async def test_out_of_band_query_string():
                     "51554552595f535452494e47": [
                         {
                             "date": "2019-08-17T16:52:41+00:00",
-                            "url": \
-                                "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
+                            "url": "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
                             "ip": "192.168.2.1",
                             "size": 999,
                             "payload": "linux2"
@@ -237,11 +240,11 @@ async def test_out_of_band_query_string():
         )
     )
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await module.finish()
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "QUERY_STRING"
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "QUERY_STRING"
     await crawler.close()
 
 
@@ -249,7 +252,7 @@ async def test_out_of_band_query_string():
 @respx.mock
 async def test_direct_upload():
     respx.route(host="127.0.0.1").pass_through()
-    persister = FakePersister()
+    persister = AsyncMock()
     request = Request(
         "http://127.0.0.1:65084/xxe/outofband/upload.php",
         file_params=[
@@ -258,7 +261,7 @@ async def test_direct_upload():
         ]
     )
     request.path_id = 8
-    persister.requests.append(request)
+    persister.get_path_by_id.return_value = request
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {
         "timeout": 10,
@@ -291,11 +294,11 @@ async def test_direct_upload():
         )
     )
 
-    assert not persister.vulnerabilities
+    assert not persister.add_payload.call_count
     await module.finish()
 
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["parameter"] == "calendar"
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "calendar"
     await crawler.close()
 
 

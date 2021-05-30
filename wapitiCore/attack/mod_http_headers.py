@@ -35,6 +35,7 @@ class mod_http_headers(Attack):
     check_list_xss = ['1']
     check_list_xcontent = ['nosniff']
     check_list_hsts = ['max-age=']
+
     headers_to_check = {
         "X-Frame-Options": {
             "list": check_list_xframe, "info": INFO_XFRAME_OPTIONS, "log": "Checking X-Frame-Options :"},
@@ -53,11 +54,11 @@ class mod_http_headers(Attack):
 
         return any(element in response.headers[header_name].lower() for element in check_list)
 
-    def check_header(self, response, request, header, check_list, info, log):
+    async def check_header(self, response, request, header, check_list, info, log):
         self.log_blue(_(log))
         if not self.is_set(response, header, check_list):
             self.log_red(info)
-            self.add_vuln_low(
+            await self.add_vuln_low(
                 category=NAME,
                 request=request,
                 info=info
@@ -65,14 +66,14 @@ class mod_http_headers(Attack):
         else:
             self.log_green("OK")
 
-    def must_attack(self, request: Request):
+    async def must_attack(self, request: Request):
         if self.finished:
             return False
 
         if request.method == "POST":
             return False
 
-        return request.url == self.persister.get_root_url()
+        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
         request_to_root = Request(request.url)
@@ -85,4 +86,4 @@ class mod_http_headers(Attack):
             return
 
         for header, value in self.headers_to_check.items():
-            self.check_header(response, request_to_root, header, value["list"], value["info"], value["log"])
+            await self.check_header(response, request_to_root, header, value["list"], value["info"], value["log"])

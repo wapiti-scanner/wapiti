@@ -53,24 +53,33 @@ class CSVReportGenerator(ReportGenerator):
         """
         if request is not None:
             self._vulns.append(
-                [category, level, info, request.method, parameter, request.url,
-                request.encoded_data, request.referer, auth, module]
+                [
+                    category, level, info, request.method, parameter,
+                    request.url, request.encoded_data, request.referer,
+                    auth, module
+                ]
             )
 
     def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """Store the information about an anomaly met during the attack."""
         if request is not None:
             self._anomalies.append(
-                [category, level, info, request.method, parameter, request.url,
-                request.encoded_data, request.referer, auth, module]
+                [
+                    category, level, info, request.method, parameter,
+                    request.url, request.encoded_data, request.referer,
+                    auth, module
+                ]
             )
 
     def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """Store the information about an additional."""
         if request is not None:
             self._additionals.append(
-                [category, level, info, request.method, parameter, request.url,
-                request.encoded_data, request.referer, auth, module]
+                [
+                    category, level, info, request.method, parameter,
+                    request.url, request.encoded_data, request.referer,
+                    auth, module
+                ]
             )
 
     # We don't want description of each vulnerability for this report format

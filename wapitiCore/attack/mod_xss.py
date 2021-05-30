@@ -132,7 +132,7 @@ class mod_xss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
 
-                self.add_anom_medium(
+                await self.add_anom_medium(
                     request_id=original_request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=evil_request,
@@ -153,7 +153,7 @@ class mod_xss(Attack):
                     if has_strong_csp(response):
                         message += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                    self.add_vuln_medium(
+                    await self.add_vuln_medium(
                         request_id=original_request.path_id,
                         category=NAME,
                         request=evil_request,
@@ -190,7 +190,7 @@ class mod_xss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param)
 
-                    self.add_anom_high(
+                    await self.add_anom_high(
                         request_id=original_request.path_id,
                         category=Messages.ERROR_500,
                         request=evil_request,

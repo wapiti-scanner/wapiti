@@ -77,7 +77,7 @@ class mod_timesql(Attack):
                     vuln_message = _("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
                     log_message = Messages.MSG_PARAM_INJECT
 
-                self.add_vuln_critical(
+                await self.add_vuln_critical(
                     request_id=request.path_id,
                     category=NAME,
                     request=mutated_request,
@@ -110,7 +110,7 @@ class mod_timesql(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                    self.add_anom_high(
+                    await self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
                         request=mutated_request,

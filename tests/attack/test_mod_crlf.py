@@ -5,11 +5,12 @@ import respx
 import pytest
 import httpx
 
-from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_crlf import mod_crlf
 from wapitiCore.language.vulnerability import _
+from wapitiCore.attack.mod_crlf import mod_crlf
+from tests import AsyncMock
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -20,7 +21,7 @@ async def test_whole_stuff():
         return_value=httpx.Response(200, text="Hello there", headers={"wapiti": "3.0.5 version"})
     )
 
-    persister = FakePersister()
+    persister = AsyncMock()
 
     request = Request("http://perdu.com/?a=b&foo=bar")
     request.path_id = 1
@@ -34,8 +35,8 @@ async def test_whole_stuff():
     module.do_get = True
     await module.attack(request)
 
-    assert persister.module == "crlf"
-    assert persister.vulnerabilities
-    assert persister.vulnerabilities[0]["category"] == _("CRLF Injection")
-    assert persister.vulnerabilities[0]["parameter"] == "foo"
+    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_args_list[0][1]["module"] == "crlf"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("CRLF Injection")
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"
     await crawler.close()
