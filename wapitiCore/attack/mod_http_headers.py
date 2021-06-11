@@ -35,12 +35,34 @@ class mod_http_headers(Attack):
     check_list_xss = ['1']
     check_list_xcontent = ['nosniff']
     check_list_hsts = ['max-age=']
+    headers_to_check = {
+        "X-Frame-Options": {
+            "list": check_list_xframe, "info": INFO_XFRAME_OPTIONS, "log": "Checking X-Frame-Options :"},
+        "X-XSS-Protection": {
+            "list": check_list_xss, "info": INFO_XSS_PROTECTION, "log": "Checking X-XSS-Protection :"},
+        "X-Content-Type-Options": {
+            "list": check_list_xcontent, "info": INFO_XCONTENT_TYPE, "log": "Checking X-Content-Type-Options :"},
+        "Strict-Transport-Security": {
+            "list": check_list_hsts, "info": INFO_HSTS, "log": "Checking Strict-Transport-Security :"}
+    }
 
     def is_set(self, response: Page, header_name, check_list):
         if header_name not in response.headers:
             return False
 
         return any(element in response.headers[header_name].lower() for element in check_list)
+
+    def check_header(self, response, request, header, check_list, info, log):
+        self.log_blue(_(log))
+        if not self.is_set(response, header, check_list):
+            self.log_red(info)
+            self.add_vuln_low(
+                category=NAME,
+                request=request,
+                info=info
+            )
+        else:
+            self.log_green("OK")
 
     def must_attack(self, request: Request):
         if self.finished:
@@ -61,46 +83,5 @@ class mod_http_headers(Attack):
             self.network_errors += 1
             return
 
-        self.log_blue(_("Checking X-Frame-Options :"))
-        if not self.is_set(response, "X-Frame-Options", self.check_list_xframe):
-            self.log_red(INFO_XFRAME_OPTIONS)
-            self.add_vuln_low(
-                category=NAME,
-                request=request_to_root,
-                info=INFO_XFRAME_OPTIONS
-            )
-        else:
-            self.log_green("OK")
-
-        self.log_blue(_("Checking X-XSS-Protection :"))
-        if not self.is_set(response, "X-XSS-Protection", self.check_list_xss):
-            self.log_red(INFO_XSS_PROTECTION)
-            self.add_vuln_low(
-                category=NAME,
-                request=request_to_root,
-                info=INFO_XSS_PROTECTION
-            )
-        else:
-            self.log_green("OK")
-
-        self.log_blue(_("Checking X-Content-Type-Options :"))
-        if not self.is_set(response, "X-Content-Type-Options", self.check_list_xcontent):
-            self.log_red(INFO_XCONTENT_TYPE)
-            self.add_vuln_low(
-                category=NAME,
-                request=request_to_root,
-                info=INFO_XCONTENT_TYPE
-            )
-        else:
-            self.log_green("OK")
-
-        self.log_blue(_("Checking Strict-Transport-Security :"))
-        if not self.is_set(response, "Strict-Transport-Security", self.check_list_hsts):
-            self.log_red(INFO_HSTS)
-            self.add_vuln_low(
-                category=NAME,
-                request=request_to_root,
-                info=INFO_HSTS
-            )
-        else:
-            self.log_green("OK")
+        for header, value in self.headers_to_check.items():
+            self.check_header(response, request_to_root, header, value["list"], value["info"], value["log"])
