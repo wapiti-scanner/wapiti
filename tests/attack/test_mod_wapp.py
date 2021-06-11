@@ -10,6 +10,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wapp import mod_wapp
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -71,7 +72,9 @@ async def test_url_detection():
 
     await module.attack(request)
 
+    assert persister.module == "wapp"
     assert persister.additionals
+    assert persister.additionals[2]["category"] == _("Fingerprint web technology")
     assert persister.additionals[2]["info"] == '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
     await crawler.close()
 
@@ -356,8 +359,8 @@ async def test_vulnerabilities():
 
     assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["info"] == '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
-    assert persister.vulnerabilities[0]["category"] == 'Fingerprint web application framework'
+    assert persister.vulnerabilities[0]["category"] == _("Fingerprint web application framework")
     assert persister.vulnerabilities[1]["info"] == \
            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
-    assert persister.vulnerabilities[1]["category"] == 'Fingerprint web server'
+    assert persister.vulnerabilities[1]["category"] == _("Fingerprint web server")
     await crawler.close()

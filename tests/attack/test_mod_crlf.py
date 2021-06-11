@@ -9,6 +9,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_crlf import mod_crlf
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -33,6 +34,8 @@ async def test_whole_stuff():
     module.do_get = True
     await module.attack(request)
 
+    assert persister.module == "crlf"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("CRLF Injection")
     assert persister.vulnerabilities[0]["parameter"] == "foo"
     await crawler.close()

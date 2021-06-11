@@ -9,6 +9,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssrf import mod_ssrf
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -67,7 +68,9 @@ async def test_whole_stuff():
     # We must trigger finish(à normally called by wapiti.py
     await module.finish()
 
+    assert persister.module == "ssrf"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Server Side Request Forgery")
     assert persister.vulnerabilities[0]["parameter"] == "file"
     file_params = persister.vulnerabilities[0]["request"].file_params
     assert file_params[0][1][0] == "http://external.url/page"

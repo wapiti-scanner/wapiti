@@ -9,6 +9,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_backup import mod_backup
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -33,6 +34,8 @@ async def test_whole_stuff():
     module.do_get = True
     await module.attack(request)
 
+    assert persister.module == "backup"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Backup file")
     assert persister.vulnerabilities[0]["request"].url == "http://perdu.com/config.php.bak"
     await crawler.close()

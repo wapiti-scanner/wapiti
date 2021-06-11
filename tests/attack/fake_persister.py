@@ -9,6 +9,7 @@ class FakePersister:
 
     def __init__(self):
         self.requests = []
+        self.module = None
         self.payloads = {"additional": [], "anomaly": [], "vulnerability": []}
 
     def get_links(self, _path=None, attack_module: str = ""):
@@ -37,9 +38,10 @@ class FakePersister:
     def additionals(self):
         return self.payloads["additional"]
 
-    def add_payload(self, request_id: int, payload_type: str, category=None,
-    level=0, request=None, parameter="", info=""):
+    def add_payload(self, request_id: int, payload_type: str, module: str,
+    category=None, level=0, request=None, parameter="", info=""):
         self.payloads[payload_type].append({
             "level": level, "request_id": request_id, "request": request,
             "parameter": parameter, "info" :info, "category": category
         })
+        self.module = module

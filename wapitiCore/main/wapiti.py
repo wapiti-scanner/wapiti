@@ -509,6 +509,17 @@ class Wapiti:
                 )
                 self.output_file = filename + "." + self.report_generator_type
 
+        auth_dict = None
+        if self.crawler.credentials:
+            auth_url = None
+            if self.crawler.auth_method == "post":
+                auth_url = self.crawler.auth_url
+
+            auth_dict = {
+                "method": self.crawler.auth_method,
+                "url": auth_url
+            }
+
         for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":
                 self.report_gen.add_vulnerability(
@@ -516,7 +527,9 @@ class Wapiti:
                     level=payload.level,
                     request=payload.evil_request,
                     parameter=payload.parameter,
-                    info=payload.info
+                    info=payload.info,
+                    module=payload.module,
+                    auth=auth_dict
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
@@ -524,7 +537,9 @@ class Wapiti:
                     level=payload.level,
                     request=payload.evil_request,
                     parameter=payload.parameter,
-                    info=payload.info
+                    info=payload.info,
+                    module=payload.module,
+                    auth=auth_dict
                 )
             elif payload.type == "additional":
                 self.report_gen.add_additional(
@@ -532,7 +547,9 @@ class Wapiti:
                     level=payload.level,
                     request=payload.evil_request,
                     parameter=payload.parameter,
-                    info=payload.info
+                    info=payload.info,
+                    module=payload.module,
+                    auth=auth_dict
                 )
 
         self.report_gen.generate_report(self.output_file)
@@ -1167,8 +1184,7 @@ async def wapiti_main():
         if "auth_type" in args:
             if args.auth_type == "post" and args.starting_urls != []:
                 wap.crawler.auth_url = args.starting_urls[0]
-            else:
-                wap.set_auth_type(args.auth_type)
+            wap.set_auth_type(args.auth_type)
 
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)

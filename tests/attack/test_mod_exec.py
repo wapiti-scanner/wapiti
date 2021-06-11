@@ -13,6 +13,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_exec import mod_exec
+from wapitiCore.language.vulnerability import _
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -89,7 +90,9 @@ async def test_detection():
     module.verbose = 2
     await module.attack(request)
 
+    assert persister.module == "exec"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Command execution")
     assert persister.vulnerabilities[0]["parameter"] == "vuln"
     assert "env" in persister.vulnerabilities[0]["request"].get_params[0][1]
     await crawler.close()
