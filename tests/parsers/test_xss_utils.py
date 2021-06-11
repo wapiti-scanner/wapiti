@@ -597,13 +597,13 @@ def test_payload_requirements():
     context_list = get_context_list(code, "injected")
     assert context_list[0]["special_attributes"] == {"type=text"}
     # Requirement met as input type is not "hidden" and style is missing
-    assert meet_requirements(["!style", "type!=hidden"], context_list[0]["special_attributes"]) is ""
+    assert meet_requirements(["!style", "type!=hidden"], context_list[0]["special_attributes"]) == ""
 
     code = '<input value="injected"/>'
     context_list = get_context_list(code, "injected")
     # Requirement met as there is no special attributes to make our life harder
     assert "special_attributes" not in context_list[0]
-    assert meet_requirements(["!style", "type!=hidden"], []) is ""
+    assert meet_requirements(["!style", "type!=hidden"], []) == ""
 
 
 def test_find_separator():

@@ -107,7 +107,7 @@ class mod_permanentxss(Attack):
                         # The following trick may seems dirty but it allows to treat GET and POST requests
                         # the same way.
                         for params_list in [get_params, post_params, file_params]:
-                            for i in range(len(params_list)):
+                            for i, _ in enumerate(params_list):
                                 parameter, value = params_list[i]
                                 parameter = quote(parameter)
                                 if value != taint:

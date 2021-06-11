@@ -124,7 +124,8 @@ async def test_multi_versions_detected():
     await module.attack(request)
 
     assert persister.additionals
-    assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
+    assert persister.additionals[0]["info"] == \
+        '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
     await crawler.close()
 
 

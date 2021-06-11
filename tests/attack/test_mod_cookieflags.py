@@ -1,7 +1,5 @@
 import asyncio
 from unittest.mock import Mock
-from collections import defaultdict
-import re
 
 import httpx
 import respx

@@ -48,5 +48,3 @@ async def test_command():
                 }
             }
         }
-
-

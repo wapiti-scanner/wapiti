@@ -3,7 +3,6 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-import re
 from asyncio import Event
 
 import pytest

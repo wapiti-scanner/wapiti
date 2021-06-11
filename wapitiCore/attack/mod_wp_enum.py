@@ -129,7 +129,8 @@ class mod_wp_enum(Attack):
                     info=json.dumps(theme_detected)
                 )
 
-    def check_wordpress(self, response: object):
+    @staticmethod
+    def check_wordpress(response: object):
         if re.findall('WordPress.*', response.content):
             return True
         return False

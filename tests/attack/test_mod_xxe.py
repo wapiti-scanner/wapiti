@@ -47,7 +47,7 @@ async def test_direct_body():
     await module.attack(request)
 
     assert persister.module == "xxe"
-    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["category"] == _("XML External Entity")
     assert persister.vulnerabilities[0]["parameter"] == "raw body"
     assert "/etc/passwd" in persister.vulnerabilities[0]["request"].post_params
@@ -68,7 +68,7 @@ async def test_direct_param():
     module.do_post = False
     await module.attack(request)
 
-    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["parameter"] == "vuln"
     await crawler.close()
 
@@ -86,7 +86,7 @@ async def test_direct_query_string():
     module.do_post = False
     await module.attack(request)
 
-    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["parameter"] == "QUERY_STRING"
     await crawler.close()
 
@@ -225,7 +225,8 @@ async def test_out_of_band_query_string():
                     "51554552595f535452494e47": [
                         {
                             "date": "2019-08-17T16:52:41+00:00",
-                            "url": "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
+                            "url": \
+                                "https://wapiti3.ovh/xxe_data/yolo/4/51554552595f535452494e47/31337-0-192.168.2.1.txt",
                             "ip": "192.168.2.1",
                             "size": 999,
                             "payload": "linux2"
@@ -239,7 +240,7 @@ async def test_out_of_band_query_string():
     assert not persister.vulnerabilities
     await module.finish()
 
-    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["parameter"] == "QUERY_STRING"
     await crawler.close()
 
@@ -293,7 +294,7 @@ async def test_direct_upload():
     assert not persister.vulnerabilities
     await module.finish()
 
-    assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities
     assert persister.vulnerabilities[0]["parameter"] == "calendar"
     await crawler.close()
 

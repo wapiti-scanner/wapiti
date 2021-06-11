@@ -130,7 +130,8 @@ class ApplicationData:
                 if regex != '':
                     self.applications[application_name][string_field] = self.normalize_regex(regex)
 
-    def normalize_regex(self, pattern: str):
+    @staticmethod
+    def normalize_regex(pattern: str):
         """
         Return a dict containing version regex and application regex extracted from pattern string and compiled regex
         """
@@ -248,7 +249,8 @@ class Wappalyzer:
 
         return is_detected
 
-    def update_version_detected(self, application: dict, regex_params, content):
+    @staticmethod
+    def update_version_detected(application: dict, regex_params, content):
         """
         Add a new detected version of application.
         """

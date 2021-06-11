@@ -205,7 +205,7 @@ class SqlitePersister:
                         """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                         (path_id, "POST", i, post_param_key, post_param_value, None, None)
                     )
-            elif len(post_params):
+            elif post_params:
                 cursor.execute(
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (path_id, "POST", 0, "__RAW__", post_params, None, None)
@@ -395,7 +395,7 @@ class SqlitePersister:
                     """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (path_id, "POST", i, post_param_key, post_param_value, None, None)
                 )
-        elif len(post_params):
+        elif post_params:
             cursor.execute(
                 """INSERT INTO params VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (path_id, "POST", 0, "__RAW__", post_params, None, None)

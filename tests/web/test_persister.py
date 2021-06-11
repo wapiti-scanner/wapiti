@@ -36,9 +36,9 @@ async def test_persister_basic():
 
     assert persister.get_root_url() == "http://httpbin.org/"
     assert persister.count_paths() == 2
-    assert not len(list(persister.get_links()))
-    assert not len(list(persister.get_forms()))
-    assert not len(list(persister.get_payloads()))
+    assert not list(persister.get_links())
+    assert not list(persister.get_forms())
+    assert not list(persister.get_payloads())
 
     stored_requests = set(persister.get_to_browse())
     assert simple_get in stored_requests
@@ -72,7 +72,7 @@ async def test_persister_basic():
     assert next(persister.get_payloads())
     persister.flush_attacks()
     assert not persister.have_attacks_started()
-    assert not len(list(persister.get_payloads()))
+    assert not list(persister.get_payloads())
     persister.flush_session()
     assert not persister.count_paths()
 
