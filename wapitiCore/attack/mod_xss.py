@@ -22,7 +22,7 @@ from configparser import ConfigParser
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
-from wapitiCore.language.vulnerability import Messages, HIGH_LEVEL, MEDIUM_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
 from wapitiCore.net.csp_utils import has_strong_csp
@@ -132,10 +132,9 @@ class mod_xss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
 
-                self.add_anom(
+                self.add_anom_medium(
                     request_id=original_request.path_id,
                     category=Messages.RES_CONSUMPTION,
-                    level=MEDIUM_LEVEL,
                     request=evil_request,
                     info=anom_msg,
                     parameter=xss_param
@@ -154,10 +153,9 @@ class mod_xss(Attack):
                     if has_strong_csp(response):
                         message += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                    self.add_vuln(
+                    self.add_vuln_medium(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=MEDIUM_LEVEL,
                         request=evil_request,
                         parameter=xss_param,
                         info=message
@@ -192,10 +190,9 @@ class mod_xss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param)
 
-                    self.add_anom(
+                    self.add_anom_high(
                         request_id=original_request.path_id,
                         category=Messages.ERROR_500,
-                        level=HIGH_LEVEL,
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param

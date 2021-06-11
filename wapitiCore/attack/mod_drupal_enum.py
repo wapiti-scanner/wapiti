@@ -4,7 +4,7 @@ from os.path import join as path_join
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -82,7 +82,6 @@ class mod_drupal_enum(Attack):
                 )
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=request_to_root,
                     info=json.dumps(drupal_detected)
                 )
@@ -99,7 +98,6 @@ class mod_drupal_enum(Attack):
                 )
                 self.add_addition(
                     category=TECHNO_DETECTED,
-                    level=LOW_LEVEL,
                     request=request_to_root,
                     info=json.dumps(drupal_detected)
                 )

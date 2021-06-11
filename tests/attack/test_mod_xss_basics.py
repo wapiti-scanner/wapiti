@@ -5,35 +5,10 @@ import respx
 import httpx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xss import mod_xss
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "GET"]
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        for parameter_name, value in request.get_params:
-            if parameter_name == parameter:
-                self.vulnerabilities.append((parameter, value))
-
 
 @pytest.mark.asyncio
 @respx.mock

@@ -18,7 +18,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
 from wapitiCore.definitions.csp import NAME
 
@@ -53,9 +53,8 @@ class mod_csp(Attack):
 
         if "Content-Security-Policy" not in response.headers:
             self.log_red(MSG_NO_CSP)
-            self.add_vuln(
+            self.add_vuln_low(
                 category=NAME,
-                level=LOW_LEVEL,
                 request=request_to_root,
                 info=MSG_NO_CSP
             )
@@ -67,17 +66,15 @@ class mod_csp(Attack):
 
                 if result == -1:
                     self.log_red(MSG_CSP_MISSING.format(policy_name))
-                    self.add_vuln(
+                    self.add_vuln_low(
                         category=NAME,
-                        level=LOW_LEVEL,
                         request=request_to_root,
                         info=MSG_CSP_MISSING.format(policy_name)
                     )
                 elif result == 0:
                     self.log_red(MSG_CSP_UNSAFE.format(policy_name))
-                    self.add_vuln(
+                    self.add_vuln_low(
                         category=NAME,
-                        level=LOW_LEVEL,
                         request=request_to_root,
                         info=MSG_CSP_UNSAFE.format(policy_name)
                     )

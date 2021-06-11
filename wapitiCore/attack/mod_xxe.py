@@ -25,7 +25,7 @@ from os.path import join as path_join
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xxe import NAME
 from wapitiCore.net.web import Request
 
@@ -157,10 +157,9 @@ class mod_xxe(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
 
-                self.add_anom(
+                self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
-                    level=MEDIUM_LEVEL,
                     request=mutated_request,
                     info=anom_msg,
                     parameter=parameter
@@ -179,10 +178,9 @@ class mod_xxe(Attack):
                         vuln_message = _("{0} via injection in the parameter {1}").format(
                             self.MSG_VULN, parameter)
 
-                    self.add_vuln(
+                    self.add_vuln_high(
                         request_id=request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter
@@ -210,10 +208,9 @@ class mod_xxe(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter)
 
-                    self.add_anom(
+                    self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter
@@ -242,10 +239,9 @@ class mod_xxe(Attack):
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(tags))
                 if pattern and not await self.false_positive(original_request, pattern):
-                    self.add_vuln(
+                    self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
                         parameter="raw body"
@@ -287,10 +283,9 @@ class mod_xxe(Attack):
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
                 if pattern and not await self.false_positive(original_request, pattern):
-                    self.add_vuln(
+                    self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
                         parameter=parameter
@@ -415,10 +410,9 @@ class mod_xxe(Attack):
                         )
                         mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                    self.add_vuln(
+                    self.add_vuln_high(
                         request_id=original_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter

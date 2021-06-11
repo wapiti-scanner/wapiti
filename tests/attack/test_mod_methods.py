@@ -4,34 +4,11 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_methods import mod_methods
 from wapitiCore.language.logger import BaseLogger
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "GET"]
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(request)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append(request)
-
 
 class FakeLogger(BaseLogger):
     def __init__(self):

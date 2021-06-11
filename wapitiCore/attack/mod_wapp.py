@@ -22,7 +22,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
-from wapitiCore.language.vulnerability import LOW_LEVEL, INFO_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
@@ -119,23 +119,20 @@ class mod_wapp(Attack):
             )
             self.add_addition(
                 category=TECHNO_DETECTED,
-                level=LOW_LEVEL,
                 request=request_to_root,
                 info=json.dumps(detected_applications[application_name])
             )
 
             if versions:
                 if "Web servers" in categories:
-                    self.add_vuln(
+                    self.add_vuln_info(
                         category=WEB_SERVER_VERSIONED,
-                        level=INFO_LEVEL,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])
                     )
                 else:
-                    self.add_vuln(
+                    self.add_vuln_info(
                         category=WEB_APP_VERSIONED,
-                        level=INFO_LEVEL,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])
                     )

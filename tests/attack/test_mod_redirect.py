@@ -10,30 +10,10 @@ import pytest
 import httpx
 import respx
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_redirect import mod_redirect
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = set()
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return self.requests
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.add(parameter)
-
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -57,7 +37,7 @@ async def test_redirect_detection():
     module = mod_redirect(crawler, persister, logger, options, Event())
     await module.attack(request)
 
-    assert persister.vulnerabilities == {"url"}
+    assert persister.vulnerabilities[0]["parameter"] == "url"
     await crawler.close()
 
 
