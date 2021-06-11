@@ -14,7 +14,7 @@ def test_http():
                 "X-Men": "Wolverine",
                 "Server": "nginx",
                 "Set-Cookie": "session_id=31337;",
-                "Content-Type": "text/html"
+                "Content-Type": "text/html; charset=ISO-8859-1"
             },
             text="Hello world!"
         )
@@ -31,13 +31,13 @@ def test_http():
     assert page.is_plain
     assert page.size == page.raw_size != 0
     assert page.delay > 0
-    assert isinstance(page.bytes, bytes) and len(page.bytes)
-    assert page.type == "text/html"
-    assert page.encoding == "ISO-8859-1"
+    assert isinstance(page.bytes, bytes) and page.bytes
+    assert page.type == "text/html; charset=iso-8859-1"
+    assert page.encoding == "ISO-8859-1" # see https://github.com/encode/httpx/pull/1269
 
 
 @respx.mock
-def test_http():
+def test_http_redir():
     url = "http://perdu.com/folder"
     respx.get(url).mock(
         return_value=httpx.Response(301, text="Hello world!", headers={"Location": "http://perdu.com/folder/"})

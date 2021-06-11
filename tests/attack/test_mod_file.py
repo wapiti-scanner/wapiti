@@ -1,4 +1,3 @@
-from binascii import a2b_base64
 from unittest.mock import Mock
 from subprocess import Popen
 import os

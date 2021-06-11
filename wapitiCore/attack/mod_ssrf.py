@@ -58,7 +58,7 @@ class SsrfMutator(Mutator):
         # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
-            for i in range(len(params_list)):
+            for i, _ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:

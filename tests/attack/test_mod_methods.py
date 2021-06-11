@@ -8,16 +8,16 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_methods import mod_methods
-from wapitiCore.language.logger import BaseLogger
+from wapitiCore.language.logger import ConsoleLogger
 
-class FakeLogger(BaseLogger):
+class FakeLogger(ConsoleLogger):
     def __init__(self):
         super().__init__()
         self.message = ""
 
-    def log_orange(self, message, *args):
-        if message != "---":
-            self.message = message
+    def log_orange(self, fmt_string, *args):
+        if fmt_string != "---":
+            self.message = fmt_string
 
 
 @pytest.mark.asyncio

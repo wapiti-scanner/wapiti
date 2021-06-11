@@ -115,7 +115,7 @@ class LameJs:
             logging.debug("func_name = {0}".format(func_name))
             logging.debug("params = {0}".format(params))
             if func_name == "window.open":
-                if len(params) and params[0]:
+                if params and params[0]:
                     self.links.append(params[0])
             elif func_name.endswith(".asyncRequest"):
                 if len(params) > 1:

@@ -46,7 +46,8 @@ class mod_http_headers(Attack):
             "list": check_list_hsts, "info": INFO_HSTS, "log": "Checking Strict-Transport-Security :"}
     }
 
-    def is_set(self, response: Page, header_name, check_list):
+    @staticmethod
+    def is_set(response: Page, header_name, check_list):
         if header_name not in response.headers:
             return False
 

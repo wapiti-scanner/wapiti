@@ -380,7 +380,7 @@ class Mutator:
             if params_list is file_params and not self._mutate_file:
                 continue
 
-            for i in range(len(params_list)):
+            for i, _ in enumerate(params_list):
                 param_name = quote(params_list[i][0])
 
                 if self._skip_list and param_name in self._skip_list:
