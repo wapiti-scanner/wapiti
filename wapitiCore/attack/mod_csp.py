@@ -64,17 +64,17 @@ class mod_csp(Attack):
             for policy_name in CSP_CHECK_LISTS:
                 result = check_policy_values(policy_name, csp_dict)
 
-                if result == -1:
-                    self.log_red(MSG_CSP_MISSING.format(policy_name))
+                info = ""
+                if result <= 0:
+                    if result == -1:
+                        info = MSG_CSP_MISSING.format(policy_name)
+
+                    else: # result == 0
+                        info = MSG_CSP_UNSAFE.format(policy_name)
+
+                    self.log_red(info)
                     self.add_vuln_low(
                         category=NAME,
                         request=request_to_root,
-                        info=MSG_CSP_MISSING.format(policy_name)
-                    )
-                elif result == 0:
-                    self.log_red(MSG_CSP_UNSAFE.format(policy_name))
-                    self.add_vuln_low(
-                        category=NAME,
-                        request=request_to_root,
-                        info=MSG_CSP_UNSAFE.format(policy_name)
+                        info=info
                     )
