@@ -14,7 +14,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xxe import mod_xxe
-
+from wapitiCore.language.vulnerability import _
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -46,7 +46,9 @@ async def test_direct_body():
 
     await module.attack(request)
 
+    assert persister.module == "xxe"
     assert len(persister.vulnerabilities)
+    assert persister.vulnerabilities[0]["category"] == _("XML External Entity")
     assert persister.vulnerabilities[0]["parameter"] == "raw body"
     assert "/etc/passwd" in persister.vulnerabilities[0]["request"].post_params
     await crawler.close()

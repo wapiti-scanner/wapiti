@@ -234,7 +234,7 @@ class Attack:
 
     def add_payload(self, request_id: int, payload_type: str, category: str,
     level=0, request=None, parameter="", info=""):
-        self.persister.add_payload(request_id, payload_type, category, level, request, parameter, info)
+        self.persister.add_payload(request_id, payload_type, self.name, category, level, request, parameter, info)
 
     def add_payload_critical(self, request_id: int, payload_type: str, category: str,
     request=None, parameter="", info=""):

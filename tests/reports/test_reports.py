@@ -57,7 +57,8 @@ def test_reports():
             level=1,
             request=request,
             parameter="foo",
-            info="This is dope"
+            info="This is dope",
+            module="xss"
         )
 
         request = Request("http://perdu.com/fifi?foo=bar")
@@ -66,7 +67,8 @@ def test_reports():
             level=2,
             request=request,
             parameter="foo",
-            info="This is the way"
+            info="This is the way",
+            module="xss"
         )
 
         request = Request("http://perdu.com/?foo=bar")
@@ -75,7 +77,8 @@ def test_reports():
             level=3,
             request=request,
             parameter="foo",
-            info="loulou"
+            info="loulou",
+            module="wapp"
         )
 
         report_gen.generate_report(output)

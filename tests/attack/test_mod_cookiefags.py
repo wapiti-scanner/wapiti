@@ -11,6 +11,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_cookieflags import mod_cookieflags
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -38,7 +39,10 @@ async def test_cookieflags():
     module = mod_cookieflags(crawler, persister, logger, options, asyncio.Event())
     await module.attack(request)
 
+    assert persister.module == "cookieflags"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("HttpOnly Flag cookie")
+    assert persister.vulnerabilities[2]["category"] == _("Secure Flag cookie")
     assert persister.vulnerabilities[0]["info"] == "HttpOnly flag is not set in the cookie : _octo"
     assert persister.vulnerabilities[1]["info"] == "HttpOnly flag is not set in the cookie : foo"
     assert persister.vulnerabilities[2]["info"] == "Secure flag is not set in the cookie : foo"

@@ -11,6 +11,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_shellshock import mod_shellshock
+from wapitiCore.language.vulnerability import _
 
 def shellshock_callback(request):
     if "user-agent" in request.headers:
@@ -52,7 +53,9 @@ async def test_whole_stuff():
     for request in persister.requests:
         await module.attack(request)
 
+    assert persister.module == "shellshock"
     assert len(persister.vulnerabilities) == 1
+    assert persister.vulnerabilities[0]["category"] == _("Command execution")
     assert persister.vulnerabilities[0]["request"].url == (
         "http://perdu.com/vuln/"
     )

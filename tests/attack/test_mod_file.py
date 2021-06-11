@@ -1,3 +1,4 @@
+from binascii import a2b_base64
 from unittest.mock import Mock
 from subprocess import Popen
 import os
@@ -11,6 +12,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import mod_file, has_prefix_or_suffix, find_warning_message, FileWarning
+from wapitiCore.language.vulnerability import _
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -37,6 +39,8 @@ async def test_inclusion_detection():
     module.do_post = False
     await module.attack(request)
 
+    assert persister.module == "file"
+    assert persister.vulnerabilities[0]["category"] == _("Path Traversal")
     assert persister.vulnerabilities[0]["request"].get_params[1] == ["f", "/etc/services"]
     await crawler.close()
 

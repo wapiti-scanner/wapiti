@@ -56,7 +56,9 @@ async def test_title_positive():
     module.do_post = False
     await module.attack(request)
 
+    assert persister.module == "xss"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Cross Site Scripting")
     assert persister.vulnerabilities[0]["parameter"] == "title"
     assert persister.vulnerabilities[0]["request"].get_params[0][1].startswith("</title>")
     assert _("Warning: Content-Security-Policy is present!") not in persister.vulnerabilities[0]["info"]

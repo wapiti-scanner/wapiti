@@ -147,7 +147,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -161,7 +161,8 @@ class TXTReportGenerator(ReportGenerator):
                 "level": level,
                 "request": request,
                 "parameter": parameter,
-                "info": info
+                "info": info,
+                "module": module
             }
         )
 
@@ -176,7 +177,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -188,6 +189,7 @@ class TXTReportGenerator(ReportGenerator):
             "info": info,
             "level": level,
             "parameter": parameter,
+            "module": module
         }
         if category not in self._anomalies:
             self._anomalies[category] = []
@@ -212,7 +214,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -224,6 +226,7 @@ class TXTReportGenerator(ReportGenerator):
             "info": info,
             "level": level,
             "parameter": parameter,
+            "module": module
         }
         if category not in self._additionals:
             self._additionals[category] = []

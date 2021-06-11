@@ -13,6 +13,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_timesql import mod_timesql
+from wapitiCore.language.vulnerability import _
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -40,7 +41,9 @@ async def test_timesql_detection():
     module.do_post = False
     await module.attack(request)
 
+    assert persister.module == "timesql"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Blind SQL Injection")
     assert persister.vulnerabilities[0]["parameter"] == "vuln1"
     assert "sleep" in persister.vulnerabilities[0]["request"].get_params[1][1]
     await crawler.close()

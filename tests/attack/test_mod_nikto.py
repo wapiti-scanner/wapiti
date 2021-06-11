@@ -11,6 +11,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_nikto import mod_nikto
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -43,7 +44,9 @@ async def test_whole_stuff():
     module.do_get = True
     await module.attack(request)
 
+    assert persister.module == "nikto"
     assert len(persister.vulnerabilities) == 1
+    assert persister.vulnerabilities[0]["category"] == _("Potentially dangerous file")
     assert persister.vulnerabilities[0]["request"].url == (
         "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
     )

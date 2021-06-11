@@ -40,32 +40,37 @@ class CSVReportGenerator(ReportGenerator):
         """
         with open(output_path, 'w', newline='', encoding="utf-8") as csv_fd:
             writer = csv.writer(csv_fd, quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
-            writer.writerow(["category", "level", "description", "method", "parameter", "url", "body"])
+            writer.writerow(
+                ["category", "level", "description", "method", "parameter", "url", "body", "referer", "auth", "module"]
+            )
             writer.writerows(self._vulns)
             writer.writerows(self._anomalies)
             writer.writerows(self._additionals)
 
-    def add_vulnerability(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """
         Store the information about a vulnerability.
         """
         if request is not None:
             self._vulns.append(
-                [category, level, info, request.method, parameter, request.url, request.encoded_data]
+                [category, level, info, request.method, parameter, request.url,
+                request.encoded_data, request.referer, auth, module]
             )
 
-    def add_anomaly(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """Store the information about an anomaly met during the attack."""
         if request is not None:
             self._anomalies.append(
-                [category, level, info, request.method, parameter, request.url, request.encoded_data]
+                [category, level, info, request.method, parameter, request.url,
+                request.encoded_data, request.referer, auth, module]
             )
 
-    def add_additional(self, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
         """Store the information about an additional."""
         if request is not None:
             self._additionals.append(
-                [category, level, info, request.method, parameter, request.url, request.encoded_data]
+                [category, level, info, request.method, parameter, request.url,
+                request.encoded_data, request.referer, auth, module]
             )
 
     # We don't want description of each vulnerability for this report format

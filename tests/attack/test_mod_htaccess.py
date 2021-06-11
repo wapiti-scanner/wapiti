@@ -9,6 +9,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_htaccess import mod_htaccess
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -49,6 +50,8 @@ async def test_whole_stuff():
         else:
             assert request.path_id == 1
 
+    assert persister.module == "htaccess"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("Htaccess Bypass")
     assert persister.vulnerabilities[0]["request"].url == "http://perdu.com/admin/"
     await crawler.close()

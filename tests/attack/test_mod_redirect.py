@@ -14,6 +14,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_redirect import mod_redirect
+from wapitiCore.language.vulnerability import _
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
@@ -37,6 +38,8 @@ async def test_redirect_detection():
     module = mod_redirect(crawler, persister, logger, options, Event())
     await module.attack(request)
 
+    assert persister.module == "redirect"
+    assert persister.vulnerabilities[0]["category"] == _("Open Redirect")
     assert persister.vulnerabilities[0]["parameter"] == "url"
     await crawler.close()
 

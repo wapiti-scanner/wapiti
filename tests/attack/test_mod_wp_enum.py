@@ -9,6 +9,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_wp_enum import mod_wp_enum
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -110,7 +111,9 @@ async def test_plugin():
 
     await module.attack(request)
 
+    assert persister.module == "wp_enum"
     assert persister.additionals
+    assert persister.additionals[0]["category"] == _("Fingerprint web technology")
     assert persister.additionals[0]["info"] == \
         '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"]}'
     assert persister.additionals[1]["info"] == \

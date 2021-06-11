@@ -12,6 +12,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import mod_drupal_enum
+from wapitiCore.language.vulnerability import _
 
 # Test no Drupal detected
 @pytest.mark.asyncio
@@ -81,7 +82,9 @@ async def test_version_detected():
 
     await module.attack(request)
 
+    assert persister.module == "drupal_enum"
     assert persister.additionals
+    assert persister.additionals[0]["category"] == _("Fingerprint web technology")
     assert persister.additionals[0]["info"] == '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
     await crawler.close()
 

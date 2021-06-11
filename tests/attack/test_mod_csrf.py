@@ -70,6 +70,8 @@ async def test_csrf_cases():
             # Not attacked because of GET verb
             assert request.path_id == 1
 
+    assert persister.module == "csrf"
+    assert persister.vulnerabilities[0]["category"] == _("Cross Site Request Forgery")
     assert persister.vulnerabilities[0]["request_id"] == 2
     assert persister.vulnerabilities[0]["info"] == \
         _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")

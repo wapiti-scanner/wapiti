@@ -12,6 +12,7 @@ from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_sql import mod_sql
+from wapitiCore.language.vulnerability import _
 
 @pytest.mark.asyncio
 @respx.mock
@@ -104,7 +105,9 @@ async def test_true_positive():
     module.do_post = True
     await module.attack(request)
 
+    assert persister.module == "sql"
     assert persister.vulnerabilities
+    assert persister.vulnerabilities[0]["category"] == _("SQL Injection")
     await crawler.close()
 
 
