@@ -23,7 +23,7 @@ from os.path import join as path_join
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
-from wapitiCore.language.vulnerability import Messages, MEDIUM_LEVEL, HIGH_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
@@ -145,10 +145,9 @@ class mod_permanentxss(Attack):
                                 if has_strong_csp(response):
                                     description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                                self.add_vuln(
+                                self.add_vuln_high(
                                     request_id=request.path_id,
                                     category=NAME,
-                                    level=HIGH_LEVEL,
                                     request=evil_request,
                                     parameter=parameter,
                                     info=description
@@ -234,10 +233,9 @@ class mod_permanentxss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
 
-                self.add_anom(
+                self.add_anom_medium(
                     request_id=injection_request.path_id,
                     category=Messages.RES_CONSUMPTION,
-                    level=MEDIUM_LEVEL,
                     request=evil_request,
                     info=anom_msg,
                     parameter=xss_param
@@ -276,10 +274,9 @@ class mod_permanentxss(Attack):
                     if has_strong_csp(response):
                         description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
-                    self.add_vuln(
+                    self.add_vuln_high(
                         request_id=injection_request.path_id,
                         category=NAME,
-                        level=HIGH_LEVEL,
                         request=evil_request,
                         parameter=xss_param,
                         info=description
@@ -314,10 +311,9 @@ class mod_permanentxss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param)
 
-                    self.add_anom(
+                    self.add_anom_high(
                         request_id=injection_request.path_id,
                         category=Messages.ERROR_500,
-                        level=HIGH_LEVEL,
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param

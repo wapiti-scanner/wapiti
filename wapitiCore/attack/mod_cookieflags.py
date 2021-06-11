@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import _, LOW_LEVEL
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.secure_cookie import NAME as COOKIE_SECURE_DISABLED
 from wapitiCore.definitions.http_only import NAME as COOKIE_HTTPONLY_DISABLED
 
@@ -54,18 +54,16 @@ class mod_cookieflags(Attack):
             self.log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 self.log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
-                self.add_vuln(
+                self.add_vuln_low(
                     category=COOKIE_HTTPONLY_DISABLED,
-                    level=LOW_LEVEL,
                     request=request,
                     info=INFO_COOKIE_HTTPONLY.format(cookie.name)
                 )
 
             if not self.check_secure_flag(cookie):
                 self.log_red(INFO_COOKIE_SECURE.format(cookie.name))
-                self.add_vuln(
+                self.add_vuln_low(
                     category=COOKIE_SECURE_DISABLED,
-                    level=LOW_LEVEL,
                     request=request,
                     info=INFO_COOKIE_SECURE.format(cookie.name)
                 )

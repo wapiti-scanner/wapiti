@@ -19,7 +19,7 @@
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.redirect import NAME
 from wapitiCore.net.web import Request
 
@@ -52,10 +52,9 @@ class mod_redirect(Attack):
                 continue
 
             if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
-                self.add_vuln(
+                self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
-                    level=LOW_LEVEL,
                     request=mutated_request,
                     parameter=parameter,
                     info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)

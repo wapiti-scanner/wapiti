@@ -23,7 +23,7 @@ from binascii import hexlify, unhexlify
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
-from wapitiCore.language.vulnerability import Messages, CRITICAL_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.ssrf import NAME
 from wapitiCore.net.web import Request
 
@@ -241,10 +241,9 @@ class mod_ssrf(Attack):
 
                             mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                            self.add_vuln(
+                            self.add_vuln_critical(
                                 request_id=original_request.path_id,
                                 category=NAME,
-                                level=CRITICAL_LEVEL,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter

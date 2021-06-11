@@ -7,40 +7,10 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_nikto import mod_nikto
-
-
-class FakePersister:
-    CONFIG_DIR_NAME = "config"
-    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
-    BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
-    CONFIG_DIR = os.path.join(BASE_DIR, CONFIG_DIR_NAME)
-
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = []
-
-    def get_links(self, path=None, attack_module: str = ""):
-        for request in self.requests:
-            if request.method == "GET":
-                yield request
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        pass
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.vulnerabilities.append((request, info))
-
 
 @pytest.mark.asyncio
 @respx.mock
@@ -74,8 +44,8 @@ async def test_whole_stuff():
     await module.attack(request)
 
     assert len(persister.vulnerabilities) == 1
-    assert persister.vulnerabilities[0][0].url == (
+    assert persister.vulnerabilities[0]["request"].url == (
         "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
     )
-    assert "This CGI allows attackers read arbitrary files on the host" in persister.vulnerabilities[0][1]
+    assert "This CGI allows attackers read arbitrary files on the host" in persister.vulnerabilities[0]["info"]
     await crawler.close()

@@ -24,7 +24,7 @@ from itertools import product
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, LOW_LEVEL, _
+from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME
 from wapitiCore.net.web import Request
 
@@ -166,10 +166,9 @@ class mod_brute_login_form(Attack):
                     link_depth=login_form.link_depth
                 )
 
-                self.add_vuln(
+                self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
-                    level=LOW_LEVEL,
                     request=evil_request,
                     info=vuln_message
                 )

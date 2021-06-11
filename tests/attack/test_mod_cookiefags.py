@@ -7,34 +7,10 @@ import httpx
 import respx
 import pytest
 
+from tests.attack.fake_persister import FakePersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_cookieflags import mod_cookieflags
-
-
-class FakePersister:
-    def __init__(self):
-        self.requests = []
-        self.additionals = set()
-        self.anomalies = set()
-        self.vulnerabilities = defaultdict(list)
-
-    def get_links(self, path=None, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "GET"]
-
-    def get_forms(self, attack_module: str = ""):
-        return [request for request in self.requests if request.method == "POST"]
-
-    def add_additional(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.additionals.add(request)
-
-    def add_anomaly(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        self.anomalies.add(parameter)
-
-    def add_vulnerability(self, request_id: int = -1, category=None, level=0, request=None, parameter="", info=""):
-        description, cookie_name = info.split(":")
-        self.vulnerabilities[cookie_name.strip()].append(re.search(r"(HttpOnly|Secure)", description).group())
-
 
 @pytest.mark.asyncio
 @respx.mock
@@ -63,6 +39,7 @@ async def test_cookieflags():
     await module.attack(request)
 
     assert persister.vulnerabilities
-    assert persister.vulnerabilities["foo"] == ["HttpOnly", "Secure"]
-    assert persister.vulnerabilities["_octo"] == ["HttpOnly"]
+    assert persister.vulnerabilities[0]["info"] == "HttpOnly flag is not set in the cookie : _octo"
+    assert persister.vulnerabilities[1]["info"] == "HttpOnly flag is not set in the cookie : foo"
+    assert persister.vulnerabilities[2]["info"] == "Secure flag is not set in the cookie : foo"
     await crawler.close()
