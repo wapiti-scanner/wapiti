@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-respx = "==0.16.3"
+respx = "==0.17.0"
 
 [packages]
 beautifulsoup4 = ">=4.9.3"
@@ -12,7 +12,7 @@ mako = ">=1.1.4"
 markupsafe = "==1.1.1"
 httpx-socks = "==0.3.1"
 pytest = ">=5.4.1"
-httpx = "==0.17.1"
+httpx = "==0.18.1"
 tld = ">=0.12.5"
 yaswfp = ">=0.9.3"
 six = ">=1.15.0"

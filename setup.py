@@ -106,8 +106,8 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "httpx==0.17.1",
-        "httpx-socks==0.3.1",
+        "httpx==0.18.1",
+        "httpx-socks==0.4.1",
         "beautifulsoup4>=4.9.3",
         "tld>=0.12.5",
         "yaswfp>=0.9.3",
@@ -130,7 +130,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=6.2.2", "respx==0.16.3", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
+    tests_require=["pytest>=6.2.2", "respx==0.17.0", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )
