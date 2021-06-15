@@ -457,10 +457,7 @@ class AsyncCrawler:
         if form.referer:
             form_headers["referer"] = form.referer
 
-        if form.is_multipart:
-            file_params = form.post_params + form.file_params
-            post_params = []
-        elif "urlencoded" in form.enctype:
+        if form.is_multipart or "urlencoded" in form.enctype:
             file_params = form.file_params
             post_params = form.post_params
         else:
