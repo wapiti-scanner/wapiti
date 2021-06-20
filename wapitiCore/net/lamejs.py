@@ -182,7 +182,11 @@ if __name__ == "__main__":
     function yolo() {
       u='http://www.website.com/page.php?uid=1';
       t='Hi there';
-      window.open('http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
+      window.open(
+          'http://www.facebook.com/sharer.php?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t),
+          'sharer',
+          'toolbar=0,status=0,width=626,height=436'
+      );
       return false;
     }"""
 
