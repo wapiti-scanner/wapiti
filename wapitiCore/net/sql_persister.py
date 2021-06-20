@@ -82,7 +82,7 @@ attack_logs = Table(
 )
 
 
-class SqlitePersister:
+class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
     in other to can continue the process in the future.
     """

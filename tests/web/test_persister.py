@@ -5,7 +5,7 @@ import pytest
 import httpx
 import respx
 
-from wapitiCore.net.sqlite_persister import SqlitePersister
+from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler, Page
 
@@ -23,7 +23,7 @@ async def test_persister_basic():
     except FileNotFoundError:
         pass
 
-    persister = SqlitePersister("/tmp/crawl.db")
+    persister = SqlPersister("/tmp/crawl.db")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
 
@@ -118,7 +118,7 @@ async def test_persister_upload():
     except FileNotFoundError:
         pass
 
-    persister = SqlitePersister("/tmp/crawl.db")
+    persister = SqlPersister("/tmp/crawl.db")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
 
@@ -195,7 +195,7 @@ async def test_persister_forms():
         except FileNotFoundError:
             pass
 
-        persister = SqlitePersister("/tmp/crawl.db")
+        persister = SqlPersister("/tmp/crawl.db")
         await persister.create()
         await persister.set_root_url("http://httpbin.org/")
         await persister.set_to_browse(forms)
@@ -226,7 +226,7 @@ async def test_raw_post():
     except FileNotFoundError:
         pass
 
-    persister = SqlitePersister("/tmp/crawl.db")
+    persister = SqlPersister("/tmp/crawl.db")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
     await persister.set_to_browse([json_req])
