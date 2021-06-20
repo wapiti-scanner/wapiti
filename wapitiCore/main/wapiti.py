@@ -46,7 +46,7 @@ from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flat
 from wapitiCore.net import crawler, jsoncookie
 from wapitiCore.net.web import Request
 from wapitiCore.report import get_report_generator_instance, GENERATORS
-from wapitiCore.net.sqlite_persister import SqlitePersister
+from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.moon import phase
 
 from wapitiCore.attack import attack
@@ -139,13 +139,13 @@ class Wapiti:
         self._bug_report = True
 
         if session_dir:
-            SqlitePersister.CRAWLER_DATA_DIR = session_dir
+            SqlPersister.CRAWLER_DATA_DIR = session_dir
 
         if config_dir:
-            SqlitePersister.CONFIG_DIR = config_dir
+            SqlPersister.CONFIG_DIR = config_dir
 
         self._history_file = os.path.join(
-            SqlitePersister.CRAWLER_DATA_DIR,
+            SqlPersister.CRAWLER_DATA_DIR,
             "{}_{}_{}.db".format(
                 self.server.replace(':', '_'),
                 self.target_scope,
@@ -153,10 +153,10 @@ class Wapiti:
             )
         )
 
-        if not os.path.isdir(SqlitePersister.CRAWLER_DATA_DIR):
-            os.makedirs(SqlitePersister.CRAWLER_DATA_DIR)
+        if not os.path.isdir(SqlPersister.CRAWLER_DATA_DIR):
+            os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
-        self.persister = SqlitePersister(self._history_file)
+        self.persister = SqlPersister(self._history_file)
 
     async def init_persister(self):
         await self.persister.create()
@@ -692,7 +692,7 @@ class Wapiti:
             os.unlink(self.persister.output_file[:-2] + "pkl")
         except FileNotFoundError:
             pass
-        self.persister = SqlitePersister(self._history_file)
+        self.persister = SqlPersister(self._history_file)
         await self.persister.create()
 
     async def count_resources(self) -> int:

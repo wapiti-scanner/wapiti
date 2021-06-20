@@ -200,9 +200,6 @@ class Attack:
         self.crawler = crawler
         self.persister = persister
         self._stop_event = stop_event
-        # self.add_vuln = persister.add_vulnerability
-        # self.add_anom = persister.add_anomaly
-        # self.add_addition = persister.add_additional
         self.payload_reader = PayloadReader(attack_options)
         self.options = attack_options
 
