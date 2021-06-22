@@ -161,6 +161,10 @@ class Wapiti:
     async def init_persister(self):
         await self.persister.create()
 
+    @property
+    def history_file(self):
+        return self._history_file
+
     def _init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
@@ -317,7 +321,6 @@ class Wapiti:
         print(_("Update done."))
 
     async def load_scan_state(self):
-        await self.persister.create()
         async for resource in self.persister.get_to_browse():
             self._start_urls.append(resource)
         async for resource in self.persister.get_links():
@@ -1278,6 +1281,8 @@ async def wapiti_main():
     except InvalidOptionValue as msg:
         print(msg)
         sys.exit(2)
+
+    assert os.path.exists(wap.history_file)
 
     loop = asyncio.get_event_loop()
 
