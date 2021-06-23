@@ -31,7 +31,6 @@ import functools
 from time import sleep
 from typing import Tuple, List
 import asyncio
-from os import cpu_count
 
 # Third-parties
 import httpx
@@ -112,7 +111,7 @@ def retry(delay=1, times=3):
             final_excep = None
             for counter in range(times):
                 if counter > 0:
-                    sleep(delay)
+                    await asyncio.sleep(delay)
 
                 try:
                     value = await function(*args, **kwargs)
