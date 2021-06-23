@@ -592,9 +592,7 @@ class Explorer:
         # Event to stop processing tasks
         self._stopped = stop_event
 
-        # CPU count + 4 is default concurrent tasks for CPython ThreadPoolExecutor with a high limit set at 32
-        self._max_tasks = min(parallelism, 32, (cpu_count() or 1) + 4)
-        self._max_tasks += round(self._max_tasks / 2)
+        self._max_tasks = min(parallelism, 32)
 
     @property
     def max_depth(self) -> int:
@@ -824,7 +822,7 @@ class Explorer:
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
                 if page.raw_size > self._max_page_size:
-                    page.clean()
+                    await page.clean()
                     return False, []
 
             await asyncio.sleep(0)

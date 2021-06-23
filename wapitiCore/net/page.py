@@ -294,11 +294,11 @@ class Page:
                 self._soup = BeautifulSoup('', parser_name)
         return self._soup
 
-    def clean(self):
+    async def clean(self):
         if self._soup is not None:
             self._soup.decompose()
             del self._soup
-        self._response.close()
+        await self._response.aclose()
 
     @property
     @lru_cache(maxsize=2)
@@ -565,10 +565,10 @@ class Page:
     def text_only_md5(self) -> str:
         return md5(self.text_only.encode(errors="ignore")).hexdigest()
 
-    def empty(self):
+    async def empty(self):
         """Modify the current Page object to make it appears as if the content-length was 0."""
         self._is_empty = True
-        self.clean()
+        await self.clean()
 
     @property
     def encoding(self):
