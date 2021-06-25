@@ -177,6 +177,9 @@ msgstr ""
 "Vulnérabilité de XSS permanent trouvée dans {0} via une injection dans la "
 "paramètre {1} de {2}"
 
+msgid "Credentials transported over an Unencrypted Channel on : {0}"
+msgstr "Identifiants transportés sur un canal non chiffré sur : {0}"
+
 msgid "Warning: Content-Security-Policy is present!"
 msgstr "Avertissement: L'entête Content-Security-Policy est présent!"
 

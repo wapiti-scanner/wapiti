@@ -908,8 +908,10 @@ class Page:
                     username_field_idx.append(i)
 
                 elif input_type == "text" and (
-                        any(field_name in input_name for field_name in ["mail", "user", "login", "name"]) or
-                        any(field_id in input_id for field_id in ["mail", "user", "login", "name"])
+                        any(field_name in input_name for field_name in \
+                            ["mail", "user", "login", "name", "id", "client", "nom"])
+                        or any(field_id in input_id for field_id in \
+                               ["mail", "user", "login", "name", "id", "client", "nom"])
                 ):
                     username_field_idx.append(i)
 
