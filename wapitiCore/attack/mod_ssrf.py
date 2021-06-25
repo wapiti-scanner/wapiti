@@ -21,6 +21,7 @@ from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, _
@@ -153,8 +154,8 @@ class mod_ssrf(Attack):
     name = "ssrf"
     MSG_VULN = _("SSRF vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        super().__init__(crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
 
         methods = ""
         if self.do_get:
@@ -176,7 +177,7 @@ class mod_ssrf(Attack):
         # contacted the endpoint.
         for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 await self.crawler.async_send(mutated_request)
@@ -186,7 +187,7 @@ class mod_ssrf(Attack):
 
     async def finish(self):
         endpoint_url = "{}get_ssrf.php?session_id={}".format(self.internal_endpoint, self._session_id)
-        print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
+        logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
@@ -194,7 +195,7 @@ class mod_ssrf(Attack):
             response = await self.crawler.async_send(endpoint_request)
         except RequestError:
             self.network_errors += 1
-            print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
+            logging.error(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
         else:
             data = response.json
             if isinstance(data, dict):

@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
@@ -43,9 +42,8 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options, Event())
+    module = mod_sql(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = True
     for request in all_requests:
@@ -67,9 +65,8 @@ async def test_false_positive():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options, Event())
+    module = mod_sql(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = True
     await module.attack(request)
@@ -100,9 +97,8 @@ async def test_true_positive():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options, Event())
+    module = mod_sql(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = True
     await module.attack(request)
@@ -159,9 +155,8 @@ async def test_blind_detection():
 
         crawler = AsyncCrawler("http://perdu.com/", timeout=1)
         options = {"timeout": 10, "level": 1}
-        logger = Mock()
 
-        module = mod_sql(crawler, persister, logger, options, Event())
+        module = mod_sql(crawler, persister, options, Event())
         module.verbose = 2
         module.do_post = True
         await module.attack(request)
@@ -184,9 +179,8 @@ async def test_negative_blind():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_sql(crawler, persister, logger, options, Event())
+    module = mod_sql(crawler, persister, options, Event())
     module.verbose = 2
     await module.attack(request)
 
@@ -245,9 +239,8 @@ async def test_blind_detection_parenthesis():
 
         crawler = AsyncCrawler("http://perdu.com/", timeout=1)
         options = {"timeout": 10, "level": 1}
-        logger = Mock()
 
-        module = mod_sql(crawler, persister, logger, options, Event())
+        module = mod_sql(crawler, persister, options, Event())
         module.verbose = 2
         module.do_post = True
         await module.attack(request)

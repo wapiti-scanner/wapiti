@@ -19,6 +19,7 @@
 from urllib.parse import quote
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
@@ -36,8 +37,8 @@ class mod_crlf(Attack):
     do_post = True
     payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.5 version"), Flags())
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        super().__init__(crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
     async def attack(self, request: Request):
@@ -45,7 +46,7 @@ class mod_crlf(Attack):
 
         for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request.url))
+                logging.info("[¨] {0}".format(mutated_request.url))
 
             try:
                 response = await self.crawler.async_send(mutated_request)

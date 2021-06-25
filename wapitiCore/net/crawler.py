@@ -31,6 +31,7 @@ import functools
 from time import sleep
 from typing import Tuple, List
 import asyncio
+from loguru import logger as logging
 
 # Third-parties
 import httpx
@@ -361,7 +362,7 @@ class AsyncCrawler:
     async def async_try_login(self, auth_url: str):
         """Try to authenticate with the provided url and credentials."""
         if len(self._auth_credentials) != 2:
-            print(_("Login failed") + " : " + _("Invalid credentials format"))
+            logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
             return
 
         username, password = self._auth_credentials
@@ -399,17 +400,17 @@ class AsyncCrawler:
                 # ensure logged in
                 if login_response.soup.find_all(text=re.compile(r'(?i)((log|sign)\s?out|disconnect|déconnexion)')):
                     self.is_logged_in = True
-                    print(_("Login success"))
+                    logging.success(_("Login success"))
 
                 else:
-                    print(_("Login failed") + " : " + _("Credentials might be invalid"))
+                    logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
             else:
-                print(_("Login failed") + " : " + _("No login form detected"))
+                logging.warning(_("Login failed") + " : " + _("No login form detected"))
 
         except ConnectionError:
-            print(_("[!] Connection error with URL"), auth_url)
+            logging.error(_("[!] Connection error with URL"), auth_url)
         except httpx.RequestError as error:
-            print(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
+            logging.error(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
 
     @retry(delay=1, times=3)
     async def async_get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
@@ -769,7 +770,7 @@ class Explorer:
             self._processed_requests.append(request)  # thread safe
 
             if self._log:
-                print("[+] {0}".format(request))
+                logging.info("[+] {0}".format(request))
 
             dir_name = request.dir_name
             async with self._shared_lock:
@@ -790,17 +791,17 @@ class Explorer:
             try:
                 page = await self._crawler.async_send(request)
             except (TypeError, UnicodeDecodeError) as exception:
-                print("{} with url {}".format(exception, resource_url))  # debug
+                logging.debug("{} with url {}".format(exception, resource_url))  # debug
                 return False, []
             # except SSLError:
             #     print(_("[!] SSL/TLS error occurred with URL"), resource_url)
             #     return False, []
             # TODO: what to do of connection errors ? sleep a while before retrying ?
             except ConnectionError:
-                print(_("[!] Connection error with URL"), resource_url)
+                logging.error(_("[!] Connection error with URL"), resource_url)
                 return False, []
             except httpx.RequestError as error:
-                print(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
+                logging.error(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
                 return False, []
 
             if self._max_files_per_dir:
@@ -927,7 +928,7 @@ class Explorer:
                 try:
                     success, resources = await task
                 except Exception as exc:
-                    print('%r generated an exception: %s' % (request, exc))
+                    logging.error('%r generated an exception: %s' % (request, exc))
                 else:
                     if success:
                         yield request

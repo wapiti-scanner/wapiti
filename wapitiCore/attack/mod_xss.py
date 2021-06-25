@@ -20,6 +20,7 @@ from os.path import join as path_join
 from configparser import ConfigParser
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
 from wapitiCore.language.vulnerability import Messages, _
@@ -51,8 +52,8 @@ class mod_xss(Attack):
 
     MSG_VULN = _("XSS vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         methods = ""
         if self.do_get:
             methods += "G"
@@ -112,7 +113,7 @@ class mod_xss(Attack):
 
         for evil_request, xss_param, xss_payload, xss_flags in attack_mutator.mutate(original_request):
             if self.verbose == 2:
-                print("[¨] {0}".format(evil_request))
+                logging.info("[¨] {0}".format(evil_request))
 
             try:
                 response = await self.crawler.async_send(evil_request)

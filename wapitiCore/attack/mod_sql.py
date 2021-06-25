@@ -20,6 +20,7 @@ import re
 from random import randint
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, _
@@ -276,8 +277,8 @@ class mod_sql(Attack):
     payloads = ("[VALUE]\xBF'\"(", Flags())
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        super().__init__(crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
     @staticmethod
@@ -336,7 +337,7 @@ class mod_sql(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -480,7 +481,7 @@ class mod_sql(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)

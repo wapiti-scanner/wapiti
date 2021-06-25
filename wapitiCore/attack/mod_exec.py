@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, PayloadType
 from wapitiCore.language.vulnerability import Messages, _
@@ -33,8 +34,8 @@ class mod_exec(Attack):
 
     name = "exec"
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        super().__init__(crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
         self.false_positive_timeouts = set()
         self.mutator = self.get_mutator()
 
@@ -100,7 +101,7 @@ class mod_exec(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)

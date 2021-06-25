@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from subprocess import Popen
 import os
 import sys
@@ -42,9 +41,8 @@ async def test_direct_body():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -64,9 +62,8 @@ async def test_direct_param():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -82,9 +79,8 @@ async def test_direct_query_string():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -115,9 +111,8 @@ async def test_out_of_band_body():
         "external_endpoint": "http://wapiti3.ovh/",
         "internal_endpoint": "http://wapiti3.ovh/"
     }
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
 
     respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
         return_value=httpx.Response(
@@ -165,9 +160,8 @@ async def test_out_of_band_param():
         "external_endpoint": "http://wapiti3.ovh/",
         "internal_endpoint": "http://wapiti3.ovh/"
     }
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
 
     respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
         return_value=httpx.Response(
@@ -215,9 +209,8 @@ async def test_out_of_band_query_string():
         "external_endpoint": "http://wapiti3.ovh/",
         "internal_endpoint": "http://wapiti3.ovh/"
     }
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -269,9 +262,8 @@ async def test_direct_upload():
         "external_endpoint": "http://wapiti3.ovh/",
         "internal_endpoint": "http://wapiti3.ovh/"
     }
-    logger = Mock()
 
-    module = mod_xxe(crawler, persister, logger, options, Event())
+    module = mod_xxe(crawler, persister, options, Event())
 
     await module.attack(request)
 

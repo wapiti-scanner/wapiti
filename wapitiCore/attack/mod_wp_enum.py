@@ -2,6 +2,8 @@ import re
 import json
 from os.path import join as path_join
 
+from loguru import logger as logging
+
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
@@ -46,7 +48,7 @@ class mod_wp_enum(Attack):
                 if version:
                     version = version.group(1)
                 else:
-                    print("Readme.txt is not in a valid format")
+                    logging.warning("Readme.txt is not in a valid format")
                     version = ""
 
                 plugin_detected = {

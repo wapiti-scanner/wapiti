@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import os
 import sys
 from os.path import join as path_join
@@ -37,9 +36,8 @@ async def test_no_drupal():
     crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options, Event())
+    module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -75,9 +73,8 @@ async def test_version_detected():
     crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options, Event())
+    module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -117,9 +114,8 @@ async def test_multi_versions_detected():
     crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options, Event())
+    module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -158,9 +154,8 @@ async def test_version_not_detected():
     crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_drupal_enum(crawler, persister, logger, options, Event())
+    module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)

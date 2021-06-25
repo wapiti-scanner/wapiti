@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
@@ -35,8 +36,8 @@ class mod_buster(Attack):
     do_get = False
     do_post = False
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.known_dirs = []
         self.known_pages = []
         self.new_resources = []
@@ -44,7 +45,7 @@ class mod_buster(Attack):
 
     async def test_directory(self, path: str):
         if self.verbose == 2:
-            print("[¨] Testing directory {0}".format(path))
+            logging.info("[¨] Testing directory {0}".format(path))
 
         test_page = Request(path + "does_n0t_exist.htm")
         try:

@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
@@ -49,7 +50,7 @@ class mod_methods(Attack):
         )
 
         if self.verbose == 2:
-            print("[+] {}".format(option_request))
+            logging.info("[+] {}".format(option_request))
 
         try:
             response = await self.crawler.async_send(option_request)

@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
@@ -36,8 +37,8 @@ class mod_timesql(Attack):
 
     MSG_VULN = _("Blind SQL vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
     def set_timeout(self, timeout):
@@ -59,7 +60,7 @@ class mod_timesql(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.error("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -67,7 +68,7 @@ class mod_timesql(Attack):
                 # The request with time based payload did timeout, what about a regular request?
                 if await self.does_timeout(request):
                     self.network_errors += 1
-                    print("[!] Too much lag from website, can't reliably test time-based blind SQL")
+                    logging.error("[!] Too much lag from website, can't reliably test time-based blind SQL")
                     break
 
                 if parameter == "QUERY_STRING":

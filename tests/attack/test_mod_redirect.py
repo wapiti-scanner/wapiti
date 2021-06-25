@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from subprocess import Popen
 import os
 import sys
@@ -33,9 +32,8 @@ async def test_redirect_detection():
     request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
     crawler = AsyncCrawler("http://127.0.0.1:65080/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_redirect(crawler, persister, logger, options, Event())
+    module = mod_redirect(crawler, persister, options, Event())
     await module.attack(request)
 
     assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -74,9 +72,8 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_redirect(crawler, persister, logger, options, Event())
+    module = mod_redirect(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = True
     for request in all_requests:

@@ -26,9 +26,10 @@ from math import ceil
 import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
-from functools import partialmethod
+from functools import partialmethod, partial
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.web import Request
@@ -194,7 +195,7 @@ class Attack:
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
+    def __init__(self, crawler, persister, attack_options, stop_event):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
@@ -216,17 +217,6 @@ class Attack:
         # Must be left empty in the code
         self.deps = []
 
-        self._logger = logger
-        self.log = self._logger.log
-        self.log_blue = self._logger.log_blue
-        self.log_cyan = self._logger.log_cyan
-        self.log_green = self._logger.log_green
-        self.log_magenta = self._logger.log_magenta
-        self.log_orange = self._logger.log_orange
-        self.log_red = self._logger.log_red
-        self.log_white = self._logger.log_white
-        self.log_yellow = self._logger.log_yellow
-
     def set_verbose(self, verbose):
         self.verbose = verbose
 
@@ -245,6 +235,11 @@ class Attack:
             parameter=parameter,
             info=info
         )
+
+    log_blue = partial(logging.log, "BLUE")
+    log_green = partial(logging.log, "GREEN")
+    log_red = partial(logging.log, "RED")
+    log_orange = partial(logging.log, "ORANGE")
 
     add_vuln_critical = partialmethod(add_payload, payload_type=VULN, level=CRITICAL_LEVEL)
     add_vuln_high = partialmethod(add_payload, payload_type=VULN, level=HIGH_LEVEL)

@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from subprocess import Popen
 import os
 import sys
@@ -33,9 +32,8 @@ async def test_inclusion_detection():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options, Event())
+    module = mod_file(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -53,9 +51,8 @@ async def test_warning_false_positive():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options, Event())
+    module = mod_file(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -83,9 +80,8 @@ async def test_no_crash():
 
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_file(crawler, persister, logger, options, Event())
+    module = mod_file(crawler, persister, options, Event())
     module.do_post = False
     for request in all_requests:
         await module.attack(request)
