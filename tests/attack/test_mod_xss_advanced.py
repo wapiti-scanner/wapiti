@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from subprocess import Popen
 import os
 import sys
@@ -33,9 +32,8 @@ async def test_title_false_positive():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -51,9 +49,8 @@ async def test_title_positive():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -76,9 +73,8 @@ async def test_script_filter_bypass():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -96,9 +92,8 @@ async def test_attr_quote_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -116,9 +111,8 @@ async def test_attr_double_quote_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -136,9 +130,8 @@ async def test_attr_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -156,9 +149,8 @@ async def test_tag_name_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -176,9 +168,8 @@ async def test_partial_tag_name_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -195,9 +186,8 @@ async def test_xss_inside_tag_input():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -215,9 +205,8 @@ async def test_xss_inside_tag_link():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -235,9 +224,8 @@ async def test_xss_uppercase_no_script():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -255,9 +243,8 @@ async def test_frame_src_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -275,9 +262,8 @@ async def test_frame_src_no_escape():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -295,9 +281,8 @@ async def test_bad_separator_used():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -314,9 +299,8 @@ async def test_escape_with_style():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -333,9 +317,8 @@ async def test_rare_tag_and_event():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -352,9 +335,8 @@ async def test_xss_with_strong_csp():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -370,9 +352,8 @@ async def test_xss_with_weak_csp():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_xss(crawler, persister, logger, options, Event())
+    module = mod_xss(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 

@@ -21,6 +21,7 @@ from configparser import ConfigParser
 from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator
 from wapitiCore.language.vulnerability import Messages, _
@@ -213,7 +214,7 @@ class mod_permanentxss(Attack):
 
         for evil_request, xss_param, _xss_payload, xss_flags in attack_mutator.mutate(injection_request):
             if self.verbose == 2:
-                print("[¨] {0}".format(evil_request))
+                logging.info("[¨] {0}".format(evil_request))
 
             try:
                 await self.crawler.async_send(evil_request)

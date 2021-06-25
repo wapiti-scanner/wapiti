@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from subprocess import Popen
 import os
 import sys
@@ -60,9 +59,8 @@ async def test_csrf_cases():
 
     crawler = AsyncCrawler("http://127.0.0.1:65086/", timeout=1)
     options = {"timeout": 10, "level": 1}
-    logger = Mock()
 
-    module = mod_csrf(crawler, persister, logger, options, Event())
+    module = mod_csrf(crawler, persister, options, Event())
     module.do_post = True
     module.verbose = 2
     for request in all_requests:

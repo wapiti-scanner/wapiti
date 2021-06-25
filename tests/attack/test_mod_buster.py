@@ -35,13 +35,12 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
     with patch(
             "wapitiCore.attack.mod_buster.mod_buster.payloads",
             [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
     ):
-        module = mod_buster(crawler, persister, logger, options, Event())
+        module = mod_buster(crawler, persister, options, Event())
         module.verbose = 2
         module.do_get = True
         await module.attack(request)

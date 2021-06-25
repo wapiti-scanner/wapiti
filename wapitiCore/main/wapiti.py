@@ -38,9 +38,9 @@ import signal
 import browser_cookie3
 import httpx
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.language.language import _
-from wapitiCore.language.logger import ConsoleLogger
 from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flatten_references
 
 from wapitiCore.net import crawler, jsoncookie
@@ -51,6 +51,11 @@ from wapitiCore.moon import phase
 
 from wapitiCore.attack import attack
 
+logging.remove()
+logging.level("RED", no=45, color="<red>")
+logging.level("ORANGE", no=35, color="<yellow>")
+logging.level("GREEN", no=22, color="<green>")
+logging.level("BLUE", no=21, color="<blue>")
 
 BASE_DIR = None
 WAPITI_VERSION = "Wapiti 3.0.5"
@@ -80,12 +85,12 @@ stop_event = asyncio.Event()
 
 
 def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
-    print(_("Waiting for running crawler tasks to finish, please wait."))
+    logging.info(_("Waiting for running crawler tasks to finish, please wait."))
     stop_event.set()
 
 
 def stop_attack_process():  # pylint: disable=unused-argument
-    print(_("Waiting for all payload tasks to finish for current resource, please wait."))
+    logging.info(_("Waiting for all payload tasks to finish for current resource, please wait."))
     stop_event.set()
 
 
@@ -202,21 +207,17 @@ class Wapiti:
     def _init_attacks(self, stop_event):
         self._init_report()
 
-        logger = ConsoleLogger()
-        if self.color:
-            logger.color = True
-
-        print(_("[*] Loading modules:"))
+        logging.info(_("[*] Loading modules:"))
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
-        print("\t {0}".format(", ".join(modules_list)))
+        logging.info("\t {0}".format(", ".join(modules_list)))
         for mod_name in attack.modules:
             try:
                 mod = import_module("wapitiCore.attack." + mod_name)
             except ImportError:
-                print(_("[!] Could not find module {0}").format(mod_name))
+                logging.error(_("[!] Could not find module {0}").format(mod_name))
                 continue
 
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options, stop_event)
+            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
             if hasattr(mod_instance, "set_timeout"):
                 mod_instance.set_timeout(self.crawler.timeout)
             self.attacks.append(mod_instance)
@@ -275,7 +276,7 @@ class Wapiti:
                                 elif method == "post":
                                     attack_module.do_post = False
                         if not found:
-                            print(_("[!] Unable to find a module named {0}").format(module_name))
+                            logging.error(_("[!] Unable to find a module named {0}").format(module_name))
 
                 # activate some module options
                 else:
@@ -303,22 +304,19 @@ class Wapiti:
                                 elif method == "post":
                                     attack_module.do_post = True
                         if not found:
-                            print(_("[!] Unable to find a module named {0}").format(module_name))
+                            logging.error(_("[!] Unable to find a module named {0}").format(module_name))
 
     async def update(self):
         """Update modules that implement an update method"""
-        logger = ConsoleLogger()
-        if self.color:
-            logger.color = True
 
         stop_event = asyncio.Event()
         for mod_name in attack.modules:
             mod = import_module("wapitiCore.attack." + mod_name)
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, logger, self.attack_options, stop_event)
+            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
             if hasattr(mod_instance, "update"):
-                print(_("Updating module {0}").format(mod_name[4:]))
+                logging.info(_("Updating module {0}").format(mod_name[4:]))
                 await mod_instance.update()
-        print(_("Update done."))
+        logging.success(_("Update done."))
 
     async def load_scan_state(self):
         async for resource in self.persister.get_to_browse():
@@ -331,7 +329,7 @@ class Wapiti:
         await self.persister.set_root_url(self.target_url)
 
     async def save_scan_state(self):
-        print(_("[*] Saving scan state, please wait..."))
+        logging.info(_("[*] Saving scan state, please wait..."))
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
@@ -339,7 +337,7 @@ class Wapiti:
         print(_(" Note"))
         print("========")
 
-        print(_("This scan has been saved in the file {0}").format(self.persister.output_file))
+        logging.success(_("This scan has been saved in the file {0}").format(self.persister.output_file))
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
@@ -360,7 +358,7 @@ class Wapiti:
             # Browsed URLs are saved one at a time
             await self.persister.add_request(resource)
             if not stop_event.is_set() and (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
-                print(_("Max scan time was reached, stopping."))
+                logging.info(_("Max scan time was reached, stopping."))
                 stop_event.set()
 
         # Let's save explorer values (limits)
@@ -392,8 +390,8 @@ class Wapiti:
                 attack_name_list = [attack.name for attack in self.attacks if attack.name in attack_module.require and
                                     (attack.do_get or attack.do_post)]
                 if attack_module.require != attack_name_list:
-                    print(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
-                    print("  {0}".format(",".join([attack for attack in attack_module.require
+                    logging.error(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
+                    logging.error("  {0}".format(",".join([attack for attack in attack_module.require
                                                    if attack not in attack_name_list])))
                     continue
 
@@ -401,11 +399,11 @@ class Wapiti:
                     [attack for attack in self.attacks if attack.name in attack_module.require]
                 )
 
-            attack_module.log_green(_("[*] Launching module {0}"), attack_module.name)
+            logging.log("GREEN", _("[*] Launching module {0}"), attack_module.name)
 
             already_attacked = await self.persister.count_attacked(attack_module.name)
             if already_attacked:
-                attack_module.log_green(
+                logging.warning(
                     _("[*] {0} pages were previously attacked and will be skipped"),
                     already_attacked
                 )
@@ -444,12 +442,12 @@ class Wapiti:
                 try:
                     if await attack_module.must_attack(original_request):
                         if self.verbose >= 1:
-                            print("[+] {}".format(original_request))
+                            logging.info("[+] {}".format(original_request))
 
                         await attack_module.attack(original_request)
 
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
-                        print(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
+                        logging.info(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
                         break
                 except RequestError:
                     # Hmmm it should be caught inside the module
@@ -458,8 +456,7 @@ class Wapiti:
                 except Exception as exception:
                     # Catch every possible exceptions and print it
                     exception_traceback = sys.exc_info()[2]
-                    print(exception.__class__.__name__, exception)
-                    print_tb(exception_traceback)
+                    logging.exception(exception.__class__.__name__, exception)
 
                     if self._bug_report:
                         traceback_file = str(uuid1())
@@ -467,7 +464,7 @@ class Wapiti:
                             print_tb(exception_traceback, file=traceback_fd)
                             print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
                             print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
-                            print("{}. httpx {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
+                            logging.info("{}. httpx {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
 
                         try:
                             upload_request = Request(
@@ -477,9 +474,9 @@ class Wapiti:
                                 ]
                             )
                             page = await self.crawler.async_send(upload_request)
-                            print(_("Sending crash report {} ... {}").format(traceback_file, page.content))
+                            logging.info(_("Sending crash report {} ... {}").format(traceback_file, page.content))
                         except RequestError:
-                            print(_("Error sending crash report"))
+                            logging.error(_("Error sending crash report"))
                         os.unlink(traceback_file)
                 else:
                     if original_request.path_id is not None:
@@ -491,7 +488,7 @@ class Wapiti:
                 await attack_module.finish()
 
             if attack_module.network_errors:
-                print(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
+                logging.warning(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
 
             if answer == "r":
                 # Do not process remaining modules
@@ -564,10 +561,10 @@ class Wapiti:
         self.report_gen.generate_report(self.output_file)
         print('')
         print(_("Report"))
-        print("------")
-        print(_("A report has been generated in the file {0}").format(self.output_file))
+        logging.info("------")
+        logging.info(_("A report has been generated in the file {0}").format(self.output_file))
         if self.report_generator_type == "html":
-            print(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
+            logging.info(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
 
         await self.crawler.close()
         await self.persister.close()
@@ -718,15 +715,15 @@ def is_valid_endpoint(url_type, url):
     try:
         parts = urlparse(url)
     except ValueError:
-        print('ValueError')
+        logging.error('ValueError')
         return False
     else:
         if parts.params or parts.query or parts.fragment:
-            print(_("Error: {} must not contain params, query or fragment!").format(url_type))
+            logging.error(_("Error: {} must not contain params, query or fragment!").format(url_type))
             return False
         if parts.scheme in ("http", "https") and parts.netloc:
             return True
-    print(_("Error: {} must contain scheme and host").format(url_type))
+    logging.error(_("Error: {} must contain scheme and host").format(url_type))
     return False
 
 
@@ -1075,6 +1072,13 @@ async def wapiti_main():
     )
 
     parser.add_argument(
+        "--log",
+        metavar="OUTPUT_PATH",
+        default=None,
+        help=_("Output log file")
+    )
+
+    parser.add_argument(
         "--external-endpoint",
         metavar="EXTERNAL_ENDPOINT_URL",
         default=argparse.SUPPRESS,
@@ -1110,8 +1114,16 @@ async def wapiti_main():
 
     args = parser.parse_args()
 
+    if args.color:
+        logging.add(sys.stdout, format="<lvl>{message}</lvl>", level="INFO")
+    else:
+        logging.add(sys.stdout, colorize=False, format="{message}", level="INFO")
+
+    if args.log:
+        logging.add(args.log, level="DEBUG")
+
     if args.tasks < 1:
-        print(_("Number of concurrent tasks must be 1 or above!"))
+        logging.error(_("Number of concurrent tasks must be 1 or above!"))
         sys.exit(2)
 
     if args.scope == "punk":
@@ -1132,13 +1144,13 @@ async def wapiti_main():
 
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc:
-        print(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
+        logging.error(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
 
     wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     if args.update:
-        print(_("[*] Updating modules"))
+        logging.info(_("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
         await wap.update()
@@ -1158,7 +1170,7 @@ async def wapiti_main():
                             wap.add_start_url(urlline)
                     urlfd.close()
                 except UnicodeDecodeError:
-                    print(_("Error: File given with the -s option must be UTF-8 encoded !"))
+                    logging.error(_("Error: File given with the -s option must be UTF-8 encoded !"))
                     raise InvalidOptionValue("-s", start_url)
             else:
                 raise InvalidOptionValue('-s', start_url)
@@ -1261,7 +1273,7 @@ async def wapiti_main():
                 if ping(internal_endpoint):
                     attack_options["internal_endpoint"] = internal_endpoint
                 else:
-                    print(_("Error: Internal endpoint URL must be accessible from Wapiti!"))
+                    logging.error(_("Error: Internal endpoint URL must be accessible from Wapiti!"))
                     raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
             else:
                 raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
@@ -1279,7 +1291,7 @@ async def wapiti_main():
             await wap.flush_session()
 
     except InvalidOptionValue as msg:
-        print(msg)
+        logging.error(msg)
         sys.exit(2)
 
     assert os.path.exists(wap.history_file)
@@ -1292,7 +1304,7 @@ async def wapiti_main():
                 pass
             else:
                 if await wap.has_scan_started():
-                    print(_("[*] Resuming scan from previous session, please wait"))
+                    logging.info(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args and args.auth_type == "post":
                     await wap.crawler.async_try_login(wap.crawler.auth_url)
@@ -1305,20 +1317,20 @@ async def wapiti_main():
 
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)
-            print(_("[*] {0} URLs and forms having more than {1} parameters were removed.".format(
+            logging.info(_("[*] {0} URLs and forms having more than {1} parameters were removed.".format(
                 count,
                 args.max_parameters
             )))
 
-        print(_("[*] Wapiti found {0} URLs and forms during the scan").format(await wap.count_resources()))
+        logging.info(_("[*] Wapiti found {0} URLs and forms during the scan").format(await wap.count_resources()))
         stop_event.clear()
         loop.add_signal_handler(signal.SIGINT, stop_attack_process)
         await wap.attack(stop_event)
         loop.remove_signal_handler(signal.SIGINT)
 
     except OperationalError:
-        print(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
-        print(_("[!] You should unlock and launch Wapiti again."))
+        logging.error(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
+        logging.error(_("[!] You should unlock and launch Wapiti again."))
     except SystemExit:
         pass
 

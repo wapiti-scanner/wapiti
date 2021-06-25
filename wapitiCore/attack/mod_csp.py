@@ -26,7 +26,6 @@ MSG_NO_CSP = _("CSP is not set")
 MSG_CSP_MISSING = _("CSP attribute \"{0}\" is missing")
 MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
 
-
 # This module check the basics recommendations of CSP
 class mod_csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""

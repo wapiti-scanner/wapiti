@@ -23,6 +23,7 @@ import random
 from urllib.parse import urlparse
 
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
@@ -66,8 +67,8 @@ class mod_nikto(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
@@ -91,7 +92,7 @@ class mod_nikto(Attack):
                 writer.writerows(self.nikto_db)
 
         except IOError:
-            print(_("Error downloading nikto database."))
+            logging.error(_("Error downloading nikto database."))
 
     async def must_attack(self, request: Request):
         if self.finished:
@@ -106,8 +107,8 @@ class mod_nikto(Attack):
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
         except IOError:
-            print(_("Problem with local nikto database."))
-            print(_("Downloading from the web..."))
+            logging.warning(_("Problem with local nikto database."))
+            logging.info(_("Downloading from the web..."))
             await self.update()
 
         self.finished = True
@@ -154,9 +155,9 @@ class mod_nikto(Attack):
 
             if self.verbose == 2:
                 if method == "GET":
-                    print("[¨] {0}".format(evil_request.url))
+                    logging.info("[¨] {0}".format(evil_request.url))
                 else:
-                    print("[¨] {0}".format(evil_request.http_repr()))
+                    logging.info("[¨] {0}".format(evil_request.http_repr()))
 
             try:
                 response = await self.crawler.async_send(evil_request)

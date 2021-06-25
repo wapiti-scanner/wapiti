@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from asyncio import Event
 
 import respx
@@ -33,9 +32,8 @@ async def test_no_wordpress():
     crawler = AsyncCrawler("http://perdu.com/")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options, Event())
+    module = mod_wp_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -105,9 +103,8 @@ async def test_plugin():
     crawler = AsyncCrawler("http://perdu.com")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options, Event())
+    module = mod_wp_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -187,9 +184,8 @@ async def test_theme():
     crawler = AsyncCrawler("http://perdu.com")
 
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wp_enum(crawler, persister, logger, options, Event())
+    module = mod_wp_enum(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)

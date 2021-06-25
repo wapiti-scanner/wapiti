@@ -1,4 +1,3 @@
-from unittest.mock import Mock, MagicMock
 from asyncio import Event
 
 import httpx
@@ -27,9 +26,8 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_backup(crawler, persister, logger, options, Event())
+    module = mod_backup(crawler, persister, options, Event())
     module.verbose = 2
     module.do_get = True
     await module.attack(request)

@@ -25,6 +25,7 @@ from os.path import splitext
 from urllib.parse import urljoin
 
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import LOW_LEVEL, _
@@ -82,7 +83,7 @@ class mod_backup(Attack):
                 url = urljoin(request.path, payload)
 
             if self.verbose == 2:
-                print("[¨] {0}".format(url))
+                logging.info("[¨] {0}".format(url))
 
             self.attacked_get.append(page)
             evil_req = Request(url)

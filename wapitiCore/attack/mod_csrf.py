@@ -53,8 +53,8 @@ class mod_csrf(Attack):
         "anti-csrf-token", "x-csrf-header", "x-xsrf-header", "x-csrf-protection"
     ]
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
         self.already_vulnerable = []
 

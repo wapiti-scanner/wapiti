@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import os
 from asyncio import Event
 from itertools import chain
@@ -41,9 +40,8 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_nikto(crawler, persister, logger, options, Event())
+    module = mod_nikto(crawler, persister, options, Event())
     module.verbose = 2
     module.do_get = True
     await module.attack(request)

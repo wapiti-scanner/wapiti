@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import os
 from asyncio import Event
 
@@ -38,9 +37,8 @@ async def test_false_positive():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -72,9 +70,8 @@ async def test_url_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -112,9 +109,8 @@ async def test_html_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -151,9 +147,8 @@ async def test_script_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -190,9 +185,8 @@ async def test_cookies_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -229,9 +223,8 @@ async def test_headers_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -269,9 +262,8 @@ async def test_meta_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -311,9 +303,8 @@ async def test_multi_detection():
 
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -350,9 +341,8 @@ async def test_implies_detection():
 
     crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)
@@ -392,9 +382,8 @@ async def test_vulnerabilities():
 
     crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_wapp(crawler, persister, logger, options, Event())
+    module = mod_wapp(crawler, persister, options, Event())
     module.verbose = 2
 
     await module.attack(request)

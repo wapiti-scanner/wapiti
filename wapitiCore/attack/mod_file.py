@@ -22,6 +22,7 @@ from collections import defaultdict, namedtuple
 import re
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Messages, _
@@ -103,8 +104,8 @@ class mod_file(Attack):
 
     name = "file"
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.rules_to_messages = {}
         self.payload_to_rules = {}
         self.known_false_positives = defaultdict(set)
@@ -177,7 +178,7 @@ class mod_file(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)

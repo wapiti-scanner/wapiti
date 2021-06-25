@@ -23,6 +23,7 @@ from configparser import ConfigParser
 from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
 from wapitiCore.language.vulnerability import Messages, _
@@ -47,8 +48,8 @@ class mod_xxe(Attack):
     PAYLOADS_FILE = "xxePayloads.ini"
     MSG_VULN = _("XXE vulnerability")
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.vulnerables = set()
         self.attacked_urls = set()
         self.payload_to_rules = {}
@@ -137,7 +138,7 @@ class mod_xxe(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -229,7 +230,7 @@ class mod_xxe(Attack):
             mutated_request = Request(original_request.url, method="POST", enctype="text/xml", post_params=payload)
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -274,7 +275,7 @@ class mod_xxe(Attack):
                 continue
 
             if self.verbose == 2:
-                print("[¨] {0}".format(mutated_request))
+                logging.info("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -306,7 +307,7 @@ class mod_xxe(Attack):
 
     async def finish(self):
         endpoint_url = "{}get_xxe.php?session_id={}".format(self.internal_endpoint, self._session_id)
-        print(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
+        logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
@@ -314,7 +315,7 @@ class mod_xxe(Attack):
             response = await self.crawler.async_send(endpoint_request)
         except RequestError:
             self.network_errors += 1
-            print(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
+            logging.error(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
             return
 
         data = response.json

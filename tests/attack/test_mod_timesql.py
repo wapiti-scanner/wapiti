@@ -36,9 +36,8 @@ async def test_timesql_detection():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
-    logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options, Event())
+    module = mod_timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -59,9 +58,8 @@ async def test_timesql_false_positive():
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
-    logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options, Event())
+    module = mod_timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -80,9 +78,8 @@ async def test_false_positive_request_count():
     request.path_id = 42
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
-    logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options, Event())
+    module = mod_timesql(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = False
     await module.attack(request)
@@ -107,9 +104,8 @@ async def test_true_positive_request_count():
     request.path_id = 42
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
-    logger = Mock()
 
-    module = mod_timesql(crawler, persister, logger, options, Event())
+    module = mod_timesql(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = False
     await module.attack(request)

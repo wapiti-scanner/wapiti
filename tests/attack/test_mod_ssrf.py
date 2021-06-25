@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from asyncio import Event
 
 import httpx
@@ -47,9 +46,8 @@ async def test_whole_stuff():
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
-    logger = Mock()
 
-    module = mod_ssrf(crawler, persister, logger, options, Event())
+    module = mod_ssrf(crawler, persister, options, Event())
     module.verbose = 2
     module.do_post = True
 

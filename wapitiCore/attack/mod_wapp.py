@@ -19,6 +19,7 @@ import json
 import os
 
 from httpx import RequestError
+from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
@@ -45,8 +46,8 @@ class mod_wapp(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, logger, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, logger, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
@@ -62,7 +63,7 @@ class mod_wapp(Attack):
                 json.dump(response.json, wapp_db_file)
 
         except IOError:
-            print(_("Error downloading wapp database."))
+            logging.error(_("Error downloading wapp database."))
 
     async def must_attack(self, request: Request):
         if self.finished:
@@ -81,18 +82,18 @@ class mod_wapp(Attack):
             with open(os.path.join(self.user_config_dir, self.WAPP_DB)) as wapp_db_file:
                 json.load(wapp_db_file)
         except IOError:
-            print(_("Problem with local wapp database."))
-            print(_("Downloading from the web..."))
+            logging.warning(_("Problem with local wapp database."))
+            logging.info(_("Downloading from the web..."))
             await self.update()
 
         try:
             application_data = ApplicationData(os.path.join(self.user_config_dir, self.WAPP_DB))
         except FileNotFoundError as exception:
-            print(exception)
-            print(_("Try using --store-session option, or update apps.json using --update option."))
+            logging.error(exception)
+            logging.error(_("Try using --store-session option, or update apps.json using --update option."))
             return
         except ApplicationDataException as exception:
-            print(exception)
+            logging.error(exception)
             return
 
         try:
