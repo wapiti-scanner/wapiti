@@ -47,6 +47,6 @@ async def test_whole_stuff():
     for request in all_requests:
         await module.attack(request)
 
-    #assert logger.log_orange.call_count == 3 # TODO: find another way to test
-    #assert "http://perdu.com/dav/" in logger.log_orange.call_args_list[1][0][0] # TODO: idem
+    assert persister.add_payload.call_count == 1
+    assert "http://perdu.com/dav/" in persister.add_payload.call_args_list[0][1]["info"]
     await crawler.close()

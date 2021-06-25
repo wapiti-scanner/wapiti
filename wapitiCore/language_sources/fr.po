@@ -72,6 +72,10 @@ msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
 msgid "{0} {1} detected"
 msgstr "{0} {1} détecté"
 
+#, python-brace-format
+msgid "Interesting methods allowed on {}: {}"
+msgstr "Méthodes intéressantes autorisées sur {} : {}"
+
 msgid "No Drupal Detected"
 msgstr "Drupal non détecté"
 
@@ -602,6 +606,19 @@ msgstr "Cela peut être de signe d'une potentielle vulnérabilité."
 
 msgid "More information about the error should be found in the server logs."
 msgstr "Plus d'information sur cette erreur devrait se trouver dans les logs du serveur."
+
+msgid "HTTP Methods"
+msgstr "Méthodes HTTP"
+
+msgid ""
+"While GET and POST are by far the most common methods that are used to access "
+"information provided by a web server, HTTP allows several other (and somewhat less known) methods."
+msgstr ""
+"Tandis que GET et POST sont de loin les méthodes les plus utilisées pour accéder "
+"aux informations fournies par un serveur web, HTTP permet d'autres méthodes moins connues."
+
+msgid "Some of these can be used for nefarious purposes if the web server is misconfigured."
+msgstr "Certaines peuvent être utilisées de manière malveillante si le serveur web est mal configuré."
 
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "

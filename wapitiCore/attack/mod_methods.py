@@ -20,7 +20,9 @@ from httpx import RequestError
 from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
+from wapitiCore.definitions.methods import NAME
 from wapitiCore.net.web import Request
+from wapitiCore.language.vulnerability import _
 
 
 class mod_methods(Attack):
@@ -66,7 +68,15 @@ class mod_methods(Attack):
             if interesting_methods:
                 self.log_orange("---")
                 self.log_orange(
-                    "Interesting methods allowed on {}: {}".format(
+                    _("Interesting methods allowed on {}: {}").format(
+                        page,
+                        ", ".join(interesting_methods)
+                    )
+                )
+                await self.add_addition(
+                    category=NAME,
+                    request=option_request,
+                    info=_("Interesting methods allowed on {}: {}").format(
                         page,
                         ", ".join(interesting_methods)
                     )

@@ -72,6 +72,10 @@ msgstr "CSRF token '{}' might be easy to predict"
 msgid "{0} {1} detected"
 msgstr "{0} {1} detected"
 
+#, python-brace-format
+msgid "Interesting methods allowed on {}: {}"
+msgstr "Interesting methods allowed on {}: {}"
+
 msgid "No Drupal Detected"
 msgstr "No Drupal Detected"
 
@@ -566,6 +570,19 @@ msgstr "It may be the sign of a vulnerability."
 
 msgid "More information about the error should be found in the server logs."
 msgstr "More information about the error should be found in the server logs."
+
+msgid "HTTP Methods"
+msgstr "HTTP Methods"
+
+msgid ""
+"While GET and POST are by far the most common methods that are used to access "
+"information provided by a web server, HTTP allows several other (and somewhat less known) methods."
+msgstr ""
+"While GET and POST are by far the most common methods that are used to access "
+"information provided by a web server, HTTP allows several other (and somewhat less known) methods."
+
+msgid "Some of these can be used for nefarious purposes if the web server is misconfigured."
+msgstr "Some of these can be used for nefarious purposes if the web server is misconfigured."
 
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "
