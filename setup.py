@@ -106,8 +106,8 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "httpx==0.18.1",
-        "httpx-socks==0.4.1",
+        "httpx==0.18.2",
+        "httpx-socks[asyncio] == 0.4.1",
         "beautifulsoup4>=4.9.3",
         "tld>=0.12.5",
         "yaswfp>=0.9.3",

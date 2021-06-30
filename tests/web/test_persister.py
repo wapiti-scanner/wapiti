@@ -54,7 +54,7 @@ async def test_persister_basic():
         if req == simple_get:
             await crawler.async_send(req)
             # Add the sent request
-            await persister.add_request(req)
+            await persister.save_request(req)
             assert req.path_id == 1
             assert await persister.get_path_by_id(1) == req
             break
@@ -133,8 +133,8 @@ async def test_persister_upload():
         post_params=[["post1", "c"], ["post2", "d"]],
         file_params=[["calendar", ("calendar.xml", "<xml>Hello there</xml>", "application/xml")]]
     )
-    await persister.add_request(simple_upload)
-    await persister.add_request(xml_upload)
+    await persister.save_request(simple_upload)
+    await persister.save_request(xml_upload)
     assert await persister.count_paths() == 2
     stored_requests = set([__ async for __ in persister.get_to_browse()])
     assert simple_upload in stored_requests
@@ -145,7 +145,7 @@ async def test_persister_upload():
 
     for req in stored_requests:
         await crawler.async_send(req)
-        await persister.add_request(req)
+        await persister.save_request(req)
 
         if req == simple_upload:
             assert req.file_params == simple_upload.file_params

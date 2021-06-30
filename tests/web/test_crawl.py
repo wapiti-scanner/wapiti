@@ -43,6 +43,7 @@ async def test_resume_crawling():
 
     temp_obj = TemporaryDirectory()
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
+    await wapiti.init_persister()
     await wapiti.load_scan_state()
     await wapiti.browse(stop_event, parallelism=1)
     await wapiti.save_scan_state()
@@ -55,6 +56,7 @@ async def test_resume_crawling():
     await wapiti.crawler.close()
 
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
+    await wapiti.init_persister()
     await wapiti.load_scan_state()
     stop_event.clear()
     await wapiti.browse(stop_event)

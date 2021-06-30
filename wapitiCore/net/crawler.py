@@ -928,8 +928,8 @@ class Explorer:
                 request = task_to_request[task]
                 try:
                     success, resources = await task
-                except Exception as exc:
-                    logging.error('%r generated an exception: %s' % (request, exc))
+                except Exception as exception:
+                    logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                 else:
                     if success:
                         yield request

@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import os
 from collections import namedtuple
-from typing import Iterable
+from typing import Iterable, Sequence, AsyncGenerator
 
 from aiocache import cached
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -142,6 +142,7 @@ class SqlPersister:
 
         self._must_create = not os.path.exists(self.output_file)
         self._engine = create_async_engine(f'sqlite+aiosqlite:///{self.output_file}')
+        # May be of interest: https://charlesleifer.com/blog/going-fast-with-sqlite-and-python/
 
     async def create(self):
         if self._must_create:
@@ -151,7 +152,7 @@ class SqlPersister:
     async def close(self):
         await self._engine.dispose()
 
-    async def set_root_url(self, root_url):
+    async def set_root_url(self, root_url: str):
         async with self._engine.begin() as conn:
             await conn.execute(scan_infos.insert().values(
                 key="root_url",
@@ -160,25 +161,25 @@ class SqlPersister:
         self.root_url = root_url
 
     @cached()
-    async def get_root_url(self):
+    async def get_root_url(self) -> str:
         statement = select(scan_infos).where(scan_infos.c.key == "root_url").limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone().value
 
-    async def set_to_browse(self, to_browse):
-        await self._set_paths(to_browse)
+    async def set_to_browse(self, to_browse: Sequence):
+        await self.save_requests(to_browse)
 
-    async def get_to_browse(self):
+    async def get_to_browse(self) -> AsyncGenerator:
         async for path in self._get_paths(method=None, crawled=False):
             yield path
 
-    async def _set_paths(self, paths_list):
+    async def save_requests(self, paths_list: Sequence):
         if not paths_list:
             return
 
         if len(paths_list) == 1:
-            await self.add_request(paths_list[0])
+            await self.save_request(paths_list[0])
             return
 
         bigest_id = 0
@@ -295,7 +296,7 @@ class SqlPersister:
                 if all_param_values:
                     await conn.execute(params.insert(), all_param_values)
 
-    async def add_request(self, http_resource):
+    async def save_request(self, http_resource):
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
@@ -388,7 +389,8 @@ class SqlPersister:
             if all_values:
                 await conn.execute(params.insert(), all_values)
 
-    async def _get_paths(self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False):
+    async def _get_paths(
+            self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False) -> AsyncGenerator:
         conditions = [paths.c.evil == evil]
 
         if path and isinstance(path, str):
@@ -398,6 +400,7 @@ class SqlPersister:
             conditions.append(paths.c.method == method)
 
         if crawled:
+            # Bellow is sqlalchemy syntax, do not replace the comparison
             conditions.append(paths.c.headers != None)
 
         async with self._engine.begin() as conn:
@@ -471,11 +474,11 @@ class SqlPersister:
 
                 yield http_res
 
-    async def get_links(self, path=None, attack_module: str = ""):
+    async def get_links(self, path=None, attack_module: str = "") -> AsyncGenerator:
         async for path in self._get_paths(path=path, method="GET", crawled=True, module=attack_module):
             yield path
 
-    async def get_forms(self, path=None, attack_module: str = ""):
+    async def get_forms(self, path=None, attack_module: str = "") -> AsyncGenerator:
         async for path in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
             yield path
 
@@ -485,7 +488,7 @@ class SqlPersister:
             result = await conn.execute(statement)
             return result.fetchone()[0]
 
-    async def set_attacked(self, path_ids: Iterable, module_name):
+    async def set_attacked(self, path_ids: Iterable, module_name: str):
         if not path_ids:
             return
 
@@ -499,35 +502,36 @@ class SqlPersister:
         statement = select(func.count(attack_logs.c.path_id)).where(attack_logs.c.module == module_name)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
+            return result.fetchone()[0]
 
-        return result.fetchone()[0]
-
-    async def has_scan_finished(self):
+    async def has_scan_finished(self) -> bool:
         # If we have a path without headers set then the scan is not finished
+        # Bellow is sqlalchemy syntax, do not replace the comparison
         statement = select(paths.c.path_id).where(paths.c.headers == None).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
+            if result.fetchone():
+                return False
 
-        if result.fetchone():
-            return False
         return True
 
     async def has_scan_started(self) -> bool:
         statement = select(paths.c.path_id).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
-        if result.fetchone():
-            return True
-        return False
+            if result.fetchone():
+                return True
+
+            return False
 
     async def have_attacks_started(self) -> bool:
         statement = select(attack_logs.c.path_id).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
+            if result.fetchone():
+                return True
 
-        if result.fetchone():
-            return True
-        return False
+            return False
 
     async def add_payload(
             self, request_id: int, payload_type: str, module: str,
@@ -689,7 +693,7 @@ class SqlPersister:
 
             return request
 
-    async def get_payloads(self):
+    async def get_payloads(self) -> AsyncGenerator:
         async with self._engine.begin() as conn:
             result = await conn.execute(select(payloads))
 
@@ -711,6 +715,7 @@ class SqlPersister:
         async with self._engine.begin() as conn:
             await conn.execute(attack_logs.delete())  # which module was launched on which URL
             await conn.execute(payloads.delete())  # information on vulnerabilities and anomalies
+            # Bellow is sqlalchemy syntax, do not replace the comparison
             await conn.execute(paths.delete().where(paths.c.evil == True))  # Evil requests
             # Remove params tied to deleted requests
             await conn.execute(params.delete().where(~params.c.path_id.in_(select(paths.c.path_id))))
@@ -732,16 +737,17 @@ class SqlPersister:
 
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
-        path_ids = set()
-        for row in result.fetchall():
-            path_id, __ = row
-            path_ids.add(path_id)
+            path_ids = set()
+            for row in result.fetchall():
+                path_id, __ = row
+                path_ids.add(path_id)
 
-        return list(path_ids)
+            return list(path_ids)
 
     async def remove_big_requests(self, params_count: int) -> int:
         path_ids = await self.get_big_requests_ids(params_count)
 
         for path_id in path_ids:
             await self.delete_path_by_id(path_id)
+
         return len(path_ids)

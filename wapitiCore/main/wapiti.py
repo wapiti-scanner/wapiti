@@ -34,6 +34,7 @@ import codecs
 from inspect import getdoc
 import asyncio
 import signal
+from typing import AsyncGenerator
 
 import browser_cookie3
 import httpx
@@ -204,7 +205,7 @@ class Wapiti:
                 flatten_references(additional.REFERENCES)
             )
 
-    def _init_attacks(self, stop_event):
+    def _init_attacks(self, stop_event: asyncio.Event):
         self._init_report()
 
         logging.info(_("[*] Loading modules:"))
@@ -308,7 +309,6 @@ class Wapiti:
 
     async def update(self):
         """Update modules that implement an update method"""
-
         stop_event = asyncio.Event()
         for mod_name in attack.modules:
             mod = import_module("wapitiCore.attack." + mod_name)
@@ -353,18 +353,26 @@ class Wapiti:
         explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
 
         start = datetime.utcnow()
+        buffer = []
 
+        # Browse URLs are saved them once we have enough in our buffer
         async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
-            # Browsed URLs are saved one at a time
-            await self.persister.add_request(resource)
+            buffer.append(resource)
+
+            if len(buffer) > 100:
+                await self.persister.save_requests(buffer)
+                buffer = []
+
             if not stop_event.is_set() and (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
                 logging.info(_("Max scan time was reached, stopping."))
                 stop_event.set()
 
+        await self.persister.save_requests(buffer)
+
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
 
-    async def load_resources_for_module(self, module: attack.Attack):
+    async def load_resources_for_module(self, module: attack.Attack) -> AsyncGenerator[Request, None]:
         if module.do_get:
             async for resource in self.persister.get_links(attack_module=module.name):
                 yield resource
@@ -663,11 +671,11 @@ class Wapiti:
     def set_attack_options(self, options: dict = None):
         self.attack_options = options if isinstance(options, dict) else {}
 
-    def set_modules(self, options=""):
+    def set_modules(self, options: str = ""):
         """Activate or deactivate (default) all attacks"""
         self.module_options = options
 
-    def set_report_generator_type(self, report_type="xml"):
+    def set_report_generator_type(self, report_type: str = "xml"):
         """Set the format of the generated report. Can be html, json, txt or xml"""
         self.report_generator_type = report_type
 
@@ -705,12 +713,12 @@ class Wapiti:
         return await self.persister.have_attacks_started()
 
 
-def fix_url_path(url):
+def fix_url_path(url: str):
     """Fix the url path if its not defined"""
     return url if urlparse(url).path else url + '/'
 
 
-def is_valid_endpoint(url_type, url):
+def is_valid_endpoint(url_type, url: str):
     """Verify if the url provided has the right format"""
     try:
         parts = urlparse(url)
@@ -727,7 +735,7 @@ def is_valid_endpoint(url_type, url):
     return False
 
 
-def ping(url):
+def ping(url: str):
     try:
         httpx.get(url, timeout=5)
     except RequestError:
@@ -1004,7 +1012,7 @@ async def wapiti_main():
         "--tasks",
         metavar="tasks",
         help=_("Number of concurrent tasks to use for the exploration (crawling) of the target."),
-        type=int, default=8
+        type=int, default=32
     )
 
     parser.add_argument(
