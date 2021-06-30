@@ -209,8 +209,7 @@ class AsyncCrawler:
                 proxies=self._proxies,
                 timeout=self._timeout,
                 event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None,
-                transport=self._transport,
-                limits=httpx.Limits(max_keepalive_connections=None, max_connections=None)
+                transport=self._transport
             )
 
             self._client.max_redirects = 5
@@ -773,16 +772,18 @@ class Explorer:
                 logging.info("[+] {0}".format(request))
 
             dir_name = request.dir_name
-            async with self._shared_lock:
-                # lock to prevent launching duplicates requests that would otherwise waste time
-                if dir_name not in self._custom_404_codes:
-                    invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
-                    invalid_resource = web.Request(dir_name + invalid_page)
-                    try:
-                        page = await self._crawler.async_get(invalid_resource)
-                        self._custom_404_codes[dir_name] = page.status
-                    except httpx.RequestError:
-                        pass
+            # Currently not exploited. Would be interesting though but then it should be implemented separately
+            # Maybe in another task as we don't want to spend to much time in this function
+            # async with self._shared_lock:
+            #     # lock to prevent launching duplicates requests that would otherwise waste time
+            #     if dir_name not in self._custom_404_codes:
+            #         invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in range(10)]))
+            #         invalid_resource = web.Request(dir_name + invalid_page)
+            #         try:
+            #             page = await self._crawler.async_get(invalid_resource)
+            #             self._custom_404_codes[dir_name] = page.status
+            #         except httpx.RequestError:
+            #             pass
 
             self._hostnames.add(request.hostname)
 
