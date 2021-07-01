@@ -813,10 +813,19 @@ class Page:
             for input_field in form.find_all("input", attrs={"formaction": True}):
                 form_actions.add(self.make_absolute(input_field["formaction"].strip() or self.url))
 
-            for button_field in form.find_all("button", formaction=True):
-                # If formaction is empty it basically send to the current URL
-                # which can be different from the defined action attribute on the form...
-                form_actions.add(self.make_absolute(button_field["formaction"].strip() or self.url))
+            for button_field in form.find_all("button"):
+                if "name" in button_field.attrs and "value" in button_field.attrs:
+                    input_name = button_field["name"]
+                    input_value = button_field["value"]
+                    if method == "GET":
+                        get_params.append([input_name, input_value])
+                    else:
+                        post_params.append([input_name, input_value])
+
+                if "formaction" in button_field.attrs:
+                    # If formaction is empty it basically send to the current URL
+                    # which can be different from the defined action attribute on the form...
+                    form_actions.add(self.make_absolute(button_field["formaction"].strip() or self.url))
 
             if form.find("input", attrs={"name": False, "type": "image"}):
                 # Unnamed input type file => names will be set as x and y
