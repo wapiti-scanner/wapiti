@@ -1257,7 +1257,8 @@ async def wapiti_main():
 
         attack_options = {
             "level": args.level,
-            "timeout": args.timeout
+            "timeout": args.timeout,
+            "tasks": args.tasks
         }
 
         if "endpoint" in args:
