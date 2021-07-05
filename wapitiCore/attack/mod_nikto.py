@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import asyncio
 import csv
 import re
 import os
@@ -70,6 +71,10 @@ class mod_nikto(Attack):
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
         self.user_config_dir = self.persister.CONFIG_DIR
+        self.junk_string = "w" + "".join(
+            [random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)]
+        )
+        self.parts = None
 
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
@@ -112,159 +117,184 @@ class mod_nikto(Attack):
             await self.update()
 
         self.finished = True
-        junk_string = "w" + "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)])
         root_url = request.url
-        parts = urlparse(root_url)
+        self.parts = urlparse(root_url)
 
+        tasks = set()
         for line in self.nikto_db:
+            task = asyncio.create_task(self.process_line(line))
+            tasks.add(task)
+
+            while True:
+                done_tasks, pending_tasks = await asyncio.wait(
+                    tasks,
+                    timeout=0.01,
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+
+                for task in done_tasks:
+                    await task
+                    tasks.remove(task)
+
+                if self._stop_event.is_set():
+                    for task in pending_tasks:
+                        task.cancel()
+
+                if len(pending_tasks) > self.options["tasks"]:
+                    continue
+
+                break
+
             if self._stop_event.is_set():
                 break
 
-            match = match_or = match_and = False
-            fail = fail_or = False
+    async def process_line(self, line):
+        match = match_or = match_and = False
+        fail = fail_or = False
 
-            osv_id = line[1]
-            path = line[3]
-            method = line[4]
-            vuln_desc = line[10]
-            post_data = line[11]
+        osv_id = line[1]
+        path = line[3]
+        method = line[4]
+        vuln_desc = line[10]
+        post_data = line[11]
 
-            path = path.replace("@CGIDIRS", "/cgi-bin/")
-            path = path.replace("@ADMIN", "/admin/")
-            path = path.replace("@NUKE", "/modules/")
-            path = path.replace("@PHPMYADMIN", "/phpMyAdmin/")
-            path = path.replace("@POSTNUKE", "/postnuke/")
-            path = re.sub(r"JUNK\((\d+)\)", lambda x: junk_string[:int(x.group(1))], path)
+        path = path.replace("@CGIDIRS", "/cgi-bin/")
+        path = path.replace("@ADMIN", "/admin/")
+        path = path.replace("@NUKE", "/modules/")
+        path = path.replace("@PHPMYADMIN", "/phpMyAdmin/")
+        path = path.replace("@POSTNUKE", "/postnuke/")
+        path = re.sub(r"JUNK\((\d+)\)", lambda x: self.junk_string[:int(x.group(1))], path)
 
-            if path[0] == "@":
-                continue
-            if not path.startswith("/"):
-                path = "/" + path
+        if path[0] == "@":
+            return
 
-            try:
-                url = f"{parts.scheme}://{parts.netloc}{path}"
-            except UnicodeDecodeError:
-                continue
+        if not path.startswith("/"):
+            path = "/" + path
 
+        try:
+            url = f"{self.parts.scheme}://{self.parts.netloc}{path}"
+        except UnicodeDecodeError:
+            return
+
+        if method == "GET":
+            evil_request = Request(url)
+        elif method == "POST":
+            evil_request = Request(url, post_params=post_data, method=method)
+        else:
+            evil_request = Request(url, post_params=post_data, method=method)
+
+        if self.verbose == 2:
             if method == "GET":
-                evil_request = Request(url)
-            elif method == "POST":
-                evil_request = Request(url, post_params=post_data, method=method)
+                logging.info("[¨] {0}".format(evil_request.url))
             else:
-                evil_request = Request(url, post_params=post_data, method=method)
+                logging.info("[¨] {0}".format(evil_request.http_repr()))
 
-            if self.verbose == 2:
-                if method == "GET":
-                    logging.info("[¨] {0}".format(evil_request.url))
-                else:
-                    logging.info("[¨] {0}".format(evil_request.http_repr()))
+        try:
+            response = await self.crawler.async_send(evil_request)
+        except RequestError:
+            self.network_errors += 1
+            return
+        except Exception as exception:
+            logging.warning("%s occurred with URL %s", exception, evil_request.url)
+            return
 
-            try:
-                response = await self.crawler.async_send(evil_request)
-            except RequestError:
-                self.network_errors += 1
-                continue
-            except ValueError:
-                # ValueError raised by urllib3 (Method cannot contain non-token characters), we don't want to raise
-                continue
+        page = response.content
+        code = response.status
+        raw = " ".join([x + ": " + y for x, y in response.headers.items()])
+        raw += page
 
-            page = response.content
-            code = response.status
-            raw = " ".join([x + ": " + y for x, y in response.headers.items()])
-            raw += page
+        # First condition (match)
+        if len(line[5]) == 3 and line[5].isdigit():
+            if code == int(line[5]):
+                match = True
+        else:
+            if line[5] in raw:
+                match = True
 
-            # First condition (match)
-            if len(line[5]) == 3 and line[5].isdigit():
-                if code == int(line[5]):
-                    match = True
+        # Second condition (or)
+        if line[6] != "":
+            if len(line[6]) == 3 and line[6].isdigit():
+                if code == int(line[6]):
+                    match_or = True
             else:
-                if line[5] in raw:
-                    match = True
+                if line[6] in raw:
+                    match_or = True
 
-            # Second condition (or)
-            if line[6] != "":
-                if len(line[6]) == 3 and line[6].isdigit():
-                    if code == int(line[6]):
-                        match_or = True
-                else:
-                    if line[6] in raw:
-                        match_or = True
-
-            # Third condition (and)
-            if line[7] != "":
-                if len(line[7]) == 3 and line[7].isdigit():
-                    if code == int(line[7]):
-                        match_and = True
-                else:
-                    if line[7] in raw:
-                        match_and = True
+        # Third condition (and)
+        if line[7] != "":
+            if len(line[7]) == 3 and line[7].isdigit():
+                if code == int(line[7]):
+                    match_and = True
             else:
-                match_and = True
+                if line[7] in raw:
+                    match_and = True
+        else:
+            match_and = True
 
-            # Fourth condition (fail)
-            if line[8] != "":
-                if len(line[8]) == 3 and line[8].isdigit():
-                    if code == int(line[8]):
-                        fail = True
-                else:
-                    if line[8] in raw:
-                        fail = True
+        # Fourth condition (fail)
+        if line[8] != "":
+            if len(line[8]) == 3 and line[8].isdigit():
+                if code == int(line[8]):
+                    fail = True
+            else:
+                if line[8] in raw:
+                    fail = True
 
-            # Fifth condition (or)
-            if line[9] != "":
-                if len(line[9]) == 3 and line[9].isdigit():
-                    if code == int(line[9]):
-                        fail_or = True
-                else:
-                    if line[9] in raw:
-                        fail_or = True
+        # Fifth condition (or)
+        if line[9] != "":
+            if len(line[9]) == 3 and line[9].isdigit():
+                if code == int(line[9]):
+                    fail_or = True
+            else:
+                if line[9] in raw:
+                    fail_or = True
 
-            if ((match or match_or) and match_and) and not (fail or fail_or):
-                self.log_red("---")
-                self.log_red(vuln_desc)
-                self.log_red(url)
+        if ((match or match_or) and match_and) and not (fail or fail_or):
+            self.log_red("---")
+            self.log_red(vuln_desc)
+            self.log_red(url)
 
-                refs = []
-                if osv_id != "0":
-                    refs.append("https://vulners.com/osvdb/OSVDB:" + osv_id)
+            refs = []
+            if osv_id != "0":
+                refs.append("https://vulners.com/osvdb/OSVDB:" + osv_id)
 
-                # CERT
-                cert_advisory = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)
-                if cert_advisory is not None:
-                    refs.append("http://www.cert.org/advisories/" + cert_advisory.group(0) + ".html")
+            # CERT
+            cert_advisory = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)
+            if cert_advisory is not None:
+                refs.append("http://www.cert.org/advisories/" + cert_advisory.group(0) + ".html")
 
-                # SecurityFocus
-                securityfocus_bid = re.search("BID-([0-9]{4})", vuln_desc)
-                if securityfocus_bid is not None:
-                    refs.append("http://www.securityfocus.com/bid/" + securityfocus_bid.group(1))
+            # SecurityFocus
+            securityfocus_bid = re.search("BID-([0-9]{4})", vuln_desc)
+            if securityfocus_bid is not None:
+                refs.append("http://www.securityfocus.com/bid/" + securityfocus_bid.group(1))
 
-                # Mitre.org
-                mitre_cve = re.search("((CVE|CAN)-[0-9]{4}-[0-9]{4,})", vuln_desc)
-                if mitre_cve is not None:
-                    refs.append("http://cve.mitre.org/cgi-bin/cvename.cgi?name=" + mitre_cve.group(0))
+            # Mitre.org
+            mitre_cve = re.search("((CVE|CAN)-[0-9]{4}-[0-9]{4,})", vuln_desc)
+            if mitre_cve is not None:
+                refs.append("http://cve.mitre.org/cgi-bin/cvename.cgi?name=" + mitre_cve.group(0))
 
-                # CERT Incidents
-                cert_incident = re.search("(IN-[0-9]{4}-[0-9]{2})", vuln_desc)
-                if cert_incident is not None:
-                    refs.append("http://www.cert.org/incident_notes/" + cert_incident.group(0) + ".html")
+            # CERT Incidents
+            cert_incident = re.search("(IN-[0-9]{4}-[0-9]{2})", vuln_desc)
+            if cert_incident is not None:
+                refs.append("http://www.cert.org/incident_notes/" + cert_incident.group(0) + ".html")
 
-                # Microsoft Technet
-                ms_bulletin = re.search("(MS[0-9]{2}-[0-9]{3})", vuln_desc)
-                if ms_bulletin is not None:
-                    refs.append("http://www.microsoft.com/technet/security/bulletin/" + ms_bulletin.group(0) + ".asp")
+            # Microsoft Technet
+            ms_bulletin = re.search("(MS[0-9]{2}-[0-9]{3})", vuln_desc)
+            if ms_bulletin is not None:
+                refs.append("http://www.microsoft.com/technet/security/bulletin/" + ms_bulletin.group(0) + ".asp")
 
-                info = vuln_desc
-                if refs:
-                    self.log_red(_("References:"))
-                    self.log_red("  {0}".format("\n  ".join(refs)))
+            info = vuln_desc
+            if refs:
+                self.log_red(_("References:"))
+                self.log_red("  {0}".format("\n  ".join(refs)))
 
-                    info += "\n" + _("References:") + "\n"
-                    info += "\n".join(refs)
+                info += "\n" + _("References:") + "\n"
+                info += "\n".join(refs)
 
-                self.log_red("---")
+            self.log_red("---")
 
-                await self.add_vuln_high(
-                    category=NAME,
-                    request=evil_request,
-                    info=info
-                )
+            await self.add_vuln_high(
+                category=NAME,
+                request=evil_request,
+                info=info
+            )
