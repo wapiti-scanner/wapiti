@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import asyncio
+
 from httpx import RequestError
 from loguru import logger as logging
 
@@ -43,6 +45,25 @@ class mod_buster(Attack):
         self.new_resources = []
         self.network_errors = 0
 
+    async def check_path(self, url):
+        page = Request(url)
+        response = await self.crawler.async_send(page)
+        if response.redirection_url:
+            loc = response.redirection_url
+            if response.is_directory_redirection:
+                self.log_red("Found webpage {0}", loc)
+                self.new_resources.append(loc)
+            else:
+                self.log_red("Found webpage {0}", page.path)
+                self.new_resources.append(page.path)
+            return True
+        if response.status not in [403, 404]:
+            self.log_red("Found webpage {0}", page.path)
+            self.new_resources.append(page.path)
+            return True
+
+        return False
+
     async def test_directory(self, path: str):
         if self.verbose == 2:
             logging.info("[¨] Testing directory {0}".format(path))
@@ -58,31 +79,38 @@ class mod_buster(Attack):
             # we don't want to deal with this at the moment
             return
 
+        tasks = set()
         for candidate, __ in self.payloads:
-            if self._stop_event.is_set():
-                break
-
             url = path + candidate
             if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
-                page = Request(path + candidate)
-                try:
-                    response = await self.crawler.async_send(page)
-                    if response.redirection_url:
-                        loc = response.redirection_url
-                        # if loc in self.known_dirs or loc in self.known_pages:
-                        #     continue
-                        if response.is_directory_redirection:
-                            self.log_red("Found webpage {0}", loc)
-                            self.new_resources.append(loc)
-                        else:
-                            self.log_red("Found webpage {0}", page.path)
-                            self.new_resources.append(page.path)
-                    elif response.status not in [403, 404]:
-                        self.log_red("Found webpage {0}", page.path)
-                        self.new_resources.append(page.path)
-                except RequestError:
-                    self.network_errors += 1
-                    continue
+                task = asyncio.create_task(self.check_path(url))
+                tasks.add(task)
+
+                while True:
+                    done_tasks, pending_tasks = await asyncio.wait(
+                        tasks,
+                        timeout=0.01,
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+
+                    for task in done_tasks:
+                        try:
+                            await task
+                        except RequestError:
+                            self.network_errors += 1
+                        tasks.remove(task)
+
+                    if self._stop_event.is_set():
+                        for task in pending_tasks:
+                            task.cancel()
+
+                    if len(pending_tasks) > self.options["tasks"]:
+                        continue
+
+                    break
+
+                if self._stop_event.is_set():
+                    break
 
     async def attack(self, request: Request):
         self.finished = True

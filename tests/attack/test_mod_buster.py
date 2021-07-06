@@ -34,7 +34,7 @@ async def test_whole_stuff():
     persister.get_links.return_value = AsyncIterator([request])
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
-    options = {"timeout": 10, "level": 2}
+    options = {"timeout": 10, "level": 2, "tasks": 20}
 
     with patch(
             "wapitiCore.attack.mod_buster.mod_buster.payloads",
