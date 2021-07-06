@@ -35,7 +35,7 @@ async def test_no_drupal():
 
     crawler = AsyncCrawler("http://perdu.com/")
 
-    options = {"timeout": 10, "level": 2}
+    options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
@@ -72,7 +72,7 @@ async def test_version_detected():
 
     crawler = AsyncCrawler("http://perdu.com/")
 
-    options = {"timeout": 10, "level": 2}
+    options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
@@ -113,7 +113,7 @@ async def test_multi_versions_detected():
 
     crawler = AsyncCrawler("http://perdu.com/")
 
-    options = {"timeout": 10, "level": 2}
+    options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
@@ -153,7 +153,7 @@ async def test_version_not_detected():
 
     crawler = AsyncCrawler("http://perdu.com/")
 
-    options = {"timeout": 10, "level": 2}
+    options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = mod_drupal_enum(crawler, persister, options, Event())
     module.verbose = 2
