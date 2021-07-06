@@ -20,9 +20,9 @@
 # This module may be handy for CTF though.
 from os.path import join as path_join
 from itertools import product
+import asyncio
 
 from httpx import RequestError
-from loguru import logger as logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
@@ -63,7 +63,7 @@ class mod_brute_login_form(Attack):
                 if password:
                     yield password
 
-    async def test_credentials(self, login_form, username_index, password_index, username, password):
+    async def send_credentials(self, login_form, username_index, password_index, username, password):
         post_params = login_form.post_params
         get_params = login_form.get_params
 
@@ -113,7 +113,7 @@ class mod_brute_login_form(Attack):
             return
 
         try:
-            failure_text = await self.test_credentials(
+            failure_text = await self.send_credentials(
                 login_form,
                 username_field_idx, password_field_idx,
                 "invalid", "invalid"
@@ -126,57 +126,98 @@ class mod_brute_login_form(Attack):
             self.network_errors += 1
             return
 
+        tasks = set()
+        found = False
         for username, password in product(self.get_usernames(), self.get_passwords()):
-            if self._stop_event.is_set():
-                break
-
-            try:
-                response = await self.test_credentials(
+            task = asyncio.create_task(
+                self.test_credentials(
                     login_form,
-                    username_field_idx, password_field_idx,
-                    username, password
-                )
-            except RequestError:
-                self.network_errors += 1
-                continue
-
-            if self.check_success_auth(response) and failure_text != response:
-                vuln_message = _("Credentials found for URL {} : {} / {}").format(
-                    request.referer,
+                    username_field_idx,
+                    password_field_idx,
                     username,
-                    password
+                    password,
+                    failure_text
+                )
+            )
+            tasks.add(task)
+
+            while True:
+                done_tasks, pending_tasks = await asyncio.wait(
+                    tasks,
+                    timeout=0.01,
+                    return_when=asyncio.FIRST_COMPLETED
                 )
 
-                # Recreate the request that succeed in order to print and store it
-                post_params = login_form.post_params
-                get_params = login_form.get_params
+                for task in done_tasks:
+                    try:
+                        result = await task
+                    except RequestError:
+                        self.network_errors += 1
+                    else:
+                        if result:
+                            found = True
+                            username, password = result
+                            vuln_message = _("Credentials found for URL {} : {} / {}").format(
+                                request.referer,
+                                username,
+                                password
+                            )
 
-                if login_form.method == "POST":
-                    post_params[username_field_idx][1] = username
-                    post_params[password_field_idx][1] = password
-                else:
-                    get_params[username_field_idx][1] = username
-                    get_params[password_field_idx][1] = password
+                            # Recreate the request that succeed in order to print and store it
+                            post_params = login_form.post_params
+                            get_params = login_form.get_params
 
-                evil_request = Request(
-                    path=login_form.url,
-                    method=login_form.method,
-                    post_params=post_params,
-                    get_params=get_params,
-                    referer=login_form.referer,
-                    link_depth=login_form.link_depth
-                )
+                            if login_form.method == "POST":
+                                post_params[username_field_idx][1] = username
+                                post_params[password_field_idx][1] = password
+                            else:
+                                get_params[username_field_idx][1] = username
+                                get_params[password_field_idx][1] = password
 
-                await self.add_vuln_low(
-                    request_id=request.path_id,
-                    category=NAME,
-                    request=evil_request,
-                    info=vuln_message
-                )
+                            evil_request = Request(
+                                path=login_form.url,
+                                method=login_form.method,
+                                post_params=post_params,
+                                get_params=get_params,
+                                referer=login_form.referer,
+                                link_depth=login_form.link_depth
+                            )
 
-                self.log_red("---")
-                self.log_red(vuln_message)
-                self.log_red(Messages.MSG_EVIL_REQUEST)
-                self.log_red(evil_request.http_repr())
-                self.log_red("---")
+                            await self.add_vuln_low(
+                                request_id=request.path_id,
+                                category=NAME,
+                                request=evil_request,
+                                info=vuln_message
+                            )
+
+                            self.log_red("---")
+                            self.log_red(vuln_message)
+                            self.log_red(Messages.MSG_EVIL_REQUEST)
+                            self.log_red(evil_request.http_repr())
+                            self.log_red("---")
+
+                    tasks.remove(task)
+
+                if self._stop_event.is_set() or found:
+                    for task in pending_tasks:
+                        task.cancel()
+
+                if len(pending_tasks) > self.options["tasks"]:
+                    continue
+
                 break
+
+            if self._stop_event.is_set() or found:
+                break
+
+    async def test_credentials(self, login_form, username_idx, password_idx, username, password, failure_text):
+        response = await self.send_credentials(
+                login_form,
+                username_idx, password_idx,
+                username, password
+        )
+
+        if self.check_success_auth(response) and failure_text != response:
+            return username, password
+
+        return None
