@@ -109,6 +109,7 @@ class mod_nikto(Attack):
         try:
             with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
                 reader = csv.reader(nikto_db_file)
+                next(reader)
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
         except IOError:
@@ -121,17 +122,32 @@ class mod_nikto(Attack):
         self.parts = urlparse(root_url)
 
         tasks = set()
-        for line in self.nikto_db:
-            task = asyncio.create_task(self.process_line(line))
-            tasks.add(task)
+        pending_count = 0
 
+        with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+            reader = csv.reader(nikto_db_file)
             while True:
+                if pending_count < self.options["tasks"] and not self._stop_event.is_set():
+                    try:
+                        line = next(reader)
+                    except StopIteration:
+                        pass
+                    else:
+                        if line == [] or not line[0].isdigit():
+                            continue
+
+                        task = asyncio.create_task(self.process_line(line))
+                        tasks.add(task)
+
+                if not tasks:
+                    break
+
                 done_tasks, pending_tasks = await asyncio.wait(
                     tasks,
                     timeout=0.01,
                     return_when=asyncio.FIRST_COMPLETED
                 )
-
+                pending_count = len(pending_tasks)
                 for task in done_tasks:
                     await task
                     tasks.remove(task)
@@ -139,14 +155,7 @@ class mod_nikto(Attack):
                 if self._stop_event.is_set():
                     for task in pending_tasks:
                         task.cancel()
-
-                if len(pending_tasks) > self.options["tasks"]:
-                    continue
-
-                break
-
-            if self._stop_event.is_set():
-                break
+                        tasks.remove(task)
 
     async def process_line(self, line):
         match = match_or = match_and = False
@@ -191,15 +200,15 @@ class mod_nikto(Attack):
 
         try:
             response = await self.crawler.async_send(evil_request)
+            page = response.content
+            code = response.status
         except RequestError:
             self.network_errors += 1
             return
         except Exception as exception:
-            logging.warning("%s occurred with URL %s", exception, evil_request.url)
+            logging.warning(f"{exception} occurred with URL {evil_request.url}")
             return
 
-        page = response.content
-        code = response.status
         raw = " ".join([x + ": " + y for x, y in response.headers.items()])
         raw += page
 
