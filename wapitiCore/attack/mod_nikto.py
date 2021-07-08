@@ -202,7 +202,7 @@ class mod_nikto(Attack):
             response = await self.crawler.async_send(evil_request)
             page = response.content
             code = response.status
-        except RequestError:
+        except (RequestError, ConnectionResetError):
             self.network_errors += 1
             return
         except Exception as exception:
