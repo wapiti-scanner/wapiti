@@ -127,88 +127,94 @@ class mod_brute_login_form(Attack):
             return
 
         tasks = set()
+        pending_count = 0
         found = False
-        for username, password in product(self.get_usernames(), self.get_passwords()):
-            task = asyncio.create_task(
-                self.test_credentials(
-                    login_form,
-                    username_field_idx,
-                    password_field_idx,
-                    username,
-                    password,
-                    failure_text
-                )
-            )
-            tasks.add(task)
 
-            while True:
-                done_tasks, pending_tasks = await asyncio.wait(
-                    tasks,
-                    timeout=0.01,
-                    return_when=asyncio.FIRST_COMPLETED
-                )
+        creds_iterator = product(self.get_usernames(), self.get_passwords())
+        while True:
+            if pending_count < self.options["tasks"] and not self._stop_event.is_set() and not found:
+                try:
+                    username, password = next(creds_iterator)
+                except StopIteration:
+                    pass
+                else:
+                    task = asyncio.create_task(
+                        self.test_credentials(
+                            login_form,
+                            username_field_idx,
+                            password_field_idx,
+                            username,
+                            password,
+                            failure_text
+                        )
+                    )
+                    tasks.add(task)
 
-                for task in done_tasks:
-                    try:
-                        result = await task
-                    except RequestError:
-                        self.network_errors += 1
-                    else:
-                        if result:
-                            found = True
-                            username, password = result
-                            vuln_message = _("Credentials found for URL {} : {} / {}").format(
-                                request.referer,
-                                username,
-                                password
-                            )
-
-                            # Recreate the request that succeed in order to print and store it
-                            post_params = login_form.post_params
-                            get_params = login_form.get_params
-
-                            if login_form.method == "POST":
-                                post_params[username_field_idx][1] = username
-                                post_params[password_field_idx][1] = password
-                            else:
-                                get_params[username_field_idx][1] = username
-                                get_params[password_field_idx][1] = password
-
-                            evil_request = Request(
-                                path=login_form.url,
-                                method=login_form.method,
-                                post_params=post_params,
-                                get_params=get_params,
-                                referer=login_form.referer,
-                                link_depth=login_form.link_depth
-                            )
-
-                            await self.add_vuln_low(
-                                request_id=request.path_id,
-                                category=NAME,
-                                request=evil_request,
-                                info=vuln_message
-                            )
-
-                            self.log_red("---")
-                            self.log_red(vuln_message)
-                            self.log_red(Messages.MSG_EVIL_REQUEST)
-                            self.log_red(evil_request.http_repr())
-                            self.log_red("---")
-
-                    tasks.remove(task)
-
-                if self._stop_event.is_set() or found:
-                    for task in pending_tasks:
-                        task.cancel()
-
-                if len(pending_tasks) > self.options["tasks"]:
-                    continue
-
+            if not tasks:
                 break
+
+            done_tasks, pending_tasks = await asyncio.wait(
+                tasks,
+                timeout=0.01,
+                return_when=asyncio.FIRST_COMPLETED
+            )
+            pending_count = len(pending_tasks)
+            for task in done_tasks:
+                try:
+                    result = await task
+                except RequestError:
+                    self.network_errors += 1
+                else:
+                    if result:
+                        found = True
+                        username, password = result
+                        vuln_message = _("Credentials found for URL {} : {} / {}").format(
+                            request.referer,
+                            username,
+                            password
+                        )
+
+                        # Recreate the request that succeed in order to print and store it
+                        post_params = login_form.post_params
+                        get_params = login_form.get_params
+
+                        if login_form.method == "POST":
+                            post_params[username_field_idx][1] = username
+                            post_params[password_field_idx][1] = password
+                        else:
+                            get_params[username_field_idx][1] = username
+                            get_params[password_field_idx][1] = password
+
+                        evil_request = Request(
+                            path=login_form.url,
+                            method=login_form.method,
+                            post_params=post_params,
+                            get_params=get_params,
+                            referer=login_form.referer,
+                            link_depth=login_form.link_depth
+                        )
+
+                        await self.add_vuln_low(
+                            request_id=request.path_id,
+                            category=NAME,
+                            request=evil_request,
+                            info=vuln_message
+                        )
+
+                        self.log_red("---")
+                        self.log_red(vuln_message)
+                        self.log_red(Messages.MSG_EVIL_REQUEST)
+                        self.log_red(evil_request.http_repr())
+                        self.log_red("---")
+
+                tasks.remove(task)
 
             if self._stop_event.is_set() or found:
-                break
+                # If we found valid credentials we need to stop pending tasks as they may generate false positives
+                # because the session is opened on the website and next attempts may appear as logged in
+                for task in pending_tasks:
+                    task.cancel()
+                    tasks.remove(task)
 
     async def test_credentials(self, login_form, username_idx, password_idx, username, password, failure_text):
         response = await self.send_credentials(
