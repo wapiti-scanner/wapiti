@@ -47,7 +47,12 @@ class mod_buster(Attack):
 
     async def check_path(self, url):
         page = Request(url)
-        response = await self.crawler.async_send(page)
+        try:
+            response = await self.crawler.async_send(page)
+        except RequestError:
+            self.network_errors += 1
+            return False
+        
         if response.redirection_url:
             loc = response.redirection_url
             if response.is_directory_redirection:
@@ -80,37 +85,41 @@ class mod_buster(Attack):
             return
 
         tasks = set()
-        for candidate, __ in self.payloads:
-            url = path + candidate
-            if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
-                task = asyncio.create_task(self.check_path(url))
-                tasks.add(task)
+        pending_count = 0
+        payload_iterator = iter(self.payloads)
 
-                while True:
-                    done_tasks, pending_tasks = await asyncio.wait(
-                        tasks,
-                        timeout=0.01,
-                        return_when=asyncio.FIRST_COMPLETED
-                    )
+        while True:
+            if pending_count < self.options["tasks"] and not self._stop_event.is_set():
+                try:
+                    candidate, __ = next(payload_iterator)
+                except StopIteration:
+                    pass
+                else:
+                    url = path + candidate
+                    if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
+                        task = asyncio.create_task(self.check_path(url))
+                        tasks.add(task)
 
-                    for task in done_tasks:
-                        try:
-                            await task
-                        except RequestError:
-                            self.network_errors += 1
-                        tasks.remove(task)
+            if not tasks:
+                break
 
-                    if self._stop_event.is_set():
-                        for task in pending_tasks:
-                            task.cancel()
+            done_tasks, pending_tasks = await asyncio.wait(
+                tasks,
+                timeout=0.01,
+                return_when=asyncio.FIRST_COMPLETED
+            )
+            pending_count = len(pending_tasks)
+            for task in done_tasks:
+                try:
+                    await task
+                except RequestError:
+                    self.network_errors += 1
+                tasks.remove(task)
 
-                    if len(pending_tasks) > self.options["tasks"]:
-                        continue
-
-                    break
-
-                if self._stop_event.is_set():
-                    break
+            if self._stop_event.is_set():
+                for task in pending_tasks:
+                    task.cancel()
+                    tasks.remove(task)
 
     async def attack(self, request: Request):
         self.finished = True
