@@ -52,7 +52,7 @@ class mod_buster(Attack):
         except RequestError:
             self.network_errors += 1
             return False
-        
+
         if response.redirection_url:
             loc = response.redirection_url
             if response.is_directory_redirection:
