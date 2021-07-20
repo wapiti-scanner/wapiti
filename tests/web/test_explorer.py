@@ -161,7 +161,7 @@ async def test_explorer_extract_links():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_explorer_extract_links_from_js():
+async def test_explorer_extract_links_from_angular():
     crawler = AsyncCrawler("http://perdu.com/")
     explorer = Explorer(crawler, Event())
 
@@ -208,4 +208,51 @@ async def test_explorer_extract_links_from_js():
     # http://host.perdu.com is out of scope since by default scope is folder
     assert len(results) == 12
     assert Request("http://perdu.com/secret/path", "GET", link_depth=1) in results
+    await crawler.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_explorer_extract_links_from_react():
+    crawler = AsyncCrawler("http://perdu.com/")
+    explorer = Explorer(crawler, Event())
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="""Hello there!
+        <a href="http://perdu.com/index.html"></a>
+        <script src="app-6a5ff156114f658eb742.js"></script>
+        """
+        )
+    )
+
+    respx.get("http://perdu.com/app-6a5ff156114f658eb742.js").mock(
+        return_value=httpx.Response(
+            200,
+            text="""
+            function f(e){var t=e.grid,a=e.title,n=e.onClick,o=e.sectionName,l=e.open;
+            return r.a.createElement(i.a,{basename:"/myapp"}),
+            r.a.createElement(i.a,{to:"/custom/"},"Custom"),r.a.createElement(i.a,{to:"/admin/secret"},"Admin"),
+            r.a.createElement(i.a,{path:"/default/"},"Default"),
+            r.a.createElement("a",{href:"http://perdu.com/test",target:"_blank",rel:"noopener noreferrer"},"Perdu"),
+            r.a.createElement("a",{href:"https://host.perdu.com/",target:"_blank",rel:"noopener noreferrer"},"Host Perdu");
+            """,
+            headers={"content-type": "application/javascript"}
+        )
+    )
+
+    request = Request("http://perdu.com/")
+    page = await crawler.async_send(request)
+    results = list(explorer.extract_links(page, request))
+    assert len(results) == 2
+
+    request = Request("http://perdu.com/app-6a5ff156114f658eb742.js")
+    page = await crawler.async_send(request)
+
+    results = list(explorer.extract_links(page, request))
+    # http://host.perdu.com is out of scope since by default scope is folder
+    # "/default" detected twice : with react ("/myapp/default") and angular ("/default") parsers
+    assert len(results) == 5
+    assert Request("http://perdu.com/myapp/admin/secret", "GET", link_depth=1) in results
     await crawler.close()
