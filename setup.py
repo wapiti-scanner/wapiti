@@ -121,7 +121,8 @@ if a script is vulnerable.""",
         "sqlalchemy>=1.4.23",
         "aiocache==0.11.1",
         "aiosqlite==0.17.0",
-        "loguru>=0.5.3"
+        "loguru>=0.5.3",
+        "dnspython==2.1.0"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],

@@ -1,7 +1,26 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
+# Copyright (C) 2021 Nicolas Surribas
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 import json
 import os
-from typing import Tuple, List, Iterator
+from typing import List, Iterator
 import re
 import sys
 from itertools import cycle
@@ -9,18 +28,18 @@ import socket
 from random import shuffle
 
 import httpx
-from httpx import RequestError
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
 import dns.asyncresolver
 import dns.exception
 import dns.name
 import dns.resolver
-from loguru import logger as log
+from loguru import logger as logging
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
+from wapitiCore.definitions.subdomain_takeovers import NAME
 
 
 FINGERPRINTS_FILENAME = "takeover_fingerprints.json"
@@ -84,8 +103,8 @@ class Takeover:
                                     response = await client.head(f"https://github.com/{username}", timeout=10.)
                                     if response.status_code == 404:
                                         return True
-                            except httpx.RequestError as exception:
-                                log.warning(f"HTTP request to https://github.com/{username} failed")
+                            except httpx.RequestError:
+                                logging.warning(f"HTTP request to https://github.com/{username} failed")
                             return False
 
                         search = MY_SHOPIFY_REGEX.search(domain)
@@ -105,8 +124,8 @@ class Takeover:
                                     data = response.json()
                                     if data["status"] == "available":
                                         return True
-                            except httpx.RequestError as exception:
-                                log.warning(f"HTTP request to Shopify API failed")
+                            except httpx.RequestError:
+                                logging.warning(f"HTTP request to Shopify API failed")
 
                             return False
 
@@ -124,45 +143,13 @@ class Takeover:
         root_domain = get_fld(domain, fix_protocol=True)
         try:
             # We use this request to see if this is an unregistered domain
-            answers = await dns.asyncresolver.resolve(root_domain, "SOA", raise_on_no_answer=False)
+            await dns.asyncresolver.resolve(root_domain, "SOA", raise_on_no_answer=False)
         except dns.resolver.NXDOMAIN:
             return True
         except BaseException as exception:
-            log.warning(f"ANY request for {root_domain}: {exception}")
+            logging.warning(f"ANY request for {root_domain}: {exception}")
 
         return False
-
-
-async def feed_queue(queue: asyncio.Queue, domain: str, event: asyncio.Event):
-    with open(os.path.join(DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore") as fd:
-        for line in fd:
-            sub = line.strip()
-
-            if not sub:
-                continue
-
-            while True:
-                try:
-                    queue.put_nowait(f"{sub}.{domain}")
-                except asyncio.QueueFull:
-                    await asyncio.sleep(.01)
-                else:
-                    break
-
-            if event.is_set():
-                break
-
-    # send stop command to every worker
-    for __ in range(CONCURRENT_TASKS):
-        while True:
-            try:
-                queue.put_nowait("__exit__")
-            except asyncio.QueueFull:
-                await asyncio.sleep(.01)
-            else:
-                break
-
-takeover = Takeover()
 
 
 def load_resolvers() -> List[str]:
@@ -172,54 +159,14 @@ def load_resolvers() -> List[str]:
         return resolvers
 
 
-async def worker(queue: asyncio.Queue, resolvers: Iterator[str], root_domain: str, verbose: bool = True):
-    global takeover
-
-    while True:
-        try:
-            domain = queue.get_nowait().strip()
-        except asyncio.QueueEmpty:
-            await asyncio.sleep(.05)
-        else:
-            queue.task_done()
-            if domain == "__exit__":
-                break
-
-            try:
-                resolver = dns.asyncresolver.Resolver()
-                resolver.timeout = 10.
-                resolver.nameservers = [next(resolvers) for __ in range(10)]
-                answers = await resolver.resolve(domain, 'CNAME', raise_on_no_answer=False)
-            except (socket.gaierror, UnicodeError):
-                continue
-            except (dns.asyncresolver.NXDOMAIN, dns.exception.Timeout) as exception:
-                # print(f"{domain}: {exception}")
-                continue
-            except (dns.name.EmptyLabel, dns.resolver.NoNameservers) as exception:
-                log.warning(f"{domain}: {exception}")
-                continue
-
-            for answer in answers:
-                cname = answer.to_text().strip(".")
-                if verbose:
-                    log.info(f"Record {domain} points to {cname}")
-
-                try:
-                    if get_fld(cname, fix_protocol=True) == root_domain:
-                        # If it is an internal CNAME (like www.target.tld to target.tld) just ignore
-                        continue
-                except TldDomainNotFound:
-                    log.warning(f"{cname} is not a valid domain name")
-                    continue
-
-                if await takeover.check(domain, cname):
-                    log.critical(f"{domain} to {cname} CNAME seems vulnerable to takeover")
-
-
 class mod_takeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
-    processed_domains = set()
+
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
+        self.processed_domains = set()
+        self.takeover = Takeover()
 
     async def must_attack(self, request: Request):
         root_domain = get_fld(request.hostname, fix_protocol=True)
@@ -228,39 +175,93 @@ class mod_takeover(Attack):
 
         return True
 
+    async def feed_queue(self, queue: asyncio.Queue, domain: str):
+        with open(os.path.join(DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore") as fd:
+            for line in fd:
+                sub = line.strip()
+
+                if not sub:
+                    continue
+
+                while True:
+                    try:
+                        queue.put_nowait(f"{sub}.{domain}")
+                    except asyncio.QueueFull:
+                        await asyncio.sleep(.01)
+                    else:
+                        break
+
+                if self._stop_event.is_set():
+                    break
+
+        # send stop command to every worker
+        for __ in range(CONCURRENT_TASKS):
+            while True:
+                try:
+                    queue.put_nowait("__exit__")
+                except asyncio.QueueFull:
+                    await asyncio.sleep(.01)
+                else:
+                    break
+
+    async def worker(self, queue: asyncio.Queue, resolvers: Iterator[str], root_domain: str):
+        while True:
+            try:
+                domain = queue.get_nowait().strip()
+            except asyncio.QueueEmpty:
+                await asyncio.sleep(.05)
+            else:
+                queue.task_done()
+                if domain == "__exit__":
+                    break
+
+                try:
+                    resolver = dns.asyncresolver.Resolver()
+                    resolver.timeout = 10.
+                    resolver.nameservers = [next(resolvers) for __ in range(10)]
+                    answers = await resolver.resolve(domain, 'CNAME', raise_on_no_answer=False)
+                except (socket.gaierror, UnicodeError):
+                    continue
+                except (dns.asyncresolver.NXDOMAIN, dns.exception.Timeout):
+                    continue
+                except (dns.name.EmptyLabel, dns.resolver.NoNameservers) as exception:
+                    logging.warning(f"{domain}: {exception}")
+                    continue
+
+                for answer in answers:
+                    cname = answer.to_text().strip(".")
+                    if self.verbose:
+                        logging.info(_(f"[¨] Record {domain} points to {cname}"))
+
+                    try:
+                        if get_fld(cname, fix_protocol=True) == root_domain:
+                            # If it is an internal CNAME (like www.target.tld to target.tld) just ignore
+                            continue
+                    except TldDomainNotFound:
+                        logging.warning(f"{cname} is not a valid domain name")
+                        continue
+
+                    if await self.takeover.check(domain, cname):
+                        self.log_red("---")
+                        self.log_red(_(f"CNAME {domain} to {cname} seems vulnerable to takeover"))
+                        self.log_red("---")
+
+                        await self.add_vuln_high(
+                            category=NAME,
+                            info=_(f"CNAME {domain} to {cname} seems vulnerable to takeover"),
+                            request=Request(f"https://{domain}/")
+                        )
+
     async def attack(self, request: Request):
-        root_domain = get_fld(request.hostname, fix_protocol=True)
-
         tasks = []
-
         sub_queue = asyncio.Queue(maxsize=CONCURRENT_TASKS)
-        tasks.append(asyncio.create_task(feed_queue(sub_queue, root_domain, self._stop_event)))
+        tasks.append(asyncio.create_task(self.feed_queue(sub_queue, request.hostname)))
 
         resolvers = load_resolvers()
         resolvers_cycle = cycle(resolvers)
         for __ in range(CONCURRENT_TASKS):
             tasks.append(
-                asyncio.create_task(worker(sub_queue, resolvers_cycle, root_domain))
+                asyncio.create_task(self.worker(sub_queue, resolvers_cycle, request.hostname))
             )
 
         await asyncio.gather(*tasks)
-
-        # TODO: log things properly / add vulnerabilities to report / add definitions for subdomain takeovers
-        #     await self.detect_version(request_to_root.url)
-        #     self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else [""]
-        #     drupal_detected = {
-        #         "name": "Drupal",
-        #         "versions": self.versions,
-        #         "categories": ["CMS Drupal"]
-        #     }
-        #     self.log_blue(
-        #         MSG_TECHNO_VERSIONED,
-        #         "Drupal",
-        #         self.versions
-        #     )
-        #     await self.add_addition(
-        #         category=TECHNO_DETECTED,
-        #         request=request_to_root,
-        #         info=json.dumps(drupal_detected),
-        #     )
-
