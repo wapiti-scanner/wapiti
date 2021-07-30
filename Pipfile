@@ -14,7 +14,7 @@ pytest-cov = ">=2.11.1"
 beautifulsoup4 = ">=4.9.3"
 mako = ">=1.1.4"
 markupsafe = "==1.1.1"
-httpx-socks = {extras = ["asyncio"], version = "==0.4.1"}
+httpx-socks = {extras = ["asyncio"],version = "==0.4.1"}
 pytest = ">=5.4.1"
 tld = ">=0.12.5"
 yaswfp = ">=0.9.3"
@@ -25,6 +25,7 @@ sqlalchemy = ">=1.4.23"
 aiocache = "==0.11.1"
 aiosqlite = "==0.17.0"
 loguru = ">=0.5.3"
+dnspython = "==2.1.0"
 
 [requires]
 python_version = "3.8"

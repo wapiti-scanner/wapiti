@@ -59,7 +59,8 @@ modules = [
     "mod_redirect",
     "mod_xxe",
     "mod_wapp",
-    "mod_wp_enum"
+    "mod_wp_enum",
+    "mod_takeover"
 ]
 
 # Modules that will be used if option -m isn't used
