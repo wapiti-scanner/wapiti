@@ -1,0 +1,1146 @@
+{
+    "services": [
+        {
+            "name": "hatenablog",
+            "cname": [
+                "\\.dontknowyet\\.noidea$"
+            ],
+            "fingerprint": [
+                "404 Blog is not found",
+                "Sorry, we can't find the page you're looking for"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "smartjob",
+            "cname": [
+                "\\.dontknowyet\\.noidea$"
+            ],
+            "fingerprint": [
+                "Job Board Is Unavailable",
+                "This job board website is either expired"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "smugmug",
+            "cname": [
+                "domains\\.smugmug\\.com$"
+            ],
+            "fingerprint": [
+                "Page Not Found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "uptimerobot",
+            "cname": [
+                "\\.uptimerobot\\.com$"
+            ],
+            "fingerprint": [
+                "page not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "pingdom",
+            "cname": [
+                "\\.pingdom\\.com$"
+            ],
+            "fingerprint": [
+                "Public Report Not Activated",
+                "This public report page has not been activated by the user"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "vosfactures",
+            "cname": [
+                "\\.vosfactures\\.fr$"
+            ],
+            "fingerprint": [
+                "<title>vosfactures.fr - logiciel de facturation</title>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "jazzhr",
+            "cname": [
+                "applytojob\\.com$"
+            ],
+            "fingerprint": [
+                "This account no longer active"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "smugmug",
+            "cname": [
+                "hubspot\\.com\\.edgekey\\.net$"
+            ],
+            "fingerprint": [
+                "Domain not found",
+                "does not exist in our system"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "strikingly",
+            "cname": [
+                "strikinglydns\\.com$"
+            ],
+            "fingerprint": [
+                "But if you're looking to build your own website",
+                "you've come to the right place"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "cargo",
+            "cname": [
+                "\\.cargocollective\\.com$"
+            ],
+            "fingerprint": [
+                "404 Not Found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "anima",
+            "cname": [
+                "\\.animaapp\\.com$"
+            ],
+            "fingerprint": [
+                "Missing Website",
+                "If this is your website and you've just created it, try refreshing in a minute"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "worksites",
+            "cname": [
+                "\\.worksites\\.net$"
+            ],
+            "fingerprint": [
+                "Company Not Found",
+                "Sorry, but the website you"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "landingi",
+            "cname": [
+                "\\.landingi\\.com$"
+            ],
+            "fingerprint": [
+                "It looks like you're lost",
+                "The page you are looking for is not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "canny",
+            "cname": [
+                "\\.canny\\.io$"
+            ],
+            "fingerprint": [
+                "Company Not Found",
+                "There is no such company",
+                "Did you enter the right URL"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "ngrok",
+            "cname": [
+                "\\.ngrok\\.io$"
+            ],
+            "fingerprint": [
+                "ngrok.io not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "helprace",
+            "cname": [
+                "\\.helprace\\.com$"
+            ],
+            "fingerprint": [
+                "Alias not configured",
+                "Admin of this Helprace account needs to set up domain alias",
+                "Using your own domain with Helprace"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "airee",
+            "cname": [
+                "cdn.airee.ru"
+            ],
+            "fingerprint": [
+                "Сервис Айри.рф не оплачен"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "branch.io",
+            "cname": [
+                "\\.app\\.link$",
+                "\\.bnc\\.lt$"
+            ],
+            "fingerprint": [
+                "That link could not be found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "elasticbean",
+            "cname": [
+                "\\.elasticbeanstalk\\.com$"
+            ],
+            "fingerprint": [
+                "Redirecting to"
+            ],
+            "warning": false,
+            "nxdomain": true
+        },
+        {
+            "name": "hubspot",
+            "cname": [
+                "\\.hubspot\\.net$",
+                "\\.hubspot\\.com\\.edgekey\\.net$"
+            ],
+            "fingerprint": [
+                "Domain Not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "unbouncepages",
+            "cname": [
+                "\\.unbouncepages\\.com$"
+            ],
+            "fingerprint": [
+                "The requested URL was not found on this server"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "wufoo",
+            "cname": [
+                "\\.wufoo\\.com$"
+            ],
+            "fingerprint": [
+                "Profile not found",
+                "Hmmm....something is not right"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "kayako",
+            "cname": [
+                "\\.kayako\\.com$"
+            ],
+            "fingerprint": [
+                "That's not an active Kayako account"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "fastly",
+            "cname": [
+                "\\.fastly\\.net$"
+            ],
+            "fingerprint": [
+                "Fastly error: unknown domain"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "github",
+            "cname": [
+                "\\.github\\.io$"
+            ],
+            "fingerprint": [
+                "There isn't a GitHub Pages site here"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "launchrock",
+            "cname": [
+                "\\.launchrock\\.com$"
+            ],
+            "fingerprint": [
+                "It looks like you may have taken a wrong turn somewhere"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "kinsta",
+            "cname": [
+                "\\.kinsta\\.cloud$"
+            ],
+            "fingerprint": [
+                "No Site For Domain"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "heroku",
+            "cname": [
+                "\\.herokuapp\\.com$",
+                "\\.herokudns\\.com$"
+            ],
+            "fingerprint": [
+                "herokucdn.com/error-pages/no-such-app.html"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "pantheon",
+            "cname": [
+                "pantheonsite\\.io$"
+            ],
+            "fingerprint": [
+                "The gods are wise, but do not know of the site which you seek."
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "tumblr",
+            "cname": [
+                "domains\\.tumblr\\.com$"
+            ],
+            "fingerprint": [
+                "Whatever you were looking for doesn't currently exist at this address"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "wordpress",
+            "cname": [
+                "\\.wordpress\\.com$"
+            ],
+            "fingerprint": [
+                "Do you want to register"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "teamwork",
+            "cname": [
+                "teamwork\\.com$"
+            ],
+            "fingerprint": [
+                "Oops - We didn't find your site"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "helpjuice",
+            "cname": [
+                "\\.helpjuice\\.com$"
+            ],
+            "fingerprint": [
+                "We could not find what you're looking for"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "helpscout",
+            "cname": [
+                "\\.helpscoutdocs\\.com$"
+            ],
+            "fingerprint": [
+                "No settings were found for this company"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "s3 bucket",
+            "cname": [
+                "s3[a-zA-Z0-9\\-\\._]*\\.amazonaws\\.com$"
+            ],
+            "fingerprint": [
+                "The specified bucket does not exist"
+            ],
+            "warning": true,
+            "nxdomain": false
+        },
+        {
+            "name": "ghost",
+            "cname": [
+                "ghost\\.io$"
+            ],
+            "fingerprint": [
+                "The thing you were looking for is no longer here"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "feedpress",
+            "cname": [
+                "redirect\\.feedpress\\.me$"
+            ],
+            "fingerprint": [
+                "The feed has not been found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "shopify",
+            "cname": [
+                "\\.myshopify\\.com$"
+            ],
+            "fingerprint": [
+                "Sorry, this shop is currently unavailable"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "statuspage",
+            "cname": [
+                "\\.statuspage\\.io$",
+                "\\.stspg-customer\\.com$"
+            ],
+            "fingerprint": [
+                "Better Status Communication",
+                "You are being <a href=\"https://www.statuspage.io\">redirected"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "tilda",
+            "cname": [
+                "\\.tilda\\.ws$"
+            ],
+            "fingerprint": [
+                "Domain has been assigned"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "uservoice",
+            "cname": [
+                "\\.uservoice\\.com$"
+            ],
+            "fingerprint": [
+                "This UserVoice subdomain is currently available"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "surge",
+            "cname": [
+                "surge\\.sh$"
+            ],
+            "fingerprint": [
+                "project not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "smartling",
+            "cname": [
+                "smartling\\.com$"
+            ],
+            "fingerprint": [
+                "Domain is not configured"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "bitbucket",
+            "cname": [
+                "\\.bitbucket\\.io$"
+            ],
+            "fingerprint": [
+                "The page you have requested does not exist",
+                "Repository not found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "surveygizmo",
+            "cname": [
+                "privatedomain\\.sgizmo\\.com$",
+                "privatedomain\\.surveygizmo\\.eu$",
+                "privatedomain\\.sgizmoca\\.com$"
+            ],
+            "fingerprint": [
+                "data-html-name"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "intercom",
+            "cname": [
+                "custom\\.intercom\\.help$"
+            ],
+            "fingerprint": [
+                "This page is reserved for artistic dogs.",
+                "<h1 class=\"headline\"Uh oh. That page doesn't exist.</h1>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "tave",
+            "cname": [
+                "clientaccess\\.tave\\.com$"
+            ],
+            "fingerprint": [
+                "Error 404: Page Not Found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "thinkific",
+            "cname": [
+                "thinkific\\.com$"
+            ],
+            "fingerprint": [
+                "You may have mistyped the address or the page may have moved"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "webflow",
+            "cname": [
+                "proxy.webflow\\.com$",
+                "proxy-ssl.webflow\\.com$"
+            ],
+            "fingerprint": [
+                "<p class=\"description\">The page you are looking for doesn't exist or has been moved.</p>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "kajabi",
+            "cname": [
+                "\\.myKajabi\\.com$"
+            ],
+            "fingerprint": [
+                "The page you were looking for doesn't exist"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "wishpond",
+            "cname": [
+                "wishpond\\.com$"
+            ],
+            "fingerprint": [
+                "https://www.wishpond.com/404?campaign=true"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "aftership",
+            "cname": [
+                "aftership\\.com$"
+            ],
+            "fingerprint": [
+                "Oops.</h2><p class=\"text-muted text-tight\">The page you're looking for doesn't exist."
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "aha",
+            "cname": [
+                "ideas\\.aha\\.io$"
+            ],
+            "fingerprint": [
+                "There is no portal here ... sending you back to Aha!"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "tictail",
+            "cname": [
+                "domains\\.tictail\\.com$"
+            ],
+            "fingerprint": [
+                "Building a brand of your own",
+                "to target URL: <a href=\"https://tictail.com",
+                "Start selling on Tictail."
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "brightcove",
+            "cname": [
+                "bcvp0rtal\\.com$",
+                "brightcovegallery\\.com$",
+                "gallery\\.video$"
+            ],
+            "fingerprint": [
+                "<p class=\"bc-gallery-error-code\">Error Code: 404</p>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "bigcartel",
+            "cname": [
+                "\\.bigcartel\\.com$"
+            ],
+            "fingerprint": [
+                "<h1>Oops! We could&#8217;t find that page.</h1>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "campaignmonitor",
+            "cname": [
+                "\\.createsend\\.com$"
+            ],
+            "fingerprint": [
+                "Double check the URL",
+                "Trying to access your account"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "activecompaign",
+            "cname": [
+                "activehosted\\.com$"
+            ],
+            "fingerprint": [
+                "LIGHTTPD - fly light"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "compaignmonitor",
+            "cname": [
+                "createsend\\.com$"
+            ],
+            "fingerprint": [
+                "Double check the URL or <a href=\"mailto:help@createsend.com"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "proposify",
+            "cname": [
+                "proposify\\.biz$"
+            ],
+            "fingerprint": [
+                "If you need immediate assistance, please contact <a href=\"mailto:support@proposify.biz"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "acquia",
+            "cname": [
+                "acquia-test\\.co$"
+            ],
+            "fingerprint": [
+                "If you are an Acquia Cloud customer and expect to see your site at this address",
+                "The site you are looking for could not be found"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "simplebooklet",
+            "cname": [
+                "\\.simplebooklet\\.com$"
+            ],
+            "fingerprint": [
+                "We can't find this <a href=\"https://simplebooklet.com"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "getresponse",
+            "cname": [
+                "\\.gr8\\.com$"
+            ],
+            "fingerprint": [
+                "With GetResponse Landing Pages, lead generation has never been easier"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "vend",
+            "cname": [
+                "\\.vendecommerce\\.com$"
+            ],
+            "fingerprint": [
+                "Looks like you've traveled too far into cyberspace"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "jetbrains",
+            "cname": [
+                "\\.myjetbrains\\.com$"
+            ],
+            "fingerprint": [
+                "is not a registered InCloud YouTrack"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "mashery",
+            "cname": [
+                "mashery\\.com$"
+            ],
+            "fingerprint": [
+                "Unrecognized domain <strong>"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "service-now",
+            "cname": [
+                "\\.service-now\\.com$"
+            ],
+            "fingerprint": [],
+            "warning": false,
+            "nxdomain": true
+        },
+        {
+            "name": "azure",
+            "cname": [
+                "\\.azurewebsites\\.net$",
+                "\\.azurewebsites\\.windows\\.net$",
+                "\\.cloudapp\\.net$",
+                "\\.cloudapp\\.azure\\.com$",
+                "\\.trafficmanager\\.net$",
+                "\\.blob\\.core\\.windows\\.net$",
+                "\\.azure-api\\.net$",
+                "\\.azure-mobile\\.net$",
+                "\\.azurehdinsight\\.net$",
+                "\\.azureedge\\.net$",
+                "\\.azurefd\\.net$",
+                "\\.azurecontainer\\.io$",
+                "\\.database\\.windows\\.net$",
+                "\\.azuredatalakestore\\.net$",
+                "\\.search.windows\\.net$",
+                "\\.azurecr\\.io$",
+                "\\.redis\\.cache\\.windows\\.net$",
+                "\\.servicebus\\.windows\\.net$",
+                "\\.visualstudio\\.com$"
+            ],
+            "fingerprint": [],
+            "warning": false,
+            "nxdomain": true
+        },
+        {
+            "name": "wpmudev",
+            "cname": [
+                "wpmudev\\.host$"
+            ],
+            "fingerprint": [],
+            "warning": false,
+            "nxdomain": true
+        },
+        {
+            "name": "zendesk",
+            "cname": [
+                "\\.zendesk\\.com$"
+            ],
+            "fingerprint": [
+                "Help Center Closed",
+                "this help center no longer exists"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "readme",
+            "cname": [
+                "\\.readme\\.io$",
+                "\\.readmessl\\.com$"
+            ],
+            "fingerprint": [
+                "Project doesnt exist... yet"
+            ],
+            "warning": false,
+            "nxdomain": false
+        },
+        {
+            "name": "apigee",
+            "cname": [
+                "-portal\\.apigee\\.net$"
+            ],
+            "fingerprint": [],
+            "warning": false,
+            "nxdomain": true
+        }
+    ],
+    "ignore": [
+        "\\.share$",
+        "\\.local$",
+        "\\.internal$",
+        "\\.mlan$",
+        "\\.test$",
+        "\\.gov$",
+        "\\.srv$",
+        "\\.consul$",
+        "\\.elb.*amazonaws\\.com$",
+        "\\.elb.*amazonaws\\.com.cn$",
+        "\\.execute-api.*amazonaws\\.com",
+        "\\.compute-1\\.amazonaws\\.com",
+        "\\.compute-2\\.amazonaws\\.com",
+        "\\.compute\\.amazonaws\\.com",
+        "\\.gouv\\.fr$",
+        "\\.education\\.fr$",
+        "\\.educagri\\.fr$",
+        "\\.culture\\.fr$",
+        "\\.as8677\\.net$",
+        "atosorigin.com",
+        "amazon.co.uk",
+        "rds.amazonaws.com",
+        "socgen.com",
+        "waycom.net",
+        "altima-hosting.fr",
+        "filassistance.fr",
+        "amazon-corp.com",
+        "algolianet.com",
+        "a-msedge.net",
+        "\\.mozaws\\.net$",
+        "weightwatchers.com",
+        "everytrail.com",
+        "emailretargeting.com",
+        "\\.truaws\\.com$",
+        "decitre.fr",
+        "\\.eto\\.fr$",
+        "\\.carrefour\\.fr$",
+        "\\.carrefour\\.com$",
+        "\\.nolim\\.fr$",
+        "\\.juretho\\.com$",
+        "247realmedia.com",
+        "myteksi.com",
+        "smailru.net",
+        "devmail.ru",
+        "1688.com",
+        "badoo.com",
+        "centrify-dev.net",
+        "phhtcloud.net",
+        "nintendo-europe.com",
+        "multimediabs.com",
+        "twilio.com",
+        "yahoo.co.kr",
+        "xerox.net",
+        "webalogues.fr",
+        "bazaarvoice.com",
+        "netgear.com",
+        "\\.philips\\.com$",
+        "aea.amazon.com",
+        "cingular.com",
+        "twimg.com",
+        "periscope.tv",
+        "\\.pscp\\.tv$",
+        "pinterest.com",
+        "paypalobjects.com",
+        "objectstorage.io",
+        "\\.office\\.oath$",
+        "\\.prod\\.oath$",
+        "\\.cic\\.oath$",
+        "\\.oath\\.cloud$",
+        "skyeris.net",
+        "deezer-blog.com",
+        "azweupub.hbogo.eu",
+        "hbogoasia.hk",
+        "hbogoasia.sg",
+        "\\.hbo\\.ws$",
+        "\\.cvf\\.fr$",
+        "\\.ccmbg\\.net$",
+        "multimediabs.com",
+        "voila.com",
+        "integra.fr",
+        "msft.net",
+        "tf1.fr",
+        "selftrade.com",
+        "llnwi.net",
+        "take2games.com",
+        "wanadoo.fr",
+        "mobivillage.com",
+        "be3a.com",
+        "groupo.com",
+        "eloqua.com",
+        "learnupon.com",
+        "incapdns.net",
+        "tesla.services",
+        "teslamotors.com",
+        "verizon.com",
+        "visualplatform.net",
+        "microsoft.com",
+        "lithium.com",
+        "appspot.com",
+        "nextit.com",
+        "yp.com",
+        "2o7.net",
+        "aeturnum.com",
+        "airbnb-aws.com",
+        "ai.srv",
+        "akadns.net",
+        "akamaiedge.net",
+        "akamaiedge-staging.net",
+        "akamai.net",
+        "algolia.com",
+        "algolia.net",
+        "alibaba.com",
+        "alibaba.co.uk",
+        "alibabadns.com",
+        "alicdn.com",
+        "aliexpress.com",
+        "alikunlun.com",
+        "alimama.com",
+        "aliyun.com",
+        "as44099.com",
+        "attcompute.com",
+        "attens.com",
+        "attforyou.com",
+        "att-idns.net",
+        "att.io",
+        "att.net",
+        "att.com",
+        "avangate.com",
+        "b05-apps.nl",
+        "b2c.srv",
+        "boulanger.com",
+        "boursorama.fr",
+        "boursorama.com",
+        "boulanger.fr",
+        "braintree-api.com",
+        "braintreepayments.com",
+        "brinkow.com",
+        "carlton.ca",
+        "cdngslb.com",
+        "cedexis.net",
+        "cegid.com",
+        "cloudflare.net",
+        "cloudfront.net",
+        "compute.internal",
+        "csedigital.com",
+        "ebayimg.com",
+        "edgekey.net",
+        "edgekey-staging.net",
+        "edgesuite.net",
+        "ericsson.net",
+        "etao.com",
+        "facebook.com",
+        "fastly.net",
+        "fciis.net",
+        "freshdesk.com",
+        "\\.fti\\.net$",
+        "geotab.com",
+        "github.net",
+        "github.com",
+        "google.com",
+        "twttr.net",
+        "kaspersky.com",
+        "kaspersky-labs.com",
+        "aliyunwaf.com",
+        "steampowered.com",
+        "aol.com",
+        "\\.gm\\.com$",
+        "\\.mi\\.com$",
+        "mozilla.org",
+        "mozilla.com",
+        "stylelabs.cloud",
+        "googlehosted.com",
+        "grammarlyaws.com",
+        "hitfarm.com",
+        "hostedemail.com",
+        "ibm.com",
+        "improbable.io",
+        "inscname.net",
+        "neolane.net",
+        "kering.net",
+        "pprgroup.net",
+        "adobe-campaign.com",
+        "llnwd.net",
+        "mailpolicies.nl",
+        "mi-dun.com",
+        "mi-dun.srv",
+        "muscache.com",
+        "musta.ch",
+        "na-att-idns.net",
+        "netflix.com",
+        "netflix.net",
+        "netrefer.com",
+        "netsuite.com",
+        "nssb-oracle.com",
+        "office365.com",
+        "online-metrix.net",
+        "oracle.com",
+        "orange.fr",
+        "ovh.net",
+        "francetelecom.com",
+        "paddypower.com",
+        "paypal.com",
+        "paypalcorp.com",
+        "paytona.com",
+        "pornhub.com",
+        "pornhubsurvey.com",
+        "spotify.net",
+        "mozilla.com",
+        "yahoodns.net",
+        "xerox.com",
+        "yahooapis.com",
+        "qingcdn.com",
+        "rdtcdn.com",
+        "redtube8.it",
+        "redtube.com",
+        "redtube.com.br",
+        "redtubee.net",
+        "redtubefiles.com",
+        "redtubelive.com",
+        "redtube.net",
+        "redtubepremium.com",
+        "redtubeshop.com",
+        "adbx.io",
+        "\\.sfr\\.net$",
+        "vsct\\.fr$",
+        "cdn-vsct\\.fr$",
+        "cdntaging-vsct\\.fr",
+        "katecdn.com",
+        "sc-gw.com",
+        "securepromotion.com",
+        "secureserver.net",
+        "sendgrid.net",
+        "shopifycloud.com",
+        "\\.shopify\\.com$",
+        "siteforce.com",
+        "solarsilk.com",
+        "spotify.com",
+        "sprinklr.com",
+        "starbucks.com",
+        "starbucks.net",
+        "taobao.com",
+        "taobizhong.com",
+        "tbcache.com",
+        "tessco.com",
+        "tinyspeck.com",
+        "tmall.com",
+        "twitter.biz",
+        "valvesoftware.com",
+        "verizon.net",
+        "weightwatchers.com",
+        "where.com",
+        "woob2.com",
+        "wpengine.com",
+        "wpeproxy.com",
+        "x-echo.com",
+        "xiaomi.com",
+        "xiaomi.srv",
+        "\\.bitly\\.com$",
+        "yahoo.com",
+        "as44099.net",
+        "email-match.com",
+        "yahoo.net",
+        "verizonwireless.com",
+        "yahoo.cloud",
+        "yelpcorp.com",
+        "\\.rncdn[0-9]*\\.com",
+        "youpin.srv",
+        "youporncams.com",
+        "youporn.com",
+        "youporngay.com",
+        "youpornpremium.com",
+        "youpornshop.com",
+        "ypmate.com",
+        "ypncdn.com",
+        "zarcrom.net",
+        "affex.org",
+        "t-msedge.net",
+        "edgecastdns.net",
+        "\\.xicdn\\.net$",
+        "\\.outlook\\.com$",
+        "\\.office\\.com$",
+        "verizonwireless.com",
+        "melt\\.sh$",
+        "melt\\.services$",
+        "meltprod\\.com$",
+        "roche\\.com$",
+        "roche\\.net$",
+        "\\.vzw\\.com$",
+        "\\.fastlylb\\.net$",
+        "credit-cooperatif\\.coop$",
+        "bpce-it\\.fr$",
+        "fidorbank\\.com$",
+        "banquepopulaire\\.fr$",
+        "caisse-epargne\\.fr$",
+        "fidorbank\\.uk$",
+        "gandi\\.net$",
+        "adopteunmec\\.com$",
+        "webslice\\.eu$",
+        "netdna-cdn\\.com$",
+        "edgecastcdn\\.net$",
+        "akamaized\\.net$",
+        "footprint\\.net$",
+        "schneevonmorgen\\.com$",
+        "qwant\\.com$",
+        "cdxcn\\.cn$",
+        "ahdss\\.net$",
+        "zillowgroup\\.com"
+    ]
+}
