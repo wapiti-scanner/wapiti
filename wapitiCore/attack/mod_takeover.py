@@ -20,16 +20,17 @@
 import asyncio
 import json
 import os
-from typing import List, Iterator
+from typing import List, Iterator, Set
 import re
 import sys
 from itertools import cycle
+from functools import lru_cache
 import socket
 from random import shuffle
 
 import httpx
 from tld import get_fld
-from tld.exceptions import TldDomainNotFound
+from tld.exceptions import TldDomainNotFound, TldBadUrl
 import dns.asyncresolver
 import dns.exception
 import dns.name
@@ -48,11 +49,18 @@ SUBDOMAINS_FILENAME = "subdomain-wordlist.txt"
 
 GITHUB_IO_REGEX = re.compile(r"([a-z0-9]+)\.github\.io$")
 MY_SHOPIFY_REGEX = re.compile(r"([a-z0-9-]+)\.myshopify\.com$")
+IPV4_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)\.(\d+)$")
 
 BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 DATA_DIR = os.path.join(BASE_DIR, "data", "attacks")
 
 CONCURRENT_TASKS = 100  # We can afford more concurrent tasks than for HTTP
+
+
+@lru_cache(maxsize=2000)
+def get_root_domain(domain: str):
+    # May raise tld.exceptions.TldDomainNotFound, tld.exceptions.TldBadUrl
+    return get_fld(domain, fix_protocol=True)
 
 
 class Takeover:
@@ -83,11 +91,20 @@ class Takeover:
         return False
 
     async def check(self, origin: str, domain: str) -> bool:
+        if "." not in domain or domain.endswith((".local", ".internal")):
+            # Stuff like "localhost": internal CNAMEs we can't control
+            return False
+
         # Check for known false positives first
         for regex in self.ignore:
             if regex.search(domain):
                 return False
 
+        if IPV4_REGEX.match(domain):
+            # Obviously we can't take control over any IP on the Internet
+            return False
+
+        # Is the pointed domain part of some particular takeover case?
         for service_entry in self.services:
             for cname_regex in service_entry["cname"]:
                 if re.search(cname_regex, domain):
@@ -140,9 +157,17 @@ class Takeover:
                         except BaseException:
                             continue
 
-        root_domain = get_fld(domain, fix_protocol=True)
+        # What remains is potentially unregistered domain.
+        # First: get root domain of the pointed domain
         try:
-            # We use this request to see if this is an unregistered domain
+            root_domain = get_root_domain(domain)
+        except (TldDomainNotFound, TldBadUrl):
+            # We can't register the pointed domain as it is invalid
+            logging.warning(f"Pointed domain {domain} is not a valid domain name")
+            return False
+
+        try:
+            # Second: using SOA on this root domain we check if it is available
             await dns.asyncresolver.resolve(root_domain, "SOA", raise_on_no_answer=False)
         except dns.resolver.NXDOMAIN:
             return True
@@ -159,6 +184,19 @@ def load_resolvers() -> List[str]:
         return resolvers
 
 
+async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[str]:
+    # Ask for an improbable subdomain to see if there are any responses
+    resolver = dns.asyncresolver.Resolver()
+    resolver.timeout = 10.
+    resolver.nameservers = [next(resolvers) for __ in range(10)]
+
+    try:
+        results = await resolver.resolve(f"supercalifragilisticexpialidocious.{domain}", "CNAME")
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout, dns.resolver.NoNameservers):
+        return []
+    return [record.to_text().strip(".") for record in results]
+
+
 class mod_takeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
@@ -169,7 +207,7 @@ class mod_takeover(Attack):
         self.takeover = Takeover()
 
     async def must_attack(self, request: Request):
-        root_domain = get_fld(request.hostname, fix_protocol=True)
+        root_domain = get_root_domain(request.hostname)
         if root_domain in self.processed_domains:
             return False
 
@@ -204,7 +242,7 @@ class mod_takeover(Attack):
                 else:
                     break
 
-    async def worker(self, queue: asyncio.Queue, resolvers: Iterator[str], root_domain: str):
+    async def worker(self, queue: asyncio.Queue, resolvers: Iterator[str], root_domain: str, bad_responses: Set[str]):
         while True:
             try:
                 domain = queue.get_nowait().strip()
@@ -230,14 +268,18 @@ class mod_takeover(Attack):
 
                 for answer in answers:
                     cname = answer.to_text().strip(".")
+
+                    if cname in bad_responses:
+                        continue
+
                     if self.verbose:
                         logging.info(_(f"[¨] Record {domain} points to {cname}"))
 
                     try:
-                        if get_fld(cname, fix_protocol=True) == root_domain:
+                        if get_root_domain(cname) == root_domain:
                             # If it is an internal CNAME (like www.target.tld to target.tld) just ignore
                             continue
-                    except TldDomainNotFound:
+                    except (TldDomainNotFound, TldBadUrl):
                         logging.warning(f"{cname} is not a valid domain name")
                         continue
 
@@ -259,9 +301,10 @@ class mod_takeover(Attack):
 
         resolvers = load_resolvers()
         resolvers_cycle = cycle(resolvers)
+        wildcard_responses = await get_wildcard_responses(request.hostname, resolvers_cycle)
         for __ in range(CONCURRENT_TASKS):
             tasks.append(
-                asyncio.create_task(self.worker(sub_queue, resolvers_cycle, request.hostname))
+                asyncio.create_task(self.worker(sub_queue, resolvers_cycle, request.hostname, set(wildcard_responses)))
             )
 
         await asyncio.gather(*tasks)
