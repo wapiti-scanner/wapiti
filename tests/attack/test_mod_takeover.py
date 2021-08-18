@@ -10,7 +10,7 @@ import dns.resolver
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_takeover import mod_takeover
+from wapitiCore.attack.mod_takeover import mod_takeover, Takeover
 from tests import AsyncMock
 
 CNAME_TEMPLATE = """id 5395
@@ -70,3 +70,33 @@ async def test_unregistered_cname(mocked_resolve, mocked_resolve_):
     assert "unregistered.com" in persister.add_payload.call_args_list[0][1]["info"]
 
     await crawler.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_github_io_false_positive():
+    respx.get("https://victim.com/").mock(
+        return_value=httpx.Response(200, text="There isn't a GitHub Pages site here")
+    )
+
+    respx.head("https://github.com/falsepositive").mock(
+        return_value=httpx.Response(200, text="I'm registered")
+    )
+
+    takeover = Takeover()
+    assert not await takeover.check("victim.com", "falsepositive.github.io")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_github_io_true_positive():
+    respx.get("https://victim.com/").mock(
+        return_value=httpx.Response(200, text="There isn't a GitHub Pages site here")
+    )
+
+    respx.head("https://github.com/truepositive").mock(
+        return_value=httpx.Response(404, text="No such user")
+    )
+
+    takeover = Takeover()
+    assert await takeover.check("victim.com", "truepositive.github.io")
