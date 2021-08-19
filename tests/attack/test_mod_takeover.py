@@ -100,3 +100,41 @@ async def test_github_io_true_positive():
 
     takeover = Takeover()
     assert await takeover.check("victim.com", "truepositive.github.io")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_myshopify_false_positive():
+    respx.get("https://victim.com/").mock(
+        return_value=httpx.Response(200, text="Sorry, this shop is currently unavailable")
+    )
+
+    myshopify_api_url = (
+        "https://app.shopify.com/services/signup/check_availability.json?"
+        f"shop_name=falsepositive&email=test@example.com"
+    )
+    respx.get(myshopify_api_url).mock(
+        return_value=httpx.Response(200, json={"status": "unavailable"})
+    )
+
+    takeover = Takeover()
+    assert not await takeover.check("victim.com", "falsepositive.myshopify.com")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_myshopify_true_positive():
+    respx.get("https://victim.com/").mock(
+        return_value=httpx.Response(200, text="Sorry, this shop is currently unavailable")
+    )
+
+    myshopify_api_url = (
+        "https://app.shopify.com/services/signup/check_availability.json?"
+        f"shop_name=falsepositive&email=test@example.com"
+    )
+    respx.get(myshopify_api_url).mock(
+        return_value=httpx.Response(200, json={"status": "available"})
+    )
+
+    takeover = Takeover()
+    assert await takeover.check("victim.com", "falsepositive.myshopify.com")

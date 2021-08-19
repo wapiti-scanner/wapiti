@@ -72,10 +72,6 @@ msgstr "CSRF token '{}' might be easy to predict"
 msgid "{0} {1} detected"
 msgstr "{0} {1} detected"
 
-#, python-brace-format
-msgid "Interesting methods allowed on {}: {}"
-msgstr "Interesting methods allowed on {}: {}"
-
 msgid "No Drupal Detected"
 msgstr "No Drupal Detected"
 
@@ -152,6 +148,9 @@ msgstr "Checking X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Checking Strict-Transport-Security :"
 
+msgid "Interesting methods allowed on {}: {}"
+msgstr "Interesting methods allowed on {}: {}"
+
 msgid "Error downloading nikto database."
 msgstr "Error downloading nikto database."
 
@@ -226,6 +225,14 @@ msgstr ""
 "{0} via injection in the parameter {1}.\n"
 "The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
 "Full request can be seen at {5}"
+
+#, python-brace-format
+msgid "Record {domain} points to {cname}"
+msgstr "Record {domain} points to {cname}"
+
+#, python-brace-format
+msgid "CNAME {domain} to {cname} seems vulnerable to takeover"
+msgstr "CNAME {domain} to {cname} seems vulnerable to takeover"
 
 msgid "Blind SQL vulnerability"
 msgstr "Blind SQL vulnerability"
@@ -575,14 +582,20 @@ msgid "HTTP Methods"
 msgstr "HTTP Methods"
 
 msgid ""
-"While GET and POST are by far the most common methods that are used to access "
-"information provided by a web server, HTTP allows several other (and somewhat less known) methods."
+"While GET and POST are by far the most common methods that are used to "
+"access information provided by a web server, HTTP allows several other (and "
+"somewhat less known) methods."
 msgstr ""
-"While GET and POST are by far the most common methods that are used to access "
-"information provided by a web server, HTTP allows several other (and somewhat less known) methods."
+"While GET and POST are by far the most common methods that are used to "
+"access information provided by a web server, HTTP allows several other (and "
+"somewhat less known) methods."
 
-msgid "Some of these can be used for nefarious purposes if the web server is misconfigured."
-msgstr "Some of these can be used for nefarious purposes if the web server is misconfigured."
+msgid ""
+"Some of these can be used for nefarious purposes if the web server is "
+"misconfigured."
+msgstr ""
+"Some of these can be used for nefarious purposes if the web server is "
+"misconfigured."
 
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "
@@ -697,6 +710,23 @@ msgid ""
 msgstr ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
+
+msgid "Subdomain takeover"
+msgstr "Subdomain takeover"
+
+msgid ""
+"A DNS CNAME record points to a non existing domain or to a content that an "
+"attacker can take control of."
+msgstr ""
+"A DNS CNAME record points to a non existing domain or to a content that an "
+"attacker can take control of."
+
+msgid ""
+"Prevent dangling DNS entries by making sure you already have control over "
+"the pointed domain."
+msgstr ""
+"Prevent dangling DNS entries by making sure you already have control over "
+"the pointed domain."
 
 msgid "Blind SQL Injection"
 msgstr "Blind SQL Injection"
@@ -919,6 +949,11 @@ msgstr "url = {0}"
 
 msgid "Waiting for running crawler tasks to finish, please wait."
 msgstr "Waiting for running crawler tasks to finish, please wait."
+
+msgid ""
+"Waiting for all payload tasks to finish for current resource, please wait."
+msgstr ""
+"Waiting for all payload tasks to finish for current resource, please wait."
 
 msgid "[*] Loading modules:"
 msgstr "[*] Loading modules:"
@@ -1167,6 +1202,9 @@ msgstr "Default is html."
 
 msgid "Output file or folder"
 msgstr "Output file or folder"
+
+msgid "Output log file"
+msgstr "Output log file"
 
 msgid "Url serving as endpoint for target"
 msgstr "Url serving as endpoint for target"

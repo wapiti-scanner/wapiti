@@ -148,6 +148,9 @@ msgstr ""
 msgid "Checking Strict-Transport-Security :"
 msgstr ""
 
+msgid "Interesting methods allowed on {}: {}"
+msgstr ""
+
 msgid "Error downloading nikto database."
 msgstr ""
 
@@ -216,6 +219,14 @@ msgid ""
 "{0} via injection in the parameter {1}.\n"
 "The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
 "Full request can be seen at {5}"
+msgstr ""
+
+#, python-brace-format
+msgid "Record {domain} points to {cname}"
+msgstr ""
+
+#, python-brace-format
+msgid "CNAME {domain} to {cname} seems vulnerable to takeover"
 msgstr ""
 
 msgid "Blind SQL vulnerability"
@@ -498,6 +509,20 @@ msgstr ""
 msgid "More information about the error should be found in the server logs."
 msgstr ""
 
+msgid "HTTP Methods"
+msgstr ""
+
+msgid ""
+"While GET and POST are by far the most common methods that are used to "
+"access information provided by a web server, HTTP allows several other (and "
+"somewhat less known) methods."
+msgstr ""
+
+msgid ""
+"Some of these can be used for nefarious purposes if the web server is "
+"misconfigured."
+msgstr ""
+
 msgid ""
 "Unvalidated redirects and forwards are possible when a web application "
 "accepts untrusted input that could cause the web application to redirect the "
@@ -583,6 +608,19 @@ msgstr ""
 msgid ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
+msgstr ""
+
+msgid "Subdomain takeover"
+msgstr ""
+
+msgid ""
+"A DNS CNAME record points to a non existing domain or to a content that an "
+"attacker can take control of."
+msgstr ""
+
+msgid ""
+"Prevent dangling DNS entries by making sure you already have control over "
+"the pointed domain."
 msgstr ""
 
 msgid "Blind SQL Injection"
@@ -782,6 +820,10 @@ msgid "url = {0}"
 msgstr "url = {0}"
 
 msgid "Waiting for running crawler tasks to finish, please wait."
+msgstr ""
+
+msgid ""
+"Waiting for all payload tasks to finish for current resource, please wait."
 msgstr ""
 
 msgid "[*] Loading modules:"
@@ -1028,6 +1070,9 @@ msgstr ""
 
 msgid "Output file or folder"
 msgstr "Arquivo ou pasta de saída "
+
+msgid "Output log file"
+msgstr ""
 
 msgid "Url serving as endpoint for target"
 msgstr ""

@@ -9,10 +9,17 @@ xgettext --copyright-holder="2009-2021 Nicolas SURRIBAS" --package-name="Wapiti"
 # Next, update the translation files by adding entry for new strings
 # while keeping already translated strings if they are still used.
 # Old references will be commented and put at the end of files
+echo "German"
 msgmerge --update --no-fuzzy-matching --backup=off de.po template.po
+echo "English"
 msgmerge --update --no-fuzzy-matching --backup=off en.po template.po
+echo "Spanish"
 msgmerge --update --no-fuzzy-matching --backup=off es.po template.po
+echo "French"
 msgmerge --update --no-fuzzy-matching --backup=off fr.po template.po
+echo "Malay"
 msgmerge --update --no-fuzzy-matching --backup=off ms.po template.po
+echo "Portuguese"
 msgmerge --update --no-fuzzy-matching --backup=off pt.po template.po
+echo "Chinese"
 msgmerge --update --no-fuzzy-matching --backup=off zh.po template.po

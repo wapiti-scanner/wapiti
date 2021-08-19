@@ -38,13 +38,17 @@ class mod_http_headers(Attack):
 
     headers_to_check = {
         "X-Frame-Options": {
-            "list": check_list_xframe, "info": INFO_XFRAME_OPTIONS, "log": "Checking X-Frame-Options :"},
+            "list": check_list_xframe, "info": INFO_XFRAME_OPTIONS, "log": _("Checking X-Frame-Options :")
+        },
         "X-XSS-Protection": {
-            "list": check_list_xss, "info": INFO_XSS_PROTECTION, "log": "Checking X-XSS-Protection :"},
+            "list": check_list_xss, "info": INFO_XSS_PROTECTION, "log": _("Checking X-XSS-Protection :")
+        },
         "X-Content-Type-Options": {
-            "list": check_list_xcontent, "info": INFO_XCONTENT_TYPE, "log": "Checking X-Content-Type-Options :"},
+            "list": check_list_xcontent, "info": INFO_XCONTENT_TYPE, "log": _("Checking X-Content-Type-Options :")
+        },
         "Strict-Transport-Security": {
-            "list": check_list_hsts, "info": INFO_HSTS, "log": "Checking Strict-Transport-Security :"}
+            "list": check_list_hsts, "info": INFO_HSTS, "log": _("Checking Strict-Transport-Security :")
+        }
     }
 
     @staticmethod
@@ -55,7 +59,7 @@ class mod_http_headers(Attack):
         return any(element in response.headers[header_name].lower() for element in check_list)
 
     async def check_header(self, response, request, header, check_list, info, log):
-        self.log_blue(_(log))
+        self.log_blue(log)
         if not self.is_set(response, header, check_list):
             self.log_red(info)
             await self.add_vuln_low(

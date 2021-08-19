@@ -273,7 +273,7 @@ class mod_takeover(Attack):
                         continue
 
                     if self.verbose:
-                        logging.info(_(f"[¨] Record {domain} points to {cname}"))
+                        logging.info(_(f"Record {domain} points to {cname}"))
 
                     try:
                         if get_root_domain(cname) == root_domain:

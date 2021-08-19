@@ -18,6 +18,7 @@
 ../attack/mod_shellshock.py
 ../attack/mod_sql.py
 ../attack/mod_ssrf.py
+../attack/mod_takeover.py
 ../attack/mod_timesql.py
 ../attack/mod_wapp.py
 ../attack/mod_wp_enum.py
@@ -38,11 +39,13 @@
 ../definitions/http_headers.py
 ../definitions/http_only.py
 ../definitions/internal_error.py
+../definitions/methods.py
 ../definitions/redirect.py
 ../definitions/resource_consumption.py
 ../definitions/secure_cookie.py
 ../definitions/sql.py
 ../definitions/ssrf.py
+../definitions/subdomain_takeovers.py
 ../definitions/timesql.py
 ../definitions/xss.py
 ../definitions/xxe.py
