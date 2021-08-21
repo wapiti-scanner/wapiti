@@ -32,10 +32,10 @@ def make_cname_answer(qname, cname):
     return answer
 
 
-@pytest.mark.asyncio
-@respx.mock
 @patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.resolve")
 @patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.Resolver.resolve")
+@pytest.mark.asyncio
+@respx.mock
 async def test_unregistered_cname(mocked_resolve, mocked_resolve_):
     # Test attacking all kind of parameter without crashing
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
