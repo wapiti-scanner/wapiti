@@ -65,7 +65,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
+        file_params=[["file", ("calendar.xml", b"<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     all_requests.append(request)

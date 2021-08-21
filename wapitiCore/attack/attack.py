@@ -538,7 +538,8 @@ class FileMutator:
                     hexlify(param_name.encode("utf-8", errors="replace")).decode()
                 )
 
-                new_params[i][1] = ("content.xml", payload, "text/xml")
+                # httpx needs bytes as content value
+                new_params[i][1] = ("content.xml", payload.encode(errors="replace"), "text/xml")
 
                 evil_req = Request(
                     request.path,

@@ -388,7 +388,7 @@ class Request:
                     field_name,
                     field_value[0],
                     left_margin,
-                    field_value[1].replace("\n", "\n" + left_margin).strip()
+                    field_value[1].decode(errors="replace").replace("\n", "\n" + left_margin).strip()
                 )
             http_string += "{0}{1}--\n".format(left_margin, boundary)
         elif self._post_params:

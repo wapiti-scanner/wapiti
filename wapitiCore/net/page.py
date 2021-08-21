@@ -744,7 +744,7 @@ class Page:
                 "datetime": "2019-03-03T20:35:34.32",
                 "datetime-local": "2019-03-03T22:41",
                 "email": "wapiti2021@mailinator.com",
-                "file": ("pix.gif", "GIF89a", "image/gif"),
+                "file": ("pix.gif", b"GIF89a", "image/gif"),
                 "hidden": "default",
                 "month": "2019-03",
                 "number": "1337",

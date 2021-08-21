@@ -73,7 +73,7 @@ async def test_no_crash():
     request = Request(
         "http://127.0.0.1:65085/empty.html?foo=bar",
         post_params=[["x", "y"]],
-        file_params=[["file", ("fname", "content", "text/plain")]]
+        file_params=[["file", ("fname", b"content", "text/plain")]]
     )
     request.path_id = 2
     all_requests.append(request)

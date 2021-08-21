@@ -125,13 +125,13 @@ async def test_persister_upload():
     simple_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["file1", ("'fname1", "content", "text/plain")], ["file2", ("fname2", "content", "text/plain")]]
+        file_params=[["file1", ("'fname1", b"content", "text/plain")], ["file2", ("fname2", b"content", "text/plain")]]
     )
 
     xml_upload = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ("calendar.xml", "<xml>Hello there</xml>", "application/xml")]]
+        file_params=[["calendar", ("calendar.xml", b"<xml>Hello there</xml>", "application/xml")]]
     )
     await persister.save_request(simple_upload)
     await persister.save_request(xml_upload)
@@ -149,16 +149,16 @@ async def test_persister_upload():
 
         if req == simple_upload:
             assert req.file_params == simple_upload.file_params
-            assert req.file_params[0] == ["file1", ("'fname1", "content", "text/plain")]
-            assert req.file_params[1] == ["file2", ("fname2", "content", "text/plain")]
+            assert req.file_params[0] == ["file1", ("'fname1", b"content", "text/plain")]
+            assert req.file_params[1] == ["file2", ("fname2", b"content", "text/plain")]
         else:
             assert req.file_params == xml_upload.file_params
-            assert req.file_params[0] == ["calendar", ("calendar.xml", "<xml>Hello there</xml>", "application/xml")]
+            assert req.file_params[0] == ["calendar", ("calendar.xml", b"<xml>Hello there</xml>", "application/xml")]
 
     naughty_file = Request(
         "http://httpbin.org/post?qs1",
         post_params=[["post1", "c"], ["post2", "d"]],
-        file_params=[["calendar", ("calendar.xml", "<xml>XXE there</xml>", "application/xml")]]
+        file_params=[["calendar", ("calendar.xml", b"<xml>XXE there</xml>", "application/xml")]]
     )
 
     await persister.add_payload(
@@ -208,7 +208,7 @@ async def test_persister_forms():
 
         for form in extracted_forms:
             if form.file_path == "/upload.php":
-                assert form.file_params[0] == ["file", ("pix.gif", "GIF89a", "image/gif")]
+                assert form.file_params[0] == ["file", ("pix.gif", b"GIF89a", "image/gif")]
             elif form.file_path == "/fields.php":
                 assert ["file", "pix.gif"] in form.post_params
 
