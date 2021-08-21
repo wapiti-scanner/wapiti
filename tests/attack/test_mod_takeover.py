@@ -32,11 +32,9 @@ def make_cname_answer(qname, cname):
     return answer
 
 
-@patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.resolve")
-@patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.Resolver.resolve")
 @pytest.mark.asyncio
 @respx.mock
-async def test_unregistered_cname(mocked_resolve, mocked_resolve_):
+async def test_unregistered_cname():
     # Test attacking all kind of parameter without crashing
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
 
@@ -48,28 +46,30 @@ async def test_unregistered_cname(mocked_resolve, mocked_resolve_):
             return make_cname_answer("perdu.com", "unregistered.com")
         raise dns.resolver.NXDOMAIN("Yolo")
 
-    mocked_resolve.side_effect = resolve
-    mocked_resolve_.side_effect = resolve
-    persister = AsyncMock()
-    all_requests = []
+    with patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.resolve") as mocked_resolve_:
+        with patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.Resolver.resolve") as mocked_resolve:
+            mocked_resolve.side_effect = resolve
+            mocked_resolve_.side_effect = resolve
+            persister = AsyncMock()
+            all_requests = []
 
-    request = Request("http://perdu.com/")
-    request.path_id = 1
-    all_requests.append(request)
+            request = Request("http://perdu.com/")
+            request.path_id = 1
+            all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
-    options = {"timeout": 10, "level": 2}
+            crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+            options = {"timeout": 10, "level": 2}
 
-    module = mod_takeover(crawler, persister, options, Event())
-    module.verbose = 2
+            module = mod_takeover(crawler, persister, options, Event())
+            module.verbose = 2
 
-    for request in all_requests:
-        await module.attack(request)
+            for request in all_requests:
+                await module.attack(request)
 
-    assert persister.add_payload.call_args_list[0][1]["request"].hostname == "admin.perdu.com"
-    assert "unregistered.com" in persister.add_payload.call_args_list[0][1]["info"]
+            assert persister.add_payload.call_args_list[0][1]["request"].hostname == "admin.perdu.com"
+            assert "unregistered.com" in persister.add_payload.call_args_list[0][1]["info"]
 
-    await crawler.close()
+            await crawler.close()
 
 
 @pytest.mark.asyncio
