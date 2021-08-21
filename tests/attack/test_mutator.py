@@ -8,7 +8,7 @@ def test_mutations():
         method="POST",
         get_params=[["p", "login.php"]],
         post_params=[["user", "admin"], ["password", "letmein"]],
-        file_params=[["file", ("pix.gif", "GIF89a", "image/gif")]]
+        file_params=[["file", ("pix.gif", b"GIF89a", "image/gif")]]
     )
     mutator = Mutator(payloads=[("INJECT", Flags())])
     count = 0
@@ -64,7 +64,7 @@ def test_mutations():
         method="POST",
         get_params=[["JSESSIONID", "deadbeef"]],
         post_params=[["user", "admin"], ["password", "letmein"]],
-        file_params=[["file", ("pix.gif", "GIF89a", "image/gif")]]
+        file_params=[["file", ("pix.gif", b"GIF89a", "image/gif")]]
     )
     mutator = Mutator(payloads=[("INJECT", Flags())])
     count = 0

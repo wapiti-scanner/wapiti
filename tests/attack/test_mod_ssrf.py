@@ -31,7 +31,7 @@ async def test_whole_stuff():
     request = Request(
         "http://perdu.com/?foo=bar",
         post_params=[["a", "b"]],
-        file_params=[["file", ("calendar.xml", "<xml>Hello there</xml", "application/xml")]]
+        file_params=[["file", ("calendar.xml", b"<xml>Hello there</xml", "application/xml")]]
     )
     request.path_id = 3
     all_requests.append(request)
@@ -81,6 +81,6 @@ async def test_whole_stuff():
     assert persister.add_payload.call_args_list[0][1]["category"] == _("Server Side Request Forgery")
     assert persister.add_payload.call_args_list[0][1]["parameter"] == "file"
     assert persister.add_payload.call_args_list[0][1]["request"].file_params == [
-        ['file', ('http://external.url/page', '<xml>Hello there</xml', 'application/xml')]
+        ['file', ('http://external.url/page', b'<xml>Hello there</xml', 'application/xml')]
     ]
     await crawler.close()

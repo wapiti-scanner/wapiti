@@ -249,8 +249,8 @@ async def test_direct_upload():
     request = Request(
         "http://127.0.0.1:65084/xxe/outofband/upload.php",
         file_params=[
-            ["foo", ("bar.xml", "<xml>test</xml>", "application/xml")],
-            ["calendar", ("calendar.xml", "<xml>test</xml>", "application/xml")]
+            ["foo", ("bar.xml", b"<xml>test</xml>", "application/xml")],
+            ["calendar", ("calendar.xml", b"<xml>test</xml>", "application/xml")]
         ]
     )
     request.path_id = 8

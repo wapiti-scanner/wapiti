@@ -63,7 +63,7 @@ async def test_request_object():
     res12 = Request(
         "http://httpbin.org/post?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
-        file_params=[['file1', ('fname1', 'content')], ['file2', ('fname2', 'content')]]
+        file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]]
     )
 
     res13 = Request("https://www.youtube.com/user/OneMinuteSilenceBand/videos")
@@ -160,7 +160,7 @@ async def test_request_object():
     res19 = Request(
         "http://httpbin.org/post?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
-        file_params=[['file1', ('fname1', 'content')], ['file2', ('fname2', 'content')]],
+        file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]],
         enctype="multipart/form-data"
     )
     page = await crawler.async_send(res19)
