@@ -19,7 +19,7 @@
 from urllib.parse import quote
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _

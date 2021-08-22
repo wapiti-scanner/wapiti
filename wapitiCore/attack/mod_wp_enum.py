@@ -2,7 +2,7 @@ import re
 import json
 from os.path import join as path_join
 
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack

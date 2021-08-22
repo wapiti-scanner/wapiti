@@ -22,7 +22,7 @@ from collections import defaultdict, namedtuple
 import re
 
 from httpx import ReadTimeout, RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Messages, _

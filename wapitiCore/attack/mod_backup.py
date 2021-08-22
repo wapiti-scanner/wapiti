@@ -25,7 +25,7 @@ from os.path import splitext
 from urllib.parse import urljoin
 
 from httpx import RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import LOW_LEVEL, _

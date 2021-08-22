@@ -24,7 +24,7 @@ import random
 from urllib.parse import urlparse
 
 from httpx import RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
