@@ -20,7 +20,7 @@ from os.path import join as path_join
 from configparser import ConfigParser
 
 from httpx import ReadTimeout, RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
 from wapitiCore.language.vulnerability import Messages, _

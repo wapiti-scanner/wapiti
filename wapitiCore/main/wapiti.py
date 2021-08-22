@@ -39,7 +39,6 @@ from typing import AsyncGenerator
 import browser_cookie3
 import httpx
 from httpx import RequestError
-from loguru import logger as logging
 
 from wapitiCore.language.language import _
 from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flatten_references
@@ -49,14 +48,9 @@ from wapitiCore.net.web import Request
 from wapitiCore.report import get_report_generator_instance, GENERATORS
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.moon import phase
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack import attack
-
-logging.remove()
-logging.level("RED", no=45, color="<red>")
-logging.level("ORANGE", no=35, color="<yellow>")
-logging.level("GREEN", no=22, color="<green>")
-logging.level("BLUE", no=21, color="<blue>")
 
 BASE_DIR = None
 WAPITI_VERSION = "Wapiti 3.0.5"

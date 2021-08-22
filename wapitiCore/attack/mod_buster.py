@@ -20,7 +20,7 @@
 import asyncio
 
 from httpx import RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request

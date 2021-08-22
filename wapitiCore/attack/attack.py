@@ -29,7 +29,7 @@ from binascii import hexlify
 from functools import partialmethod, partial
 
 from httpx import ReadTimeout, RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.web import Request

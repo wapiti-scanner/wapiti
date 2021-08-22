@@ -21,7 +21,7 @@ from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
 from httpx import RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, _

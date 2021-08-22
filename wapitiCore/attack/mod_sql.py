@@ -20,7 +20,7 @@ import re
 from random import randint
 
 from httpx import ReadTimeout, RequestError
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, _

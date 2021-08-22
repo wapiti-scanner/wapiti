@@ -31,7 +31,7 @@ import functools
 from time import sleep
 from typing import Tuple, List
 import asyncio
-from loguru import logger as logging
+from wapitiCore.main.log import logging
 
 # Third-parties
 import httpx
