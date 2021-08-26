@@ -353,7 +353,7 @@ class SqlPersister:
                             "meta": None
                         }
                     )
-            elif len(post_params):
+            elif post_params:
                 all_values.append(
                     {
                         "path_id": path_id,

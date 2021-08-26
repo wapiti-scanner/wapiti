@@ -208,7 +208,8 @@ class mod_xss(Attack):
 
     def check_payload(self, response, flags, taint):
         config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)))
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)) as payload_file:
+            config_reader.read_file(payload_file)
 
         for section in config_reader.sections():
             if section == flags.section:

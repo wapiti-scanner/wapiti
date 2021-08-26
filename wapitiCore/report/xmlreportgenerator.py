@@ -212,40 +212,40 @@ class XMLReportGenerator(ReportGenerator):
         additionals = self._xml_doc.createElement("additionals")
 
         # Loop on each flaw classification
-        for flaw_type in self._flaw_types:
+        for flaw_type_name, flaw_type in self._flaw_types.items():
             container = None
             classification = ""
             flaw_dict = {}
-            if flaw_type in self._vulns:
+            if flaw_type_name in self._vulns:
                 container = vulnerabilities
                 classification = "vulnerability"
                 flaw_dict = self._vulns
-            elif flaw_type in self._anomalies:
+            elif flaw_type_name in self._anomalies:
                 container = anomalies
                 classification = "anomaly"
                 flaw_dict = self._anomalies
-            elif flaw_type in self._additionals:
+            elif flaw_type_name in self._additionals:
                 container = additionals
                 classification = "additional"
                 flaw_dict = self._additionals
 
             # Child nodes with a description of the flaw type
             flaw_type_node = self._xml_doc.createElement(classification)
-            flaw_type_node.setAttribute("name", flaw_type)
+            flaw_type_node.setAttribute("name", flaw_type_name)
             flaw_type_desc = self._xml_doc.createElement("description")
-            flaw_type_desc.appendChild(self._xml_doc.createCDATASection(self._flaw_types[flaw_type]["desc"]))
+            flaw_type_desc.appendChild(self._xml_doc.createCDATASection(flaw_type["desc"]))
             flaw_type_node.appendChild(flaw_type_desc)
             flaw_type_solution = self._xml_doc.createElement("solution")
-            flaw_type_solution.appendChild(self._xml_doc.createCDATASection(self._flaw_types[flaw_type]["sol"]))
+            flaw_type_solution.appendChild(self._xml_doc.createCDATASection(flaw_type["sol"]))
             flaw_type_node.appendChild(flaw_type_solution)
 
             flaw_type_references = self._xml_doc.createElement("references")
-            for ref in self._flaw_types[flaw_type]["ref"]:
+            for ref in flaw_type["ref"]:
                 reference_node = self._xml_doc.createElement("reference")
                 title_node = self._xml_doc.createElement("title")
                 url_node = self._xml_doc.createElement("url")
                 title_node.appendChild(self._xml_doc.createTextNode(ref))
-                url = self._flaw_types[flaw_type]["ref"][ref]
+                url = flaw_type["ref"][ref]
                 url_node.appendChild(self._xml_doc.createTextNode(url))
                 reference_node.appendChild(title_node)
                 reference_node.appendChild(url_node)
@@ -254,7 +254,7 @@ class XMLReportGenerator(ReportGenerator):
 
             # And child nodes with each flaw of the current type
             entries_node = self._xml_doc.createElement("entries")
-            for flaw in flaw_dict[flaw_type]:
+            for flaw in flaw_dict[flaw_type_name]:
                 entry_node = self._xml_doc.createElement("entry")
                 method_node = self._xml_doc.createElement("method")
                 method_node.appendChild(self._xml_doc.createTextNode(flaw["method"]))

@@ -41,16 +41,16 @@ def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
         try:
             # non-sequence items should not work with len()
             # non-empty strings will fail this
-            if len(query) and not isinstance(query[0], tuple):
+            if len(query) > 0 and not isinstance(query[0], tuple):
                 raise TypeError
             # Zero-length sequences of all types will get here and succeed,
             # but that's a minor nit.  Since the original implementation
             # allowed empty dicts that type of behavior probably should be
             # preserved for consistency
-        except TypeError:
+        except TypeError as type_error:
             exception_traceback = sys.exc_info()[2]
             raise TypeError("not a valid non-string sequence "
-                            "or mapping object").with_traceback(exception_traceback)
+                            "or mapping object").with_traceback(exception_traceback) from type_error
 
     key_value_pair = []
 

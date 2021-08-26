@@ -120,7 +120,9 @@ class mod_file(Attack):
         payloads = []
 
         config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)))
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)) as payload_file:
+            config_reader.read_file(payload_file)
+
         # No time based payloads here so we don't care yet
         reader = PayloadReader(self.options)
 

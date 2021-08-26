@@ -306,7 +306,7 @@ class mod_permanentxss(Attack):
 
                     # stop trying payloads and jump to the next parameter
                     break
-                elif response.status == 500 and not saw_internal_error:
+                if response.status == 500 and not saw_internal_error:
                     if xss_param == "QUERY_STRING":
                         anom_msg = Messages.MSG_QS_500
                     else:
@@ -329,7 +329,8 @@ class mod_permanentxss(Attack):
 
     def check_payload(self, response, flags, taint):
         config_reader = ConfigParser(interpolation=None)
-        config_reader.read_file(open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)))
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)) as payload_file:
+            config_reader.read_file(payload_file)
 
         for section in config_reader.sections():
             if section == flags.section:

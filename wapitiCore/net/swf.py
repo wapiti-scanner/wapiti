@@ -43,10 +43,10 @@ def looks_like_an_url(string):
         return False
     if string.startswith("/") or string.endswith("/"):
         return True
-    for ext in {
+    for ext in [
             ".php", ".asp", ".php4", ".php5", ".html", ".xhtml", ".htm", ".swf", ".xml", ".pl", ".cgi", ".rb", ".py",
             ".js", ".pdf", ".gif", ".png", ".jpg", ".svg", ".jpeg", ".mp3", ".wav", ".aspx"
-    }:
+    ]:
         if ext in string and not string.startswith(ext) and "(" not in string:
             return True
     if "?" in string and "=" in string:
