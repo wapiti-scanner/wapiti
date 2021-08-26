@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Don't use this script unless you know exactly what you are doing !
 from distutils.core import setup
-import py2exe
+
 import os
 import sys
 

@@ -28,7 +28,7 @@ from httpx import RequestError
 from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import LOW_LEVEL, _
+from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.backup import NAME
 from wapitiCore.net.web import Request
 

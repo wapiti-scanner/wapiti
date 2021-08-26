@@ -76,17 +76,17 @@ class InvalidOptionValue(Exception):
         return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
 
 
-stop_event = asyncio.Event()
+global_stop_event = asyncio.Event()
 
 
 def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
     logging.info(_("Waiting for running crawler tasks to finish, please wait."))
-    stop_event.set()
+    global_stop_event.set()
 
 
 def stop_attack_process():  # pylint: disable=unused-argument
     logging.info(_("Waiting for all payload tasks to finish for current resource, please wait."))
-    stop_event.set()
+    global_stop_event.set()
 
 
 class Wapiti:
@@ -1314,7 +1314,7 @@ async def wapiti_main():
 
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
-                await wap.browse(stop_event, parallelism=args.tasks)
+                await wap.browse(global_stop_event, parallelism=args.tasks)
                 loop.remove_signal_handler(signal.SIGINT)
                 await wap.save_scan_state()
 
@@ -1326,9 +1326,9 @@ async def wapiti_main():
             )))
 
         logging.info(_("[*] Wapiti found {0} URLs and forms during the scan").format(await wap.count_resources()))
-        stop_event.clear()
+        global_stop_event.clear()
         loop.add_signal_handler(signal.SIGINT, stop_attack_process)
-        await wap.attack(stop_event)
+        await wap.attack(global_stop_event)
         loop.remove_signal_handler(signal.SIGINT)
 
     except OperationalError:

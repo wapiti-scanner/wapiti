@@ -52,7 +52,7 @@ class mod_redirect(Attack):
                 self.network_errors += 1
                 continue
 
-            if any([url.startswith("https://openbugbounty.org/") for url in response.all_redirections]):
+            if any(url.startswith("https://openbugbounty.org/") for url in response.all_redirections):
                 await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,

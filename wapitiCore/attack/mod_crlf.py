@@ -19,12 +19,12 @@
 from urllib.parse import quote
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
-from wapitiCore.main.log import logging
 
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.crlf import NAME
 from wapitiCore.net.web import Request
+from wapitiCore.main.log import logging
 
 
 class mod_crlf(Attack):
@@ -67,7 +67,7 @@ class mod_crlf(Attack):
                 self.log_orange("---")
             except HTTPStatusError:
                 self.network_errors += 1
-                self.log(_("Error: The server did not understand this request"))
+                logging.error(_("Error: The server did not understand this request"))
             except RequestError:
                 self.network_errors += 1
             else:

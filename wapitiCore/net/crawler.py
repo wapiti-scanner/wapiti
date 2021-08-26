@@ -19,8 +19,6 @@
 
 # Standard libraries
 import re
-from random import choice
-from string import ascii_letters
 from enum import Enum
 from urllib.parse import urlparse, urlunparse
 import warnings
@@ -28,10 +26,8 @@ from collections import deque, defaultdict
 import pickle
 import math
 import functools
-from time import sleep
 from typing import Tuple, List
 import asyncio
-from wapitiCore.main.log import logging
 
 # Third-parties
 import httpx
@@ -46,6 +42,7 @@ from wapitiCore.net import swf
 from wapitiCore.net import lamejs
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.page import Page
+from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
@@ -863,7 +860,7 @@ class Explorer:
         self._crawler.stream = True
 
         if self._max_depth < 0:
-            raise StopIteration
+            return
 
         task_to_request = {}
         while True:

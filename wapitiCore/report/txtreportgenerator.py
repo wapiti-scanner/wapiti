@@ -57,75 +57,75 @@ class TXTReportGenerator(ReportGenerator):
         Create a TXT file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
         the methods add_vulnerability and add_anomaly.
         """
-        txt_report_file = codecs.open(output_path, mode="w", encoding="UTF-8")
-        try:
-            txt_report_file.write(separator)
-            txt_report_file.write(center("{0} - wapiti.sourceforge.io\n".format(self._infos["version"])))
-            txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
-            txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
-            if "scope" in self._infos:
-                txt_report_file.write(center(_("Scope of the scan : {0}\n").format(self._infos["scope"])))
-            txt_report_file.write(separator)
-            txt_report_file.write("\n")
+        with codecs.open(output_path, mode="w", encoding="UTF-8") as txt_report_file:
+            try:
+                txt_report_file.write(separator)
+                txt_report_file.write(center("{0} - wapiti.sourceforge.io\n".format(self._infos["version"])))
+                txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
+                txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
+                if "scope" in self._infos:
+                    txt_report_file.write(center(_("Scope of the scan : {0}\n").format(self._infos["scope"])))
+                txt_report_file.write(separator)
+                txt_report_file.write("\n")
 
-            txt_report_file.write(title(_("Summary of vulnerabilities :")))
-            for name in self._vulns:
-                txt_report_file.write(_("{0} : {1:>3}\n").format(name, len(self._vulns[name])).rjust(NB_COLUMNS))
-            txt_report_file.write(separator)
+                txt_report_file.write(title(_("Summary of vulnerabilities :")))
+                for category, vulnerabilities in self._vulns.items():
+                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(vulnerabilities)).rjust(NB_COLUMNS))
+                txt_report_file.write(separator)
 
-            for name in self._vulns:
-                if self._vulns[name]:
-                    txt_report_file.write("\n")
-                    txt_report_file.write(title(name))
-                    for vuln in self._vulns[name]:
-                        txt_report_file.write(vuln["info"])
+                for category, vulnerabilities in self._vulns.items():
+                    if vulnerabilities:
                         txt_report_file.write("\n")
-                        # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
-                        txt_report_file.write(_("Evil request:\n"))
-                        txt_report_file.write(vuln["request"].http_repr())
+                        txt_report_file.write(title(category))
+                        for vuln in vulnerabilities:
+                            txt_report_file.write(vuln["info"])
+                            txt_report_file.write("\n")
+                            # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
+                            txt_report_file.write(_("Evil request:\n"))
+                            txt_report_file.write(vuln["request"].http_repr())
+                            txt_report_file.write("\n")
+                            txt_report_file.write(_("cURL command PoC : \"{0}\"").format(vuln["request"].curl_repr))
+                            txt_report_file.write("\n\n")
+                            txt_report_file.write(center("*   *   *\n\n"))
+                        txt_report_file.write(separator)
+
+                txt_report_file.write("\n")
+
+                txt_report_file.write(title(_("Summary of anomalies :")))
+                for category, vulnerabilities in self._anomalies.items():
+                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(vulnerabilities)).rjust(NB_COLUMNS))
+                txt_report_file.write(separator)
+
+                for category, anomalies in self._anomalies.items():
+                    if anomalies:
                         txt_report_file.write("\n")
-                        txt_report_file.write(_("cURL command PoC : \"{0}\"").format(vuln["request"].curl_repr))
-                        txt_report_file.write("\n\n")
-                        txt_report_file.write(center("*   *   *\n\n"))
-                    txt_report_file.write(separator)
+                        txt_report_file.write(title(category))
+                        for anom in anomalies:
+                            txt_report_file.write(anom["info"])
+                            txt_report_file.write("\n")
+                            txt_report_file.write(_("Evil request:\n"))
+                            txt_report_file.write(anom["request"].http_repr())
+                            txt_report_file.write("\n\n")
+                            txt_report_file.write(center("*   *   *\n\n"))
+                        txt_report_file.write(separator)
 
-            txt_report_file.write("\n")
+                txt_report_file.write(title(_("Summary of additionals :")))
+                for category, additionnals in self._additionals.items():
+                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(additionnals)).rjust(NB_COLUMNS))
+                txt_report_file.write(separator)
 
-            txt_report_file.write(title(_("Summary of anomalies :")))
-            for name in self._anomalies:
-                txt_report_file.write(_("{0} : {1:>3}\n").format(name, len(self._anomalies[name])).rjust(NB_COLUMNS))
-            txt_report_file.write(separator)
-
-            for name in self._anomalies:
-                if self._anomalies[name]:
-                    txt_report_file.write("\n")
-                    txt_report_file.write(title(name))
-                    for anom in self._anomalies[name]:
-                        txt_report_file.write(anom["info"])
+                for category, additionnals in self._additionals.items():
+                    if additionnals:
                         txt_report_file.write("\n")
-                        txt_report_file.write(_("Evil request:\n"))
-                        txt_report_file.write(anom["request"].http_repr())
-                        txt_report_file.write("\n\n")
-                        txt_report_file.write(center("*   *   *\n\n"))
-                    txt_report_file.write(separator)
+                        txt_report_file.write(title(category))
+                        for additional in additionnals:
+                            txt_report_file.write(additional["info"])
+                            txt_report_file.write("\n\n")
+                            txt_report_file.write(center("*   *   *\n\n"))
+                        txt_report_file.write(separator)
 
-            txt_report_file.write(title(_("Summary of additionals :")))
-            for name in self._additionals:
-                txt_report_file.write(_("{0} : {1:>3}\n").format(name, len(self._additionals[name])).rjust(NB_COLUMNS))
-            txt_report_file.write(separator)
-
-            for name in self._additionals:
-                if self._additionals[name]:
-                    txt_report_file.write("\n")
-                    txt_report_file.write(title(name))
-                    for additional in self._additionals[name]:
-                        txt_report_file.write(additional["info"])
-                        txt_report_file.write("\n\n")
-                        txt_report_file.write(center("*   *   *\n\n"))
-                    txt_report_file.write(separator)
-
-        finally:
-            txt_report_file.close()
+            finally:
+                txt_report_file.close()
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None):
