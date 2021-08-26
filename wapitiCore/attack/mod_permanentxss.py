@@ -23,7 +23,7 @@ from os.path import join as path_join
 from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import logging
 
-from wapitiCore.attack.attack import Attack, PayloadType, Mutator
+from wapitiCore.attack.attack import Attack, PayloadType, Mutator, random_string
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.web import Request
@@ -50,6 +50,12 @@ class mod_permanentxss(Attack):
     PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
 
     MSG_VULN = _("Stored XSS vulnerability")
+
+    RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
+
+    @property
+    def external_endpoint(self):
+        return self.RANDOM_WEBSITE
 
     async def must_attack(self, request: Request):
         if not valid_xss_content_type(request) or request.status in (301, 302, 303):
@@ -334,7 +340,9 @@ class mod_permanentxss(Attack):
 
         for section in config_reader.sections():
             if section == flags.section:
-                expected_value = config_reader[section]["value"].replace("__XSS__", taint)
+                expected_value = config_reader[section]["value"].replace('[EXTERNAL_ENDPOINT]', self.external_endpoint)
+                expected_value = expected_value.replace("[PROTO_ENDPOINT]", self.proto_endpoint)
+                expected_value = expected_value.replace("__XSS__", taint)
                 tag_names = config_reader[section]["tag"].split(",")
                 attribute = config_reader[section]["attribute"]
                 case_sensitive = config_reader[section].getboolean("case_sensitive")

@@ -85,6 +85,27 @@ async def test_script_filter_bypass():
 
 
 @pytest.mark.asyncio
+async def test_script_src_protocol_relative():
+    # The PHP script is blocking "http" and "("
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65081/no_http_no_parenthesis.php?name=kenobi")
+    request.path_id = 42
+    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    options = {"timeout": 10, "level": 2}
+
+    module = mod_xss(crawler, persister, options, Event())
+    module.do_post = False
+    await module.attack(request)
+
+    assert persister.add_payload.call_count
+    assert persister.add_payload.call_args_list[0][1]["parameter"] == "name"
+    used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
+    assert used_payload.startswith("<script src=//")
+    assert "wapiti3.ovh" not in used_payload
+    await crawler.close()
+
+
+@pytest.mark.asyncio
 async def test_attr_quote_escape():
     # We should succeed at closing the attribute value and the opening tag
     persister = AsyncMock()

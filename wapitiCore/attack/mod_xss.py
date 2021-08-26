@@ -22,7 +22,7 @@ from configparser import ConfigParser
 from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import logging
 
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags
+from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
@@ -52,6 +52,8 @@ class mod_xss(Attack):
 
     MSG_VULN = _("XSS vulnerability")
 
+    RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
+
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
         methods = ""
@@ -66,6 +68,10 @@ class mod_xss(Attack):
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters")
         )
+
+    @property
+    def external_endpoint(self):
+        return self.RANDOM_WEBSITE
 
     async def attack(self, request: Request):
         for mutated_request, parameter, taint, flags in self.mutator.mutate(request):
@@ -214,6 +220,7 @@ class mod_xss(Attack):
         for section in config_reader.sections():
             if section == flags.section:
                 expected_value = config_reader[section]["value"].replace('[EXTERNAL_ENDPOINT]', self.external_endpoint)
+                expected_value = expected_value.replace("[PROTO_ENDPOINT]", self.proto_endpoint)
                 expected_value = expected_value.replace("__XSS__", taint)
                 tag_names = config_reader[section]["tag"].split(",")
                 attribute = config_reader[section]["attribute"]
