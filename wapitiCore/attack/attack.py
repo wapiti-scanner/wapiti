@@ -19,7 +19,7 @@
 import os
 import sys
 from os.path import splitext, join as path_join
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from collections import defaultdict
 from enum import Enum
 from math import ceil
@@ -274,6 +274,11 @@ class Attack:
     @property
     def external_endpoint(self):
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
+
+    @property
+    def proto_endpoint(self):
+        parts = urlparse(self.external_endpoint)
+        return parts.netloc + parts.path
 
     async def must_attack(self, request: Request):  # pylint: disable=unused-argument
         return not self.finished
