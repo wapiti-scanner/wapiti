@@ -76,7 +76,7 @@ You don't have to, but it would be appreciated.
 
 ### Can I add some attack payloads easily ? ###
 
-Yes, most of the payloads are stored in plain text or .ini files. You just have to add your owns.
+Yes, most of the payloads are stored in plain text or .ini files. You just have to add your own.
 
 ### Launched a Wapiti scan, it takes sooooooo muuuuuuuuch time ####
 
