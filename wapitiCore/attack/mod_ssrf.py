@@ -21,8 +21,8 @@ from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.ssrf import NAME
@@ -176,8 +176,7 @@ class mod_ssrf(Attack):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
         for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 await self.crawler.async_send(mutated_request)
@@ -250,14 +249,14 @@ class mod_ssrf(Attack):
                                 parameter=parameter
                             )
 
-                            self.log_red("---")
-                            self.log_red(
+                            log_red("---")
+                            log_red(
                                 Messages.MSG_QS_INJECT if parameter == "QUERY_STRING"
                                 else Messages.MSG_PARAM_INJECT,
                                 self.MSG_VULN,
                                 page,
                                 parameter
                             )
-                            self.log_red(Messages.MSG_EVIL_REQUEST)
-                            self.log_red(mutated_request.http_repr())
-                            self.log_red("---")
+                            log_red(Messages.MSG_EVIL_REQUEST)
+                            log_red(mutated_request.http_repr())
+                            log_red("---")

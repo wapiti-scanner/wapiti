@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack, PayloadType
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.exec import NAME
@@ -100,8 +100,7 @@ class mod_exec(Attack):
                 # and move to next payload
                 continue
 
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -126,17 +125,17 @@ class mod_exec(Attack):
                         parameter=parameter
                     )
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         Messages.MSG_QS_INJECT if parameter == "QUERY_STRING"
                         else Messages.MSG_PARAM_INJECT,
                         vuln_info,
                         page,
                         parameter
                     )
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(mutated_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(mutated_request.http_repr())
+                    log_red("---")
                     vulnerable_parameter = True
                     continue
 
@@ -144,11 +143,11 @@ class mod_exec(Attack):
                 if timeouted:
                     continue
 
-                self.log_orange("---")
-                self.log_orange(Messages.MSG_TIMEOUT, page)
-                self.log_orange(Messages.MSG_EVIL_REQUEST)
-                self.log_orange(mutated_request.http_repr())
-                self.log_orange("---")
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(mutated_request.http_repr())
+                log_orange("---")
 
                 if parameter == "QUERY_STRING":
                     anom_msg = Messages.MSG_QS_TIMEOUT
@@ -186,16 +185,16 @@ class mod_exec(Attack):
                         parameter=parameter
                     )
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         log_message,
                         vuln_info,
                         page,
                         parameter
                     )
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(mutated_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(mutated_request.http_repr())
+                    log_red("---")
 
                     if executed:
                         # We reached maximum exploitation for this parameter, don't send more payloads
@@ -217,8 +216,8 @@ class mod_exec(Attack):
                         parameter=parameter
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(mutated_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(mutated_request.http_repr())
+                    log_orange("---")

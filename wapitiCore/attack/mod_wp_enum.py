@@ -2,8 +2,7 @@ import re
 import json
 from os.path import join as path_join
 
-from wapitiCore.main.log import logging
-
+from wapitiCore.main.log import logging, log_blue
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
@@ -57,7 +56,7 @@ class mod_wp_enum(Attack):
                     "categories": ["WordPress plugins"]
                 }
 
-                self.log_blue(
+                log_blue(
                     MSG_TECHNO_VERSIONED,
                     plugin,
                     version
@@ -74,7 +73,7 @@ class mod_wp_enum(Attack):
                     "versions": [""],
                     "categories": ["WordPress plugins"]
                 }
-                self.log_blue(
+                log_blue(
                     MSG_TECHNO_VERSIONED,
                     plugin,
                     [""]
@@ -104,7 +103,7 @@ class mod_wp_enum(Attack):
                     "versions": [version],
                     "categories": ["WordPress themes"]
                 }
-                self.log_blue(
+                log_blue(
                     MSG_TECHNO_VERSIONED,
                     theme,
                     version
@@ -120,7 +119,7 @@ class mod_wp_enum(Attack):
                     "versions": [""],
                     "categories": ["WordPress themes"]
                 }
-                self.log_blue(
+                log_blue(
                     MSG_TECHNO_VERSIONED,
                     theme,
                     [""]
@@ -152,10 +151,10 @@ class mod_wp_enum(Attack):
 
         response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         if self.check_wordpress(response):
-            self.log_blue(_("Enumeration of WordPress Plugins :"))
+            log_blue(_("Enumeration of WordPress Plugins :"))
             await self.detect_plugin(request_to_root.url)
-            self.log_blue("----")
-            self.log_blue(_("Enumeration of WordPress Themes :"))
+            log_blue("----")
+            log_blue(_("Enumeration of WordPress Themes :"))
             await self.detect_theme(request_to_root.url)
         else:
-            self.log_blue(MSG_NO_WP)
+            log_blue(MSG_NO_WP)

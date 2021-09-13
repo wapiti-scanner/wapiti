@@ -123,7 +123,7 @@ class Wapiti:
         self.forms = []
         self.attacks = []
 
-        self.color = 0
+        self.color = False
         self.verbose = 0
         self.module_options = None
         self.attack_options = {}
@@ -137,6 +137,7 @@ class Wapiti:
         self._max_scan_time = 0
         self._max_attack_time = 0
         self._bug_report = True
+        self._logfile = ""
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -157,6 +158,28 @@ class Wapiti:
             os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
         self.persister = SqlPersister(self._history_file)
+
+    def refresh_logging(self):
+        format = "{message}"
+        if self.color:
+            format = "<lvl>" + format + "</lvl>"
+
+        verbosity_levels = {
+            0: "BLUE",
+            1: "INFO",
+            2: "VERBOSE"
+        }
+
+        handlers = [
+            {"sink": sys.stdout, "colorize": self.color, "format": format, "level": verbosity_levels[self.verbose]}
+        ]
+        if self._logfile:
+            handlers.append({"sink": self._logfile, "level": "DEBUG"})
+        logging.configure(handlers=handlers)
+
+    def set_logfile(self, filename: str):
+        self._logfile = filename
+        self.refresh_logging()
 
     async def init_persister(self):
         await self.persister.create()
@@ -220,13 +243,9 @@ class Wapiti:
             self.attacks.sort(key=attrgetter("PRIORITY"))
 
         for attack_module in self.attacks:
-            attack_module.set_verbose(self.verbose)
             if attack_module.name not in attack.commons:
                 attack_module.do_get = False
                 attack_module.do_post = False
-
-            if self.color == 1:
-                attack_module.set_color()
 
         # Custom list of modules was specified
         if self.module_options is not None:
@@ -343,7 +362,6 @@ class Wapiti:
         explorer.max_requests_per_depth = self._max_links_per_page
         explorer.forbidden_parameters = self._bad_params
         explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
-        explorer.verbose = (self.verbose > 0)
         explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
 
         start = datetime.utcnow()
@@ -443,8 +461,7 @@ class Wapiti:
 
                 try:
                     if await attack_module.must_attack(original_request):
-                        if self.verbose >= 1:
-                            logging.info("[+] {}".format(original_request))
+                        logging.info("[+] {}".format(original_request))
 
                         await attack_module.attack(original_request)
 
@@ -653,11 +670,18 @@ class Wapiti:
 
     def set_color(self):
         """Put colors in the console output (terminal must support colors)"""
-        self.color = 1
+        # logging.remove()
+        # logging.add(sys.stdout, format="<lvl>{message}</lvl>", level="INFO")
+        self.color = True
+        self.refresh_logging()
 
     def verbosity(self, verbose: int):
         """Define the level of verbosity of the output."""
         self.verbose = verbose
+        self.refresh_logging()
+        # 0 => quiet / level="SUCCESS"
+        # 1 => normal / level="INFO"
+        # 2 => verbose / level="VERBOSE"
 
     def set_bug_reporting(self, value: bool):
         self._bug_report = value
@@ -1116,14 +1140,6 @@ async def wapiti_main():
 
     args = parser.parse_args()
 
-    if args.color:
-        logging.add(sys.stdout, format="<lvl>{message}</lvl>", level="INFO")
-    else:
-        logging.add(sys.stdout, colorize=False, format="{message}", level="INFO")
-
-    if args.log:
-        logging.add(args.log, level="DEBUG")
-
     if args.tasks < 1:
         logging.error(_("Number of concurrent tasks must be 1 or above!"))
         sys.exit(2)
@@ -1150,6 +1166,9 @@ async def wapiti_main():
         sys.exit()
 
     wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+
+    if args.log:
+        wap.set_logfile(args.log)
 
     if args.update:
         logging.info(_("[*] Updating modules"))

@@ -27,6 +27,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.htaccess import NAME
 from wapitiCore.net.web import Request
+from wapitiCore.main.log import log_red, log_verbose
 
 
 class mod_htaccess(Attack):
@@ -64,22 +65,21 @@ class mod_htaccess(Attack):
 
             unblocked_content = response.content
 
-            self.log_red("---")
+            log_red("---")
             await self.add_vuln_medium(
                 request_id=request.path_id,
                 category=NAME,
                 request=evil_req,
                 info=_("{0} bypassable weak restriction").format(evil_req.url)
             )
-            self.log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
-            self.log_red(_("HTTP status code changed from {0} to {1}").format(
+            log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
+            log_red(_("HTTP status code changed from {0} to {1}").format(
                 request.status,
                 response.status
             ))
 
-            if self.verbose == 2:
-                self.log_red(_("Source code:"))
-                self.log_red(unblocked_content)
-            self.log_red("---")
+            log_verbose(_("Source code:"))
+            log_verbose(unblocked_content)
+            log_red("---")
 
         self.attacked_get.append(url)

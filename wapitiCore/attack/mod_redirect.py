@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.redirect import NAME
@@ -43,8 +43,7 @@ class mod_redirect(Attack):
         page = request.path
 
         for mutated_request, parameter, __, __ in self.mutator.mutate(request):
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request.url))
+            log_verbose("[¨] {0}".format(mutated_request.url))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -66,13 +65,13 @@ class mod_redirect(Attack):
                 else:
                     injection_msg = Messages.MSG_PARAM_INJECT
 
-                self.log_red("---")
-                self.log_red(
+                log_red("---")
+                log_red(
                     injection_msg,
                     self.MSG_VULN,
                     page,
                     parameter
                 )
-                self.log_red(Messages.MSG_EVIL_REQUEST)
-                self.log_red(mutated_request.http_repr())
-                self.log_red("---")
+                log_red(Messages.MSG_EVIL_REQUEST)
+                log_red(mutated_request.http_repr())
+                log_red("---")

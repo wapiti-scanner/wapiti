@@ -42,7 +42,7 @@ from wapitiCore.net import swf
 from wapitiCore.net import lamejs
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.page import Page
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import logging, log_verbose
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
@@ -567,7 +567,6 @@ class Explorer:
         self._crawler = crawler_instance
         self._max_depth = 20
         self._max_page_size = MAX_PAGE_SIZE
-        self._log = True
         self._bad_params = set()
         self._max_per_depth = 0
         self._max_files_per_dir = 0
@@ -605,14 +604,6 @@ class Explorer:
     @max_page_size.setter
     def max_page_size(self, value: int):
         self._max_page_size = value
-
-    @property
-    def verbose(self) -> bool:
-        return self._log
-
-    @verbose.setter
-    def verbose(self, value: bool):
-        self._log = value
 
     @property
     def forbidden_parameters(self) -> set:
@@ -765,8 +756,7 @@ class Explorer:
         async with self._sem:
             self._processed_requests.append(request)  # thread safe
 
-            if self._log:
-                logging.info("[+] {0}".format(request))
+            log_verbose("[+] {0}".format(request))
 
             dir_name = request.dir_name
             # Currently not exploited. Would be interesting though but then it should be implemented separately

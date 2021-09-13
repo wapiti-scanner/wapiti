@@ -20,8 +20,8 @@ import re
 from random import randint
 
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME
@@ -336,8 +336,7 @@ class mod_sql(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -361,16 +360,16 @@ class mod_sql(Attack):
                         parameter=parameter
                     )
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                         vuln_info,
                         page,
                         parameter
                     )
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(mutated_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(mutated_request.http_repr())
+                    log_red("---")
 
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
@@ -391,11 +390,11 @@ class mod_sql(Attack):
                         parameter=parameter
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(mutated_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(mutated_request.http_repr())
+                    log_orange("---")
 
         return vulnerable_parameters
 
@@ -453,16 +452,16 @@ class mod_sql(Attack):
                         parameter=current_parameter
                     )
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         Messages.MSG_QS_INJECT if current_parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                         vuln_info,
                         page,
                         current_parameter
                     )
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(last_mutated_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(last_mutated_request.http_repr())
+                    log_red("---")
 
                 # Don't forget to reset session and results
                 current_session = flags.platform
@@ -480,8 +479,7 @@ class mod_sql(Attack):
                 # No need to go further: one of the tests was wrong
                 continue
 
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)

@@ -17,7 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import RequestError
-from wapitiCore.main.log import logging
+
+from wapitiCore.main.log import log_verbose, log_orange
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.methods import NAME
@@ -51,8 +52,7 @@ class mod_methods(Attack):
             link_depth=request.link_depth
         )
 
-        if self.verbose == 2:
-            logging.info("[+] {}".format(option_request))
+        log_verbose("[+] {}".format(option_request))
 
         try:
             response = await self.crawler.async_send(option_request)
@@ -66,8 +66,8 @@ class mod_methods(Attack):
             interesting_methods = sorted(methods - self.KNOWN_METHODS)
 
             if interesting_methods:
-                self.log_orange("---")
-                self.log_orange(
+                log_orange("---")
+                log_orange(
                     _("Interesting methods allowed on {}: {}").format(
                         page,
                         ", ".join(interesting_methods)
@@ -81,4 +81,4 @@ class mod_methods(Attack):
                         ", ".join(interesting_methods)
                     )
                 )
-                self.log_orange("---")
+                log_orange("---")

@@ -21,8 +21,8 @@ from configparser import ConfigParser
 from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator, random_string
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
@@ -165,8 +165,8 @@ class mod_permanentxss(Attack):
                                 else:
                                     injection_msg = Messages.MSG_PARAM_INJECT
 
-                                self.log_red("---")
-                                self.log_red(
+                                log_red("---")
+                                log_red(
                                     injection_msg,
                                     self.MSG_VULN,
                                     request.path,
@@ -174,11 +174,11 @@ class mod_permanentxss(Attack):
                                 )
 
                                 if has_strong_csp(response):
-                                    self.log_red(_("Warning: Content-Security-Policy is present!"))
+                                    log_red(_("Warning: Content-Security-Policy is present!"))
 
-                                self.log_red(Messages.MSG_EVIL_REQUEST)
-                                self.log_red(evil_request.http_repr())
-                                self.log_red("---")
+                                log_red(Messages.MSG_EVIL_REQUEST)
+                                log_red(evil_request.http_repr())
+                                log_red("---")
                                 # FIX: search for the next code in the webpage
 
                 # Ok the content is stored, but will we be able to inject javascript?
@@ -219,8 +219,7 @@ class mod_permanentxss(Attack):
         )
 
         for evil_request, xss_param, _xss_payload, xss_flags in attack_mutator.mutate(injection_request):
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(evil_request))
+            log_verbose("[¨] {0}".format(evil_request))
 
             try:
                 await self.crawler.async_send(evil_request)
@@ -229,11 +228,11 @@ class mod_permanentxss(Attack):
                 if timeouted:
                     continue
 
-                self.log_orange("---")
-                self.log_orange(Messages.MSG_TIMEOUT, page)
-                self.log_orange(Messages.MSG_EVIL_REQUEST)
-                self.log_orange(evil_request.http_repr())
-                self.log_orange("---")
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(evil_request.http_repr())
+                log_orange("---")
 
                 if xss_param == "QUERY_STRING":
                     anom_msg = Messages.MSG_QS_TIMEOUT
@@ -294,9 +293,9 @@ class mod_permanentxss(Attack):
                     else:
                         injection_msg = Messages.MSG_PARAM_INJECT
 
-                    self.log_red("---")
+                    log_red("---")
                     # TODO: a last parameter should give URL used to pass the vulnerable parameter
-                    self.log_red(
+                    log_red(
                         injection_msg,
                         self.MSG_VULN,
                         output_url,
@@ -304,11 +303,11 @@ class mod_permanentxss(Attack):
                     )
 
                     if has_strong_csp(response):
-                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+                        log_red(_("Warning: Content-Security-Policy is present!"))
 
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(evil_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(evil_request.http_repr())
+                    log_red("---")
 
                     # stop trying payloads and jump to the next parameter
                     break
@@ -326,11 +325,11 @@ class mod_permanentxss(Attack):
                         parameter=xss_param
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(evil_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(evil_request.http_repr())
+                    log_orange("---")
                     saw_internal_error = True
 
     def check_payload(self, response, flags, taint):

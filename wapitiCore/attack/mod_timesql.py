@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.timesql import NAME
@@ -59,8 +59,7 @@ class mod_timesql(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            if self.verbose == 2:
-                logging.error("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -86,16 +85,16 @@ class mod_timesql(Attack):
                     parameter=parameter
                 )
 
-                self.log_red("---")
-                self.log_red(
+                log_red("---")
+                log_red(
                     log_message,
                     self.MSG_VULN,
                     page,
                     parameter
                 )
-                self.log_red(Messages.MSG_EVIL_REQUEST)
-                self.log_red(mutated_request.http_repr())
-                self.log_red("---")
+                log_red(Messages.MSG_EVIL_REQUEST)
+                log_red(mutated_request.http_repr())
+                log_red("---")
 
                 # We reached maximum exploitation for this parameter, don't send more payloads
                 vulnerable_parameter = True
@@ -119,8 +118,8 @@ class mod_timesql(Attack):
                         parameter=parameter
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(mutated_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(mutated_request.http_repr())
+                    log_orange("---")

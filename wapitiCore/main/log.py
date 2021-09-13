@@ -16,11 +16,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import sys
+from functools import partial
 
 from loguru import logger as logging
 
 logging.remove()
-logging.level("RED", no=45, color="<red>")
-logging.level("ORANGE", no=35, color="<yellow>")
-logging.level("GREEN", no=22, color="<green>")
+# logging.debug is 10
+logging.level("VERBOSE", no=15)
+# logging.info is 20
 logging.level("BLUE", no=21, color="<blue>")
+logging.level("GREEN", no=22, color="<green>")
+# logging.success is 25
+# logging.warning is 30
+logging.level("ORANGE", no=35, color="<yellow>")
+# logging.error is 40
+logging.level("RED", no=45, color="<red>")
+# logging.critical is 50
+
+log_blue = partial(logging.log, "BLUE")
+log_green = partial(logging.log, "GREEN")
+log_red = partial(logging.log, "RED")
+log_orange = partial(logging.log, "ORANGE")
+log_verbose = partial(logging.log, "VERBOSE")
+
+# Set default logging
+logging.add(sys.stdout, colorize=False, format="{message}", level="INFO")

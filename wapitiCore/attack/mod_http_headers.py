@@ -21,6 +21,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.http_headers import NAME
 from wapitiCore.net.page import Page
+from wapitiCore.main.log import log_red, log_blue, log_green
 
 INFO_HSTS = _("Strict-Transport-Security is not set")
 INFO_XCONTENT_TYPE = _("X-Content-Type-Options is not set")
@@ -59,16 +60,16 @@ class mod_http_headers(Attack):
         return any(element in response.headers[header_name].lower() for element in check_list)
 
     async def check_header(self, response, request, header, check_list, info, log):
-        self.log_blue(log)
+        log_blue(log)
         if not self.is_set(response, header, check_list):
-            self.log_red(info)
+            log_red(info)
             await self.add_vuln_low(
                 category=NAME,
                 request=request,
                 info=info
             )
         else:
-            self.log_green("OK")
+            log_green("OK")
 
     async def must_attack(self, request: Request):
         if self.finished:

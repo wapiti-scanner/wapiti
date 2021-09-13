@@ -48,7 +48,6 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2}
 
     module = mod_shellshock(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_get = True
     for request in all_requests:
         await module.attack(request)
