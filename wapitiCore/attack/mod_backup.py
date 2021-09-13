@@ -25,8 +25,8 @@ from os.path import splitext
 from urllib.parse import urljoin
 
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.backup import NAME
@@ -82,8 +82,7 @@ class mod_backup(Attack):
 
                 url = urljoin(request.path, payload)
 
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(url))
+            log_verbose("[¨] {0}".format(url))
 
             self.attacked_get.append(page)
             evil_req = Request(url)
@@ -95,7 +94,7 @@ class mod_backup(Attack):
                 continue
 
             if response and response.status == 200:
-                self.log_red(_("Found backup file {}".format(evil_req.url)))
+                log_red(_("Found backup file {}".format(evil_req.url)))
 
                 await self.add_vuln_low(
                     request_id=request.path_id,

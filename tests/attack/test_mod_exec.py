@@ -56,7 +56,6 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2}
 
     module = mod_exec(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = True
     for request in all_requests:
         await module.attack(request)
@@ -85,7 +84,6 @@ async def test_detection():
     options = {"timeout": 10, "level": 1}
 
     module = mod_exec(crawler, persister, options, Event())
-    module.verbose = 2
     await module.attack(request)
 
     assert persister.add_payload.call_count == 1
@@ -115,7 +113,6 @@ async def test_blind_detection():
     options = {"timeout": 1, "level": 1}
 
     module = mod_exec(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = False
 
     payloads_until_sleep = 0

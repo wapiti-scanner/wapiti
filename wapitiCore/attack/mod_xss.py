@@ -20,8 +20,8 @@ from os.path import join as path_join
 from configparser import ConfigParser
 
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
@@ -118,8 +118,7 @@ class mod_xss(Attack):
         )
 
         for evil_request, xss_param, xss_payload, xss_flags in attack_mutator.mutate(original_request):
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(evil_request))
+            log_verbose("[¨] {0}".format(evil_request))
 
             try:
                 response = await self.crawler.async_send(evil_request)
@@ -128,11 +127,11 @@ class mod_xss(Attack):
                 if timeouted:
                     continue
 
-                self.log_orange("---")
-                self.log_orange(Messages.MSG_TIMEOUT, page)
-                self.log_orange(Messages.MSG_EVIL_REQUEST)
-                self.log_orange(evil_request.http_repr())
-                self.log_orange("---")
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(evil_request.http_repr())
+                log_orange("---")
 
                 if xss_param == "QUERY_STRING":
                     anom_msg = Messages.MSG_QS_TIMEOUT
@@ -173,8 +172,8 @@ class mod_xss(Attack):
                     else:
                         injection_msg = Messages.MSG_PARAM_INJECT
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         injection_msg,
                         self.MSG_VULN,
                         page,
@@ -182,11 +181,11 @@ class mod_xss(Attack):
                     )
 
                     if has_strong_csp(response):
-                        self.log_red(_("Warning: Content-Security-Policy is present!"))
+                        log_red(_("Warning: Content-Security-Policy is present!"))
 
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(evil_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(evil_request.http_repr())
+                    log_red("---")
 
                     # stop trying payloads and jump to the next parameter
                     break
@@ -205,11 +204,11 @@ class mod_xss(Attack):
                         parameter=xss_param
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(evil_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(evil_request.http_repr())
+                    log_orange("---")
                     saw_internal_error = True
 
     def check_payload(self, response, flags, taint):

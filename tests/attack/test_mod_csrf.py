@@ -62,7 +62,6 @@ async def test_csrf_cases():
 
     module = mod_csrf(crawler, persister, options, Event())
     module.do_post = True
-    module.verbose = 2
     for request in all_requests:
         if await module.must_attack(request):
             await module.attack(request)

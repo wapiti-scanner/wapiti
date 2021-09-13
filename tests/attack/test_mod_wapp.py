@@ -39,7 +39,6 @@ async def test_false_positive():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -72,7 +71,6 @@ async def test_url_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -111,7 +109,6 @@ async def test_html_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -149,7 +146,6 @@ async def test_script_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -187,7 +183,6 @@ async def test_cookies_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -225,7 +220,6 @@ async def test_headers_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -264,7 +258,6 @@ async def test_meta_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -305,7 +298,6 @@ async def test_multi_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -343,7 +335,6 @@ async def test_implies_detection():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -384,7 +375,6 @@ async def test_vulnerabilities():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wapp(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 

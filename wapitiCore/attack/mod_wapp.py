@@ -19,8 +19,8 @@ import json
 import os
 
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import logging, log_blue
 from wapitiCore.attack.attack import Attack
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import _
@@ -106,14 +106,14 @@ class mod_wapp(Attack):
         detected_applications = wappalyzer.detect_with_versions_and_categories()
 
         if len(detected_applications) > 0:
-            self.log_blue("---")
+            log_blue("---")
 
         for application_name in sorted(detected_applications, key=lambda x: x.lower()):
 
             versions = detected_applications[application_name]["versions"]
             categories = detected_applications[application_name]["categories"]
 
-            self.log_blue(
+            log_blue(
                 MSG_TECHNO_VERSIONED,
                 application_name,
                 versions

@@ -44,7 +44,6 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2}
 
     module = mod_sql(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = True
     for request in all_requests:
         await module.attack(request)
@@ -67,7 +66,6 @@ async def test_false_positive():
     options = {"timeout": 10, "level": 1}
 
     module = mod_sql(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = True
     await module.attack(request)
 
@@ -99,7 +97,6 @@ async def test_true_positive():
     options = {"timeout": 10, "level": 1}
 
     module = mod_sql(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = True
     await module.attack(request)
 
@@ -157,7 +154,6 @@ async def test_blind_detection():
         options = {"timeout": 10, "level": 1}
 
         module = mod_sql(crawler, persister, options, Event())
-        module.verbose = 2
         module.do_post = True
         await module.attack(request)
 
@@ -181,7 +177,6 @@ async def test_negative_blind():
     options = {"timeout": 10, "level": 1}
 
     module = mod_sql(crawler, persister, options, Event())
-    module.verbose = 2
     await module.attack(request)
 
     assert not persister.add_payload.call_count
@@ -241,7 +236,6 @@ async def test_blind_detection_parenthesis():
         options = {"timeout": 10, "level": 1}
 
         module = mod_sql(crawler, persister, options, Event())
-        module.verbose = 2
         module.do_post = True
         await module.attack(request)
 

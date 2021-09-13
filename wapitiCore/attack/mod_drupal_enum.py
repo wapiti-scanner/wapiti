@@ -11,6 +11,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
+from wapitiCore.main.log import log_blue
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_DRUPAL = _("No Drupal Detected")
@@ -142,7 +143,7 @@ class mod_drupal_enum(Attack):
                 "versions": self.versions,
                 "categories": ["CMS Drupal"]
             }
-            self.log_blue(
+            log_blue(
                 MSG_TECHNO_VERSIONED,
                 "Drupal",
                 self.versions
@@ -153,4 +154,4 @@ class mod_drupal_enum(Attack):
                 info=json.dumps(drupal_detected),
             )
         else:
-            self.log_blue(MSG_NO_DRUPAL)
+            log_blue(MSG_NO_DRUPAL)

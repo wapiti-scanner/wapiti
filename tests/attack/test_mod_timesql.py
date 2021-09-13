@@ -80,7 +80,6 @@ async def test_false_positive_request_count():
     options = {"timeout": 1, "level": 1}
 
     module = mod_timesql(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = False
     await module.attack(request)
 
@@ -106,7 +105,6 @@ async def test_true_positive_request_count():
     options = {"timeout": 1, "level": 1}
 
     module = mod_timesql(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = False
     await module.attack(request)
 

@@ -24,8 +24,8 @@ import random
 from urllib.parse import urlparse
 
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.dangerous_resource import NAME
@@ -192,11 +192,10 @@ class mod_nikto(Attack):
         else:
             evil_request = Request(url, post_params=post_data, method=method)
 
-        if self.verbose == 2:
-            if method == "GET":
-                logging.info("[¨] {0}".format(evil_request.url))
-            else:
-                logging.info("[¨] {0}".format(evil_request.http_repr()))
+        if method == "GET":
+            log_verbose("[¨] {0}".format(evil_request.url))
+        else:
+            log_verbose("[¨] {0}".format(evil_request.http_repr()))
 
         try:
             response = await self.crawler.async_send(evil_request)
@@ -259,9 +258,9 @@ class mod_nikto(Attack):
                     fail_or = True
 
         if ((match or match_or) and match_and) and not (fail or fail_or):
-            self.log_red("---")
-            self.log_red(vuln_desc)
-            self.log_red(url)
+            log_red("---")
+            log_red(vuln_desc)
+            log_red(url)
 
             refs = []
             if osv_id != "0":
@@ -294,13 +293,13 @@ class mod_nikto(Attack):
 
             info = vuln_desc
             if refs:
-                self.log_red(_("References:"))
-                self.log_red("  {0}".format("\n  ".join(refs)))
+                log_red(_("References:"))
+                log_red("  {0}".format("\n  ".join(refs)))
 
                 info += "\n" + _("References:") + "\n"
                 info += "\n".join(refs)
 
-            self.log_red("---")
+            log_red("---")
 
             await self.add_vuln_high(
                 category=NAME,

@@ -22,8 +22,8 @@ from collections import defaultdict, namedtuple
 import re
 
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, PayloadReader
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.file import NAME
@@ -179,8 +179,7 @@ class mod_file(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            if self.verbose == 2:
-                logging.info("[¨] {0}".format(mutated_request))
+            log_verbose("[¨] {0}".format(mutated_request))
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -189,11 +188,11 @@ class mod_file(Attack):
                 if timeouted:
                     continue
 
-                self.log_orange("---")
-                self.log_orange(Messages.MSG_TIMEOUT, page)
-                self.log_orange(Messages.MSG_EVIL_REQUEST)
-                self.log_orange(mutated_request.http_repr())
-                self.log_orange("---")
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(mutated_request.http_repr())
+                log_orange("---")
 
                 if parameter == "QUERY_STRING":
                     anom_msg = Messages.MSG_QS_TIMEOUT
@@ -267,8 +266,8 @@ class mod_file(Attack):
                         parameter=parameter
                     )
 
-                    self.log_red("---")
-                    self.log_red(
+                    log_red("---")
+                    log_red(
                         Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
                         vulnerable_method,
                         page,
@@ -276,11 +275,11 @@ class mod_file(Attack):
                     )
 
                     if constraint_message:
-                        self.log_red(constraint_message)
+                        log_red(constraint_message)
 
-                    self.log_red(Messages.MSG_EVIL_REQUEST)
-                    self.log_red(mutated_request.http_repr())
-                    self.log_red("---")
+                    log_red(Messages.MSG_EVIL_REQUEST)
+                    log_red(mutated_request.http_repr())
+                    log_red("---")
 
                     if inclusion_succeed:
                         # We reached maximum exploitation for this parameter, don't send more payloads
@@ -302,8 +301,8 @@ class mod_file(Attack):
                         parameter=parameter
                     )
 
-                    self.log_orange("---")
-                    self.log_orange(Messages.MSG_500, page)
-                    self.log_orange(Messages.MSG_EVIL_REQUEST)
-                    self.log_orange(mutated_request.http_repr())
-                    self.log_orange("---")
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(mutated_request.http_repr())
+                    log_orange("---")

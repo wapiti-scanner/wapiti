@@ -42,7 +42,6 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = mod_nikto(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_get = True
     await module.attack(request)
 

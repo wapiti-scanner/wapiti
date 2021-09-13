@@ -61,7 +61,6 @@ async def test_unregistered_cname():
             options = {"timeout": 10, "level": 2}
 
             module = mod_takeover(crawler, persister, options, Event())
-            module.verbose = 2
 
             for request in all_requests:
                 await module.attack(request)

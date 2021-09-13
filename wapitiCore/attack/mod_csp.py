@@ -21,10 +21,12 @@ from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
 from wapitiCore.definitions.csp import NAME
+from wapitiCore.main.log import log_red
 
 MSG_NO_CSP = _("CSP is not set")
 MSG_CSP_MISSING = _("CSP attribute \"{0}\" is missing")
 MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
+
 
 # This module check the basics recommendations of CSP
 class mod_csp(Attack):
@@ -51,7 +53,7 @@ class mod_csp(Attack):
             return
 
         if "Content-Security-Policy" not in response.headers:
-            self.log_red(MSG_NO_CSP)
+            log_red(MSG_NO_CSP)
             await self.add_vuln_low(
                 category=NAME,
                 request=request_to_root,
@@ -69,7 +71,7 @@ class mod_csp(Attack):
                     else:  # result == 0
                         info = MSG_CSP_UNSAFE.format(policy_name)
 
-                    self.log_red(info)
+                    log_red(info)
                     await self.add_vuln_low(
                         category=NAME,
                         request=request_to_root,

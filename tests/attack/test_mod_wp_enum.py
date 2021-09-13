@@ -34,7 +34,6 @@ async def test_no_wordpress():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wp_enum(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -105,7 +104,6 @@ async def test_plugin():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wp_enum(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 
@@ -186,7 +184,6 @@ async def test_theme():
     options = {"timeout": 10, "level": 2}
 
     module = mod_wp_enum(crawler, persister, options, Event())
-    module.verbose = 2
 
     await module.attack(request)
 

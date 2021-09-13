@@ -28,6 +28,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME
 from wapitiCore.net.web import Request
+from wapitiCore.main.log import log_red
 
 
 class mod_brute_login_form(Attack):
@@ -201,11 +202,11 @@ class mod_brute_login_form(Attack):
                             info=vuln_message
                         )
 
-                        self.log_red("---")
-                        self.log_red(vuln_message)
-                        self.log_red(Messages.MSG_EVIL_REQUEST)
-                        self.log_red(evil_request.http_repr())
-                        self.log_red("---")
+                        log_red("---")
+                        log_red(vuln_message)
+                        log_red(Messages.MSG_EVIL_REQUEST)
+                        log_red(evil_request.http_repr())
+                        log_red("---")
 
                 tasks.remove(task)
 

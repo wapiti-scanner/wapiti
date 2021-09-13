@@ -25,6 +25,7 @@ from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.csrf import NAME
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
+from wapitiCore.main.log import log_red
 
 
 class mod_csrf(Attack):
@@ -177,10 +178,10 @@ class mod_csrf(Attack):
 
         self.already_vulnerable.append((request.url, request.post_keys))
 
-        self.log_red("---")
-        self.log_red(vuln_message)
-        self.log_red(request.http_repr())
-        self.log_red("---")
+        log_red("---")
+        log_red(vuln_message)
+        log_red(request.http_repr())
+        log_red("---")
 
         await self.add_vuln_medium(
             request_id=request.path_id,

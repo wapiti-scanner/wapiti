@@ -19,6 +19,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.secure_cookie import NAME as COOKIE_SECURE_DISABLED
 from wapitiCore.definitions.http_only import NAME as COOKIE_HTTPONLY_DISABLED
+from wapitiCore.main.log import log_red, log_blue
 
 INFO_COOKIE_HTTPONLY = _("HttpOnly flag is not set in the cookie : {0}")
 INFO_COOKIE_SECURE = _("Secure flag is not set in the cookie : {0}")
@@ -51,9 +52,9 @@ class mod_cookieflags(Attack):
         cookies = self.crawler.session_cookies
 
         for cookie in cookies.jar:
-            self.log_blue(_("Checking cookie : {}").format(cookie.name))
+            log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
-                self.log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
+                log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
                 await self.add_vuln_low(
                     category=COOKIE_HTTPONLY_DISABLED,
                     request=request,
@@ -61,7 +62,7 @@ class mod_cookieflags(Attack):
                 )
 
             if not self.check_secure_flag(cookie):
-                self.log_red(INFO_COOKIE_SECURE.format(cookie.name))
+                log_red(INFO_COOKIE_SECURE.format(cookie.name))
                 await self.add_vuln_low(
                     category=COOKIE_SECURE_DISABLED,
                     request=request,

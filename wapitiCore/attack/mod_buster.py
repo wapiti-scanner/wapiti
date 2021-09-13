@@ -20,8 +20,8 @@
 import asyncio
 
 from httpx import RequestError
-from wapitiCore.main.log import logging
 
+from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 
@@ -56,22 +56,21 @@ class mod_buster(Attack):
         if response.redirection_url:
             loc = response.redirection_url
             if response.is_directory_redirection:
-                self.log_red("Found webpage {0}", loc)
+                log_red("Found webpage {0}", loc)
                 self.new_resources.append(loc)
             else:
-                self.log_red("Found webpage {0}", page.path)
+                log_red("Found webpage {0}", page.path)
                 self.new_resources.append(page.path)
             return True
         if response.status not in [403, 404]:
-            self.log_red("Found webpage {0}", page.path)
+            log_red("Found webpage {0}", page.path)
             self.new_resources.append(page.path)
             return True
 
         return False
 
     async def test_directory(self, path: str):
-        if self.verbose == 2:
-            logging.info("[¨] Testing directory {0}".format(path))
+        log_verbose("[¨] Testing directory {0}".format(path))
 
         test_page = Request(path + "does_n0t_exist.htm")
         try:

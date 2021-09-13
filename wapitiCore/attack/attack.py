@@ -26,10 +26,9 @@ from math import ceil
 import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
-from functools import partialmethod, partial
+from functools import partialmethod
 
 from httpx import ReadTimeout, RequestError
-from wapitiCore.main.log import logging
 
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.web import Request
@@ -210,19 +209,11 @@ class Attack:
         self.attacked_post = []
         self.network_errors = 0
 
-        self.verbose = 0
-        self.color = 0
         self.finished = False
 
         # List of modules (objects) that must be launched before the current module
         # Must be left empty in the code
         self.deps = []
-
-    def set_verbose(self, verbose):
-        self.verbose = verbose
-
-    def set_color(self):
-        self.color = 1
 
     async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
                           level=0, request=None, parameter="", info=""):
@@ -236,11 +227,6 @@ class Attack:
             parameter=parameter,
             info=info
         )
-
-    log_blue = partial(logging.log, "BLUE")
-    log_green = partial(logging.log, "GREEN")
-    log_red = partial(logging.log, "RED")
-    log_orange = partial(logging.log, "ORANGE")
 
     add_vuln_critical = partialmethod(add_payload, payload_type=VULN, level=CRITICAL_LEVEL)
     add_vuln_high = partialmethod(add_payload, payload_type=VULN, level=HIGH_LEVEL)

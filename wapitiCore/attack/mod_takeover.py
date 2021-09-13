@@ -35,8 +35,8 @@ import dns.asyncresolver
 import dns.exception
 import dns.name
 import dns.resolver
-from loguru import logger as logging
 
+from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
@@ -272,8 +272,7 @@ class mod_takeover(Attack):
                     if cname in bad_responses:
                         continue
 
-                    if self.verbose:
-                        logging.info(_(f"Record {domain} points to {cname}"))
+                    log_verbose(_(f"Record {domain} points to {cname}"))
 
                     try:
                         if get_root_domain(cname) == root_domain:
@@ -284,9 +283,9 @@ class mod_takeover(Attack):
                         continue
 
                     if await self.takeover.check(domain, cname):
-                        self.log_red("---")
-                        self.log_red(_(f"CNAME {domain} to {cname} seems vulnerable to takeover"))
-                        self.log_red("---")
+                        log_red("---")
+                        log_red(_(f"CNAME {domain} to {cname} seems vulnerable to takeover"))
+                        log_red("---")
 
                         await self.add_vuln_high(
                             category=NAME,

@@ -48,7 +48,6 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2}
 
     module = mod_ssrf(crawler, persister, options, Event())
-    module.verbose = 2
     module.do_post = True
 
     respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(

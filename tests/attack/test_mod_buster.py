@@ -41,7 +41,6 @@ async def test_whole_stuff():
             [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
     ):
         module = mod_buster(crawler, persister, options, Event())
-        module.verbose = 2
         module.do_get = True
         await module.attack(request)
 
