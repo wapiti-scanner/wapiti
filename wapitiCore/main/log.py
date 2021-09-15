@@ -22,7 +22,13 @@ from functools import partial
 from loguru import logger as logging
 
 logging.remove()
-# logging.debug is 10
+
+# Setup additional logging levels, from the less important to the more critical
+# Each attempted mutated request will be logged as VERBOSE as it generates a lot of output
+# Each attacked original request will be logged as INFO
+# Others info like currently used attack module must be logged even in quiet mode so BLUE level must be used as least
+
+# logging.debug is level 10, this is the value defined in Python's logging module and is reused by loguru
 logging.level("VERBOSE", no=15)
 # logging.info is 20
 logging.level("BLUE", no=21, color="<blue>")

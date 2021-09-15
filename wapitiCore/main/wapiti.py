@@ -123,7 +123,7 @@ class Wapiti:
         self.forms = []
         self.attacks = []
 
-        self.color = False
+        self.color_enabled = False
         self.verbose = 0
         self.module_options = None
         self.attack_options = {}
@@ -161,7 +161,7 @@ class Wapiti:
 
     def refresh_logging(self):
         format = "{message}"
-        if self.color:
+        if self.color_enabled:
             format = "<lvl>" + format + "</lvl>"
 
         verbosity_levels = {
@@ -171,7 +171,12 @@ class Wapiti:
         }
 
         handlers = [
-            {"sink": sys.stdout, "colorize": self.color, "format": format, "level": verbosity_levels[self.verbose]}
+            {
+                "sink": sys.stdout,
+                "colorize": self.color_enabled,
+                "format": format,
+                "level": verbosity_levels[self.verbose]
+            }
         ]
         if self._logfile:
             handlers.append({"sink": self._logfile, "level": "DEBUG"})
@@ -672,7 +677,7 @@ class Wapiti:
         """Put colors in the console output (terminal must support colors)"""
         # logging.remove()
         # logging.add(sys.stdout, format="<lvl>{message}</lvl>", level="INFO")
-        self.color = True
+        self.color_enabled = True
         self.refresh_logging()
 
     def verbosity(self, verbose: int):
