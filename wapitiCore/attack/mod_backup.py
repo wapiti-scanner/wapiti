@@ -27,7 +27,7 @@ from urllib.parse import urljoin
 from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_red
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.backup import NAME
 from wapitiCore.net.web import Request
@@ -45,6 +45,26 @@ class mod_backup(Attack):
     do_get = False
     do_post = False
 
+    def __init__(self, crawler, persister, attack_options, stop_event):
+        super().__init__(crawler, persister, attack_options, stop_event)
+        self.false_positive_directories = {}
+
+    async def is_false_positive(self, request: Request):
+        # Check for false positives by asking an improbable file inside the same folder
+        # Use a dict to cache state for each directory
+        if request.dir_name not in self.false_positive_directories:
+            request = Request(urljoin(request.dir_name, random_string() + ".zip"))
+            try:
+                response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+                # Do not put anything in false_positive_directories, another luck for next time
+                return False
+
+            self.false_positive_directories[request.dir_name] = (response and response.status == 200)
+
+        return self.false_positive_directories[request.dir_name]
+
     async def must_attack(self, request: Request):
         page = request.path
         headers = request.headers
@@ -60,7 +80,7 @@ class mod_backup(Attack):
         elif "text" not in headers["content-type"]:
             return False
 
-        return True
+        return not await self.is_false_positive(request)
 
     async def attack(self, request: Request):
         page = request.path
