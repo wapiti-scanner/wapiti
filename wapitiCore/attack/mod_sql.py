@@ -247,20 +247,23 @@ def generate_boolean_test_values(separator: str, parenthesis: bool):
         "[VALUE]{sep}) AND {left_value}={right_value} AND ({sep}{padding_value}{sep}={sep}{padding_value}"
     )[parenthesis]
 
-    # Generate two couple of payloads, first couple to test, second one to check for false-positives
     for __ in range(2):
         value1 = randint(10, 99)
         value2 = randint(10, 99) + value1
         padding_value = randint(10, 99)
 
-        # First payload of the couple gives negative test
+        # First two payloads give negative tests
         # Due to Mutator limitations we leverage some Flags attributes to put our indicators
         yield (
             fmt_string.format(left_value=value1, right_value=value2, padding_value=padding_value, sep=separator),
             Flags(section="False", platform="{}_{}".format("p" if parenthesis else "", separator))
         )
 
-        # Second payload of the couple gives positive test
+    for __ in range(2):
+        value1 = randint(10, 99)
+        padding_value = randint(10, 99)
+
+        # Last two payloads give positive tests
         yield (
             fmt_string.format(left_value=value1, right_value=value1, padding_value=padding_value, sep=separator),
             Flags(section="True", platform="{}_{}".format("p" if parenthesis else "", separator))
