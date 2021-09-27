@@ -240,6 +240,12 @@ async def test_blind_detection_parenthesis():
         await module.attack(request)
 
         assert persister.add_payload.call_count
-        # This is the same test as the previous blind except we have to put single quotes
-        assert respx.calls.call_count == 8
+        # We have:
+        # - 1 request for error-based test
+        # - 1 request to get normal response
+        # - 2 requests for boolean False test without parenthesis
+        # - 1 request for boolean True test without parenthesis => this check fails
+        # - 2 requests for boolean False test WITH parenthesis
+        # - 2 requests for boolean True test WITH parenthesis
+        assert respx.calls.call_count == 9
         await crawler.close()
