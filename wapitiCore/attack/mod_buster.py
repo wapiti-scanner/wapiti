@@ -62,7 +62,8 @@ class mod_buster(Attack):
                 log_red("Found webpage {0}", page.path)
                 self.new_resources.append(page.path)
             return True
-        if response.status not in [403, 404]:
+
+        if response.status not in [403, 404, 429]:
             log_red("Found webpage {0}", page.path)
             self.new_resources.append(page.path)
             return True
