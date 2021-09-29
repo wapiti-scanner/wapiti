@@ -58,7 +58,6 @@ async def test_resume_crawling():
     wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
     await wapiti.init_persister()
     await wapiti.load_scan_state()
-    stop_event.clear()
     await wapiti.browse(stop_event)
     await wapiti.save_scan_state()
     remaining_requests = set([request async for request in wapiti.persister.get_to_browse()])

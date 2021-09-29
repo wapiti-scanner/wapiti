@@ -229,6 +229,7 @@ class Wapiti:
 
     def _init_attacks(self, stop_event: asyncio.Event):
         self._init_report()
+        stop_event.clear()
 
         logging.info(_("[*] Loading modules:"))
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
@@ -361,6 +362,7 @@ class Wapiti:
 
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
+        stop_event.clear()
         explorer = crawler.Explorer(self.crawler, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
@@ -1350,7 +1352,6 @@ async def wapiti_main():
             )))
 
         logging.info(_("[*] Wapiti found {0} URLs and forms during the scan").format(await wap.count_resources()))
-        global_stop_event.clear()
         loop.add_signal_handler(signal.SIGINT, stop_attack_process)
         await wap.attack(global_stop_event)
         loop.remove_signal_handler(signal.SIGINT)
