@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from urllib.parse import urlparse, unquote, quote
+from urllib.parse import urlparse, unquote, quote, urljoin
 import posixpath
 from copy import deepcopy
 import sys
@@ -480,6 +480,10 @@ class Request:
         return self._file_path == "/"
 
     @property
+    def root(self) -> str:
+        return urljoin(self.path, "/")
+
+    @property
     def file_ext(self) -> str:
         return posixpath.splitext(self._file_path)[1].lower()
 
@@ -492,6 +496,10 @@ class Request:
         if self.file_name:
             return posixpath.dirname(self._resource_path) + "/"
         return self._resource_path
+
+    @property
+    def is_directory(self) -> bool:
+        return self.path.endswith("/")
 
     @property
     def parent_dir(self):

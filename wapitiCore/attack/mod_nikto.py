@@ -22,11 +22,12 @@ import re
 import os
 import random
 from urllib.parse import urlparse
+from typing import List
 
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_verbose, log_red
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.dangerous_resource import NAME
 from wapitiCore.net.web import Request
@@ -79,6 +80,9 @@ class mod_nikto(Attack):
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
 
+        self.status_codes = {}
+        self.random_string = random_string()
+
     async def update(self):
         """Update the Nikto database from the web and load the patterns."""
         try:
@@ -104,6 +108,26 @@ class mod_nikto(Attack):
             return False
 
         return request.url == await self.persister.get_root_url()
+
+    async def is_false_positive(self, evil_request: Request, expected_status_codes: List[int]) -> bool:
+        # Check for false positives by asking an improbable file of the same type at the root of the server
+        # Use a dict to cache requests
+        if evil_request.is_directory:
+            request = Request(f"{evil_request.root}{self.random_string}/")
+        else:
+            request = Request(f"{evil_request.root}{self.random_string}{evil_request.file_ext}")
+
+        if request.path not in self.status_codes:
+            try:
+                response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+                # Do not put anything in cache, another luck for next time
+                return False
+
+            self.status_codes[request.path] = response.status
+
+        return self.status_codes[request.path] in expected_status_codes
 
     async def attack(self, request: Request):
         try:
@@ -211,9 +235,13 @@ class mod_nikto(Attack):
         raw = " ".join([x + ": " + y for x, y in response.headers.items()])
         raw += page
 
+        # See https://github.com/sullo/nikto/blob/master/program/plugins/nikto_tests.plugin for reference
+        expected_status_codes = []
         # First condition (match)
         if len(line[5]) == 3 and line[5].isdigit():
-            if code == int(line[5]):
+            expected_status_code = int(line[5])
+            expected_status_codes.append(expected_status_code)
+            if code == expected_status_code:
                 match = True
         else:
             if line[5] in raw:
@@ -222,7 +250,9 @@ class mod_nikto(Attack):
         # Second condition (or)
         if line[6] != "":
             if len(line[6]) == 3 and line[6].isdigit():
-                if code == int(line[6]):
+                expected_status_code = int(line[6])
+                expected_status_codes.append(expected_status_code)
+                if code == expected_status_code:
                     match_or = True
             else:
                 if line[6] in raw:
@@ -258,6 +288,10 @@ class mod_nikto(Attack):
                     fail_or = True
 
         if ((match or match_or) and match_and) and not (fail or fail_or):
+            if expected_status_codes:
+                if await self.is_false_positive(evil_request, expected_status_codes):
+                    return
+
             log_red("---")
             log_red(vuln_desc)
             log_red(url)
