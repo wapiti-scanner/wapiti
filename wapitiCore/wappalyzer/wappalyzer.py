@@ -1,14 +1,11 @@
 import json
-import logging
 import os
 import re
 import sys
 import warnings
 
-
 from wapitiCore.net.crawler import Page
 
-logger = logging.getLogger(name=__name__)
 BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 

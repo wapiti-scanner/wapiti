@@ -348,15 +348,11 @@ class Wapiti:
         await self.persister.set_root_url(self.target_url)
 
     async def save_scan_state(self):
-        logging.info(_("[*] Saving scan state, please wait..."))
+        logging.log("GREEN", _("[*] Saving scan state, please wait..."))
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
-        print('')
-        print(_(" Note"))
-        print("========")
-
-        logging.success(_("This scan has been saved in the file {0}").format(self.persister.output_file))
+        logging.info(_("This scan has been saved in the file {0}").format(self.persister.output_file))
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
@@ -430,7 +426,7 @@ class Wapiti:
 
             already_attacked = await self.persister.count_attacked(attack_module.name)
             if already_attacked:
-                logging.warning(
+                logging.success(
                     _("[*] {0} pages were previously attacked and will be skipped"),
                     already_attacked
                 )
@@ -500,7 +496,7 @@ class Wapiti:
                                 ]
                             )
                             page = await self.crawler.async_send(upload_request)
-                            logging.info(_("Sending crash report {} ... {}").format(traceback_file, page.content))
+                            logging.success(_("Sending crash report {} ... {}").format(traceback_file, page.content))
                         except RequestError:
                             logging.error(_("Error sending crash report"))
                         os.unlink(traceback_file)
@@ -584,13 +580,12 @@ class Wapiti:
                     auth=auth_dict
                 )
 
-        self.report_gen.generate_report(self.output_file)
         print('')
-        print(_("Report"))
-        logging.info("------")
-        logging.info(_("A report has been generated in the file {0}").format(self.output_file))
+        logging.log("GREEN", _("[*] Generating report..."))
+        self.report_gen.generate_report(self.output_file)
+        logging.success(_("A report has been generated in the file {0}").format(self.output_file))
         if self.report_generator_type == "html":
-            logging.info(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
+            logging.success(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
 
         await self.crawler.close()
         await self.persister.close()
@@ -677,8 +672,6 @@ class Wapiti:
 
     def set_color(self):
         """Put colors in the console output (terminal must support colors)"""
-        # logging.remove()
-        # logging.add(sys.stdout, format="<lvl>{message}</lvl>", level="INFO")
         self.color_enabled = True
         self.refresh_logging()
 
@@ -1178,7 +1171,7 @@ async def wapiti_main():
         wap.set_logfile(args.log)
 
     if args.update:
-        logging.info(_("[*] Updating modules"))
+        logging.log("GREEN", _("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
         await wap.update()
