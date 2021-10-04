@@ -29,58 +29,6 @@ from wapitiCore.net import web
 
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,module")
 
-metadata = MetaData()
-
-scan_infos = Table(
-    "scan_infos", metadata,
-    Column("key", String(255), nullable=False),
-    Column("value", Text, nullable=False)  # We keep the root URL here. With URL scope it may be big
-)
-
-paths = Table(
-    'paths', metadata,
-    Column('path_id', Integer, primary_key=True),
-    Column('path', Text, nullable=False),  # URL, can be huge
-    Column('method', String(length=16), nullable=False),  # HTTP method
-    Column('enctype', String(length=255), nullable=False),  # HTTP request encoding (like multipart...)
-    Column('depth', Integer, nullable=False),
-    Column('encoding', String(length=255)),  # page encoding (like UTF-8...)
-    Column('http_status', Integer),
-    Column('headers', PickleType),  # Pickled HTTP headers, can be huge
-    Column('referer', Text),  # Another URL so potentially huge
-    Column('evil', Boolean, nullable=False),
-)
-
-params = Table(
-    'params', metadata,
-    Column('param_id', Integer, primary_key=True),
-    Column('path_id', None, ForeignKey("paths.path_id")),
-    Column('type', String(length=16), nullable=False),  # HTTP method or "FILE" for multipart
-    Column('position', Integer, nullable=False),
-    Column('name', Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
-    Column('value1', Text),  # Can be really huge
-    Column('value2', Text),  # File content. Will be short most of the time but we plan on more usage
-    Column('meta', String(255))  # File mime-type
-)
-
-payloads = Table(
-    'payloads', metadata,
-    Column('evil_path_id', None, ForeignKey("paths.path_id"), nullable=False),
-    Column('original_path_id', None, ForeignKey("paths.path_id"), nullable=False),
-    Column('module', String(255), nullable=False),
-    Column('category', String(255), nullable=False),  # Vulnerability category, should not be that long
-    Column('level', Integer, nullable=False),
-    Column('parameter', Text, nullable=False),  # Vulnerable parameter, can be huge
-    Column('info', Text, nullable=False),  # Vulnerability description. If it contains the parameter name then huge.
-    Column('type', String(255), nullable=False)  # Something like additional/anomaly/vulnerability
-)
-
-attack_logs = Table(
-    'attack_logs', metadata,
-    Column('path_id', None, ForeignKey("paths.path_id"), nullable=False),
-    Column('module', String(255), nullable=False)
-)
-
 
 class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
@@ -115,7 +63,7 @@ class SqlPersister:
     FILE_PARAMS = "file_params"
     DEPTH = "depth"
 
-    def __init__(self, output_file: str):
+    def __init__(self, output_file: str, table_prefix: str = ""):
         # toBrowse can contain GET and POST resources
         self.to_browse = []
         # browsed contains only GET resources
@@ -142,19 +90,74 @@ class SqlPersister:
 
         self._must_create = not os.path.exists(self.output_file)
         self._engine = create_async_engine(f'sqlite+aiosqlite:///{self.output_file}')
+        self.register_database_model(table_prefix)
         # May be of interest: https://charlesleifer.com/blog/going-fast-with-sqlite-and-python/
+
+    def register_database_model(self, table_prefix: str):
+        self.metadata = MetaData()
+
+        self.scan_infos = Table(
+            f"{table_prefix}scan_infos", self.metadata,
+            Column("key", String(255), nullable=False),
+            Column("value", Text, nullable=False)  # We keep the root URL here. With URL scope it may be big
+        )
+
+        self.paths = Table(
+            f"{table_prefix}paths", self.metadata,
+            Column("path_id", Integer, primary_key=True),
+            Column("path", Text, nullable=False),  # URL, can be huge
+            Column("method", String(length=16), nullable=False),  # HTTP method
+            Column("enctype", String(length=255), nullable=False),  # HTTP request encoding (like multipart...)
+            Column("depth", Integer, nullable=False),
+            Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
+            Column("http_status", Integer),
+            Column("headers", PickleType),  # Pickled HTTP headers, can be huge
+            Column("referer", Text),  # Another URL so potentially huge
+            Column("evil", Boolean, nullable=False),
+        )
+
+        self.params = Table(
+            f"{table_prefix}params", self.metadata,
+            Column("param_id", Integer, primary_key=True),
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id")),
+            Column("type", String(length=16), nullable=False),  # HTTP method or "FILE" for multipart
+            Column("position", Integer, nullable=False),
+            Column("name", Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
+            Column("value1", Text),  # Can be really huge
+            Column("value2", Text),  # File content. Will be short most of the time but we plan on more usage
+            Column("meta", String(255))  # File mime-type
+        )
+
+        self.payloads = Table(
+            f"{table_prefix}payloads", self.metadata,
+            Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("original_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("module", String(255), nullable=False),
+            Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
+            Column("level", Integer, nullable=False),
+            Column("parameter", Text, nullable=False),  # Vulnerable parameter, can be huge
+            Column("info", Text, nullable=False),
+            # Vulnerability description. If it contains the parameter name then huge.
+            Column("type", String(255), nullable=False)  # Something like additional/anomaly/vulnerability
+        )
+
+        self.attack_logs = Table(
+            f"{table_prefix}attack_logs", self.metadata,
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("module", String(255), nullable=False)
+        )
 
     async def create(self):
         if self._must_create:
             async with self._engine.begin() as conn:
-                await conn.run_sync(metadata.create_all)
+                await conn.run_sync(self.metadata.create_all)
 
     async def close(self):
         await self._engine.dispose()
 
     async def set_root_url(self, root_url: str):
         async with self._engine.begin() as conn:
-            await conn.execute(scan_infos.insert().values(
+            await conn.execute(self.scan_infos.insert().values(
                 key="root_url",
                 value=root_url
             ))
@@ -162,7 +165,7 @@ class SqlPersister:
 
     @cached()
     async def get_root_url(self) -> str:
-        statement = select(scan_infos).where(scan_infos.c.key == "root_url").limit(1)
+        statement = select(self.scan_infos).where(self.scan_infos.c.key == "root_url").limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone().value
@@ -190,8 +193,8 @@ class SqlPersister:
             for http_resource in paths_list:
                 if http_resource.path_id:
                     # Request was already saved but not fetched, just update to set HTTP code and headers
-                    statement = paths.update().where(
-                        paths.c.path_id == http_resource.path_id
+                    statement = self.paths.update().where(
+                        self.paths.c.path_id == http_resource.path_id
                     ).values(
                         http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                         headers=http_resource.headers
@@ -202,7 +205,7 @@ class SqlPersister:
                 if bigest_id == 0:
                     # This is a trick to be able to insert all paths and params in bulk
                     # instead of inserting path and get the new returned ID to then insert params
-                    result = await conn.execute(select(func.max(paths.c.path_id)))
+                    result = await conn.execute(select(func.max(self.paths.c.path_id)))
                     result = result.scalar()
                     if result is not None:
                         bigest_id = result
@@ -291,17 +294,17 @@ class SqlPersister:
                     )
 
             if all_path_values:
-                await conn.execute(paths.insert(), all_path_values)
+                await conn.execute(self.paths.insert(), all_path_values)
 
                 if all_param_values:
-                    await conn.execute(params.insert(), all_param_values)
+                    await conn.execute(self.params.insert(), all_param_values)
 
     async def save_request(self, http_resource):
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
-                statement = paths.update().where(
-                    paths.c.path_id == http_resource.path_id
+                statement = self.paths.update().where(
+                    self.paths.c.path_id == http_resource.path_id
                 ).values(
                     http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                     headers=http_resource.headers
@@ -310,7 +313,7 @@ class SqlPersister:
                 return
 
             # as we have a unique request let's do insertion the classic way
-            statement = paths.insert().values(
+            statement = self.paths.insert().values(
                 path=http_resource.path,
                 method=http_resource.method,
                 enctype=http_resource.enctype,
@@ -387,33 +390,33 @@ class SqlPersister:
                 )
 
             if all_values:
-                await conn.execute(params.insert(), all_values)
+                await conn.execute(self.params.insert(), all_values)
 
     async def _get_paths(
             self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False) -> AsyncGenerator:
-        conditions = [paths.c.evil == evil]
+        conditions = [self.paths.c.evil == evil]
 
         if path and isinstance(path, str):
-            conditions.append(paths.c.path == path)
+            conditions.append(self.paths.c.path == path)
 
         if method in ("GET", "POST"):
-            conditions.append(paths.c.method == method)
+            conditions.append(self.paths.c.method == method)
 
         if crawled:
             # Bellow is sqlalchemy syntax, do not replace the comparison
-            conditions.append(paths.c.headers != None)
+            conditions.append(self.paths.c.headers != None)
 
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(paths).where(and_(True, *conditions)).order_by(paths.c.path))
+            result = await conn.execute(select(self.paths).where(and_(True, *conditions)).order_by(self.paths.c.path))
 
         for row in result.fetchall():
             path_id = row[0]
 
             if module:
                 # Exclude requests matching the attack module, we want requests that aren't attacked yet
-                statement = select(attack_logs).where(
-                    attack_logs.c.path_id == path_id,
-                    attack_logs.c.module == module
+                statement = select(self.attack_logs).where(
+                    self.attack_logs.c.path_id == path_id,
+                    self.attack_logs.c.module == module
                 ).limit(1)
                 async with self._engine.begin() as conn:
                     result = await conn.execute(statement)
@@ -426,8 +429,8 @@ class SqlPersister:
             file_params = []
 
             statement = select(
-                params.c.type, params.c.name, params.c.value1, params.c.value2, params.c.meta
-            ).where(params.c.path_id == path_id).order_by(params.c.type, params.c.position)
+                self.params.c.type, self.params.c.name, self.params.c.value1, self.params.c.value2, self.params.c.meta
+            ).where(self.params.c.path_id == path_id).order_by(self.params.c.type, self.params.c.position)
 
             async with self._engine.begin() as conn:
                 async_result = await conn.stream(statement)
@@ -483,7 +486,7 @@ class SqlPersister:
             yield path
 
     async def count_paths(self) -> int:
-        statement = select(func.count(paths.c.path_id)).where(~paths.c.evil)
+        statement = select(func.count(self.paths.c.path_id)).where(~self.paths.c.evil)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone()[0]
@@ -496,10 +499,10 @@ class SqlPersister:
             all_values = [
                 {"path_id": path_id, "module": module_name} for path_id in path_ids
             ]
-            await conn.execute(attack_logs.insert(), all_values)
+            await conn.execute(self.attack_logs.insert(), all_values)
 
     async def count_attacked(self, module_name) -> int:
-        statement = select(func.count(attack_logs.c.path_id)).where(attack_logs.c.module == module_name)
+        statement = select(func.count(self.attack_logs.c.path_id)).where(self.attack_logs.c.module == module_name)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone()[0]
@@ -507,7 +510,7 @@ class SqlPersister:
     async def has_scan_finished(self) -> bool:
         # If we have a path without headers set then the scan is not finished
         # Bellow is sqlalchemy syntax, do not replace the comparison
-        statement = select(paths.c.path_id).where(paths.c.headers == None).limit(1)
+        statement = select(self.paths.c.path_id).where(self.paths.c.headers == None).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             if result.fetchone():
@@ -516,7 +519,7 @@ class SqlPersister:
         return True
 
     async def has_scan_started(self) -> bool:
-        statement = select(paths.c.path_id).limit(1)
+        statement = select(self.paths.c.path_id).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             if result.fetchone():
@@ -525,7 +528,7 @@ class SqlPersister:
             return False
 
     async def have_attacks_started(self) -> bool:
-        statement = select(attack_logs.c.path_id).limit(1)
+        statement = select(self.attack_logs.c.path_id).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             if result.fetchone():
@@ -538,7 +541,7 @@ class SqlPersister:
             category=None, level=0, request=None, parameter="", info=""):
 
         # Save the request along with its parameters
-        statement = paths.insert().values(
+        statement = self.paths.insert().values(
             path=request.path,
             method=request.method,
             enctype=request.enctype,
@@ -615,10 +618,10 @@ class SqlPersister:
 
         if all_values:
             async with self._engine.begin() as conn:
-                await conn.execute(params.insert(), all_values)
+                await conn.execute(self.params.insert(), all_values)
 
         # request_id is the ID of the original (legit) request
-        statement = payloads.insert().values(
+        statement = self.payloads.insert().values(
             evil_path_id=path_id,
             original_path_id=request_id,
             module=module,
@@ -634,7 +637,7 @@ class SqlPersister:
     async def get_path_by_id(self, path_id):
         path_id = int(path_id)
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(paths).where(paths.c.path_id == path_id).limit(1))
+            result = await conn.execute(select(self.paths).where(self.paths.c.path_id == path_id).limit(1))
 
         row = result.fetchone()
         if not row:
@@ -645,8 +648,8 @@ class SqlPersister:
         file_params = []
 
         statement = select(
-            params.c.type, params.c.name, params.c.value1, params.c.value2, params.c.meta
-        ).where(params.c.path_id == path_id).order_by(params.c.type, params.c.position)
+            self.params.c.type, self.params.c.name, self.params.c.value1, self.params.c.value2, self.params.c.meta
+        ).where(self.params.c.path_id == path_id).order_by(self.params.c.type, self.params.c.position)
 
         async with self._engine.begin() as conn:
             async_result = await conn.stream(statement)
@@ -695,7 +698,7 @@ class SqlPersister:
 
     async def get_payloads(self) -> AsyncGenerator:
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(payloads))
+            result = await conn.execute(select(self.payloads))
 
         for row in result.fetchall():
             evil_id, original_id, module, category, level, parameter, info, payload_type = row
@@ -708,31 +711,36 @@ class SqlPersister:
     async def flush_session(self):
         await self.flush_attacks()
         async with self._engine.begin() as conn:
-            await conn.execute(paths.delete())
-            await conn.execute(params.delete())
+            await conn.execute(self.paths.delete())
+            await conn.execute(self.params.delete())
 
     async def flush_attacks(self):
         async with self._engine.begin() as conn:
-            await conn.execute(attack_logs.delete())  # which module was launched on which URL
-            await conn.execute(payloads.delete())  # information on vulnerabilities and anomalies
+            await conn.execute(self.attack_logs.delete())  # which module was launched on which URL
+            await conn.execute(self.payloads.delete())  # information on vulnerabilities and anomalies
             # Bellow is sqlalchemy syntax, do not replace the comparison
-            await conn.execute(paths.delete().where(paths.c.evil == True))  # Evil requests
+            await conn.execute(self.paths.delete().where(self.paths.c.evil == True))  # Evil requests
             # Remove params tied to deleted requests
-            await conn.execute(params.delete().where(~params.c.path_id.in_(select(paths.c.path_id))))
+            await conn.execute(self.params.delete().where(~self.params.c.path_id.in_(select(self.paths.c.path_id))))
 
     async def delete_path_by_id(self, path_id):
         # First remove all references to that path then remove it
         async with self._engine.begin() as conn:
             await conn.execute(
-                payloads.delete().where(or_(payloads.c.evil_path_id == path_id, payloads.c.original_path_id == path_id))
+                self.payloads.delete().where(
+                    or_(
+                        self.payloads.c.evil_path_id == path_id,
+                        self.payloads.c.original_path_id == path_id
+                    )
+                )
             )
-            await conn.execute(attack_logs.delete().where(attack_logs.c.path_id == path_id))
-            await conn.execute(params.delete().where(params.c.path_id == path_id))
-            await conn.execute(paths.delete().where(paths.c.path_id == path_id))
+            await conn.execute(self.attack_logs.delete().where(self.attack_logs.c.path_id == path_id))
+            await conn.execute(self.params.delete().where(self.params.c.path_id == path_id))
+            await conn.execute(self.paths.delete().where(self.paths.c.path_id == path_id))
 
     async def get_big_requests_ids(self, params_count: int) -> list:
         statement = select(
-            params.c.path_id, func.count(params.c.param_id).label("params_count")
+            self.params.c.path_id, func.count(self.params.c.param_id).label("params_count")
         ).group_by("path_id").having(literal_column("params_count") > params_count)
 
         async with self._engine.begin() as conn:
