@@ -49,7 +49,7 @@ class mod_shellshock(Attack):
         for i in range(0, 64, 2):
             bash_string += "\\x" + hex_string[i:i + 2].decode()
 
-        cmd = "echo; echo; echo -e '{0}';".format(bash_string)
+        cmd = f"echo; echo; echo -e '{bash_string}';"
 
         self.hdrs = {
             "user-agent": empty_func + cmd,

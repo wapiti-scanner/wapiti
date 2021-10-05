@@ -59,7 +59,7 @@ class mod_timesql(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)

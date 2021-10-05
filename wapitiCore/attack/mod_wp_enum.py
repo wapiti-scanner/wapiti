@@ -37,7 +37,7 @@ class mod_wp_enum(Attack):
             if self._stop_event.is_set():
                 break
 
-            req = Request('{}/wp-content/plugins/{}/readme.txt'.format(url, plugin))
+            req = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt')
             rep = await self.crawler.async_get(req)
 
             if rep.status == 200:
@@ -89,7 +89,7 @@ class mod_wp_enum(Attack):
             if self._stop_event.is_set():
                 break
 
-            req = Request('{}/wp-content/themes/{}/readme.txt'.format(url, theme))
+            req = Request(f'{url}/wp-content/themes/{theme}/readme.txt')
             rep = await self.crawler.async_get(req)
             if rep.status == 200:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)

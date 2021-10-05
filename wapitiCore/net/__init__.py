@@ -9,7 +9,7 @@ def encode(params_list):
         # not safe: '&=#' with of course quotes...
         param_name = quote(param_name, safe='/%[]:;$()+,!?*')
         param_value = quote(param_value, safe='/%[]:;$()+,!?*')
-        encoded_params.append("%s=%s" % (param_name, param_value))
+        encoded_params.append(f"{param_name}={param_value}")
     return "&".join(encoded_params)
 
 

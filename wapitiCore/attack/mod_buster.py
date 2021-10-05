@@ -56,22 +56,22 @@ class mod_buster(Attack):
         if response.redirection_url:
             loc = response.redirection_url
             if response.is_directory_redirection:
-                log_red("Found webpage {0}", loc)
+                log_red(f"Found webpage {loc}")
                 self.new_resources.append(loc)
             else:
-                log_red("Found webpage {0}", page.path)
+                log_red(f"Found webpage {page.path}")
                 self.new_resources.append(page.path)
             return True
 
         if response.status not in [403, 404, 429]:
-            log_red("Found webpage {0}", page.path)
+            log_red(f"Found webpage {page.path}")
             self.new_resources.append(page.path)
             return True
 
         return False
 
     async def test_directory(self, path: str):
-        log_verbose("[¨] Testing directory {0}".format(path))
+        log_verbose(f"[¨] Testing directory {path}")
 
         test_page = Request(path + "does_n0t_exist.htm")
         try:

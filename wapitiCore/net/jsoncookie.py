@@ -100,7 +100,7 @@ class JsonCookie:
 
             domain_key = domain if domain[0] == '.' else '.' + domain
             exploded = domain_key.split(".")
-            parent_domains = [".%s" % (".".join(exploded[x:])) for x in range(1, len(exploded) - 1)]
+            parent_domains = ["." + ".".join(exploded[x:]) for x in range(1, len(exploded) - 1)]
             matching_domains = [d for d in parent_domains if d in self.cookiedict]
 
         if not matching_domains:

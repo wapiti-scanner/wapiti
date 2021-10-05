@@ -45,7 +45,7 @@ class mod_crlf(Attack):
         page = request.path
 
         for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
-            log_verbose("[¨] {0}".format(mutated_request.url))
+            log_verbose(f"[¨] {mutated_request.url}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)

@@ -71,9 +71,7 @@ class ApplicationData:
                     self.applications[application_name][dict_field] = {}
                 elif not isinstance(self.applications[application_name][dict_field], dict):
                     # Raise an exception if the provided field is not a dict
-                    raise ApplicationDataException("{0} is not a dict in {1}".format(
-                        dict_field,
-                        self.applications[application_name]))
+                    raise ApplicationDataException(f"{dict_field} is not a dict in {self.applications[application_name]}")
 
                 # Ensure keys are lowercase
                 dict_items = self.applications[application_name][dict_field].items()
@@ -95,7 +93,7 @@ class ApplicationData:
         for category in self.categories:
             for field in ["name"]:
                 if field not in self.categories[category]:
-                    raise ApplicationDataException("{0} field is not in {1}".format(field, self.categories[category]))
+                    raise ApplicationDataException(f"{field} field is not in {self.categories[category]}")
 
     def normalize_application_regex(self):
         """
@@ -141,8 +139,7 @@ class ApplicationData:
                     regex_params['regex'] = re.compile(expression, re.I)
                 except re.error as err:
                     warnings.warn(
-                        "Caught {0} while compiling regex: {1}".format(err, pattern)
-                    )
+                        f"Caught {err} while compiling regex: {pattern}")
                     # regex that never matches:
                     # http://stackoverflow.com/a/1845097/413622
                     regex_params['regex'] = re.compile(r'(?!x)x')
