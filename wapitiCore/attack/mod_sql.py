@@ -256,7 +256,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool):
         # Due to Mutator limitations we leverage some Flags attributes to put our indicators
         yield (
             fmt_string.format(left_value=value1, right_value=value2, padding_value=padding_value, sep=separator),
-            Flags(section="False", platform="{}_{}".format("p" if parenthesis else "", separator))
+            Flags(section="False", platform=f"{'p' if parenthesis else ''}_{separator}")
         )
 
     for __ in range(2):
@@ -266,7 +266,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool):
         # Last two payloads give positive tests
         yield (
             fmt_string.format(left_value=value1, right_value=value1, padding_value=padding_value, sep=separator),
-            Flags(section="True", platform="{}_{}".format("p" if parenthesis else "", separator))
+            Flags(section="True", platform=f"{'p' if parenthesis else ''}_{separator}")
         )
 
 
@@ -289,7 +289,7 @@ class mod_sql(Attack):
         for dbms, regex_list in DBMS_ERROR_PATTERNS.items():
             for regex in regex_list:
                 if regex.search(data):
-                    return _("SQL Injection") + " (DMBS: {})".format(dbms)
+                    return f"{_('SQL Injection')} (DMBS: {dbms}"
 
         # Can't guess the DBMS but may be useful
         if "Unclosed quotation mark after the character string" in data:
@@ -339,7 +339,7 @@ class mod_sql(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -482,7 +482,7 @@ class mod_sql(Attack):
                 # No need to go further: one of the tests was wrong
                 continue
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)

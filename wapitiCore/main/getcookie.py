@@ -156,7 +156,7 @@ async def getcookie_main(arguments):
             if i == 0:
                 print('')
                 print(_("Choose the form you want to use or enter 'q' to leave :"))
-            print("{0}) {1}".format(i, form))
+            print(f"{i}) {form}")
             forms.append(form)
 
         valid_choice_done = False
@@ -186,7 +186,7 @@ async def getcookie_main(arguments):
                         if not new_value:
                             new_value = value
                     else:
-                        new_value = input("{}: ".format(field))
+                        new_value = input(f"{field}: ")
                     post_params[i] = [field, new_value]
 
                 request = Request(form.url, post_params=post_params)

@@ -134,13 +134,7 @@ class Flags:
         return Flags(type=self.type, section=section, method=self.method, platform=self.platform, dbms=self.dbms)
 
     def __str__(self):
-        return "Flags(type={}, section='{}', method={}, platform='{}', dbms='{}')".format(
-            self.type,
-            self.section,
-            self.method,
-            self.platform,
-            self.dbms
-        )
+        return f"Flags(type={self.type}, section='{self.section}', method={self.method}, platform='{self.platform}', dbms='{self.dbms}')"
 
     def __eq__(self, other):
         if not isinstance(other, Flags):
@@ -437,7 +431,7 @@ class Mutator:
 
         if not get_params and request.method == "GET" and self._qs_inject:
             attack_pattern = Request(
-                "{}?__PAYLOAD__".format(request.path),
+                f"{request.path}?__PAYLOAD__",
                 method=request.method,
                 referer=referer,
                 link_depth=request.link_depth
@@ -469,7 +463,7 @@ class Mutator:
                     )
 
                     evil_req = Request(
-                        "{}?{}".format(request.path, quote(payload)),
+                        f"{request.path}?{quote(payload)}",
                         method=request.method,
                         referer=referer,
                         link_depth=request.link_depth

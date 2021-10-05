@@ -142,7 +142,7 @@ class Takeover:
                                     if data["status"] == "available":
                                         return True
                             except httpx.RequestError:
-                                logging.warning(f"HTTP request to Shopify API failed")
+                                logging.warning("HTTP request to Shopify API failed")
 
                             return False
 

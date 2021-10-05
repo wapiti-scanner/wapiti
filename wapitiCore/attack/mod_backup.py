@@ -102,7 +102,7 @@ class mod_backup(Attack):
 
                 url = urljoin(request.path, payload)
 
-            log_verbose("[¨] {0}".format(url))
+            log_verbose(f"[¨] {url}")
 
             self.attacked_get.append(page)
             evil_req = Request(url)
@@ -114,6 +114,9 @@ class mod_backup(Attack):
                 continue
 
             if response and response.status == 200:
+                # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
+                # uses the string as a token so we cannot use f string
+                # pylint: disable=consider-using-f-string
                 log_red(_("Found backup file {}".format(evil_req.url)))
 
                 await self.add_vuln_low(

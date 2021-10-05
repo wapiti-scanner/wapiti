@@ -453,7 +453,7 @@ class SqlPersister:
                         else:
                             file_params.append([name, (value1, param_row[3])])
                     else:
-                        raise ValueError("Unknown param type {}".format(param_row[0]))
+                        raise ValueError(f"Unknown param type {param_row[0]}")
 
                 http_res = web.Request(
                     row[1],
@@ -672,7 +672,7 @@ class SqlPersister:
                     else:
                         file_params.append([name, (value1, param_row[3])])
                 else:
-                    raise ValueError("Unknown param type {}".format(param_row[0]))
+                    raise ValueError(f"Unknown param type {param_row[0]}")
 
             request = web.Request(
                 row[1],
