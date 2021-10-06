@@ -141,7 +141,7 @@ async def getcookie_main(arguments):
 
     # Open or create the cookie file and delete previous cookies from this server
     json_cookie = jsoncookie.JsonCookie()
-    json_cookie.open(args.cookie)
+    json_cookie.load(args.cookie)
     json_cookie.delete(server)
 
     page = await crawler.async_get(Request(args.url), follow_redirects=True)
@@ -201,7 +201,6 @@ async def getcookie_main(arguments):
 
     await crawler.close()
     json_cookie.dump()
-    json_cookie.close()
 
 
 def getcookie_asyncio_wrapper():
