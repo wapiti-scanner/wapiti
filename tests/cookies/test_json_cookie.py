@@ -15,7 +15,7 @@ from wapitiCore.net.web import Request
 async def test_cookie_dump():
     with NamedTemporaryFile() as json_fd:
         json_cookie = JsonCookie()
-        json_cookie.open(json_fd.name)
+        json_cookie.load(json_fd.name)
         json_cookie.delete("httpbin.org")
 
         url = "http://httpbin.org/welcome/"
@@ -36,7 +36,6 @@ async def test_cookie_dump():
 
         await crawler.close()
         json_cookie.dump()
-        json_cookie.close()
 
         data = json.load(open(json_fd.name))
         assert data == {
@@ -90,13 +89,12 @@ async def test_cookie_load():
         }
         json.dump(data, json_fd)
         json_cookie = JsonCookie()
-        json_cookie.open(json_fd.name)
+        json_cookie.load(json_fd.name)
         jar = json_cookie.cookiejar("httpbin.org")
         for cookie in jar:
             assert (cookie.name == "foo" and cookie.value == "bar" and cookie.path == "/") or\
                    (cookie.name == "dead" and cookie.value == "beef" and cookie.path == "/welcome/")
         json_cookie.dump()
-        json_cookie.close()
 
 
 @pytest.mark.asyncio
@@ -126,9 +124,8 @@ async def test_cookie_delete():
         }
         json.dump(data, json_fd)
         json_cookie = JsonCookie()
-        json_cookie.open(json_fd.name)
+        json_cookie.load(json_fd.name)
         json_cookie.delete("httpbin.org")
         json_cookie.dump()
-        json_cookie.close()
 
         assert open(json_fd.name).read() == '{}'

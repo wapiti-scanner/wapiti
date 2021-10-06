@@ -32,18 +32,19 @@ class JsonCookie:
 
     def __init__(self):
         self.cookiedict = None
-        self.file_data = None
+        self.filename = None
 
     # return a dictionary on success, None on failure
-    def open(self, filename):
+    def load(self, filename):
         if not filename:
             return None
+        self.filename = filename
         try:
-            self.file_data = open(filename, "r+", encoding='utf-8')
-            self.cookiedict = json.load(self.file_data)
+            with open(filename, "r+", encoding='utf-8') as file_data:
+                self.cookiedict = json.load(file_data)
         except (IOError, ValueError):
-            self.file_data = open(filename, "w+", encoding='utf-8')
-            self.cookiedict = {}
+            with open(filename, "w+", encoding='utf-8') as file_data:
+                self.cookiedict = {}
         return self.cookiedict
 
     def addcookies(self, cookies):
@@ -177,12 +178,10 @@ class JsonCookie:
         return False
 
     def dump(self):
-        if not self.file_data:
+        if not self.filename:
             return False
-        self.file_data.seek(0)
-        self.file_data.truncate()
-        json.dump(self.cookiedict, self.file_data, indent=2)
+        with open(self.filename, "r+", encoding='utf-8') as file_data:
+            file_data.seek(0)
+            file_data.truncate()
+            json.dump(self.cookiedict, file_data, indent=2)
         return True
-
-    def close(self):
-        self.file_data.close()

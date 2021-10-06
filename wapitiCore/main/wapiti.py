@@ -493,12 +493,13 @@ class Wapiti:
                             logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
-                            upload_request = Request(
-                                "https://wapiti3.ovh/upload.php",
-                                file_params=[
-                                    ["crash_report", (traceback_file, open(traceback_file, "rb").read(), "text/plain")]
-                                ]
-                            )
+                            with open(traceback_file, "rb", encoding='utf-8') as traceback_byte_fd:
+                                upload_request = Request(
+                                    "https://wapiti3.ovh/upload.php",
+                                    file_params=[
+                                        ["crash_report", (traceback_file, traceback_byte_fd.read(), "text/plain")]
+                                    ]
+                                )
                             page = await self.crawler.async_send(upload_request)
                             logging.success(_("Sending crash report {} ... {}").format(traceback_file, page.content))
                         except RequestError:
@@ -617,9 +618,8 @@ class Wapiti:
         """Load session cookies from a cookie file"""
         if os.path.isfile(cookie):
             json_cookie = jsoncookie.JsonCookie()
-            json_cookie.open(cookie)
+            json_cookie.load(cookie)
             cookiejar = json_cookie.cookiejar(self.server)
-            json_cookie.close()
             self.crawler.session_cookies = cookiejar
 
     def load_browser_cookies(self, browser_name: str):
@@ -1187,12 +1187,11 @@ async def wapiti_main():
                 wap.add_start_url(start_url)
             elif os.path.isfile(start_url):
                 try:
-                    urlfd = codecs.open(start_url, encoding="UTF-8")
-                    for urlline in urlfd:
-                        urlline = urlline.strip()
-                        if urlline.startswith(("http://", "https://")):
-                            wap.add_start_url(urlline)
-                    urlfd.close()
+                    with codecs.open(start_url, encoding="UTF-8") as urlfd:
+                        for urlline in urlfd:
+                            urlline = urlline.strip()
+                            if urlline.startswith(("http://", "https://")):
+                                wap.add_start_url(urlline)
                 except UnicodeDecodeError:
                     logging.error(_("Error: File given with the -s option must be UTF-8 encoded !"))
                     raise InvalidOptionValue("-s", start_url)
