@@ -13,11 +13,11 @@ VERSION = "3.0.5"
 
 
 # Build file lists
-def build_file_list(results, dest, root, src=""):
+def build_file_list(results, dest, files_root, src=""):
     cwd = os.getcwd()
     if src != "":
         os.chdir(src)
-    for root, dirs, files in os.walk(root):
+    for root, dirs, files in os.walk(files_root):
         if ".svn" in dirs:
             dirs.remove(".svn")
         if files:
