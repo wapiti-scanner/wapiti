@@ -213,7 +213,7 @@ class mod_xss(Attack):
 
     def check_payload(self, response, flags, taint):
         config_reader = ConfigParser(interpolation=None)
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE)) as payload_file:
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), encoding='utf-8') as payload_file:
             config_reader.read_file(payload_file)
 
         for section in config_reader.sections():

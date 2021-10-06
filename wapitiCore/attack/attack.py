@@ -558,7 +558,7 @@ class PayloadReader:
         """returns a array"""
         lines = []
         try:
-            with open(filename, errors="ignore") as file:
+            with open(filename, errors="ignore", encoding='utf-8') as file:
                 for line in file:
                     clean_line, flags = self.process_line(line)
                     if clean_line:

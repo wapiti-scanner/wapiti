@@ -94,8 +94,10 @@ class mod_nikto(Attack):
             self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
             with open(
-                    os.path.join(self.user_config_dir, self.NIKTO_DB),
-                    "w", errors="ignore"
+                os.path.join(self.user_config_dir, self.NIKTO_DB),
+                "w",
+                errors="ignore",
+                encoding='utf-8'
             ) as nikto_db_file:
                 writer = csv.writer(nikto_db_file)
                 writer.writerows(self.nikto_db)
@@ -131,7 +133,7 @@ class mod_nikto(Attack):
 
     async def attack(self, request: Request):
         try:
-            with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+            with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
                 reader = csv.reader(nikto_db_file)
                 next(reader)
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
@@ -148,7 +150,7 @@ class mod_nikto(Attack):
         tasks = set()
         pending_count = 0
 
-        with open(os.path.join(self.user_config_dir, self.NIKTO_DB)) as nikto_db_file:
+        with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
             reader = csv.reader(nikto_db_file)
             while True:
                 if pending_count < self.options["tasks"] and not self._stop_event.is_set():

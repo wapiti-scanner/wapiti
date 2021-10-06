@@ -39,10 +39,10 @@ class JsonCookie:
         if not filename:
             return None
         try:
-            self.file_data = open(filename, "r+")
+            self.file_data = open(filename, "r+", encoding='utf-8')
             self.cookiedict = json.load(self.file_data)
         except (IOError, ValueError):
-            self.file_data = open(filename, "w+")
+            self.file_data = open(filename, "w+", encoding='utf-8')
             self.cookiedict = {}
         return self.cookiedict
 

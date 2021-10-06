@@ -26,7 +26,7 @@ class mod_drupal_enum(Attack):
     versions = []
 
     def get_hashes(self):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_HASH), errors="ignore") as hashes:
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_HASH), errors="ignore", encoding='utf-8') as hashes:
             data = json.load(hashes)
             return data
 

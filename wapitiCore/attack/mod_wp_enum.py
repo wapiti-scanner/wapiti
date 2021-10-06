@@ -19,14 +19,22 @@ class mod_wp_enum(Attack):
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
 
     def get_plugin(self):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS), errors="ignore") as plugin_list:
+        with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS),
+            errors="ignore",
+            encoding='utf-8'
+        ) as plugin_list:
             for line in plugin_list:
                 plugin = line.strip()
                 if plugin:
                     yield plugin
 
     def get_theme(self):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE_THEMES), errors="ignore") as theme_list:
+        with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_FILE_THEMES),
+            errors="ignore",
+            encoding='utf-8'
+        ) as theme_list:
             for line in theme_list:
                 theme = line.strip()
                 if theme:

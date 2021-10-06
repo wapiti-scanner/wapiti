@@ -43,7 +43,11 @@ class mod_brute_login_form(Attack):
     do_post = False
 
     def check_success_auth(self, content_response: str):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_SUCCESS), errors="ignore") as success_pattern_file:
+        with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_SUCCESS),
+            errors="ignore",
+            encoding='utf-8'
+        ) as success_pattern_file:
             for success_pattern in success_pattern_file:
                 if success_pattern.strip() in content_response:
                     return True
@@ -51,14 +55,22 @@ class mod_brute_login_form(Attack):
         return False
 
     def get_usernames(self):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE_USER), errors="ignore") as username_file:
+        with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_FILE_USER),
+            errors="ignore",
+            encoding='utf-8'
+        ) as username_file:
             for line in username_file:
                 username = line.strip()
                 if username:
                     yield username
 
     def get_passwords(self):
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), errors="ignore") as password_file:
+        with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_FILE),
+            errors="ignore",
+            encoding='utf-8'
+        ) as password_file:
             for line in password_file:
                 password = line.strip()
                 if password:

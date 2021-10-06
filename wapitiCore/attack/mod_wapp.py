@@ -59,7 +59,7 @@ class mod_wapp(Attack):
             request = Request(self.WAPP_DB_URL)
             response = await self.crawler.async_send(request)
 
-            with open(os.path.join(self.user_config_dir, self.WAPP_DB), 'w') as wapp_db_file:
+            with open(os.path.join(self.user_config_dir, self.WAPP_DB), 'w', encoding='utf-8') as wapp_db_file:
                 json.dump(response.json, wapp_db_file)
 
         except IOError:
@@ -79,7 +79,7 @@ class mod_wapp(Attack):
         request_to_root = Request(request.url)
 
         try:
-            with open(os.path.join(self.user_config_dir, self.WAPP_DB)) as wapp_db_file:
+            with open(os.path.join(self.user_config_dir, self.WAPP_DB), encoding='utf-8') as wapp_db_file:
                 json.load(wapp_db_file)
         except IOError:
             logging.warning(_("Problem with local wapp database."))

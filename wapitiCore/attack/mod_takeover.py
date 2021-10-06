@@ -65,7 +65,7 @@ def get_root_domain(domain: str):
 
 class Takeover:
     def __init__(self):
-        with open(os.path.join(DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore") as fd:
+        with open(os.path.join(DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             data = json.load(fd)
             self.ignore = []
             for ignore_regex in data["ignore"]:
@@ -178,7 +178,7 @@ class Takeover:
 
 
 def load_resolvers() -> List[str]:
-    with open(os.path.join(DATA_DIR, RESOLVERS_FILENAME), errors="ignore") as fd:
+    with open(os.path.join(DATA_DIR, RESOLVERS_FILENAME), errors="ignore", encoding='utf-8') as fd:
         resolvers = [ip.strip() for ip in fd.readlines() if ip.strip()]
         shuffle(resolvers)
         return resolvers
@@ -214,7 +214,7 @@ class mod_takeover(Attack):
         return True
 
     async def feed_queue(self, queue: asyncio.Queue, domain: str):
-        with open(os.path.join(DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore") as fd:
+        with open(os.path.join(DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             for line in fd:
                 sub = line.strip()
 

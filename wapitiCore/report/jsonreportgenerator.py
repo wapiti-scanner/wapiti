@@ -54,7 +54,7 @@ class JSONReportGenerator(ReportGenerator):
             "additionals": self._additionals,
             "infos": self._infos
         }
-        with open(output_path, "w") as json_report_file:
+        with open(output_path, "w", encoding='utf-8') as json_report_file:
             json.dump(report_dict, json_report_file, indent=2)
 
     # Vulnerabilities

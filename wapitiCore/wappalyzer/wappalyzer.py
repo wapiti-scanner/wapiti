@@ -34,10 +34,10 @@ class ApplicationData:
             File providing application and categorie references (Json format).
         """
         if data_filename:
-            with open(data_filename, 'r') as data_file:
+            with open(data_filename, 'r', encoding='utf-8') as data_file:
                 obj = json.load(data_file)
         else:
-            with open(os.path.join(BASE_DIR, "wappalyzer", "data/apps.json"), 'r') as data_file:
+            with open(os.path.join(BASE_DIR, "wappalyzer", "data/apps.json"), 'r', encoding='utf-8') as data_file:
                 obj = json.load(data_file)
 
         self.applications = obj["technologies"]

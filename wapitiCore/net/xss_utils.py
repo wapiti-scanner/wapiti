@@ -224,7 +224,7 @@ def get_context_list(html_code, original_keyword):
 
 def load_payloads_from_ini(filename, external_endpoint):
     config_reader = ConfigParser(interpolation=None)
-    config_reader.read_file(open(filename))
+    config_reader.read_file(open(filename, encoding='utf-8'))
     payloads = []
     external_endpoint = external_endpoint if external_endpoint.endswith('/') else external_endpoint + "/"
     parts = urlparse(external_endpoint)
