@@ -469,7 +469,16 @@ class Wapiti:
                         await attack_module.attack(original_request)
 
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
+<<<<<<< HEAD
                         logging.info(_("Max attack time was reached for module {0}, stopping.".format(attack_module.name)))
+=======
+                        # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
+                        # uses the string as a token so we cannot use f string
+                        # pylint: disable=consider-using-f-string
+                        logging.info(
+                            _("Max attack time was reached for module {0}, stopping.".format(attack_module.name))
+                        )
+>>>>>>> e9000d4... Fix line-too-long linting errors
                         break
                 except RequestError:
                     # Hmmm it should be caught inside the module
@@ -510,7 +519,9 @@ class Wapiti:
                 await attack_module.finish()
 
             if attack_module.network_errors:
-                logging.warning(_("{} requests were skipped due to network issues").format(attack_module.network_errors))
+                logging.warning(
+                    _("{} requests were skipped due to network issues").format(attack_module.network_errors)
+                )
 
             if answer == "r":
                 # Do not process remaining modules
@@ -1350,7 +1361,9 @@ async def wapiti_main():
         loop.remove_signal_handler(signal.SIGINT)
 
     except OperationalError:
-        logging.error(_("[!] Can't store information in persister. SQLite database must have been locked by another process"))
+        logging.error(
+            _("[!] Can't store information in persister. SQLite database must have been locked by another process")
+        )
         logging.error(_("[!] You should unlock and launch Wapiti again."))
     except SystemExit:
         pass
