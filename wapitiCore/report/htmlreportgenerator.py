@@ -66,10 +66,11 @@ class HTMLReportGenerator(JSONReportGenerator):
             output_encoding="utf-8"
         )
 
-        filename = "{}_{}.html".format(
-            urlparse(self._infos["target"]).netloc.replace(":", "_"),
-            time.strftime("%m%d%Y_%H%M", self._date)
-        )
+        report_target_name = urlparse(self._infos['target']).netloc.replace(':', '_')
+        report_time = time.strftime('%m%d%Y_%H%M', self._date)
+
+        filename = f"{report_target_name}_{report_time}.html"
+
         self._final__path = os.path.join(output_path, filename)
 
         with open(self._final__path, "w", encoding='utf-8') as html_report_file:

@@ -65,10 +65,10 @@ def get_special_attributes(node):
             specials.add(attribute)
 
     if "type" in node.attrs:
-        specials.add("type={}".format(node.attrs["type"].lower()))
+        specials.add(f"type={node.attrs['type'].lower()}")
     if "rel" in node.attrs:
         # BeautifulSoup returns a list for rel attribute.
-        specials.add("rel={}".format(node.attrs["rel"][0].lower()))
+        specials.add(f"rel={node.attrs['rel'][0].lower()}")
     return specials
 
 
@@ -276,7 +276,7 @@ def meet_requirements(payload_requirements, special_attributes):
                 expected_attribute = requirement
                 expected_value = "z"  # Can be anything
 
-            payload_prefix += "[ATTR_SEP]{}=[VALUE_SEP]{}".format(expected_attribute, expected_value)
+            payload_prefix += f"[ATTR_SEP]{expected_attribute}=[VALUE_SEP]{expected_value}"
         elif "!" in requirement:
             if requirement.replace("!", "") in special_attributes:
                 raise RuntimeError("Requirement cannot be met")
@@ -410,7 +410,7 @@ def apply_text_context(context, payloads, code):
         if context["non_exec_parent"] != "":
             prefix = "</" + context["non_exec_parent"] + ">"
         else:
-            prefix = "</{0}>".format(context["parent"])
+            prefix = f"</{context['parent']}>"
 
     for payload_infos in payloads:
         if not payload_infos["close_tag"]:
@@ -433,9 +433,9 @@ def apply_comment_context(context, payloads, code):
         # we can't execute javascript under title or textarea tags and it's too hard to be sure our payload
         # will be executed if we have partial control over a script tag content, so let's escape them
         if context["non_exec_parent"] != "":
-            prefix += "</" + context["non_exec_parent"] + ">"
+            prefix += f"</{context['non_exec_parent']}>"
         else:
-            prefix += "</{0}>".format(context["parent"])
+            prefix += f"</{context['parent']}>"
 
     for payload_infos in payloads:
         if not payload_infos["close_tag"]:

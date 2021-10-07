@@ -186,7 +186,7 @@ class AsyncCrawler:
         protocol = url_parts.scheme.lower()
 
         if protocol not in ("http", "https", "socks"):
-            raise ValueError("Unknown proxy type: {}".format(protocol))
+            raise ValueError(f"Unknown proxy type: {protocol}")
 
         if protocol == "socks":
             self._transport = AsyncProxyTransport.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
@@ -240,7 +240,7 @@ class AsyncCrawler:
     @scope.setter
     def scope(self, value: int):
         if value not in Scope:
-            raise ValueError("Invalid scope value {}".format(value))
+            raise ValueError(f"Invalid scope value {value}")
         self._scope = value
 
     def is_in_scope(self, resource):
@@ -756,7 +756,7 @@ class Explorer:
         async with self._sem:
             self._processed_requests.append(request)  # thread safe
 
-            log_verbose("[+] {0}".format(request))
+            log_verbose(f"[+] {request}")
 
             dir_name = request.dir_name
             # Currently not exploited. Would be interesting though but then it should be implemented separately
@@ -779,7 +779,7 @@ class Explorer:
             try:
                 page = await self._crawler.async_send(request)
             except (TypeError, UnicodeDecodeError) as exception:
-                logging.debug("{} with url {}".format(exception, resource_url))  # debug
+                logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, []
             # except SSLError:
             #     print(_("[!] SSL/TLS error occurred with URL"), resource_url)

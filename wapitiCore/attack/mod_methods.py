@@ -52,7 +52,7 @@ class mod_methods(Attack):
             link_depth=request.link_depth
         )
 
-        log_verbose("[+] {}".format(option_request))
+        log_verbose(f"[+] {option_request}")
 
         try:
             response = await self.crawler.async_send(option_request)

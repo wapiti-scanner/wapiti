@@ -54,7 +54,7 @@ class LameJs:
                 self.read_node(sub_node)
         elif node.type == "VAR":
             logging.debug("# VAR IN")
-            logging.debug("# VAR OUT {}".format(self.read_node(node[0])))
+            logging.debug("# VAR OUT %s", self.read_node(node[0]))
         elif node.type == "IDENTIFIER":
             logging.debug("# IDENTIFIER")
             if hasattr(node, 'initializer'):
@@ -100,7 +100,7 @@ class LameJs:
                 func_name = node.name
             except AttributeError:
                 func_name = "anonymous"
-            logging.debug("In function {0}".format(func_name))
+            logging.debug("In function %s", func_name)
             self.read_node(node.body)
         elif node.type == "SEMICOLON":
             logging.debug("# SEMICOLON")
@@ -112,8 +112,8 @@ class LameJs:
             if not func_name:
                 func_name = "anonymous"
             params = self.read_node(node[1])
-            logging.debug("func_name = {0}".format(func_name))
-            logging.debug("params = {0}".format(params))
+            logging.debug("func_name = %s", func_name)
+            logging.debug("params = %s", params)
             if func_name == "window.open":
                 if params and params[0]:
                     self.links.append(params[0])
@@ -129,7 +129,7 @@ class LameJs:
             sub_node_list = []
             for sub_node in node:
                 sub_node_list.append(self.read_node(sub_node))
-            logging.debug("list = {0}".format(sub_node_list))
+            logging.debug("list = %s", sub_node_list)
             return sub_node_list
         elif node.type == "ASSIGN":
             logging.debug("# ASSIGN")
@@ -137,8 +137,8 @@ class LameJs:
             if node[1].type != "DOT":
                 # Seems too complicated to process objects attributes...
                 right_value = self.read_node(node[1])
-                logging.debug("left_value = {0}".format(left_value))
-                logging.debug("right_value = {0}".format(right_value))
+                logging.debug("left_value = %s", left_value)
+                logging.debug("right_value = %s", right_value)
                 if right_value and (
                         left_value.endswith(".href") or
                         left_value.endswith(".action") or
@@ -157,8 +157,8 @@ class LameJs:
             logging.debug("# PROPERTY_INIT")
             attrib_name = self.read_node(node[0])
             attrib_value = self.read_node(node[1])
-            logging.debug("attrib_name = {0}".format(attrib_name))
-            logging.debug("attrib_value = {0}".format(attrib_value))
+            logging.debug("attrib_name = %s", attrib_name)
+            logging.debug("attrib_value = %s", attrib_value)
             return attrib_name
         elif node.type == "OBJECT_INIT":
             logging.debug("# OBJECT_INIT")
@@ -172,7 +172,7 @@ class LameJs:
             logging.debug("# THIS")
             return "this"
         else:
-            logging.debug("? {}".format(node.type))
+            logging.debug("? %s", node.type)
 
 
 if __name__ == "__main__":

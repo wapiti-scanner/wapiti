@@ -34,7 +34,7 @@ def center(row):
 
 
 def title(row):
-    return "{0}\n{1}\n".format(row, "-" * len(row.strip()))
+    return f"{row}\n{'-' * len(row.strip())}\n"
 
 
 separator = ("*" * NB_COLUMNS) + "\n"
@@ -60,7 +60,7 @@ class TXTReportGenerator(ReportGenerator):
         with codecs.open(output_path, mode="w", encoding="UTF-8") as txt_report_file:
             try:
                 txt_report_file.write(separator)
-                txt_report_file.write(center("{0} - wapiti.sourceforge.io\n".format(self._infos["version"])))
+                txt_report_file.write(center(f"{self._infos['version']} - wapiti.sourceforge.io\n"))
                 txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
                 txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
                 if "scope" in self._infos:

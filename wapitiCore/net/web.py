@@ -118,7 +118,7 @@ def parse_qsl(query_string, strict_parsing=False, encoding='utf-8', errors='repl
         name_value = pair.split('=', 1)
         if len(name_value) != 2:
             if strict_parsing:
-                raise ValueError("bad query field: %r" % (pair,))
+                raise ValueError(f"bad query field: {pair!r}")
             # Handle case of a control-name with no equal sign
             name_value.append(None)
 
@@ -348,82 +348,70 @@ class Request:
 
     def __repr__(self):
         if self._get_params:
-            buff = "{0} {1} ({2})".format(self._method, self.url, self._link_depth)
+            buff = f"{self._method} {self.url} ({self._link_depth})"
         else:
-            buff = "{0} {1} ({2})".format(self._method, self._resource_path, self._link_depth)
+            buff = f"{self._method} {self._resource_path} ({self._link_depth})"
 
         if self._post_params:
-            buff += "\n\tdata: {}".format(self.encoded_data.replace("\n", "\n\t"))
+            buff += "\n\tdata: " + self.encoded_data.replace("\n", "\n\t")
         if self._file_params:
-            buff += "\n\tfiles: {}".format(self.encoded_files)
+            buff += "\n\tfiles: " + self.encoded_files
 
         return buff
 
     def http_repr(self, left_margin="    "):
         rel_url = self.url.split('/', 3)[3]
-        http_string = "{3}{0} /{1} HTTP/1.1\n{3}Host: {2}\n".format(
-            self._method,
-            rel_url,
-            self._hostname,
-            left_margin
-        )
+        http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n{left_margin}Host: {self._hostname}\n"
 
         if self._referer:
-            http_string += "{}Referer: {}\n".format(left_margin, self._referer)
+            http_string += f"{left_margin}Referer: {self._referer}\n"
 
         if self._file_params:
             boundary = "------------------------boundarystring"
-            http_string += "{}Content-Type: multipart/form-data; boundary={}\n\n".format(left_margin, boundary)
+            http_string += f"{left_margin}Content-Type: multipart/form-data; boundary={boundary}\n\n"
             for field_name, field_value in self._post_params:
                 http_string += (
-                    "{3}{0}\n{3}Content-Disposition: form-data; "
-                    "name=\"{1}\"\n\n{3}{2}\n"
-                ).format(boundary, field_name, field_value, left_margin)
+                    f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
+                    f"name=\"{field_name}\"\n\n{left_margin}{field_value}\n"
+                )
             for field_name, field_value in self._file_params:
                 http_string += (
-                    "{3}{0}\n{3}Content-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\n\n"
-                    "{3}{4}\n"
-                ).format(
-                    boundary,
-                    field_name,
-                    field_value[0],
-                    left_margin,
-                    field_value[1].decode(errors="replace").replace("\n", "\n" + left_margin).strip()
+                    f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
+                    f"name=\"{field_name}\"; filename=\"{field_value[0]}\"\n\n{left_margin}" +
+                    (field_value[1].decode(errors="replace").replace("\n", "\n" + left_margin).strip()) +
+                    "\n"
                 )
-            http_string += "{0}{1}--\n".format(left_margin, boundary)
+            http_string += f"{left_margin}{boundary}--\n"
         elif self._post_params:
             if "urlencoded" in self.enctype:
-                http_string += "{}Content-Type: application/x-www-form-urlencoded\n".format(left_margin)
-                http_string += "\n{}{}".format(left_margin, self.encoded_data)
+                http_string += f"{left_margin}Content-Type: application/x-www-form-urlencoded\n"
+                http_string += f"\n{left_margin}{self.encoded_data}"
             else:
-                http_string += "{}Content-Type: {}\n".format(left_margin, self.enctype)
-                http_string += "\n{}{}".format(
-                    left_margin,
-                    self.encoded_data.replace("\n", "\n" + left_margin).strip()
-                )
+                http_string += f"{left_margin}Content-Type: {self.enctype}\n"
+                http_string += "\n" + left_margin + self.encoded_data.replace("\n", "\n" + left_margin).strip()
 
         return http_string.rstrip()
 
     @property
     def curl_repr(self):
-        curl_string = "curl \"{0}\"".format(shell_escape(self.url))
+        curl_string = f"curl \"{shell_escape(self.url)}\""
         if self._referer:
-            curl_string += " -e \"{0}\"".format(shell_escape(self._referer))
+            curl_string += f" -e \"{shell_escape(self._referer)}\""
 
         if self._file_params:
             # POST with multipart
             for field_name, field_value in self._post_params:
-                curl_string += " -F \"{0}\"".format(shell_escape("{0}={1}".format(field_name, field_value)))
+                curl_string += f" -F \"{shell_escape(f'{field_name}={field_value}')}\""
             for field_name, field_value in self._file_params:
-                curl_upload_kv = "{0}=@your_local_file;filename={1}".format(field_name, field_value[0])
-                curl_string += " -F \"{0}\"".format(shell_escape(curl_upload_kv))
+                curl_upload_kv = f"{field_name}=@your_local_file;filename={field_value[0]}"
+                curl_string += f" -F \"{shell_escape(curl_upload_kv)}\""
         elif self._post_params:
             # POST either urlencoded
             if "urlencoded" in self._enctype:
-                curl_string += " -d \"{0}\"".format(shell_escape(self.encoded_data))
+                curl_string += f" -d \"{shell_escape(self.encoded_data)}\""
             else:
                 # Or raw blob
-                curl_string += " -H \"Content-Type: {}\" -d @payload_file".format(self._enctype)
+                curl_string += f" -H \"Content-Type: {self._enctype}\" -d @payload_file"
 
         return curl_string
 
@@ -451,10 +439,7 @@ class Request:
     def url(self) -> str:
         if not self._cached_url:
             if self._get_params:
-                self._cached_url = "{0}?{1}".format(
-                    self._resource_path,
-                    self._encode_params(self._get_params)
-                )
+                self._cached_url = f"{self._resource_path}?{self._encode_params(self._get_params)}"
             else:
                 self._cached_url = self._resource_path
         return self._cached_url
@@ -626,11 +611,11 @@ class Request:
 
     @property
     def encoded_keys(self):
-        return "{}|{}|{}".format(self.encoded_get_keys, self.encoded_post_keys, self.encoded_file_keys)
+        return f"{self.encoded_get_keys}|{self.encoded_post_keys}|{self.encoded_file_keys}"
 
     @property
     def pattern(self):
-        return "{}?{}".format(self.path, self.encoded_keys)
+        return f"{self.path}?{self.encoded_keys}"
 
     @property
     def hash_params(self):

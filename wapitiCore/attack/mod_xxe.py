@@ -139,7 +139,7 @@ class mod_xxe(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -230,7 +230,7 @@ class mod_xxe(Attack):
             payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")  # raw body
             mutated_request = Request(original_request.url, method="POST", enctype="text/xml", post_params=payload)
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -274,7 +274,7 @@ class mod_xxe(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -305,7 +305,7 @@ class mod_xxe(Attack):
                     self.vulnerables.add(original_request.path_id)
 
     async def finish(self):
-        endpoint_url = "{}get_xxe.php?session_id={}".format(self.internal_endpoint, self._session_id)
+        endpoint_url = f"{self.internal_endpoint}get_xxe.php?session_id={self._session_id}"
         logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
@@ -375,7 +375,7 @@ class mod_xxe(Attack):
                     )
 
                     for payload, _flags in self.payloads:
-                        if "{}.dtd".format(payload_name) in payload:
+                        if f"{payload_name}.dtd" in payload:
                             payload = payload.replace("[PATH_ID]", str(original_request.path_id))
                             payload = payload.replace("[PARAM_AS_HEX]", "72617720626f6479")
                             break
@@ -389,7 +389,7 @@ class mod_xxe(Attack):
                         )
                     elif parameter == "QUERY_STRING":
                         mutated_request = Request(
-                            "{}?{}".format(original_request.path, quote(payload)),
+                            f"{original_request.path}?{quote(payload)}",
                             method="GET"
                         )
                     elif parameter in original_request.get_keys or parameter in original_request.post_keys:

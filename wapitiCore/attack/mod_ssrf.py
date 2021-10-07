@@ -120,7 +120,7 @@ class SsrfMutator(Mutator):
 
         if not get_params and request.method == "GET" and self._qs_inject:
             attack_pattern = Request(
-                "{}?__PAYLOAD__".format(request.path),
+                f"{request.path}?__PAYLOAD__",
                 method=request.method,
                 referer=referer,
                 link_depth=request.link_depth
@@ -137,7 +137,7 @@ class SsrfMutator(Mutator):
                 )
 
                 evil_req = Request(
-                    "{}?{}".format(request.path, quote(payload)),
+                    f"{request.path}?{quote(payload)}",
                     method=request.method,
                     referer=referer,
                     link_depth=request.link_depth
@@ -176,7 +176,7 @@ class mod_ssrf(Attack):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
         for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
-            log_verbose("[¨] {0}".format(mutated_request))
+            log_verbose(f"[¨] {mutated_request}")
 
             try:
                 await self.crawler.async_send(mutated_request)
@@ -185,7 +185,7 @@ class mod_ssrf(Attack):
                 continue
 
     async def finish(self):
-        endpoint_url = "{}get_ssrf.php?session_id={}".format(self.internal_endpoint, self._session_id)
+        endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
         logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté

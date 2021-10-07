@@ -219,7 +219,7 @@ class mod_permanentxss(Attack):
         )
 
         for evil_request, xss_param, _xss_payload, xss_flags in attack_mutator.mutate(injection_request):
-            log_verbose("[¨] {0}".format(evil_request))
+            log_verbose(f"[¨] {evil_request}")
 
             try:
                 await self.crawler.async_send(evil_request)

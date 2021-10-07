@@ -219,9 +219,9 @@ class mod_nikto(Attack):
             evil_request = Request(url, post_params=post_data, method=method)
 
         if method == "GET":
-            log_verbose("[¨] {0}".format(evil_request.url))
+            log_verbose(f"[¨] {evil_request.url}")
         else:
-            log_verbose("[¨] {0}".format(evil_request.http_repr()))
+            log_verbose(f"[¨] {evil_request.http_repr()}")
 
         try:
             response = await self.crawler.async_send(evil_request)
@@ -330,7 +330,7 @@ class mod_nikto(Attack):
             info = vuln_desc
             if refs:
                 log_red(_("References:"))
-                log_red("  {0}".format("\n  ".join(refs)))
+                log_red("  " + "\n  ".join(refs))
 
                 info += "\n" + _("References:") + "\n"
                 info += "\n".join(refs)

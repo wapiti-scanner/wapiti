@@ -145,13 +145,12 @@ class Wapiti:
         if config_dir:
             SqlPersister.CONFIG_DIR = config_dir
 
+        server_url = self.server.replace(':', '_')
+        hashed_root_url = sha256(root_url.encode(errors='replace')).hexdigest()[:8]
+
         self._history_file = os.path.join(
             SqlPersister.CRAWLER_DATA_DIR,
-            "{}_{}_{}.db".format(
-                self.server.replace(':', '_'),
-                self.target_scope,
-                sha256(root_url.encode(errors="replace")).hexdigest()[:8]
-            )
+            f"{server_url}_{self.target_scope}_{hashed_root_url}.db"
         )
 
         if not os.path.isdir(SqlPersister.CRAWLER_DATA_DIR):
@@ -233,7 +232,7 @@ class Wapiti:
 
         logging.info(_("[*] Loading modules:"))
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
-        logging.info("\t {0}".format(", ".join(modules_list)))
+        logging.info(f"\t {', '.join(modules_list)}")
         for mod_name in attack.modules:
             try:
                 mod = import_module("wapitiCore.attack." + mod_name)
@@ -414,8 +413,8 @@ class Wapiti:
                                     (attack.do_get or attack.do_post)]
                 if attack_module.require != attack_name_list:
                     logging.error(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
-                    logging.error("  {0}".format(",".join([attack for attack in attack_module.require
-                                                   if attack not in attack_name_list])))
+                    logging.error("  %s", ",".join([attack for attack in attack_module.require
+                                                   if attack not in attack_name_list]))
                     continue
 
                 attack_module.load_require(
@@ -464,11 +463,14 @@ class Wapiti:
 
                 try:
                     if await attack_module.must_attack(original_request):
-                        logging.info("[+] {}".format(original_request))
+                        logging.info(f"[+] {original_request}")
 
                         await attack_module.attack(original_request)
 
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
+                        # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
+                        # uses the string as a token so we cannot use f string
+                        # pylint: disable=consider-using-f-string
                         logging.info(
                             _("Max attack time was reached for module {0}, stopping.".format(attack_module.name))
                         )
@@ -486,9 +488,9 @@ class Wapiti:
                         traceback_file = str(uuid1())
                         with open(traceback_file, "w", encoding='utf-8') as traceback_fd:
                             print_tb(exception_traceback, file=traceback_fd)
-                            print("{}: {}".format(exception.__class__.__name__, exception), file=traceback_fd)
-                            print("Occurred in {} on {}".format(attack_module.name, self.target_url), file=traceback_fd)
-                            logging.info("{}. httpx {}. OS {}".format(WAPITI_VERSION, httpx.__version__, sys.platform))
+                            print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
+                            print(f"Occurred in {attack_module.name} on {self.target_url}", file=traceback_fd)
+                            logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
                             upload_request = Request(
@@ -535,10 +537,7 @@ class Wapiti:
             if self.report_generator_type == "html":
                 self.output_file = self.COPY_REPORT_DIR
             else:
-                filename = "{}_{}".format(
-                    self.server.replace(":", "_"),
-                    strftime("%m%d%Y_%H%M", self.report_gen.scan_date)
-                )
+                filename = f"{self.server.replace(':', '_')}_{strftime('%m%d%Y_%H%M', self.report_gen.scan_date)}"
                 self.output_file = filename + "." + self.report_generator_type
 
         auth_dict = None
@@ -1157,7 +1156,7 @@ async def wapiti_main():
         for module_name in modules_list:
             mod = import_module("wapitiCore.attack.mod_" + module_name)
             is_common = " (used by default)" if module_name in attack.commons else ""
-            print("\t{}{}".format(module_name, is_common))
+            print(f"\t{module_name}{is_common}")
             print("\t\t" + getdoc(getattr(mod, "mod_" + module_name)))
             print('')
         sys.exit()
@@ -1343,6 +1342,9 @@ async def wapiti_main():
 
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)
+            # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
+            # uses the string as a token so we cannot use f string
+            # pylint: disable=consider-using-f-string
             logging.info(_("[*] {0} URLs and forms having more than {1} parameters were removed.".format(
                 count,
                 args.max_parameters

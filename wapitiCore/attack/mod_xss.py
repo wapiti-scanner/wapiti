@@ -118,7 +118,7 @@ class mod_xss(Attack):
         )
 
         for evil_request, xss_param, xss_payload, xss_flags in attack_mutator.mutate(original_request):
-            log_verbose("[¨] {0}".format(evil_request))
+            log_verbose(f"[¨] {evil_request}")
 
             try:
                 response = await self.crawler.async_send(evil_request)
