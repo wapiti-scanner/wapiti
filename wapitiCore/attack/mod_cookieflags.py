@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from http.cookiejar import Cookie
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
@@ -31,12 +32,12 @@ class mod_cookieflags(Attack):
     finished = False
 
     @staticmethod
-    def check_secure_flag(cookie: object):
+    def check_secure_flag(cookie: Cookie):
         return cookie.secure
 
     @staticmethod
-    def check_httponly_flag(cookie: object):
-        return "HttpOnly" in cookie._rest or "httponly" in cookie._rest
+    def check_httponly_flag(cookie: Cookie):
+        return cookie.has_nonstandard_attr("HttpOnly") or cookie.has_nonstandard_attr("httponly")
 
     async def must_attack(self, request: Request):
         if self.finished:
