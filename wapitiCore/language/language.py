@@ -62,7 +62,6 @@ LANG_PATH = os.path.join(BASE_DIR, "data", "language")
 lan = gettext.translation(
     "wapiti",
     LANG_PATH,
-    languages=[lang, "en"],
-    codeset="UTF-8"
+    languages=[lang, "en"]
 )
 _ = lan.gettext
