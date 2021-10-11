@@ -1192,9 +1192,9 @@ async def wapiti_main():
                             urlline = urlline.strip()
                             if urlline.startswith(("http://", "https://")):
                                 wap.add_start_url(urlline)
-                except UnicodeDecodeError:
+                except UnicodeDecodeError as exception:
                     logging.error(_("Error: File given with the -s option must be UTF-8 encoded !"))
-                    raise InvalidOptionValue("-s", start_url)
+                    raise InvalidOptionValue("-s", start_url) from exception
             else:
                 raise InvalidOptionValue('-s', start_url)
 
