@@ -393,7 +393,7 @@ class Page:
             query_string = ""
 
         if parts.scheme:
-            if parts.scheme == "http" or parts.scheme == "https":
+            if parts.scheme in ('http', 'https'):
                 if parts.netloc and parts.netloc != "http:":  # malformed url
                     netloc = parts.netloc
                     try:
