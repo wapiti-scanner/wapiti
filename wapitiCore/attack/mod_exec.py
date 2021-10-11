@@ -95,7 +95,7 @@ class mod_exec(Attack):
                 # If parameter is vulnerable, just skip till next parameter
                 continue
 
-            if flags.type == PayloadType.time and request.path_id in self.false_positive_timeouts:
+            if flags.payload_type == PayloadType.time and request.path_id in self.false_positive_timeouts:
                 # If the original request is known to gives timeout and payload is time-based, just skip
                 # and move to next payload
                 continue
@@ -105,7 +105,7 @@ class mod_exec(Attack):
             try:
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
-                if flags.type == PayloadType.time:
+                if flags.payload_type == PayloadType.time:
                     if await self.does_timeout(request):
                         self.network_errors += 1
                         self.false_positive_timeouts.add(request.path_id)

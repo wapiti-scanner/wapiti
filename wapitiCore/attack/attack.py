@@ -120,28 +120,53 @@ def random_string_with_flags():
 
 
 class Flags:
-    def __init__(self, type=PayloadType.pattern, section="", method=PayloadType.get, platform="all", dbms="all"):
-        self.type = type
+    def __init__(
+        self,
+        payload_type=PayloadType.pattern,
+        section="",
+        method=PayloadType.get,
+        platform="all",
+        dbms="all"
+    ):
+        self.payload_type = payload_type
         self.section = section
         self.method = method
         self.platform = platform
         self.dbms = dbms
 
     def with_method(self, method):
-        return Flags(type=self.type, section=self.section, method=method, platform=self.platform, dbms=self.dbms)
+        return Flags(
+            payload_type=self.payload_type,
+            section=self.section,
+            method=method,
+            platform=self.platform,
+            dbms=self.dbms
+        )
 
     def with_section(self, section):
-        return Flags(type=self.type, section=section, method=self.method, platform=self.platform, dbms=self.dbms)
+        return Flags(
+            payload_type=self.payload_type,
+            section=section,
+            method=self.method,
+            platform=self.platform,
+            dbms=self.dbms
+        )
 
     def __str__(self):
-        return f"Flags(type={self.type}, section='{self.section}', method={self.method}, platform='{self.platform}', dbms='{self.dbms}')"
+        return (
+            f"Flags(payload_type={self.payload_type}, "
+            f"section='{self.section}', "
+            f"method={self.method}, "
+            f"platform='{self.platform}', "
+            f"dbms='{self.dbms}')"
+        )
 
     def __eq__(self, other):
         if not isinstance(other, Flags):
             raise ValueError("Can't compare a Flags object to another kind of object")
 
         return (
-            self.type == other.type and
+            self.payload_type == other.payload_type and
             self.section == other.section and
             self.method == other.method and
             self.platform == other.platform and
@@ -576,7 +601,7 @@ class PayloadReader:
 
         clean_line = clean_line.replace("\\0", "\0")
 
-        return clean_line, Flags(type=flag_type)
+        return clean_line, Flags(payload_type=flag_type)
 
 
 if __name__ == "__main__":
