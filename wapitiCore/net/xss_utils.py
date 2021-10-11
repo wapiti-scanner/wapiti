@@ -318,7 +318,7 @@ def apply_attrval_context(context, payloads, code):
                     except RuntimeError:
                         continue
 
-                result.append((js_code, Flags(type=PayloadType.xss_non_closing_tag, section=payload_infos["name"])))
+                result.append((js_code, Flags(payload_type=PayloadType.xss_non_closing_tag, section=payload_infos["name"])))
 
         else:
             js_code = context["separator"]
@@ -341,7 +341,7 @@ def apply_attrval_context(context, payloads, code):
                 js_code += "</" + context["non_exec_parent"] + ">"
 
             js_code += payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
 
     return result
 
@@ -362,7 +362,7 @@ def apply_attrname_context(context, payloads, code):
                     js_code += "</" + context["non_exec_parent"] + ">"
                 js_code += payload_infos["payload"].replace("__XSS__", code)
 
-                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
 
     return result
 
@@ -384,7 +384,7 @@ def apply_tagname_context(context, payloads, code):
                 js_code += payload_infos["payload"].replace("__XSS__", code)
 
                 js_code = js_code[1:]  # use independent payloads, just remove the first character (<)
-                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
     else:
         for payload_infos in payloads:
             if not payload_infos["close_tag"]:
@@ -395,7 +395,7 @@ def apply_tagname_context(context, payloads, code):
                 if context["non_exec_parent"]:
                     js_code += "</" + context["non_exec_parent"] + ">"
                 js_code += payload_infos["payload"].replace("__XSS__", code)
-                result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
 
     return result
 
@@ -420,7 +420,7 @@ def apply_text_context(context, payloads, code):
             pass
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
 
     return result
 
@@ -445,7 +445,7 @@ def apply_comment_context(context, payloads, code):
             pass
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
 
     return result
 

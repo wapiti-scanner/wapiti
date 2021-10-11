@@ -159,9 +159,9 @@ class Wapiti:
         self.persister = SqlPersister(self._history_file)
 
     def refresh_logging(self):
-        format = "{message}"
+        message_format = "{message}"
         if self.color_enabled:
-            format = "<lvl>" + format + "</lvl>"
+            message_format = "<lvl>" + message_format + "</lvl>"
 
         verbosity_levels = {
             0: "BLUE",
@@ -173,7 +173,7 @@ class Wapiti:
             {
                 "sink": sys.stdout,
                 "colorize": self.color_enabled,
-                "format": format,
+                "format": message_format,
                 "level": verbosity_levels[self.verbose]
             }
         ]
