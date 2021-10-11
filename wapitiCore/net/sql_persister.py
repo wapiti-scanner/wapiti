@@ -404,6 +404,7 @@ class SqlPersister:
 
         if crawled:
             # Bellow is sqlalchemy syntax, do not replace the comparison
+            # pylint: disable=singleton-comparison
             conditions.append(self.paths.c.headers != None)
 
         async with self._engine.begin() as conn:
@@ -510,6 +511,7 @@ class SqlPersister:
     async def has_scan_finished(self) -> bool:
         # If we have a path without headers set then the scan is not finished
         # Bellow is sqlalchemy syntax, do not replace the comparison
+        # pylint: disable=singleton-comparison
         statement = select(self.paths.c.path_id).where(self.paths.c.headers == None).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
@@ -719,6 +721,7 @@ class SqlPersister:
             await conn.execute(self.attack_logs.delete())  # which module was launched on which URL
             await conn.execute(self.payloads.delete())  # information on vulnerabilities and anomalies
             # Bellow is sqlalchemy syntax, do not replace the comparison
+            # pylint: disable=singleton-comparison
             await conn.execute(self.paths.delete().where(self.paths.c.evil == True))  # Evil requests
             # Remove params tied to deleted requests
             await conn.execute(self.params.delete().where(~self.params.c.path_id.in_(select(self.paths.c.path_id))))
