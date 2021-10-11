@@ -27,7 +27,7 @@ from wapitiCore.attack.attack import Attack, PayloadType, Mutator, random_string
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xss import NAME
 from wapitiCore.net.web import Request
-from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, find_non_exec_parent
+from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 
 
@@ -104,7 +104,15 @@ class mod_permanentxss(Attack):
                     # Yes, it means XSS payloads were injected, not just tainted code.
                     payload, flags = self.successful_xss[taint]
 
-                    if self.check_payload(response, flags, taint):
+                    if check_payload(
+                        self.DATA_DIR,
+                        self.PAYLOADS_FILE,
+                        self.external_endpoint,
+                        self.proto_endpoint,
+                        response,
+                        flags,
+                        taint
+                    ):
                         # If we can find the payload again, this is in fact a stored XSS
                         get_params = input_request.get_params
                         post_params = input_request.post_params
@@ -260,7 +268,15 @@ class mod_permanentxss(Attack):
                 if (
                         response.status not in (301, 302, 303) and
                         valid_xss_content_type(evil_request) and
-                        self.check_payload(response, xss_flags, taint)
+                        check_payload(
+                            self.DATA_DIR,
+                            self.PAYLOADS_FILE,
+                            self.external_endpoint,
+                            self.proto_endpoint,
+                            response,
+                            xss_flags,
+                            taint
+                        )
                 ):
 
                     if page == output_request.path:
@@ -331,63 +347,3 @@ class mod_permanentxss(Attack):
                     log_orange(evil_request.http_repr())
                     log_orange("---")
                     saw_internal_error = True
-
-    def check_payload(self, response, flags, taint):
-        config_reader = ConfigParser(interpolation=None)
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), encoding='utf-8') as payload_file:
-            config_reader.read_file(payload_file)
-
-        for section in config_reader.sections():
-            if section == flags.section:
-                expected_value = config_reader[section]["value"].replace('[EXTERNAL_ENDPOINT]', self.external_endpoint)
-                expected_value = expected_value.replace("[PROTO_ENDPOINT]", self.proto_endpoint)
-                expected_value = expected_value.replace("__XSS__", taint)
-                tag_names = config_reader[section]["tag"].split(",")
-                attribute = config_reader[section]["attribute"]
-                case_sensitive = config_reader[section].getboolean("case_sensitive")
-                match_type = config_reader[section].get("match_type", "exact")
-
-                attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
-
-                for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
-                    non_exec_parent = find_non_exec_parent(tag)
-
-                    if non_exec_parent and not (tag.name == "frame" and non_exec_parent == "frameset"):
-                        continue
-
-                    if attribute == "string" and tag.string:
-                        if case_sensitive:
-                            if expected_value in tag.string:
-                                return True
-                        else:
-                            if expected_value.lower() in tag.string.lower():
-                                return True
-                    elif attribute == "full_string" and tag.string:
-                        if case_sensitive:
-                            if match_type == "exact" and expected_value == tag.string.strip():
-                                return True
-                            if match_type == "starts_with" and tag.string.strip().startswith(expected_value):
-                                return True
-                        else:
-                            if match_type == "exact" and expected_value.lower() == tag.string.strip().lower():
-                                return True
-                            if match_type == "starts_with" and \
-                                    tag.string.strip().lower().startswith(expected_value.lower()):
-                                return True
-                    else:
-                        # Found attribute specified in .ini file in attributes of the HTML tag
-                        if attribute in tag.attrs:
-                            if case_sensitive:
-                                if match_type == "exact" and tag[attribute] == expected_value:
-                                    return True
-                                if match_type == "starts_with" and tag[attribute].startswith(expected_value):
-                                    return True
-                            else:
-                                if match_type == "exact" and tag[attribute].lower() == expected_value.lower():
-                                    return True
-                                if match_type == "starts_with" and \
-                                        expected_value.lower().startswith(tag[attribute].lower()):
-                                    return True
-                break
-
-        return False
