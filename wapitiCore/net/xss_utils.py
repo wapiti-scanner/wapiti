@@ -317,7 +317,9 @@ def apply_attrval_context(context, payloads, code):
                     except RuntimeError:
                         continue
 
-                result.append((js_code, Flags(payload_type=PayloadType.xss_non_closing_tag, section=payload_infos["name"])))
+                result.append(
+                    (js_code, Flags(payload_type=PayloadType.xss_non_closing_tag, section=payload_infos["name"]))
+                )
 
         else:
             js_code = context["separator"]

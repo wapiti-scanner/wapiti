@@ -71,7 +71,9 @@ class ApplicationData:
                     self.applications[application_name][dict_field] = {}
                 elif not isinstance(self.applications[application_name][dict_field], dict):
                     # Raise an exception if the provided field is not a dict
-                    raise ApplicationDataException(f"{dict_field} is not a dict in {self.applications[application_name]}")
+                    raise ApplicationDataException(
+                        f"{dict_field} is not a dict in {self.applications[application_name]}"
+                    )
 
                 # Ensure keys are lowercase
                 dict_items = self.applications[application_name][dict_field].items()
