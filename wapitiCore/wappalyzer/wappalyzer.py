@@ -20,10 +20,10 @@ class ApplicationDataException(Exception):
 class ApplicationData:
     """
     Store application database.
-    For instance https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json.
+    For instance https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies/.
     """
 
-    def __init__(self, data_filename=None):
+    def __init__(self, categories_file_path=None, groups_file_path=None, technologies_file_path=None):
         """
         Initialize a new ApplicationData object.
 
@@ -33,14 +33,19 @@ class ApplicationData:
         data_filename : str
             File providing application and categorie references (Json format).
         """
-        if data_filename:
-            with open(data_filename, 'r', encoding='utf-8') as data_file:
-                obj = json.load(data_file)
-        else:
-            with open(os.path.join(BASE_DIR, "wappalyzer", "data/apps.json"), 'r', encoding='utf-8') as data_file:
-                obj = json.load(data_file)
+        default_categories_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/categories.json")
+        default_groups_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/groups.json")
+        default_technologies_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/technologies.json")
 
-        self.applications = obj["technologies"]
+        with open(categories_file_path or default_categories_file_path, 'r', encoding='utf-8') as categories_file:
+            self.categories = json.load(categories_file)
+
+        with open(groups_file_path or default_groups_file_path, 'r', encoding='utf-8') as groups_file:
+            self.groups = json.load(groups_file)
+
+        with open(technologies_file_path or default_technologies_file_path, 'r', encoding='utf-8') as technologies_file:
+            self.applications = json.load(technologies_file)
+
         self.normalize_applications()
 
         # Ignore regex parsing warnings
@@ -48,8 +53,8 @@ class ApplicationData:
             warnings.simplefilter("ignore")
             self.normalize_application_regex()
 
-        self.categories = obj["categories"]
         self.normalize_categories()
+        self.normalize_groups()
 
     def normalize_applications(self):
         """
@@ -96,6 +101,15 @@ class ApplicationData:
             for field in ["name"]:
                 if field not in self.categories[category]:
                     raise ApplicationDataException(f"{field} field is not in {self.categories[category]}")
+
+    def normalize_groups(self):
+        """
+        Ensure that at least each needed field exists
+        """
+        for group in self.groups:
+            for field in ["name"]:
+                if field not in self.groups[group]:
+                    raise ApplicationDataException(f"{field} field is not in {self.groups[group]}")
 
     def normalize_application_regex(self):
         """
@@ -160,6 +174,10 @@ class ApplicationData:
         """Provide normalized ApplicationData applications"""
         return self.applications
 
+    def get_groups(self):
+        """Provide normalized ApplicationData groups"""
+        return self.groups
+
 
 class Wappalyzer:
     """
@@ -172,6 +190,7 @@ class Wappalyzer:
         """
         self.applications = application_data.get_applications()
         self.categories = application_data.get_categories()
+        self.groups = application_data.get_groups()
 
         self._url = web_content.url
         self._html = web_content.content
@@ -312,6 +331,23 @@ class Wappalyzer:
 
         return category_names
 
+
+    def get_groups(self, application_name: str):
+        """
+        Returns a list of the groups for a name of application.
+        """
+        category_numbers = self.applications.get(application_name, {}).get("cats", [])
+        application_group = []
+
+        for application_categorie in category_numbers:
+            groups_numbers = self.categories.get(str(application_categorie), {}).get("groups", [])
+            application_group += [
+                self.groups.get(str(group_number), "").get("name", "")
+                for group_number in groups_numbers
+            ]
+
+        return application_group
+
     def get_versions(self, application_name: str):
         """
         Returns a list of the discovered versions for a name of application.
@@ -361,3 +397,18 @@ class Wappalyzer:
             versioned_and_categorised_applications[application_name]["categories"] = category_names
 
         return versioned_and_categorised_applications
+
+    def detect_with_versions_and_categories_and_groups(self):
+        """
+        Return a list of applications with their categories, their versions & theirs groups
+        that can be detected on web content.
+        """
+        versioned_and_categorised_applications = self.detect_with_versions_and_categories()
+        applications = versioned_and_categorised_applications
+
+        for application_name in versioned_and_categorised_applications:
+            group_names = self.get_groups(application_name)
+            # Set the group & prevent group duplicates
+            applications[application_name]["groups"] = list(dict.fromkeys(group_names))
+
+        return applications

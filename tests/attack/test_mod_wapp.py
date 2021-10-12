@@ -78,7 +78,7 @@ async def test_url_detection():
     assert persister.add_payload.call_args_list[0][1]["module"] == "wapp"
     assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
     assert persister.add_payload.call_args_list[2][1]["info"] == (
-        '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"]}'
+        '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
     )
     await crawler.close()
 
@@ -114,7 +114,7 @@ async def test_html_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"]}'
+        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"], "groups": ["Web development"]}'
     )
     await crawler.close()
 
@@ -151,7 +151,7 @@ async def test_script_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"]}'
+        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"], "groups": ["Web development"]}'
     )
     await crawler.close()
 
@@ -188,7 +188,7 @@ async def test_cookies_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"]}'
+        '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"], "groups": ["Web development"]}'
     )
     await crawler.close()
 
@@ -225,7 +225,7 @@ async def test_headers_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
     )
     await crawler.close()
 
@@ -263,7 +263,7 @@ async def test_meta_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"]}'
+        '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"], "groups": ["Content"]}'
     )
     await crawler.close()
 
@@ -303,7 +303,7 @@ async def test_multi_detection():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[-1][1]["info"] == (
-        '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"]}'
+        '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
     )
     await crawler.close()
 
@@ -340,10 +340,10 @@ async def test_implies_detection():
 
     assert persister.add_payload.call_count == 3
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
     )
     assert persister.add_payload.call_args_list[-1][1]["info"] == (
-        '{"versions": [], "name": "PHP", "categories": ["Programming languages"]}'
+        '{"versions": [], "name": "PHP", "categories": ["Programming languages"], "groups": ["Web development"]}'
     )
     await crawler.close()
 
@@ -381,12 +381,12 @@ async def test_vulnerabilities():
     assert persister.add_payload.call_count == 5
     # FIrst one is an additional
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"]}'
+        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
     )
     assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
 
     assert persister.add_payload.call_args_list[3][1]["info"] == (
-        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"]}'
+        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
     )
     assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
     await crawler.close()
