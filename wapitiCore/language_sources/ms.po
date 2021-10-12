@@ -72,6 +72,14 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
+msgstr ""
+
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
 msgid "No Drupal Detected"
 msgstr ""
 

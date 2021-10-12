@@ -17,11 +17,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
 import os
-
+import asyncio
+import string
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_blue
 from wapitiCore.attack.attack import Attack
+from wapitiCore.net.page import Page
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
@@ -30,7 +32,8 @@ from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
-
+MSG_CATEGORIES = _("  -> Categorie(s): {0}")
+MSG_GROUPS = _("  -> Group(s): {0}")
 
 class mod_wapp(Attack):
     """
@@ -38,8 +41,15 @@ class mod_wapp(Attack):
     """
 
     name = "wapp"
-    WAPP_DB = "apps.json"
-    WAPP_DB_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/master/src/technologies.json"
+
+    WAPP_CATEGORIES_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/categories.json"
+    WAPP_CATEGORIES = "categories.json"
+
+    WAPP_GROUPS_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/groups.json"
+    WAPP_GROUPS = "groups.json"
+
+    WAPP_TECHNOLOGIES_BASE_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies/"
+    WAPP_TECHNOLOGIES = "technologies.json"
 
     do_get = False
     do_post = False
@@ -56,12 +66,11 @@ class mod_wapp(Attack):
     async def update(self):
         """Update the Wappalizer database from the web and load the patterns."""
         try:
-            request = Request(self.WAPP_DB_URL)
-            response = await self.crawler.async_send(request)
-
-            with open(os.path.join(self.user_config_dir, self.WAPP_DB), 'w', encoding='utf-8') as wapp_db_file:
-                json.dump(response.json, wapp_db_file)
-
+            await self._load_wapp_database(
+                self.WAPP_CATEGORIES_URL,
+                self.WAPP_TECHNOLOGIES_BASE_URL,
+                self.WAPP_GROUPS_URL
+            )
         except IOError:
             logging.error(_("Error downloading wapp database."))
 
@@ -77,17 +86,14 @@ class mod_wapp(Attack):
     async def attack(self, request: Request):
         self.finished = True
         request_to_root = Request(request.url)
+        categories_file_path = os.path.join(self.user_config_dir, self.WAPP_CATEGORIES)
+        groups_file_path = os.path.join(self.user_config_dir, self.WAPP_GROUPS)
+        technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
+
+        await self._verify_wapp_database(categories_file_path, technologies_file_path, groups_file_path)
 
         try:
-            with open(os.path.join(self.user_config_dir, self.WAPP_DB), encoding='utf-8') as wapp_db_file:
-                json.load(wapp_db_file)
-        except IOError:
-            logging.warning(_("Problem with local wapp database."))
-            logging.info(_("Downloading from the web..."))
-            await self.update()
-
-        try:
-            application_data = ApplicationData(os.path.join(self.user_config_dir, self.WAPP_DB))
+            application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
         except FileNotFoundError as exception:
             logging.error(exception)
             logging.error(_("Try using --store-session option, or update apps.json using --update option."))
@@ -103,7 +109,7 @@ class mod_wapp(Attack):
             return
 
         wappalyzer = Wappalyzer(application_data, response)
-        detected_applications = wappalyzer.detect_with_versions_and_categories()
+        detected_applications = wappalyzer.detect_with_versions_and_categories_and_groups()
 
         if len(detected_applications) > 0:
             log_blue("---")
@@ -112,13 +118,12 @@ class mod_wapp(Attack):
 
             versions = detected_applications[application_name]["versions"]
             categories = detected_applications[application_name]["categories"]
+            groups = detected_applications[application_name]["groups"]
 
-            log_blue(
-                MSG_TECHNO_VERSIONED,
-                application_name,
-                versions
-            )
-
+            log_blue(MSG_TECHNO_VERSIONED, application_name, versions)
+            log_blue(MSG_CATEGORIES, categories)
+            log_blue(MSG_GROUPS, groups)
+            log_blue("")
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
@@ -138,3 +143,53 @@ class mod_wapp(Attack):
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])
                     )
+
+    async def _dump_url_content_to_file(self, url: str, file_path: str):
+        request = Request(url)
+        response = await self.crawler.async_send(request)
+
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(response.json, file)
+
+    async def _load_wapp_database(self, categories_url: str, technologies_base_url: str, groups_url: str):
+        categories_file_path = os.path.join(self.user_config_dir, self.WAPP_CATEGORIES)
+        groups_file_path = os.path.join(self.user_config_dir, self.WAPP_GROUPS)
+        technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
+        technologie_files_name = list(map(lambda file_name: file_name + ".json", list("_" + string.ascii_lowercase)))
+        technologies = {}
+
+        # Requesting all technologies one by one
+        for technologie_file_name in technologie_files_name:
+            request = Request(technologies_base_url + technologie_file_name)
+            response: Page = await self.crawler.async_send(request)
+            # Merging all technologies in one object
+            for technologie_name in response.json:
+                technologies[technologie_name] = response.json[technologie_name]
+
+        # Saving categories & groups
+        await asyncio.gather(
+            self._dump_url_content_to_file(categories_url, categories_file_path),
+            self._dump_url_content_to_file(groups_url, groups_file_path)
+        )
+
+        # Saving technologies
+        with open(technologies_file_path, 'w', encoding='utf-8') as file:
+            json.dump(technologies, file)
+
+    async def _verify_wapp_database(
+        self,
+        categories_file_path: str,
+        technologies_base_path: str,
+        groups_file_path: str
+    ):
+        try:
+            with open(categories_file_path, encoding='utf-8') as categories_file, \
+                open(technologies_base_path, encoding='utf-8') as technologies_file, \
+                open(groups_file_path, encoding='utf-8') as groups_file:
+                json.load(categories_file)
+                json.load(technologies_file)
+                json.load(groups_file)
+        except IOError:
+            logging.warning(_("Problem with local wapp database."))
+            logging.info(_("Downloading from the web..."))
+            await self.update()
