@@ -366,6 +366,7 @@ class AsyncCrawler:
         # Fetch the login page and try to extract the login form
         try:
             page = await self.async_get(web.Request(auth_url), follow_redirects=True)
+            form = {}
 
             login_form, username_field_idx, password_field_idx = page.find_login_form()
             if login_form:
@@ -375,9 +376,13 @@ class AsyncCrawler:
                 if login_form.method == "POST":
                     post_params[username_field_idx][1] = username
                     post_params[password_field_idx][1] = password
+                    form["login_field"] = post_params[username_field_idx][0]
+                    form["password_field"] = post_params[password_field_idx][0]
                 else:
                     get_params[username_field_idx][1] = username
                     get_params[password_field_idx][1] = password
+                    form["login_field"] = get_params[username_field_idx][0]
+                    form["password_field"] = get_params[password_field_idx][0]
 
                 login_request = web.Request(
                     path=login_form.url,
@@ -402,6 +407,7 @@ class AsyncCrawler:
                     logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
             else:
                 logging.warning(_("Login failed") + " : " + _("No login form detected"))
+            return self.is_logged_in, form
 
         except ConnectionError:
             logging.error(_("[!] Connection error with URL"), auth_url)

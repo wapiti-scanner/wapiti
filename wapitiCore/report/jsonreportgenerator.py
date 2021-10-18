@@ -69,7 +69,7 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the informations about a found vulnerability.
         """
@@ -82,7 +82,6 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
         }
@@ -102,7 +101,7 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """Store the informations about an anomaly met during the attack."""
         anom_dict = {
             "method": request.method,
@@ -112,7 +111,6 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr
         }
@@ -131,7 +129,7 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """Store the information about an additional."""
         addition_dict = {
             "method": request.method,
@@ -141,7 +139,6 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr
         }

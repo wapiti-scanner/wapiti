@@ -138,6 +138,7 @@ class Wapiti:
         self._max_attack_time = 0
         self._bug_report = True
         self._logfile = ""
+        self._auth_state = None
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -199,7 +200,8 @@ class Wapiti:
             self.target_url,
             self.target_scope,
             gmtime(),
-            WAPITI_VERSION
+            WAPITI_VERSION,
+            self._auth_state
         )
 
         for vul in vulnerabilities:
@@ -541,17 +543,6 @@ class Wapiti:
                 filename = f"{self.server.replace(':', '_')}_{strftime('%m%d%Y_%H%M', self.report_gen.scan_date)}"
                 self.output_file = filename + "." + self.report_generator_type
 
-        auth_dict = None
-        if self.crawler.credentials:
-            auth_url = None
-            if self.crawler.auth_method == "post":
-                auth_url = self.crawler.auth_url
-
-            auth_dict = {
-                "method": self.crawler.auth_method,
-                "url": auth_url
-            }
-
         async for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":
                 self.report_gen.add_vulnerability(
@@ -561,7 +552,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
@@ -571,7 +561,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
             elif payload.type == "additional":
                 self.report_gen.add_additional(
@@ -581,7 +570,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
 
         print('')
@@ -732,6 +720,14 @@ class Wapiti:
 
     async def have_attacks_started(self) -> bool:
         return await self.persister.have_attacks_started()
+
+    def set_auth_state(self, is_logged_in: bool, form: dict, url: str, method: str):
+        self._auth_state = {
+            "method": method,
+            "url": url,
+            "logged_in": is_logged_in,
+            "form": form,
+        }
 
 
 def fix_url_path(url: str):
@@ -1331,7 +1327,8 @@ async def wapiti_main():
                     logging.info(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args and args.auth_type == "post":
-                    await wap.crawler.async_try_login(wap.crawler.auth_url)
+                    is_logged_in, form = await wap.crawler.async_try_login(wap.crawler.auth_url)
+                    wap.set_auth_state(is_logged_in, form, wap.crawler.auth_url, args.auth_type)
 
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
