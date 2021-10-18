@@ -1326,8 +1326,8 @@ async def wapiti_main():
                 if await wap.has_scan_started():
                     logging.info(_("[*] Resuming scan from previous session, please wait"))
 
-                if "auth_type" in args and args.auth_type == "post":
-                    is_logged_in, form = await wap.crawler.async_try_login(wap.crawler.auth_url)
+                if "auth_type" in args:
+                    is_logged_in, form = await wap.crawler.async_try_login(wap.crawler.auth_url, args.auth_type)
                     wap.set_auth_state(is_logged_in, form, wap.crawler.auth_url, args.auth_type)
 
                 await wap.load_scan_state()

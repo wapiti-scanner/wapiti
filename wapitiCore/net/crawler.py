@@ -355,14 +355,26 @@ class AsyncCrawler:
 
             self.client.auth = self._auth
 
-    async def async_try_login(self, auth_url: str):
+    async def async_try_login(self, auth_url: str, auth_type: str) -> Tuple[bool, dict]:
         """Try to authenticate with the provided url and credentials."""
         if len(self._auth_credentials) != 2:
             logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
-            return
+            return False, {}
 
         username, password = self._auth_credentials
 
+        if auth_type == "post":
+            return await self._async_try_login_post(username, password, auth_url)
+        return await self._async_try_login_basic_digest_ntlm(auth_url)
+
+    async def _async_try_login_basic_digest_ntlm(self, auth_url: str) -> Tuple[bool, dict]:
+        page = await self.async_get(web.Request(auth_url))
+
+        if page.status in (401, 404):
+            return False, {}
+        return True, {}
+
+    async def _async_try_login_post(self, username: str, password: str, auth_url: str) -> Tuple[bool, dict]:
         # Fetch the login page and try to extract the login form
         try:
             page = await self.async_get(web.Request(auth_url), follow_redirects=True)
