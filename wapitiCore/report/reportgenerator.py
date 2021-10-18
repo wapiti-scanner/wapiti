@@ -30,12 +30,13 @@ class ReportGenerator:
         self._infos = {}
         self._date = None
 
-    def set_report_info(self, target, scope, date, version):
+    def set_report_info(self, target, scope, date, version, auth):
         """Set the informations about the scan"""
         self._infos["target"] = target
         self._infos["date"] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", date)
         self._infos["version"] = version
         self._infos["scope"] = scope
+        self._infos["auth"] = auth
         self._date = date
 
     @property
@@ -49,19 +50,19 @@ class ReportGenerator:
     def add_vulnerability_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         raise NotImplementedError("Must be overridden")
 
     # Anomalies
     def add_anomaly_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         raise NotImplementedError("Must be overridden")
 
     # Additionals
     def add_additional_type(self, name, description="", solution="", references=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         raise NotImplementedError("Must be overridden")

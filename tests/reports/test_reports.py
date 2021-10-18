@@ -15,7 +15,8 @@ def test_reports():
             "http://perdu.com",
             "folder",
             gmtime(),
-            "WAPITI_VERSION"
+            "WAPITI_VERSION",
+            None
         )
 
         for vul in vulnerabilities:
