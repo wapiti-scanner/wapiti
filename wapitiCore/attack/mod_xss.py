@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import join as path_join
-from configparser import ConfigParser
 
 from httpx import ReadTimeout, RequestError
 
@@ -218,4 +217,3 @@ class mod_xss(Attack):
                     log_orange(evil_request.http_repr())
                     log_orange("---")
                     saw_internal_error = True
-
