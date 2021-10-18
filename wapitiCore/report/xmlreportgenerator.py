@@ -299,7 +299,7 @@ class XMLReportGenerator(ReportGenerator):
         auth_node = self._xml_doc.createElement("info")
         auth_node.setAttribute("name", "auth")
 
-        if self._infos["auth"] is not None:
+        if self._infos.get("auth") is not None:
             auth_dict = self._infos["auth"]
             is_logged_in = "true" if auth_dict["logged_in"] is True else "false"
 
@@ -314,7 +314,7 @@ class XMLReportGenerator(ReportGenerator):
             auth_node.appendChild(auth_logged_in_node)
 
             form_node = self._xml_doc.createElement("form")
-            if len(self._infos["auth"]["form"]) > 0:
+            if auth_dict.get("form") is not None and len(auth_dict["form"]) > 0:
                 auth_form_dict = auth_dict["form"]
 
                 form_login_field_node = self._xml_doc.createElement("login_field")

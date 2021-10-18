@@ -239,7 +239,7 @@ class TXTReportGenerator(ReportGenerator):
         Write the authentication section explaining what method, fields, url were used and also if it has been
         successful
         """
-        if self._infos["auth"] is None:
+        if self._infos.get("auth") is None:
             return
         auth_dict = self._infos["auth"]
         txt_report_file.write(title(_("Authentication :")))
@@ -247,11 +247,10 @@ class TXTReportGenerator(ReportGenerator):
         txt_report_file.write(f"Url: {auth_dict['url']}\n")
         txt_report_file.write(f"Logged in: {auth_dict['logged_in']}\n")
 
-        auth_form_dict = auth_dict["form"]
-        login_field = auth_form_dict["login_field"] if auth_form_dict["login_field"] is not None else "null"
-        password_field = auth_form_dict["password_field"] if auth_form_dict["password_field"] is not None else "null"
-
-        txt_report_file.write(f"Login field: {login_field}\n")
-        txt_report_file.write(f"Password field: {password_field}\n")
+        auth_form_dict = auth_dict.get("form")
+        if auth_form_dict is None or len(auth_form_dict) == 0:
+            return
+        txt_report_file.write(f"Login field: {auth_form_dict['login_field']}\n")
+        txt_report_file.write(f"Password field: {auth_form_dict['password_field']}\n")
         txt_report_file.write("\n")
         txt_report_file.write(separator)

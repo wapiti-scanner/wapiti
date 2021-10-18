@@ -21,8 +21,10 @@
             Method: ${auth_dict["method"]}<br>
             Url: ${auth_dict["url"]}<br>
             Logged in: ${auth_dict["logged_in"]}<br>
-            Login field: ${auth_dict["form"]["login_field"] if auth_dict != None and len(auth_dict) > 0 else "null"}<br>
-            Password field: ${auth_dict["form"]["password_field"] if auth_dict != None and len(auth_dict) > 0 else "null"}<br>
+            % if auth_form_dict != None and len(auth_form_dict) > 0:
+            Login field: ${auth_form_dict["login_field"]}<br>
+            Password field: ${auth_form_dict["password_field"]}<br>
+            % endif
         </p>
         <hr />
         % endif
