@@ -47,7 +47,7 @@ class JsonCookie:
                 self.cookiedict = {}
         return self.cookiedict
 
-    def addcookies(self, cookies):
+    def addcookies(self, cookies: Cookies):
         """Inject Cookies from a CookieJar into our JSON dictionary."""
         if not isinstance(cookies, Cookies):
             return False
