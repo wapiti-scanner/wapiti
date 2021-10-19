@@ -75,6 +75,7 @@ class JsonCookie:
                 "version": cookie.version
             }
             self.cookiedict[domain_key][cookie.path][cookie.name] = cookie_attrs
+        return True
 
     def cookiejar(self, domain):
         """Returns a cookielib.CookieJar object containing cookies matching the given domain."""

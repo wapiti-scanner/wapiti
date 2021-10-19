@@ -331,7 +331,7 @@ class Page:
     def is_directory_redirection(self):
         if not self.redirection_url:
             return False
-        if self.url + "/" == self.redirection_url:
+        if self.url + ("" if self.url.endswith("/") else "/") == self.redirection_url:
             return True
         return False
 
