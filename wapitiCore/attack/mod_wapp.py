@@ -42,13 +42,13 @@ class mod_wapp(Attack):
 
     name = "wapp"
 
-    WAPP_CATEGORIES_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/categories.json"
+    WAPP_CATEGORIES_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/categories.json"
     WAPP_CATEGORIES = "categories.json"
 
-    WAPP_GROUPS_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/groups.json"
+    WAPP_GROUPS_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/groups.json"
     WAPP_GROUPS = "groups.json"
 
-    WAPP_TECHNOLOGIES_BASE_URL = "https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/technologies/"
+    WAPP_TECHNOLOGIES_BASE_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/technologies/"
     WAPP_TECHNOLOGIES = "technologies.json"
 
     do_get = False

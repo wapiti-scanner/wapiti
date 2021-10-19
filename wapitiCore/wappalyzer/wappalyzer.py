@@ -62,7 +62,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["cats", "html", "implies", "scripts"]:
+            for list_field in ["cats", "html", "implies", "scriptSrc"]:
                 if list_field not in self.applications[application_name]:
                     # Complete with empty elements if not already present
                     self.applications[application_name][list_field] = []
@@ -117,7 +117,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["html", "implies", "scripts"]:
+            for list_field in ["html", "implies", "scriptSrc"]:
                 self.applications[application_name][list_field] = [
                     self.normalize_regex(pattern) for pattern in self.applications[application_name][list_field]
                 ]
@@ -206,7 +206,7 @@ class Wappalyzer:
         """
         url_detected = self.is_application_detected_normalize_string(application, 'url', self._url)
         html_detected = self.is_application_detected_normalize_list(application, 'html', self._html)
-        scripts_detected = self.is_application_detected_normalize_list(application, 'scripts', self._scripts)
+        scripts_detected = self.is_application_detected_normalize_list(application, 'scriptSrc', self._scripts)
         cookies_detected = self.is_application_detected_normalize_dict(application, 'cookies', self._cookies)
         headers_detected = self.is_application_detected_normalize_dict(application, 'headers', self._headers)
         meta_detected = self.is_application_detected_normalize_dict(application, 'meta', self._metas)
