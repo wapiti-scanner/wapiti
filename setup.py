@@ -134,7 +134,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=6.2.2", "respx==0.17.0", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
+    tests_require=["pytest>=6.2.2", "respx==0.18.0", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )
