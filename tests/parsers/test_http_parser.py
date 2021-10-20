@@ -43,6 +43,6 @@ def test_http_redir():
         return_value=httpx.Response(301, text="Hello world!", headers={"Location": "http://perdu.com/folder/"})
     )
 
-    resp = httpx.get(url, allow_redirects=False)
+    resp = httpx.get(url, follow_redirects=False)
     page = Page(resp)
     assert page.is_directory_redirection

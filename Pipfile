@@ -10,18 +10,18 @@ pytest-asyncio = "==0.14.0"
 pytest-cov = ">=2.11.1"
 
 [packages]
-"httpx[brotli]" = "==0.19.0"
-beautifulsoup4 = ">=4.9.3"
+"httpx[brotli]" = "==0.20.0"
+beautifulsoup4 = ">=4.10.0"
 mako = ">=1.1.4"
 markupsafe = "==1.1.1"
-httpx-socks = {extras = ["asyncio"],version = "==0.4.1"}
+httpx-socks = {extras = ["asyncio"],version = "==0.5.1"}
 pytest = ">=5.4.1"
 tld = ">=0.12.5"
 yaswfp = ">=0.9.3"
 six = ">=1.15.0"
 browser-cookie3 = "==0.11.4"
 importlib_metadata = "==3.7.2"
-sqlalchemy = ">=1.4.23"
+sqlalchemy = ">=1.4.26"
 aiocache = "==0.11.1"
 aiosqlite = "==0.17.0"
 loguru = ">=0.5.3"

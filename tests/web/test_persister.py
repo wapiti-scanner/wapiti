@@ -185,7 +185,7 @@ async def test_persister_forms():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         forms = list(page.iter_forms())

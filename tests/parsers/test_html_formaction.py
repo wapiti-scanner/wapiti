@@ -10,7 +10,7 @@ def test_formactions():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=form_action.read()))
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
         count = 0
 
