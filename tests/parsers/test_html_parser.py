@@ -63,7 +63,7 @@ def test_other_links():
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         assert sorted(page.iter_frames()) == [
@@ -89,7 +89,7 @@ def test_extra_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         assert set(page.extra_urls) == {
@@ -123,7 +123,7 @@ def test_meta():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         assert page.title == "  -  Title :) "
@@ -171,7 +171,7 @@ def test_base_extra_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         assert set(page.extra_urls) == {
@@ -206,7 +206,7 @@ def test_base_other_links():
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = httpx.get(url, allow_redirects=False)
+        resp = httpx.get(url, follow_redirects=False)
         page = Page(resp)
 
         assert sorted(page.iter_frames()) == [

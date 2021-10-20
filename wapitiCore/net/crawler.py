@@ -421,10 +421,10 @@ class AsyncCrawler:
         @type headers: dict
         @rtype: Page
         """
-        request = self.client.build_request("GET", resource.url, headers=headers)
+        request = self.client.build_request("GET", resource.url, headers=headers, timeout=self._timeout)
         try:
             response = await self.client.send(
-                request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
+                request, stream=self.stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
@@ -479,11 +479,12 @@ class AsyncCrawler:
             data=post_params,  # httpx expects a dict, hope to see more types soon
             content=content,
             files=file_params or None,
-            headers=form_headers
+            headers=form_headers,
+            timeout=self._timeout
         )
         try:
             response = await self.client.send(
-                request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
+                request, stream=self.stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
@@ -531,10 +532,11 @@ class AsyncCrawler:
             content=content,
             files=form.file_params or None,
             headers=form_headers,
+            timeout=self._timeout
         )
         try:
             response = await self.client.send(
-                request, stream=self.stream, allow_redirects=follow_redirects, timeout=self._timeout
+                request, stream=self.stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):

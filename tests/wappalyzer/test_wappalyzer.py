@@ -107,7 +107,7 @@ async def test_applicationdata():
         )
     )
 
-    resp = httpx.get(target_url, allow_redirects=False)
+    resp = httpx.get(target_url, follow_redirects=False)
     page = Page(resp)
 
     wappalyzer = Wappalyzer(application_data, page)
