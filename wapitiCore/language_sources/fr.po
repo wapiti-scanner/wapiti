@@ -72,14 +72,6 @@ msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
 msgid "{0} {1} detected"
 msgstr "{0} {1} détecté"
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr "  -> Catégorie(s): {0}"
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr "  -> Groupe(s): {0}"
-
 msgid "No Drupal Detected"
 msgstr "Drupal non détecté"
 
@@ -202,20 +194,20 @@ msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock !"
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr "L'URL {0} semble vulnérable à l'attaque Shellshock"
 
-msgid "SQL Injection"
-msgstr "Injection SQL"
-
 msgid ".NET SQL Injection"
 msgstr "Injection SQL .NET"
 
 msgid "Spring JDBC Injection"
-msgstr ""
+msgstr "Injection Spring JDBC"
 
 msgid "XPath Injection"
 msgstr "Injection XPath"
 
 msgid "LDAP Injection"
 msgstr "Injection LDAP"
+
+msgid "SQL Injection"
+msgstr "Injection SQL"
 
 msgid "SSRF vulnerability"
 msgstr "Vulnérabilité SSRF"
@@ -243,22 +235,31 @@ msgstr "L'enregistrement {domain} pointe vers {cname}"
 
 #, python-brace-format
 msgid "CNAME {domain} to {cname} seems vulnerable to takeover"
-msgstr "L'enregistrement CNAME {domain} vers {cname} semble vulnérable à un takeover"
+msgstr ""
+"L'enregistrement CNAME {domain} vers {cname} semble vulnérable à un takeover"
 
 msgid "Blind SQL vulnerability"
 msgstr "Vulnérabilité d'injection SQL en aveugle"
 
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
+msgstr "  -> Catégorie(s): {0}"
+
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr "  -> Groupe(s): {0}"
+
 msgid "Error downloading wapp database."
 msgstr "Erreur de téléchargement de la base de données Wappalizer."
-
-msgid "Problem with local wapp database."
-msgstr "Un problème est survenu avec la base de données wapp locale"
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
 msgstr ""
 "Essayez avec l'option --store-session, ou mettez à jour apps.json avec "
 "l'option --update."
+
+msgid "Problem with local wapp database."
+msgstr "Un problème est survenu avec la base de données wapp locale"
 
 msgid "No WordPress Detected"
 msgstr "WordPress non détecté"
@@ -1029,9 +1030,6 @@ msgstr "Mise à jour effectuée."
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Enregistrement de l'état du scan, veuillez patienter..."
 
-msgid " Note"
-msgstr " Note"
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr "Ce scan a été sauvé dans le fichier {0}"
@@ -1082,8 +1080,8 @@ msgstr "Erreur lors de l'envoi du rapport d'erreur"
 msgid "{} requests were skipped due to network issues"
 msgstr "{} requêtes ont été abandonnées en raison d'erreurs réseau"
 
-msgid "Report"
-msgstr "Rapport"
+msgid "[*] Generating report..."
+msgstr "[*] Génération du rapport..."
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"

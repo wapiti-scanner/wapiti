@@ -72,14 +72,6 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr ""
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr ""
 
@@ -198,9 +190,6 @@ msgstr "¡La URL {0} parece vulnerable al ataque Shellshock!"
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr "La URL {0} parece vulnerable al ataque Shellshock"
 
-msgid "SQL Injection"
-msgstr "Inyección SQL"
-
 msgid ".NET SQL Injection"
 msgstr "Inyección .NET SQL"
 
@@ -212,6 +201,9 @@ msgstr "Inyección XPath"
 
 msgid "LDAP Injection"
 msgstr "Inyección LDAP"
+
+msgid "SQL Injection"
+msgstr "Inyección SQL"
 
 msgid "SSRF vulnerability"
 msgstr ""
@@ -240,14 +232,22 @@ msgstr ""
 msgid "Blind SQL vulnerability"
 msgstr "Inyección SQL ciega"
 
-msgid "Error downloading wapp database."
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
 msgstr ""
 
-msgid "Problem with local wapp database."
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "Problem with local wapp database."
 msgstr ""
 
 msgid "No WordPress Detected"
@@ -853,9 +853,6 @@ msgstr ""
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Escanee el registro del estado, espere ..."
 
-msgid " Note"
-msgstr "Nota"
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr "Este escaneo se ha guardado en el archivo {0}"
@@ -906,8 +903,8 @@ msgstr "Error al enviar el informe de error"
 msgid "{} requests were skipped due to network issues"
 msgstr "{} solicitudes se descartaron debido a errores de red"
 
-msgid "Report"
-msgstr "Informe"
+msgid "[*] Generating report..."
+msgstr ""
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
@@ -1203,36 +1200,3 @@ msgstr "Resumen de anomalías :"
 
 msgid "Summary of additionals :"
 msgstr ""
-
-#, python-brace-format
-#~ msgid "error: {0} while attacking {1}"
-#~ msgstr "error: {0} mientras se realizaba el ataque {1}"
-
-#~ msgid ""
-#~ "The scan will be resumed next time unless you pass the --skip-crawl "
-#~ "option."
-#~ msgstr ""
-#~ "Este escaneo se reanudará la próxima vez a menos que pase la opción --"
-#~ "skip-crawl."
-
-#~ msgid "Set a JSON cookie file to use"
-#~ msgstr "Establecer un archivo cookie JSON para usar"
-
-#~ msgid "Set output format. Supported: json, html (default), txt, xml"
-#~ msgstr ""
-#~ "Establecer el formato del informe. Formatos admitidos: json, html "
-#~ "(predeterminado), txt, xml"
-
-#~ msgid ""
-#~ "Attack process interrupted. Scan will be resumed next time unless you "
-#~ "specify \"--flush-attacks\" or \"--flush-session\"."
-#~ msgstr ""
-#~ "Proceso de ataque interrumpido. La exploración se reanudará la próxima "
-#~ "vez, a menos que pase \"--flush-attacks\" o \"--flush-session\"."
-
-#~ msgid ""
-#~ "[!] Can't store informations in persister. SQLite database must have been "
-#~ "locked by another process"
-#~ msgstr ""
-#~ "[!] No se puede almacenar información en el persist. La base de datos "
-#~ "SQLite debe ser abierta por otro proceso."

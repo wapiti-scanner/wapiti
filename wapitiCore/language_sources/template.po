@@ -53,14 +53,6 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr ""
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr ""
 
@@ -177,9 +169,6 @@ msgstr ""
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr ""
 
-msgid "SQL Injection"
-msgstr ""
-
 msgid ".NET SQL Injection"
 msgstr ""
 
@@ -190,6 +179,9 @@ msgid "XPath Injection"
 msgstr ""
 
 msgid "LDAP Injection"
+msgstr ""
+
+msgid "SQL Injection"
 msgstr ""
 
 msgid "SSRF vulnerability"
@@ -219,13 +211,21 @@ msgstr ""
 msgid "Blind SQL vulnerability"
 msgstr ""
 
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
+msgstr ""
+
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
 msgid "Error downloading wapp database."
 msgstr ""
 
-msgid "Problem with local wapp database."
+msgid "Try using --store-session option, or update apps.json using --update option."
 msgstr ""
 
-msgid "Try using --store-session option, or update apps.json using --update option."
+msgid "Problem with local wapp database."
 msgstr ""
 
 msgid "No WordPress Detected"
@@ -681,9 +681,6 @@ msgstr ""
 msgid "[*] Saving scan state, please wait..."
 msgstr ""
 
-msgid " Note"
-msgstr ""
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr ""
@@ -734,7 +731,7 @@ msgstr ""
 msgid "{} requests were skipped due to network issues"
 msgstr ""
 
-msgid "Report"
+msgid "[*] Generating report..."
 msgstr ""
 
 #, python-brace-format

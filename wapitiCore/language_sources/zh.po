@@ -72,14 +72,6 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr ""
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr ""
 
@@ -198,9 +190,6 @@ msgstr "URL {0} 可能遭受Shellshock攻击！"
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr "URL {0} 可能遭受Shellshock攻击"
 
-msgid "SQL Injection"
-msgstr "SQL注入"
-
 msgid ".NET SQL Injection"
 msgstr ".NET SQL注入"
 
@@ -212,6 +201,9 @@ msgstr "XPath注入"
 
 msgid "LDAP Injection"
 msgstr "LDAP注入"
+
+msgid "SQL Injection"
+msgstr "SQL注入"
 
 msgid "SSRF vulnerability"
 msgstr ""
@@ -240,14 +232,22 @@ msgstr ""
 msgid "Blind SQL vulnerability"
 msgstr "SQL盲注漏洞"
 
-msgid "Error downloading wapp database."
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
 msgstr ""
 
-msgid "Problem with local wapp database."
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "Problem with local wapp database."
 msgstr ""
 
 msgid "No WordPress Detected"
@@ -839,9 +839,6 @@ msgstr ""
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] 正在存储扫描状态，请稍等..."
 
-msgid " Note"
-msgstr " Note"
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr "本次扫描已存储在 {0}"
@@ -892,8 +889,8 @@ msgstr "发送崩溃报告错误"
 msgid "{} requests were skipped due to network issues"
 msgstr "{} 因网络问题跳过请求"
 
-msgid "Report"
-msgstr "报告"
+msgid "[*] Generating report..."
+msgstr ""
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
@@ -1166,34 +1163,3 @@ msgstr "问题汇总："
 
 msgid "Summary of additionals :"
 msgstr ""
-
-#, python-brace-format
-#~ msgid "error: {0} while attacking {1}"
-#~ msgstr "error: {0} while attacking {1}"
-
-#~ msgid ""
-#~ "The scan will be resumed next time unless you pass the --skip-crawl "
-#~ "option."
-#~ msgstr ""
-#~ "下次启动将恢复本次扫描，如果您不想恢复，可使用\"--skip-crawl\"选项。"
-
-#~ msgid "Set a JSON cookie file to use"
-#~ msgstr "设置cookie文件，要求json格式"
-
-#~ msgid "Set output format. Supported: json, html (default), txt, xml"
-#~ msgstr "设置输出格式。支持：json, html (default), txt, xml"
-
-#~ msgid ""
-#~ "Attack process interrupted. Scan will be resumed next time unless you "
-#~ "specify \"--flush-attacks\" or \"--flush-session\"."
-#~ msgstr ""
-#~ "攻击进行异常中止，下次启动将恢复扫描，如果你不想恢复，请使用\"--flush-"
-#~ "attacks\" or \"--flush-session\"参数。"
-
-#~ msgid ""
-#~ "[!] Can't store informations in persister. SQLite database must have been "
-#~ "locked by another process"
-#~ msgstr "[!] 无法存储信息，SQLite数据库很可能被另一进程锁定"
-
-#~ msgid "[!] SSL/TLS error occurred with URL"
-#~ msgstr "[!] SSL/TLS URL出错"

@@ -72,14 +72,6 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr ""
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr ""
 
@@ -198,9 +190,6 @@ msgstr ""
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr ""
 
-msgid "SQL Injection"
-msgstr "Suntikan SQL"
-
 msgid ".NET SQL Injection"
 msgstr "Suntikan .NET SQL"
 
@@ -212,6 +201,9 @@ msgstr "Suntikan XPath"
 
 msgid "LDAP Injection"
 msgstr "Suntikan LDAP"
+
+msgid "SQL Injection"
+msgstr "Suntikan SQL"
 
 msgid "SSRF vulnerability"
 msgstr ""
@@ -240,14 +232,22 @@ msgstr ""
 msgid "Blind SQL vulnerability"
 msgstr "Kelemahan SQL buta "
 
-msgid "Error downloading wapp database."
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
 msgstr ""
 
-msgid "Problem with local wapp database."
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "Problem with local wapp database."
 msgstr ""
 
 msgid "No WordPress Detected"
@@ -851,9 +851,6 @@ msgstr ""
 msgid "[*] Saving scan state, please wait..."
 msgstr ""
 
-msgid " Note"
-msgstr ""
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr ""
@@ -904,8 +901,8 @@ msgstr ""
 msgid "{} requests were skipped due to network issues"
 msgstr ""
 
-msgid "Report"
-msgstr "Laporan"
+msgid "[*] Generating report..."
+msgstr ""
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
@@ -1176,7 +1173,3 @@ msgstr ""
 
 msgid "Summary of additionals :"
 msgstr ""
-
-#, python-brace-format
-#~ msgid "error: {0} while attacking {1}"
-#~ msgstr "ralat: {0} ketika serangan {1}"

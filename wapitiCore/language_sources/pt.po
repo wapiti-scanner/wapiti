@@ -72,14 +72,6 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr ""
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr ""
 
@@ -198,9 +190,6 @@ msgstr "A URL {0} parece vulnerável ao ataque Shellshock!"
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr "A URL {0} parece vulnerável ao ataque Shellshock"
 
-msgid "SQL Injection"
-msgstr "Injeção de SQL"
-
 msgid ".NET SQL Injection"
 msgstr "Injeção de SQL em .NET"
 
@@ -212,6 +201,9 @@ msgstr "Injeção no XPath"
 
 msgid "LDAP Injection"
 msgstr "Injeção no LDAP"
+
+msgid "SQL Injection"
+msgstr "Injeção de SQL"
 
 msgid "SSRF vulnerability"
 msgstr ""
@@ -240,14 +232,22 @@ msgstr ""
 msgid "Blind SQL vulnerability"
 msgstr "Vulnerabilidade de SQL cego"
 
-msgid "Error downloading wapp database."
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
 msgstr ""
 
-msgid "Problem with local wapp database."
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr ""
+
+msgid "Error downloading wapp database."
 msgstr ""
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
+msgstr ""
+
+msgid "Problem with local wapp database."
 msgstr ""
 
 msgid "No WordPress Detected"
@@ -855,9 +855,6 @@ msgstr ""
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Salvando o estado da verificação, por favor aguarde ..."
 
-msgid " Note"
-msgstr "Nota"
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr "Esta verificação foi salva no arquivo {0}"
@@ -908,8 +905,8 @@ msgstr "Erro ao enviar relatório de falhas"
 msgid "{} requests were skipped due to network issues"
 msgstr "{} solicitações foram ignoradas devido a problemas de rede"
 
-msgid "Report"
-msgstr "Relatório"
+msgid "[*] Generating report..."
+msgstr ""
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
@@ -1193,38 +1190,3 @@ msgstr "Resumo das anomalias:"
 
 msgid "Summary of additionals :"
 msgstr ""
-
-#, python-brace-format
-#~ msgid "error: {0} while attacking {1}"
-#~ msgstr "erro: {0} enquanto atacando {1}"
-
-#~ msgid ""
-#~ "The scan will be resumed next time unless you pass the --skip-crawl "
-#~ "option."
-#~ msgstr ""
-#~ "A verificação será retomada na próxima execução, exceto se você passar a "
-#~ "opção --skip-crawl."
-
-#~ msgid "Set a JSON cookie file to use"
-#~ msgstr "Defina um arquivo de cookie JSON a ser usado"
-
-#~ msgid "Set output format. Supported: json, html (default), txt, xml"
-#~ msgstr "Definir formato de saída. Suportados: json, html (padrão), txt, xml"
-
-#~ msgid ""
-#~ "Attack process interrupted. Scan will be resumed next time unless you "
-#~ "specify \"--flush-attacks\" or \"--flush-session\"."
-#~ msgstr ""
-#~ "Processo de ataque interrompido. A verificação será retomada na próxima "
-#~ "vez, a menos que você especifique \"--flash-attacks\" ou \"--flush-session"
-#~ "\"."
-
-#~ msgid ""
-#~ "[!] Can't store informations in persister. SQLite database must have been "
-#~ "locked by another process"
-#~ msgstr ""
-#~ "[!] Não é possível armazenar informações no repositório. O banco de dados "
-#~ "SQLite deve ter sido bloqueado por outro processo"
-
-#~ msgid "[!] SSL/TLS error occurred with URL"
-#~ msgstr "[!] Ocorreu um erro SSL/TLS com a URL"

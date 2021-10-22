@@ -72,14 +72,6 @@ msgstr "CSRF token '{}' might be easy to predict"
 msgid "{0} {1} detected"
 msgstr "{0} {1} detected"
 
-#, python-brace-format
-msgid "  -> Categorie(s): {0}"
-msgstr "  -> Categorie(s): {0}"
-
-#, python-brace-format
-msgid "  -> Group(s): {0}"
-msgstr "  -> Group(s): {0}"
-
 msgid "No Drupal Detected"
 msgstr "No Drupal Detected"
 
@@ -200,9 +192,6 @@ msgstr "URL {0} seems vulnerable to Shellshock attack!"
 msgid "URL {0} seems vulnerable to Shellshock attack"
 msgstr "URL {0} seems vulnerable to Shellshock attack"
 
-msgid "SQL Injection"
-msgstr "SQL Injection"
-
 msgid ".NET SQL Injection"
 msgstr ".NET SQL Injection"
 
@@ -214,6 +203,9 @@ msgstr "XPath Injection"
 
 msgid "LDAP Injection"
 msgstr "LDAP Injection"
+
+msgid "SQL Injection"
+msgstr "SQL Injection"
 
 msgid "SSRF vulnerability"
 msgstr "SSRF vulnerability"
@@ -245,16 +237,24 @@ msgstr "CNAME {domain} to {cname} seems vulnerable to takeover"
 msgid "Blind SQL vulnerability"
 msgstr "Blind SQL vulnerability"
 
+#, python-brace-format
+msgid "  -> Categorie(s): {0}"
+msgstr "  -> Categorie(s): {0}"
+
+#, python-brace-format
+msgid "  -> Group(s): {0}"
+msgstr "  -> Group(s): {0}"
+
 msgid "Error downloading wapp database."
 msgstr "Error downloading wapp database."
-
-msgid "Problem with local wapp database."
-msgstr "Problem with local wapp database."
 
 msgid ""
 "Try using --store-session option, or update apps.json using --update option."
 msgstr ""
 "Try using --store-session option, or update apps.json using --update option."
+
+msgid "Problem with local wapp database."
+msgstr "Problem with local wapp database."
 
 msgid "No WordPress Detected"
 msgstr "No WordPress Detected"
@@ -984,9 +984,6 @@ msgstr "Update done."
 msgid "[*] Saving scan state, please wait..."
 msgstr "[*] Saving scan state, please wait..."
 
-msgid " Note"
-msgstr " Note"
-
 #, python-brace-format
 msgid "This scan has been saved in the file {0}"
 msgstr "This scan has been saved in the file {0}"
@@ -1037,8 +1034,8 @@ msgstr "Error sending crash report"
 msgid "{} requests were skipped due to network issues"
 msgstr "{} requests were skipped due to network issues"
 
-msgid "Report"
-msgstr "Report"
+msgid "[*] Generating report..."
+msgstr "[*] Generating report..."
 
 #, python-brace-format
 msgid "A report has been generated in the file {0}"
