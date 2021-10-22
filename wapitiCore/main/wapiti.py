@@ -883,6 +883,7 @@ async def wapiti_main():
 
     parser.add_argument(
         "--auth-type",
+        required='-a' or '--auth-type' in sys.argv,
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
         choices=["basic", "digest", "ntlm", "post"]
@@ -1222,6 +1223,8 @@ async def wapiti_main():
             wap.set_drop_cookies()
 
         if "credentials" in args:
+            if "auth_type" not in args:
+                raise InvalidOptionValue ("--auth-type", args.auth_type)
             if "%" in args.credentials:
                 wap.set_auth_credentials(args.credentials.split("%", 1))
             else:
