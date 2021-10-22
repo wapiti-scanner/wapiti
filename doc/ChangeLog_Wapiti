@@ -1,3 +1,16 @@
+XX/XX/XXXX
+    Wapiti 3.0.6
+    Crawler: Extract URLs from AngularJS based websites
+    Crawler: Support HTTP responses compressed with Brotli
+    Crawler: Fix handling of upload forms (due to moving to httpx), handling of button fields having a value
+    CLI: Added option to log output to a file
+    Modules: Increased speed of modules Nikto, buster, drupal_enum, brute_login_form thank to concurrency
+    Modules: Added a module to detect subdomain takeovers
+    XSS: Removed references to wapiti3.ovh for XSS payloads
+    Modules: Fixed some false positives in modules backup, Nikto and SQL
+    Modules: Upgrade Wappalyzer module
+    Crawler: Upgrade HTTP related dependencies (httpx, httpcore)
+
 13/05/2021
     Wapiti 3.0.5
     SQL: boolean based blind SQL injection support added
@@ -8,7 +21,6 @@
     CMS: New modules to detect versions and installed modules for Wordpress and Drupal
     Fingerprinting: several issues fixed on mod_wapp
     Crawler: HTTP requests are processed concurrently for faster crawling. Check the new --tasks option.
-
 
 20/02/2021
     Wapiti 3.0.4
