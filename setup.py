@@ -5,7 +5,7 @@ from multiprocessing import cpu_count
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-VERSION = "3.0.6"
+VERSION = "3.0.7"
 DOC_DIR = "share/doc/wapiti"
 
 

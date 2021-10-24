@@ -1,5 +1,5 @@
 14/10/2021
-    Wapiti 3.0.6
+    Wapiti 3.0.7
     Crawler: Extract URLs from AngularJS based websites
     Crawler: Support HTTP responses compressed with Brotli
     Crawler: Fix handling of upload forms (due to moving to httpx), handling of button fields having a value

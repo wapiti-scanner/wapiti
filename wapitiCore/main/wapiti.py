@@ -53,7 +53,7 @@ from wapitiCore.main.log import logging
 from wapitiCore.attack import attack
 
 BASE_DIR = None
-WAPITI_VERSION = "Wapiti 3.0.6"
+WAPITI_VERSION = "Wapiti 3.0.7"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 SCAN_FORCE_VALUES = {

@@ -211,6 +211,7 @@ class mod_takeover(Attack):
         if root_domain in self.processed_domains:
             return False
 
+        self.processed_domains.add(root_domain)
         return True
 
     async def feed_queue(self, queue: asyncio.Queue, domain: str):
