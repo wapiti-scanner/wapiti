@@ -53,7 +53,7 @@ from wapitiCore.main.log import logging
 from wapitiCore.attack import attack
 
 BASE_DIR = None
-WAPITI_VERSION = "Wapiti 3.0.5"
+WAPITI_VERSION = "Wapiti 3.0.6"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 SCAN_FORCE_VALUES = {
@@ -790,7 +790,7 @@ async def wapiti_main():
     ]
 
     print(choice(banners))
-    print("Wapiti-3.0.5 (wapiti.sourceforge.io)")
+    print(f"{WAPITI_VERSION} (wapiti.sourceforge.io)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))
@@ -812,7 +812,7 @@ async def wapiti_main():
     elif datetime.now().month == 3 and datetime.now().day == 31:
         print(_("[*] Today is world backup day! Is your data safe?"))
 
-    parser = argparse.ArgumentParser(description="Wapiti-3.0.5: Web application vulnerability scanner")
+    parser = argparse.ArgumentParser(description=f"{WAPITI_VERSION}: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
