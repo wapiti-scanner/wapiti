@@ -1,4 +1,3 @@
-import os
 import json
 
 import pytest
@@ -18,12 +17,7 @@ async def test_persister_basic():
 
     crawler = AsyncCrawler("http://httpbin.org/")
 
-    try:
-        os.unlink("/tmp/crawl.db")
-    except FileNotFoundError:
-        pass
-
-    persister = SqlPersister("sqlite+aiosqlite:////tmp/crawl.db")
+    persister = SqlPersister("mysql+asyncmy://root:wapiti@127.0.0.1:3306/wapiti", "test1_")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
 
@@ -118,12 +112,7 @@ async def test_persister_basic():
 @pytest.mark.asyncio
 @respx.mock
 async def test_persister_upload():
-    try:
-        os.unlink("/tmp/crawl.db")
-    except FileNotFoundError:
-        pass
-
-    persister = SqlPersister("sqlite+aiosqlite:////tmp/crawl.db")
+    persister = SqlPersister("mysql+asyncmy://root:wapiti@127.0.0.1:3306/wapiti",  "test2_")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
 
@@ -195,12 +184,7 @@ async def test_persister_forms():
 
         forms = list(page.iter_forms())
 
-        try:
-            os.unlink("/tmp/crawl.db")
-        except FileNotFoundError:
-            pass
-
-        persister = SqlPersister("sqlite+aiosqlite:////tmp/crawl.db")
+        persister = SqlPersister("mysql+asyncmy://root:wapiti@127.0.0.1:3306/wapiti",  "test3_")
         await persister.create()
         await persister.set_root_url("http://httpbin.org/")
         await persister.set_to_browse(forms)
@@ -226,12 +210,7 @@ async def test_raw_post():
         enctype="application/json"
     )
 
-    try:
-        os.unlink("/tmp/crawl.db")
-    except FileNotFoundError:
-        pass
-
-    persister = SqlPersister("sqlite+aiosqlite:////tmp/crawl.db")
+    persister = SqlPersister("mysql+asyncmy://root:wapiti@127.0.0.1:3306/wapiti",  "test4_")
     await persister.create()
     await persister.set_root_url("http://httpbin.org/")
     await persister.set_to_browse([json_req])
