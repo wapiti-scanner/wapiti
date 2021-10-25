@@ -11,7 +11,7 @@ import httpx
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_exec import mod_exec
+from wapitiCore.attack.mod_exec import Exec
 from tests import AsyncMock
 
 
@@ -55,7 +55,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = mod_exec(crawler, persister, options, Event())
+    module = Exec(crawler, persister, options, Event())
     module.do_post = True
     for request in all_requests:
         await module.attack(request)
@@ -83,7 +83,7 @@ async def test_detection():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 1}
 
-    module = mod_exec(crawler, persister, options, Event())
+    module = Exec(crawler, persister, options, Event())
     await module.attack(request)
 
     assert persister.add_payload.call_count == 1
@@ -112,7 +112,7 @@ async def test_blind_detection():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
 
-    module = mod_exec(crawler, persister, options, Event())
+    module = Exec(crawler, persister, options, Event())
     module.do_post = False
 
     payloads_until_sleep = 0

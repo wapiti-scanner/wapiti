@@ -28,7 +28,7 @@ from wapitiCore.net.crawler import Page
 from wapitiCore.main.log import log_red
 
 
-class mod_csrf(Attack):
+class Csrf(Attack):
     """
     Detect forms missing Cross-Site Request Forgery protections (CSRF tokens).
     """

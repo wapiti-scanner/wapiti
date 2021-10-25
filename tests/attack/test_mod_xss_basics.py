@@ -6,7 +6,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_xss import mod_xss
+from wapitiCore.attack.mod_xss import Xss
 from tests import AsyncMock
 
 
@@ -39,7 +39,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = mod_xss(crawler, persister, options, Event())
+    module = Xss(crawler, persister, options, Event())
     module.do_post = True
     for request in all_requests:
         await module.attack(request)

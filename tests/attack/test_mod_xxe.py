@@ -11,7 +11,7 @@ import httpx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_xxe import mod_xxe
+from wapitiCore.attack.mod_xxe import Xxe
 from wapitiCore.language.vulnerability import _
 from tests import AsyncMock
 
@@ -42,7 +42,7 @@ async def test_direct_body():
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -63,7 +63,7 @@ async def test_direct_param():
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 1}
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -80,7 +80,7 @@ async def test_direct_query_string():
     crawler = AsyncCrawler("http://127.0.0.1:65084/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -112,7 +112,7 @@ async def test_out_of_band_body():
         "internal_endpoint": "http://wapiti3.ovh/"
     }
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
 
     respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
         return_value=httpx.Response(
@@ -161,7 +161,7 @@ async def test_out_of_band_param():
         "internal_endpoint": "http://wapiti3.ovh/"
     }
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
 
     respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
         return_value=httpx.Response(
@@ -210,7 +210,7 @@ async def test_out_of_band_query_string():
         "internal_endpoint": "http://wapiti3.ovh/"
     }
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -263,7 +263,7 @@ async def test_direct_upload():
         "internal_endpoint": "http://wapiti3.ovh/"
     }
 
-    module = mod_xxe(crawler, persister, options, Event())
+    module = Xxe(crawler, persister, options, Event())
 
     await module.attack(request)
 

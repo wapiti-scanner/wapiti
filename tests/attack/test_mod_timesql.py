@@ -12,7 +12,7 @@ import httpx
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_timesql import mod_timesql
+from wapitiCore.attack.mod_timesql import Timesql
 from tests import AsyncMock
 
 
@@ -37,7 +37,7 @@ async def test_timesql_detection():
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
 
-    module = mod_timesql(crawler, persister, options, Event())
+    module = Timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -59,7 +59,7 @@ async def test_timesql_false_positive():
     crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
     options = {"timeout": 1, "level": 1}
 
-    module = mod_timesql(crawler, persister, options, Event())
+    module = Timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -79,7 +79,7 @@ async def test_false_positive_request_count():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
 
-    module = mod_timesql(crawler, persister, options, Event())
+    module = Timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -104,7 +104,7 @@ async def test_true_positive_request_count():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 1, "level": 1}
 
-    module = mod_timesql(crawler, persister, options, Event())
+    module = Timesql(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 

@@ -26,7 +26,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 
 
-class mod_methods(Attack):
+class Methods(Attack):
     """
     Detect uncommon HTTP methods (like PUT) that may be allowed by a script.
     """

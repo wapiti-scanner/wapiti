@@ -25,7 +25,7 @@ from wapitiCore.definitions.exec import NAME
 from wapitiCore.net.web import Request
 
 
-class mod_exec(Attack):
+class Exec(Attack):
     """
     Detect scripts vulnerable to command and/or code execution.
     """

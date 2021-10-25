@@ -89,6 +89,13 @@ def stop_attack_process():  # pylint: disable=unused-argument
     global_stop_event.set()
 
 
+def module_to_class_name(module_name: str) -> str:
+    # We should use str.removeprefix when 3.7/3.8 support is removed
+    if module_name.startswith("mod_"):
+        module_name = module_name[4:]
+    return module_name.title().replace("_", "")
+
+
 class Wapiti:
     """This class parse the options from the command line and set the modules and the HTTP engine accordingly.
     Launch wapiti without arguments or with the "-h" option for more information."""
@@ -240,10 +247,11 @@ class Wapiti:
                 logging.error(_("[!] Could not find module {0}").format(mod_name))
                 continue
 
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(mod_instance, "set_timeout"):
-                mod_instance.set_timeout(self.crawler.timeout)
-            self.attacks.append(mod_instance)
+            class_name = module_to_class_name(mod_name)
+            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+            if hasattr(class_instance, "set_timeout"):
+                class_instance.set_timeout(self.crawler.timeout)
+            self.attacks.append(class_instance)
 
             self.attacks.sort(key=attrgetter("PRIORITY"))
 
@@ -330,10 +338,11 @@ class Wapiti:
         stop_event = asyncio.Event()
         for mod_name in attack.modules:
             mod = import_module("wapitiCore.attack." + mod_name)
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(mod_instance, "update"):
+            class_name = module_to_class_name(mod_name)
+            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+            if hasattr(class_instance, "update"):
                 logging.info(_("Updating module {0}").format(mod_name[4:]))
-                await mod_instance.update()
+                await class_instance.update()
         logging.success(_("Update done."))
 
     async def load_scan_state(self):
@@ -1155,9 +1164,10 @@ async def wapiti_main():
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
         for module_name in modules_list:
             mod = import_module("wapitiCore.attack.mod_" + module_name)
+            class_name = module_to_class_name(module_name)
             is_common = " (used by default)" if module_name in attack.commons else ""
             print(f"\t{module_name}{is_common}")
-            print("\t\t" + getdoc(getattr(mod, "mod_" + module_name)))
+            print("\t\t" + getdoc(getattr(mod, class_name)))
             print('')
         sys.exit()
 

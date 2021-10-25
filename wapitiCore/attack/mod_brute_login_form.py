@@ -31,7 +31,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red
 
 
-class mod_brute_login_form(Attack):
+class BruteLoginForm(Attack):
     """Attempt to login on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
     PAYLOADS_FILE = "passwords.txt"

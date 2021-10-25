@@ -63,7 +63,7 @@ def get_root_domain(domain: str):
     return get_fld(domain, fix_protocol=True)
 
 
-class Takeover:
+class TakeoverChecker:
     def __init__(self):
         with open(os.path.join(DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             data = json.load(fd)
@@ -197,14 +197,14 @@ async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[
     return [record.to_text().strip(".") for record in results]
 
 
-class mod_takeover(Attack):
+class Takeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         super().__init__(crawler, persister, attack_options, stop_event)
         self.processed_domains = set()
-        self.takeover = Takeover()
+        self.takeover = TakeoverChecker()
 
     async def must_attack(self, request: Request):
         root_domain = get_root_domain(request.hostname)

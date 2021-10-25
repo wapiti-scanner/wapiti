@@ -10,7 +10,7 @@ import dns.resolver
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_takeover import mod_takeover, Takeover
+from wapitiCore.attack.mod_takeover import Takeover, TakeoverChecker
 from tests import AsyncMock
 
 CNAME_TEMPLATE = """id 5395
@@ -60,7 +60,7 @@ async def test_unregistered_cname():
             crawler = AsyncCrawler("http://perdu.com/", timeout=1)
             options = {"timeout": 10, "level": 2}
 
-            module = mod_takeover(crawler, persister, options, Event())
+            module = Takeover(crawler, persister, options, Event())
 
             for request in all_requests:
                 await module.attack(request)
@@ -82,7 +82,7 @@ async def test_github_io_false_positive():
         return_value=httpx.Response(200, text="I'm registered")
     )
 
-    takeover = Takeover()
+    takeover = TakeoverChecker()
     assert not await takeover.check("victim.com", "falsepositive.github.io")
 
 
@@ -97,7 +97,7 @@ async def test_github_io_true_positive():
         return_value=httpx.Response(404, text="No such user")
     )
 
-    takeover = Takeover()
+    takeover = TakeoverChecker()
     assert await takeover.check("victim.com", "truepositive.github.io")
 
 
@@ -116,7 +116,7 @@ async def test_myshopify_false_positive():
         return_value=httpx.Response(200, json={"status": "unavailable"})
     )
 
-    takeover = Takeover()
+    takeover = TakeoverChecker()
     assert not await takeover.check("victim.com", "falsepositive.myshopify.com")
 
 
@@ -135,5 +135,5 @@ async def test_myshopify_true_positive():
         return_value=httpx.Response(200, json={"status": "available"})
     )
 
-    takeover = Takeover()
+    takeover = TakeoverChecker()
     assert await takeover.check("victim.com", "falsepositive.myshopify.com")

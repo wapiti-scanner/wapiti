@@ -7,7 +7,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_wapp import mod_wapp
+from wapitiCore.attack.mod_wapp import Wapp
 from wapitiCore.language.language import _
 from tests import AsyncMock
 
@@ -38,7 +38,7 @@ async def test_false_positive():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -70,7 +70,7 @@ async def test_url_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -108,7 +108,7 @@ async def test_html_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -145,7 +145,7 @@ async def test_script_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -182,7 +182,7 @@ async def test_cookies_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -219,7 +219,7 @@ async def test_headers_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -257,7 +257,7 @@ async def test_meta_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -297,7 +297,7 @@ async def test_multi_detection():
     crawler = AsyncCrawler("http://perdu.com/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -334,7 +334,7 @@ async def test_implies_detection():
     crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -374,7 +374,7 @@ async def test_vulnerabilities():
     crawler = AsyncCrawler("http://perdu.com")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wapp(crawler, persister, options, Event())
+    module = Wapp(crawler, persister, options, Event())
 
     await module.attack(request)
 

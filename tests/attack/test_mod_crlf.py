@@ -7,7 +7,7 @@ import httpx
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_crlf import mod_crlf
+from wapitiCore.attack.mod_crlf import Crlf
 from tests import AsyncMock
 
 
@@ -28,7 +28,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = mod_crlf(crawler, persister, options, Event())
+    module = Crlf(crawler, persister, options, Event())
     module.do_get = True
     await module.attack(request)
 

@@ -53,7 +53,7 @@ from wapitiCore.net.web import Request
 # ((6 or 7) and 8) and not (9 or 10)
 
 
-class mod_nikto(Attack):
+class Nikto(Attack):
     """
     Perform a brute-force attack to uncover known and potentially dangerous scripts on the web server.
     """
