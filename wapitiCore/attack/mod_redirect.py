@@ -25,7 +25,7 @@ from wapitiCore.definitions.redirect import NAME
 from wapitiCore.net.web import Request
 
 
-class mod_redirect(Attack):
+class Redirect(Attack):
     """Detect Open Redirect vulnerabilities."""
     # Won't work with PHP >= 4.4.2
 

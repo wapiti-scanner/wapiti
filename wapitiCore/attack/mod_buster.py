@@ -26,7 +26,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 
 
-class mod_buster(Attack):
+class Buster(Attack):
     """
     Brute force paths on the web-server to discover hidden files and directories.
     """

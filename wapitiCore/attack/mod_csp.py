@@ -29,7 +29,7 @@ MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
 
 
 # This module check the basics recommendations of CSP
-class mod_csp(Attack):
+class Csp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 

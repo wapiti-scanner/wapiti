@@ -9,7 +9,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_nikto import mod_nikto
+from wapitiCore.attack.mod_nikto import Nikto
 from tests import AsyncMock
 
 
@@ -41,7 +41,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = mod_nikto(crawler, persister, options, Event())
+    module = Nikto(crawler, persister, options, Event())
     module.do_get = True
     await module.attack(request)
 
@@ -95,7 +95,7 @@ async def test_false_positives():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = mod_nikto(crawler, persister, options, Event())
+    module = Nikto(crawler, persister, options, Event())
     module.do_get = True
     module.NIKTO_DB = "temp_nikto_db"
     await module.attack(request)

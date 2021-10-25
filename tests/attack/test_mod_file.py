@@ -9,7 +9,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_file import mod_file, has_prefix_or_suffix, find_warning_message, FileWarning
+from wapitiCore.attack.mod_file import File, has_prefix_or_suffix, find_warning_message, FileWarning
 from tests import AsyncMock
 
 
@@ -33,7 +33,7 @@ async def test_inclusion_detection():
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_file(crawler, persister, options, Event())
+    module = File(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -52,7 +52,7 @@ async def test_warning_false_positive():
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_file(crawler, persister, options, Event())
+    module = File(crawler, persister, options, Event())
     module.do_post = False
     await module.attack(request)
 
@@ -81,7 +81,7 @@ async def test_no_crash():
     crawler = AsyncCrawler("http://127.0.0.1:65085/")
     options = {"timeout": 10, "level": 2}
 
-    module = mod_file(crawler, persister, options, Event())
+    module = File(crawler, persister, options, Event())
     module.do_post = False
     for request in all_requests:
         await module.attack(request)

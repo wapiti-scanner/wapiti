@@ -35,7 +35,8 @@ MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_CATEGORIES = _("  -> Categorie(s): {0}")
 MSG_GROUPS = _("  -> Group(s): {0}")
 
-class mod_wapp(Attack):
+
+class Wapp(Attack):
     """
     Identify web technologies used by the web server using Wappalyzer database.
     """
@@ -177,15 +178,15 @@ class mod_wapp(Attack):
             json.dump(technologies, file)
 
     async def _verify_wapp_database(
-        self,
-        categories_file_path: str,
-        technologies_base_path: str,
-        groups_file_path: str
+            self,
+            categories_file_path: str,
+            technologies_base_path: str,
+            groups_file_path: str
     ):
         try:
             with open(categories_file_path, encoding='utf-8') as categories_file, \
-                open(technologies_base_path, encoding='utf-8') as technologies_file, \
-                open(groups_file_path, encoding='utf-8') as groups_file:
+                    open(technologies_base_path, encoding='utf-8') as technologies_file, \
+                    open(groups_file_path, encoding='utf-8') as groups_file:
                 json.load(categories_file)
                 json.load(technologies_file)
                 json.load(groups_file)
