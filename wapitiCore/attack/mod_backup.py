@@ -33,7 +33,7 @@ from wapitiCore.definitions.backup import NAME
 from wapitiCore.net.web import Request
 
 
-class Backup(Attack):
+class ModuleBackup(Attack):
     """
     Uncover backup files on the web server.
     """

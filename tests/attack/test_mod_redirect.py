@@ -11,7 +11,7 @@ import respx
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_redirect import Redirect
+from wapitiCore.attack.mod_redirect import ModuleRedirect
 from tests import AsyncMock
 
 
@@ -33,7 +33,7 @@ async def test_redirect_detection():
     crawler = AsyncCrawler("http://127.0.0.1:65080/")
     options = {"timeout": 10, "level": 2}
 
-    module = Redirect(crawler, persister, options, Event())
+    module = ModuleRedirect(crawler, persister, options, Event())
     await module.attack(request)
 
     assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -73,7 +73,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Redirect(crawler, persister, options, Event())
+    module = ModuleRedirect(crawler, persister, options, Event())
     module.do_post = True
     for request in all_requests:
         await module.attack(request)

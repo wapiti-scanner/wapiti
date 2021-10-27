@@ -9,7 +9,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_drupal_enum import DrupalEnum
+from wapitiCore.attack.mod_drupal_enum import ModuleDrupalEnum
 from tests import AsyncMock
 
 
@@ -37,7 +37,7 @@ async def test_no_drupal():
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = DrupalEnum(crawler, persister, options, Event())
+    module = ModuleDrupalEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -73,7 +73,7 @@ async def test_version_detected():
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = DrupalEnum(crawler, persister, options, Event())
+    module = ModuleDrupalEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -113,7 +113,7 @@ async def test_multi_versions_detected():
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = DrupalEnum(crawler, persister, options, Event())
+    module = ModuleDrupalEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -152,7 +152,7 @@ async def test_version_not_detected():
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = DrupalEnum(crawler, persister, options, Event())
+    module = ModuleDrupalEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 

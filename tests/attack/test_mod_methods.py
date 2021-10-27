@@ -7,7 +7,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_methods import Methods
+from wapitiCore.attack.mod_methods import ModuleMethods
 from tests import AsyncMock
 
 
@@ -41,7 +41,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Methods(crawler, persister, options, Event())
+    module = ModuleMethods(crawler, persister, options, Event())
     module.do_get = True
     for request in all_requests:
         await module.attack(request)

@@ -17,7 +17,7 @@ MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_DRUPAL = _("No Drupal Detected")
 
 
-class DrupalEnum(Attack):
+class ModuleDrupalEnum(Attack):
     """Detect Drupal version."""
     name = "drupal_enum"
     PAYLOADS_HASH = "drupal_hash_files.json"

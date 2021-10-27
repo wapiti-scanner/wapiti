@@ -6,7 +6,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_backup import Backup
+from wapitiCore.attack.mod_backup import ModuleBackup
 from tests import AsyncMock
 
 
@@ -27,7 +27,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Backup(crawler, persister, options, Event())
+    module = ModuleBackup(crawler, persister, options, Event())
     module.do_get = True
     await module.attack(request)
 
@@ -52,7 +52,7 @@ async def test_false_positive():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Backup(crawler, persister, options, Event())
+    module = ModuleBackup(crawler, persister, options, Event())
     module.do_get = True
     assert not await module.must_attack(request)
 

@@ -27,7 +27,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
 
-class Crlf(Attack):
+class ModuleCrlf(Attack):
     """Detect Carriage Return Line Feed (CRLF) injection vulnerabilities."""
     # Won't work with PHP >= 4.4.2
 
