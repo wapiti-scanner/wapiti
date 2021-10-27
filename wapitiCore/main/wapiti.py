@@ -93,7 +93,7 @@ def module_to_class_name(module_name: str) -> str:
     # We should use str.removeprefix when 3.7/3.8 support is removed
     if module_name.startswith("mod_"):
         module_name = module_name[4:]
-    return module_name.title().replace("_", "")
+    return "Module" + module_name.title().replace("_", "")
 
 
 class Wapiti:

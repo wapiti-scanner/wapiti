@@ -29,7 +29,7 @@ from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net.web import Request
 
 
-class Xss(Attack):
+class ModuleXss(Attack):
     """Detects stored (aka permanent) Cross-Site Scripting vulnerabilities on the web server."""
 
     name = "xss"

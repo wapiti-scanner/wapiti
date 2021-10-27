@@ -8,7 +8,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_csrf import Csrf
+from wapitiCore.attack.mod_csrf import ModuleCsrf
 from wapitiCore.language.vulnerability import _
 from tests import AsyncMock
 
@@ -60,7 +60,7 @@ async def test_csrf_cases():
     crawler = AsyncCrawler("http://127.0.0.1:65086/", timeout=1)
     options = {"timeout": 10, "level": 1}
 
-    module = Csrf(crawler, persister, options, Event())
+    module = ModuleCsrf(crawler, persister, options, Event())
     module.do_post = True
     for request in all_requests:
         if await module.must_attack(request):

@@ -10,7 +10,7 @@ import dns.resolver
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_takeover import Takeover, TakeoverChecker
+from wapitiCore.attack.mod_takeover import ModuleTakeover, TakeoverChecker
 from tests import AsyncMock
 
 CNAME_TEMPLATE = """id 5395
@@ -60,7 +60,7 @@ async def test_unregistered_cname():
             crawler = AsyncCrawler("http://perdu.com/", timeout=1)
             options = {"timeout": 10, "level": 2}
 
-            module = Takeover(crawler, persister, options, Event())
+            module = ModuleTakeover(crawler, persister, options, Event())
 
             for request in all_requests:
                 await module.attack(request)

@@ -7,7 +7,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_htaccess import Htaccess
+from wapitiCore.attack.mod_htaccess import ModuleHtaccess
 from tests import AsyncMock
 
 
@@ -41,7 +41,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Htaccess(crawler, persister, options, Event())
+    module = ModuleHtaccess(crawler, persister, options, Event())
     module.do_get = True
     for request in all_requests:
         if await module.must_attack(request):

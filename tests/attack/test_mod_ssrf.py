@@ -7,7 +7,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_ssrf import Ssrf
+from wapitiCore.attack.mod_ssrf import ModuleSsrf
 from tests import AsyncMock
 
 
@@ -47,7 +47,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = Ssrf(crawler, persister, options, Event())
+    module = ModuleSsrf(crawler, persister, options, Event())
     module.do_post = True
 
     respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(

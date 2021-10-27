@@ -197,7 +197,7 @@ async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[
     return [record.to_text().strip(".") for record in results]
 
 
-class Takeover(Attack):
+class ModuleTakeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
 

@@ -36,7 +36,7 @@ MSG_CATEGORIES = _("  -> Categorie(s): {0}")
 MSG_GROUPS = _("  -> Group(s): {0}")
 
 
-class Wapp(Attack):
+class ModuleWapp(Attack):
     """
     Identify web technologies used by the web server using Wappalyzer database.
     """

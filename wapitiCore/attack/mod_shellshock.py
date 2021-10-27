@@ -29,7 +29,7 @@ from wapitiCore.definitions.exec import NAME
 from wapitiCore.main.log import log_red
 
 
-class Shellshock(Attack):
+class ModuleShellshock(Attack):
     """
     Detects scripts vulnerable to the infamous ShellShock vulnerability.
     """
