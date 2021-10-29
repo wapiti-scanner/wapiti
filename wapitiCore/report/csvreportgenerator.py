@@ -47,7 +47,7 @@ class CSVReportGenerator(ReportGenerator):
             writer.writerows(self._anomalies)
             writer.writerows(self._additionals)
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about a vulnerability.
         """
@@ -56,29 +56,29 @@ class CSVReportGenerator(ReportGenerator):
                 [
                     category, level, info, request.method, parameter,
                     request.url, request.encoded_data, request.referer,
-                    auth, module
+                    self._infos["auth"], module
                 ]
             )
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """Store the information about an anomaly met during the attack."""
         if request is not None:
             self._anomalies.append(
                 [
                     category, level, info, request.method, parameter,
                     request.url, request.encoded_data, request.referer,
-                    auth, module
+                    self._infos["auth"], module
                 ]
             )
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """Store the information about an additional."""
         if request is not None:
             self._additionals.append(
                 [
                     category, level, info, request.method, parameter,
                     request.url, request.encoded_data, request.referer,
-                    auth, module
+                    self._infos["auth"], module
                 ]
             )
 

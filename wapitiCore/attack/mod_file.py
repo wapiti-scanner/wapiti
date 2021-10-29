@@ -97,7 +97,7 @@ def find_warning_message(data, payload):
     return None
 
 
-class mod_file(Attack):
+class ModuleFile(Attack):
     """Detect file-related vulnerabilities such as directory traversal and include() vulnerabilities."""
 
     PAYLOADS_FILE = "fileHandlingPayloads.ini"

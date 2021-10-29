@@ -53,7 +53,7 @@ from wapitiCore.main.log import logging
 from wapitiCore.attack import attack
 
 BASE_DIR = None
-WAPITI_VERSION = "Wapiti 3.0.5"
+WAPITI_VERSION = "Wapiti 3.0.7"
 CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 SCAN_FORCE_VALUES = {
@@ -87,6 +87,13 @@ def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
 def stop_attack_process():  # pylint: disable=unused-argument
     logging.info(_("Waiting for all payload tasks to finish for current resource, please wait."))
     global_stop_event.set()
+
+
+def module_to_class_name(module_name: str) -> str:
+    # We should use str.removeprefix when 3.7/3.8 support is removed
+    if module_name.startswith("mod_"):
+        module_name = module_name[4:]
+    return "Module" + module_name.title().replace("_", "")
 
 
 class Wapiti:
@@ -138,6 +145,7 @@ class Wapiti:
         self._max_attack_time = 0
         self._bug_report = True
         self._logfile = ""
+        self._auth_state = None
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -199,7 +207,8 @@ class Wapiti:
             self.target_url,
             self.target_scope,
             gmtime(),
-            WAPITI_VERSION
+            WAPITI_VERSION,
+            self._auth_state
         )
 
         for vul in vulnerabilities:
@@ -240,10 +249,11 @@ class Wapiti:
                 logging.error(_("[!] Could not find module {0}").format(mod_name))
                 continue
 
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(mod_instance, "set_timeout"):
-                mod_instance.set_timeout(self.crawler.timeout)
-            self.attacks.append(mod_instance)
+            class_name = module_to_class_name(mod_name)
+            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+            if hasattr(class_instance, "set_timeout"):
+                class_instance.set_timeout(self.crawler.timeout)
+            self.attacks.append(class_instance)
 
             self.attacks.sort(key=attrgetter("PRIORITY"))
 
@@ -330,10 +340,11 @@ class Wapiti:
         stop_event = asyncio.Event()
         for mod_name in attack.modules:
             mod = import_module("wapitiCore.attack." + mod_name)
-            mod_instance = getattr(mod, mod_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(mod_instance, "update"):
+            class_name = module_to_class_name(mod_name)
+            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+            if hasattr(class_instance, "update"):
                 logging.info(_("Updating module {0}").format(mod_name[4:]))
-                await mod_instance.update()
+                await class_instance.update()
         logging.success(_("Update done."))
 
     async def load_scan_state(self):
@@ -541,17 +552,6 @@ class Wapiti:
                 filename = f"{self.server.replace(':', '_')}_{strftime('%m%d%Y_%H%M', self.report_gen.scan_date)}"
                 self.output_file = filename + "." + self.report_generator_type
 
-        auth_dict = None
-        if self.crawler.credentials:
-            auth_url = None
-            if self.crawler.auth_method == "post":
-                auth_url = self.crawler.auth_url
-
-            auth_dict = {
-                "method": self.crawler.auth_method,
-                "url": auth_url
-            }
-
         async for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":
                 self.report_gen.add_vulnerability(
@@ -561,7 +561,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
@@ -571,7 +570,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
             elif payload.type == "additional":
                 self.report_gen.add_additional(
@@ -581,7 +579,6 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    auth=auth_dict
                 )
 
         print('')
@@ -733,6 +730,14 @@ class Wapiti:
     async def have_attacks_started(self) -> bool:
         return await self.persister.have_attacks_started()
 
+    def set_auth_state(self, is_logged_in: bool, form: dict, url: str, method: str):
+        self._auth_state = {
+            "method": method,
+            "url": url,
+            "logged_in": is_logged_in,
+            "form": form,
+        }
+
 
 def fix_url_path(url: str):
     """Fix the url path if its not defined"""
@@ -790,7 +795,7 @@ async def wapiti_main():
     ]
 
     print(choice(banners))
-    print("Wapiti-3.0.5 (wapiti.sourceforge.io)")
+    print(f"{WAPITI_VERSION} (wapiti.sourceforge.io)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))
@@ -812,7 +817,7 @@ async def wapiti_main():
     elif datetime.now().month == 3 and datetime.now().day == 31:
         print(_("[*] Today is world backup day! Is your data safe?"))
 
-    parser = argparse.ArgumentParser(description="Wapiti-3.0.5: Web application vulnerability scanner")
+    parser = argparse.ArgumentParser(description=f"{WAPITI_VERSION}: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -1156,9 +1161,10 @@ async def wapiti_main():
         modules_list = sorted(module_name[4:] for module_name in attack.modules)
         for module_name in modules_list:
             mod = import_module("wapitiCore.attack.mod_" + module_name)
+            class_name = module_to_class_name(module_name)
             is_common = " (used by default)" if module_name in attack.commons else ""
             print(f"\t{module_name}{is_common}")
-            print("\t\t" + getdoc(getattr(mod, "mod_" + module_name)))
+            print("\t\t" + getdoc(getattr(mod, class_name)))
             print('')
         sys.exit()
 
@@ -1333,8 +1339,9 @@ async def wapiti_main():
                 if await wap.has_scan_started():
                     logging.info(_("[*] Resuming scan from previous session, please wait"))
 
-                if "auth_type" in args and args.auth_type == "post":
-                    await wap.crawler.async_try_login(wap.crawler.auth_url)
+                if "auth_type" in args:
+                    is_logged_in, form = await wap.crawler.async_try_login(wap.crawler.auth_url, args.auth_type)
+                    wap.set_auth_state(is_logged_in, form, wap.crawler.auth_url, args.auth_type)
 
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)

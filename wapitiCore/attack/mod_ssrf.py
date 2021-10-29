@@ -146,7 +146,7 @@ class SsrfMutator(Mutator):
                 yield evil_req, "QUERY_STRING", payload, Flags(method=PayloadType.get)
 
 
-class mod_ssrf(Attack):
+class ModuleSsrf(Attack):
     """
     Detect Server-Side Request Forgery vulnerabilities.
     """

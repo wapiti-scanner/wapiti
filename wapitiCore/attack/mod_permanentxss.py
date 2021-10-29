@@ -30,7 +30,7 @@ from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, 
 from wapitiCore.net.csp_utils import has_strong_csp
 
 
-class mod_permanentxss(Attack):
+class ModulePermanentxss(Attack):
     """
     Detect stored (aka permanent) Cross-Site Scripting vulnerabilities on the web server.
     """

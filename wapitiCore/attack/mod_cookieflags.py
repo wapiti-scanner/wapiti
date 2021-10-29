@@ -26,7 +26,7 @@ INFO_COOKIE_HTTPONLY = _("HttpOnly flag is not set in the cookie : {0}")
 INFO_COOKIE_SECURE = _("Secure flag is not set in the cookie : {0}")
 
 
-class mod_cookieflags(Attack):
+class ModuleCookieflags(Attack):
     """Evaluate the security of cookies on the website."""
     name = "cookieflags"
     finished = False

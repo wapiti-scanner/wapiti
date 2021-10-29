@@ -15,6 +15,20 @@
         <p>Date of the scan: ${scan_date}. Scope of the scan: ${scan_scope}</p>
         </header>
         <hr />
+        % if auth_dict != None:
+        <h4>Authentication</h4>
+        <p>
+            Method: ${auth_dict["method"]}<br>
+            Url: ${auth_dict["url"]}<br>
+            Logged in: ${auth_dict["logged_in"]}<br>
+            % if auth_form_dict != None and len(auth_form_dict) > 0:
+            Login field: ${auth_form_dict["login_field"]}<br>
+            Password field: ${auth_form_dict["password_field"]}<br>
+            % endif
+        </p>
+        <hr />
+        % endif
+
         <h4>Summary</h4>
         <table class="width-100 hovered" style="background: url('logo_clear.png') no-repeat center;">
             <thead>

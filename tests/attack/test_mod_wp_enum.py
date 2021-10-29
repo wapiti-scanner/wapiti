@@ -6,7 +6,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_wp_enum import mod_wp_enum
+from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
 from wapitiCore.language.vulnerability import _
 from tests import AsyncMock
 
@@ -33,7 +33,7 @@ async def test_no_wordpress():
 
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wp_enum(crawler, persister, options, Event())
+    module = ModuleWpEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -103,7 +103,7 @@ async def test_plugin():
 
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wp_enum(crawler, persister, options, Event())
+    module = ModuleWpEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 
@@ -183,7 +183,7 @@ async def test_theme():
 
     options = {"timeout": 10, "level": 2}
 
-    module = mod_wp_enum(crawler, persister, options, Event())
+    module = ModuleWpEnum(crawler, persister, options, Event())
 
     await module.attack(request)
 

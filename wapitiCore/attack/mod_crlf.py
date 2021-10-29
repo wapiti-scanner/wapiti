@@ -27,7 +27,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
 
-class mod_crlf(Attack):
+class ModuleCrlf(Attack):
     """Detect Carriage Return Line Feed (CRLF) injection vulnerabilities."""
     # Won't work with PHP >= 4.4.2
 
@@ -35,7 +35,7 @@ class mod_crlf(Attack):
     MSG_VULN = _("CRLF Injection")
     do_get = True
     do_post = True
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.5 version"), Flags())
+    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.7 version"), Flags())
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         super().__init__(crawler, persister, attack_options, stop_event)

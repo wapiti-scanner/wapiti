@@ -47,7 +47,7 @@ class JsonCookie:
                 self.cookiedict = {}
         return self.cookiedict
 
-    def addcookies(self, cookies):
+    def addcookies(self, cookies: Cookies):
         """Inject Cookies from a CookieJar into our JSON dictionary."""
         if not isinstance(cookies, Cookies):
             return False
@@ -75,6 +75,7 @@ class JsonCookie:
                 "version": cookie.version
             }
             self.cookiedict[domain_key][cookie.path][cookie.name] = cookie_attrs
+        return True
 
     def cookiejar(self, domain):
         """Returns a cookielib.CookieJar object containing cookies matching the given domain."""

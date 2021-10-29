@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from xml.dom.minidom import Document
+from xml.dom.minidom import Document, Element
 
 from wapitiCore.report.reportgenerator import ReportGenerator
 
@@ -34,7 +34,7 @@ class XMLReportGenerator(ReportGenerator):
     method add_vulnerability(vulnerabilityTypeName,level,url,parameter,info).
     The format of the file is XML and it has the following structure:
     <report type="security">
-        <generatedBy id="Wapiti 3.0.5"/>
+        <generatedBy id="Wapiti 3.0.7"/>
         <vulnerabilityTypeList>
             <vulnerabilityType name="SQL Injection">
 
@@ -72,7 +72,7 @@ class XMLReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -87,7 +87,6 @@ class XMLReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
         }
@@ -107,7 +106,7 @@ class XMLReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -122,7 +121,6 @@ class XMLReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
         }
@@ -145,7 +143,7 @@ class XMLReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -160,7 +158,6 @@ class XMLReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "auth": auth,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
         }
@@ -179,32 +176,7 @@ class XMLReportGenerator(ReportGenerator):
         self._xml_doc.appendChild(report)
 
         # Add report infos
-        report_infos = self._xml_doc.createElement("report_infos")
-        generator_name = self._xml_doc.createElement("info")
-        generator_name.setAttribute("name", "generatorName")
-        generator_name.appendChild(self._xml_doc.createTextNode("wapiti"))
-        report_infos.appendChild(generator_name)
-
-        generator_version = self._xml_doc.createElement("info")
-        generator_version.setAttribute("name", "generatorVersion")
-        generator_version.appendChild(self._xml_doc.createTextNode(self._infos["version"]))
-        report_infos.appendChild(generator_version)
-
-        scope = self._xml_doc.createElement("info")
-        scope.setAttribute("name", "scope")
-        scope.appendChild(self._xml_doc.createTextNode(self._infos["scope"]))
-        report_infos.appendChild(scope)
-
-        date_of_scan = self._xml_doc.createElement("info")
-        date_of_scan.setAttribute("name", "dateOfScan")
-        date_of_scan.appendChild(self._xml_doc.createTextNode(self._infos["date"]))
-        report_infos.appendChild(date_of_scan)
-
-        target = self._xml_doc.createElement("info")
-        target.setAttribute("name", "target")
-        target.appendChild(self._xml_doc.createTextNode(self._infos["target"]))
-        report_infos.appendChild(target)
-
+        report_infos = self._create_info_section()
         report.appendChild(report_infos)
 
         vulnerabilities = self._xml_doc.createElement("vulnerabilities")
@@ -277,17 +249,6 @@ class XMLReportGenerator(ReportGenerator):
                 module_node = self._xml_doc.createElement("module")
                 module_node.appendChild(self._xml_doc.createTextNode(flaw["module"]))
                 entry_node.appendChild(module_node)
-                auth_node = self._xml_doc.createElement("auth")
-                if flaw["auth"]:
-                    auth_method_node = self._xml_doc.createElement("auth_method")
-                    auth_method_node.appendChild(self._xml_doc.createTextNode(flaw["auth"]["method"]))
-                    auth_node.appendChild(auth_method_node)
-                    auth_url_node = self._xml_doc.createElement("auth_url")
-                    auth_url_node.appendChild(self._xml_doc.createTextNode(flaw["auth"]["url"]))
-                    auth_node.appendChild(auth_url_node)
-                else:
-                    auth_node.appendChild(self._xml_doc.createTextNode(str(flaw["auth"])))
-                entry_node.appendChild(auth_node)
                 http_request_node = self._xml_doc.createElement("http_request")
                 http_request_node.appendChild(self._xml_doc.createCDATASection(flaw["http_request"]))
                 entry_node.appendChild(http_request_node)
@@ -303,3 +264,69 @@ class XMLReportGenerator(ReportGenerator):
 
         with open(output_path, "w", errors="ignore", encoding='utf-8') as xml_report_file:
             self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")
+
+    def _create_info_section(self) -> Element:
+        """
+        Write the authentication section explaining what method, fields, url were used and also if it has been
+        successful
+        """
+        report_infos = self._xml_doc.createElement("report_infos")
+        generator_name = self._xml_doc.createElement("info")
+        generator_name.setAttribute("name", "generatorName")
+        generator_name.appendChild(self._xml_doc.createTextNode("wapiti"))
+        report_infos.appendChild(generator_name)
+
+        generator_version = self._xml_doc.createElement("info")
+        generator_version.setAttribute("name", "generatorVersion")
+        generator_version.appendChild(self._xml_doc.createTextNode(self._infos["version"]))
+        report_infos.appendChild(generator_version)
+
+        scope = self._xml_doc.createElement("info")
+        scope.setAttribute("name", "scope")
+        scope.appendChild(self._xml_doc.createTextNode(self._infos["scope"]))
+        report_infos.appendChild(scope)
+
+        date_of_scan = self._xml_doc.createElement("info")
+        date_of_scan.setAttribute("name", "dateOfScan")
+        date_of_scan.appendChild(self._xml_doc.createTextNode(self._infos["date"]))
+        report_infos.appendChild(date_of_scan)
+
+        target = self._xml_doc.createElement("info")
+        target.setAttribute("name", "target")
+        target.appendChild(self._xml_doc.createTextNode(self._infos["target"]))
+        report_infos.appendChild(target)
+
+        auth_node = self._xml_doc.createElement("info")
+        auth_node.setAttribute("name", "auth")
+
+        if self._infos.get("auth") is not None:
+            auth_dict = self._infos["auth"]
+            is_logged_in = "true" if auth_dict["logged_in"] is True else "false"
+
+            auth_method_node = self._xml_doc.createElement("method")
+            auth_method_node.appendChild(self._xml_doc.createTextNode(auth_dict["method"]))
+            auth_node.appendChild(auth_method_node)
+            auth_url_node = self._xml_doc.createElement("url")
+            auth_url_node.appendChild(self._xml_doc.createTextNode(auth_dict["url"]))
+            auth_node.appendChild(auth_url_node)
+            auth_logged_in_node = self._xml_doc.createElement("logged_in")
+            auth_logged_in_node.appendChild(self._xml_doc.createTextNode(is_logged_in))
+            auth_node.appendChild(auth_logged_in_node)
+
+            form_node = self._xml_doc.createElement("form")
+            if auth_dict.get("form") is not None and len(auth_dict["form"]) > 0:
+                auth_form_dict = auth_dict["form"]
+
+                form_login_field_node = self._xml_doc.createElement("login_field")
+                form_login_field_node.appendChild(self._xml_doc.createTextNode(auth_form_dict["login_field"]))
+                form_node.appendChild(form_login_field_node)
+                form_password_field_node = self._xml_doc.createElement("password_field")
+                form_password_field_node.appendChild(self._xml_doc.createTextNode(auth_form_dict["password_field"]))
+                form_node.appendChild(form_password_field_node)
+                auth_node.appendChild(form_node)
+            else:
+                form_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
+        else:
+            auth_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
+        report_infos.appendChild(auth_node)
+        return report_infos

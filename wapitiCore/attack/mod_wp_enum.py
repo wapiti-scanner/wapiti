@@ -12,7 +12,7 @@ MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_WP = _("No WordPress Detected")
 
 
-class mod_wp_enum(Attack):
+class ModuleWpEnum(Attack):
     """Detect WordPress Plugins with version."""
     name = "wp_enum"
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"

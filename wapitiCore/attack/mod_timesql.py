@@ -25,7 +25,7 @@ from wapitiCore.definitions.timesql import NAME
 from wapitiCore.net.web import Request
 
 
-class mod_timesql(Attack):
+class ModuleTimesql(Attack):
     """
     Detect SQL injection vulnerabilities using blind time-based technique.
     """

@@ -30,7 +30,7 @@ from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red, log_verbose
 
 
-class mod_htaccess(Attack):
+class ModuleHtaccess(Attack):
     """
     Attempt to bypass access controls to a resource by using a custom HTTP method.
     """

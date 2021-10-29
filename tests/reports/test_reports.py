@@ -15,7 +15,16 @@ def test_reports():
             "http://perdu.com",
             "folder",
             gmtime(),
-            "WAPITI_VERSION"
+            "WAPITI_VERSION",
+            {
+                "method": "post",
+                "url": "http://testphp.vulnweb.com/login.php",
+                "logged_in": True,
+                "form": {
+                    "login_field": "uname",
+                    "password_field": "pass"
+                }
+            }
         )
 
         for vul in vulnerabilities:
@@ -91,3 +100,6 @@ def test_reports():
             assert "riri" in report
             assert "fifi" in report
             assert "loulou" in report
+            assert "http://testphp.vulnweb.com/login.php" in report
+            assert "uname" in report
+            assert "pass" in report

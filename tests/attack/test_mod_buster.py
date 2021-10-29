@@ -7,7 +7,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_buster import mod_buster
+from wapitiCore.attack.mod_buster import ModuleBuster
 from wapitiCore.attack.attack import Flags
 from tests import AsyncIterator
 
@@ -37,10 +37,10 @@ async def test_whole_stuff():
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
     with patch(
-            "wapitiCore.attack.mod_buster.mod_buster.payloads",
+            "wapitiCore.attack.mod_buster.ModuleBuster.payloads",
             [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
     ):
-        module = mod_buster(crawler, persister, options, Event())
+        module = ModuleBuster(crawler, persister, options, Event())
         module.do_get = True
         await module.attack(request)
 

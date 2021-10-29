@@ -7,7 +7,7 @@ import httpx
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
-from wapitiCore.attack.mod_crlf import mod_crlf
+from wapitiCore.attack.mod_crlf import ModuleCrlf
 from tests import AsyncMock
 
 
@@ -17,7 +17,7 @@ async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     respx.get(url__regex=r"http://perdu\.com/\?a=.*&foo=bar").mock(return_value=httpx.Response(200, text="Hello there"))
     respx.get(url__regex=r"http://perdu.com/\?a=b*&foo=.*wapiti.*").mock(
-        return_value=httpx.Response(200, text="Hello there", headers={"wapiti": "3.0.5 version"})
+        return_value=httpx.Response(200, text="Hello there", headers={"wapiti": "3.0.7 version"})
     )
 
     persister = AsyncMock()
@@ -28,7 +28,7 @@ async def test_whole_stuff():
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
     options = {"timeout": 10, "level": 2}
 
-    module = mod_crlf(crawler, persister, options, Event())
+    module = ModuleCrlf(crawler, persister, options, Event())
     module.do_get = True
     await module.attack(request)
 

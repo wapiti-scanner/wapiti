@@ -103,6 +103,7 @@ Supported attacks
 + Cross Site Request Forgery (CSRF) basic detection
 + Fingerprinting of web applications using the Wappalyzer database
 + Enumeration of Wordpress and Drupal modules
++ Subdomain takeovers detection
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -133,6 +134,7 @@ The aforementioned attacks are tied to the following module names :
 + shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
 + sql (Error-based and boolean-based SQL injection detection)
 + ssrf (Server Side Request Forgery)
++ takeover (Subdomain takeover)
 + timesql (SQL injection vulnerabilities detected with time-based methodology)
 + wapp (Not an attack module, retrieves web technologies with versions and categories in use on the target)
 + wp_enum (Enumerate plugins and themes on a Wordpress website)

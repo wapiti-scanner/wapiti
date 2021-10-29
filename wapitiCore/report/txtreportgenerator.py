@@ -68,6 +68,8 @@ class TXTReportGenerator(ReportGenerator):
                 txt_report_file.write(separator)
                 txt_report_file.write("\n")
 
+                self._write_auth_info(txt_report_file)
+
                 txt_report_file.write(title(_("Summary of vulnerabilities :")))
                 for category, vulnerabilities in self._vulns.items():
                     txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(vulnerabilities)).rjust(NB_COLUMNS))
@@ -147,7 +149,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -177,7 +179,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -214,7 +216,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", auth=None):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -231,3 +233,24 @@ class TXTReportGenerator(ReportGenerator):
         if category not in self._additionals:
             self._additionals[category] = []
         self._additionals[category].append(addition_dict)
+
+    def _write_auth_info(self, txt_report_file: codecs.StreamReaderWriter):
+        """
+        Write the authentication section explaining what method, fields, url were used and also if it has been
+        successful
+        """
+        if self._infos.get("auth") is None:
+            return
+        auth_dict = self._infos["auth"]
+        txt_report_file.write(title(_("Authentication :")))
+        txt_report_file.write(f"Method: {auth_dict['method']}\n")
+        txt_report_file.write(f"Url: {auth_dict['url']}\n")
+        txt_report_file.write(f"Logged in: {auth_dict['logged_in']}\n")
+
+        auth_form_dict = auth_dict.get("form")
+        if auth_form_dict is None or len(auth_form_dict) == 0:
+            return
+        txt_report_file.write(f"Login field: {auth_form_dict['login_field']}\n")
+        txt_report_file.write(f"Password field: {auth_form_dict['password_field']}\n")
+        txt_report_file.write("\n")
+        txt_report_file.write(separator)
