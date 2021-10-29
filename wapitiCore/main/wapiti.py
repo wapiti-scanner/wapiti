@@ -888,7 +888,6 @@ async def wapiti_main():
 
     parser.add_argument(
         "--auth-type",
-        required='-a' or '--auth-type' in sys.argv,
         default=argparse.SUPPRESS,
         help=_("Set the authentication type to use"),
         choices=["basic", "digest", "ntlm", "post"]
@@ -1230,13 +1229,15 @@ async def wapiti_main():
 
         if "credentials" in args:
             if "auth_type" not in args:
-                raise InvalidOptionValue ("--auth-type", args.auth_type)
+                raise InvalidOptionValue("--auth-type", "This option is required when -a is used")
             if "%" in args.credentials:
                 wap.set_auth_credentials(args.credentials.split("%", 1))
             else:
                 raise InvalidOptionValue("-a", args.credentials)
 
         if "auth_type" in args:
+            if "credentials" not in args:
+                raise InvalidOptionValue("-a", "This option is required when --auth-type is used")
             if args.auth_type == "post" and args.starting_urls != []:
                 wap.crawler.auth_url = args.starting_urls[0]
             wap.set_auth_type(args.auth_type)
