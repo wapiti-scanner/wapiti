@@ -259,3 +259,18 @@ async def test_raw_post():
     payload = [__ async for __ in persister.get_payloads()][0]
     assert naughty_json == payload.evil_request
     assert payload.parameter == "z"
+
+
+@pytest.mark.asyncio
+async def test_null_byte_in_parameter():
+    try:
+        os.unlink("/tmp/crawl.db")
+    except FileNotFoundError:
+        pass
+
+    persister = SqlPersister("sqlite+aiosqlite:////tmp/crawl.db")
+    await persister.create()
+    bad_request = Request("http://httpbin.org/match", get_params=[["pattern", "env\0"]])
+    await persister.set_to_browse([bad_request])
+    stored_request = [__ async for __ in persister.get_to_browse()][0]
+    assert stored_request.url == "http://httpbin.org/match?pattern=env%00"
