@@ -134,7 +134,7 @@ class SqlPersister:
             Column(
                 "original_path_id", None,
                 ForeignKey(f"{table_prefix}paths.path_id", ondelete="CASCADE"),
-                nullable=False
+                nullable=True  # allows to link a vulnerability to no existing original request
             ),
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
@@ -695,7 +695,11 @@ class SqlPersister:
             evil_id, original_id, module, category, level, parameter, info, payload_type = row
 
             evil_request = await self.get_path_by_id(evil_id)
-            original_request = await self.get_path_by_id(original_id)
+
+            if original_id is None:
+                original_request = None
+            else:
+                original_request = await self.get_path_by_id(original_id)
 
             yield Payload(evil_request, original_request, category, level, parameter, info, payload_type, module)
 
@@ -704,11 +708,8 @@ class SqlPersister:
             os.unlink(self.database_uri[20:])
             return
 
-        await self.flush_attacks()
         async with self._engine.begin() as conn:
-            await conn.execute(self.paths.delete())
-            await conn.execute(self.params.delete())
-            await conn.execute(self.scan_infos.delete())
+            await conn.run_sync(self.metadata.drop_all)
 
     async def flush_attacks(self):
         async with self._engine.begin() as conn:

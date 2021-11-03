@@ -27,6 +27,7 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -234,7 +235,7 @@ class Attack:
         # Must be left empty in the code
         self.deps = []
 
-    async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
+    async def add_payload(self, payload_type: str, category: str, request_id: Optional[int] = None,
                           level=0, request=None, parameter="", info=""):
         await self.persister.add_payload(
             request_id=request_id,
