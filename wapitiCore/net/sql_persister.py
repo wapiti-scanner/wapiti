@@ -22,7 +22,7 @@ from typing import Iterable, Sequence, AsyncGenerator
 
 from aiocache import cached
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import Table, Column, Integer, String, Boolean, Text, MetaData, ForeignKey, select, \
+from sqlalchemy import Table, Column, Integer, String, Boolean, Text, LargeBinary, MetaData, ForeignKey, select, \
     PickleType, func, and_, or_, literal_column
 
 from wapitiCore.net import web
@@ -63,7 +63,7 @@ class SqlPersister:
     FILE_PARAMS = "file_params"
     DEPTH = "depth"
 
-    def __init__(self, output_file: str, table_prefix: str = ""):
+    def __init__(self, database_uri: str, table_prefix: str = ""):
         # toBrowse can contain GET and POST resources
         self.to_browse = []
         # browsed contains only GET resources
@@ -86,10 +86,10 @@ class SqlPersister:
         self.post_params = []
         self.file_params = []
         self.depth = 0
-        self.output_file = output_file
+        self.database_uri = database_uri
 
-        self._must_create = not os.path.exists(self.output_file)
-        self._engine = create_async_engine(f'sqlite+aiosqlite:///{self.output_file}')
+        self._must_create = not os.path.exists(self.database_uri)
+        self._engine = create_async_engine(database_uri)
         self.register_database_model(table_prefix)
         # May be of interest: https://charlesleifer.com/blog/going-fast-with-sqlite-and-python/
 
@@ -119,19 +119,23 @@ class SqlPersister:
         self.params = Table(
             f"{table_prefix}params", self.metadata,
             Column("param_id", Integer, primary_key=True),
-            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id")),
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id", ondelete="CASCADE")),
             Column("type", String(length=16), nullable=False),  # HTTP method or "FILE" for multipart
             Column("position", Integer, nullable=False),
             Column("name", Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
             Column("value1", Text),  # Can be really huge
-            Column("value2", Text),  # File content. Will be short most of the time but we plan on more usage
+            Column("value2", LargeBinary),  # File content. Will be short most of the time but we plan on more usage
             Column("meta", String(255))  # File mime-type
         )
 
         self.payloads = Table(
             f"{table_prefix}payloads", self.metadata,
             Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
-            Column("original_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column(
+                "original_path_id", None,
+                ForeignKey(f"{table_prefix}paths.path_id", ondelete="CASCADE"),
+                nullable=True  # allows to link a vulnerability to no existing original request
+            ),
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
             Column("level", Integer, nullable=False),
@@ -143,14 +147,14 @@ class SqlPersister:
 
         self.attack_logs = Table(
             f"{table_prefix}attack_logs", self.metadata,
-            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id", ondelete="CASCADE"), nullable=False),
             Column("module", String(255), nullable=False)
         )
 
     async def create(self):
-        if self._must_create:
-            async with self._engine.begin() as conn:
-                await conn.run_sync(self.metadata.create_all)
+        # if self._must_create:
+        async with self._engine.begin() as conn:
+            await conn.run_sync(self.metadata.create_all)
 
     async def close(self):
         await self._engine.dispose()
@@ -185,8 +189,6 @@ class SqlPersister:
             await self.save_request(paths_list[0])
             return
 
-        bigest_id = 0
-        all_path_values = []
         all_param_values = []
 
         async with self._engine.begin() as conn:
@@ -202,41 +204,31 @@ class SqlPersister:
                     await conn.execute(statement)
                     continue
 
-                if bigest_id == 0:
-                    # This is a trick to be able to insert all paths and params in bulk
-                    # instead of inserting path and get the new returned ID to then insert params
-                    result = await conn.execute(select(func.max(self.paths.c.path_id)))
-                    result = result.scalar()
-                    if result is not None:
-                        bigest_id = result
-
-                bigest_id += 1
-
                 # Save the request along with its parameters
+                statement = self.paths.insert().values(
+                    path=http_resource.path,
+                    method=http_resource.method,
+                    enctype=http_resource.enctype,
+                    depth=http_resource.link_depth,
+                    encoding=http_resource.encoding,
+                    http_status=http_resource.status if isinstance(http_resource.status, int) else None,
+                    headers=http_resource.headers,
+                    referer=http_resource.referer,
+                    evil=False
+                )
+
+                result = await conn.execute(statement)
+                path_id = result.inserted_primary_key[0]
+
                 # Beware: https://docs.sqlalchemy.org/en/14/core/tutorial.html#executing-multiple-statements
                 # When executing multiple sets of parameters, each dictionary must have the same set of keys;
                 # i.e. you cant have fewer keys in some dictionaries than others.
                 # This is because the Insert statement is compiled against the first dictionary in the list,
                 # and it’s assumed that all subsequent argument dictionaries are compatible with that statement.
-                all_path_values.append(
-                    {
-                        "path_id": bigest_id,
-                        "path": http_resource.path,
-                        "method": http_resource.method,
-                        "enctype": http_resource.enctype,
-                        "depth": http_resource.link_depth,
-                        "encoding": http_resource.encoding,
-                        "http_status": http_resource.status if isinstance(http_resource.status, int) else None,
-                        "headers": http_resource.headers,
-                        "referer": http_resource.referer,
-                        "evil": False
-                    }
-                )
-
                 for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
                     all_param_values.append(
                         {
-                            "path_id": bigest_id,
+                            "path_id": path_id,
                             "type": "GET",
                             "position": i,
                             "name": get_param_key,
@@ -251,7 +243,7 @@ class SqlPersister:
                     for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
                         all_param_values.append(
                             {
-                                "path_id": bigest_id,
+                                "path_id": path_id,
                                 "type": "POST",
                                 "position": i,
                                 "name": post_param_key,
@@ -263,7 +255,7 @@ class SqlPersister:
                 elif post_params:
                     all_param_values.append(
                         {
-                            "path_id": bigest_id,
+                            "path_id": path_id,
                             "type": "POST",
                             "position": 0,
                             "name": "__RAW__",
@@ -283,7 +275,7 @@ class SqlPersister:
 
                     all_param_values.append(
                         {
-                            "path_id": bigest_id,
+                            "path_id": path_id,
                             "type": "FILE",
                             "position": i,
                             "name": file_param_key,
@@ -293,11 +285,8 @@ class SqlPersister:
                         }
                     )
 
-            if all_path_values:
-                await conn.execute(self.paths.insert(), all_path_values)
-
-                if all_param_values:
-                    await conn.execute(self.params.insert(), all_param_values)
+            if all_param_values:
+                await conn.execute(self.params.insert(), all_param_values)
 
     async def save_request(self, http_resource):
         async with self._engine.begin() as conn:
@@ -556,6 +545,7 @@ class SqlPersister:
         )
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
+
         # path_id is the ID of the evil path
         path_id = result.inserted_primary_key[0]
 
@@ -706,15 +696,21 @@ class SqlPersister:
             evil_id, original_id, module, category, level, parameter, info, payload_type = row
 
             evil_request = await self.get_path_by_id(evil_id)
-            original_request = await self.get_path_by_id(original_id)
+
+            if original_id is None:
+                original_request = None
+            else:
+                original_request = await self.get_path_by_id(original_id)
 
             yield Payload(evil_request, original_request, category, level, parameter, info, payload_type, module)
 
     async def flush_session(self):
-        await self.flush_attacks()
+        if self.database_uri.startswith("sqlite+aiosqlite:///"):
+            os.unlink(self.database_uri[20:])
+            return
+
         async with self._engine.begin() as conn:
-            await conn.execute(self.paths.delete())
-            await conn.execute(self.params.delete())
+            await conn.run_sync(self.metadata.drop_all)
 
     async def flush_attacks(self):
         async with self._engine.begin() as conn:

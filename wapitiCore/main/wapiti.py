@@ -35,6 +35,7 @@ from inspect import getdoc
 import asyncio
 import signal
 from typing import AsyncGenerator
+import configparser
 
 import browser_cookie3
 import httpx
@@ -156,15 +157,25 @@ class Wapiti:
         server_url = self.server.replace(':', '_')
         hashed_root_url = sha256(root_url.encode(errors='replace')).hexdigest()[:8]
 
-        self._history_file = os.path.join(
+        self._state_file = os.path.join(
             SqlPersister.CRAWLER_DATA_DIR,
-            f"{server_url}_{self.target_scope}_{hashed_root_url}.db"
+            f"{server_url}_{self.target_scope}_{hashed_root_url}.pkl"
         )
 
         if not os.path.isdir(SqlPersister.CRAWLER_DATA_DIR):
             os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
-        self.persister = SqlPersister(self._history_file)
+        config = configparser.ConfigParser()
+        config.read(os.path.join(SqlPersister.CONFIG_DIR, "wapiti.conf"))
+        try:
+            self.database_uri = config["database"]["uri"]
+            self.prefix = f"{server_url.replace('.', '_').replace('-', '_')}__{self.target_scope}_{hashed_root_url}_"
+        except KeyError:
+            # If not specified, database is a flat SQLite3 db which the same name but .db suffix
+            self.database_uri = f"sqlite+aiosqlite:///{self._state_file[:-4]}.db"
+            self.prefix = ""
+
+        self.persister = SqlPersister(self.database_uri, self.prefix)
 
     def refresh_logging(self):
         message_format = "{message}"
@@ -195,10 +206,6 @@ class Wapiti:
 
     async def init_persister(self):
         await self.persister.create()
-
-    @property
-    def history_file(self):
-        return self._history_file
 
     def _init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
@@ -362,7 +369,7 @@ class Wapiti:
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
-        logging.info(_("This scan has been saved in the file {0}").format(self.persister.output_file))
+        logging.info(_("This scan has been saved in the file {0}").format(self.persister.database_uri))
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
@@ -375,7 +382,7 @@ class Wapiti:
         explorer.max_requests_per_depth = self._max_links_per_page
         explorer.forbidden_parameters = self._bad_params
         explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
-        explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
+        explorer.load_saved_state(self._state_file)
 
         start = datetime.utcnow()
         buffer = []
@@ -395,7 +402,7 @@ class Wapiti:
         await self.persister.save_requests(buffer)
 
         # Let's save explorer values (limits)
-        explorer.save_state(self.persister.output_file[:-2] + "pkl")
+        explorer.save_state(self._state_file)
 
     async def load_resources_for_module(self, module: attack.Attack) -> AsyncGenerator[Request, None]:
         if module.do_get:
@@ -504,7 +511,7 @@ class Wapiti:
                             logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
-                            with open(traceback_file, "rb", encoding='utf-8') as traceback_byte_fd:
+                            with open(traceback_file, "rb") as traceback_byte_fd:
                                 upload_request = Request(
                                     "https://wapiti3.ovh/upload.php",
                                     file_params=[
@@ -708,17 +715,16 @@ class Wapiti:
         await self.persister.flush_attacks()
 
     async def flush_session(self):
+        await self.persister.flush_session()
         await self.persister.close()
+
         try:
-            os.unlink(self._history_file)
+            # Remove pkl file
+            os.unlink(self._state_file)
         except FileNotFoundError:
             pass
 
-        try:
-            os.unlink(self.persister.output_file[:-2] + "pkl")
-        except FileNotFoundError:
-            pass
-        self.persister = SqlPersister(self._history_file)
+        self.persister = SqlPersister(self.database_uri, self.prefix)
         await self.persister.create()
 
     async def count_resources(self) -> int:
@@ -1327,8 +1333,6 @@ async def wapiti_main():
     except InvalidOptionValue as msg:
         logging.error(msg)
         sys.exit(2)
-
-    assert os.path.exists(wap.history_file)
 
     loop = asyncio.get_event_loop()
 

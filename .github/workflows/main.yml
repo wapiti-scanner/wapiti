@@ -42,6 +42,24 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+    services:
+      mysqldb:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: wapiti
+          MYSQL_DATABASE: wapiti
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      postgresdb:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: wapiti
+          POSTGRES_DB: wapiti
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a health-check
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -55,7 +73,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install php7.4-cli php7.4-xml -y --no-install-recommends
         python -m pip install --upgrade pip
-        pip install -U setuptools
+        pip install -U setuptools cython
     - name: Test project
       run: |
         python setup.py test -vv

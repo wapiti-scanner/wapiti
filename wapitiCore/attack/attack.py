@@ -27,6 +27,7 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -234,7 +235,7 @@ class Attack:
         # Must be left empty in the code
         self.deps = []
 
-    async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
+    async def add_payload(self, payload_type: str, category: str, request_id: Optional[int] = None,
                           level=0, request=None, parameter="", info=""):
         await self.persister.add_payload(
             request_id=request_id,
@@ -623,7 +624,7 @@ if __name__ == "__main__":
 
     assert res1.hash_params == res2.hash_params
 
-    for evil_request, param_name, payload, flags in mutator.mutate(res1):
+    for evil_request, param, evil_payload, flags in mutator.mutate(res1):
         print(evil_request)
         print(flags)
 
@@ -631,7 +632,7 @@ if __name__ == "__main__":
     print("#" * 50)
     print('')
 
-    for evil_request, param_name, payload, flags in mutator.mutate(res2):
+    for evil_request, param, evil_payload, flags in mutator.mutate(res2):
         print(evil_request)
 
     print('')
@@ -643,7 +644,7 @@ if __name__ == "__main__":
         yield "def", Flags()
 
     mutator = Mutator(payloads=iterator, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, payload, flags in mutator.mutate(res3):
+    for evil_request, param, evil_payload, flags in mutator.mutate(res3):
         print(evil_request)
 
     print('')
@@ -651,9 +652,9 @@ if __name__ == "__main__":
     print('')
 
     mutator = Mutator(payloads=random_string_with_flags, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, payload, flags in mutator.mutate(res3):
+    for evil_request, param, evil_payload, flags in mutator.mutate(res3):
         print(evil_request)
-        print("Payload is", payload)
+        print("Payload is", evil_payload)
 
     mutator = Mutator(
         methods="G",

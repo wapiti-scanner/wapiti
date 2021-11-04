@@ -1,4 +1,5 @@
 from asyncio import Event
+from tempfile import TemporaryDirectory
 
 from wapitiCore.main.wapiti import Wapiti
 from wapitiCore.attack.attack import commons, modules
@@ -53,3 +54,16 @@ def test_options():
     cli._init_attacks(stop_event)
     activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
     assert activated_modules == set(commons)
+
+
+def test_backend_configuration():
+    with TemporaryDirectory() as temp_dir:
+        with open(f"{temp_dir}/wapiti.conf", "w") as file_obj:
+            file_obj.write(
+                "[database]\n"
+                "uri = mysql+asyncmy://root:secret@127.0.0.1:3306/wapiti\n"
+            )
+
+        cli = Wapiti("http://perdu.com/", config_dir=temp_dir)
+        assert cli.database_uri == "mysql+asyncmy://root:secret@127.0.0.1:3306/wapiti"
+        assert cli.prefix == "perdu_com__folder_16e84364_"
