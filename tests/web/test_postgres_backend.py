@@ -240,6 +240,7 @@ async def test_raw_post():
     assert payload.parameter == "z"
 
 
+@pytest.mark.xfail(reason="PostgreSQL can't encode NULL byte to UTF-8")
 @pytest.mark.asyncio
 async def test_null_byte_in_parameter():
     persister = SqlPersister("postgresql+asyncpg://postgres:wapiti@127.0.0.1:5432/wapiti",  "test5_")

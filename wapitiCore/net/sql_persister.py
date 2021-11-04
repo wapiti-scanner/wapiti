@@ -545,6 +545,7 @@ class SqlPersister:
         )
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
+
         # path_id is the ID of the evil path
         path_id = result.inserted_primary_key[0]
 
