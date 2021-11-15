@@ -103,7 +103,9 @@ async def test_request_object():
     assert res16 not in query_list
     assert res17.dir_name == "http://example.com:8080/dir/"
     assert res18.url == "http://httpbin.org/get?get1=c&get2=d"
-    assert res17.hostname == "example.com:8080"
+    assert res17.hostname == "example.com"
+    assert res17.netloc == "example.com:8080"
+    assert res17.port == 8080
     assert res1.encoded_get_keys == res8.encoded_get_keys
     assert res17.encoded_get_keys == "x"
     assert res16.encoded_get_keys == ""

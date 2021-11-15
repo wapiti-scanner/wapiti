@@ -116,14 +116,16 @@ if a script is vulnerable.""",
         "six>=1.15.0",
         "importlib_metadata==3.7.2",
         "browser-cookie3==0.11.4",
-        "cryptography==3.3.2",
+        "cryptography==35.0.0",
         "httpx[brotli]==0.21.1",
         "sqlalchemy>=1.4.26",
         "aiocache==0.11.1",
         "aiosqlite==0.17.0",
         "loguru>=0.5.3",
         "dnspython==2.1.0",
-        "httpcore>=0.14.1"
+        "httpcore>=0.14.1",
+        "sslyze==5.0.0",
+        "humanize==3.13.1"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],

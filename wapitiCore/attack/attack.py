@@ -59,7 +59,8 @@ modules = [
     "mod_xxe",
     "mod_wapp",
     "mod_wp_enum",
-    "mod_takeover"
+    "mod_takeover",
+    "mod_ssl"
 ]
 
 # Modules that will be used if option -m isn't used
@@ -72,6 +73,7 @@ commons = [
     "permanentxss",
     "redirect",
     "sql",
+    "ssl",
     "ssrf",
     "xss"
 ]
@@ -255,6 +257,7 @@ class Attack:
             info=info
         )
 
+    add_vuln = partialmethod(add_payload, payload_type=VULN)
     add_vuln_critical = partialmethod(add_payload, payload_type=VULN, level=CRITICAL_LEVEL)
     add_vuln_high = partialmethod(add_payload, payload_type=VULN, level=HIGH_LEVEL)
     add_vuln_medium = partialmethod(add_payload, payload_type=VULN, level=MEDIUM_LEVEL)
@@ -264,7 +267,7 @@ class Attack:
     add_anom_high = partialmethod(add_payload, payload_type=ANOM, level=HIGH_LEVEL)
     add_anom_medium = partialmethod(add_payload, payload_type=ANOM, level=MEDIUM_LEVEL)
 
-    add_addition = partialmethod(add_payload, payload_type=ADDITION, level=LOW_LEVEL)
+    add_addition = partialmethod(add_payload, payload_type=ADDITION, level=INFO_LEVEL)
 
     @property
     def payloads(self):
@@ -610,70 +613,3 @@ class PayloadReader:
         clean_line = clean_line.replace("\\0", "\0")
 
         return clean_line, Flags(payload_type=flag_type)
-
-
-if __name__ == "__main__":
-
-    mutator = Mutator(payloads=[("INJECT", Flags()), ("ATTACK", Flags())], qs_inject=True, max_queries_per_pattern=16)
-    res1 = Request(
-        "http://httpbin.org/post?var1=a&var2=b",
-        post_params=[['post1', 'c'], ['post2', 'd']]
-    )
-
-    res2 = Request(
-        "http://httpbin.org/post?var1=a&var2=z",
-        post_params=[['post1', 'c'], ['post2', 'd']]
-    )
-
-    res3 = Request(
-        "http://httpbin.org/get?login=admin&password=letmein",
-    )
-
-    assert res1.hash_params == res2.hash_params
-
-    for evil_request, param_name, _payload, flags in mutator.mutate(res1):
-        print(evil_request)
-        print(flags)
-
-    print('')
-    print("#" * 50)
-    print('')
-
-    for evil_request, param_name, _payload, flags in mutator.mutate(res2):
-        print(evil_request)
-
-    print('')
-    print("#" * 50)
-    print('')
-
-    def iterator():
-        yield "abc", Flags()
-        yield "def", Flags()
-
-    mutator = Mutator(payloads=iterator, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, _payload, flags in mutator.mutate(res3):
-        print(evil_request)
-
-    print('')
-    print("#" * 50)
-    print('')
-
-    mutator = Mutator(payloads=random_string_with_flags, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, _payload, flags in mutator.mutate(res3):
-        print(evil_request)
-        print("Payload is", _payload)
-
-    mutator = Mutator(
-        methods="G",
-        payloads=[("INJECT", Flags()), ("ATTACK", Flags())],
-        qs_inject=True,
-        parameters=["var1"]
-    )
-
-    assert len(list(mutator.mutate(res1))) == 2
-
-    f1 = Flags()
-    f2 = Flags()
-    assert f1 == f2
-    assert f1.with_section("abcd") == f2.with_section("abcd")
-    assert f1 != f1.with_section("abcd")
