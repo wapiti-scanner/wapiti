@@ -1,0 +1,5428 @@
+{
+  "TLS_AES_128_CCM_8_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x13",
+    "hex_byte_2": "0x05",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_AES_128_CCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "TLS_AES_128_CCM_SHA256",
+    "hex_byte_1": "0x13",
+    "hex_byte_2": "0x04",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "TLS_AES_128_GCM_SHA256",
+    "hex_byte_1": "0x13",
+    "hex_byte_2": "0x01",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "TLS_AES_256_GCM_SHA384",
+    "hex_byte_1": "0x13",
+    "hex_byte_2": "0x02",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x13",
+    "hex_byte_2": "0x03",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x19",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_anon_EXPORT_WITH_RC4_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x17",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "RC4 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_DH_ANON_3DES_EDE_CBC_SHA1",
+    "openssl_name": "ADH-DES-CBC3-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x1B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_DH_ANON_AES_128_CBC_SHA1",
+    "openssl_name": "ADH-AES128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x34",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_AES_128_CBC_SHA256",
+    "openssl_name": "ADH-AES128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x6C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_AES_128_GCM_SHA256",
+    "openssl_name": "ADH-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA6",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_DH_ANON_AES_256_CBC_SHA1",
+    "openssl_name": "ADH-AES256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_AES_256_CBC_SHA256",
+    "openssl_name": "ADH-AES256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x6D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DH_ANON_AES_256_GCM_SHA384",
+    "openssl_name": "ADH-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA7",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x46",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x47",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_128_CBC_SHA1",
+    "openssl_name": "ADH-CAMELLIA128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x46",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "ADH-CAMELLIA128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBF",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x84",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_256_CBC_SHA1",
+    "openssl_name": "ADH-CAMELLIA256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x89",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_256_CBC_SHA256",
+    "openssl_name": "ADH-CAMELLIA256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC5",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DH_ANON_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x85",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x1A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_anon_WITH_RC4_128_MD5": {
+    "gnutls_name": "TLS_DH_ANON_ARCFOUR_128_MD5",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x18",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_anon_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "ADH-SEED-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0B",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x30",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA4",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x36",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x68",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA5",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x58",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x59",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x42",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBB",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x82",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x85",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC1",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x83",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_DSS_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_DSS_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x97",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x11",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_DSS_3DES_EDE_CBC_SHA1",
+    "openssl_name": "DHE-DSS-DES-CBC3-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x13",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_DSS_AES_128_CBC_SHA1",
+    "openssl_name": "DHE-DSS-AES128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x32",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_AES_128_CBC_SHA256",
+    "openssl_name": "DHE-DSS-AES128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x40",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_AES_128_GCM_SHA256",
+    "openssl_name": "DHE-DSS-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA2",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_DSS_AES_256_CBC_SHA1",
+    "openssl_name": "DHE-DSS-AES256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x38",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_AES_256_CBC_SHA256",
+    "openssl_name": "DHE-DSS-AES256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x6A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_DSS_AES_256_GCM_SHA384",
+    "openssl_name": "DHE-DSS-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA3",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x42",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x56",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x43",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x57",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_128_CBC_SHA1",
+    "openssl_name": "DHE-DSS-CAMELLIA128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x44",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "DHE-DSS-CAMELLIA128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBD",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x80",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_256_CBC_SHA1",
+    "openssl_name": "DHE-DSS-CAMELLIA256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x87",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_256_CBC_SHA256",
+    "openssl_name": "DHE-DSS-CAMELLIA256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC3",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_DSS_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x81",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x12",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_DSS_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "DHE-DSS-SEED-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x99",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "DSS",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_PSK_3DES_EDE_CBC_SHA1",
+    "openssl_name": "DHE-PSK-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_PSK_AES_128_CBC_SHA1",
+    "openssl_name": "DHE-PSK-AES128-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x90",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_AES_128_CBC_SHA256",
+    "openssl_name": "DHE-PSK-AES128-CBC-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB2",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_128_CCM": {
+    "gnutls_name": "TLS_DHE_PSK_AES_128_CCM",
+    "openssl_name": "DHE-PSK-AES128-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA6",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_AES_128_GCM_SHA256",
+    "openssl_name": "DHE-PSK-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAA",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_PSK_AES_256_CBC_SHA1",
+    "openssl_name": "DHE-PSK-AES256-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x91",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_DHE_PSK_AES_256_CBC_SHA384",
+    "openssl_name": "DHE-PSK-AES256-CBC-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB3",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_256_CCM": {
+    "gnutls_name": "TLS_DHE_PSK_AES_256_CCM",
+    "openssl_name": "DHE-PSK-AES256-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA7",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_PSK_AES_256_GCM_SHA384",
+    "openssl_name": "DHE-PSK-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAB",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x66",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x67",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "DHE-PSK-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x96",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x90",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_DHE_PSK_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "DHE-PSK-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x97",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_PSK_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x91",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_CHACHA20_POLY1305",
+    "openssl_name": "DHE-PSK-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xAD",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_DHE_PSK_NULL_SHA1",
+    "openssl_name": "DHE-PSK-NULL-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_NULL_SHA256": {
+    "gnutls_name": "TLS_DHE_PSK_NULL_SHA256",
+    "openssl_name": "DHE-PSK-NULL-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB4",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_NULL_SHA384": {
+    "gnutls_name": "TLS_DHE_PSK_NULL_SHA384",
+    "openssl_name": "DHE-PSK-NULL-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB5",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_PSK_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_DHE_PSK_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x14",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_RSA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "DHE-RSA-DES-CBC3-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x16",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_RSA_AES_128_CBC_SHA1",
+    "openssl_name": "DHE-RSA-AES128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x33",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_AES_128_CBC_SHA256",
+    "openssl_name": "DHE-RSA-AES128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x67",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_128_CCM": {
+    "gnutls_name": "TLS_DHE_RSA_AES_128_CCM",
+    "openssl_name": "DHE-RSA-AES128-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_128_CCM_8": {
+    "gnutls_name": "TLS_DHE_RSA_AES_128_CCM_8",
+    "openssl_name": "DHE-RSA-AES128-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA2",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_AES_128_GCM_SHA256",
+    "openssl_name": "DHE-RSA-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_RSA_AES_256_CBC_SHA1",
+    "openssl_name": "DHE-RSA-AES256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x39",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_AES_256_CBC_SHA256",
+    "openssl_name": "DHE-RSA-AES256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x6B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_256_CCM": {
+    "gnutls_name": "TLS_DHE_RSA_AES_256_CCM",
+    "openssl_name": "DHE-RSA-AES256-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_256_CCM_8": {
+    "gnutls_name": "TLS_DHE_RSA_AES_256_CCM_8",
+    "openssl_name": "DHE-RSA-AES256-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA3",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_RSA_AES_256_GCM_SHA384",
+    "openssl_name": "DHE-RSA-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x44",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x52",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x45",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x53",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_128_CBC_SHA1",
+    "openssl_name": "DHE-RSA-CAMELLIA128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x45",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "DHE-RSA-CAMELLIA128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBE",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_256_CBC_SHA1",
+    "openssl_name": "DHE-RSA-CAMELLIA256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x88",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_256_CBC_SHA256",
+    "openssl_name": "DHE-RSA-CAMELLIA256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC4",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_DHE_RSA_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_DHE_RSA_CHACHA20_POLY1305",
+    "openssl_name": "DHE-RSA-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xAA",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x15",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DHE_RSA_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "DHE-RSA-SEED-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0E",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x10",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x31",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA0",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x37",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x69",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA1",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x40",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x54",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x41",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x55",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x43",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBC",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x86",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC2",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_DH_RSA_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_DH_RSA_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x98",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECCPWD_WITH_AES_128_CCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xB2",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECCPWD",
+    "auth_algorithm": "ECCPWD",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECCPWD_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xB0",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECCPWD",
+    "auth_algorithm": "ECCPWD",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECCPWD_WITH_AES_256_CCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xB3",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECCPWD",
+    "auth_algorithm": "ECCPWD",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECCPWD_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xB1",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECCPWD",
+    "auth_algorithm": "ECCPWD",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_ECDH_ANON_3DES_EDE_CBC_SHA1",
+    "openssl_name": "AECDH-DES-CBC3-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x17",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDH_anon_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_ECDH_ANON_AES_128_CBC_SHA1",
+    "openssl_name": "AECDH-AES128-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x18",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_anon_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_ECDH_ANON_AES_256_CBC_SHA1",
+    "openssl_name": "AECDH-AES256-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x19",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_anon_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_ECDH_ANON_NULL_SHA1",
+    "openssl_name": "AECDH-NULL-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x15",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_anon_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_ECDH_ANON_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x16",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "anon",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x03",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x04",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x25",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x05",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x26",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x74",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x88",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x75",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x89",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_NULL_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x01",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_ECDSA_WITH_RC4_128_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x02",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "ECDHE-ECDSA-DES-CBC3-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x08",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_128_CBC_SHA1",
+    "openssl_name": "ECDHE-ECDSA-AES128-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x09",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_128_CBC_SHA256",
+    "openssl_name": "ECDHE-ECDSA-AES128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x23",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_128_CCM": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_128_CCM",
+    "openssl_name": "ECDHE-ECDSA-AES128-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAC",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_128_CCM_8",
+    "openssl_name": "ECDHE-ECDSA-AES128-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAE",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_128_GCM_SHA256",
+    "openssl_name": "ECDHE-ECDSA-AES128-GCM-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_256_CBC_SHA1",
+    "openssl_name": "ECDHE-ECDSA-AES256-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_256_CBC_SHA384",
+    "openssl_name": "ECDHE-ECDSA-AES256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x24",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_256_CCM": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_256_CCM",
+    "openssl_name": "ECDHE-ECDSA-AES256-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAD",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_256_CCM_8",
+    "openssl_name": "ECDHE-ECDSA-AES256-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAF",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_AES_256_GCM_SHA384",
+    "openssl_name": "ECDHE-ECDSA-AES256-GCM-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x48",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x49",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x5D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "ECDHE-ECDSA-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x72",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x86",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "ECDHE-ECDSA-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x73",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x87",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_CHACHA20_POLY1305",
+    "openssl_name": "ECDHE-ECDSA-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xA9",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_NULL_SHA1",
+    "openssl_name": "ECDHE-ECDSA-NULL-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x06",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_ECDHE_ECDSA_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x07",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "ECDSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_PSK_3DES_EDE_CBC_SHA1",
+    "openssl_name": "ECDHE-PSK-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x34",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_PSK_AES_128_CBC_SHA1",
+    "openssl_name": "ECDHE-PSK-AES128-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x35",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_PSK_AES_128_CBC_SHA256",
+    "openssl_name": "ECDHE-PSK-AES128-CBC-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x37",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xD0",
+    "hex_byte_2": "0x03",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xD0",
+    "hex_byte_2": "0x05",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xD0",
+    "hex_byte_2": "0x01",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_PSK_AES_256_CBC_SHA1",
+    "openssl_name": "ECDHE-PSK-AES256-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x36",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_PSK_AES_256_CBC_SHA384",
+    "openssl_name": "ECDHE-PSK-AES256-CBC-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x38",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xD0",
+    "hex_byte_2": "0x02",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x70",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x71",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_PSK_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "ECDHE-PSK-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_PSK_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "ECDHE-PSK-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_ECDHE_PSK_CHACHA20_POLY1305",
+    "openssl_name": "ECDHE-PSK-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xAC",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "recommended",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_ECDHE_PSK_NULL_SHA1",
+    "openssl_name": "ECDHE-PSK-NULL-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x39",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_NULL_SHA256": {
+    "gnutls_name": "TLS_ECDHE_PSK_NULL_SHA256",
+    "openssl_name": "ECDHE-PSK-NULL-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_NULL_SHA384": {
+    "gnutls_name": "TLS_ECDHE_PSK_NULL_SHA384",
+    "openssl_name": "ECDHE-PSK-NULL-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_PSK_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_ECDHE_PSK_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x33",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_RSA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "ECDHE-RSA-DES-CBC3-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x12",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_128_CBC_SHA1",
+    "openssl_name": "ECDHE-RSA-AES128-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x13",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_128_CBC_SHA256",
+    "openssl_name": "ECDHE-RSA-AES128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x27",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_128_GCM_SHA256",
+    "openssl_name": "ECDHE-RSA-AES128-GCM-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_256_CBC_SHA1",
+    "openssl_name": "ECDHE-RSA-AES256-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x14",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_256_CBC_SHA384",
+    "openssl_name": "ECDHE-RSA-AES256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x28",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_ECDHE_RSA_AES_256_GCM_SHA384",
+    "openssl_name": "ECDHE-RSA-AES256-GCM-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x30",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x60",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x61",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_ECDHE_RSA_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "ECDHE-RSA-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x76",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_ECDHE_RSA_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_ECDHE_RSA_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "ECDHE-RSA-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x77",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_ECDHE_RSA_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_ECDHE_RSA_CHACHA20_POLY1305",
+    "openssl_name": "ECDHE-RSA-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xA8",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_ECDHE_RSA_NULL_SHA1",
+    "openssl_name": "ECDHE-RSA-NULL-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x10",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDHE_RSA_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_ECDHE_RSA_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x11",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDHE",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x29",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x31",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x2A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x32",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x62",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x4F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x63",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x78",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x79",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_NULL_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_ECDH_RSA_WITH_RC4_128_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x0C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "ECDH",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x29",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "DES CBC 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x26",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "DES CBC 40",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2A",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC2 CBC 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x27",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC2 CBC 40",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_RC4_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2B",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC4 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_EXPORT_WITH_RC4_40_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x28",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC4 40",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_WITH_3DES_EDE_CBC_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x23",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x1F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_DES_CBC_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x22",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x1E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_IDEA_CBC_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x25",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "IDEA CBC",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_IDEA_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x21",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "IDEA CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_KRB5_WITH_RC4_128_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x24",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_KRB5_WITH_RC4_128_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x20",
+    "protocol_version": "TLS",
+    "kex_algorithm": "KRB5",
+    "auth_algorithm": "KRB5",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_NULL_WITH_NULL_NULL": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x00",
+    "protocol_version": "TLS",
+    "kex_algorithm": "NULL",
+    "auth_algorithm": "NULL",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "NULL",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_DHE_WITH_AES_128_CCM_8": {
+    "gnutls_name": "TLS_DHE_PSK_AES_128_CCM_8",
+    "openssl_name": "DHE-PSK-AES128-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAA",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_DHE_WITH_AES_256_CCM_8": {
+    "gnutls_name": "TLS_DHE_PSK_AES_256_CCM_8",
+    "openssl_name": "DHE-PSK-AES256-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xAB",
+    "protocol_version": "TLS",
+    "kex_algorithm": "DHE",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "secure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_PSK_3DES_EDE_CBC_SHA1",
+    "openssl_name": "PSK-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_PSK_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_PSK_AES_128_CBC_SHA1",
+    "openssl_name": "PSK-AES128-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_PSK_AES_128_CBC_SHA256",
+    "openssl_name": "PSK-AES128-CBC-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAE",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_128_CCM": {
+    "gnutls_name": "TLS_PSK_AES_128_CCM",
+    "openssl_name": "PSK-AES128-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA4",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_128_CCM_8": {
+    "gnutls_name": "TLS_PSK_AES_128_CCM_8",
+    "openssl_name": "PSK-AES128-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA8",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_PSK_AES_128_GCM_SHA256",
+    "openssl_name": "PSK-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA8",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_PSK_AES_256_CBC_SHA1",
+    "openssl_name": "PSK-AES256-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_PSK_AES_256_CBC_SHA384",
+    "openssl_name": "PSK-AES256-CBC-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAF",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_256_CCM": {
+    "gnutls_name": "TLS_PSK_AES_256_CCM",
+    "openssl_name": "PSK-AES256-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA5",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_256_CCM_8": {
+    "gnutls_name": "TLS_PSK_AES_256_CCM_8",
+    "openssl_name": "PSK-AES256-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA9",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_PSK_AES_256_GCM_SHA384",
+    "openssl_name": "PSK-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xA9",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x64",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x65",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_PSK_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "PSK-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x94",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_PSK_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_PSK_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "PSK-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x95",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_PSK_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x8F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_PSK_CHACHA20_POLY1305",
+    "openssl_name": "PSK-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xAB",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_PSK_NULL_SHA1",
+    "openssl_name": "PSK-NULL-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_NULL_SHA256": {
+    "gnutls_name": "TLS_PSK_NULL_SHA256",
+    "openssl_name": "PSK-NULL-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB0",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_NULL_SHA384": {
+    "gnutls_name": "TLS_PSK_NULL_SHA384",
+    "openssl_name": "PSK-NULL-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB1",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_PSK_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_PSK_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x8A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "PSK",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x08",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES40 CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x06",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC2 CBC 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_EXPORT_WITH_RC4_40_MD5": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x03",
+    "protocol_version": "TLS EXPORT",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC4 40",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_PSK_3DES_EDE_CBC_SHA1",
+    "openssl_name": "RSA-PSK-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x93",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_PSK_AES_128_CBC_SHA1",
+    "openssl_name": "RSA-PSK-AES128-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x94",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_AES_128_CBC_SHA256",
+    "openssl_name": "RSA-PSK-AES128-CBC-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB6",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_AES_128_GCM_SHA256",
+    "openssl_name": "RSA-PSK-AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAC",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_PSK_AES_256_CBC_SHA1",
+    "openssl_name": "RSA-PSK-AES256-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x95",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_256_CBC_SHA384": {
+    "gnutls_name": "TLS_RSA_PSK_AES_256_CBC_SHA384",
+    "openssl_name": "RSA-PSK-AES256-CBC-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB7",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_RSA_PSK_AES_256_GCM_SHA384",
+    "openssl_name": "RSA-PSK-AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xAD",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x68",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x69",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x6F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "RSA-PSK-CAMELLIA128-SHA256",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x98",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x92",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384": {
+    "gnutls_name": "TLS_RSA_PSK_CAMELLIA_256_CBC_SHA384",
+    "openssl_name": "RSA-PSK-CAMELLIA256-SHA384",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x99",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_RSA_PSK_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x93",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_CHACHA20_POLY1305",
+    "openssl_name": "RSA-PSK-CHACHA20-POLY1305",
+    "hex_byte_1": "0xCC",
+    "hex_byte_2": "0xAE",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "CHACHA20 POLY1305",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_RSA_PSK_NULL_SHA1",
+    "openssl_name": "RSA-PSK-NULL-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_NULL_SHA256": {
+    "gnutls_name": "TLS_RSA_PSK_NULL_SHA256",
+    "openssl_name": "RSA-PSK-NULL-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB8",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_NULL_SHA384": {
+    "gnutls_name": "TLS_RSA_PSK_NULL_SHA384",
+    "openssl_name": "RSA-PSK-NULL-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xB9",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA384",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_PSK_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_RSA_PSK_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x92",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "PSK",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "DES-CBC3-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x0A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_AES_128_CBC_SHA1",
+    "openssl_name": "AES128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x2F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_128_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_AES_128_CBC_SHA256",
+    "openssl_name": "AES128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_128_CCM": {
+    "gnutls_name": "TLS_RSA_AES_128_CCM",
+    "openssl_name": "AES128-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_128_CCM_8": {
+    "gnutls_name": "TLS_RSA_AES_128_CCM_8",
+    "openssl_name": "AES128-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA0",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_128_GCM_SHA256": {
+    "gnutls_name": "TLS_RSA_AES_128_GCM_SHA256",
+    "openssl_name": "AES128-GCM-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_AES_256_CBC_SHA1",
+    "openssl_name": "AES256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x35",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_256_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_AES_256_CBC_SHA256",
+    "openssl_name": "AES256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_256_CCM": {
+    "gnutls_name": "TLS_RSA_AES_256_CCM",
+    "openssl_name": "AES256-CCM",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x9D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_256_CCM_8": {
+    "gnutls_name": "TLS_RSA_AES_256_CCM_8",
+    "openssl_name": "AES256-CCM8",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0xA1",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 CCM 8",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_AES_256_GCM_SHA384": {
+    "gnutls_name": "TLS_RSA_AES_256_GCM_SHA384",
+    "openssl_name": "AES256-GCM-SHA384",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x9D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "AES 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_ARIA_128_CBC_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_ARIA_128_GCM_SHA256": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x50",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_ARIA_256_CBC_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x3D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 CBC",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_ARIA_256_GCM_SHA384": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x51",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "ARIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_128_CBC_SHA1",
+    "openssl_name": "CAMELLIA128-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x41",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_128_CBC_SHA256",
+    "openssl_name": "CAMELLIA128-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xBA",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_128_GCM_SHA256",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 128 GCM",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_256_CBC_SHA1",
+    "openssl_name": "CAMELLIA256-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x84",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_256_CBC_SHA256",
+    "openssl_name": "CAMELLIA256-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC0",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 CBC",
+    "hash_algorithm": "SHA256",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384": {
+    "gnutls_name": "TLS_RSA_CAMELLIA_256_GCM_SHA384",
+    "openssl_name": "",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x7B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "CAMELLIA 256 GCM",
+    "hash_algorithm": "SHA384",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_DES_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x09",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "DES CBC",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_RSA_WITH_IDEA_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "IDEA-CBC-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x07",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "IDEA CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_RSA_WITH_NULL_MD5": {
+    "gnutls_name": "TLS_RSA_NULL_MD5",
+    "openssl_name": "NULL-MD5",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x01",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_NULL_SHA": {
+    "gnutls_name": "TLS_RSA_NULL_SHA1",
+    "openssl_name": "NULL-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x02",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_NULL_SHA256": {
+    "gnutls_name": "TLS_RSA_NULL_SHA256",
+    "openssl_name": "NULL-SHA256",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x3B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "NULL",
+    "hash_algorithm": "SHA256",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_RC4_128_MD5": {
+    "gnutls_name": "TLS_RSA_ARCFOUR_128_MD5",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x04",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "MD5",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_RC4_128_SHA": {
+    "gnutls_name": "TLS_RSA_ARCFOUR_128_SHA1",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x05",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "RC4 128",
+    "hash_algorithm": "SHA",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_RSA_WITH_SEED_CBC_SHA": {
+    "gnutls_name": "",
+    "openssl_name": "SEED-SHA",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0x96",
+    "protocol_version": "TLS",
+    "kex_algorithm": "RSA",
+    "auth_algorithm": "RSA",
+    "enc_algorithm": "SEED CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SM4_CCM_SM3": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC7",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "SM4 CCM",
+    "hash_algorithm": "SM3",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_SM4_GCM_SM3": {
+    "gnutls_name": "",
+    "openssl_name": "",
+    "hex_byte_1": "0x00",
+    "hex_byte_2": "0xC6",
+    "protocol_version": "TLS",
+    "kex_algorithm": "-",
+    "auth_algorithm": "-",
+    "enc_algorithm": "SM4 GCM",
+    "hash_algorithm": "SM3",
+    "security": "insecure",
+    "tls_version": [
+      "TLS1.3"
+    ]
+  },
+  "TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_DSS_3DES_EDE_CBC_SHA1",
+    "openssl_name": "SRP-DSS-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1C",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA DSS",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_DSS_AES_128_CBC_SHA1",
+    "openssl_name": "SRP-DSS-AES-128-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1F",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA DSS",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_DSS_AES_256_CBC_SHA1",
+    "openssl_name": "SRP-DSS-AES-256-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x22",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA DSS",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_RSA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "SRP-RSA-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1B",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA RSA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_RSA_AES_128_CBC_SHA1",
+    "openssl_name": "SRP-RSA-AES-128-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1E",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA RSA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_RSA_AES_256_CBC_SHA1",
+    "openssl_name": "SRP-RSA-AES-256-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x21",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA RSA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_3DES_EDE_CBC_SHA1",
+    "openssl_name": "SRP-3DES-EDE-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1A",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA",
+    "enc_algorithm": "3DES EDE CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1"
+    ]
+  },
+  "TLS_SRP_SHA_WITH_AES_128_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_AES_128_CBC_SHA1",
+    "openssl_name": "SRP-AES-128-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x1D",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA",
+    "enc_algorithm": "AES 128 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  },
+  "TLS_SRP_SHA_WITH_AES_256_CBC_SHA": {
+    "gnutls_name": "TLS_SRP_SHA_AES_256_CBC_SHA1",
+    "openssl_name": "SRP-AES-256-CBC-SHA",
+    "hex_byte_1": "0xC0",
+    "hex_byte_2": "0x20",
+    "protocol_version": "TLS",
+    "kex_algorithm": "SRP",
+    "auth_algorithm": "SHA",
+    "enc_algorithm": "AES 256 CBC",
+    "hash_algorithm": "SHA",
+    "security": "weak",
+    "tls_version": [
+      "TLS1.0",
+      "TLS1.1",
+      "TLS1.2"
+    ]
+  }
+}

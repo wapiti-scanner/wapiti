@@ -249,7 +249,10 @@ class Request:
         self._link_depth = link_depth
         parsed = urlparse(self._resource_path)
         self._file_path = parsed.path
-        self._hostname = parsed.netloc
+        self._hostname = parsed.hostname
+        self._scheme = parsed.scheme or ""
+        self._netloc = parsed.netloc
+
         self._port = 80
         if parsed.port is not None:
             self._port = parsed.port
@@ -447,6 +450,14 @@ class Request:
     @property
     def hostname(self) -> str:
         return self._hostname
+
+    @property
+    def netloc(self) -> str:
+        return self._netloc
+
+    @property
+    def scheme(self) -> str:
+        return self._scheme.lower()
 
     @property
     def port(self):
