@@ -5,16 +5,16 @@ verify_ssl = true
 
 [dev-packages]
 pytest = ">=6.2.2"
-respx = "==0.18.0"
+respx = "==0.19.0"
 pytest-asyncio = "==0.14.0"
 pytest-cov = ">=2.11.1"
 
 [packages]
-"httpx[brotli]" = "==0.20.0"
+"httpx[brotli]" = "==0.21.0"
 beautifulsoup4 = ">=4.10.0"
 mako = ">=1.1.4"
 markupsafe = "==1.1.1"
-httpx-socks = {extras = ["asyncio"],version = "==0.5.1"}
+httpx-socks = {extras = ["asyncio"],version = "==0.5.2"}
 pytest = ">=5.4.1"
 tld = ">=0.12.5"
 yaswfp = ">=0.9.3"
@@ -26,6 +26,7 @@ aiocache = "==0.11.1"
 aiosqlite = "==0.17.0"
 loguru = ">=0.5.3"
 dnspython = "==2.1.0"
+httpcore = "==0.14.1"
 
 [requires]
 python_version = "3.8"
