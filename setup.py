@@ -106,7 +106,7 @@ if a script is vulnerable.""",
         "Topic :: Software Development :: Testing"
     ],
     install_requires=[
-        "httpx-socks[asyncio] == 0.5.1",
+        "httpx-socks[asyncio] == 0.5.2",
         "beautifulsoup4>=4.10.0",
         "tld>=0.12.5",
         "yaswfp>=0.9.3",
@@ -117,12 +117,13 @@ if a script is vulnerable.""",
         "importlib_metadata==3.7.2",
         "browser-cookie3==0.11.4",
         "cryptography==3.3.2",
-        "httpx[brotli]==0.20.0",
+        "httpx[brotli]==0.21.0",
         "sqlalchemy>=1.4.26",
         "aiocache==0.11.1",
         "aiosqlite==0.17.0",
         "loguru>=0.5.3",
-        "dnspython==2.1.0"
+        "dnspython==2.1.0",
+        "httpcore==0.14.1"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
@@ -134,7 +135,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=6.2.2", "respx==0.18.0", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
+    tests_require=["pytest>=6.2.2", "respx==0.19.0", "pytest-cov>=2.11.1", "pytest-asyncio==0.14.0"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )
