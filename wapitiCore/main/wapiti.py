@@ -504,7 +504,7 @@ class Wapiti:
                             logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
-                            with open(traceback_file, "rb", encoding='utf-8') as traceback_byte_fd:
+                            with open(traceback_file, "rb") as traceback_byte_fd:
                                 upload_request = Request(
                                     "https://wapiti3.ovh/upload.php",
                                     file_params=[
