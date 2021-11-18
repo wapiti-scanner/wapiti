@@ -9,7 +9,7 @@ import sys
 if "py2exe" not in sys.argv:
     sys.argv.append("py2exe")
 
-VERSION = "3.0.7"
+VERSION = "3.0.8"
 
 
 # Build file lists

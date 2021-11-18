@@ -17,7 +17,7 @@ async def test_whole_stuff():
     # Test attacking all kind of parameter without crashing
     respx.get(url__regex=r"http://perdu\.com/\?a=.*&foo=bar").mock(return_value=httpx.Response(200, text="Hello there"))
     respx.get(url__regex=r"http://perdu.com/\?a=b*&foo=.*wapiti.*").mock(
-        return_value=httpx.Response(200, text="Hello there", headers={"wapiti": "3.0.7 version"})
+        return_value=httpx.Response(200, text="Hello there", headers={"wapiti": "3.0.8 version"})
     )
 
     persister = AsyncMock()

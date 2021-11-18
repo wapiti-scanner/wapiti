@@ -1,3 +1,8 @@
+18/11/2021
+    Wapiti 3.0.8
+    CLI: prevent users from using -a without specifying --ayth-type (and vice versa)
+    Crawler: Upgrade HTTP related dependencies (httpx, httpcore, httpx-socks)
+
 14/10/2021
     Wapiti 3.0.7
     Crawler: Extract URLs from AngularJS based websites
