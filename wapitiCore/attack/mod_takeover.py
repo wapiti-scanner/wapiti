@@ -207,7 +207,12 @@ class ModuleTakeover(Attack):
         self.takeover = TakeoverChecker()
 
     async def must_attack(self, request: Request):
-        root_domain = get_root_domain(request.hostname)
+        try:
+            root_domain = get_root_domain(request.hostname)
+        except (TldDomainNotFound, TldBadUrl):
+            # If the hostname part is an IP or is invalid we can't do subdomain enumeration obviously
+            return False
+
         if root_domain in self.processed_domains:
             return False
 
