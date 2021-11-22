@@ -72,6 +72,10 @@ msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
 msgid "{0} {1} detected"
 msgstr "{0} {1} détecté"
 
+#, python-brace-format
+msgid "Range for {0} is from {1} to {2}"
+msgstr "{0} a été détecté de la version {1} à {2}"
+
 msgid "No Drupal Detected"
 msgstr "Drupal non détecté"
 

@@ -53,6 +53,10 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
+#, python-brace-format
+msgid "Range for {0} is from {1} to {2}"
+msgstr ""
+
 msgid "No Drupal Detected"
 msgstr ""
 

@@ -72,6 +72,10 @@ msgstr "CSRF token '{}' might be easy to predict"
 msgid "{0} {1} detected"
 msgstr "{0} {1} detected"
 
+#, python-brace-format
+msgid "Range for {0} is from {1} to {2}"
+msgstr "Range for {0} is from {1} to {2}"
+
 msgid "No Drupal Detected"
 msgstr "No Drupal Detected"
 
