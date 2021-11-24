@@ -209,3 +209,12 @@ Wapiti is released under the GNU General Public License version 2 (the GPL).
 Source code is available on `Github <https://github.com/wapiti-scanner/wapiti>`__.
 
 Created by Nicolas SURRIBAS. Sponsored by Cyberwatch https://cyberwatch.fr.
+
+Disclaimer
+==========
+
+Wapiti is a cybersecurity software. It performs security assessments on a provided target, which can lead to malfunctions and crashes on the target, as well as potential data loss.
+
+Usage of Wapiti for attacking a target without prior consent of its owner is illegal. It is the end user's responsibility to obey all applicable local laws.
+
+Developers and people involved in the Wapiti project assume no liability and are not responsible for any misuse or damage caused by this program.
