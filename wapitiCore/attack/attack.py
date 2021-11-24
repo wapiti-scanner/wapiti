@@ -76,6 +76,14 @@ commons = [
     "xss"
 ]
 
+# Modules that will be used in passive mode -m passive
+passives = [
+    "cookieflags",
+    "csp",
+    "http_headers",
+    "wapp"
+]
+
 VULN = "vulnerability"
 ANOM = "anomaly"
 ADDITION = "additional"
@@ -623,7 +631,7 @@ if __name__ == "__main__":
 
     assert res1.hash_params == res2.hash_params
 
-    for evil_request, param_name, payload, flags in mutator.mutate(res1):
+    for evil_request, param_name, _payload, flags in mutator.mutate(res1):
         print(evil_request)
         print(flags)
 
@@ -631,7 +639,7 @@ if __name__ == "__main__":
     print("#" * 50)
     print('')
 
-    for evil_request, param_name, payload, flags in mutator.mutate(res2):
+    for evil_request, param_name, _payload, flags in mutator.mutate(res2):
         print(evil_request)
 
     print('')
@@ -643,7 +651,7 @@ if __name__ == "__main__":
         yield "def", Flags()
 
     mutator = Mutator(payloads=iterator, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, payload, flags in mutator.mutate(res3):
+    for evil_request, param_name, _payload, flags in mutator.mutate(res3):
         print(evil_request)
 
     print('')
@@ -651,9 +659,9 @@ if __name__ == "__main__":
     print('')
 
     mutator = Mutator(payloads=random_string_with_flags, qs_inject=True, max_queries_per_pattern=16)
-    for evil_request, param_name, payload, flags in mutator.mutate(res3):
+    for evil_request, param_name, _payload, flags in mutator.mutate(res3):
         print(evil_request)
-        print("Payload is", payload)
+        print("Payload is", _payload)
 
     mutator = Mutator(
         methods="G",

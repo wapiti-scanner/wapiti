@@ -235,6 +235,15 @@ class Wapiti:
                 flatten_references(additional.REFERENCES)
             )
 
+    @staticmethod
+    def _activate_method_module(module: attack.Attack, method: str, status: bool):
+        if not method:
+            module.do_get = module.do_post = status
+        elif method == "get":
+            module.do_get = status
+        elif method == "post":
+            module.do_post = status
+
     def _init_attacks(self, stop_event: asyncio.Event):
         self._init_report()
         stop_event.clear()
@@ -287,23 +296,13 @@ class Wapiti:
                     if module_name in ("all", "common"):
                         for attack_module in self.attacks:
                             if module_name == "all" or attack_module.name in attack.commons:
-                                if not method:
-                                    attack_module.do_get = attack_module.do_post = False
-                                elif method == "get":
-                                    attack_module.do_get = False
-                                elif method == "post":
-                                    attack_module.do_post = False
+                                self._activate_method_module(attack_module, method, False)
                     else:
                         found = False
                         for attack_module in self.attacks:
                             if attack_module.name == module_name:
                                 found = True
-                                if not method:
-                                    attack_module.do_get = attack_module.do_post = False
-                                elif method == "get":
-                                    attack_module.do_get = False
-                                elif method == "post":
-                                    attack_module.do_post = False
+                                self._activate_method_module(attack_module, method, False)
                         if not found:
                             logging.error(_("[!] Unable to find a module named {0}").format(module_name))
 
@@ -315,23 +314,17 @@ class Wapiti:
                     if module_name in ("all", "common"):
                         for attack_module in self.attacks:
                             if module_name == "all" or attack_module.name in attack.commons:
-                                if not method:
-                                    attack_module.do_get = attack_module.do_post = True
-                                elif method == "get":
-                                    attack_module.do_get = True
-                                elif method == "post":
-                                    attack_module.do_post = True
+                                self._activate_method_module(attack_module, method, True)
+                    elif module_name == "passive":
+                        for attack_module in self.attacks:
+                            if attack_module.name in attack.passives:
+                                self._activate_method_module(attack_module, method, True)
                     else:
                         found = False
                         for attack_module in self.attacks:
                             if attack_module.name == module_name:
                                 found = True
-                                if not method:
-                                    attack_module.do_get = attack_module.do_post = True
-                                elif method == "get":
-                                    attack_module.do_get = True
-                                elif method == "post":
-                                    attack_module.do_post = True
+                                self._activate_method_module(attack_module, method, True)
                         if not found:
                             logging.error(_("[!] Unable to find a module named {0}").format(module_name))
 
