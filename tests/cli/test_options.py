@@ -1,7 +1,7 @@
 from asyncio import Event
 
 from wapitiCore.main.wapiti import Wapiti
-from wapitiCore.attack.attack import commons, modules
+from wapitiCore.attack.attack import commons, passives, modules
 
 
 def test_options():
@@ -41,6 +41,21 @@ def test_options():
     cli._init_attacks(stop_event)
     activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
     assert len(activated_modules) == 1
+
+    cli.set_modules("passive")
+    cli._init_attacks(stop_event)
+    activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+    assert len(activated_modules) == len(passives)
+
+    cli.set_modules("passive,xxe")
+    cli._init_attacks(stop_event)
+    activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+    assert len(activated_modules) == len(passives) + 1
+
+    cli.set_modules("passive,-wapp")
+    cli._init_attacks(stop_event)
+    activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+    assert len(activated_modules) == len(passives) - 1
 
     # Empty module list: no modules will be used
     cli.set_modules("")
