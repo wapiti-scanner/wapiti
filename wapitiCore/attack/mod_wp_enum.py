@@ -1,16 +1,21 @@
-import re
 import json
+import re
+import xml
+import xml.etree.ElementTree as ET
 from os.path import join as path_join
+from typing import Match
 
-from wapitiCore.main.log import logging, log_blue
-from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
+from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
+from wapitiCore.language.vulnerability import _
+from wapitiCore.main.log import log_blue, logging
+from wapitiCore.net.page import Page
+from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_WP = _("No WordPress Detected")
-
+MSG_WP_VERSION = _("WordPress Version : {0}")
 
 class ModuleWpEnum(Attack):
     """Detect WordPress Plugins with version."""
@@ -39,6 +44,45 @@ class ModuleWpEnum(Attack):
                 theme = line.strip()
                 if theme:
                     yield theme
+
+    async def detect_version(self, url: str):
+        rss_urls = ["feed/", "comments/feed/", "feed/rss/", "feed/rss2/"]
+        detected_version = None
+
+        for rss_url in rss_urls:
+            req = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}")
+            rep: Page = await self.crawler.async_get(req, follow_redirects=True)
+
+            if not rep.content or rep.status != 200:
+                continue
+            root = ET.fromstring(rep.content)
+
+            if root is None:
+                continue
+            try:
+                generator_text = root.findtext('./channel/generator')
+            except xml.etree.ElementTree.ParseError:
+                continue
+            version: Match = re.search(r"\Ahttps?:\/\/wordpress\.(?:[a-z]+)\/\?v=(.*)\Z", generator_text)
+            if version is None:
+                continue
+            detected_version = version.group(1)
+            break
+        if detected_version is None:
+            log_blue(
+                MSG_WP_VERSION,
+                "N/A"
+            )
+        else:
+            log_blue(
+                MSG_WP_VERSION,
+                detected_version
+            )
+            await self.add_vuln_info(
+                category=WEB_APP_VERSIONED,
+                request=req,
+                info=json.dumps({"name": "WordPress", "versions": [detected_version], "categories": ["CMS", "Blogs"]})
+            )
 
     async def detect_plugin(self, url):
         for plugin in self.get_plugin():
@@ -159,6 +203,8 @@ class ModuleWpEnum(Attack):
 
         response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         if self.check_wordpress(response):
+            await self.detect_version(request_to_root.url)
+            log_blue("----")
             log_blue(_("Enumeration of WordPress Plugins :"))
             await self.detect_plugin(request_to_root.url)
             log_blue("----")

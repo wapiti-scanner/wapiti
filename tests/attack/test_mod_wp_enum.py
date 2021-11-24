@@ -1,14 +1,14 @@
 from asyncio import Event
+from unittest import mock
 
-import respx
 import httpx
 import pytest
-
-from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import AsyncCrawler
+import respx
+from tests import AsyncMock
 from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
 from wapitiCore.language.vulnerability import _
-from tests import AsyncMock
+from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.web import Request
 
 
 @pytest.mark.asyncio
@@ -93,6 +93,7 @@ async def test_plugin():
 
     respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(404))
     respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(404))
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = AsyncMock()
 
@@ -173,6 +174,7 @@ async def test_theme():
 
     respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(404))
     respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(404))
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = AsyncMock()
 
@@ -199,3 +201,84 @@ async def test_theme():
     )
 
     await crawler.close()
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_wp_version():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress WordPress\
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    respx.get("http://perdu.com/feed/").mock(
+        return_value=httpx.Response(
+            200,
+            text='<?xml version="1.0" encoding="UTF-8"?>\
+                <rss version="2.0">\
+                    <channel>\
+                        <generator>https://wordpress.org/?v=5.8.2</generator>\
+                    </channel>\
+                </rss>'
+        )
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler = AsyncCrawler("http://perdu.com")
+
+    options = {"timeout": 10, "level": 2}
+
+    with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+        mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+        module = ModuleWpEnum(crawler, persister, options, Event())
+
+        await module.attack(request)
+
+        mock_detect_plugin.assert_called_once()
+        mock_detect_theme.assert_called_once()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_wp_version_no_file():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress WordPress\
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler = AsyncCrawler("http://perdu.com")
+
+    options = {"timeout": 10, "level": 2}
+
+    with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+        mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+        module = ModuleWpEnum(crawler, persister, options, Event())
+
+        await module.attack(request)
+
+        mock_detect_plugin.assert_called_once()
+        mock_detect_theme.assert_called_once()
+        assert persister.add_payload.call_count == 0
