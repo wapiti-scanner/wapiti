@@ -231,6 +231,12 @@ msgstr ""
 msgid "No WordPress Detected"
 msgstr ""
 
+msgid "WordPress Version : {0}"
+msgstr ""
+
+msgid "WordPress Version : {0}"
+msgstr ""
+
 msgid "Enumeration of WordPress Plugins :"
 msgstr ""
 

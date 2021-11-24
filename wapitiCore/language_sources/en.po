@@ -259,6 +259,9 @@ msgstr "Problem with local wapp database."
 msgid "No WordPress Detected"
 msgstr "No WordPress Detected"
 
+msgid "WordPress Version : {0}"
+msgstr "WordPress Version : {0}"
+
 msgid "Enumeration of WordPress Plugins :"
 msgstr "Enumeration of WordPress Plugins :"
 

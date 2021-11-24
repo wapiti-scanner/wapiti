@@ -264,6 +264,9 @@ msgstr "Un problème est survenu avec la base de données wapp locale"
 msgid "No WordPress Detected"
 msgstr "WordPress non détecté"
 
+msgid "WordPress Version : {0}"
+msgstr "Version de WordPress : {0}"
+
 msgid "Enumeration of WordPress Plugins :"
 msgstr "Enumération des extensions WordPress :"
 
