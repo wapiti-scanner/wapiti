@@ -371,10 +371,10 @@ class AsyncCrawler:
             return await self._async_try_login_post(username, password, auth_url)
         return await self._async_try_login_basic_digest_ntlm(auth_url)
 
-    async def _async_try_login_basic_digest_ntlm(self, auth_url: str) -> Tuple[bool, dict]:
+    async def _async_try_login_basic_digest_ntlm(self, auth_url: str) -> Tuple[bool, dict, List[str]]:
         page = await self.async_get(web.Request(auth_url))
 
-        if page.status in (401, 404):
+        if page.status in (401, 403, 404):
             return False, {}, []
         return True, {}, []
 
