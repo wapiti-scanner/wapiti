@@ -200,7 +200,7 @@ class Wapiti:
     def history_file(self):
         return self._history_file
 
-    def _init_report(self):
+    async def _init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
         self.report_gen.set_report_info(
@@ -208,7 +208,8 @@ class Wapiti:
             self.target_scope,
             gmtime(),
             WAPITI_VERSION,
-            self._auth_state
+            self._auth_state,
+            await self.count_resources()
         )
 
         for vul in vulnerabilities:
@@ -244,8 +245,8 @@ class Wapiti:
         elif method == "post":
             module.do_post = status
 
-    def _init_attacks(self, stop_event: asyncio.Event):
-        self._init_report()
+    async def _init_attacks(self, stop_event: asyncio.Event):
+        await self._init_report()
         stop_event.clear()
 
         logging.info(_("[*] Loading modules:"))
@@ -400,7 +401,7 @@ class Wapiti:
 
     async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
-        self._init_attacks(stop_event)
+        await self._init_attacks(stop_event)
         answer = "0"
 
         for attack_module in self.attacks:

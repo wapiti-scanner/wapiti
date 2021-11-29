@@ -1141,6 +1141,10 @@ msgid "Date of the scan : {0}\n"
 msgstr "扫描日期： {0}\n"
 
 #, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr ""
+
+#, python-brace-format
 msgid "Scope of the scan : {0}\n"
 msgstr "扫描范围： {0}\n"
 

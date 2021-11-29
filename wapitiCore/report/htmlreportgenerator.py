@@ -82,6 +82,7 @@ class HTMLReportGenerator(JSONReportGenerator):
                     scan_scope=self._infos["scope"],
                     auth_dict=self._infos["auth"],
                     auth_form_dict=self._infos["auth"]["form"] if self._infos.get("auth") is not None else None,
+                    crawled_pages=self._infos["crawled_pages"],
                     vulnerabilities=self._vulns,
                     anomalies=self._anomalies,
                     additionals=self._additionals,

@@ -24,7 +24,8 @@ def test_reports():
                     "login_field": "uname",
                     "password_field": "pass"
                 }
-            }
+            },
+            123456
         )
 
         for vul in vulnerabilities:
@@ -103,3 +104,7 @@ def test_reports():
             assert "http://testphp.vulnweb.com/login.php" in report
             assert "uname" in report
             assert "pass" in report
+
+            # the csv report only contains vulnerabilities without the info section
+            if report_format != "csv":
+                assert "123456" in report
