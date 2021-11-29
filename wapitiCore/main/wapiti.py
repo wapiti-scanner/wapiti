@@ -1335,9 +1335,13 @@ async def wapiti_main():
                     logging.info(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args:
-                    is_logged_in, form = await wap.crawler.async_try_login(wap.crawler.auth_url, args.auth_type)
+                    is_logged_in, form, excluded_urls = await wap.crawler.async_try_login(
+                        wap.crawler.auth_url,
+                        args.auth_type
+                    )
                     wap.set_auth_state(is_logged_in, form, wap.crawler.auth_url, args.auth_type)
-
+                    for url in excluded_urls:
+                        wap.add_excluded_url(url)
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
                 await wap.browse(global_stop_event, parallelism=args.tasks)

@@ -74,6 +74,7 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 
 BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
 
+DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
 
 def wildcard_translate(pattern):
     """Translate a wildcard PATTERN to a regular expression object.
@@ -355,11 +356,14 @@ class AsyncCrawler:
 
             self.client.auth = self._auth
 
-    async def async_try_login(self, auth_url: str, auth_type: str) -> Tuple[bool, dict]:
-        """Try to authenticate with the provided url and credentials."""
+    async def async_try_login(self, auth_url: str, auth_type: str) -> Tuple[bool, dict, List[str]]:
+        """
+        Try to authenticate with the provided url and credentials.
+        Returns if the the authentication has been successful, the used form variables and the disconnect urls.
+        """
         if len(self._auth_credentials) != 2:
             logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
-            return False, {}
+            return False, {}, []
 
         username, password = self._auth_credentials
 
@@ -372,13 +376,28 @@ class AsyncCrawler:
 
         if page.status in (401, 404):
             return False, {}
-        return True, {}
+        return True, {}, []
 
-    async def _async_try_login_post(self, username: str, password: str, auth_url: str) -> Tuple[bool, dict]:
+    def _extract_disconnect_urls(self, page: Page) -> List[str]:
+        """
+        Extract all the disconnect urls on the given page and returns them.
+        """
+        disconnect_urls = []
+        for link in page.links:
+            if self.is_in_scope(link) is False:
+                continue
+            element = re.search(DISCONNECT_REGEX, link)
+
+            if element is not None:
+                disconnect_urls.append(page.make_absolute(link))
+        return disconnect_urls
+
+    async def _async_try_login_post(self, username: str, password: str, auth_url: str) -> Tuple[bool, dict, List[str]]:
         # Fetch the login page and try to extract the login form
         try:
             page = await self.async_get(web.Request(auth_url), follow_redirects=True)
             form = {}
+            disconnect_urls = []
 
             login_form, username_field_idx, password_field_idx = page.find_login_form()
             if login_form:
@@ -411,15 +430,17 @@ class AsyncCrawler:
                 )
 
                 # ensure logged in
-                if login_response.soup.find_all(text=re.compile(r'(?i)((log|sign)\s?out|disconnect|déconnexion)')):
+                if login_response.soup.find_all(
+                    text=re.compile(DISCONNECT_REGEX)
+                ):
                     self.is_logged_in = True
                     logging.success(_("Login success"))
-
+                    disconnect_urls = self._extract_disconnect_urls(login_response)
                 else:
                     logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
             else:
                 logging.warning(_("Login failed") + " : " + _("No login form detected"))
-            return self.is_logged_in, form
+            return self.is_logged_in, form, disconnect_urls
 
         except ConnectionError:
             logging.error(_("[!] Connection error with URL"), auth_url)
