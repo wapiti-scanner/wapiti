@@ -30,13 +30,14 @@ class ReportGenerator:
         self._infos = {}
         self._date = None
 
-    def set_report_info(self, target, scope, date, version, auth):
+    def set_report_info(self, target, scope, date, version, auth, crawled_pages: int):
         """Set the informations about the scan"""
         self._infos["target"] = target
         self._infos["date"] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", date)
         self._infos["version"] = version
         self._infos["scope"] = scope
         self._infos["auth"] = auth
+        self._infos["crawled_pages"] = crawled_pages
         self._date = date
 
     @property

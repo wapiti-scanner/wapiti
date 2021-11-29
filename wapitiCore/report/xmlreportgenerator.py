@@ -296,6 +296,11 @@ class XMLReportGenerator(ReportGenerator):
         target.appendChild(self._xml_doc.createTextNode(self._infos["target"]))
         report_infos.appendChild(target)
 
+        target = self._xml_doc.createElement("info")
+        target.setAttribute("name", "crawledPages")
+        target.appendChild(self._xml_doc.createTextNode(str(self._infos["crawled_pages"])))
+        report_infos.appendChild(target)
+
         auth_node = self._xml_doc.createElement("info")
         auth_node.setAttribute("name", "auth")
 

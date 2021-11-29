@@ -1151,6 +1151,10 @@ msgid "Date of the scan : {0}\n"
 msgstr "Tarikh imbasan : {0}\n"
 
 #, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr ""
+
+#, python-brace-format
 msgid "Scope of the scan : {0}\n"
 msgstr "Skop imbasan : {0}\n"
 

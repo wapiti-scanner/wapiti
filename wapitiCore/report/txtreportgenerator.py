@@ -63,6 +63,7 @@ class TXTReportGenerator(ReportGenerator):
                 txt_report_file.write(center(f"{self._infos['version']} - wapiti.sourceforge.io\n"))
                 txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
                 txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
+                txt_report_file.write(center(_("Crawled pages : {0}\n").format(self._infos["crawled_pages"])))
                 if "scope" in self._infos:
                     txt_report_file.write(center(_("Scope of the scan : {0}\n").format(self._infos["scope"])))
                 txt_report_file.write(separator)
