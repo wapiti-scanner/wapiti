@@ -23,7 +23,7 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.xss import NAME
+from wapitiCore.definitions.reflected_xss import NAME
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net.web import Request

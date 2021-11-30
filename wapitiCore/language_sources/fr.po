@@ -834,8 +834,11 @@ msgstr ""
 "Ce type de vulnérabilité est plus difficile à détecter en raison de "
 "l'absence de messages d'erreur renvoyés par l'application web."
 
-msgid "Cross Site Scripting"
-msgstr "Cross Site Scripting"
+msgid "Reflected Cross Site Scripting"
+msgstr ""
+
+msgid "Stored Cross Site Scripting"
+msgstr ""
 
 msgid "XSS"
 msgstr "XSS"
