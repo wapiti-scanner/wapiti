@@ -21,7 +21,8 @@ from wapitiCore.language.language import _
 
 TYPE = "vulnerability"
 
-NAME = _("Cross Site Scripting")
+NAME = _("Reflected Cross Site Scripting")
+
 SHORT_NAME = _("XSS")
 
 DESCRIPTION = _(

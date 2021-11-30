@@ -29,6 +29,11 @@ DESCRIPTION = _(
 ) + " " + _(
     "An attacker may then be able to extract or modify information stored in the database or even escalate his "
     "privileges on the system."
+) + " " + _(
+    "Blind SQL injection is a technique that exploits a vulnerability occurring in the database of an application."
+) + " " + _(
+    "This kind of vulnerability is harder to detect than basic SQL injections because no error message will be "
+    "displayed on the webpage."
 )
 
 SOLUTION = _(
@@ -49,5 +54,9 @@ REFERENCES = [
     {
         "title": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
         "url": "https://cwe.mitre.org/data/definitions/89.html"
+    },
+    {
+        "title": "OWASP: Blind SQL Injection",
+        "url": "https://owasp.org/www-community/attacks/Blind_SQL_Injection"
     },
 ]

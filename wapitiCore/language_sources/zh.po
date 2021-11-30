@@ -671,8 +671,11 @@ msgid ""
 "because no error message will be displayed on the webpage."
 msgstr ""
 
-msgid "Cross Site Scripting"
-msgstr "跨站脚本"
+msgid "Reflected Cross Site Scripting"
+msgstr ""
+
+msgid "Stored Cross Site Scripting"
+msgstr ""
 
 msgid "XSS"
 msgstr ""

@@ -552,7 +552,10 @@ msgstr ""
 msgid "This kind of vulnerability is harder to detect than basic SQL injections because no error message will be displayed on the webpage."
 msgstr ""
 
-msgid "Cross Site Scripting"
+msgid "Reflected Cross Site Scripting"
+msgstr ""
+
+msgid "Stored Cross Site Scripting"
 msgstr ""
 
 msgid "XSS"

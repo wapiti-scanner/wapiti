@@ -21,7 +21,7 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.timesql import NAME
+from wapitiCore.definitions.sql import NAME
 from wapitiCore.net.web import Request
 
 
