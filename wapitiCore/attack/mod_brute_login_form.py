@@ -26,7 +26,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.credentials import NAME
+from wapitiCore.definitions.credentials import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red
 
@@ -211,7 +211,8 @@ class ModuleBruteLoginForm(Attack):
                             request_id=request.path_id,
                             category=NAME,
                             request=evil_request,
-                            info=vuln_message
+                            info=vuln_message,
+                            wstg=WSTG_CODE
                         )
 
                         log_red("---")

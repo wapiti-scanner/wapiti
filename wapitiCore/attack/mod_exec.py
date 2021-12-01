@@ -21,7 +21,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack, PayloadType
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.exec import NAME
+from wapitiCore.definitions.exec import NAME, WSTG_CODE
+from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -122,7 +124,8 @@ class ModuleExec(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -159,7 +162,8 @@ class ModuleExec(Attack):
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
                     info=anom_msg,
-                    parameter=parameter
+                    parameter=parameter,
+                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -182,7 +186,8 @@ class ModuleExec(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -213,7 +218,8 @@ class ModuleExec(Attack):
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")

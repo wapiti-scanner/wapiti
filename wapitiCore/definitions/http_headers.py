@@ -24,6 +24,18 @@ TYPE = "vulnerability"
 NAME = _("HTTP Secure Headers")
 SHORT_NAME = NAME
 
+WSTG_CODE_FRAME_OPTIONS = ["WSTG-CLNT-09"]
+WSTG_CODE_XSS_PROTECTION = ["WSTG-INPV-01", "WSTG-INPV-02"]
+WSTG_CODE_CONTENT_TYPE_OPTIONS = ["WSTG-ATHN-01"]
+WSTG_CODE_STRICT_TRANSPORT_SECURITY = ["WSTG-CONF-07"]
+
+WSTG_CODE = (
+    WSTG_CODE_FRAME_OPTIONS +
+    WSTG_CODE_XSS_PROTECTION +
+    WSTG_CODE_CONTENT_TYPE_OPTIONS +
+    WSTG_CODE_STRICT_TRANSPORT_SECURITY
+)
+
 DESCRIPTION = _(
     "HTTP security headers tell the browser how to behave when handling the website's content."
 )
@@ -44,5 +56,33 @@ REFERENCES = [
     {
         "title": "OWASP: HTTP SECURITY HEADERS (Protection For Browsers) (PDF)",
         "url": "https://owasp.org/www-chapter-ghana/assets/slides/HTTP_Header_Security.pdf"
+    },
+    {
+        "title": "OWASP: Clickjacking",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "11-Client-side_Testing/09-Testing_for_Clickjacking"
+        )
+    },
+    {
+        "title": "OWASP: Reflected Cross Site Scripting",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/01-Testing_for_Reflected_Cross_Site_Scripting"
+        )
+    },
+    {
+        "title": "OWASP: Stored Cross Site Scripting",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/02-Testing_for_Stored_Cross_Site_Scripting"
+        )
+    },
+    {
+        "title": "OWASP: HTTP Strict Transport Security",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "02-Configuration_and_Deployment_Management_Testing/07-Test_HTTP_Strict_Transport_Security"
+        )
     }
 ]

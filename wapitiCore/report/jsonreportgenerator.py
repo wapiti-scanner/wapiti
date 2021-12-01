@@ -58,18 +58,19 @@ class JSONReportGenerator(ReportGenerator):
             json.dump(report_dict, json_report_file, indent=2)
 
     # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None):
+    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
         """Add informations on a type of vulnerability"""
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the informations about a found vulnerability.
         """
@@ -84,24 +85,26 @@ class JSONReportGenerator(ReportGenerator):
             "module": module,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
+            "wstg": wstg,
         }
         if category not in self._vulns:
             self._vulns[category] = []
         self._vulns[category].append(vuln_dict)
 
     # Anomalies
-    def add_anomaly_type(self, name, description="", solution="", references=None):
+    def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
         """Register a type of anomaly"""
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg,
             }
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """Store the informations about an anomaly met during the attack."""
         anom_dict = {
             "method": request.method,
@@ -112,24 +115,26 @@ class JSONReportGenerator(ReportGenerator):
             "referer": request.referer,
             "module": module,
             "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr
+            "curl_command": request.curl_repr,
+            "wstg": wstg
         }
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
 
-    def add_additional_type(self, name, description="", solution="", references=None):
+    def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
         """Register a type of additional"""
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """Store the information about an additional."""
         addition_dict = {
             "method": request.method,
@@ -140,7 +145,8 @@ class JSONReportGenerator(ReportGenerator):
             "referer": request.referer,
             "module": module,
             "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr
+            "curl_command": request.curl_repr,
+            "wstg": wstg
         }
         if category not in self._additionals:
             self._additionals[category] = []

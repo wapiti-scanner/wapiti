@@ -189,7 +189,8 @@ async def test_verify_headers_vuln_found():
             request=request,
             parameter="Header: payload",
             info=_("URL {0} seems vulnerable to Log4Shell attack by using the header {1}") \
-                        .format(modified_request.url, "Header")
+                        .format(modified_request.url, "Header"),
+            wstg=["WSTG-INPV-11"]
         )
 
 

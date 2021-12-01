@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Secure Flag cookie")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-SESS-02"]
+
 DESCRIPTION = _(
     "The secure flag is an option that can be set by the application server when sending a new cookie to the user "
     "within an HTTP Response."

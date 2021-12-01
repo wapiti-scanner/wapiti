@@ -7,6 +7,7 @@ from typing import Match
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
+from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
@@ -118,7 +119,8 @@ class ModuleWpEnum(Attack):
                 await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
-                    info=json.dumps(plugin_detected)
+                    info=json.dumps(plugin_detected),
+                    wstg=TECHNO_DETECTED_WSTG_CODE
                 )
             elif rep.status == 403:
                 plugin_detected = {
@@ -134,7 +136,8 @@ class ModuleWpEnum(Attack):
                 await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
-                    info=json.dumps(plugin_detected)
+                    info=json.dumps(plugin_detected),
+                    wstg=TECHNO_DETECTED_WSTG_CODE
                 )
 
     async def detect_theme(self, url):
@@ -164,7 +167,8 @@ class ModuleWpEnum(Attack):
                 await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
-                    info=json.dumps(theme_detected)
+                    info=json.dumps(theme_detected),
+                    wstg=TECHNO_DETECTED_WSTG_CODE
                 )
             elif rep.status == 403:
                 theme_detected = {
@@ -180,7 +184,8 @@ class ModuleWpEnum(Attack):
                 await self.add_addition(
                     category=TECHNO_DETECTED,
                     request=req,
-                    info=json.dumps(theme_detected)
+                    info=json.dumps(theme_detected),
+                    wstg=TECHNO_DETECTED_WSTG_CODE
                 )
 
     @staticmethod

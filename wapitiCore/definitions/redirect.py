@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Open Redirect")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CLNT-04"]
+
 DESCRIPTION = _(
     "Unvalidated redirects and forwards are possible when a web application accepts untrusted input that could cause "
     "the web application to redirect the request to a URL contained within untrusted input."
@@ -50,4 +52,11 @@ REFERENCES = [
         "title": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
         "url": "https://cwe.mitre.org/data/definitions/601.html"
     },
+    {
+        "title": "OWASP: Client-side URL Redirect",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "11-Client-side_Testing/04-Testing_for_Client-side_URL_Redirect"
+        )
+    }
 ]

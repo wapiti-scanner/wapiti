@@ -16,18 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import json
 import os
 from collections import namedtuple
-from typing import Iterable, Sequence, AsyncGenerator
+from typing import AsyncGenerator, Iterable, Sequence
 
 from aiocache import cached
+from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
+                        PickleType, String, Table, Text, and_, func,
+                        literal_column, or_, select)
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import Table, Column, Integer, String, Boolean, Text, MetaData, ForeignKey, select, \
-    PickleType, func, and_, or_, literal_column
-
 from wapitiCore.net import web
 
-Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,module")
+Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module")
 
 
 class SqlPersister:
@@ -138,7 +139,8 @@ class SqlPersister:
             Column("parameter", Text, nullable=False),  # Vulnerable parameter, can be huge
             Column("info", Text, nullable=False),
             # Vulnerability description. If it contains the parameter name then huge.
-            Column("type", String(255), nullable=False)  # Something like additional/anomaly/vulnerability
+            Column("type", String(255), nullable=False),  # Something like additional/anomaly/vulnerability
+            Column("wstg", String(255), nullable=False)  # Something like additional/anomaly/vulnerability
         )
 
         self.attack_logs = Table(
@@ -540,7 +542,7 @@ class SqlPersister:
 
     async def add_payload(
             self, request_id: int, payload_type: str, module: str,
-            category=None, level=0, request=None, parameter="", info=""):
+            category=None, level=0, request=None, parameter="", info="", wstg=None):
 
         # Save the request along with its parameters
         statement = self.paths.insert().values(
@@ -631,7 +633,8 @@ class SqlPersister:
             level=level,
             parameter=parameter,
             info=info,
-            type=payload_type
+            type=payload_type,
+            wstg=json.dumps(wstg or []),
         )
         async with self._engine.begin() as conn:
             await conn.execute(statement)
@@ -703,12 +706,22 @@ class SqlPersister:
             result = await conn.execute(select(self.payloads))
 
         for row in result.fetchall():
-            evil_id, original_id, module, category, level, parameter, info, payload_type = row
+            evil_id, original_id, module, category, level, parameter, info, payload_type, wstg = row
 
             evil_request = await self.get_path_by_id(evil_id)
             original_request = await self.get_path_by_id(original_id)
 
-            yield Payload(evil_request, original_request, category, level, parameter, info, payload_type, module)
+            yield Payload(
+                evil_request,
+                original_request,
+                category,
+                level,
+                parameter,
+                info,
+                payload_type,
+                json.loads(wstg),
+                module
+            )
 
     async def flush_session(self):
         await self.flush_attacks()

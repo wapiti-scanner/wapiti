@@ -34,7 +34,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _, CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
 from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
-from wapitiCore.definitions.ssl import NAME
+from wapitiCore.definitions.ssl import NAME, WSTG_CODE
 
 
 def get_common_name(name_field: x509.Name) -> str:
@@ -368,6 +368,6 @@ class ModuleSsl(Attack):
 
         for level, message in scan_results:
             if level == INFO_LEVEL:
-                await self.add_addition(category=NAME, request=request, info=message)
+                await self.add_addition(category=NAME, request=request, info=message, wstg=WSTG_CODE)
             else:
-                await self.add_vuln(level=level, category=NAME, request=request, info=message)
+                await self.add_vuln(level=level, category=NAME, request=request, info=message, wstg=WSTG_CODE)

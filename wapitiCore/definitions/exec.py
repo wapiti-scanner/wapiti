@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Command execution")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-INPV-12"]
+
 DESCRIPTION = _(
     "This attack consists in executing system commands on the server."
 ) + " " + _(
@@ -37,7 +39,10 @@ SOLUTION = _(
 REFERENCES = [
     {
         "title": "OWASP: Command Injection",
-        "url": "https://owasp.org/www-community/attacks/Command_Injection"
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/12-Testing_for_Command_Injection"
+        )
     },
     {
         "title": "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",

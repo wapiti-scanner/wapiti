@@ -24,7 +24,8 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.sql import NAME
+from wapitiCore.definitions.sql import NAME, WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
@@ -360,7 +361,8 @@ class ModuleSql(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -390,7 +392,8 @@ class ModuleSql(Attack):
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")
@@ -452,7 +455,8 @@ class ModuleSql(Attack):
                         category=NAME,
                         request=last_mutated_request,
                         info=vuln_message,
-                        parameter=current_parameter
+                        parameter=current_parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")

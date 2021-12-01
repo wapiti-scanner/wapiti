@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Server Side Request Forgery")
 SHORT_NAME = _("SSRF")
 
+WSTG_CODE = ["WSTG-INPV-19"]
+
 DESCRIPTION = _(
     "The target application may have functionality for importing data from a URL, "
     "publishing data to a URL or otherwise reading data from a URL that can be tampered with."
@@ -51,4 +53,11 @@ REFERENCES = [
         "title": "CWE-918: Server-Side Request Forgery (SSRF)",
         "url": "https://cwe.mitre.org/data/definitions/918.html"
     },
+    {
+        "title": "OWASP: Server-Side Request Forgery",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/19-Testing_for_Server-Side_Request_Forgery"
+        )
+    }
 ]

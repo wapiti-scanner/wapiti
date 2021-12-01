@@ -29,7 +29,7 @@ from httpx import RequestError
 from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.dangerous_resource import NAME
+from wapitiCore.definitions.dangerous_resource import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -338,5 +338,6 @@ class ModuleNikto(Attack):
             await self.add_vuln_high(
                 category=NAME,
                 request=evil_request,
-                info=info
+                info=info,
+                wstg=WSTG_CODE
             )

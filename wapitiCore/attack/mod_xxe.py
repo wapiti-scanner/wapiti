@@ -27,7 +27,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.xxe import NAME
+from wapitiCore.definitions.xxe import NAME, WSTG_CODE
+from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -164,7 +166,8 @@ class ModuleXxe(Attack):
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
                     info=anom_msg,
-                    parameter=parameter
+                    parameter=parameter,
+                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -185,7 +188,8 @@ class ModuleXxe(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -215,7 +219,8 @@ class ModuleXxe(Attack):
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")
@@ -245,7 +250,8 @@ class ModuleXxe(Attack):
                         category=NAME,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
-                        parameter="raw body"
+                        parameter="raw body",
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -288,7 +294,8 @@ class ModuleXxe(Attack):
                         category=NAME,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
@@ -415,7 +422,8 @@ class ModuleXxe(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=WSTG_CODE
                     )
 
                     log_red("---")

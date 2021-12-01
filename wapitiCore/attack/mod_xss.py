@@ -23,7 +23,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.reflected_xss import NAME
+from wapitiCore.definitions.reflected_xss import NAME, WSTG_CODE
+from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net.web import Request
@@ -142,7 +144,8 @@ class ModuleXss(Attack):
                     category=Messages.RES_CONSUMPTION,
                     request=evil_request,
                     info=anom_msg,
-                    parameter=xss_param
+                    parameter=xss_param,
+                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -171,7 +174,8 @@ class ModuleXss(Attack):
                         category=NAME,
                         request=evil_request,
                         parameter=xss_param,
-                        info=message
+                        info=message,
+                        wstg=WSTG_CODE
                     )
 
                     if xss_param == "QUERY_STRING":
@@ -208,7 +212,8 @@ class ModuleXss(Attack):
                         category=Messages.ERROR_500,
                         request=evil_request,
                         info=anom_msg,
-                        parameter=xss_param
+                        parameter=xss_param,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")

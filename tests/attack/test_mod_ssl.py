@@ -63,6 +63,7 @@ async def test_ssl_scanner():
         level=INFO_LEVEL,
         request=request,
         parameter='',
+        wstg=["WSTG-CRYP-01"],
         info="Certificate subject: yolo.com"
     )
 
@@ -74,6 +75,7 @@ async def test_ssl_scanner():
         level=CRITICAL_LEVEL,
         request=request,
         parameter='',
+        wstg=["WSTG-CRYP-01"],
         info="Requested hostname doesn't match those in the certificate"
     )
 
@@ -85,6 +87,7 @@ async def test_ssl_scanner():
         level=CRITICAL_LEVEL,
         request=request,
         parameter='',
+        wstg=["WSTG-CRYP-01"],
         info="Certificate is invalid for Mozilla trust store: self signed certificate"
     )
 
@@ -96,6 +99,7 @@ async def test_ssl_scanner():
         level=HIGH_LEVEL,
         request=request,
         parameter='',
+        wstg=["WSTG-CRYP-01"],
         info="Strict Transport Security (HSTS) is not set"
     )
 

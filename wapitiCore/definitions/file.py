@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Path Traversal")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-ATHZ-01"]
+
 DESCRIPTION = _(
     "This attack is known as Path or Directory Traversal."
 ) + " " + _(
@@ -53,7 +55,10 @@ SOLUTION = _(
 REFERENCES = [
     {
         "title": "OWASP: Path Traversal",
-        "url": "https://owasp.org/www-community/attacks/Path_Traversal"
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "05-Authorization_Testing/01-Testing_Directory_Traversal_File_Include"
+        )
     },
     {
         "title": "Acunetix: What is a Directory Traversal attack?",

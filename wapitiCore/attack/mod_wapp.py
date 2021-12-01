@@ -27,9 +27,9 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net.page import Page
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
-from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED
-from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
+from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED, WSTG_CODE as WEB_SERVER_WSTG_CODE
+from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_APP_WSTG_CODE
 from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -120,7 +120,8 @@ class ModuleWapp(Attack):
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
-                info=json.dumps(detected_applications[application_name])
+                info=json.dumps(detected_applications[application_name]),
+                wstg=TECHNO_DETECTED_WSTG_CODE
             )
 
             if versions:
@@ -128,13 +129,15 @@ class ModuleWapp(Attack):
                     await self.add_vuln_info(
                         category=WEB_SERVER_VERSIONED,
                         request=request_to_root,
-                        info=json.dumps(detected_applications[application_name])
+                        info=json.dumps(detected_applications[application_name]),
+                        wstg=WEB_SERVER_WSTG_CODE
                     )
                 else:
                     await self.add_vuln_info(
                         category=WEB_APP_VERSIONED,
                         request=request_to_root,
-                        info=json.dumps(detected_applications[application_name])
+                        info=json.dumps(detected_applications[application_name]),
+                        wstg=WEB_APP_WSTG_CODE
                     )
 
     async def _detect_applications(self, url: str, application_data: ApplicationData) -> Dict:

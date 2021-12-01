@@ -29,7 +29,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.backup import NAME
+from wapitiCore.definitions.backup import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -123,5 +123,6 @@ class ModuleBackup(Attack):
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_req,
-                    info=_("Backup file {0} found for {1}").format(url, page)
+                    info=_("Backup file {0} found for {1}").format(url, page),
+                    wstg=WSTG_CODE
                 )

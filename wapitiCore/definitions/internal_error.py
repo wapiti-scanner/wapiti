@@ -24,6 +24,8 @@ TYPE = "anomaly"
 NAME = _("Internal Server Error")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-ERRH-01"]
+
 DESCRIPTION = _(
     "An error occurred on the server's side, preventing it to process the request."
 ) + " " + _(
@@ -42,5 +44,12 @@ REFERENCES = [
     {
         "title": "OWASP: Improper Error Handling",
         "url": "https://owasp.org/www-community/Improper_Error_Handling"
+    },
+    {
+        "title": "OWASP: Improper Error Handling",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling"
+        )
     }
 ]

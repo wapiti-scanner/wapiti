@@ -24,7 +24,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator, random_string
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.stored_xss import NAME
+from wapitiCore.definitions.stored_xss import NAME, WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.net.web import Request
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
@@ -164,7 +166,8 @@ class ModulePermanentxss(Attack):
                                     category=NAME,
                                     request=evil_request,
                                     parameter=parameter,
-                                    info=description
+                                    info=description,
+                                    wstg=WSTG_CODE
                                 )
 
                                 if parameter == "QUERY_STRING":
@@ -251,7 +254,8 @@ class ModulePermanentxss(Attack):
                     category=Messages.RES_CONSUMPTION,
                     request=evil_request,
                     info=anom_msg,
-                    parameter=xss_param
+                    parameter=xss_param,
+                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -300,7 +304,8 @@ class ModulePermanentxss(Attack):
                         category=NAME,
                         request=evil_request,
                         parameter=xss_param,
-                        info=description
+                        info=description,
+                        wstg=WSTG_CODE
                     )
 
                     if xss_param == "QUERY_STRING":
@@ -337,7 +342,8 @@ class ModulePermanentxss(Attack):
                         category=Messages.ERROR_500,
                         request=evil_request,
                         info=anom_msg,
-                        parameter=xss_param
+                        parameter=xss_param,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")

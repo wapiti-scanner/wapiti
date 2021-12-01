@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Weak credentials")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-ATHN-07"]
+
 DESCRIPTION = _(
     "The web application is using either default credentials or weak passwords that can be found in well-known "
     "passwords lists."
@@ -45,4 +47,11 @@ REFERENCES = [
         "title": "CWE-521: Weak Password Requirements",
         "url": "https://cwe.mitre.org/data/definitions/521.html"
     },
+    {
+        "title": "OWASP: Testing for Weak Password Policy",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/"
+            "04-Authentication_Testing/07-Testing_for_Weak_Password_Policy"
+        )
+    }
 ]

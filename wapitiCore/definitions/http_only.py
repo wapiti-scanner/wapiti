@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("HttpOnly Flag cookie")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CONF-07", "WSTG-SESS-02"]
+
 DESCRIPTION = _(
     "HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
 ) + " " + _(
@@ -36,6 +38,13 @@ SOLUTION = _(
 )
 
 REFERENCES = [
+    {
+        "title": "OWASP: HTTP Strict Transport Security",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/"
+            "02-Configuration_and_Deployment_Management_Testing/07-Test_HTTP_Strict_Transport_Security"
+        )
+    },
     {
         "title": "OWASP: Testing for Cookies Attributes",
         "url": (

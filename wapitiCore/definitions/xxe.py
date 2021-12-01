@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("XML External Entity")
 SHORT_NAME = _("XXE")
 
+WSTG_CODE = ["WSTG-INPV-07"]
+
 DESCRIPTION = _(
     "An XML External Entity attack is a type of attack against an application that parses XML input."
 ) + " " + _(
@@ -53,4 +55,11 @@ REFERENCES = [
         "title": "OWASP: XML External Entity Prevention Cheat Sheet",
         "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
     },
+    {
+        "title": "OWASP: XML Injection",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/07-Testing_for_XML_Injection"
+        )
+    }
 ]
