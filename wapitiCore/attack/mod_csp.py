@@ -20,7 +20,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
-from wapitiCore.definitions.csp import NAME
+from wapitiCore.definitions.csp import NAME, WSTG_CODE
 from wapitiCore.main.log import log_red
 
 MSG_NO_CSP = _("CSP is not set")
@@ -57,7 +57,8 @@ class ModuleCsp(Attack):
             await self.add_vuln_low(
                 category=NAME,
                 request=request_to_root,
-                info=MSG_NO_CSP
+                info=MSG_NO_CSP,
+                wstg=WSTG_CODE
             )
         else:
             csp_dict = csp_header_to_dict(response.headers["Content-Security-Policy"])
@@ -75,5 +76,6 @@ class ModuleCsp(Attack):
                     await self.add_vuln_low(
                         category=NAME,
                         request=request_to_root,
-                        info=info
+                        info=info,
+                        wstg=WSTG_CODE
                     )

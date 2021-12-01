@@ -8,7 +8,7 @@ from typing import Dict, Iterable, List, Tuple
 import dns.resolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.log4shell import NAME
+from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net.web import Request
@@ -112,7 +112,8 @@ class ModuleLog4Shell(Attack):
             request=request,
             info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
                 .format(request.url, element_type, param_name),
-            parameter=f"{param_name}"
+            parameter=f"{param_name}",
+            wstg=WSTG_CODE
         )
 
         log_red("---")
@@ -146,7 +147,8 @@ class ModuleLog4Shell(Attack):
                 request=modified_request,
                 info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
                     .format(modified_request.url, "header", header),
-                parameter=f"{header}: {payload}"
+                parameter=f"{header}: {payload}",
+                wstg=WSTG_CODE
             )
 
             log_red("---")

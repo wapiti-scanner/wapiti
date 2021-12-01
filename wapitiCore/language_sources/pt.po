@@ -1215,6 +1215,10 @@ msgstr "Resumo das vulnerabilidades :"
 msgid "{0} : {1:>3}\n"
 msgstr "{0} : {1:>3}\n"
 
+#, python-brace-format
+msgid "WSTG code: {0}"
+msgstr ""
+
 msgid "Evil request:\n"
 msgstr "Requisição maliciosa:\n"
 

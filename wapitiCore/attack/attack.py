@@ -255,7 +255,7 @@ class Attack:
         self.deps = []
 
     async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
-                          level=0, request=None, parameter="", info=""):
+                          level=0, request=None, parameter="", info="", wstg=None):
         await self.persister.add_payload(
             request_id=request_id,
             payload_type=payload_type,
@@ -264,7 +264,8 @@ class Attack:
             level=level,
             request=request,
             parameter=parameter,
-            info=info
+            info=info,
+            wstg=wstg
         )
 
     add_vuln = partialmethod(add_payload, payload_type=VULN)

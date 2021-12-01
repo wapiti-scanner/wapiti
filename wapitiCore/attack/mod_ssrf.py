@@ -25,7 +25,7 @@ from httpx import RequestError
 from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.ssrf import NAME
+from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
@@ -246,7 +246,8 @@ class ModuleSsrf(Attack):
                                 category=NAME,
                                 request=mutated_request,
                                 info=vuln_message,
-                                parameter=parameter
+                                parameter=parameter,
+                                wstg=WSTG_CODE
                             )
 
                             log_red("---")

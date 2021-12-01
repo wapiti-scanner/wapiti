@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Cross Site Request Forgery")
 SHORT_NAME = _("CSRF")
 
+WSTG_CODE = ["WSTG-SESS-05"]
+
 DESCRIPTION = _(
     "Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web "
     "application in which they're currently authenticated."

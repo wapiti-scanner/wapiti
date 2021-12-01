@@ -24,6 +24,8 @@ TYPE = "anomaly"
 NAME = _("Resource consumption")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-ERRH-01"]
+
 DESCRIPTION = _(
     "It took an abnormal time to the server to respond to a query."
 ) + " " + _(
@@ -43,5 +45,12 @@ REFERENCES = [
     {
         "title": "CWE-400: Uncontrolled Resource Consumption",
         "url": "https://cwe.mitre.org/data/definitions/400.html"
+    },
+    {
+        "title": "OWASP: Improper Error Handling",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling"
+        )
     }
 ]

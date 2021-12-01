@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Subdomain takeover")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CONF-10"]
+
 DESCRIPTION = _(
     "A DNS CNAME record points to a non existing domain or to a content that an attacker can take control of."
 )
@@ -40,5 +42,12 @@ REFERENCES = [
     {
         "title": "Can I take over XYZ? — a list of services and how to claim (sub)domains with dangling DNS records.",
         "url": "https://github.com/EdOverflow/can-i-take-over-xyz"
+    },
+    {
+        "title": "OWASP: Subdomain Takeover",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "02-Configuration_and_Deployment_Management_Testing/10-Test_for_Subdomain_Takeover"
+        )
     }
 ]

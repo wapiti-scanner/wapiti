@@ -22,7 +22,8 @@ from httpx import ReadTimeout, HTTPStatusError, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.crlf import NAME
+from wapitiCore.definitions.crlf import NAME, WSTG_CODE
+from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
@@ -56,7 +57,8 @@ class ModuleCrlf(Attack):
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
                     parameter=parameter,
-                    info="Timeout (" + parameter + ")"
+                    info="Timeout (" + parameter + ")",
+                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
 
                 log_orange("---")
@@ -76,7 +78,8 @@ class ModuleCrlf(Attack):
                         category=NAME,
                         request=mutated_request,
                         parameter=parameter,
-                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
+                        wstg=WSTG_CODE
                     )
 
                     if parameter == "QUERY_STRING":

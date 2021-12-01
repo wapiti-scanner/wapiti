@@ -8,6 +8,8 @@ TYPE = "additional"
 NAME = _("HTTP Methods")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CONF-06"]
+
 DESCRIPTION = _(
     "While GET and POST are by far the most common methods that are used to access "
     "information provided by a web server, HTTP allows several other (and somewhat less known) methods."

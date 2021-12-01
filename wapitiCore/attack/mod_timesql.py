@@ -21,7 +21,8 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.sql import NAME
+from wapitiCore.definitions.sql import NAME, WSTG_CODE
+from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -82,7 +83,8 @@ class ModuleTimesql(Attack):
                     category=NAME,
                     request=mutated_request,
                     info=vuln_message,
-                    parameter=parameter
+                    parameter=parameter,
+                    wstg=WSTG_CODE
                 )
 
                 log_red("---")
@@ -115,7 +117,8 @@ class ModuleTimesql(Attack):
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter
+                        parameter=parameter,
+                        wstg=INTERNAL_ERROR_WSTG_CODE
                     )
 
                     log_orange("---")

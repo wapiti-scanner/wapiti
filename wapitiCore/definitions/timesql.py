@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Blind SQL Injection")
 SHORT_NAME = _("Blind SQLI")
 
+WSTG_CODE = ["WSTG-INPV-05"]
+
 DESCRIPTION = _(
     "Blind SQL injection is a technique that exploits a vulnerability occurring in the database of an application."
 ) + " " + _(
@@ -51,4 +53,11 @@ REFERENCES = [
         "title": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
         "url": "https://cwe.mitre.org/data/definitions/89.html"
     },
+    {
+        "title": "OWASP: SQL Injection",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/05-Testing_for_SQL_Injection"
+        )
+    }
 ]

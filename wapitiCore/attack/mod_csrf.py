@@ -22,7 +22,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.csrf import NAME
+from wapitiCore.definitions.csrf import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import Page
 from wapitiCore.main.log import log_red
@@ -187,5 +187,6 @@ class ModuleCsrf(Attack):
             request_id=request.path_id,
             category=NAME,
             request=request,
-            info=vuln_message
+            info=vuln_message,
+            wstg=WSTG_CODE
         )

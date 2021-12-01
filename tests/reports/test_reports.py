@@ -63,7 +63,7 @@ def test_reports():
         print("Using report type '{}'".format(report_format))
         request = Request("http://perdu.com/riri?foo=bar")
         report_gen.add_vulnerability(
-            category=_("Cross Site Scripting"),
+            category=_("Reflected Cross Site Scripting"),
             level=1,
             request=request,
             parameter="foo",

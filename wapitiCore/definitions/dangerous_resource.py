@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Potentially dangerous file")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CONF-04", "WSTG-CONF-01"]
+
 DESCRIPTION = _(
     "A file with potential vulnerabilities has been found on the website."
 )
@@ -37,4 +39,11 @@ REFERENCES = [
         "title": "Mitre: Search details of a CVE",
         "url": "https://cve.mitre.org/cve/search_cve_list.html"
     },
+    {
+        "title": "OWASP: Test Network Infrastructure Configuration",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "02-Configuration_and_Deployment_Management_Testing/01-Test_Network_Infrastructure_Configuration"
+        )
+    }
 ]

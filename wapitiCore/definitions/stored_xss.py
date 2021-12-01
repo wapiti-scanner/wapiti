@@ -25,6 +25,8 @@ NAME = _("Stored Cross Site Scripting")
 
 SHORT_NAME = _("XSS")
 
+WSTG_CODE = ["WSTG-INPV-02"]
+
 DESCRIPTION = _(
     "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications "
     "which allow code injection by malicious web users into the web pages viewed by other users."
@@ -54,4 +56,11 @@ REFERENCES = [
         "title": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
         "url": "https://cwe.mitre.org/data/definitions/79.html"
     },
+    {
+        "title": "OWASP: Stored Cross Site Scripting",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/02-Testing_for_Stored_Cross_Site_Scripting"
+        )
+    }
 ]

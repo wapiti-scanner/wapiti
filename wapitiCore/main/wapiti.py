@@ -16,42 +16,40 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import sys
 import argparse
+import asyncio
+import codecs
 import os
-from urllib.parse import urlparse
-from time import strftime, gmtime
-from importlib import import_module
-from operator import attrgetter
-from traceback import print_tb
+import signal
+import sys
 from collections import deque
 from datetime import datetime
-from uuid import uuid1
-from sqlite3 import OperationalError
 from hashlib import sha256
-from random import choice
-import codecs
+from importlib import import_module
 from inspect import getdoc
-import asyncio
-import signal
+from operator import attrgetter
+from random import choice
+from sqlite3 import OperationalError
+from time import gmtime, strftime
+from traceback import print_tb
 from typing import AsyncGenerator, Dict, List
+from urllib.parse import urlparse
+from uuid import uuid1
 
 import browser_cookie3
 import httpx
 from httpx import RequestError
-
+from wapitiCore.attack.attack import (Attack, all_modules, common_modules,
+                                      presets)
+from wapitiCore.definitions import (additionals, anomalies, flatten_references,
+                                    vulnerabilities)
 from wapitiCore.language.language import _
-from wapitiCore.definitions import anomalies, additionals, vulnerabilities, flatten_references
-
-from wapitiCore.net import crawler, jsoncookie
-from wapitiCore.net.web import Request
-from wapitiCore.report import get_report_generator_instance, GENERATORS
-from wapitiCore.net.sql_persister import SqlPersister
-from wapitiCore.moon import phase
 from wapitiCore.main.log import logging
-
-from wapitiCore.attack.attack import Attack, presets, all_modules, common_modules
-
+from wapitiCore.moon import phase
+from wapitiCore.net import crawler, jsoncookie
+from wapitiCore.net.sql_persister import SqlPersister
+from wapitiCore.net.web import Request
+from wapitiCore.report import GENERATORS, get_report_generator_instance
 
 WAPITI_VERSION = "Wapiti 3.0.9"
 
@@ -285,7 +283,8 @@ class Wapiti:
                 vul.NAME,
                 vul.DESCRIPTION,
                 vul.SOLUTION,
-                flatten_references(vul.REFERENCES)
+                flatten_references(vul.REFERENCES),
+                vul.WSTG_CODE
             )
 
         for anomaly in anomalies:
@@ -293,7 +292,8 @@ class Wapiti:
                 anomaly.NAME,
                 anomaly.DESCRIPTION,
                 anomaly.SOLUTION,
-                flatten_references(anomaly.REFERENCES)
+                flatten_references(anomaly.REFERENCES),
+                anomaly.WSTG_CODE
             )
 
         for additional in additionals:
@@ -301,7 +301,8 @@ class Wapiti:
                 additional.NAME,
                 additional.DESCRIPTION,
                 additional.SOLUTION,
-                flatten_references(additional.REFERENCES)
+                flatten_references(additional.REFERENCES),
+                additional.WSTG_CODE
             )
 
     async def _init_attacks(self, stop_event: asyncio.Event):
@@ -569,6 +570,7 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
+                    wstg=payload.wstg
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
@@ -578,6 +580,7 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
+                    wstg=payload.wstg
                 )
             elif payload.type == "additional":
                 self.report_gen.add_additional(
@@ -587,6 +590,7 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
+                    wstg=payload.wstg
                 )
 
         print('')

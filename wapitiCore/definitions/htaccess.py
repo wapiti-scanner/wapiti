@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("Htaccess Bypass")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-CONF-06"]
+
 DESCRIPTION = _(
     "Htaccess files are used to restrict access to some files or HTTP method."
 ) + " " + _(
@@ -43,4 +45,11 @@ REFERENCES = [
         "title": "CWE-538: Insertion of Sensitive Information into Externally-Accessible File or Directory",
         "url": "https://cwe.mitre.org/data/definitions/538.html"
     },
+    {
+        "title": "OWASP: HTTP Methods",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"
+        )
+    }
 ]

@@ -39,7 +39,7 @@ from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.subdomain_takeovers import NAME
+from wapitiCore.definitions.subdomain_takeovers import NAME, WSTG_CODE
 
 
 FINGERPRINTS_FILENAME = "takeover_fingerprints.json"
@@ -292,7 +292,8 @@ class ModuleTakeover(Attack):
                         await self.add_vuln_high(
                             category=NAME,
                             info=_(f"CNAME {domain} to {cname} seems vulnerable to takeover"),
-                            request=Request(f"https://{domain}/")
+                            request=Request(f"https://{domain}/"),
+                            wstg=WSTG_CODE
                         )
 
     async def attack(self, request: Request):

@@ -83,6 +83,8 @@ class TXTReportGenerator(ReportGenerator):
                         for vuln in vulnerabilities:
                             txt_report_file.write(vuln["info"])
                             txt_report_file.write("\n")
+                            txt_report_file.write(_("WSTG code: {0}").format(vuln['wstg']))
+                            txt_report_file.write("\n")
                             # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
                             txt_report_file.write(_("Evil request:\n"))
                             txt_report_file.write(vuln["request"].http_repr())
@@ -106,6 +108,8 @@ class TXTReportGenerator(ReportGenerator):
                         for anom in anomalies:
                             txt_report_file.write(anom["info"])
                             txt_report_file.write("\n")
+                            txt_report_file.write(_("WSTG code: {0}").format(anom['wstg']))
+                            txt_report_file.write("\n")
                             txt_report_file.write(_("Evil request:\n"))
                             txt_report_file.write(anom["request"].http_repr())
                             txt_report_file.write("\n\n")
@@ -123,6 +127,8 @@ class TXTReportGenerator(ReportGenerator):
                         txt_report_file.write(title(category))
                         for additional in additionnals:
                             txt_report_file.write(additional["info"])
+                            txt_report_file.write("\n")
+                            txt_report_file.write(f"WSTG: {additional['wstg']}")
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
                         txt_report_file.write(separator)
@@ -131,7 +137,7 @@ class TXTReportGenerator(ReportGenerator):
                 txt_report_file.close()
 
     # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None):
+    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
         """
         This method adds a vulnerability type, it can be invoked to include in the
         report the type.
@@ -145,12 +151,13 @@ class TXTReportGenerator(ReportGenerator):
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -165,22 +172,24 @@ class TXTReportGenerator(ReportGenerator):
                 "request": request,
                 "parameter": parameter,
                 "info": info,
-                "module": module
+                "module": module,
+                "wstg": wstg
             }
         )
 
     # Anomalies
-    def add_anomaly_type(self, name, description="", solution="", references=None):
+    def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -192,14 +201,15 @@ class TXTReportGenerator(ReportGenerator):
             "info": info,
             "level": level,
             "parameter": parameter,
-            "module": module
+            "module": module,
+            "wstg": wstg
         }
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
 
     # Additionals
-    def add_additional_type(self, name, description="", solution="", references=None):
+    def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
         """
         This method adds an addtional type, it can be invoked to include in the
         report the type.
@@ -212,12 +222,13 @@ class TXTReportGenerator(ReportGenerator):
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -229,7 +240,8 @@ class TXTReportGenerator(ReportGenerator):
             "info": info,
             "level": level,
             "parameter": parameter,
-            "module": module
+            "module": module,
+            "wstg": wstg
         }
         if category not in self._additionals:
             self._additionals[category] = []

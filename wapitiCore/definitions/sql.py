@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("SQL Injection")
 SHORT_NAME = _("SQLI")
 
+WSTG_CODE = ["WSTG-INPV-05"]
+
 DESCRIPTION = _(
     "SQL injection vulnerabilities allow an attacker to alter the queries executed on the backend database."
 ) + " " + _(
@@ -59,4 +61,11 @@ REFERENCES = [
         "title": "OWASP: Blind SQL Injection",
         "url": "https://owasp.org/www-community/attacks/Blind_SQL_Injection"
     },
+    {
+        "title": "OWASP: SQL Injection",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/05-Testing_for_SQL_Injection"
+        )
+    }
 ]

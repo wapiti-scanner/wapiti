@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("CRLF Injection")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-INPV-15"]
+
 DESCRIPTION = _(
     "The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, \\n)."
 ) + " " + _(
@@ -49,4 +51,11 @@ REFERENCES = [
         "title": "CWE-93: Improper Neutralization of CRLF Sequences ('CRLF Injection')",
         "url": "https://cwe.mitre.org/data/definitions/93.html"
     },
+    {
+        "title": "OWASP: Testing for HTTP Splitting Smuggling",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/15-Testing_for_HTTP_Splitting_Smuggling"
+        )
+    }
 ]

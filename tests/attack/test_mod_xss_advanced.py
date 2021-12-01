@@ -56,7 +56,7 @@ async def test_title_positive():
 
     assert persister.add_payload.call_count
     assert persister.add_payload.call_args_list[0][1]["module"] == "xss"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Cross Site Scripting")
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Reflected Cross Site Scripting")
     assert persister.add_payload.call_args_list[0][1]["parameter"] == "title"
     assert persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].startswith("</title>")
     assert _(

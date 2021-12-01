@@ -24,6 +24,8 @@ TYPE = "additional"
 NAME = _("Fingerprint web technology")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-INFO-02", "WSTG-INFO-08"]
+
 DESCRIPTION = _(
     "The use of a web technology can be deducted due to the presence of its specific fingerprints."
 )

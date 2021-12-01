@@ -21,7 +21,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
-from wapitiCore.definitions.redirect import NAME
+from wapitiCore.definitions.redirect import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 
 
@@ -57,7 +57,8 @@ class ModuleRedirect(Attack):
                     category=NAME,
                     request=mutated_request,
                     parameter=parameter,
-                    info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                    info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
+                    wstg=WSTG_CODE
                 )
 
                 if parameter == "QUERY_STRING":

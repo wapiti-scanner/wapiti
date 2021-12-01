@@ -10,7 +10,7 @@ from httpx import RequestError
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
+from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -152,6 +152,7 @@ class ModuleDrupalEnum(Attack):
                 category=TECHNO_DETECTED,
                 request=request_to_root,
                 info=json.dumps(drupal_detected),
+                wstg=WSTG_CODE
             )
         else:
             log_blue(MSG_NO_DRUPAL)

@@ -24,6 +24,8 @@ TYPE = "vulnerability"
 NAME = _("TLS/SSL misconfigurations")
 SHORT_NAME = _("SSL misconfigurations")
 
+WSTG_CODE = ["WSTG-CRYP-01"]
+
 DESCRIPTION = _(
     "The TLS protocol aims primarily to provide privacy and data integrity between "
     "two or more communicating computer applications."
@@ -60,6 +62,14 @@ REFERENCES = [
         "url": (
             "https://blog.trailofbits.com/2019/03/25/"
             "what-application-developers-need-to-know-about-tls-early-data-0rtt/"
+        )
+    },
+    {
+        "title": "OWASP: Weak SSL TLS Ciphers Insufficient Transport Layer Protection",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/v41/"
+            "4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/"
+            "01-Testing_for_Weak_SSL_TLS_Ciphers_Insufficient_Transport_Layer_Protection"
         )
     }
 ]

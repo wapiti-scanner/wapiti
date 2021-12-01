@@ -5,6 +5,8 @@ TYPE = "vulnerability"
 NAME = _("Log4Shell")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-INPV-11"]
+
 DESCRIPTION = _(
     "Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against "
     "attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages "
@@ -29,4 +31,11 @@ REFERENCES = [
         "title": "NITRE: CVE-2021-44228",
         "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228"
     },
+    {
+        "title": "OWASP: Code Injection",
+        "url": (
+            "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/"
+            "07-Input_Validation_Testing/11-Testing_for_Code_Injection"
+        )
+    }
 ]

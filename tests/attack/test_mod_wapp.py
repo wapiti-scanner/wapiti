@@ -2,14 +2,13 @@ import os
 from asyncio import Event
 
 import httpx
-import respx
 import pytest
-
-from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import AsyncCrawler
+import respx
+from tests import AsyncMock
 from wapitiCore.attack.mod_wapp import ModuleWapp
 from wapitiCore.language.language import _
-from tests import AsyncMock
+from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.web import Request
 
 
 @pytest.mark.asyncio

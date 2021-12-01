@@ -5,6 +5,8 @@ TYPE = "vulnerability"
 NAME = _("Fingerprint web application framework")
 SHORT_NAME = NAME
 
+WSTG_CODE = ["WSTG-INFO-08"]
+
 DESCRIPTION = _(
     "The version of a web application framework can be identified due to the presence of its specific fingerprints."
 )

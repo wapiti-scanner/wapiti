@@ -12,7 +12,7 @@
         <header style="text-align: center">
         <h2 class="title" style="text-align: center">Wapiti vulnerability report</h2>
         <h3>Target: ${target}</h3>
-        <p>Date of the scan: ${scan_date}. Scope of the scan: ${scan_scope}</p>
+        <p>Date of the scan: ${scan_date}. Scope of the scan: ${scan_scope}. Crawled pages: ${crawled_pages}</p>
         </header>
         <hr />
         % if auth_dict != None:
@@ -20,7 +20,6 @@
         <p>
             Method: ${auth_dict["method"]}<br>
             Url: ${auth_dict["url"]}<br>
-            Crawled pages: ${crawled_pages}<br>
             Logged in: ${auth_dict["logged_in"]}<br>
             % if auth_form_dict != None and len(auth_form_dict) > 0:
             Login field: ${auth_form_dict["login_field"]}<br>
@@ -93,6 +92,7 @@
                             <a href="#tab-vuln-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-vuln-${i}-${j}-2">HTTP Request</a>
                             <a href="#tab-vuln-${i}-${j}-3">cURL command line</a>
+                            <a href="#tab-vuln-${i}-${j}-4">WSTG Code</a>
                         </nav>
                         <section id="tab-vuln-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${vulnerability["info"] | h}</pre>
@@ -102,6 +102,9 @@
                         </section>
                         <section id="tab-vuln-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${vulnerability["curl_command"] | h}</pre>
+                        </section>
+                        <section id="tab-vuln-${i}-${j}-4" style="min-height: 124px;" class="is-hidden">
+                            <pre>${vulnerability["wstg"] | h}</pre>
                         </section>
                     % endfor
 
@@ -130,6 +133,7 @@
                             <a href="#tab-anom-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-anom-${i}-${j}-2">HTTP Request</a>
                             <a href="#tab-anom-${i}-${j}-3">cURL command line</a>
+                            <a href="#tab-anom-${i}-${j}-4">WSTG Code</a>
                         </nav>
                         <section id="tab-anom-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${anomaly["info"] | h}</pre>
@@ -139,6 +143,9 @@
                         </section>
                         <section id="tab-anom-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${anomaly["curl_command"] | h}</pre>
+                        </section>
+                        <section id="tab-anom-${i}-${j}-4" style="min-height: 124px;" class="is-hidden">
+                            <pre>${anomaly["wstg"] | h}</pre>
                         </section>
                     % endfor
 
@@ -167,6 +174,7 @@
                             <a href="#tab-addition-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-addition-${i}-${j}-2">HTTP Request</a>
                             <a href="#tab-addition-${i}-${j}-3">cURL command line</a>
+                            <a href="#tab-addition-${i}-${j}-4">WSTG Code</a>
                         </nav>
                         <section id="tab-addition-${i}-${j}-1" style="min-height: 124px;">
                             <pre>${additional["info"] | h}</pre>
@@ -176,6 +184,9 @@
                         </section>
                         <section id="tab-addition-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                             <pre>${additional["curl_command"] | h}</pre>
+                        </section>
+                        <section id="tab-addition-${i}-${j}-4" style="min-height: 124px;" class="is-hidden">
+                            <pre>${additional["wstg"] | h}</pre>
                         </section>
                     % endfor
                 <dl><dt>Solutions</dt><dd>${flaws[additional_name]["sol"]}</dd></dl>

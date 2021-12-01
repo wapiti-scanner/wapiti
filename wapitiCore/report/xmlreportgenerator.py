@@ -62,17 +62,18 @@ class XMLReportGenerator(ReportGenerator):
         self._additionals = {}
 
     # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None):
+    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -89,6 +90,7 @@ class XMLReportGenerator(ReportGenerator):
             "module": module,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
+            "wstg": wstg
         }
 
         if category not in self._vulns:
@@ -96,17 +98,18 @@ class XMLReportGenerator(ReportGenerator):
         self._vulns[category].append(vuln_dict)
 
     # Anomalies
-    def add_anomaly_type(self, name, description="", solution="", references=None):
+    def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -123,13 +126,14 @@ class XMLReportGenerator(ReportGenerator):
             "module": module,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
+            "wstg": wstg
         }
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
 
     # Additionals
-    def add_additional_type(self, name, description="", solution="", references=None):
+    def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
         """
         This method adds an addtional type, it can be invoked to include in the
         report the type.
@@ -138,12 +142,13 @@ class XMLReportGenerator(ReportGenerator):
             self._flaw_types[name] = {
                 "desc": description,
                 "sol": solution,
-                "ref": references
+                "ref": references,
+                "wstg": wstg
             }
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info=""):
+    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -160,6 +165,7 @@ class XMLReportGenerator(ReportGenerator):
             "module": module,
             "http_request": request.http_repr(left_margin=""),
             "curl_command": request.curl_repr,
+            "wstg": wstg
         }
         if category not in self._additionals:
             self._additionals[category] = []
@@ -219,8 +225,14 @@ class XMLReportGenerator(ReportGenerator):
                 title_node.appendChild(self._xml_doc.createTextNode(ref))
                 url = flaw_type["ref"][ref]
                 url_node.appendChild(self._xml_doc.createTextNode(url))
+                wstg_node = self._xml_doc.createElement("wstg")
+                for wstg_code in flaw_type["wstg"] or []:
+                    wstg_code_node = self._xml_doc.createElement("code")
+                    wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
+                    wstg_node.appendChild(wstg_code_node)
                 reference_node.appendChild(title_node)
                 reference_node.appendChild(url_node)
+                reference_node.appendChild(wstg_node)
                 flaw_type_references.appendChild(reference_node)
             flaw_type_node.appendChild(flaw_type_references)
 
@@ -255,6 +267,12 @@ class XMLReportGenerator(ReportGenerator):
                 curl_command_node = self._xml_doc.createElement("curl_command")
                 curl_command_node.appendChild(self._xml_doc.createCDATASection(flaw["curl_command"]))
                 entry_node.appendChild(curl_command_node)
+                wstg_node = self._xml_doc.createElement("wstg")
+                for wstg_code in flaw["wstg"] or []:
+                    wstg_code_node = self._xml_doc.createElement("code")
+                    wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
+                    wstg_node.appendChild(wstg_code_node)
+                entry_node.appendChild(wstg_node)
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
             container.appendChild(flaw_type_node)

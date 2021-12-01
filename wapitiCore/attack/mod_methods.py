@@ -21,7 +21,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_verbose, log_orange
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.methods import NAME
+from wapitiCore.definitions.methods import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 
@@ -79,6 +79,7 @@ class ModuleMethods(Attack):
                     info=_("Interesting methods allowed on {}: {}").format(
                         page,
                         ", ".join(interesting_methods)
-                    )
+                    ),
+                    wstg=WSTG_CODE
                 )
                 log_orange("---")
