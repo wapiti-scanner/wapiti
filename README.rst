@@ -31,7 +31,6 @@ In order to work correctly, Wapiti needs :
 + yaswfp ( https://github.com/facundobatista/yaswfp )
 + tld ( https://github.com/barseghyanartur/tld )
 + Mako ( https://www.makotemplates.org/ )
-+ httpx-socks ( https://github.com/romis2012/httpx-socks )
 
 See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md>`__ for more details on installation.
 

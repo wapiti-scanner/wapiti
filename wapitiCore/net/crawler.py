@@ -31,7 +31,6 @@ import asyncio
 
 # Third-parties
 import httpx
-from httpx_socks import AsyncProxyTransport
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
 
@@ -75,6 +74,7 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
+
 
 def wildcard_translate(pattern):
     """Translate a wildcard PATTERN to a regular expression object.
@@ -186,14 +186,16 @@ class AsyncCrawler:
         url_parts = urlparse(proxy)
         protocol = url_parts.scheme.lower()
 
-        if protocol not in ("http", "https", "socks"):
+        if protocol not in ("http", "https", "socks", "socks5"):
             raise ValueError(f"Unknown proxy type: {protocol}")
 
         if protocol == "socks":
-            self._transport = AsyncProxyTransport.from_url(urlunparse(("socks5", url_parts.netloc, '/', '', '', '')))
-        else:
-            proxy_url = urlunparse((url_parts.scheme, url_parts.netloc, '/', '', '', ''))
-            self._proxies = {"http://": proxy_url, "https://": proxy_url}
+            protocol = "socks5"
+
+        self._proxies = {
+            "http://": urlunparse((protocol, url_parts.netloc, '/', '', '', '')),
+            "https://": urlunparse((protocol, url_parts.netloc, '/', '', '', '')),
+        }
 
     @property
     def client(self):
