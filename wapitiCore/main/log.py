@@ -18,9 +18,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import sys
 from functools import partial
+import logging as legacy_logger
 
 from loguru import logger as logging
 
+legacy_logger.getLogger("charset_normalizer").setLevel(legacy_logger.ERROR)
 logging.remove()
 
 # Setup additional logging levels, from the less important to the more critical
