@@ -1235,7 +1235,7 @@ async def wapiti_main():
             wap.set_proxy(args.proxy)
 
         if args.tor:
-            wap.set_proxy("socks://127.0.0.1:9050/")
+            wap.set_proxy("socks5://127.0.0.1:9050/")
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):

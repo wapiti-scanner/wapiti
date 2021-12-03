@@ -116,11 +116,11 @@ async def getcookie_main(arguments):
     if args.proxy:
         proxy_parts = urlparse(args.proxy)
         if proxy_parts.scheme and proxy_parts.netloc:
-            if proxy_parts.scheme.lower() in ("http", "https", "socks"):
+            if proxy_parts.scheme.lower() in ("http", "https", "socks", "socks5"):
                 crawler.set_proxy(args.proxy)
 
     if args.tor:
-        crawler.set_proxy("socks://127.0.0.1:9050/")
+        crawler.set_proxy("socks5://127.0.0.1:9050/")
 
     if "user_agent" in args:
         crawler.add_custom_header("user-agent", args.user_agent)
