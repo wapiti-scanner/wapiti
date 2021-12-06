@@ -46,6 +46,7 @@ all_modules = {
     "exec",
     "file",
     "htaccess",
+    "htp",
     "http_headers",
     "log4shell",
     "methods",

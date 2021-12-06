@@ -72,6 +72,18 @@ msgstr ""
 msgid "{0} {1} detected"
 msgstr ""
 
+#, python-brace-format
+msgid "The range for {0} is from {1} to {2}"
+msgstr ""
+
+#, python-brace-format
+msgid "Error downloading htp database."
+msgstr ""
+
+#, python-brace-format
+msgid "Problem with local htp database."
+msgstr ""
+
 msgid "No Drupal Detected"
 msgstr ""
 
