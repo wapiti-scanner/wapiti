@@ -72,6 +72,18 @@ msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
 msgid "{0} {1} detected"
 msgstr "{0} {1} détecté"
 
+#, python-brace-format
+msgid "The range for {0} is from {1} to {2}"
+msgstr "{0} a été détecté de la version {1} à {2}"
+
+#, python-brace-format
+msgid "Error downloading htp database."
+msgstr "Erreur de téléchargement de la base de données Hash The Planet."
+
+#, python-brace-format
+msgid "Problem with local htp database."
+msgstr "Un problème est survenu avec la base de données Hash The Planet locale"
+
 msgid "No Drupal Detected"
 msgstr "Drupal non détecté"
 
