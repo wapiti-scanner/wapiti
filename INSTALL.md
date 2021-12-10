@@ -36,7 +36,7 @@ python -m venv wapiti3
 Now let's activate it (make it our current working environment) :
  
 ```sh
-./wapiti3/bin/activate
+. wapiti3/bin/activate
 ```
 
 Or alternatively on Windows :
