@@ -8,7 +8,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.exec import NAME
 from wapitiCore.language.vulnerability import _
-from wapitiCore.main.log import log_red
+from wapitiCore.main.log import log_red, logging
 from wapitiCore.net.web import Request
 
 
@@ -26,6 +26,8 @@ class ModuleLog4Shell(Attack):
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
+        if not self.is_valid_dns(attack_options.get("dns_endpoint")):
+            self.finished = True
 
     async def must_attack(self, request: Request):
         if self.finished is True:
@@ -99,3 +101,14 @@ class ModuleLog4Shell(Attack):
             batch_malicious_headers.append(malicious_header)
 
         return batch_malicious_headers, headers_uuid_record
+
+    @staticmethod
+    def is_valid_dns(dns_endpoint: str) -> str:
+        if dns_endpoint is None:
+            return False
+        try:
+            socket.gethostbyname(dns_endpoint)
+        except OSError:
+            logging.error(_("Error: {} is not a valid domain name").format(dns_endpoint))
+            return False
+        return True
