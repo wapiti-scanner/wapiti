@@ -390,3 +390,54 @@ async def test_vulnerabilities():
     )
     assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
     await crawler.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_merge_with_and_without_redirection():
+    # Test for vulnerabilities detected
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            301,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"X-OWA-Version": "15.0.1497.26", "Location": "http://perdu.com/auth/login"}
+        )
+    )
+    respx.get("http://perdu.com/auth/login").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <link rel='shortcut icon' href='/owa/auth/15.0.1497/themes/resources/favicon.ico' type='image/x-icon'> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler = AsyncCrawler("http://perdu.com/")
+    options = {"timeout": 10, "level": 2}
+
+    module = ModuleWapp(crawler, persister, options, Event())
+
+    await module.attack(request)
+
+    assert persister.add_payload.call_count == 5
+
+    assert persister.add_payload.call_args_list[3][1]["info"] == (
+        '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
+    )
+    assert persister.add_payload.call_args_list[3][1]["category"] == _("Fingerprint web application framework")
+
+    await crawler.close()

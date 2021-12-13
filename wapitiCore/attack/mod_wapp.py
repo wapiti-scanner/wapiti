@@ -19,6 +19,7 @@ import json
 import os
 import asyncio
 import string
+from typing import Dict
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_blue
@@ -103,14 +104,7 @@ class ModuleWapp(Attack):
             logging.error(exception)
             return
 
-        try:
-            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
-        except RequestError:
-            self.network_errors += 1
-            return
-
-        wappalyzer = Wappalyzer(application_data, response)
-        detected_applications = wappalyzer.detect_with_versions_and_categories_and_groups()
+        detected_applications = await self._detect_applications(request.url, application_data)
 
         if len(detected_applications) > 0:
             log_blue("---")
@@ -144,6 +138,28 @@ class ModuleWapp(Attack):
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name])
                     )
+
+    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Dict:
+        detected_applications = []
+
+        # Detecting the applications for the url with and without the follow_redirects flag
+        for follow_redirect in [True, False]:
+            request = Request(url)
+
+            try:
+                response = await self.crawler.async_send(request, follow_redirects=follow_redirect)
+            except RequestError:
+                self.network_errors += 1
+                continue
+
+            wappalyzer = Wappalyzer(application_data, response)
+            detected_applications.append(wappalyzer.detect_with_versions_and_categories_and_groups())
+
+        if not detected_applications:
+            return {}
+        if len(detected_applications) == 1:
+            return detected_applications[0]
+        return {**detected_applications[0], **detected_applications[1]}
 
     async def _dump_url_content_to_file(self, url: str, file_path: str):
         request = Request(url)
