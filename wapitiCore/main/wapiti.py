@@ -34,6 +34,7 @@ import codecs
 from inspect import getdoc
 import asyncio
 import signal
+import socket
 from typing import AsyncGenerator
 
 import browser_cookie3
@@ -738,6 +739,14 @@ def fix_url_path(url: str):
     return url if urlparse(url).path else url + '/'
 
 
+def is_valid_dns(dns_endpoint: str) -> str:
+    try:
+        socket.gethostbyname(dns_endpoint)
+    except OSError:
+        logging.error(_("Error: {} is not a valid domain name").format(dns_endpoint))
+        return False
+    return True
+
 def is_valid_endpoint(url_type, url: str):
     """Verify if the url provided has the right format"""
     try:
@@ -1121,6 +1130,13 @@ async def wapiti_main():
     )
 
     parser.add_argument(
+        "--dns-endpoint",
+        metavar="DNS_ENDPOINT_DOMAIN",
+        default="dns.wapiti.ovh",
+        help=_("Domain serving as DNS endpoint for Log4Shell attack")
+    )
+
+    parser.add_argument(
         "--endpoint",
         metavar="ENDPOINT_URL",
         default="https://wapiti3.ovh/",
@@ -1279,6 +1295,12 @@ async def wapiti_main():
             "timeout": args.timeout,
             "tasks": args.tasks
         }
+
+        if "dns_endpoint" in args:
+            if is_valid_dns(args.dns_endpoint):
+                attack_options["dns_endpoint"] = args.dns_endpoint
+            else:
+                raise InvalidOptionValue("--dns-endpoint", args.endpoint)
 
         if "endpoint" in args:
             endpoint = fix_url_path(args.endpoint)

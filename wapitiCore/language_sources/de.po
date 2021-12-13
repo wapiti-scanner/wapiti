@@ -148,6 +148,9 @@ msgstr ""
 msgid "Checking Strict-Transport-Security :"
 msgstr ""
 
+msgid "URL {0} seems vulnerable to Log4Shell attack by using the header {1}"
+msgstr ""
+
 msgid "Interesting methods allowed on {}: {}"
 msgstr ""
 
@@ -915,6 +918,9 @@ msgstr "Ein Bericht wurde in der Datei {0} erzeugt"
 msgid "Open {0} with a browser to see this report."
 msgstr "Öffnen Sie {0} in einem Browser um diesen Bericht zu sehen."
 
+msgid "Error: {} is not a valid domain name"
+msgstr ""
+
 msgid "Error: {} must not contain params, query or fragment!"
 msgstr ""
 
@@ -1071,6 +1077,9 @@ msgid "Url serving as endpoint for target"
 msgstr ""
 
 msgid "Url serving as endpoint for attacker"
+msgstr ""
+
+msgid "Domain serving as DNS endpoint for Log4Shell attack"
 msgstr ""
 
 msgid "Url serving as endpoint for both attacker and target"
