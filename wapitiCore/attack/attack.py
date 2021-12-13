@@ -60,7 +60,8 @@ modules = [
     "mod_wapp",
     "mod_wp_enum",
     "mod_takeover",
-    "mod_ssl"
+    "mod_ssl",
+    "mod_log4shell"
 ]
 
 # Modules that will be used if option -m isn't used
@@ -282,6 +283,10 @@ class Attack:
     @property
     def attack_level(self):
         return self.options.get("level", 1)
+
+    @property
+    def dns_endpoint(self):
+        return self.options.get("dns_endpoint", "dns.wapiti.ovh")
 
     @property
     def internal_endpoint(self):
