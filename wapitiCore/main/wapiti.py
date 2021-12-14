@@ -34,7 +34,7 @@ import codecs
 from inspect import getdoc
 import asyncio
 import signal
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict, List
 
 import browser_cookie3
 import httpx
@@ -50,7 +50,8 @@ from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.moon import phase
 from wapitiCore.main.log import logging
 
-from wapitiCore.attack import attack
+from wapitiCore.attack.attack import Attack, presets, all_modules, common_modules
+
 
 BASE_DIR = None
 WAPITI_VERSION = "Wapiti 3.0.8"
@@ -94,6 +95,75 @@ def module_to_class_name(module_name: str) -> str:
     if module_name.startswith("mod_"):
         module_name = module_name[4:]
     return "Module" + module_name.title().replace("_", "")
+
+
+def activate_method_module(module: Attack, method: str, status: bool):
+    if not method:
+        module.do_get = module.do_post = status
+    elif method == "get":
+        module.do_get = status
+    elif method == "post":
+        module.do_post = status
+
+
+def filter_modules_with_options(module_options: str, loaded_modules: Dict[str, Attack]) -> List[Attack]:
+    activated_modules: Dict[str, Attack] = {}
+
+    if module_options == "":
+        return []
+
+    if module_options is None:
+        # Default is to use common modules
+        module_options = "common"
+
+    for module_opt in module_options.split(","):
+        if module_opt.strip() == "":
+            # Trailing comma, etc
+            continue
+
+        method = ""
+        if module_opt.find(":") > 0:
+            module_name, method = module_opt.split(":", 1)
+        else:
+            module_name = module_opt
+
+        if module_name.startswith("-"):
+            # The whole module or some of the methods needs to be deactivated
+            module_name = module_name[1:]
+
+            for bad_module in presets.get(module_name, [module_name]):
+                if bad_module not in all_modules:
+                    logging.error(_("[!] Unable to find a module named {0}").format(bad_module))
+                    continue
+
+                if bad_module not in activated_modules:
+                    # You can't deactivate a module that is not used
+                    continue
+
+                if not method:
+                    activated_modules.pop(bad_module)
+                else:
+                    activate_method_module(activated_modules[bad_module], method, False)
+        else:
+            # The whole module or some of the methods needs to be deactivated
+            if module_name.startswith("+"):
+                module_name = module_name[1:]
+
+            for good_module in presets.get(module_name, [module_name]):
+                if good_module not in all_modules:
+                    logging.error(_("[!] Unable to find a module named {0}").format(good_module))
+                    continue
+
+                if good_module in activated_modules:
+                    continue
+
+                if good_module not in activated_modules:
+                    activated_modules[good_module] = loaded_modules[good_module]
+
+                if method:
+                    activate_method_module(activated_modules[good_module], method, False)
+
+    return sorted(activated_modules.values(), key=attrgetter("PRIORITY"))
 
 
 class Wapiti:
@@ -236,109 +306,55 @@ class Wapiti:
                 flatten_references(additional.REFERENCES)
             )
 
-    @staticmethod
-    def _activate_method_module(module: attack.Attack, method: str, status: bool):
-        if not method:
-            module.do_get = module.do_post = status
-        elif method == "get":
-            module.do_get = status
-        elif method == "post":
-            module.do_post = status
-
     async def _init_attacks(self, stop_event: asyncio.Event):
         await self._init_report()
         stop_event.clear()
 
-        logging.info(_("[*] Loading modules:"))
-        modules_list = sorted(module_name[4:] for module_name in attack.modules)
-        logging.info(f"\t {', '.join(modules_list)}")
-        for mod_name in attack.modules:
+        logging.info(_("[*] Existing modules:"))
+        logging.info(f"\t {', '.join(sorted(all_modules))}")
+
+        modules = {}
+        for mod_name in all_modules:
             try:
-                mod = import_module("wapitiCore.attack." + mod_name)
-            except ImportError:
-                logging.error(_("[!] Could not find module {0}").format(mod_name))
-                continue
-
-            class_name = module_to_class_name(mod_name)
-            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(class_instance, "set_timeout"):
-                class_instance.set_timeout(self.crawler.timeout)
-            self.attacks.append(class_instance)
-
-            self.attacks.sort(key=attrgetter("PRIORITY"))
-
-        for attack_module in self.attacks:
-            if attack_module.name not in attack.commons:
-                attack_module.do_get = False
-                attack_module.do_post = False
-
-        # Custom list of modules was specified
-        if self.module_options is not None:
-            # First deactivate all modules
-            for attack_module in self.attacks:
-                attack_module.do_get = False
-                attack_module.do_post = False
-
-            opts = self.module_options.split(",")
-
-            for module_opt in opts:
-                if module_opt.strip() == "":
+                try:
+                    mod = import_module("wapitiCore.attack.mod_" + mod_name)
+                except ImportError:
+                    logging.error(_("[!] Unable to import module {0}").format(mod_name))
                     continue
 
-                method = ""
-                if module_opt.find(":") > 0:
-                    module_name, method = module_opt.split(":", 1)
-                else:
-                    module_name = module_opt
+                class_name = module_to_class_name(mod_name)
+                class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+                if hasattr(class_instance, "set_timeout"):
+                    class_instance.set_timeout(self.crawler.timeout)
 
-                # deactivate some module options
-                if module_name.startswith("-"):
-                    module_name = module_name[1:]
-                    if module_name in ("all", "common"):
-                        for attack_module in self.attacks:
-                            if module_name == "all" or attack_module.name in attack.commons:
-                                self._activate_method_module(attack_module, method, False)
-                    else:
-                        found = False
-                        for attack_module in self.attacks:
-                            if attack_module.name == module_name:
-                                found = True
-                                self._activate_method_module(attack_module, method, False)
-                        if not found:
-                            logging.error(_("[!] Unable to find a module named {0}").format(module_name))
+            except Exception as exception:
+                # Catch every possible exceptions and print it
+                logging.error(_("[!] Module {0} seems broken and will be skipped").format(mod_name))
+                logging.exception(exception.__class__.__name__, exception)
+                continue
 
-                # activate some module options
-                else:
-                    if module_name.startswith("+"):
-                        module_name = module_name[1:]
+            modules[mod_name] = class_instance
 
-                    if module_name in ("all", "common"):
-                        for attack_module in self.attacks:
-                            if module_name == "all" or attack_module.name in attack.commons:
-                                self._activate_method_module(attack_module, method, True)
-                    elif module_name == "passive":
-                        for attack_module in self.attacks:
-                            if attack_module.name in attack.passives:
-                                self._activate_method_module(attack_module, method, True)
-                    else:
-                        found = False
-                        for attack_module in self.attacks:
-                            if attack_module.name == module_name:
-                                found = True
-                                self._activate_method_module(attack_module, method, True)
-                        if not found:
-                            logging.error(_("[!] Unable to find a module named {0}").format(module_name))
+        self.attacks = filter_modules_with_options(self.module_options, modules)
 
     async def update(self):
         """Update modules that implement an update method"""
         stop_event = asyncio.Event()
-        for mod_name in attack.modules:
-            mod = import_module("wapitiCore.attack." + mod_name)
-            class_name = module_to_class_name(mod_name)
-            class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
-            if hasattr(class_instance, "update"):
-                logging.info(_("Updating module {0}").format(mod_name[4:]))
-                await class_instance.update()
+        for mod_name in all_modules:
+            try:
+                mod = import_module("wapitiCore.attack.mod_" + mod_name)
+                class_name = module_to_class_name(mod_name)
+                class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+                if hasattr(class_instance, "update"):
+                    logging.info(_("Updating module {0}").format(mod_name))
+                    await class_instance.update()
+            except ImportError:
+                continue
+            except Exception:  # pylint: disable=broad-except
+                # Catch every possible exceptions and print it
+                logging.error(_("[!] Module {0} seems broken and will be skipped").format(mod_name))
+                continue
+
         logging.success(_("Update done."))
 
     async def load_scan_state(self):
@@ -391,7 +407,7 @@ class Wapiti:
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
 
-    async def load_resources_for_module(self, module: attack.Attack) -> AsyncGenerator[Request, None]:
+    async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, None]:
         if module.do_get:
             async for resource in self.persister.get_links(attack_module=module.name):
                 yield resource
@@ -736,6 +752,7 @@ class Wapiti:
 def fix_url_path(url: str):
     """Fix the url path if its not defined"""
     return url if urlparse(url).path else url + '/'
+
 
 def is_valid_endpoint(url_type, url: str):
     """Verify if the url provided has the right format"""
@@ -1157,14 +1174,16 @@ async def wapiti_main():
 
     if args.list_modules:
         print(_("[*] Available modules:"))
-        modules_list = sorted(module_name[4:] for module_name in attack.modules)
-        for module_name in modules_list:
-            mod = import_module("wapitiCore.attack.mod_" + module_name)
-            class_name = module_to_class_name(module_name)
-            is_common = " (used by default)" if module_name in attack.commons else ""
-            print(f"\t{module_name}{is_common}")
-            print("\t\t" + getdoc(getattr(mod, class_name)))
-            print('')
+        for module_name in sorted(all_modules):
+            try:
+                mod = import_module("wapitiCore.attack.mod_" + module_name)
+                class_name = module_to_class_name(module_name)
+                is_common = " (used by default)" if module_name in common_modules else ""
+                print(f"\t{module_name}{is_common}")
+                print("\t\t" + getdoc(getattr(mod, class_name)))
+                print('')
+            except ImportError:
+                continue
         sys.exit()
 
     url = fix_url_path(args.base_url)

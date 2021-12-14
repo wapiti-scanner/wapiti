@@ -1,4 +1,8 @@
 import json
+import os
+from subprocess import Popen
+from time import sleep
+import sys
 
 import respx
 import httpx
@@ -6,6 +10,17 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
+
+
+@pytest.fixture(autouse=True)
+def run_around_tests():
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/")
+
+    proc = Popen(["php", "-S", "127.0.0.1:65084", "-a", "-t", test_directory])
+    sleep(.5)
+    yield
+    proc.terminate()
 
 
 @pytest.mark.asyncio
@@ -61,7 +76,7 @@ async def test_request_object():
     )
 
     res12 = Request(
-        "http://httpbin.org/post?qs1",
+        "http://127.0.0.1:65084/httpbin.php?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
         file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]]
     )
@@ -145,22 +160,22 @@ async def test_request_object():
     print('')
 
     json_req = Request(
-        "http://httpbin.org/post?a=b",
+        "http://127.0.0.1:65084/httpbin.php?a=b",
         post_params=json.dumps({"z": 1, "a": 2}),
         enctype="application/json"
     )
 
-    crawler = AsyncCrawler("http://httpbin.org/")
+    crawler = AsyncCrawler("http://127.0.0.1:65084/")
     page = await crawler.async_send(json_req)
     assert page.json["json"] == {"z": 1, "a": 2}
     assert page.json["headers"]["Content-Type"] == "application/json"
-    assert page.json["form"] == {}
+    assert page.json["form"] == []  # PHP dictionaries are array too
 
     page = await crawler.async_send(res12)
     assert page.json["files"]
 
     res19 = Request(
-        "http://httpbin.org/post?qs1",
+        "http://127.0.0.1:65084/httpbin.php?qs1",
         post_params=[['post1', 'c'], ['post2', 'd']],
         file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]],
         enctype="multipart/form-data"

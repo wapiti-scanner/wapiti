@@ -56,6 +56,7 @@ jobs:
         sudo apt-get install php7.4-cli php7.4-xml -y --no-install-recommends
         python -m pip install --upgrade pip
         pip install -U setuptools
+        pip3 install .[sslyze]
     - name: Test project
       run: |
         python setup.py test -vv

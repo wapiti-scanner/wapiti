@@ -23,7 +23,6 @@ class ModuleLog4Shell(Attack):
 
     HEADERS_FILE = "log4shell_headers.txt"
 
-
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
         if not self.is_valid_dns(attack_options.get("dns_endpoint")):

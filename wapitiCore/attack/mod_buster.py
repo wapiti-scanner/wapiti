@@ -35,7 +35,7 @@ class ModuleBuster(Attack):
 
     name = "buster"
 
-    do_get = False
+    do_get = True
     do_post = False
 
     def __init__(self, crawler, persister, attack_options, stop_event):

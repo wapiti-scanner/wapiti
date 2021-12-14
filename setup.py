@@ -124,11 +124,13 @@ if a script is vulnerable.""",
         "loguru>=0.5.3",
         "dnspython==2.1.0",
         "httpcore>=0.14.1",
-        "sslyze==5.0.0",
-        "humanize==3.13.1"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
+        "sslyze": [
+            "sslyze==5.0.0",
+            "humanize==3.13.1"
+        ]
     },
     entry_points={
         "console_scripts": [

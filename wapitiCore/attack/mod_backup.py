@@ -42,7 +42,7 @@ class ModuleBackup(Attack):
 
     name = "backup"
 
-    do_get = False
+    do_get = True
     do_post = False
 
     def __init__(self, crawler, persister, attack_options, stop_event):
