@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 import dns.resolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.exec import NAME
+from wapitiCore.definitions.log4shell import NAME
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net.web import Request
