@@ -17,6 +17,7 @@ MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_WP = _("No WordPress Detected")
 MSG_WP_VERSION = _("WordPress Version : {0}")
 
+
 class ModuleWpEnum(Attack):
     """Detect WordPress Plugins with version."""
     name = "wp_enum"

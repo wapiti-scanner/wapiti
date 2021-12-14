@@ -53,8 +53,6 @@ class ModuleWapp(Attack):
     WAPP_TECHNOLOGIES_BASE_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/technologies/"
     WAPP_TECHNOLOGIES = "technologies.json"
 
-    do_get = False
-    do_post = False
     user_config_dir = None
     finished = False
 

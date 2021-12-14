@@ -37,8 +37,8 @@ class ModuleHtaccess(Attack):
 
     name = "htaccess"
 
-    do_get = False
-    do_post = False
+    do_get = True
+    do_post = True
 
     async def must_attack(self, request: Request):
         if request.path in self.attacked_get:

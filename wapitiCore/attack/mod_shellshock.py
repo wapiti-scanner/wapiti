@@ -36,8 +36,8 @@ class ModuleShellshock(Attack):
 
     name = "shellshock"
 
-    do_get = False
-    do_post = False
+    do_get = True
+    do_post = True
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)

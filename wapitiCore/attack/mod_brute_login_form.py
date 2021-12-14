@@ -39,8 +39,8 @@ class ModuleBruteLoginForm(Attack):
     PAYLOADS_SUCCESS = "successMessage.txt"
     PAYLOADS_FAIL = "incorrectMessage.txt"
 
-    do_get = False
-    do_post = False
+    do_get = True
+    do_post = True
 
     def check_success_auth(self, content_response: str):
         with open(

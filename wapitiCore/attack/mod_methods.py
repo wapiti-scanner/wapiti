@@ -34,8 +34,8 @@ class ModuleMethods(Attack):
     name = "methods"
     PRIORITY = 6
     KNOWN_METHODS = {"GET", "POST", "OPTIONS", "HEAD", "TRACE"}
-    do_get = False
-    do_post = False
+    do_get = True
+    do_post = True
     excluded_path = set()
 
     async def must_attack(self, request: Request):

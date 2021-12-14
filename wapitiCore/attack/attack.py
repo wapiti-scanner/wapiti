@@ -33,39 +33,39 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.web import Request
 
-# All Wapiti attack modules
-modules = [
-    "mod_crlf",
-    "mod_csp",
-    "mod_http_headers",
-    "mod_csrf",
-    "mod_cookieflags",
-    "mod_drupal_enum",
-    "mod_exec",
-    "mod_file",
-    "mod_sql",
-    "mod_xss",
-    "mod_backup",
-    "mod_brute_login_form",
-    "mod_htaccess",
-    "mod_timesql",
-    "mod_permanentxss",
-    "mod_nikto",
-    "mod_buster",
-    "mod_shellshock",
-    "mod_methods",
-    "mod_ssrf",
-    "mod_redirect",
-    "mod_xxe",
-    "mod_wapp",
-    "mod_wp_enum",
-    "mod_takeover",
-    "mod_ssl",
-    "mod_log4shell"
-]
+
+all_modules = {
+    "backup",
+    "brute_login_form",
+    "buster",
+    "cookieflags",
+    "crlf",
+    "csp",
+    "csrf",
+    "drupal_enum",
+    "exec",
+    "file",
+    "htaccess",
+    "http_headers",
+    "log4shell",
+    "methods",
+    "nikto",
+    "permanentxss",
+    "redirect",
+    "shellshock",
+    "sql",
+    "ssl",
+    "ssrf",
+    "takeover",
+    "timesql",
+    "wapp",
+    "wp_enum",
+    "xss",
+    "xxe"
+}
 
 # Modules that will be used if option -m isn't used
-commons = [
+common_modules = {
     "cookieflags",
     "csp",
     "exec",
@@ -77,15 +77,22 @@ commons = [
     "ssl",
     "ssrf",
     "xss"
-]
+}
 
 # Modules that will be used in passive mode -m passive
-passives = [
+passive_modules = {
     "cookieflags",
     "csp",
     "http_headers",
     "wapp"
-]
+}
+
+presets = {
+    "all": all_modules,
+    "common": common_modules,
+    "passive": passive_modules
+}
+
 
 VULN = "vulnerability"
 ANOM = "anomaly"
@@ -132,12 +139,12 @@ def random_string_with_flags():
 
 class Flags:
     def __init__(
-        self,
-        payload_type=PayloadType.pattern,
-        section="",
-        method=PayloadType.get,
-        platform="all",
-        dbms="all"
+            self,
+            payload_type=PayloadType.pattern,
+            section="",
+            method=PayloadType.get,
+            platform="all",
+            dbms="all"
     ):
         self.payload_type = payload_type
         self.section = section
@@ -177,11 +184,11 @@ class Flags:
             raise ValueError("Can't compare a Flags object to another kind of object")
 
         return (
-            self.payload_type == other.payload_type and
-            self.section == other.section and
-            self.method == other.method and
-            self.platform == other.platform and
-            self.dbms == other.dbms
+                self.payload_type == other.payload_type and
+                self.section == other.section and
+                self.method == other.method and
+                self.platform == other.platform and
+                self.dbms == other.dbms
         )
 
 

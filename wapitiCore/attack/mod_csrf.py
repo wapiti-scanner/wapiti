@@ -36,7 +36,7 @@ class ModuleCsrf(Attack):
     name = "csrf"
 
     do_get = False
-    do_post = False
+    do_post = True
 
     csrf_string = None
 
