@@ -286,7 +286,7 @@ class Attack:
 
     @property
     def dns_endpoint(self):
-        return self.options.get("dns_endpoint", "dns.wapiti.ovh")
+        return self.options.get("dns_endpoint", "dns.wapiti3.ovh")
 
     @property
     def internal_endpoint(self):

@@ -1122,7 +1122,7 @@ async def wapiti_main():
     parser.add_argument(
         "--dns-endpoint",
         metavar="DNS_ENDPOINT_DOMAIN",
-        default="dns.wapiti.ovh",
+        default="dns.wapiti3.ovh",
         help=_("Domain serving as DNS endpoint for Log4Shell attack")
     )
 
