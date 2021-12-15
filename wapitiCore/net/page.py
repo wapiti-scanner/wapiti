@@ -19,25 +19,24 @@
 
 # Standard libraries
 import re
-from functools import lru_cache
-from urllib.parse import urlparse, urlunparse
-from hashlib import md5
-from http.client import IncompleteRead
 import warnings
 from ast import literal_eval
+from functools import lru_cache
+from hashlib import md5
+from http.client import IncompleteRead
 from posixpath import normpath
+from urllib.parse import urlparse, urlunparse
+from tld import get_fld
+from tld.exceptions import TldBadUrl, TldDomainNotFound
 
 # Third-parties
 import httpx
-from tld import get_fld
-from tld.exceptions import TldDomainNotFound, TldBadUrl
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Doctype
 
 # Internal libraries
 from wapitiCore import parser_name
-from wapitiCore.net import web
-from wapitiCore.net import lamejs
+from wapitiCore.net import lamejs, web
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 RE_JS_REDIR = re.compile(
@@ -216,7 +215,7 @@ class Page:
 
         try:
             return literal_eval(self.content)
-        except ValueError:
+        except (ValueError, SyntaxError):
             pass
 
         return None
