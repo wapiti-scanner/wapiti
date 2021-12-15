@@ -148,7 +148,7 @@ msgstr ""
 msgid "Checking Strict-Transport-Security :"
 msgstr ""
 
-msgid "URL {0} seems vulnerable to Log4Shell attack by using the header {1}"
+msgid "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 msgstr ""
 
 msgid "Interesting methods allowed on {}: {}"

@@ -148,8 +148,8 @@ msgstr "Checking X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Checking Strict-Transport-Security :"
 
-msgid "URL {0} seems vulnerable to Log4Shell attack by using the header {1}"
-msgstr "URL {0} seems vulnerable to Log4Shell attack by using the header {1}"
+msgid "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
+msgstr "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 
 msgid "Interesting methods allowed on {}: {}"
 msgstr "Interesting methods allowed on {}: {}"
