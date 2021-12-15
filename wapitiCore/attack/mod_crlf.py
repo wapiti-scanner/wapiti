@@ -35,7 +35,7 @@ class ModuleCrlf(Attack):
     MSG_VULN = _("CRLF Injection")
     do_get = True
     do_post = True
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.8 version"), Flags())
+    payloads = (quote("http://www.google.fr\r\nwapiti: 3.0.9 version"), Flags())
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         super().__init__(crawler, persister, attack_options, stop_event)

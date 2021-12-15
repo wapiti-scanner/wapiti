@@ -1,3 +1,10 @@
+15/02/2021
+    Wapiti 3.0.9
+    CLI: New "passive" module option allows to use less aggressives modules only
+    WP_ENUM: Improve detection of Wordpress
+    SSL: New module to check TLS/SSL configuration, powered by SSLyze
+    Log4Shell: New attack module to detect the infamous vulnerability
+
 18/11/2021
     Wapiti 3.0.8
     CLI: prevent users from using -a without specifying --ayth-type (and vice versa)

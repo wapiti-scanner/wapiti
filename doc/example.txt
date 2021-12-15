@@ -34,7 +34,7 @@ bash-4.2$ wapiti -u http://wackopicko/ -x http://wackopicko/users/logout.php -c 
  ██║███╗██║██╔══██║██╔═══╝ ██║   ██║   ██║ ╚═══██╗
  ╚███╔███╔╝██║  ██║██║     ██║   ██║   ██║██████╔╝
   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝   ╚═╝╚═════╝  
-Wapiti-3.0.8 (wapiti.sourceforge.io)
+Wapiti-3.0.9 (wapiti.sourceforge.io)
 [*] Saving scan state, please wait...
 
  Note
