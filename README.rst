@@ -104,6 +104,7 @@ Supported attacks
 + Fingerprinting of web applications using the Wappalyzer database
 + Enumeration of Wordpress and Drupal modules
 + Subdomain takeovers detection
++ Log4Shell (CVE-2021-44228) detection
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -127,6 +128,7 @@ The aforementioned attacks are tied to the following module names :
 + file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)
 + http_header (Check HTTP security headers)
++ log4shell (Detects websites vulnerable to CVE-2021-44228)
 + methods (Look for uncommon availables HTTP methods like PUT)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
