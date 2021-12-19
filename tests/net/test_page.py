@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 from httpx import Request, Response
 from wapitiCore.net.page import Page
 
-def test_make_absolute():
 
+def test_make_absolute():
     TEST_CASES = [
         ("http://base.url", "relative", "http://base.url/relative"),
         ("http://base.url", ".", "http://base.url/"),
@@ -37,6 +37,7 @@ def test_make_absolute():
         page._base = base_url
         assert page.make_absolute(relative_url) == expected, \
             f"Absolute url from base_url='{base_url}' and relative_url='{relative_url}' is not '{expected}'"
+
 
 @respx.mock
 def test_page():
@@ -191,6 +192,7 @@ def test_page():
     assert login_form.url == "http://perdu.com/userinfo.php"
     assert login_form.encoded_data == "uname=&pass="
 
+
 @respx.mock
 def test_size_page():
     target_url_1 = "http://perdu.com/"
@@ -252,6 +254,7 @@ def test_size_page():
 
     assert page.size == 122
 
+
 @respx.mock
 def test_raw_size_page():
     target_url_1 = "http://perdu.com/"
@@ -302,17 +305,16 @@ def test_raw_size_page():
 
     assert page.raw_size == 229
 
-
     resp = httpx.get(target_url_2, follow_redirects=False)
     page = Page(resp)
 
     assert page.raw_size == 240
 
-
     resp = httpx.get(target_url_3, follow_redirects=False)
     page = Page(resp)
 
     assert page.size == 122
+
 
 @respx.mock
 def test_content_page():
@@ -348,7 +350,6 @@ def test_content_page():
 
     assert page.content == "foobar"
 
-
     resp = httpx.get(target_url_2, follow_redirects=False)
     page = Page(resp)
 
@@ -371,6 +372,7 @@ def test_bytes_page():
     page = Page(resp)
 
     assert page.bytes == b""
+
 
 @respx.mock
 def test_json_page():
@@ -407,14 +409,12 @@ def test_json_page():
 
     assert page.json is None
 
-
     mock.patch('httpx.Response.json', return_value=ValueError(None))
 
     resp = httpx.get(target_url_2, follow_redirects=False)
     page = Page(resp)
 
     assert page.json == {'a': 1}
-
 
     resp = httpx.get(target_url_3, follow_redirects=False)
     page = Page(resp)
@@ -495,6 +495,7 @@ def test_scripts_page():
     assert len(page.scripts) == 1
     assert page.scripts[0] == "http://netloc/awesome-script.js"
 
+
 @respx.mock
 def test_soup_page():
     target_url_1 = "http://perdu.com/"
@@ -552,6 +553,7 @@ def test_soup_page():
     assert page.base_url == "https://example.com/"
     assert page.soup.find("title").get_text() == "Foobar"
 
+
 @respx.mock
 def test_iter_frame_page():
     target_url_1 = "http://perdu.com/"
@@ -584,6 +586,7 @@ def test_iter_frame_page():
     page = Page(resp)
 
     assert next(page.iter_frames()) == "http://example.com/"
+
 
 @respx.mock
 def test_redirection_url_page():
@@ -646,6 +649,7 @@ def test_redirection_url_page():
     assert page.redirection_url == "http://perdu3.com/"
     assert page.is_directory_redirection is True
 
+
 @respx.mock
 def test_is_directory_redirection_page():
     target_url_1 = "http://perdu.com/"
@@ -688,6 +692,7 @@ def test_is_directory_redirection_page():
     page = Page(resp)
 
     assert page.redirection_url == "http://perdu2.com/index.html"
+
 
 @respx.mock
 def test_title_page():

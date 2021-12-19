@@ -814,9 +814,9 @@ class Page:
                 form_actions.add(self.make_absolute(input_field["formaction"].strip() or self.url))
 
             for button_field in form.find_all("button"):
-                if "name" in button_field.attrs and "value" in button_field.attrs:
+                if "name" in button_field.attrs:
                     input_name = button_field["name"]
-                    input_value = button_field["value"]
+                    input_value = button_field.get("value", "")
                     if method == "GET":
                         get_params.append([input_name, input_value])
                     else:

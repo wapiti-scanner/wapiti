@@ -1,4 +1,3 @@
-
 import httpx
 import respx
 from wapitiCore.net.crawler import AsyncCrawler
@@ -27,6 +26,7 @@ def test_extract_disconnect_urls_one_url():
 
     assert len(disconnect_urls) == 1
 
+
 @respx.mock
 def test_extract_disconnect_urls_no_url():
     target_url = "http://perdu.com/"
@@ -48,6 +48,7 @@ def test_extract_disconnect_urls_no_url():
     disconnect_urls = crawler._extract_disconnect_urls(page)
 
     assert len(disconnect_urls) == 0
+
 
 @respx.mock
 def test_extract_disconnect_urls_multiple_urls():

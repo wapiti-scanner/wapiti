@@ -102,3 +102,23 @@ def test_email_input():
 
     form = next(page.iter_forms())
     assert "@" in form.post_params[0][1]
+
+
+@respx.mock
+def test_button_without_value():
+    url = "https://crazyandthebrains.net/"
+    body = """<html>
+    <body>
+        <form method="POST" action="/post">
+            <input type=text name="text" /><br />
+            <button name="btn" type=submit>submit</button>
+        </form>
+    """
+
+    respx.get(url).mock(return_value=httpx.Response(200, text=body))
+
+    resp = httpx.get(url, follow_redirects=False)
+    page = Page(resp)
+
+    form = next(page.iter_forms())
+    assert form.post_params == [["text", "default"], ["btn", ""]]
