@@ -37,12 +37,12 @@ class ModuleLog4Shell(Attack):
             return False
         return True
 
-    def read_headers(self):
+    async def read_headers(self) -> List[str]:
         with open(path_join(self.DATA_DIR, self.HEADERS_FILE), encoding='utf-8') as headers_file:
-            return headers_file.read().split("\n")
+            return headers_file.read().strip().split("\n")
 
     async def attack(self, request: Request):
-        headers = self.read_headers()
+        headers = await self.read_headers()
 
         batch_malicious_headers, headers_uuid_record = self._get_malicious_headers(headers)
 
