@@ -65,8 +65,9 @@ async def test_read_headers():
         assert len(headers) == 1
 
 
-def test_get_malicious_headers():
+def test_get_batch_malicious_headers():
     persister = AsyncMock()
+    persister.get_root_url.return_value = "http://perdu.com"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
@@ -80,7 +81,7 @@ def test_get_malicious_headers():
     module = ModuleLog4Shell(crawler, persister, options, Event())
 
     headers = random.sample(range(0, 100), 100)
-    malicious_headers, headers_uuid_record = module._get_malicious_headers(headers)
+    malicious_headers, headers_uuid_record = module._get_batch_malicious_headers(headers)
 
     assert len(malicious_headers) == 10
 
@@ -257,6 +258,7 @@ async def test_attack():
     }
 
     persister = AsyncMock()
+    persister.get_root_url.return_value = "http://perdu.com"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
@@ -275,6 +277,7 @@ async def test_attack():
     with mock.patch("builtins.open", get_mock_open(files)) as mock_open, \
         patch.object(ModuleLog4Shell, "_verify_headers_vulnerability", return_value=future_verify_headers) as mock_verify_headers:
         module = ModuleLog4Shell(crawler, persister, options, Event())
+        module._dns_host = ""
 
         module.DATA_DIR = ""
         module.HEADERS_FILE = "headers.txt"
