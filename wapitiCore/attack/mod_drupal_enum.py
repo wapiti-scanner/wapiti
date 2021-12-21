@@ -32,7 +32,7 @@ class ModuleDrupalEnum(Attack):
 
     async def get_url_hash(self, root_url: str, path: str) -> Tuple[str, str]:
         request = Request(f"{root_url}{path}")
-        response = await self.crawler.async_get(request)
+        response = await self.crawler.async_get(request, follow_redirects=True)
         if response.status != 200:
             return "", ""
 
@@ -112,7 +112,7 @@ class ModuleDrupalEnum(Attack):
         for item in check_list:
             request = Request(f'{url}{item}')
             try:
-                response = await self.crawler.async_get(request)
+                response = await self.crawler.async_get(request, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
             except Exception as exception:
