@@ -375,7 +375,7 @@ class AsyncCrawler:
         page = await self.async_get(web.Request(auth_url))
 
         if page.status in (401, 404):
-            return False, {}
+            return False, {}, []
         return True, {}, []
 
     def _extract_disconnect_urls(self, page: Page) -> List[str]:
