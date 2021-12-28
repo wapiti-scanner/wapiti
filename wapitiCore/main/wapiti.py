@@ -132,7 +132,7 @@ def filter_modules_with_options(module_options: str, loaded_modules: Dict[str, A
             module_name = module_name[1:]
 
             for bad_module in presets.get(module_name, [module_name]):
-                if bad_module not in all_modules:
+                if bad_module not in loaded_modules:
                     logging.error(_("[!] Unable to find a module named {0}").format(bad_module))
                     continue
 
@@ -150,7 +150,7 @@ def filter_modules_with_options(module_options: str, loaded_modules: Dict[str, A
                 module_name = module_name[1:]
 
             for good_module in presets.get(module_name, [module_name]):
-                if good_module not in all_modules:
+                if good_module not in loaded_modules:
                     logging.error(_("[!] Unable to find a module named {0}").format(good_module))
                     continue
 
