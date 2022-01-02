@@ -22,7 +22,6 @@ import json
 import os
 from typing import List, Iterator, Set
 import re
-import sys
 from itertools import cycle
 from functools import lru_cache
 import socket
@@ -51,9 +50,6 @@ GITHUB_IO_REGEX = re.compile(r"([a-z0-9]+)\.github\.io$")
 MY_SHOPIFY_REGEX = re.compile(r"([a-z0-9-]+)\.myshopify\.com$")
 IPV4_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)\.(\d+)$")
 
-BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-DATA_DIR = os.path.join(BASE_DIR, "data", "attacks")
-
 CONCURRENT_TASKS = 100  # We can afford more concurrent tasks than for HTTP
 
 
@@ -65,7 +61,7 @@ def get_root_domain(domain: str):
 
 class TakeoverChecker:
     def __init__(self):
-        with open(os.path.join(DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore", encoding='utf-8') as fd:
+        with open(os.path.join(Attack.DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             data = json.load(fd)
             self.ignore = []
             for ignore_regex in data["ignore"]:
@@ -178,7 +174,7 @@ class TakeoverChecker:
 
 
 def load_resolvers() -> List[str]:
-    with open(os.path.join(DATA_DIR, RESOLVERS_FILENAME), errors="ignore", encoding='utf-8') as fd:
+    with open(os.path.join(Attack.DATA_DIR, RESOLVERS_FILENAME), errors="ignore", encoding='utf-8') as fd:
         resolvers = [ip.strip() for ip in fd.readlines() if ip.strip()]
         shuffle(resolvers)
         return resolvers
@@ -220,7 +216,7 @@ class ModuleTakeover(Attack):
         return True
 
     async def feed_queue(self, queue: asyncio.Queue, domain: str):
-        with open(os.path.join(DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore", encoding='utf-8') as fd:
+        with open(os.path.join(self.DATA_DIR, SUBDOMAINS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             for line in fd:
                 sub = line.strip()
 

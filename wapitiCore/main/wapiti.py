@@ -53,9 +53,7 @@ from wapitiCore.main.log import logging
 from wapitiCore.attack.attack import Attack, presets, all_modules, common_modules
 
 
-BASE_DIR = None
 WAPITI_VERSION = "Wapiti 3.0.9"
-CONF_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,

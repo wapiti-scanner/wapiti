@@ -7,6 +7,7 @@ import pytest
 from wapitiCore.wappalyzer.wappalyzer import ApplicationData, Wappalyzer
 from wapitiCore.net.page import Page
 
+
 @respx.mock
 @pytest.mark.asyncio
 async def test_applicationdata():

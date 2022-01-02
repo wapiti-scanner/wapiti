@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import os
-import sys
 from os.path import splitext, join as path_join
 from urllib.parse import quote, urlparse
 from collections import defaultdict
@@ -27,6 +26,7 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
+from pkg_resources import resource_filename
 
 from httpx import ReadTimeout, RequestError
 
@@ -204,9 +204,7 @@ class Attack:
     # Must be defined in the code of the module
     require = []
 
-    BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-    DATA_DIR = os.path.join(BASE_DIR, "data", "attacks")
-
+    DATA_DIR = resource_filename("wapitiCore", os.path.join("data", "attacks"))
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
 
     PAYLOADS_FILE = None
@@ -231,6 +229,10 @@ class Attack:
 
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
+
+    @staticmethod
+    def get_resource(resource_path: str):
+        return resource_filename("wapitiCore", path_join("data", "attacks", resource_path))
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         super().__init__()

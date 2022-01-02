@@ -26,6 +26,7 @@ import os
 import locale
 import gettext
 import sys
+from pkg_resources import resource_filename
 
 AVAILABLE_LANGS = ["en", "es", "fr", "pt", "zh"]  # "de", "ms"]
 
@@ -56,12 +57,13 @@ elif lang not in AVAILABLE_LANGS:
     print("===============================================================")
     lang = "en"
 
-BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
-LANG_PATH = os.path.join(BASE_DIR, "data", "language")
+LANG_PATH = os.path.join("data", "language")
+LOCALE_DIRECTORY = resource_filename("wapitiCore", LANG_PATH)
 
 lan = gettext.translation(
     "wapiti",
-    LANG_PATH,
-    languages=[lang, "en"]
+    LOCALE_DIRECTORY,
+    languages=[lang, "en"],
+    fallback=True,  # If for some reasons the language files are missing
 )
 _ = lan.gettext
