@@ -6,7 +6,7 @@ additionals = []
 anomalies = []
 vulnerabilities = []
 
-for __, modname, ___ in pkgutil.iter_modules([dirname(__file__)], prefix=__package__ + "."):
+for __, modname, ___ in pkgutil.walk_packages(path=[dirname(__file__)], prefix="wapitiCore.definitions."):
     module = __import__(modname, fromlist="dummy")
     if module.TYPE == "additional":
         additionals.append(module)

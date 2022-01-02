@@ -20,10 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import sys
 from shutil import copytree, rmtree, copy
 from urllib.parse import urlparse
 import time
+from pkg_resources import resource_filename
 
 from mako.template import Template
 
@@ -39,7 +39,6 @@ class HTMLReportGenerator(JSONReportGenerator):
         super().__init__()
         self._final__path = None
 
-    BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
     REPORT_DIR = "report_template"
 
     def generate_report(self, output_path):
@@ -55,13 +54,17 @@ class HTMLReportGenerator(JSONReportGenerator):
                 except FileNotFoundError:
                     pass
 
-                copytree(os.path.join(self.BASE_DIR, self.REPORT_DIR, subdir), os.path.join(output_path, subdir))
-            copy(os.path.join(self.BASE_DIR, self.REPORT_DIR, "logo_clear.png"), output_path)
+                copytree(
+                    resource_filename("wapitiCore", os.path.join(self.REPORT_DIR, subdir)),
+                    os.path.join(output_path, subdir)
+                )
+
+            copy(resource_filename("wapitiCore", os.path.join(self.REPORT_DIR, "logo_clear.png")), output_path)
         else:
-            copytree(os.path.join(self.BASE_DIR, self.REPORT_DIR), output_path)
+            copytree(resource_filename("wapitiCore", self.REPORT_DIR), output_path)
 
         mytemplate = Template(
-            filename=os.path.join(self.BASE_DIR, self.REPORT_DIR, "report.html"),
+            filename=resource_filename("wapitiCore", os.path.join(self.REPORT_DIR, "report.html")),
             input_encoding="utf-8",
             output_encoding="utf-8"
         )

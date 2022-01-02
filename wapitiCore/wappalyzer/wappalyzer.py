@@ -1,12 +1,9 @@
 import json
 import os
 import re
-import sys
 import warnings
 
 from wapitiCore.net.crawler import Page
-
-BASE_DIR = os.path.dirname(sys.modules["wapitiCore"].__file__)
 
 
 class ApplicationDataException(Exception):
@@ -33,9 +30,10 @@ class ApplicationData:
         data_filename : str
             File providing application and categorie references (Json format).
         """
-        default_categories_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/categories.json")
-        default_groups_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/groups.json")
-        default_technologies_file_path = os.path.join(BASE_DIR, "wappalyzer", "data/technologies.json")
+        base_dir = os.path.join(os.getenv("HOME") or os.getenv("USERPROFILE"), ".wapiti")
+        default_categories_file_path = os.path.join(base_dir, "wappalyzer", "data/categories.json")
+        default_groups_file_path = os.path.join(base_dir, "wappalyzer", "data/groups.json")
+        default_technologies_file_path = os.path.join(base_dir, "wappalyzer", "data/technologies.json")
 
         with open(categories_file_path or default_categories_file_path, 'r', encoding='utf-8') as categories_file:
             self.categories = json.load(categories_file)
@@ -330,7 +328,6 @@ class Wappalyzer:
         ]
 
         return category_names
-
 
     def get_groups(self, application_name: str):
         """
