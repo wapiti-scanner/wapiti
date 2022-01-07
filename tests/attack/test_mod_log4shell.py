@@ -19,7 +19,7 @@ from wapitiCore.net.web import Request
 
 
 def get_mock_open(files: Dict[str, str]):
-    def open_mock(filename, *args, **kwargs):
+    def open_mock(filename, *_args, **_kwargs):
         for expected_filename, content in files.items():
             if filename == expected_filename:
                 return mock_open(read_data=content).return_value
@@ -48,12 +48,12 @@ async def test_read_headers():
     module = ModuleLog4Shell(crawler, persister, options, Event())
     module.DATA_DIR = ""
 
-    with mock.patch("builtins.open", get_mock_open(files)) as mock_open:
+    with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers:
         module.HEADERS_FILE = "headers.txt"
 
         headers = await module.read_headers()
 
-        mock_open.assert_called_once()
+        mock_open_headers.assert_called_once()
 
         assert len(headers) == 2
         assert headers[0] == "Header1"
@@ -65,8 +65,9 @@ async def test_read_headers():
         assert len(headers) == 1
 
 
-def test_get_malicious_headers():
+def test_get_batch_malicious_headers():
     persister = AsyncMock()
+    persister.get_root_url.return_value = "http://perdu.com"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
@@ -80,7 +81,7 @@ def test_get_malicious_headers():
     module = ModuleLog4Shell(crawler, persister, options, Event())
 
     headers = random.sample(range(0, 100), 100)
-    malicious_headers, headers_uuid_record = module._get_malicious_headers(headers)
+    malicious_headers, headers_uuid_record = module._get_batch_malicious_headers(headers)
 
     assert len(malicious_headers) == 10
 
@@ -153,7 +154,7 @@ async def test_is_valid_dns():
 @respx.mock
 async def test_verify_headers_vuln_found():
 
-    async def mock_verify_dns(header_uuid: str):
+    async def mock_verify_dns(_header_uuid: str):
         return True
 
     # When a vuln has been found
@@ -186,7 +187,7 @@ async def test_verify_headers_vuln_found():
             category=NAME,
             level=CRITICAL_LEVEL,
             request=request,
-            parameter=f"Header: payload",
+            parameter="Header: payload",
             info=_("URL {0} seems vulnerable to Log4Shell attack by using the header {1}") \
                         .format(modified_request.url, "Header")
         )
@@ -196,7 +197,7 @@ async def test_verify_headers_vuln_found():
 @respx.mock
 async def test_verify_headers_vuln_not_found():
 
-    async def mock_verify_dns(header_uuid: str):
+    async def mock_verify_dns(_header_uuid: str):
         return False
 
     #  When no vuln have been found
@@ -257,6 +258,7 @@ async def test_attack():
     }
 
     persister = AsyncMock()
+    persister.get_root_url.return_value = "http://perdu.com"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
@@ -269,19 +271,22 @@ async def test_attack():
 
     request_to_attack = Request("http://foobar/")
 
-    future_verify_headers = asyncio.Future()
-    future_verify_headers.set_result(True)
+    future_verify_dns = asyncio.Future()
+    future_verify_dns.set_result(True)
 
-    with mock.patch("builtins.open", get_mock_open(files)) as mock_open, \
-        patch.object(ModuleLog4Shell, "_verify_headers_vulnerability", return_value=future_verify_headers) as mock_verify_headers:
+    with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers, \
+        patch.object(ModuleLog4Shell, "_verify_dns", return_value=future_verify_dns) as mock_verify_dns:
         module = ModuleLog4Shell(crawler, persister, options, Event())
 
         module.DATA_DIR = ""
         module.HEADERS_FILE = "headers.txt"
         await module.attack(request_to_attack)
 
-        assert crawler.async_send.call_count == 10
-        assert mock_verify_headers.call_count == 10
+        mock_open_headers.assert_called_once()
+
+        # vsphere case + each header batch
+        assert crawler.async_send.call_count == 11
+        assert mock_verify_dns.call_count == 101
 
 def test_init():
     persister = AsyncMock()

