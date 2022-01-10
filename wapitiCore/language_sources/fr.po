@@ -151,6 +151,9 @@ msgstr "Vérification de Strict-Transport-Security :"
 msgid "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 msgstr "L'URL {0} semble vulnérable à l'attaque Log4Shell en utilisant le {1} {2}"
 
+msgid "URL {0} seems vulnerable to Log4Shell attack"
+msgstr "L'URL {0} semble vulnérable à l'attaque Log4Shell"
+
 msgid "Interesting methods allowed on {}: {}"
 msgstr "Méthodes intéressantes autorisées sur {} : {}"
 

