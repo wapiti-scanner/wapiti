@@ -285,9 +285,9 @@ async def test_attack():
 
         mock_open_headers.assert_called_once()
 
-        # vsphere case (2) + each header batch (10) + url case (1) + druid case (1)
-        assert crawler.async_send.call_count == 14
-        assert mock_verify_dns.call_count == 104
+        # vsphere case (2) + each header batch (10) + url case (1) + druid case (1) + solr case (1)
+        assert crawler.async_send.call_count == 15
+        assert mock_verify_dns.call_count == 105
 
 def test_init():
     persister = AsyncMock()
