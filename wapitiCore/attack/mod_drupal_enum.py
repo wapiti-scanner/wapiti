@@ -118,7 +118,7 @@ class ModuleDrupalEnum(Attack):
             except Exception as exception:
                 logging.exception(exception)
             else:
-                if response.status != 404:
+                if response.status == 200:
                     return True
         return False
 
