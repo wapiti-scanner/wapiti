@@ -20,6 +20,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
 
+from httpx import Response
+
+from wapitiCore.net.web import detail_request, detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
@@ -70,7 +73,17 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_vulnerability(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg: str = None,
+        response: Response = None
+    ):
         """
         Store the information about a found vulnerability.
         """
@@ -87,6 +100,11 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg,
         }
+        if self._infos["detailed_report"]:
+            vuln_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._vulns:
             self._vulns[category] = []
         self._vulns[category].append(vuln_dict)
@@ -104,8 +122,18 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
-        """Store the information about an anomaly met during the attack."""
+    def add_anomaly(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
+        """Store the informations about an anomaly met during the attack."""
         anom_dict = {
             "method": request.method,
             "path": request.file_path,
@@ -118,6 +146,11 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg
         }
+        if self._infos["detailed_report"]:
+            anom_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
@@ -134,7 +167,17 @@ class JSONReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_additional(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """Store the information about an additional."""
         addition_dict = {
             "method": request.method,
@@ -148,6 +191,11 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg
         }
+        if self._infos["detailed_report"]:
+            addition_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._additionals:
             self._additionals[category] = []
         self._additionals[category].append(addition_dict)

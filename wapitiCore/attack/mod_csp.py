@@ -47,7 +47,7 @@ class ModuleCsp(Attack):
         request_to_root = Request(request.url)
 
         try:
-            response = await self.crawler.async_get(request_to_root, follow_redirects=True)
+            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
@@ -58,7 +58,8 @@ class ModuleCsp(Attack):
                 category=NAME,
                 request=request_to_root,
                 info=MSG_NO_CSP,
-                wstg=WSTG_CODE
+                wstg=WSTG_CODE,
+                response=response
             )
         else:
             csp_dict = csp_header_to_dict(response.headers["Content-Security-Policy"])
@@ -77,5 +78,6 @@ class ModuleCsp(Attack):
                         category=NAME,
                         request=request_to_root,
                         info=info,
-                        wstg=WSTG_CODE
+                        wstg=WSTG_CODE,
+                        response=response
                     )

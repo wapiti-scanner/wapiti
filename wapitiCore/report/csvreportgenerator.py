@@ -20,6 +20,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import csv
 
+from httpx import Response
+
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
@@ -57,7 +59,17 @@ class CSVReportGenerator(ReportGenerator):
             writer.writerows(self._anomalies)
             writer.writerows(self._additionals)
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_vulnerability(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """
         Store the information about a vulnerability.
         """
@@ -70,7 +82,17 @@ class CSVReportGenerator(ReportGenerator):
                 ]
             )
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_anomaly(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """Store the information about an anomaly met during the attack."""
         if request is not None:
             self._anomalies.append(
@@ -81,7 +103,17 @@ class CSVReportGenerator(ReportGenerator):
                 ]
             )
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_additional(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """Store the information about an additional."""
         if request is not None:
             self._additionals.append(

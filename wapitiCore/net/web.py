@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from urllib.parse import urlparse, unquote, quote, urljoin
-import posixpath
 from copy import deepcopy
+import posixpath
 import sys
+from urllib.parse import urlparse, unquote, quote, urljoin
+from httpx import Response
 
+import httpx
 
 def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
     """Encode a dict or sequence of two-element tuples into a URL query string.
@@ -178,6 +180,7 @@ class Request:
 
         self._cached_hash_params = None
         self._status = None
+        self._cookies = None
 
         if not method:
             # For lazy
@@ -259,6 +262,8 @@ class Request:
         elif parsed.scheme == "https":
             self._port = 443
         self._headers = None
+        self._sent_headers = None
+        self._response_content = None
         self._start_time = None
         self._size = 0
         self._path_id = None
@@ -422,6 +427,16 @@ class Request:
         """Set the HTTP headers received while requesting the resource"""
         self._headers = response_headers
 
+    def set_sent_headers(self, sent_headers: httpx.Headers):
+        """Set the sent HTTP headers while requesting the resource"""
+        self._sent_headers = sent_headers
+
+    def set_response_content(self, content: str):
+        self._response_content = content
+
+    def set_cookies(self, cookies):
+        self._cookies = cookies
+
     @property
     def size(self):
         return self._size
@@ -522,8 +537,20 @@ class Request:
         return "multipart" in self._enctype
 
     @property
-    def headers(self):
+    def headers(self) -> httpx.Headers:
         return self._headers
+
+    @property
+    def sent_headers(self) -> httpx.Headers:
+        return self._sent_headers
+
+    @property
+    def response_content(self) -> str:
+        return self._response_content
+
+    @property
+    def cookies(self):
+        return self._cookies
 
     @property
     def referer(self) -> str:
@@ -641,3 +668,24 @@ class Request:
     @path_id.setter
     def path_id(self, value: int):
         self._path_id = value
+
+def detail_response(response: Response) -> dict:
+    if not response:
+        return None
+    return {
+        "status_code": response.status_code,
+        "body": response.body,
+        "headers": response.headers.multi_items()
+    }
+
+def detail_request(request: Request) -> dict:
+    if not request:
+        return None
+    return {
+        "url": request.url,
+        "method": request.method,
+        "headers": (request.sent_headers and request.sent_headers.multi_items()) or [],
+        "query": request.get_params,
+        "body": request.post_params,
+        "encoding": request.encoding,
+    }

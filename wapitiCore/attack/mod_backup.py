@@ -124,5 +124,6 @@ class ModuleBackup(Attack):
                     category=NAME,
                     request=evil_req,
                     info=_("Backup file {0} found for {1}").format(url, page),
-                    wstg=WSTG_CODE
+                    wstg=WSTG_CODE,
+                    response=response
                 )

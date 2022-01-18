@@ -118,7 +118,8 @@ class ModuleTimesql(Attack):
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter,
-                        wstg=INTERNAL_ERROR_WSTG_CODE
+                        wstg=INTERNAL_ERROR_WSTG_CODE,
+                        response=response
                     )
 
                     log_orange("---")

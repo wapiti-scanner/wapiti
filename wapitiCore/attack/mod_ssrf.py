@@ -247,7 +247,8 @@ class ModuleSsrf(Attack):
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter,
-                                wstg=WSTG_CODE
+                                wstg=WSTG_CODE,
+                                response=response
                             )
 
                             log_red("---")

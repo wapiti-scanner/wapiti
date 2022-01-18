@@ -175,7 +175,8 @@ class ModuleXss(Attack):
                         request=evil_request,
                         parameter=xss_param,
                         info=message,
-                        wstg=WSTG_CODE
+                        wstg=WSTG_CODE,
+                        response=response
                     )
 
                     if xss_param == "QUERY_STRING":
@@ -213,7 +214,8 @@ class ModuleXss(Attack):
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param,
-                        wstg=INTERNAL_ERROR_WSTG_CODE
+                        wstg=INTERNAL_ERROR_WSTG_CODE,
+                        response=response
                     )
 
                     log_orange("---")

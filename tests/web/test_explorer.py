@@ -52,7 +52,7 @@ async def test_explorer_filtering():
     explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/filters.html"])
     excluded_urls = []
-    results = {resource.url async for resource in explorer.async_explore(start_urls, excluded_urls)}
+    results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
     # We should have current URL and JS URL but without query string.
     # CSS URL should be excluded
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}

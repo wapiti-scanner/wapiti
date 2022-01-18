@@ -362,7 +362,8 @@ class ModuleSql(Attack):
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter,
-                        wstg=WSTG_CODE
+                        wstg=WSTG_CODE,
+                        response=response
                     )
 
                     log_red("---")
@@ -393,7 +394,8 @@ class ModuleSql(Attack):
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter,
-                        wstg=INTERNAL_ERROR_WSTG_CODE
+                        wstg=INTERNAL_ERROR_WSTG_CODE,
+                        response=response
                     )
 
                     log_orange("---")
@@ -435,6 +437,7 @@ class ModuleSql(Attack):
         current_session = None
         test_results = []
         last_mutated_request = None
+        last_response = None
 
         for mutated_request, parameter, __, flags in mutator.mutate(request):
             # Make sure we always pass through the following block to see changes of payloads formats
@@ -456,7 +459,8 @@ class ModuleSql(Attack):
                         request=last_mutated_request,
                         info=vuln_message,
                         parameter=current_parameter,
-                        wstg=WSTG_CODE
+                        wstg=WSTG_CODE,
+                        response=last_response
                     )
 
                     log_red("---")
@@ -504,3 +508,4 @@ class ModuleSql(Attack):
 
             test_results.append(comparison == (flags.section == "True"))
             last_mutated_request = mutated_request
+            last_response = response

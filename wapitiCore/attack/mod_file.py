@@ -267,7 +267,8 @@ class ModuleFile(Attack):
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter,
-                        wstg=WSTG_CODE
+                        wstg=WSTG_CODE,
+                        response=response
                     )
 
                     log_red("---")
@@ -303,7 +304,8 @@ class ModuleFile(Attack):
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter,
-                        wstg=INTERNAL_ERROR_WSTG_CODE
+                        wstg=INTERNAL_ERROR_WSTG_CODE,
+                        response=response
                     )
 
                     log_orange("---")

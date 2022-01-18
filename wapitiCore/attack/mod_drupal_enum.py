@@ -31,8 +31,8 @@ class ModuleDrupalEnum(Attack):
             return data
 
     async def get_url_hash(self, root_url: str, path: str) -> Tuple[str, str]:
-        request = Request(f"{root_url}{path}")
-        response = await self.crawler.async_get(request, follow_redirects=True)
+        request = Request(f"{root_url}{path}", "GET")
+        response = await self.crawler.async_send(request, follow_redirects=True)
         if response.is_error:
             return "", ""
 
@@ -110,9 +110,9 @@ class ModuleDrupalEnum(Attack):
     async def check_drupal(self, url):
         check_list = ['core/misc/drupal.js', 'misc/drupal.js']
         for item in check_list:
-            request = Request(f'{url}{item}')
+            request = Request(f'{url}{item}', 'GET')
             try:
-                response = await self.crawler.async_get(request, follow_redirects=True)
+                response = await self.crawler.async_send(request, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
             except Exception as exception:

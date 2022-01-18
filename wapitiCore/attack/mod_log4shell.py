@@ -11,6 +11,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
+from wapitiCore.net.page import Page
 from wapitiCore.net.web import Request
 
 
@@ -58,11 +59,11 @@ class ModuleLog4Shell(Attack):
         malicious_headers = {header_target: payload}
 
         try:
-            await self.crawler.async_send(malicious_request, malicious_headers, follow_redirects=True)
+            page = await self.crawler.async_send(malicious_request, malicious_headers, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
-        await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id)
+        await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id, page)
 
     async def attack_apache_solr_url(self, request_url: str):
         payload_unique_id = uuid.uuid4()
@@ -76,11 +77,11 @@ class ModuleLog4Shell(Attack):
         )
 
         try:
-            await self.crawler.async_send(malicious_request, follow_redirects=True)
+            page = await self.crawler.async_send(malicious_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
-        await self._verify_param_vulnerability(malicious_request, payload_unique_id, "name")
+        await self._verify_param_vulnerability(malicious_request, payload_unique_id, "name", page)
 
     async def _attack_apache_struts(self, request_url: str):
         payload_unique_id = uuid.uuid4()
@@ -92,11 +93,11 @@ class ModuleLog4Shell(Attack):
         modified_request = Request(request_url + ("" if request_url.endswith("/") else "/") + payload + "/")
 
         try:
-            await self.crawler.async_send(modified_request, follow_redirects=True)
+            page = await self.crawler.async_send(modified_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
-        await self._verify_url_vulnerability(modified_request, payload_unique_id)
+        await self._verify_url_vulnerability(modified_request, payload_unique_id, page)
 
     async def _attack_apache_druid_url(self, request_url: str):
         payload_unique_id = uuid.uuid4()
@@ -108,11 +109,11 @@ class ModuleLog4Shell(Attack):
         )
 
         try:
-            await self.crawler.async_send(malicious_request, follow_redirects=True)
+            page = await self.crawler.async_send(malicious_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
-        await self._verify_url_vulnerability(malicious_request, payload_unique_id)
+        await self._verify_url_vulnerability(malicious_request, payload_unique_id, page)
 
     async def _attack_specific_cases(self, request: Request):
         root_url = await self.persister.get_root_url()
@@ -142,11 +143,11 @@ class ModuleLog4Shell(Attack):
             modified_request = Request(request.url)
 
             try:
-                await self.crawler.async_send(modified_request, malicious_headers, follow_redirects=True)
+                page = await self.crawler.async_send(modified_request, malicious_headers, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
                 continue
-            await self._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record)
+            await self._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
 
         injected_get_and_post_requests: Iterable[Tuple[Request, str, uuid.UUID]] = itertools.chain(
             self._inject_payload(request, request.get_params),
@@ -155,13 +156,13 @@ class ModuleLog4Shell(Attack):
 
         for malicious_request, param_name, param_uuid in injected_get_and_post_requests:
             try:
-                await self.crawler.async_send(malicious_request, follow_redirects=True)
+                page = await self.crawler.async_send(malicious_request, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
                 continue
-            await self._verify_param_vulnerability(malicious_request, param_uuid, param_name)
+            await self._verify_param_vulnerability(malicious_request, param_uuid, param_name, page)
 
-    async def _verify_param_vulnerability(self, request: Request, param_uuid: uuid.UUID, param_name: str):
+    async def _verify_param_vulnerability(self, request: Request, param_uuid: uuid.UUID, param_name: str, page: Page):
         if not await self._verify_dns(str(param_uuid)):
             return
         element_type = "query parameter" if request.method == "GET" else "body parameter"
@@ -172,7 +173,8 @@ class ModuleLog4Shell(Attack):
             info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
                 .format(request.url, element_type, param_name),
             parameter=f"{param_name}",
-            wstg=WSTG_CODE
+            wstg=WSTG_CODE,
+            response=page
         )
 
         log_red("---")
@@ -184,21 +186,23 @@ class ModuleLog4Shell(Attack):
         log_red("---")
 
     async def _verify_headers_vulnerability(
-            self,
-            modified_request: Request,
-            malicious_headers: dict,
-            headers_uuid_record: dict
+        self,
+        modified_request: Request,
+        malicious_headers: dict,
+        headers_uuid_record: dict,
+        page: Page
     ):
         for header, payload in malicious_headers.items():
             header_uuid = headers_uuid_record.get(header)
-            await self._verify_header_vulnerability(modified_request, header, payload, header_uuid)
+            await self._verify_header_vulnerability(modified_request, header, payload, header_uuid, page)
 
     async def _verify_header_vulnerability(
-            self,
-            modified_request: Request,
-            header: str,
-            payload: str,
-            unique_id: uuid.UUID
+        self,
+        modified_request: Request,
+        header: str,
+        payload: str,
+        unique_id: uuid.UUID,
+        page: Page
     ):
         if await self._verify_dns(str(unique_id)) is True:
             await self.add_vuln_critical(
@@ -207,7 +211,8 @@ class ModuleLog4Shell(Attack):
                 info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
                     .format(modified_request.url, "header", header),
                 parameter=f"{header}: {payload}",
-                wstg=WSTG_CODE
+                wstg=WSTG_CODE,
+                response=page
             )
 
             log_red("---")
@@ -218,7 +223,7 @@ class ModuleLog4Shell(Attack):
             log_red(modified_request.http_repr())
             log_red("---")
 
-    async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID):
+    async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID, page: Page):
         if not await self._verify_dns(str(param_uuid)):
             return
 
@@ -228,7 +233,8 @@ class ModuleLog4Shell(Attack):
             info=_("URL {0} seems vulnerable to Log4Shell attack") \
                 .format(request.url),
             parameter="",
-            wstg=WSTG_CODE
+            wstg=WSTG_CODE,
+            response=page
         )
 
         log_red("---")

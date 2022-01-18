@@ -84,5 +84,6 @@ class ModuleShellshock(Attack):
                     category=NAME,
                     request=evil_req,
                     info=_("URL {0} seems vulnerable to Shellshock attack").format(url),
-                    wstg=WSTG_CODE
+                    wstg=WSTG_CODE,
+                    response=resp
                 )

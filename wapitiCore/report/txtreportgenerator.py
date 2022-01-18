@@ -18,7 +18,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import codecs
 
+from httpx import Response
+
 from wapitiCore.language.language import _
+from wapitiCore.net.web import detail_request, detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 NB_COLUMNS = 80
@@ -63,7 +66,7 @@ class TXTReportGenerator(ReportGenerator):
                 txt_report_file.write(center(f"{self._infos['version']} - wapiti-scanner.github.io\n"))
                 txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
                 txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
-                txt_report_file.write(center(_("Crawled pages : {0}\n").format(self._infos["crawled_pages"])))
+                txt_report_file.write(center(_("Crawled pages : {0}\n").format(self._infos["crawled_pages_nbr"])))
                 if "scope" in self._infos:
                     txt_report_file.write(center(_("Scope of the scan : {0}\n").format(self._infos["scope"])))
                 txt_report_file.write(separator)
@@ -157,25 +160,39 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_vulnerability(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
         vulnerabilities notified through the current method.
         """
 
+        vuln_dict = {
+            "level": level,
+            "request": request,
+            "parameter": parameter,
+            "info": info,
+            "module": module,
+            "wstg": wstg
+        }
+        if self._infos["detailed_report"]:
+            vuln_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._vulns:
             self._vulns[category] = []
-        self._vulns[category].append(
-            {
-                "level": level,
-                "request": request,
-                "parameter": parameter,
-                "info": info,
-                "module": module,
-                "wstg": wstg
-            }
-        )
+        self._vulns[category].append(vuln_dict)
 
     # Anomalies
     def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
@@ -189,7 +206,17 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_anomaly(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """
         Store the information about the vulnerability to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -204,6 +231,11 @@ class TXTReportGenerator(ReportGenerator):
             "module": module,
             "wstg": wstg
         }
+        if self._infos["detailed_report"]:
+            anom_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._anomalies:
             self._anomalies[category] = []
         self._anomalies[category].append(anom_dict)
@@ -228,7 +260,17 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_additional(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         """
         Store the information about the addtional to be printed later.
         The method printToFile(fileName) can be used to save in a file the
@@ -243,6 +285,11 @@ class TXTReportGenerator(ReportGenerator):
             "module": module,
             "wstg": wstg
         }
+        if self._infos["detailed_report"]:
+            addition_dict["detail"] = {
+                "request": detail_request(request),
+                "response": detail_response(response)
+            }
         if category not in self._additionals:
             self._additionals[category] = []
         self._additionals[category].append(addition_dict)

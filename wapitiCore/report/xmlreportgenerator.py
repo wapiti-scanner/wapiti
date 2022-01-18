@@ -24,10 +24,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from xml.dom.minidom import Document, Element
 
-from wapitiCore.report.reportgenerator import ReportGenerator
+from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
 
-
-class XMLReportGenerator(ReportGenerator):
+class XMLReportGenerator(JSONReportGenerator):
     """
     This class generates a report with the method printToFile(fileName) which contains
     the information of all the vulnerabilities notified to this object through the
@@ -60,116 +59,6 @@ class XMLReportGenerator(ReportGenerator):
         self._vulns = {}
         self._anomalies = {}
         self._additionals = {}
-
-    # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._vulns:
-            self._vulns[name] = []
-
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
-        """
-        Store the information about the vulnerability to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        vulnerabilities notified through the current method.
-        """
-
-        vuln_dict = {
-            "method": request.method,
-            "path": request.file_path,
-            "info": info,
-            "level": level,
-            "parameter": parameter,
-            "referer": request.referer,
-            "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
-            "wstg": wstg
-        }
-
-        if category not in self._vulns:
-            self._vulns[category] = []
-        self._vulns[category].append(vuln_dict)
-
-    # Anomalies
-    def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._anomalies:
-            self._anomalies[name] = []
-
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
-        """
-        Store the information about the vulnerability to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        vulnerabilities notified through the current method.
-        """
-
-        anom_dict = {
-            "method": request.method,
-            "path": request.file_path,
-            "info": info,
-            "level": level,
-            "parameter": parameter,
-            "referer": request.referer,
-            "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
-            "wstg": wstg
-        }
-        if category not in self._anomalies:
-            self._anomalies[category] = []
-        self._anomalies[category].append(anom_dict)
-
-    # Additionals
-    def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
-        """
-        This method adds an addtional type, it can be invoked to include in the
-        report the type.
-        """
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._additionals:
-            self._additionals[name] = []
-
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
-        """
-        Store the information about the addtional to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        addtionals notified through the current method.
-        """
-
-        addition_dict = {
-            "method": request.method,
-            "path": request.file_path,
-            "info": info,
-            "level": level,
-            "parameter": parameter,
-            "referer": request.referer,
-            "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
-            "wstg": wstg
-        }
-        if category not in self._additionals:
-            self._additionals[category] = []
-        self._additionals[category].append(addition_dict)
 
     def generate_report(self, output_path):
         """
@@ -273,6 +162,8 @@ class XMLReportGenerator(ReportGenerator):
                     wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
                     wstg_node.appendChild(wstg_code_node)
                 entry_node.appendChild(wstg_node)
+                if self._infos["detailed_report"] is True:
+                    entry_node.appendChild(self._create_detail_section(flaw))
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
             container.appendChild(flaw_type_node)
@@ -282,6 +173,90 @@ class XMLReportGenerator(ReportGenerator):
 
         with open(output_path, "w", errors="ignore", encoding='utf-8') as xml_report_file:
             self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")
+
+    def _create_detail_section(self, flaw: dict) -> Element:
+        """
+        Create a section composed of the detail of the request & its response
+        """
+        detail_section = self._xml_doc.createElement("detail")
+        detail_request_section = self._create_detail_request(flaw["detail"]["request"])
+        detail_response_section = self._create_detail_response(flaw["detail"]["response"])
+        if detail_request_section:
+            detail_section.appendChild(detail_request_section)
+        if detail_response_section:
+            detail_section.appendChild(detail_response_section)
+        return detail_section
+
+    def _create_detail_request(self, request: dict) -> Element:
+        """
+        Create a section focused on the exploit's http request
+        """
+        if not request:
+            return None
+        request_section: Element = self._xml_doc.createElement("request")
+        url_node = self._xml_doc.createElement("url")
+        url_node.appendChild(self._xml_doc.createTextNode(request["url"]))
+        request_section.appendChild(url_node)
+
+        method_node = self._xml_doc.createElement("method")
+        method_node.appendChild(self._xml_doc.createTextNode(request["method"]))
+        request_section.appendChild(method_node)
+
+        headers_node = self._xml_doc.createElement("headers")
+        for header in request.get("headers") or []:
+            header_node = self._xml_doc.createElement("header")
+            header_node.setAttribute("name", header[0])
+            header_node.appendChild(self._xml_doc.createTextNode(header[1]))
+            headers_node.appendChild(header_node)
+        request_section.appendChild(headers_node)
+
+        query_node = self._xml_doc.createElement("query")
+        for param in request.get("query") or []:
+            param_node = self._xml_doc.createElement("param")
+            param_node.setAttribute("name", param[0])
+            param_node.appendChild(self._xml_doc.createTextNode(param[1]))
+            query_node.appendChild(param_node)
+        request_section.appendChild(query_node)
+
+        body_node = self._xml_doc.createElement("body")
+        for param in request.get("body") or []:
+            param_node = self._xml_doc.createElement("param")
+            param_node.setAttribute("name", param[0])
+            param_node.appendChild(self._xml_doc.createTextNode(param[1]))
+            body_node.appendChild(param_node)
+        request_section.appendChild(body_node)
+
+        encoding_node = self._xml_doc.createElement("encoding")
+        encoding_node.appendChild(self._xml_doc.createTextNode(request["encoding"]))
+        request_section.appendChild(encoding_node)
+
+        return request_section
+
+    def _create_detail_response(self, response: dict) -> Element:
+        """
+        Create a section focused on the exploit http request's response
+        """
+        if not response:
+            return None
+        response_section: Element = self._xml_doc.createElement("response")
+        status_code_node = self._xml_doc.createElement("status_code")
+        status_code_node.appendChild(self._xml_doc.createTextNode(str(response["status_code"])))
+        response_section.appendChild(status_code_node)
+
+        body_node = self._xml_doc.createElement("body")
+        body_node.appendChild(self._xml_doc.createTextNode(response["body"]))
+        response_section.appendChild(body_node)
+
+
+        headers_node = self._xml_doc.createElement("headers")
+        for header in response.get("headers") or []:
+            header_node = self._xml_doc.createElement("header")
+            header_node.setAttribute("name", header[0])
+            header_node.appendChild(self._xml_doc.createTextNode(header[1]))
+            headers_node.appendChild(header_node)
+        response_section.appendChild(headers_node)
+        return response_section
+
 
     def _create_info_section(self) -> Element:
         """
@@ -316,7 +291,7 @@ class XMLReportGenerator(ReportGenerator):
 
         target = self._xml_doc.createElement("info")
         target.setAttribute("name", "crawledPages")
-        target.appendChild(self._xml_doc.createTextNode(str(self._infos["crawled_pages"])))
+        target.appendChild(self._xml_doc.createTextNode(str(self._infos["crawled_pages_nbr"])))
         report_infos.appendChild(target)
 
         auth_node = self._xml_doc.createElement("info")
@@ -352,4 +327,23 @@ class XMLReportGenerator(ReportGenerator):
         else:
             auth_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
         report_infos.appendChild(auth_node)
+        if self._infos["detailed_report"]:
+            report_infos.appendChild(self._create_crawled_pages_section(self._infos["crawled_pages"]))
         return report_infos
+
+    def _create_crawled_pages_section(self, crawled_pages: dict) -> Element:
+        """
+        Create a new section containing all the crawled pages with all the details of the requests and the responses
+        """
+        crawled_pages_node = self._xml_doc.createElement("crawled_pages")
+
+        for crawled_page in crawled_pages:
+            entry_section = self._xml_doc.createElement("entry")
+            detail_request = self._create_detail_request(crawled_page["request"])
+            detail_response = self._create_detail_response(crawled_page["response"])
+            if detail_response:
+                entry_section.appendChild(detail_request)
+            if detail_response:
+                entry_section.appendChild(detail_response)
+            crawled_pages_node.appendChild(entry_section)
+        return crawled_pages_node
