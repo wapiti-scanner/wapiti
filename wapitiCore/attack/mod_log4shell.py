@@ -188,7 +188,8 @@ class ModuleLog4Shell(Attack):
             request=request,
             info=_("URL {0} seems vulnerable to Log4Shell attack") \
                 .format(request.url),
-            parameter=""
+            parameter="",
+            wstg=WSTG_CODE
         )
 
         log_red("---")
