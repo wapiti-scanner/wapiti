@@ -58,7 +58,8 @@ class ModuleRedirect(Attack):
                     request=mutated_request,
                     parameter=parameter,
                     info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
-                    wstg=WSTG_CODE
+                    wstg=WSTG_CODE,
+                    response=response
                 )
 
                 if parameter == "QUERY_STRING":

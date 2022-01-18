@@ -64,7 +64,8 @@ async def test_ssl_scanner():
         request=request,
         parameter='',
         wstg=["WSTG-CRYP-01"],
-        info="Certificate subject: yolo.com"
+        info="Certificate subject: yolo.com",
+        response=None
     )
 
     persister.add_payload.assert_any_call(
@@ -76,7 +77,8 @@ async def test_ssl_scanner():
         request=request,
         parameter='',
         wstg=["WSTG-CRYP-01"],
-        info="Requested hostname doesn't match those in the certificate"
+        info="Requested hostname doesn't match those in the certificate",
+        response=None
     )
 
     persister.add_payload.assert_any_call(
@@ -88,7 +90,8 @@ async def test_ssl_scanner():
         request=request,
         parameter='',
         wstg=["WSTG-CRYP-01"],
-        info="Certificate is invalid for Mozilla trust store: self signed certificate"
+        info="Certificate is invalid for Mozilla trust store: self signed certificate",
+        response=None
     )
 
     persister.add_payload.assert_any_call(
@@ -100,7 +103,8 @@ async def test_ssl_scanner():
         request=request,
         parameter='',
         wstg=["WSTG-CRYP-01"],
-        info="Strict Transport Security (HSTS) is not set"
+        info="Strict Transport Security (HSTS) is not set",
+        response=None
     )
 
     await crawler.close()

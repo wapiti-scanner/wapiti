@@ -71,7 +71,8 @@ class ModuleHtaccess(Attack):
                 category=NAME,
                 request=evil_req,
                 info=_("{0} bypassable weak restriction").format(evil_req.url),
-                wstg=WSTG_CODE
+                wstg=WSTG_CODE,
+                response=response
             )
             log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
             log_red(_("HTTP status code changed from {0} to {1}").format(

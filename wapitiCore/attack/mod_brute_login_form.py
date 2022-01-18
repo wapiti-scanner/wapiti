@@ -27,6 +27,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
+from wapitiCore.net.page import Page
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red
 
@@ -76,7 +77,7 @@ class ModuleBruteLoginForm(Attack):
                 if password:
                     yield password
 
-    async def send_credentials(self, login_form, username_index, password_index, username, password):
+    async def send_credentials(self, login_form, username_index, password_index, username, password) -> Page:
         post_params = login_form.post_params
         get_params = login_form.get_params
 
@@ -101,7 +102,7 @@ class ModuleBruteLoginForm(Attack):
             follow_redirects=True
         )
 
-        return login_response.content
+        return login_response
 
     async def must_attack(self, request: Request):
         # We leverage the fact that the crawler will fill password entries with a known placeholder
@@ -116,7 +117,7 @@ class ModuleBruteLoginForm(Attack):
 
     async def attack(self, request: Request):
         try:
-            page = await self.crawler.async_get(Request(request.referer), follow_redirects=True)
+            page = await self.crawler.async_send(Request(request.referer, "GET"), follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
@@ -126,13 +127,13 @@ class ModuleBruteLoginForm(Attack):
             return
 
         try:
-            failure_text = await self.send_credentials(
+            failure_response = await self.send_credentials(
                 login_form,
                 username_field_idx, password_field_idx,
                 "invalid", "invalid"
             )
 
-            if self.check_success_auth(failure_text):
+            if self.check_success_auth(failure_response.content):
                 # Ignore this case as it raises false positives
                 return
         except RequestError:
@@ -158,7 +159,7 @@ class ModuleBruteLoginForm(Attack):
                             password_field_idx,
                             username,
                             password,
-                            failure_text
+                            failure_response.content
                         )
                     )
                     tasks.add(task)
@@ -180,7 +181,7 @@ class ModuleBruteLoginForm(Attack):
                 else:
                     if result:
                         found = True
-                        username, password = result
+                        username, password, response = result
                         vuln_message = _("Credentials found for URL {} : {} / {}").format(
                             request.referer,
                             username,
@@ -212,7 +213,8 @@ class ModuleBruteLoginForm(Attack):
                             category=NAME,
                             request=evil_request,
                             info=vuln_message,
-                            wstg=WSTG_CODE
+                            wstg=WSTG_CODE,
+                            response=response
                         )
 
                         log_red("---")
@@ -237,7 +239,7 @@ class ModuleBruteLoginForm(Attack):
                 username, password
         )
 
-        if self.check_success_auth(response) and failure_text != response:
-            return username, password
+        if self.check_success_auth(response.content) and failure_text != response.content:
+            return username, password, response
 
         return None

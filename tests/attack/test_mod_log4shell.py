@@ -5,6 +5,7 @@ from asyncio import Event
 from typing import Dict
 from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch
+from httpx import Response
 
 import pytest
 import respx
@@ -15,6 +16,7 @@ from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.definitions.log4shell import NAME
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, _
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.page import Page
 from wapitiCore.net.web import Request
 
 
@@ -178,7 +180,9 @@ async def test_verify_headers_vuln_found():
         malicious_headers = {"Header": "payload"}
         headers_uuid_record = {"Header": "unique_id"}
 
-        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record)
+        page = Page(Response(200, request=modified_request))
+
+        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
         mock_http_repr.assert_called_once()
         persister.add_payload.assert_called_once_with(
             request_id=-1,
@@ -190,7 +194,8 @@ async def test_verify_headers_vuln_found():
             parameter="Header: payload",
             info=_("URL {0} seems vulnerable to Log4Shell attack by using the header {1}") \
                         .format(modified_request.url, "Header"),
-            wstg=["WSTG-INPV-11"]
+            wstg=["WSTG-INPV-11"],
+            response=page
         )
 
 
@@ -223,7 +228,9 @@ async def test_verify_headers_vuln_not_found():
         malicious_headers = {"Header": "payload"}
         headers_uuid_record = {"Header": "unique_id"}
 
-        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record)
+        page = Page(Response(200, request=modified_request))
+
+        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
         mock_http_repr.assert_not_called()
         persister.add_payload.assert_not_called()
 

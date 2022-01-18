@@ -83,7 +83,8 @@ class ModuleHttpHeaders(Attack):
                 category=NAME,
                 request=request,
                 info=info,
-                wstg=wstg
+                wstg=wstg,
+                response=response
             )
         else:
             log_green("OK")
@@ -98,11 +99,11 @@ class ModuleHttpHeaders(Attack):
         return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request):
-        request_to_root = Request(request.url)
+        request_to_root = Request(request.url, "GET")
         self.finished = True
 
         try:
-            response = await self.crawler.async_get(request_to_root, follow_redirects=True)
+            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return

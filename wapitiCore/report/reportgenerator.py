@@ -24,20 +24,35 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import time
 
+from httpx import Response
+
 
 class ReportGenerator:
     def __init__(self):
         self._infos = {}
         self._date = None
 
-    def set_report_info(self, target, scope, date, version, auth, crawled_pages: int):
-        """Set the information about the scan"""
+    def set_report_info(
+        self,
+        target,
+        scope,
+        date,
+        version,
+        auth,
+        crawled_pages: list,
+        crawled_pages_nbr: int,
+        detail_report: bool
+    ):
+        """Set the informations about the scan"""
         self._infos["target"] = target
         self._infos["date"] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", date)
         self._infos["version"] = version
         self._infos["scope"] = scope
         self._infos["auth"] = auth
-        self._infos["crawled_pages"] = crawled_pages
+        self._infos["crawled_pages_nbr"] = crawled_pages_nbr
+        if detail_report is True:
+            self._infos["crawled_pages"] = crawled_pages
+        self._infos["detailed_report"] = detail_report
         self._date = date
 
     @property
@@ -51,19 +66,49 @@ class ReportGenerator:
     def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_vulnerability(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg: str = None,
+        response: Response = None
+    ):
         raise NotImplementedError("Must be overridden")
 
     # Anomalies
     def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_anomaly(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         raise NotImplementedError("Must be overridden")
 
     # Additionals
     def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
-    def add_additional(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
+    def add_additional(
+        self,
+        module: str,
+        category=None,
+        level=0,
+        request=None,
+        parameter="",
+        info="",
+        wstg=None,
+        response: Response = None
+    ):
         raise NotImplementedError("Must be overridden")

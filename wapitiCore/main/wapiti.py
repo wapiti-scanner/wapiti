@@ -212,6 +212,7 @@ class Wapiti:
         self._bug_report = True
         self._logfile = ""
         self._auth_state = None
+        self.detailed_report = False
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -275,7 +276,9 @@ class Wapiti:
             gmtime(),
             f"Wapiti {WAPITI_VERSION}",
             self._auth_state,
-            await self.count_resources()
+            await self.persister.get_all_paths() if self.detailed_report else None,
+            await self.count_resources(),
+            self.detailed_report
         )
 
         for vul in vulnerabilities:
@@ -392,8 +395,8 @@ class Wapiti:
         buffer = []
 
         # Browse URLs are saved them once we have enough in our buffer
-        async for resource in explorer.async_explore(self._start_urls, self._excluded_urls):
-            buffer.append(resource)
+        async for resource, response in explorer.async_explore(self._start_urls, self._excluded_urls):
+            buffer.append((resource, response))
 
             if len(buffer) > 100:
                 await self.persister.save_requests(buffer)
@@ -435,8 +438,9 @@ class Wapiti:
                                     (attack.do_get or attack.do_post)]
                 if attack_module.require != attack_name_list:
                     logging.error(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
-                    logging.error("  %s", ",".join([attack for attack in attack_module.require
-                                                   if attack not in attack_name_list]))
+                    logging.error("  {0}", ",".join(
+                        [attack for attack in attack_module.require if attack not in attack_name_list]
+                    ))
                     continue
 
                 attack_module.load_require(
@@ -572,7 +576,8 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    wstg=payload.wstg
+                    wstg=payload.wstg,
+                    response=payload.response
                 )
             elif payload.type == "anomaly":
                 self.report_gen.add_anomaly(
@@ -582,7 +587,8 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    wstg=payload.wstg
+                    wstg=payload.wstg,
+                    response=payload.response
                 )
             elif payload.type == "additional":
                 self.report_gen.add_additional(
@@ -592,7 +598,8 @@ class Wapiti:
                     parameter=payload.parameter,
                     info=payload.info,
                     module=payload.module,
-                    wstg=payload.wstg
+                    wstg=payload.wstg,
+                    response=payload.response
                 )
 
         print('')
@@ -688,6 +695,9 @@ class Wapiti:
         """Put colors in the console output (terminal must support colors)"""
         self.color_enabled = True
         self.refresh_logging()
+
+    def set_detail_report(self):
+        self.detailed_report = True
 
     def verbosity(self, verbose: int):
         """Define the level of verbosity of the output."""
@@ -1162,6 +1172,12 @@ async def wapiti_main():
     )
 
     parser.add_argument(
+        "-dr", "--detailed-report",
+        action="store_true",
+        help=_("Adds more details to requests and responses")
+    )
+
+    parser.add_argument(
         "--no-bugreport",
         action="store_true",
         help=_("Don't send automatic bug report when an attack module fails")
@@ -1292,6 +1308,8 @@ async def wapiti_main():
 
         # should be a setter
         wap.verbosity(args.verbosity)
+        if args.detailed_report:
+            wap.set_detail_report()
         if args.color:
             wap.set_color()
         wap.set_timeout(args.timeout)

@@ -339,5 +339,6 @@ class ModuleNikto(Attack):
                 category=NAME,
                 request=evil_request,
                 info=info,
-                wstg=WSTG_CODE
+                wstg=WSTG_CODE,
+                response=response
             )

@@ -607,7 +607,9 @@ class AsyncCrawler:
             )
 
         resource.status = page.status
+        resource.set_cookies(self._cookies)
         resource.set_headers(page.headers)
+        resource.set_sent_headers(httpx.Headers(headers or {}))
         return page
 
     async def close(self):
@@ -832,14 +834,14 @@ class Explorer:
                 page = await self._crawler.async_send(request)
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
-                return False, []
+                return False, [], None
             # TODO: what to do of connection errors ? sleep a while before retrying ?
             except ConnectionError:
                 logging.error(_("[!] Connection error with URL"), resource_url)
-                return False, []
+                return False, [], None
             except httpx.RequestError as error:
                 logging.error(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
-                return False, []
+                return False, [], None
 
             if self._max_files_per_dir:
                 async with self._shared_lock:
@@ -852,7 +854,7 @@ class Explorer:
             if request.link_depth == self._max_depth:
                 # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
                 await page.close()
-                return True, []
+                return True, [], page
 
             # Above this line we need the content of the page. As we are in stream mode we must force reading the body.
             try:
@@ -864,15 +866,15 @@ class Explorer:
             if self._max_page_size > 0:
                 if page.raw_size > self._max_page_size:
                     await page.clean()
-                    return False, []
+                    return False, [], page
 
             await asyncio.sleep(0)
             resources = self.extract_links(page, request)
             # TODO: there's more situations where we would not want to attack the resource... must check this
             if page.is_directory_redirection:
-                return False, resources
+                return False, resources, page
 
-            return True, resources
+            return True, resources, page
 
     async def async_explore(
             self,
@@ -966,12 +968,12 @@ class Explorer:
             for task in done:
                 request = task_to_request[task]
                 try:
-                    success, resources = await task
+                    success, resources, response = await task
                 except Exception as exception:
                     logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                 else:
                     if success:
-                        yield request
+                        yield request, response
 
                     accepted_urls = 0
                     for unfiltered_request in resources:

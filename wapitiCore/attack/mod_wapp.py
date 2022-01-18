@@ -19,7 +19,7 @@ import json
 import os
 import asyncio
 import string
-from typing import Dict
+from typing import Dict, Tuple
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_blue
@@ -102,7 +102,7 @@ class ModuleWapp(Attack):
             logging.error(exception)
             return
 
-        detected_applications = await self._detect_applications(request.url, application_data)
+        detected_applications, response = await self._detect_applications(request.url, application_data)
 
         if len(detected_applications) > 0:
             log_blue("---")
@@ -121,7 +121,8 @@ class ModuleWapp(Attack):
                 category=TECHNO_DETECTED,
                 request=request_to_root,
                 info=json.dumps(detected_applications[application_name]),
-                wstg=TECHNO_DETECTED_WSTG_CODE
+                wstg=TECHNO_DETECTED_WSTG_CODE,
+                response=response
             )
 
             if versions:
@@ -130,18 +131,21 @@ class ModuleWapp(Attack):
                         category=WEB_SERVER_VERSIONED,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name]),
-                        wstg=WEB_SERVER_WSTG_CODE
+                        wstg=WEB_SERVER_WSTG_CODE,
+                        response=response
                     )
                 else:
                     await self.add_vuln_info(
                         category=WEB_APP_VERSIONED,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name]),
-                        wstg=WEB_APP_WSTG_CODE
+                        wstg=WEB_APP_WSTG_CODE,
+                        response=response
                     )
 
-    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Dict:
+    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Tuple[Dict, Page]:
         detected_applications = []
+        response = None
 
         # Detecting the applications for the url with and without the follow_redirects flag
         for follow_redirect in [True, False]:
@@ -157,10 +161,10 @@ class ModuleWapp(Attack):
             detected_applications.append(wappalyzer.detect_with_versions_and_categories_and_groups())
 
         if not detected_applications:
-            return {}
+            return {}, response
         if len(detected_applications) == 1:
-            return detected_applications[0]
-        return {**detected_applications[0], **detected_applications[1]}
+            return detected_applications[0], response
+        return {**detected_applications[0], **detected_applications[1]}, response
 
     async def _dump_url_content_to_file(self, url: str, file_path: str):
         request = Request(url)

@@ -80,6 +80,7 @@ class ModuleMethods(Attack):
                         page,
                         ", ".join(interesting_methods)
                     ),
-                    wstg=WSTG_CODE
+                    wstg=WSTG_CODE,
+                    response=response
                 )
                 log_orange("---")

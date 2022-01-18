@@ -30,7 +30,10 @@ from pkg_resources import resource_filename
 
 from httpx import ReadTimeout, RequestError
 
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
+from wapitiCore.net.page import Page
+from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 
 
@@ -235,7 +238,7 @@ class Attack:
     def get_resource(resource_path: str):
         return resource_filename("wapitiCore", path_join("data", "attacks", resource_path))
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
+    def __init__(self, crawler: AsyncCrawler, persister: SqlPersister, attack_options, stop_event):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
@@ -256,7 +259,8 @@ class Attack:
         self.deps = []
 
     async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
-                          level=0, request=None, parameter="", info="", wstg=None):
+                          level=0, request: Request = None, parameter="", info="", wstg: str = None,
+                          response: Page = None):
         await self.persister.add_payload(
             request_id=request_id,
             payload_type=payload_type,
@@ -266,7 +270,8 @@ class Attack:
             request=request,
             parameter=parameter,
             info=info,
-            wstg=wstg
+            wstg=wstg,
+            response=response
         )
 
     add_vuln = partialmethod(add_payload, payload_type=VULN)
