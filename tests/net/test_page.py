@@ -722,3 +722,66 @@ def test_title_page():
 
     assert page.soup is not None
     assert page.title == "Foobar"
+
+@respx.mock
+def test_html_redirection():
+    target_url_1 = "http://perdu.com/"
+    target_url_2 = "http://perdu2.com/"
+    target_url_3 = "http://perdu3.com/"
+
+    page_content_1 = """
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="0;url=http://test.com/" />
+            <title>Foobar</title>
+        </head>
+        <body>
+            <h1>Perdu sur l'Internet ?</h1>
+        </body>
+    </html>
+    """
+
+    page_content_2 = """
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="0;url='http://test.com/'" />
+            <title>Foobar</title>
+        </head>
+        <body>
+            <h1>Perdu sur l'Internet ?</h1>
+        </body>
+    </html>
+    """
+
+    page_content_3 = """
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="refresh" content='0;url="http://test.com/"' />
+            <title>Foobar</title>
+        </head>
+        <body>
+            <h1>Perdu sur l'Internet ?</h1>
+        </body>
+    </html>
+    """
+
+
+    target_urls = [target_url_1, target_url_2, target_url_3]
+    page_contents = [page_content_1, page_content_2, page_content_3]
+
+    for (target_url, page_content) in zip(target_urls, page_contents):
+        respx.get(target_url).mock(
+            return_value=httpx.Response(
+                200,
+                text=page_content,
+            )
+        )
+
+        resp = httpx.get(target_url, follow_redirects=False)
+        page = Page(resp)
+
+        assert len(page.html_redirections) == 1
+        assert page.html_redirections[0] == "http://test.com/"

@@ -700,10 +700,16 @@ class Page:
         urls = set()
         for meta_tag in self.soup.find_all("meta", attrs={"content": True, "http-equiv": True}):
             if meta_tag and meta_tag["http-equiv"].lower() == "refresh":
-                content_str = meta_tag["content"].lower()
-                url_eq_idx = content_str.find("url=")
+                content_str = meta_tag["content"]
+                content_str_length = len(meta_tag["content"])
+                url_eq_idx = content_str.lower().find("url=")
+
                 if url_eq_idx >= 0:
-                    url = meta_tag["content"][url_eq_idx + 4:]
+                    if content_str[url_eq_idx + 4] in ("\"", "'"):
+                        url_eq_idx += 1
+                        if content_str.endswith(("\"", "'")):
+                            content_str_length -= 1
+                    url = content_str[url_eq_idx + 4:content_str_length]
                     if url:
                         urls.add(self.make_absolute(url))
         return [url for url in urls if url]
