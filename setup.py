@@ -5,7 +5,7 @@ from multiprocessing import cpu_count
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-VERSION = "3.0.9"
+VERSION = "3.1.0"
 DOC_DIR = "share/doc/wapiti"
 
 
@@ -73,7 +73,7 @@ application but will scans the webpages of the deployed webapp, looking for
 scripts and forms where it can inject data.
 Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see
 if a script is vulnerable.""",
-    url="https://wapiti.sourceforge.io/",
+    url="https://wapiti-scanner.github.io/",
     author="Nicolas Surribas",
     author_email="nicolas.surribas@gmail.com",
     license="GPLv2",
@@ -94,7 +94,6 @@ if a script is vulnerable.""",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Natural Language :: English",
         "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3",

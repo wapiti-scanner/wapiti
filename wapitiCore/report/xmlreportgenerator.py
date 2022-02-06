@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
-# Copyright (C) 2008-2021 Nicolas Surribas
+# This file is part of the Wapiti project (https://wapiti-scanner.github.io)
+# Copyright (C) 2008-2022 Nicolas Surribas
 #
 # Original authors :
 # Alberto Pastor
@@ -34,7 +34,7 @@ class XMLReportGenerator(ReportGenerator):
     method add_vulnerability(vulnerabilityTypeName,level,url,parameter,info).
     The format of the file is XML and it has the following structure:
     <report type="security">
-        <generatedBy id="Wapiti 3.0.9"/>
+        <generatedBy id="Wapiti 3.1.0"/>
         <vulnerabilityTypeList>
             <vulnerabilityType name="SQL Injection">
 

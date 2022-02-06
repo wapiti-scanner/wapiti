@@ -325,7 +325,7 @@ The recommended approach to using `pylint-ignore` is:
 ```
 > 1: #!/usr/bin/env python3
   2: # -*- coding: utf-8 -*-
-  3: # This file is part of the Wapiti project (https://wapiti.sourceforge.io)
+  3: # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
 ```
 
 

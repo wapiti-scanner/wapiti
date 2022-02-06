@@ -64,8 +64,6 @@ class ModuleLog4Shell(Attack):
             return
         await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id)
 
-
-
     async def attack_apache_solr_url(self, request_url: str):
         payload_unique_id = uuid.uuid4()
         payload = self._generate_payload(payload_unique_id).replace("{", "%7B").replace("}", "%7D")
@@ -186,21 +184,21 @@ class ModuleLog4Shell(Attack):
         log_red("---")
 
     async def _verify_headers_vulnerability(
-        self,
-        modified_request: Request,
-        malicious_headers: dict,
-        headers_uuid_record: dict
+            self,
+            modified_request: Request,
+            malicious_headers: dict,
+            headers_uuid_record: dict
     ):
         for header, payload in malicious_headers.items():
             header_uuid = headers_uuid_record.get(header)
             await self._verify_header_vulnerability(modified_request, header, payload, header_uuid)
 
     async def _verify_header_vulnerability(
-        self,
-        modified_request: Request,
-        header: str,
-        payload: str,
-        unique_id: uuid.UUID
+            self,
+            modified_request: Request,
+            header: str,
+            payload: str,
+            unique_id: uuid.UUID
     ):
         if await self._verify_dns(str(unique_id)) is True:
             await self.add_vuln_critical(
@@ -271,9 +269,9 @@ class ModuleLog4Shell(Attack):
         return batch_malicious_headers, headers_uuid_record
 
     def _inject_payload(
-        self,
-        original_request: Request,
-        params: List[Tuple[str, str]],
+            self,
+            original_request: Request,
+            params: List[Tuple[str, str]],
     ) -> Tuple[Request, str, uuid.UUID]:
         for idx, _ in enumerate(params):
             malicious_params = copy.deepcopy(params)

@@ -30,3 +30,9 @@ you will have to make the endpoint listen on an IP of that network. You may end 
 - Internal endpoint: http://127.0.0.1/ - this is the URL that Wapiti will request at the end of the attack to get results
 
 The XXE module also use the endpoints options. The whole process is described in the `doc/xxe_module.md` file.
+
+## What is the DNS endpoint?
+
+The log4shell attack module uses a DNS endpoint to see if a scanned website is vulnerable to the popular log4j vulnerability.
+
+The default endpoint used is dns.wapiti3.ovh which is a DNS server.

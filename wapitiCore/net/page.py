@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
-# Copyright (C) 2006-2021 Nicolas SURRIBAS
+# This file is part of the Wapiti project (https://wapiti-scanner.github.io)
+# Copyright (C) 2006-2022 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -761,7 +761,7 @@ class Page:
                 "tel": "0606060606",
                 "text": "default",
                 "time": "13:37",
-                "url": "https://wapiti.sourceforge.io/",
+                "url": "https://wapiti-scanner.github.io/",
                 "username": "alice",
                 "week": "2019-W24"
             }

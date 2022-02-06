@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
-# Copyright (C) 2008-2021 Nicolas Surribas
+# This file is part of the Wapiti project (https://wapiti-scanner.github.io)
+# Copyright (C) 2008-2022 Nicolas Surribas
 #
 # Original author :
 # David del Pozo
@@ -25,21 +25,13 @@
 import os
 import locale
 import gettext
-import sys
 from pkg_resources import resource_filename
 
 AVAILABLE_LANGS = ["en", "es", "fr", "pt", "zh"]  # "de", "ms"]
 
-if sys.platform == "win32":
-    import ctypes
-
-    windll = ctypes.windll.kernel32
-    def_locale = locale.windows_locale[windll.GetUserDefaultUILanguage()]  # for example fr_FR
-    lang_country = def_locale[:2]
-else:
-    # getdefaultlocale will return (None, None) if locale settings are incorrectly set (ex: LANG=C)
-    def_locale = locale.getdefaultlocale()  # for example ('fr_FR', 'cp1252')
-    lang_country = def_locale[0]
+# getdefaultlocale will return (None, None) if locale settings are incorrectly set (ex: LANG=C)
+def_locale = locale.getdefaultlocale()  # for example ('fr_FR', 'cp1252')
+lang_country = def_locale[0]
 
 lang = None
 if isinstance(lang_country, str) and len(lang_country) >= 2:

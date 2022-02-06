@@ -61,7 +61,7 @@ def test_forms():
                     "text": "default",
                     "textarea": "Hi there!",
                     "time": "13:37",
-                    "url": "https://wapiti.sourceforge.io/",
+                    "url": "https://wapiti-scanner.github.io/",
                     "week": "2019-W24"
                 }
             elif form.file_path == "/upload.php":

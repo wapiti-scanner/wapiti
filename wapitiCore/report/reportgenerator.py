@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
-# Copyright (C) 2008-2021 Nicolas Surribas
+# This file is part of the Wapiti project (https://wapiti-scanner.github.io)
+# Copyright (C) 2008-2022 Nicolas Surribas
 #
 # Original authors :
 # Alberto Pastor
@@ -31,7 +31,7 @@ class ReportGenerator:
         self._date = None
 
     def set_report_info(self, target, scope, date, version, auth, crawled_pages: int):
-        """Set the informations about the scan"""
+        """Set the information about the scan"""
         self._infos["target"] = target
         self._infos["date"] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", date)
         self._infos["version"] = version

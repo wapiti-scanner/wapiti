@@ -4,7 +4,7 @@
 # --no-location               ne pas créer les commentaires de numérotation du type "#: fichier:ligne"
 # --omit-header               ne pas créer d'en-têtes de la forme 'msgid ""'
 # First generate the template with all current strings, it will delete the previous file (so remove old strings)
-xgettext --copyright-holder="2009-2021 Nicolas SURRIBAS" --package-name="Wapiti" --package-version="GIT" --from-code=UTF-8 -L Python --no-wrap -d wapiti -o template.po -f file_list.txt  --no-location --omit-header
+xgettext --copyright-holder="2009-2022 Nicolas SURRIBAS" --package-name="Wapiti" --package-version="GIT" --from-code=UTF-8 -L Python --no-wrap -d wapiti -o template.po -f file_list.txt  --no-location --omit-header
 
 # Next, update the translation files by adding entry for new strings
 # while keeping already translated strings if they are still used.

@@ -51,7 +51,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2021 Nicolas Surribas.
+Copyright (c) 2006-2022 Nicolas Surribas.
 
 ## AUTHORS
 
@@ -59,7 +59,7 @@ Nicolas Surribas is the main author, but the whole list of contributors is found
 
 ## WWW
 
-https://wapiti.sourceforge.io/
+https://wapiti-scanner.github.io/
 
 ## BUG REPORTS
 

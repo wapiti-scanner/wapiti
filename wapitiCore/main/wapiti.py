@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This file is part of the Wapiti project (https://wapiti.sourceforge.io)
-# Copyright (C) 2006-2021 Nicolas SURRIBAS
+# This file is part of the Wapiti project (https://wapiti-scanner.github.io)
+# Copyright (C) 2006-2022 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 from wapitiCore.report import GENERATORS, get_report_generator_instance
 
-WAPITI_VERSION = "Wapiti 3.0.9"
+WAPITI_VERSION = "Wapiti 3.1.0"
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
@@ -1054,6 +1054,34 @@ async def wapiti_main():
     )
 
     parser.add_argument(
+        "--external-endpoint",
+        metavar="EXTERNAL_ENDPOINT_URL",
+        default=argparse.SUPPRESS,
+        help=_("Url serving as endpoint for target")
+    )
+
+    parser.add_argument(
+        "--internal-endpoint",
+        metavar="INTERNAL_ENDPOINT_URL",
+        default=argparse.SUPPRESS,
+        help=_("Url serving as endpoint for attacker")
+    )
+
+    parser.add_argument(
+        "--endpoint",
+        metavar="ENDPOINT_URL",
+        default="https://wapiti3.ovh/",
+        help=_("Url serving as endpoint for both attacker and target")
+    )
+
+    parser.add_argument(
+        "--dns-endpoint",
+        metavar="DNS_ENDPOINT_DOMAIN",
+        default="dns.wapiti3.ovh",
+        help=_("Domain serving as DNS endpoint for Log4Shell attack")
+    )
+
+    parser.add_argument(
         "-t", "--timeout",
         type=float, default=6.0,
         help=_("Set timeout for requests"),
@@ -1103,6 +1131,13 @@ async def wapiti_main():
     )
 
     parser.add_argument(
+        "--log",
+        metavar="OUTPUT_PATH",
+        default=None,
+        help=_("Output log file")
+    )
+
+    parser.add_argument(
         "-f", "--format",
         metavar="FORMAT",
         help=_("Set output format. Supported:") + " " + ", ".join(sorted(GENERATORS)) + ". " + _("Default is html."),
@@ -1115,41 +1150,6 @@ async def wapiti_main():
         metavar="OUTPUT_PATH",
         default=argparse.SUPPRESS,
         help=_("Output file or folder")
-    )
-
-    parser.add_argument(
-        "--log",
-        metavar="OUTPUT_PATH",
-        default=None,
-        help=_("Output log file")
-    )
-
-    parser.add_argument(
-        "--external-endpoint",
-        metavar="EXTERNAL_ENDPOINT_URL",
-        default=argparse.SUPPRESS,
-        help=_("Url serving as endpoint for target")
-    )
-
-    parser.add_argument(
-        "--internal-endpoint",
-        metavar="INTERNAL_ENDPOINT_URL",
-        default=argparse.SUPPRESS,
-        help=_("Url serving as endpoint for attacker")
-    )
-
-    parser.add_argument(
-        "--dns-endpoint",
-        metavar="DNS_ENDPOINT_DOMAIN",
-        default="dns.wapiti3.ovh",
-        help=_("Domain serving as DNS endpoint for Log4Shell attack")
-    )
-
-    parser.add_argument(
-        "--endpoint",
-        metavar="ENDPOINT_URL",
-        default="https://wapiti3.ovh/",
-        help=_("Url serving as endpoint for both attacker and target")
     )
 
     parser.add_argument(

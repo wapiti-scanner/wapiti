@@ -39,12 +39,6 @@ Now let's activate it (make it our current working environment) :
 . wapiti3/bin/activate
 ```
 
-Or alternatively on Windows :
-
-```sh
-wapiti3\Scripts\activate.bat
-```
-
 Now you are in the virtual environment you can install Wapiti and its dependencies :
 
 ```sh
@@ -87,6 +81,5 @@ Then use setup.py for installation. Remember that dev version may contain unknow
 
 I made several YouTube videos to show Wapiti installation :
 
-* on Windows : https://www.youtube.com/watch?v=j3LCVj15VBE
 * on OpenSUSE : https://www.youtube.com/watch?v=RmF2Sr2B3ZA
 * on Ubuntu : https://www.youtube.com/watch?v=TD5rehelHPY

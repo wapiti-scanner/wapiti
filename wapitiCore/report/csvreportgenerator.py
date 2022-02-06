@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # CSV Report Generator Module for Wapiti Project
-# Wapiti Project (https://wapiti.sourceforge.io)
+# Wapiti Project (https://wapiti-scanner.github.io)
 #
-# Copyright (C) 2021 Nicolas SURRIBAS
+# Copyright (C) 2021-2022 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "May 2021" "" ""
+.TH "WAPITI" "1" "February 2022" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -134,6 +134,23 @@ SCAN AND ATTACKS TUNING:
 .IP "" 0
 .
 .P
+ENDPOINT OPTIONS:
+.
+.IP "\(bu" 4
+\fB\-\-external\-endpoint\fR \fIEXTERNAL_ENDPOINT_URL\fR
+.
+.IP "\(bu" 4
+\fB\-\-internal\-endpoint\fR \fIINTERNAL_ENDPOINT_URL\fR
+.
+.IP "\(bu" 4
+\fB\-\-endpoint\fR \fIENDPOINT_URL\fR
+.
+.IP "\(bu" 4
+\fB\-\-dns\-endpoint\fR \fIDNS_ENDPOINT_DOMAIN\fR
+.
+.IP "" 0
+.
+.P
 HTTP AND NETWORK OPTIONS:
 .
 .IP "\(bu" 4
@@ -158,6 +175,9 @@ OUTPUT OPTIONS:
 .
 .IP "\(bu" 4
 \fB\-v\fR \fILEVEL\fR
+.
+.IP "\(bu" 4
+\fB\-\-log\fR \fIOUTPUT_PATH\fR
 .
 .IP "" 0
 .
@@ -226,7 +246,7 @@ punk : will scan and attack every URL found whatever the domain\. Think twice be
 .
 .IP "" 0
 .
-.SH "ATTACK SPECIFICATION"
+.SH "ATTACKS SPECIFICATION"
 .
 .IP "\(bu" 4
 \fB\-m\fR, \fB\-\-module\fR \fIMODULE_LIST\fR
@@ -278,7 +298,7 @@ Default value for this option is 1\.
 .
 .IP "" 0
 .
-.SH "PROXY AND AUTHENTICATION OPTIONS"
+.SH "PROXY AND AUTHENTICATION"
 .
 .IP "\(bu" 4
 \fB\-p\fR, \fB\-\-proxy\fR \fIPROXY_URL\fR
@@ -327,7 +347,7 @@ Ignore cookies given in HTTP responses\. Cookies that have been loaded using \fB
 .
 .IP "" 0
 .
-.SH "SESSION OPTIONS"
+.SH "SESSIONS"
 Since Wapiti 3\.0\.0, scanned URLs, discovered vulnerabilities and attacks status are stored in sqlite3 databases used as Wapiti session files\.
 .
 .br
@@ -511,20 +531,19 @@ Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 an
 .br
 Wapiti leverages Python\'s asyncio framework for this\.
 .
-.IP "\(bu" 4
-\fB\-\-endpoint\fR \fIURL\fR Some attack modules are using an HTTP endpoint to check for vulnerabilities\.
+.IP "" 0
+.
+.SH "ENDPOINT OPTIONS"
+Some attack modules are using an HTTP endpoint to check for vulnerabilities\.
 .
 .br
 For example the SSRF module inject the endpoint URL into webpage arguments to check if the target script try to fetch that URL\.
 .
 .br
-Default endpoint is http://wapiti3\.ovh/\. Keep in mind that the target and your computer must be able to join that endpoint for the module to work\.
+Default HTTP endpoint is http://wapiti3\.ovh/\. Keep in mind that the target and your computer must be able to join that endpoint for the module to work\.
 .
 .br
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint\.
-.
-.br
-This option will set both internal and external endpoint URL to the same value\.
 .
 .IP "\(bu" 4
 \fB\-\-internal\-endpoint\fR \fIURL\fR You may want to specify an internal endpoint different from the external one\.
@@ -540,6 +559,15 @@ If you are behind a NAT it may be an URL for a local server (for example http://
 .
 .br
 Using your own endpoint may reduce risk of being caught by NIDS or WAF\.
+.
+.IP "\(bu" 4
+\fB\-\-endpoint\fR \fIURL\fR This option will set both internal and external endpoint URL to the same value\.
+.
+.IP "\(bu" 4
+\fB\-\-dns\-endpoint\fR \fIDNS\fR This options specify the DNS endpoint to use for the log4shell attack module\.
+.
+.br
+The default value is dns\.wapiti3\.ovh
 .
 .IP "" 0
 .
@@ -584,13 +612,19 @@ Wapiti prints its status to standard output\. The two following options allow to
 \fB\-\-color\fR
 .
 .br
-Outpout will be colorized based on the severity of the information (red is critical, orange for warnings, green for information)\.
+Output will be colorized based on the severity of the information (red is critical, orange for warnings, green for information)\.
 .
 .IP "\(bu" 4
 \fB\-v\fR, \fB\-\-verbose\fR \fILEVEL\fR
 .
 .br
 Set the level of verbosity for the output\. Possible values are quiet (O), normal (1, default behavior) and verbose (2)\.
+.
+.IP "\(bu" 4
+\fB\-\-log\fR \fIOUTPUT_PATH\fR In addition to getting information from the console you can also log the output to a local file\.
+.
+.br
+Debug information will also be stored in that file so this option should be mainly used to debug Wapiti\.
 .
 .IP "" 0
 .
@@ -646,7 +680,7 @@ Show detailed options description\. More details are available in this manpage t
 Wapiti is covered by the GNU General Public License (GPL), version 2\. Please read the LICENSE file for more information\.
 .
 .SH "COPYRIGHT"
-Copyright (c) 2006\-2021 Nicolas Surribas\.
+Copyright (c) 2006\-2022 Nicolas Surribas\.
 .
 .SH "AUTHORS"
 Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file\.

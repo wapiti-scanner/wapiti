@@ -302,15 +302,15 @@
 	Some modifications have been made on getccokie.py so it can work
 	on Webmin (and probably more web applications)
 	Added -t (--timeout) option to set the timeout in seconds
-	Added -v (--verbose) option to set the verbosity. Three availables
+	Added -v (--verbose) option to set the verbosity. Three available
 	modes :
 	0: only print found vulnerabilities
 	1: print current attacked urls (existing urls)
-	2: print every attack payload and url (very much informations... good
+	2: print every attack payload and url (very much information... good
 	for debugging)
 	Wapiti is much more modular and comes with some functions to set scan
 	and attack options... look the code ;)
-	Some defaults options are availables as "modules" with option -m
+	Some defaults options are available as "modules" with option -m
 	(--module) :
 	GET_XSS: only scan for XSS with HTTP GET method (no post)
 	POST_XSS: XSS attacks using POST and not GET

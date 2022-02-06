@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # JSON Report Generator Module for Wapiti Project
-# Wapiti Project (https://wapiti.sourceforge.io)
+# Wapiti Project (https://wapiti-scanner.github.io)
 #
-# Copyright (C) 2014-2021 Nicolas SURRIBAS
+# Copyright (C) 2014-2022 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ class JSONReportGenerator(ReportGenerator):
     - vulnerabilities : each key is matching a vulnerability class. Value is a list of found vulnerabilities.
     - anomalies : same as vulnerabilities but used only for error messages and timeouts (items of less importance).
     - additionals : some additional information about the target.
-    - infos : several informations about the scan.
+    - infos : several information about the scan.
     """
 
     def __init__(self):
@@ -59,7 +59,7 @@ class JSONReportGenerator(ReportGenerator):
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
-        """Add informations on a type of vulnerability"""
+        """Add information on a type of vulnerability"""
         if name not in self._flaw_types:
             self._flaw_types[name] = {
                 "desc": description,
@@ -72,7 +72,7 @@ class JSONReportGenerator(ReportGenerator):
 
     def add_vulnerability(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
         """
-        Store the informations about a found vulnerability.
+        Store the information about a found vulnerability.
         """
 
         vuln_dict = {
@@ -105,7 +105,7 @@ class JSONReportGenerator(ReportGenerator):
             self._anomalies[name] = []
 
     def add_anomaly(self, module: str, category=None, level=0, request=None, parameter="", info="", wstg=None):
-        """Store the informations about an anomaly met during the attack."""
+        """Store the information about an anomaly met during the attack."""
         anom_dict = {
             "method": request.method,
             "path": request.file_path,

@@ -14,9 +14,10 @@ Details of installation can be found in the INSTALL.md file.
 
 Any operating system with a recent Python3 installation should be ok.
 
-### Will you release a standalone Windows executable like the one made for Wapiti 2.3.0 ? ###
+### Is Wapiti still supported for Windows ###
 
-I'd like to but Microsoft make it so hard to actually doing it. py2exe and pyinstaller seems broken with latests Windows versions.
+Wapiti won't work out of the box on Microsoft Windows system, but you should be able to run it from inside a WSL environment.  
+See this link for more information about WSL: https://docs.microsoft.com/en-us/windows/wsl/
 
 ### Can I modify and share the software code ? ###
 
@@ -24,10 +25,9 @@ Sure as long as you respect the GPLv2 license.
 
 ### How do I execute Wapiti ? ###
 
-Wapiti is a console tool so it must be launched from a terminal (cmd.exe on Windows, Konsole or GnomeTerminal on Linux, etc)  
+Wapiti is a console tool so it must be launched from a terminal (Konsole or GnomeTerminal on Linux, etc)  
 If you installed Wapiti then the binary should be in your path. Otherwise you will have to launch it from the bin folder once the archive is uncompressed.  
-On Linux and OSX, just typing `wapiti` should work.  
-On Windows you will have to specify the interpreter (`python wapiti`).
+On Linux and OSX, just typing `wapiti` should work.
 
 ### Where can I get some help about options ? ###
 
@@ -41,7 +41,7 @@ On Windows you can use the command `chcp 65001` to change the codepage before us
 
 ### I found a bug. Where to report ? ###
 
-Please create an issue on https://sourceforge.net/p/wapiti/bugs/
+Please create an issue on https://github.com/wapiti-scanner/wapiti/issues
 
 ### Can I help the project ? ###
 
@@ -109,7 +109,7 @@ Don't hesitate to move to OWASP Zed Attack Proxy for in-depth pentesting.
 An HTTP endpoint is used for some modules in order to see if the target is vulnerable.  
 Such modules are currently XXE and SSRF. The endpoint is necessary to see if the target generates an external HTTP request.  
 The default endpoint is hosted at wapiti3.ovh so your computer and the target must be able to contact it to check vulnerability results.  
-You can set up your own endpoint, all required files can be found here : https://sourceforge.net/p/wapiti/git/ci/master/tree/endpoint/  
+You can set up your own endpoint, all required files can be found here : https://github.com/wapiti-scanner/wapiti/tree/master/endpoint  
 You will need URL rewriting to set up the endpoint.  
 Wapiti have several options that can be used to specify the endpoint's URL.
 
@@ -126,4 +126,4 @@ Crash reports are also sent to the wapiti3.ovh website so I can try to fix bugs.
 
 Yes you can follow me on Twitter @devl00p.  
 My website is http://devloop.users.sourceforge.net/  
-I write some CTF walkthrough. Articles are in french though.
+I write some CTF walkthrough. Articles are in French though.

@@ -18,7 +18,7 @@
     Version 2.3.1
     Fixed a bug in lswww if root url is not given complete.
     Fixed a bug in lswww with a call to BeautifulSoup made on non text files.
-    Fixed a bug that occured when verbosity = 2. Unicode error on stderr.
+    Fixed a bug that occurred when verbosity = 2. Unicode error on stderr.
 
 27/12/2009
 	Version 2.3.0
@@ -29,7 +29,7 @@
 	argument.
 	Fixed bug ID 2779441 "Python Version 2.5 required?"
 	Use an home made cookie library instead or urllib2's one.
-	Keep aditionnal informations on the webpages (headers + encoding)
+	Keep additional information on the webpages (headers + encoding)
 	Use BeautifulSoup to detect webpage encoding and handle parsing errors.
 	Fixed a bug when "a href" or "form action" have an empty string as value.
 	Better support of Unicode.

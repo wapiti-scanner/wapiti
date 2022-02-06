@@ -260,7 +260,7 @@ async def test_xss_uppercase_no_script():
 @pytest.mark.asyncio
 async def test_frame_src_escape():
     persister = AsyncMock()
-    request = Request("http://127.0.0.1:65081/frame_src_escape.php?url=https://wapiti.sourceforge.io/")
+    request = Request("http://127.0.0.1:65081/frame_src_escape.php?url=https://wapiti-scanner.github.io/")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}
@@ -279,7 +279,7 @@ async def test_frame_src_escape():
 @pytest.mark.asyncio
 async def test_frame_src_no_escape():
     persister = AsyncMock()
-    request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti.sourceforge.io/")
+    request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti-scanner.github.io/")
     request.path_id = 42
     crawler = AsyncCrawler("http://127.0.0.1:65081/")
     options = {"timeout": 10, "level": 2}

@@ -20,6 +20,7 @@ MSG_TECHNO_VERSIONED = _("The range for {0} is from {1} to {2}")
 Technology = str
 Version = str
 
+
 class ModuleHtp(Attack):
     """
     Identify web technologies used by the web server using the HashThePlanet database.
@@ -100,9 +101,8 @@ class ModuleHtp(Attack):
     async def finish(self):
         if self._db is None:
             return
+
         root_url = await self.persister.get_root_url()
-        truth_table: List[Version] = None
-        ranges_tables = None
 
         for technology, versions_list in self.tech_versions.items():
             # First we retrieve all the stored versions in the same order as they have been added to the database
@@ -125,9 +125,10 @@ class ModuleHtp(Attack):
             # We get the max range by sorting the ranges by descending order and retrieving the first value
             max_index = sorted(max_range, reverse=True)[0]
 
-            tech_info = {}
-            tech_info["name"] = technology
-            tech_info["versions"] = truth_table[min_index:max_index + 1]
+            tech_info = {
+                "name": technology,
+                "versions": truth_table[min_index:max_index + 1]
+            }
 
             await self.add_vuln_info(
                 category=WEB_SERVER_VERSIONED,
@@ -176,6 +177,7 @@ class ModuleHtp(Attack):
             logging.warning(_("Problem with local htp database."))
             logging.info(_("Downloading from the web..."))
             await self.update()
+
 
 def regexp(expr, item):
     reg = re.compile(expr)
