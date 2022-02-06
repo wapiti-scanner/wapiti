@@ -72,18 +72,6 @@ msgstr "CSRF token '{}' might be easy to predict"
 msgid "{0} {1} detected"
 msgstr "{0} {1} detected"
 
-#, python-brace-format
-msgid "The range for {0} is from {1} to {2}"
-msgstr "The range for {0} is from {1} to {2}"
-
-#, python-brace-format
-msgid "Error downloading htp database."
-msgstr ""
-
-#, python-brace-format
-msgid "Problem with local htp database."
-msgstr ""
-
 msgid "No Drupal Detected"
 msgstr "No Drupal Detected"
 
@@ -136,6 +124,19 @@ msgstr "HTTP status code changed from {0} to {1}"
 msgid "Source code:"
 msgstr "Source code:"
 
+#, python-brace-format
+msgid "The range for {0} is from {1} to {2}"
+msgstr "The range for {0} is from {1} to {2}"
+
+msgid "Error downloading htp database."
+msgstr "Error downloading htp database."
+
+msgid "Problem with local htp database."
+msgstr "Problem with local htp database."
+
+msgid "Downloading from the web..."
+msgstr "Downloading from the web..."
+
 msgid "Strict-Transport-Security is not set"
 msgstr "Strict-Transport-Security is not set"
 
@@ -160,11 +161,16 @@ msgstr "Checking X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Checking Strict-Transport-Security :"
 
+#, python-brace-format
 msgid "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 msgstr "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 
+#, python-brace-format
 msgid "URL {0} seems vulnerable to Log4Shell attack"
 msgstr "URL {0} seems vulnerable to Log4Shell attack"
+
+msgid "Error: {} is not a valid domain name"
+msgstr "Error: {} is not a valid domain name"
 
 msgid "Interesting methods allowed on {}: {}"
 msgstr "Interesting methods allowed on {}: {}"
@@ -174,9 +180,6 @@ msgstr "Error downloading nikto database."
 
 msgid "Problem with local nikto database."
 msgstr "Problem with local nikto database."
-
-msgid "Downloading from the web..."
-msgstr "Downloading from the web..."
 
 msgid "References:"
 msgstr "References:"
@@ -277,6 +280,7 @@ msgstr "Problem with local wapp database."
 msgid "No WordPress Detected"
 msgstr "No WordPress Detected"
 
+#, python-brace-format
 msgid "WordPress Version : {0}"
 msgstr "WordPress Version : {0}"
 
@@ -611,28 +615,32 @@ msgid "Log4Shell"
 msgstr "Log4Shell"
 
 msgid ""
-"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against "
-"attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages "
-"or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution "
-"is enabled."
+"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, "
+"and parameters do not protect against attacker controlled LDAP and other "
+"JNDI related endpoints. An attacker who can control log messages or log "
+"message parameters can execute arbitrary code loaded from LDAP servers when "
+"message lookup substitution is enabled."
 msgstr ""
-"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against "
-"attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages "
-"or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution "
-"is enabled."
+"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, "
+"and parameters do not protect against attacker controlled LDAP and other "
+"JNDI related endpoints. An attacker who can control log messages or log "
+"message parameters can execute arbitrary code loaded from LDAP servers when "
+"message lookup substitution is enabled."
 
 msgid ""
-"From log4j 2.15.0, this behavior has been disabled by default. "
-"In previous releases (>2.10) this behavior can be mitigated "
-"by setting system property \"log4j2.formatMsgNoLookups\" to \"true\" "
-"or it can be mitigated in prior releases (<2.10) by removing the JndiLookup class "
-"from the classpath (example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class)."
+"From log4j 2.15.0, this behavior has been disabled by default. In previous "
+"releases (>2.10) this behavior can be mitigated by setting system property "
+"\"log4j2.formatMsgNoLookups\" to \"true\" or it can be mitigated in prior "
+"releases (<2.10) by removing the JndiLookup class from the classpath "
+"(example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/"
+"JndiLookup.class)."
 msgstr ""
-"From log4j 2.15.0, this behavior has been disabled by default. "
-"In previous releases (>2.10) this behavior can be mitigated "
-"by setting system property \"log4j2.formatMsgNoLookups\" to \"true\" "
-"or it can be mitigated in prior releases (<2.10) by removing the JndiLookup class "
-"from the classpath (example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class)."
+"From log4j 2.15.0, this behavior has been disabled by default. In previous "
+"releases (>2.10) this behavior can be mitigated by setting system property "
+"\"log4j2.formatMsgNoLookups\" to \"true\" or it can be mitigated in prior "
+"releases (<2.10) by removing the JndiLookup class from the classpath "
+"(example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/"
+"JndiLookup.class)."
 
 msgid "HTTP Methods"
 msgstr "HTTP Methods"
@@ -675,6 +683,51 @@ msgid ""
 msgstr ""
 "Force all redirects to first go through a page notifying users that they are "
 "going off of your site, and have them click a link to confirm."
+
+msgid "Reflected Cross Site Scripting"
+msgstr "Reflected Cross Site Scripting"
+
+msgid "XSS"
+msgstr "XSS"
+
+msgid ""
+"Cross-site scripting (XSS) is a type of computer security vulnerability "
+"typically found in web applications which allow code injection by malicious "
+"web users into the web pages viewed by other users."
+msgstr ""
+"Cross-site scripting (XSS) is a type of computer security vulnerability "
+"typically found in web applications which allow code injection by malicious "
+"web users into the web pages viewed by other users."
+
+msgid "Examples of such code include HTML code and client-side scripts."
+msgstr "Examples of such code include HTML code and client-side scripts."
+
+msgid ""
+"The best way to protect a web application from XSS attacks is ensure that "
+"the application performs validation of all headers, cookies, query strings, "
+"form fields, and hidden fields."
+msgstr ""
+"The best way to protect a web application from XSS attacks is ensure that "
+"the application performs validation of all headers, cookies, query strings, "
+"form fields, and hidden fields."
+
+msgid ""
+"Encoding user supplied output in the server side can also defeat XSS "
+"vulnerabilities by preventing inserted scripts from being transmitted to "
+"users in an executable form."
+msgstr ""
+"Encoding user supplied output in the server side can also defeat XSS "
+"vulnerabilities by preventing inserted scripts from being transmitted to "
+"users in an executable form."
+
+msgid ""
+"Applications can gain significant protection from javascript based attacks "
+"by converting the following characters in all generated output to the "
+"appropriate HTML entity encoding:"
+msgstr ""
+"Applications can gain significant protection from javascript based attacks "
+"by converting the following characters in all generated output to the "
+"appropriate HTML entity encoding:"
 
 msgid "Resource consumption"
 msgstr "Resource consumption"
@@ -732,6 +785,20 @@ msgstr ""
 "database or even escalate his privileges on the system."
 
 msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+msgstr ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+
+msgid ""
 "To protect against SQL injection, user input must not directly be embedded "
 "in SQL statements."
 msgstr ""
@@ -744,6 +811,57 @@ msgid ""
 msgstr ""
 "Instead, user input must be escaped or filtered or parameterized statements "
 "must be used."
+
+msgid "TLS/SSL misconfigurations"
+msgstr "TLS/SSL misconfigurations"
+
+msgid "SSL misconfigurations"
+msgstr "SSL misconfigurations"
+
+msgid ""
+"The TLS protocol aims primarily to provide privacy and data integrity "
+"between two or more communicating computer applications."
+msgstr ""
+"The TLS protocol aims primarily to provide privacy and data integrity "
+"between two or more communicating computer applications."
+
+msgid ""
+"Over the years numerous vulnerabilities have been discovered in some SSL/TLS "
+"version or specific ciphers making the integrity of the communications at "
+"risk (eavesdropping, alteration...)"
+msgstr ""
+"Over the years numerous vulnerabilities have been discovered in some SSL/TLS "
+"version or specific ciphers making the integrity of the communications at "
+"risk (eavesdropping, alteration...)"
+
+msgid ""
+"To protect against SSL/TLS vulnerabilities make sure that deprecated "
+"versions of the protocol are disabled."
+msgstr ""
+"To protect against SSL/TLS vulnerabilities make sure that deprecated "
+"versions of the protocol are disabled."
+
+msgid ""
+"Refer to up-to-date recommendations to only allow modern versions of TLS "
+"with Perfect Forward Secrecy."
+msgstr ""
+"Refer to up-to-date recommendations to only allow modern versions of TLS "
+"with Perfect Forward Secrecy."
+
+msgid "Insecure"
+msgstr "Insecure"
+
+msgid "Weak"
+msgstr "Weak"
+
+msgid "Secure"
+msgstr "Secure"
+
+msgid "Recommended"
+msgstr "Recommended"
+
+msgid "Unknown"
+msgstr "Unknown"
 
 msgid "Server Side Request Forgery"
 msgstr "Server Side Request Forgery"
@@ -767,6 +885,9 @@ msgstr ""
 "Every URI received by the web application should be checked, especially "
 "scheme and hostname. A whitelist should be used."
 
+msgid "Stored Cross Site Scripting"
+msgstr "Stored Cross Site Scripting"
+
 msgid "Subdomain takeover"
 msgstr "Subdomain takeover"
 
@@ -789,68 +910,6 @@ msgstr "Blind SQL Injection"
 
 msgid "Blind SQLI"
 msgstr "Blind SQLI"
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-
-msgid "Reflected Cross Site Scripting"
-msgstr "Reflected Cross Site Scripting"
-
-msgid "Stored Cross Site Scripting"
-msgstr "Stored Cross Site Scripting"
-
-msgid "XSS"
-msgstr "XSS"
-
-msgid ""
-"Cross-site scripting (XSS) is a type of computer security vulnerability "
-"typically found in web applications which allow code injection by malicious "
-"web users into the web pages viewed by other users."
-msgstr ""
-"Cross-site scripting (XSS) is a type of computer security vulnerability "
-"typically found in web applications which allow code injection by malicious "
-"web users into the web pages viewed by other users."
-
-msgid "Examples of such code include HTML code and client-side scripts."
-msgstr "Examples of such code include HTML code and client-side scripts."
-
-msgid ""
-"The best way to protect a web application from XSS attacks is ensure that "
-"the application performs validation of all headers, cookies, query strings, "
-"form fields, and hidden fields."
-msgstr ""
-"The best way to protect a web application from XSS attacks is ensure that "
-"the application performs validation of all headers, cookies, query strings, "
-"form fields, and hidden fields."
-
-msgid ""
-"Encoding user supplied output in the server side can also defeat XSS "
-"vulnerabilities by preventing inserted scripts from being transmitted to "
-"users in an executable form."
-msgstr ""
-"Encoding user supplied output in the server side can also defeat XSS "
-"vulnerabilities by preventing inserted scripts from being transmitted to "
-"users in an executable form."
-
-msgid ""
-"Applications can gain significant protection from javascript based attacks "
-"by converting the following characters in all generated output to the "
-"appropriate HTML entity encoding:"
-msgstr ""
-"Applications can gain significant protection from javascript based attacks "
-"by converting the following characters in all generated output to the "
-"appropriate HTML entity encoding:"
 
 msgid "XML External Entity"
 msgstr "XML External Entity"
@@ -1014,16 +1073,20 @@ msgid ""
 msgstr ""
 "Waiting for all payload tasks to finish for current resource, please wait."
 
-msgid "[*] Loading modules:"
-msgstr "[*] Loading modules:"
-
-#, python-brace-format
-msgid "[!] Could not find module {0}"
-msgstr "[!] Could not find module {0}"
-
 #, python-brace-format
 msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Unable to find a module named {0}"
+
+msgid "[*] Existing modules:"
+msgstr "[*] Existing modules:"
+
+#, python-brace-format
+msgid "[!] Unable to import module {0}"
+msgstr "[!] Unable to import module {0}"
+
+#, python-brace-format
+msgid "[!] Module {0} seems broken and will be skipped"
+msgstr "[!] Module {0} seems broken and will be skipped"
 
 #, python-brace-format
 msgid "Updating module {0}"
@@ -1095,9 +1158,6 @@ msgstr "A report has been generated in the file {0}"
 #, python-brace-format
 msgid "Open {0} with a browser to see this report."
 msgstr "Open {0} with a browser to see this report."
-
-msgid "Error: {} is not a valid domain name"
-msgstr "Error: {} is not a valid domain name"
 
 msgid "Error: {} must not contain params, query or fragment!"
 msgstr "Error: {} must not contain params, query or fragment!"
@@ -1241,6 +1301,18 @@ msgstr ""
 "Number of concurrent tasks to use for the exploration (crawling) of the "
 "target."
 
+msgid "Url serving as endpoint for target"
+msgstr "Url serving as endpoint for target"
+
+msgid "Url serving as endpoint for attacker"
+msgstr "Url serving as endpoint for attacker"
+
+msgid "Url serving as endpoint for both attacker and target"
+msgstr "Url serving as endpoint for both attacker and target"
+
+msgid "Domain serving as DNS endpoint for Log4Shell attack"
+msgstr "Domain serving as DNS endpoint for Log4Shell attack"
+
 msgid "Set timeout for requests"
 msgstr "Set timeout for requests"
 
@@ -1253,6 +1325,9 @@ msgstr "Colorize output"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 
+msgid "Output log file"
+msgstr "Output log file"
+
 msgid "Set output format. Supported:"
 msgstr "Set output format. Supported:"
 
@@ -1261,21 +1336,6 @@ msgstr "Default is html."
 
 msgid "Output file or folder"
 msgstr "Output file or folder"
-
-msgid "Output log file"
-msgstr "Output log file"
-
-msgid "Url serving as endpoint for target"
-msgstr "Url serving as endpoint for target"
-
-msgid "Url serving as endpoint for attacker"
-msgstr "Url serving as endpoint for attacker"
-
-msgid "Domain serving as DNS endpoint for Log4Shell attack"
-msgstr "Domain serving as DNS endpoint for Log4Shell attack"
-
-msgid "Url serving as endpoint for both attacker and target"
-msgstr "Url serving as endpoint for both attacker and target"
 
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Don't send automatic bug report when an attack module fails"
@@ -1389,3 +1449,6 @@ msgstr "Summary of anomalies :"
 
 msgid "Summary of additionals :"
 msgstr "Summary of additionals :"
+
+msgid "Authentication :"
+msgstr "Authentication :"

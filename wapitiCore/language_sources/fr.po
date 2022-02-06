@@ -72,18 +72,6 @@ msgstr "Le jeton CSRF '{}' pourrait être simple à prédire"
 msgid "{0} {1} detected"
 msgstr "{0} {1} détecté"
 
-#, python-brace-format
-msgid "The range for {0} is from {1} to {2}"
-msgstr "{0} a été détecté de la version {1} à {2}"
-
-#, python-brace-format
-msgid "Error downloading htp database."
-msgstr "Erreur de téléchargement de la base de données Hash The Planet."
-
-#, python-brace-format
-msgid "Problem with local htp database."
-msgstr "Un problème est survenu avec la base de données Hash The Planet locale"
-
 msgid "No Drupal Detected"
 msgstr "Drupal non détecté"
 
@@ -136,6 +124,19 @@ msgstr "Le code de statut HTTP a changé de {0} à {1}"
 msgid "Source code:"
 msgstr "Code source :"
 
+#, python-brace-format
+msgid "The range for {0} is from {1} to {2}"
+msgstr "{0} a été détecté de la version {1} à {2}"
+
+msgid "Error downloading htp database."
+msgstr "Erreur de téléchargement de la base de données Hash The Planet."
+
+msgid "Problem with local htp database."
+msgstr "Un problème est survenu avec la base de données Hash The Planet locale"
+
+msgid "Downloading from the web..."
+msgstr "Téléchargement depuis le web..."
+
 msgid "Strict-Transport-Security is not set"
 msgstr "L'entête Strict-Transport-Security n'est pas défini"
 
@@ -160,11 +161,17 @@ msgstr "Vérification de X-Content-Type-Options :"
 msgid "Checking Strict-Transport-Security :"
 msgstr "Vérification de Strict-Transport-Security :"
 
+#, python-brace-format
 msgid "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
-msgstr "L'URL {0} semble vulnérable à l'attaque Log4Shell en utilisant le {1} {2}"
+msgstr ""
+"L'URL {0} semble vulnérable à l'attaque Log4Shell en utilisant le {1} {2}"
 
+#, python-brace-format
 msgid "URL {0} seems vulnerable to Log4Shell attack"
 msgstr "L'URL {0} semble vulnérable à l'attaque Log4Shell"
+
+msgid "Error: {} is not a valid domain name"
+msgstr "Erreur: {} n'est pas un nom de domaine valide"
 
 msgid "Interesting methods allowed on {}: {}"
 msgstr "Méthodes intéressantes autorisées sur {} : {}"
@@ -174,9 +181,6 @@ msgstr "Echec du téléchargement de la base de données Nikto."
 
 msgid "Problem with local nikto database."
 msgstr "Un problème est survenu avec la base de données nikto locale"
-
-msgid "Downloading from the web..."
-msgstr "Téléchargement depuis le web..."
 
 msgid "References:"
 msgstr "Références"
@@ -282,6 +286,7 @@ msgstr "Un problème est survenu avec la base de données wapp locale"
 msgid "No WordPress Detected"
 msgstr "WordPress non détecté"
 
+#, python-brace-format
 msgid "WordPress Version : {0}"
 msgstr "Version de WordPress : {0}"
 
@@ -652,28 +657,34 @@ msgid "Log4Shell"
 msgstr ""
 
 msgid ""
-"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against "
-"attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages "
-"or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution "
-"is enabled."
+"Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, "
+"and parameters do not protect against attacker controlled LDAP and other "
+"JNDI related endpoints. An attacker who can control log messages or log "
+"message parameters can execute arbitrary code loaded from LDAP servers when "
+"message lookup substitution is enabled."
 msgstr ""
-"Apache Log4j2 <=2.14.1 Les fonctionnalités de JNDI utilisées dans la configuration, les messages de journal, "
-"et les paramètres ne protègent pas contre un attaquant contrôllant LDAP ou d'autre points de terminaison liés à JNDI. "
-"Un attaquant qui peut contrôler les messages de journal ou les paramètres de message de journal peuvent exécuter du "
-"code arbitraire chargé à partir de serveurs LDAP quand la substitution de recherche de message est activé"
+"Apache Log4j2 <=2.14.1 Les fonctionnalités de JNDI utilisées dans la "
+"configuration, les messages de journal, et les paramètres ne protègent pas "
+"contre un attaquant contrôllant LDAP ou d'autre points de terminaison liés à "
+"JNDI. Un attaquant qui peut contrôler les messages de journal ou les "
+"paramètres de message de journal peuvent exécuter du code arbitraire chargé "
+"à partir de serveurs LDAP quand la substitution de recherche de message est "
+"activé"
 
 msgid ""
-"From log4j 2.15.0, this behavior has been disabled by default. "
-"In previous releases (>2.10) this behavior can be mitigated "
-"by setting system property \"log4j2.formatMsgNoLookups\" to \"true\" "
-"or it can be mitigated in prior releases (<2.10) by removing the JndiLookup class "
-"from the classpath (example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class)."
+"From log4j 2.15.0, this behavior has been disabled by default. In previous "
+"releases (>2.10) this behavior can be mitigated by setting system property "
+"\"log4j2.formatMsgNoLookups\" to \"true\" or it can be mitigated in prior "
+"releases (<2.10) by removing the JndiLookup class from the classpath "
+"(example: zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/"
+"JndiLookup.class)."
 msgstr ""
-"À partir de log4j 2.15.0, ce comportement a été désactivé par défaut. "
-"Dans les versions précédentes (>2.10), ce comportement peut être atténué "
-"en définissant la propriété système \"log4j2.formatMsgNoLookups\" sur \"true\" "
-"ou cela peut être atténué dans les versions précédentes (<2.10) en supprimant la classe JndiLookup "
-"à partir du chemin de classe (exemple : zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class)."
+"À partir de log4j 2.15.0, ce comportement a été désactivé par défaut. Dans "
+"les versions précédentes (>2.10), ce comportement peut être atténué en "
+"définissant la propriété système \"log4j2.formatMsgNoLookups\" sur \"true\" "
+"ou cela peut être atténué dans les versions précédentes (<2.10) en "
+"supprimant la classe JndiLookup à partir du chemin de classe (exemple : zip -"
+"q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class)."
 
 msgid "HTTP Methods"
 msgstr "Méthodes HTTP"
@@ -715,6 +726,51 @@ msgid ""
 msgstr ""
 "La page chargée de la redirection devrait avertir l'utilisateur de la "
 "redirection et demander sa confirmation via un bouton."
+
+msgid "Reflected Cross Site Scripting"
+msgstr "Cross Site Scripting réfléchi"
+
+msgid "XSS"
+msgstr "XSS"
+
+msgid ""
+"Cross-site scripting (XSS) is a type of computer security vulnerability "
+"typically found in web applications which allow code injection by malicious "
+"web users into the web pages viewed by other users."
+msgstr ""
+"Le Cross-site scripting (XSS) est une catégorie de vulnérabilités web qui "
+"permet d'exécuter du code dans le navigateur des visiteurs du site."
+
+msgid "Examples of such code include HTML code and client-side scripts."
+msgstr ""
+"Ce type de code peut être du code HTML ou du code exécuté par le navigateur "
+"(généralement Javascript)."
+
+msgid ""
+"The best way to protect a web application from XSS attacks is ensure that "
+"the application performs validation of all headers, cookies, query strings, "
+"form fields, and hidden fields."
+msgstr ""
+"Afin de se prémunir au mieu de ce type d'attaque il faut valider "
+"minutieusement toutes les données reçues via paramètres, champs de "
+"formulaires, cookies, entête etc."
+
+msgid ""
+"Encoding user supplied output in the server side can also defeat XSS "
+"vulnerabilities by preventing inserted scripts from being transmitted to "
+"users in an executable form."
+msgstr ""
+"Les données destinées à être affichées dans la navigateur des utilisateurs "
+"doivent être systématiquement encodées pour empècher leur interprétation par "
+"le navigateur."
+
+msgid ""
+"Applications can gain significant protection from javascript based attacks "
+"by converting the following characters in all generated output to the "
+"appropriate HTML entity encoding:"
+msgstr ""
+"Les caractères ayant une signification particulière en HTML doivent être "
+"remplacés par leur code d'entité HTML."
 
 msgid "Resource consumption"
 msgstr "Consommation anormale de ressource"
@@ -775,6 +831,21 @@ msgstr ""
 "ses privilèges sur le système."
 
 msgid ""
+"Blind SQL injection is a technique that exploits a vulnerability occurring "
+"in the database of an application."
+msgstr ""
+"Tout comme les Vulnérabilités d'injection SQL classiques, les injections SQL "
+"en aveugle permettent à un attaquant d'altérer les requêtes normalement "
+"exécutées sur la base de données."
+
+msgid ""
+"This kind of vulnerability is harder to detect than basic SQL injections "
+"because no error message will be displayed on the webpage."
+msgstr ""
+"Ce type de vulnérabilité est plus difficile à détecter en raison de "
+"l'absence de messages d'erreur renvoyés par l'application web."
+
+msgid ""
 "To protect against SQL injection, user input must not directly be embedded "
 "in SQL statements."
 msgstr ""
@@ -788,6 +859,56 @@ msgid ""
 msgstr ""
 "A la place elles doivent faire l'objet de vérifications (filtres, "
 "échappements) approfondies."
+
+msgid "TLS/SSL misconfigurations"
+msgstr "Mauvaise configuration TLS/SSL"
+
+msgid "SSL misconfigurations"
+msgstr "Mauvaise configuration SSL"
+
+msgid ""
+"The TLS protocol aims primarily to provide privacy and data integrity "
+"between two or more communicating computer applications."
+msgstr ""
+"Le protocole TLS vise principalement à assurer la confidentialité et l'intégrité des données "
+"entre plusieurs applications informatiques communicantes."
+
+msgid ""
+"Over the years numerous vulnerabilities have been discovered in some SSL/TLS "
+"version or specific ciphers making the integrity of the communications at "
+"risk (eavesdropping, alteration...)"
+msgstr ""
+"Au fil des années de nombreuses vulnérabilités ont été découvertes touchant des versions de SSL/TLS "
+"ou des cryptosystèmes spécifiques mettant à mal l'intégrité des communications (altération, espionnage, ...)"
+
+msgid ""
+"To protect against SSL/TLS vulnerabilities make sure that deprecated "
+"versions of the protocol are disabled."
+msgstr ""
+"Pour vous protéger des vulnérabilités SSL/TLS assurez vous que les protocoles ou leurs versions obsolètes "
+"soient désactivées."
+
+msgid ""
+"Refer to up-to-date recommendations to only allow modern versions of TLS "
+"with Perfect Forward Secrecy."
+msgstr ""
+"Veuillez vous référer aux dernières recommandations en matière de sécurité afin de n'activer que les versions "
+"modernes de TLS supportant la confidentialité persistante."
+
+msgid "Insecure"
+msgstr "Critique"
+
+msgid "Weak"
+msgstr "Faible"
+
+msgid "Secure"
+msgstr "Sécurisé"
+
+msgid "Recommended"
+msgstr "Recommandé"
+
+msgid "Unknown"
+msgstr "Inconnu"
 
 msgid "Server Side Request Forgery"
 msgstr "Server Side Request Forgery"
@@ -811,6 +932,9 @@ msgstr ""
 "particulier le protocole et le nom d'hôte. L'utilisation d'une whitelist est "
 "conseillée."
 
+msgid "Stored Cross Site Scripting"
+msgstr "Cross Site Scripting stocké"
+
 msgid "Subdomain takeover"
 msgstr "Prise de contrôle de sous-domaine"
 
@@ -833,69 +957,6 @@ msgstr "Injection SQL en aveugle"
 
 msgid "Blind SQLI"
 msgstr "Injection SQL en aveugle"
-
-msgid ""
-"Blind SQL injection is a technique that exploits a vulnerability occurring "
-"in the database of an application."
-msgstr ""
-"Tout comme les Vulnérabilités d'injection SQL classiques, les injections SQL "
-"en aveugle permettent à un attaquant d'altérer les requêtes normalement "
-"exécutées sur la base de données."
-
-msgid ""
-"This kind of vulnerability is harder to detect than basic SQL injections "
-"because no error message will be displayed on the webpage."
-msgstr ""
-"Ce type de vulnérabilité est plus difficile à détecter en raison de "
-"l'absence de messages d'erreur renvoyés par l'application web."
-
-msgid "Reflected Cross Site Scripting"
-msgstr ""
-
-msgid "Stored Cross Site Scripting"
-msgstr ""
-
-msgid "XSS"
-msgstr "XSS"
-
-msgid ""
-"Cross-site scripting (XSS) is a type of computer security vulnerability "
-"typically found in web applications which allow code injection by malicious "
-"web users into the web pages viewed by other users."
-msgstr ""
-"Le Cross-site scripting (XSS) est une catégorie de vulnérabilités web qui "
-"permet d'exécuter du code dans le navigateur des visiteurs du site."
-
-msgid "Examples of such code include HTML code and client-side scripts."
-msgstr ""
-"Ce type de code peut être du code HTML ou du code exécuté par le navigateur "
-"(généralement Javascript)."
-
-msgid ""
-"The best way to protect a web application from XSS attacks is ensure that "
-"the application performs validation of all headers, cookies, query strings, "
-"form fields, and hidden fields."
-msgstr ""
-"Afin de se prémunir au mieu de ce type d'attaque il faut valider "
-"minutieusement toutes les données reçues via paramètres, champs de "
-"formulaires, cookies, entête etc."
-
-msgid ""
-"Encoding user supplied output in the server side can also defeat XSS "
-"vulnerabilities by preventing inserted scripts from being transmitted to "
-"users in an executable form."
-msgstr ""
-"Les données destinées à être affichées dans la navigateur des utilisateurs "
-"doivent être systématiquement encodées pour empècher leur interprétation par "
-"le navigateur."
-
-msgid ""
-"Applications can gain significant protection from javascript based attacks "
-"by converting the following characters in all generated output to the "
-"appropriate HTML entity encoding:"
-msgstr ""
-"Les caractères ayant une signification particulière en HTML doivent être "
-"remplacés par leur code d'entité HTML."
 
 msgid "XML External Entity"
 msgstr "XML External Entity"
@@ -1060,16 +1121,20 @@ msgid ""
 msgstr ""
 "Veuillez patienter pendant que les taches de payloads en cours se terminent."
 
-msgid "[*] Loading modules:"
-msgstr "[*] Chargement des modules :"
-
-#, python-brace-format
-msgid "[!] Could not find module {0}"
-msgstr "[!] Impossible de trouver le module {0}"
-
 #, python-brace-format
 msgid "[!] Unable to find a module named {0}"
 msgstr "[!] Impossible de trouver le module {0}"
+
+msgid "[*] Existing modules:"
+msgstr "[*] Modules existants:"
+
+#, python-brace-format
+msgid "[!] Unable to import module {0}"
+msgstr "[!] Impossible d'importer le module {0}"
+
+#, python-brace-format
+msgid "[!] Module {0} seems broken and will be skipped"
+msgstr "[!] Le module {0} semble cassé et sera ignoré"
 
 #, python-brace-format
 msgid "Updating module {0}"
@@ -1141,9 +1206,6 @@ msgstr "Un rapport a été généré dans le fichier {0}"
 #, python-brace-format
 msgid "Open {0} with a browser to see this report."
 msgstr "Ouvrez {0} dans un navigateur pour voir ce rapport."
-
-msgid "Error: {} is not a valid domain name"
-msgstr "Erreur: {} n'est pas un nom de domaine valide"
 
 msgid "Error: {} must not contain params, query or fragment!"
 msgstr ""
@@ -1306,6 +1368,19 @@ msgstr ""
 "Nombre de taches concurrentes à utiliser pour l'exploration (crawling) du "
 "site web."
 
+msgid "Url serving as endpoint for target"
+msgstr "Url servant d'enpoint côté cible"
+
+msgid "Url serving as endpoint for attacker"
+msgstr "Url servant d'enpoint côté attaquant"
+
+msgid "Url serving as endpoint for both attacker and target"
+msgstr "Url servant d'enpoint à la fois pour l'attaquant et la cible"
+
+msgid "Domain serving as DNS endpoint for Log4Shell attack"
+msgstr ""
+"Le nom de domaine à utiliser comme endpoint DNS pour l'attaque Log4Shell"
+
 msgid "Set timeout for requests"
 msgstr "Définir le temps d'attente pour les requêtes"
 
@@ -1318,6 +1393,9 @@ msgstr "Colorier l'affichage"
 msgid "Set verbosity level (0: quiet, 1: normal, 2: verbose)"
 msgstr "Définir le niveau de verbosité (0: silencieux, 1: normal, 2: bavard)"
 
+msgid "Output log file"
+msgstr "Fichier de log de sortie"
+
 msgid "Set output format. Supported:"
 msgstr "Définir le format de sortie. Formats supportés:"
 
@@ -1326,21 +1404,6 @@ msgstr "Html est le format par défaut."
 
 msgid "Output file or folder"
 msgstr "Fichier ou dossier de destination"
-
-msgid "Output log file"
-msgstr "Fichier de log de sortie"
-
-msgid "Url serving as endpoint for target"
-msgstr "Url servant d'enpoint côté cible"
-
-msgid "Url serving as endpoint for attacker"
-msgstr "Url servant d'enpoint côté attaquant"
-
-msgid "Domain serving as DNS endpoint for Log4Shell attack"
-msgstr "Le nom de domaine à utiliser comme endpoint DNS pour l'attaque Log4Shell"
-
-msgid "Url serving as endpoint for both attacker and target"
-msgstr "Url servant d'enpoint à la fois pour l'attaquant et la cible"
 
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Ne pas envoyer de rapport de bugs quand un module d'attaque échoue"
@@ -1456,3 +1519,6 @@ msgstr "Résumé des anomalies :"
 
 msgid "Summary of additionals :"
 msgstr "Résumé des informations complémentaires :"
+
+msgid "Authentication :"
+msgstr "Authentification :"
