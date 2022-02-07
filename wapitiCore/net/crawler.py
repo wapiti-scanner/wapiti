@@ -28,6 +28,7 @@ import math
 import functools
 from typing import Tuple, List
 import asyncio
+import ssl
 
 # Third-parties
 import httpx
@@ -201,11 +202,18 @@ class AsyncCrawler:
     def client(self):
         # Construct or reconstruct an AsyncClient instance using parameters
         if self._client is None:
+            ssl_context = httpx.create_ssl_context()
+            ssl_context.check_hostname = self._secure
+            ssl_context.verify_mode = ssl.CERT_REQUIRED if self._secure else ssl.CERT_NONE
+
+            # Allows dead protocols like SSL and TLS1
+            ssl_context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+
             self._client = httpx.AsyncClient(
                 auth=self._auth,
                 headers=self._headers,
                 cookies=self._cookies,
-                verify=self._secure,
+                verify=ssl_context,
                 proxies=self._proxies,
                 timeout=self._timeout,
                 event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None,
@@ -388,9 +396,8 @@ class AsyncCrawler:
         for link in page.links:
             if self.is_in_scope(link) is False:
                 continue
-            element = re.search(DISCONNECT_REGEX, link)
 
-            if element is not None:
+            if re.search(DISCONNECT_REGEX, link) is not None:
                 disconnect_urls.append(page.make_absolute(link))
         return disconnect_urls
 
@@ -826,9 +833,6 @@ class Explorer:
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, []
-            # except SSLError:
-            #     print(_("[!] SSL/TLS error occurred with URL"), resource_url)
-            #     return False, []
             # TODO: what to do of connection errors ? sleep a while before retrying ?
             except ConnectionError:
                 logging.error(_("[!] Connection error with URL"), resource_url)
@@ -903,7 +907,6 @@ class Explorer:
                 # Concurrent tasks are limited through the use of the semaphore BUT we don't want the to_explore
                 # queue to be empty everytime (as we may need to extract remaining URLs) and overload the event loop
                 # with pending tasks.
-                # There may be more suitable way to do this though.
                 if len(task_to_request) > self._max_tasks:
                     break
 
