@@ -70,21 +70,26 @@ class ModuleWpEnum(Attack):
                 continue
             detected_version = version.group(1)
             break
-        if detected_version is None:
-            log_blue(
-                MSG_WP_VERSION,
-                "N/A"
-            )
-        else:
-            log_blue(
-                MSG_WP_VERSION,
-                detected_version
-            )
+
+        log_blue(
+            MSG_WP_VERSION,
+            detected_version or "N/A"
+        )
+        info_content = {"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}
+
+        if detected_version:
+            info_content["versions"].append(detected_version)
             await self.add_vuln_info(
                 category=WEB_APP_VERSIONED,
                 request=req,
-                info=json.dumps({"name": "WordPress", "versions": [detected_version], "categories": ["CMS", "Blogs"]})
+                info=json.dumps(info_content)
             )
+
+        await self.add_addition(
+            category=TECHNO_DETECTED,
+            request=req,
+            info=json.dumps(info_content)
+        )
 
     async def detect_plugin(self, url):
         for plugin in self.get_plugin():
@@ -107,7 +112,8 @@ class ModuleWpEnum(Attack):
                 plugin_detected = {
                     "name": plugin,
                     "versions": [version],
-                    "categories": ["WordPress plugins"]
+                    "categories": ["WordPress plugins"],
+                    "groups": ['Add-ons']
                 }
 
                 log_blue(
@@ -126,7 +132,8 @@ class ModuleWpEnum(Attack):
                 plugin_detected = {
                     "name": plugin,
                     "versions": [""],
-                    "categories": ["WordPress plugins"]
+                    "categories": ["WordPress plugins"],
+                    "groups": ['Add-ons']
                 }
                 log_blue(
                     MSG_TECHNO_VERSIONED,
@@ -157,7 +164,8 @@ class ModuleWpEnum(Attack):
                 theme_detected = {
                     "name": theme,
                     "versions": [version],
-                    "categories": ["WordPress themes"]
+                    "categories": ["WordPress themes"],
+                    "groups": ['Add-ons']
                 }
                 log_blue(
                     MSG_TECHNO_VERSIONED,
@@ -174,7 +182,8 @@ class ModuleWpEnum(Attack):
                 theme_detected = {
                     "name": theme,
                     "versions": [""],
-                    "categories": ["WordPress themes"]
+                    "categories": ["WordPress themes"],
+                    "groups": ['Add-ons']
                 }
                 log_blue(
                     MSG_TECHNO_VERSIONED,

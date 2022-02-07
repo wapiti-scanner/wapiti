@@ -10,6 +10,7 @@ import pytest
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import ModuleDrupalEnum
+from wapitiCore.language.vulnerability import _
 from tests import AsyncMock
 
 
@@ -77,10 +78,16 @@ async def test_version_detected():
 
     await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_count == 2
     assert persister.add_payload.call_args_list[0][1]["module"] == "drupal_enum"
+    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web application framework")
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"]}'
+        '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+    )
+    assert persister.add_payload.call_args_list[1][1]["module"] == "drupal_enum"
+    assert persister.add_payload.call_args_list[1][1]["category"] == _("Fingerprint web technology")
+    assert persister.add_payload.call_args_list[1][1]["info"] == (
+        '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
     )
     await crawler.close()
 
@@ -117,9 +124,12 @@ async def test_multi_versions_detected():
 
     await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
+    assert persister.add_payload.call_count == 2
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]}'
+        '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+    )
+    assert persister.add_payload.call_args_list[1][1]["info"] == (
+        '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
     )
     await crawler.close()
 
@@ -158,6 +168,6 @@ async def test_version_not_detected():
 
     assert persister.add_payload.call_count == 1
     assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"name": "Drupal", "versions": [""], "categories": ["CMS Drupal"]}'
+        '{"name": "Drupal", "versions": [], "categories": ["CMS Drupal"], "groups": ["Content"]}'
     )
     await crawler.close()
