@@ -446,8 +446,10 @@ class AsyncCrawler:
 
         except ConnectionError:
             logging.error(_("[!] Connection error with URL"), auth_url)
+            return False, {}, []
         except httpx.RequestError as error:
             logging.error(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
+            return False, {}, []
 
     @retry(delay=1, times=3)
     async def async_get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
