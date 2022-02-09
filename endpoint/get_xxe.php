@@ -38,6 +38,12 @@ if (strlen($session_id) ==6 && ctype_alnum($session_id))
             case 2:
                 $payload = "windows";
                 break;
+            case 3:
+                $payload = "javalin";
+                break;
+            case 4:
+                $payload = "javawin";
+                break;
             default:
                 $payload = "unknown";
         }
