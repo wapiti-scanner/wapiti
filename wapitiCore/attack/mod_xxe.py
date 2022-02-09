@@ -362,17 +362,24 @@ class ModuleXxe(Attack):
                             parameter
                         )
 
-                    more_infos = _(
-                        "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
-                        "Received data can be seen at {3}."
-                    ).format(
-                        request_size,
-                        request_date,
-                        request_ip,
-                        request_url
-                    )
+                    if not request_size:
+                        # Overwrite the message as the full exploit chain failed
+                        vuln_message = _(
+                            "The target reached the DTD file on the endpoint but the exploitation didn't succeed."
+                        )
+                    else:
+                        # Exploitation succeed, we have some data
+                        more_infos = _(
+                            "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
+                            "Received data can be seen at {3}."
+                        ).format(
+                            request_size,
+                            request_date,
+                            request_ip,
+                            request_url
+                        )
 
-                    vuln_message += "\n" + more_infos
+                        vuln_message += "\n" + more_infos
 
                     # placeholder if shit happens
                     payload = (
@@ -417,7 +424,14 @@ class ModuleXxe(Attack):
                         )
                         mutated_request, __, __, __ = next(mutator.mutate(original_request))
 
-                    await self.add_vuln_high(
+                    if request_size:
+                        add_vuln_method = self.add_vuln_high
+                        log_method = log_red
+                    else:
+                        add_vuln_method = self.add_vuln_medium
+                        log_method = log_orange
+
+                    await add_vuln_method(
                         request_id=original_request.path_id,
                         category=NAME,
                         request=mutated_request,
@@ -426,8 +440,8 @@ class ModuleXxe(Attack):
                         wstg=WSTG_CODE
                     )
 
-                    log_red("---")
-                    log_red(vuln_message)
-                    log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
-                    log_red("---")
+                    log_method("---")
+                    log_method(vuln_message)
+                    log_method(Messages.MSG_EVIL_REQUEST)
+                    log_method(mutated_request.http_repr())
+                    log_method("---")

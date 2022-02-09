@@ -15,10 +15,15 @@ if (!ctype_digit($path_id)) exit();
 if (!ctype_xdigit($hex_param)) exit();
 if (!ctype_digit($payload_num)) exit();
 if (!strlen($data)) exit();
-$data = base64_decode($data);
+
+if ($payload_num < 3) {
+    // those are PHP payloads using a filter to encode the data in base64
+    $data = base64_decode($data);
+}
+
 
 $time = time();
 $directory = "./xxe_data/$session_id/$path_id/$hex_param/";
-mkdir($directory, 0777, true);
+if (!is_dir($directory)) mkdir($directory, 0777, true);
 file_put_contents("$directory/$time-$payload_num-$ip.txt", $data, FILE_APPEND);
 ?>
