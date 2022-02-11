@@ -42,6 +42,7 @@ def level_to_emoji(level: int) -> str:
         return "🟡"
     if level == INFO_LEVEL:
         return "🕵️"
+    return ""
 
 
 class HTMLReportGenerator(JSONReportGenerator):
