@@ -28,6 +28,20 @@ from pkg_resources import resource_filename
 from mako.template import Template
 
 from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
+
+
+def level_to_emoji(level: int) -> str:
+    if level == CRITICAL_LEVEL:
+        return "🔥"
+    if level == HIGH_LEVEL:
+        return "🔴"
+    if level == MEDIUM_LEVEL:
+        return "🟠"
+    if level == LOW_LEVEL:
+        return "🟡"
+    if level == INFO_LEVEL:
+        return "🕵️"
 
 
 class HTMLReportGenerator(JSONReportGenerator):
@@ -89,7 +103,8 @@ class HTMLReportGenerator(JSONReportGenerator):
                     vulnerabilities=self._vulns,
                     anomalies=self._anomalies,
                     additionals=self._additionals,
-                    flaws=self._flaw_types
+                    flaws=self._flaw_types,
+                    level_to_emoji=level_to_emoji,
                 )
             )
 

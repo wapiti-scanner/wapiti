@@ -87,7 +87,7 @@
                 </dl>
 
                     % for j, vulnerability in enumerate(vulnerabilities[vuln_name]):
-                        <h4>Vulnerability found in ${vulnerability["path"] | h}</h4>
+                        <h4>${level_to_emoji(vulnerability["level"])} Vulnerability found in ${vulnerability["path"] | h}</h4>
                         <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
                             <a href="#tab-vuln-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-vuln-${i}-${j}-2">HTTP Request</a>
@@ -128,7 +128,7 @@
                 </dl>
 
                     % for j, anomaly in enumerate(anomalies[anomaly_name]):
-                        <h4>Anomaly found in ${anomaly["path"] | h}</h4>
+                        <h4>🤕 Anomaly found in ${anomaly["path"] | h}</h4>
                         <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
                             <a href="#tab-anom-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-anom-${i}-${j}-2">HTTP Request</a>
@@ -169,7 +169,7 @@
                 </dl>
 
                     % for j, additional in enumerate(additionals[additional_name]):
-                        <h4>Additional found in ${additional["path"] | h}</h4>
+                        <h4>${level_to_emoji(additional["level"])} Additional found in ${additional["path"] | h}</h4>
                         <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
                             <a href="#tab-addition-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-addition-${i}-${j}-2">HTTP Request</a>
