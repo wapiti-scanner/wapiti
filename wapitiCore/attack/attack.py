@@ -31,6 +31,7 @@ from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
+from wapitiCore.models.vulnerability.vulnerability import Vulnerability
 from wapitiCore.net.web import Request
 
 
@@ -275,6 +276,17 @@ class Attack:
     add_vuln_medium = partialmethod(add_payload, payload_type=VULN, level=MEDIUM_LEVEL)
     add_vuln_low = partialmethod(add_payload, payload_type=VULN, level=LOW_LEVEL)
     add_vuln_info = partialmethod(add_payload, payload_type=VULN, level=INFO_LEVEL)
+
+    async def register_vuln(self, vuln: Vulnerability):
+        await self.add_payload(
+            category=vuln.name,
+            payload_type=VULN,
+            request_id=vuln.attacked_request.path_id or -1,
+            level=vuln.level,
+            request=vuln.page._response.request,
+            info=vuln.info,
+            wstg=vuln.wstg_codes
+        )
 
     add_anom_high = partialmethod(add_payload, payload_type=ANOM, level=HIGH_LEVEL)
     add_anom_medium = partialmethod(add_payload, payload_type=ANOM, level=MEDIUM_LEVEL)
