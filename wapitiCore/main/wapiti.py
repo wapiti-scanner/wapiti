@@ -336,10 +336,12 @@ class Wapiti:
 
         self.attacks = filter_modules_with_options(self.module_options, modules)
 
-    async def update(self):
+    async def update(self, requested_modules: str = "all"):
         """Update modules that implement an update method"""
         stop_event = asyncio.Event()
-        for mod_name in all_modules:
+        modules = all_modules if (not requested_modules or requested_modules == "all") else requested_modules.split(",")
+
+        for mod_name in modules:
             try:
                 mod = import_module("wapitiCore.attack.mod_" + mod_name)
                 class_name = module_to_class_name(mod_name)
@@ -1204,7 +1206,7 @@ async def wapiti_main():
         logging.log("GREEN", _("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
-        await wap.update()
+        await wap.update(args.modules)
         await wap.crawler.close()
         sys.exit()
 
