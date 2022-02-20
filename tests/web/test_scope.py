@@ -36,7 +36,7 @@ def test_scopes():
         "http://external.tld/external.html"
     }
 
-    crawler = AsyncCrawler("http://perdu.com/subdir/")
+    crawler = AsyncCrawler(Request("http://perdu.com/subdir/"))
     crawler.scope = Scope.FOLDER
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -46,7 +46,7 @@ def test_scopes():
         "http://perdu.com/subdir/page.html",
     }
 
-    crawler = AsyncCrawler("http://perdu.com/subdir/page.html")
+    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html"))
     crawler.scope = Scope.PAGE
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -54,14 +54,14 @@ def test_scopes():
         "http://perdu.com/subdir/page.html"
     }
 
-    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
     crawler.scope = Scope.URL
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
         "http://perdu.com/subdir/page.html?k=v"
     }
 
-    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
     crawler.scope = Scope.DOMAIN
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == {
@@ -75,7 +75,7 @@ def test_scopes():
         "http://perdu.com/subdir/page.html"
     }
 
-    crawler = AsyncCrawler("http://perdu.com/subdir/page.html?k=v")
+    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
     crawler.scope = Scope.PUNK
     filtered = {link for link in links if crawler.is_in_scope(Request(link))}
     assert filtered == links

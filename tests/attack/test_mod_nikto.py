@@ -38,7 +38,7 @@ async def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = ModuleNikto(crawler, persister, options, Event())
@@ -92,7 +92,7 @@ async def test_false_positives():
     request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
     module = ModuleNikto(crawler, persister, options, Event())

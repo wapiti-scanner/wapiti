@@ -24,7 +24,7 @@ async def test_whole_stuff():
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleBackup(crawler, persister, options, Event())
@@ -49,7 +49,7 @@ async def test_false_positive():
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleBackup(crawler, persister, options, Event())

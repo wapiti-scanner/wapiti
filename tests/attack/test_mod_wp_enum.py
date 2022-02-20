@@ -29,7 +29,7 @@ async def test_no_wordpress():
     request.path_id = 1
     # persister.requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
 
     options = {"timeout": 10, "level": 2}
 
@@ -100,7 +100,7 @@ async def test_plugin():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
 
     options = {"timeout": 10, "level": 2}
 
@@ -181,7 +181,7 @@ async def test_theme():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
 
     options = {"timeout": 10, "level": 2}
 
@@ -232,7 +232,7 @@ async def test_wp_version():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
 
     options = {"timeout": 10, "level": 2}
 
@@ -269,7 +269,7 @@ async def test_wp_version_no_file():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
 
     options = {"timeout": 10, "level": 2}
 

@@ -149,12 +149,12 @@ class AsyncCrawler:
     UNKNOWN_ERROR = 6
 
     def __init__(
-            self, base_url: str, timeout: float = 10.0, secure: bool = False, compression: bool = True):
+            self, base_request: web.Request, timeout: float = 10.0, secure: bool = False, compression: bool = True):
         self._timeout = timeout
         self.stream = False
         self._scope = Scope.FOLDER
-        self._base = web.Request(base_url)
-        self.auth_url = self._base.url
+        self._base: web.Request = base_request
+        self.auth_url: str = self._base.url
         self.is_logged_in = False
         self._user_agent = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
         self._headers = {
@@ -877,7 +877,7 @@ class Explorer:
     ):
         """Explore a single TLD or the whole Web starting with an URL
 
-        @param to_explore: A list of URL to scan the scan with.
+        @param to_explore: A list of Request of URLs (str) to scan the scan with.
         @type to_explore: list
         @param excluded_urls: A list of URLs to skip. Request objects or strings which may contain wildcards.
         @type excluded_urls: list

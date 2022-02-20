@@ -36,7 +36,7 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())

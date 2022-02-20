@@ -16,7 +16,7 @@ async def test_persister_basic():
     url = "http://httpbin.org/?k=v"
     respx.get(url).mock(return_value=httpx.Response(200, text="Hello world!"))
 
-    crawler = AsyncCrawler("http://httpbin.org/")
+    crawler = AsyncCrawler(Request("http://httpbin.org/"))
 
     try:
         os.unlink("/tmp/crawl.db")
@@ -141,7 +141,7 @@ async def test_persister_upload():
     assert xml_upload in stored_requests
 
     respx.post("http://httpbin.org/post?qs1").mock(return_value=httpx.Response(200, text="Hello there"))
-    crawler = AsyncCrawler("http://httpbin.org/")
+    crawler = AsyncCrawler(Request("http://httpbin.org/"))
 
     for req in stored_requests:
         await crawler.async_send(req)

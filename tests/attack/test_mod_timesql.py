@@ -34,7 +34,7 @@ async def test_timesql_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65082/"), timeout=1)
     options = {"timeout": 1, "level": 1}
 
     module = ModuleTimesql(crawler, persister, options, Event())
@@ -56,7 +56,7 @@ async def test_timesql_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65082/", timeout=1)
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65082/"), timeout=1)
     options = {"timeout": 1, "level": 1}
 
     module = ModuleTimesql(crawler, persister, options, Event())
@@ -76,7 +76,7 @@ async def test_false_positive_request_count():
     persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 1, "level": 1}
 
     module = ModuleTimesql(crawler, persister, options, Event())
@@ -101,7 +101,7 @@ async def test_true_positive_request_count():
     persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 1, "level": 1}
 
     module = ModuleTimesql(crawler, persister, options, Event())

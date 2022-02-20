@@ -57,7 +57,7 @@ async def test_csrf_cases():
     request.path_id = 4
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://127.0.0.1:65086/", timeout=1)
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65086/"), timeout=1)
     options = {"timeout": 10, "level": 1}
 
     module = ModuleCsrf(crawler, persister, options, Event())

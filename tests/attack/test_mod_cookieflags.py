@@ -29,7 +29,7 @@ async def test_cookieflags():
     request = Request("https://github.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("https://github.com/", timeout=1)
+    crawler = AsyncCrawler(Request("https://github.com/"), timeout=1)
     await crawler.async_send(request)  # Put cookies in our crawler object
     options = {"timeout": 10, "level": 2}
 

@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
+from wapitiCore.net.web import Request
 from wapitiCore.main.wapiti import Wapiti
 
 
@@ -21,7 +22,7 @@ async def test_options():
 
     with mock.patch("os.makedirs", return_value=True):
         stop_event = Event()
-        cli = Wapiti("http://perdu.com/", session_dir="/dev/shm")
+        cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
         cli.persister = CustomMock()
         cli.set_attack_options({"timeout": 10})
 

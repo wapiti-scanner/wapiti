@@ -44,7 +44,7 @@ async def test_whole_stuff():
 
     persister.get_path_by_id.side_effect = get_path_by_id
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleSsrf(crawler, persister, options, Event())

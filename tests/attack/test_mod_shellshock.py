@@ -44,7 +44,7 @@ async def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleShellshock(crawler, persister, options, Event())

@@ -30,7 +30,7 @@ async def test_title_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo&fixed=yes")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -47,7 +47,7 @@ async def test_title_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -71,7 +71,7 @@ async def test_script_filter_bypass():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/script_tag_filter.php?name=kenobi")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -90,7 +90,7 @@ async def test_script_src_protocol_relative():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/no_http_no_parenthesis.php?name=kenobi")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -111,7 +111,7 @@ async def test_attr_quote_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/attr_quote_escape.php?class=custom")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -130,7 +130,7 @@ async def test_attr_double_quote_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/attr_double_quote_escape.php?class=custom")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -149,7 +149,7 @@ async def test_attr_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/attr_escape.php?state=checked")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -168,7 +168,7 @@ async def test_tag_name_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/tag_name_escape.php?tag=textarea")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -187,7 +187,7 @@ async def test_partial_tag_name_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/partial_tag_name_escape.php?importance=2")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -205,7 +205,7 @@ async def test_xss_inside_tag_input():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/input_text_strip_tags.php?uid=5")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -224,7 +224,7 @@ async def test_xss_inside_tag_link():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/link_href_strip_tags.php?url=http://perdu.com/")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -243,7 +243,7 @@ async def test_xss_uppercase_no_script():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/uppercase_no_script.php?name=obiwan")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -262,7 +262,7 @@ async def test_frame_src_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/frame_src_escape.php?url=https://wapiti-scanner.github.io/")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -281,7 +281,7 @@ async def test_frame_src_no_escape():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/frame_src_no_escape.php?url=https://wapiti-scanner.github.io/")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -300,7 +300,7 @@ async def test_bad_separator_used():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/confuse_separator.php?number=42")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -318,7 +318,7 @@ async def test_escape_with_style():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/escape_with_style.php?color=green")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -336,7 +336,7 @@ async def test_rare_tag_and_event():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/filter_common_keywords.php?msg=test")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -354,7 +354,7 @@ async def test_xss_with_strong_csp():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/strong_csp.php?content=Hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())
@@ -371,7 +371,7 @@ async def test_xss_with_weak_csp():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/weak_csp.php?content=Hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65081/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65081/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXss(crawler, persister, options, Event())

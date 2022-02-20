@@ -111,7 +111,7 @@ async def getcookie_main(arguments):
     server = parts.netloc
     base = urlunparse((parts.scheme, parts.netloc, parts.path, '', '', ''))
 
-    crawler = AsyncCrawler(base)
+    crawler = AsyncCrawler(Request(base))
 
     if args.proxy:
         proxy_parts = urlparse(args.proxy)

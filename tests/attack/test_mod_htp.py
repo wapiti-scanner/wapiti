@@ -25,7 +25,7 @@ async def test_must_attack():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
     module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -54,7 +54,7 @@ async def test_analyze_file_detection():
     techno_versions = '"{\\"versions\\": [\\"1.2\\", \\"1.2.1\\"]}"'#'{"versions": ["1.2", "1.2.1"]}'
 
     with mock.patch.object(ModuleHtp, "_find_technology", return_value=(techno, techno_versions)):
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -83,7 +83,7 @@ async def test_analyze_file_no_detection():
     request.path_id = 1
 
     with mock.patch.object(ModuleHtp, "_find_technology", return_value=None):
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -107,7 +107,7 @@ async def test_analyze_file_none_content():
     request.path_id = 1
 
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
     module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -130,7 +130,7 @@ async def test_analyze_file_request_error():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
     module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -159,7 +159,7 @@ async def test_finish_no_technologies():
 
     with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
         mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db:
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
 
@@ -198,7 +198,7 @@ async def test_finish_one_range():
     with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
         mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
         mock.patch.object(ModuleHtp, "_get_versions", return_value=versions):
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
         module_htp._root_url = "http://perdu.com/"
@@ -243,7 +243,7 @@ async def test_finish_two_ranges():
     with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
         mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
         mock.patch.object(ModuleHtp, "_get_versions", return_value=versions):
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
         module_htp._root_url = "http://perdu.com/"
@@ -294,7 +294,7 @@ async def test_root_attack_root_url():
     mock.patch.object(
         ModuleHtp, "_init_db", autospec=True
     ) as mock_init_db:
-        crawler = AsyncCrawler(target_url)
+        crawler = AsyncCrawler(Request(target_url))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
         module_htp._root_url = target_url
@@ -343,7 +343,7 @@ async def test_attack():
         ModuleHtp, "_analyze_file", autospec=True
     ) as mock_analyze_file, \
     mock.patch.object(ModuleHtp, "_init_db", return_value=future_init_db):
-        crawler = AsyncCrawler(target_url)
+        crawler = AsyncCrawler(Request(target_url))
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event())
         module_htp._root_url = target_url

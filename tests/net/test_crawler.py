@@ -23,7 +23,7 @@ def test_extract_disconnect_urls_one_url():
     resp = httpx.get(target_url, follow_redirects=False)
     page = Page(resp)
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
 
     disconnect_urls = crawler._extract_disconnect_urls(page)
 
@@ -46,7 +46,7 @@ def test_extract_disconnect_urls_no_url():
     resp = httpx.get(target_url, follow_redirects=False)
     page = Page(resp)
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
 
     disconnect_urls = crawler._extract_disconnect_urls(page)
 
@@ -70,11 +70,12 @@ def test_extract_disconnect_urls_multiple_urls():
     resp = httpx.get(target_url, follow_redirects=False)
     page = Page(resp)
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
 
     disconnect_urls = crawler._extract_disconnect_urls(page)
 
     assert len(disconnect_urls) == 2
+
 
 @respx.mock
 @pytest.mark.asyncio
@@ -109,7 +110,7 @@ async def test_async_try_login_post_good_credentials():
         )
     )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
     crawler._auth_credentials = ["username", "password"]
 
     is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
@@ -119,6 +120,7 @@ async def test_async_try_login_post_good_credentials():
     assert "http://perdu.com/foobar/signout" in disconnect_urls
     assert "http://perdu.com/a/b/signout" in disconnect_urls
     assert is_logged_in is True
+
 
 @respx.mock
 @pytest.mark.asyncio
@@ -152,7 +154,7 @@ async def test_async_try_login_post_wrong_credentials():
         )
     )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
     crawler._auth_credentials = ["username", "password"]
 
     is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
@@ -177,7 +179,7 @@ async def test_async_try_login_post_form_not_detected():
         )
     )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
     crawler._auth_credentials = ["username", "password"]
 
     is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
@@ -210,7 +212,7 @@ async def test_async_try_login_basic_digest_ntlm_good_credentials():
         )
     )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
     crawler._auth_credentials = ["username", "password"]
 
     is_logged_in, form, disconnect_urls = await crawler._async_try_login_basic_digest_ntlm(auth_url)
@@ -218,6 +220,7 @@ async def test_async_try_login_basic_digest_ntlm_good_credentials():
     assert is_logged_in is True
     assert len(form) == 0
     assert len(disconnect_urls) == 0
+
 
 @respx.mock
 @pytest.mark.asyncio
@@ -240,7 +243,7 @@ async def test_multiple_redirecton():
             )
         )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
 
     page = await crawler.async_get(Request(target_url), follow_redirects=True)
     assert page.status == 200
@@ -268,7 +271,7 @@ async def test_async_try_login_basic_digest_ntlm_wrong_credentials():
         ["http://perdu.com/login3", 404]
     ]
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
     crawler._auth_credentials = ["username", "password"]
 
     for auth_url, status_code in auth_urls:
@@ -306,7 +309,7 @@ async def test_extract_disconnect_urls():
         )
     )
 
-    crawler = AsyncCrawler(target_url, timeout=1)
+    crawler = AsyncCrawler(Request(target_url), timeout=1)
 
     page = await crawler.async_get(Request(target_url))
 

@@ -34,7 +34,7 @@ async def test_false_positive():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -66,7 +66,7 @@ async def test_url_detection():
     request = Request("http://perdu.com/owa/auth/logon.aspx")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -104,7 +104,7 @@ async def test_html_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -141,7 +141,7 @@ async def test_script_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -178,7 +178,7 @@ async def test_cookies_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -215,7 +215,7 @@ async def test_headers_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -253,7 +253,7 @@ async def test_meta_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -293,7 +293,7 @@ async def test_multi_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -330,7 +330,7 @@ async def test_implies_detection():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -370,7 +370,7 @@ async def test_vulnerabilities():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com")
+    crawler = AsyncCrawler(Request("http://perdu.com"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())
@@ -425,7 +425,7 @@ async def test_merge_with_and_without_redirection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleWapp(crawler, persister, options, Event())

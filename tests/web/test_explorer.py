@@ -27,7 +27,7 @@ def run_around_tests():
 
 @pytest.mark.asyncio
 async def test_qs_limit():
-    crawler = AsyncCrawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65080/"))
     explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/"])
     excluded_urls = []
@@ -35,7 +35,7 @@ async def test_qs_limit():
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
     await crawler.close()
 
-    crawler = AsyncCrawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65080/"))
     explorer = Explorer(crawler, Event())
     # Exclude huge POST form with limit of parameters
     explorer.qs_limit = 500
@@ -48,7 +48,7 @@ async def test_qs_limit():
 
 @pytest.mark.asyncio
 async def test_explorer_filtering():
-    crawler = AsyncCrawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65080/"))
     explorer = Explorer(crawler, Event())
     start_urls = deque(["http://127.0.0.1:65080/filters.html"])
     excluded_urls = []
@@ -71,7 +71,7 @@ async def test_cookies():
 
     respx.get("http://perdu.com/cookies").mock(side_effect=print_headers_callback)
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     response = await crawler.async_get(Request("http://perdu.com/"))
     assert "foo=bar" in response.headers["set-cookie"]
     response = await crawler.async_get(Request("http://perdu.com/cookies"))
@@ -91,7 +91,7 @@ async def test_drop_cookies():
 
     respx.get("http://perdu.com/cookies").mock(side_effect=print_headers_callback)
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     crawler.drop_cookies = True
     response = await crawler.async_get(Request("http://perdu.com/"))
     assert "foo=bar" in response.headers["set-cookie"]
@@ -128,7 +128,7 @@ def test_save_and_restore_state():
 @pytest.mark.asyncio
 @respx.mock
 async def test_explorer_extract_links():
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     explorer = Explorer(crawler, Event())
 
     respx.get("http://perdu.com/").mock(
@@ -162,7 +162,7 @@ async def test_explorer_extract_links():
 @pytest.mark.asyncio
 @respx.mock
 async def test_explorer_extract_links_from_js():
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     explorer = Explorer(crawler, Event())
 
     respx.get("http://perdu.com/").mock(
