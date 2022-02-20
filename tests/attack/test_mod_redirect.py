@@ -30,7 +30,7 @@ def run_around_tests():
 async def test_redirect_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
-    crawler = AsyncCrawler("http://127.0.0.1:65080/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65080/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleRedirect(crawler, persister, options, Event())
@@ -70,7 +70,7 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleRedirect(crawler, persister, options, Event())

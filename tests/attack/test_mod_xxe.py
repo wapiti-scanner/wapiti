@@ -39,7 +39,7 @@ async def test_direct_body():
         post_params=[["placeholder", "yolo"]]
     )
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {"timeout": 10, "level": 1}
 
     module = ModuleXxe(crawler, persister, options, Event())
@@ -60,7 +60,7 @@ async def test_direct_param():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/direct/param.php?foo=bar&vuln=yolo")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {"timeout": 10, "level": 1}
 
     module = ModuleXxe(crawler, persister, options, Event())
@@ -77,7 +77,7 @@ async def test_direct_query_string():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65084/xxe/direct/qs.php")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleXxe(crawler, persister, options, Event())
@@ -104,7 +104,7 @@ async def test_out_of_band_body():
     persister.get_path_by_id.return_value = request
 
     persister.requests.append(request)
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {
         "timeout": 10,
         "level": 1,
@@ -153,7 +153,7 @@ async def test_out_of_band_param():
     request = Request("http://127.0.0.1:65084/xxe/outofband/param.php?foo=bar&vuln=yolo")
     request.path_id = 7
     persister.get_path_by_id.return_value = request
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {
         "timeout": 10,
         "level": 1,
@@ -202,7 +202,7 @@ async def test_out_of_band_query_string():
     request = Request("http://127.0.0.1:65084/xxe/outofband/qs.php")
     request.path_id = 4
     persister.get_path_by_id.return_value = request
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {
         "timeout": 10,
         "level": 2,
@@ -255,7 +255,7 @@ async def test_direct_upload():
     )
     request.path_id = 8
     persister.get_path_by_id.return_value = request
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     options = {
         "timeout": 10,
         "level": 1,

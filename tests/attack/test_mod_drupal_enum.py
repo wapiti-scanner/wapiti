@@ -33,7 +33,7 @@ async def test_no_drupal():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
@@ -69,7 +69,7 @@ async def test_version_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
@@ -109,7 +109,7 @@ async def test_multi_versions_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
@@ -148,7 +148,7 @@ async def test_version_not_detected():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
 
     options = {"timeout": 10, "level": 2, "tasks": 20}
 

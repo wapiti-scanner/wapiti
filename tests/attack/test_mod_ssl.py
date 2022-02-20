@@ -46,7 +46,7 @@ async def test_ssl_scanner():
     persister = AsyncMock()
     request = Request("https://127.0.0.1:4443/")
     request.path_id = 42
-    crawler = AsyncCrawler("https://127.0.0.1:4443/")
+    crawler = AsyncCrawler(Request("https://127.0.0.1:4443/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleSsl(crawler, persister, options, Event())

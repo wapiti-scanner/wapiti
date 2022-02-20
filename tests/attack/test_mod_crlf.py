@@ -25,7 +25,7 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/?a=b&foo=bar")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleCrlf(crawler, persister, options, Event())

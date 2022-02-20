@@ -42,7 +42,7 @@ async def test_read_headers():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -75,7 +75,7 @@ def test_get_batch_malicious_headers():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -108,7 +108,7 @@ async def test_verify_dns():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -131,7 +131,7 @@ async def test_is_valid_dns():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -167,7 +167,7 @@ async def test_verify_headers_vuln_found():
         request = Request("http://perdu.com/")
         request.path_id = 1
 
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
 
         module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -212,7 +212,7 @@ async def test_verify_headers_vuln_not_found():
         request = Request("http://perdu.com/")
         request.path_id = 1
 
-        crawler = AsyncCrawler("http://perdu.com/")
+        crawler = AsyncCrawler(Request("http://perdu.com/"))
         options = {"timeout": 10, "level": 2}
 
         module = ModuleLog4Shell(crawler, persister, options, Event())
@@ -238,7 +238,7 @@ async def test_must_attack():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/")
+    crawler = AsyncCrawler(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleLog4Shell(crawler, persister, options, Event())

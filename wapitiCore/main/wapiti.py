@@ -32,7 +32,7 @@ from random import choice
 from sqlite3 import OperationalError
 from time import gmtime, strftime
 from traceback import print_tb
-from typing import AsyncGenerator, Dict, List
+from typing import AsyncGenerator, Dict, List, Deque, Union
 from urllib.parse import urlparse
 from uuid import uuid1
 
@@ -170,11 +170,11 @@ class Wapiti:
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
-    def __init__(self, root_url, scope="folder", session_dir=None, config_dir=None):
-        self.target_url = root_url
-        self.server = urlparse(root_url).netloc
+    def __init__(self, scope_request: Request, scope="folder", session_dir=None, config_dir=None):
+        self.base_request: Request = scope_request
+        self.server: str = scope_request.netloc
 
-        self.crawler = crawler.AsyncCrawler(root_url)
+        self.crawler = crawler.AsyncCrawler(scope_request)
 
         self.target_scope = scope
         if scope == "page":
@@ -200,7 +200,7 @@ class Wapiti:
         self.verbose = 0
         self.module_options = None
         self.attack_options = {}
-        self._start_urls = deque([self.target_url])
+        self._start_urls: Deque[Union[str, Request]] = deque([self.base_request])
         self._excluded_urls = []
         self._bad_params = set()
         self._max_depth = 40
@@ -220,7 +220,7 @@ class Wapiti:
             SqlPersister.CONFIG_DIR = config_dir
 
         server_url = self.server.replace(':', '_')
-        hashed_root_url = sha256(root_url.encode(errors='replace')).hexdigest()[:8]
+        hashed_root_url = sha256(scope_request.url.encode(errors='replace')).hexdigest()[:8]
 
         self._history_file = os.path.join(
             SqlPersister.CRAWLER_DATA_DIR,
@@ -270,7 +270,7 @@ class Wapiti:
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
         self.report_gen.set_report_info(
-            self.target_url,
+            self.base_request.url,
             self.target_scope,
             gmtime(),
             WAPITI_VERSION,
@@ -366,7 +366,7 @@ class Wapiti:
         async for resource in self.persister.get_forms():
             self._excluded_urls.append(resource)
 
-        await self.persister.set_root_url(self.target_url)
+        await self.persister.set_root_url(self.base_request.url)
 
     async def save_scan_state(self):
         logging.log("GREEN", _("[*] Saving scan state, please wait..."))
@@ -511,7 +511,7 @@ class Wapiti:
                         with open(traceback_file, "w", encoding='utf-8') as traceback_fd:
                             print_tb(exception_traceback, file=traceback_fd)
                             print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
-                            print(f"Occurred in {attack_module.name} on {self.target_url}", file=traceback_fd)
+                            print(f"Occurred in {attack_module.name} on {original_request}", file=traceback_fd)
                             logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
@@ -840,6 +840,13 @@ async def wapiti_main():
         metavar="URL", dest="base_url",
         default="http://example.com/"
         # required=True
+    )
+
+    parser.add_argument(
+        "--data",
+        help=_("Urlencoded data to send with the base URL if it is a POST form"),
+        metavar="data", dest="data",
+        default=None,
     )
 
     parser.add_argument(
@@ -1191,13 +1198,21 @@ async def wapiti_main():
         sys.exit()
 
     url = fix_url_path(args.base_url)
+    if args.data:
+        base_requests = Request(
+            url,
+            method="POST",
+            post_params=args.data
+        )
+    else:
+        base_requests = Request(url)
 
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc:
         logging.error(_("Invalid base URL was specified, please give a complete URL with protocol scheme."))
         sys.exit()
 
-    wap = Wapiti(url, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+    wap = Wapiti(base_requests, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     if args.log:
         wap.set_logfile(args.log)

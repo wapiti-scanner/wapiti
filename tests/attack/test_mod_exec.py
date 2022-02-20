@@ -52,7 +52,7 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleExec(crawler, persister, options, Event())
@@ -80,7 +80,7 @@ async def test_detection():
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 1}
 
     module = ModuleExec(crawler, persister, options, Event())
@@ -109,7 +109,7 @@ async def test_blind_detection():
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 2
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 1, "level": 1}
 
     module = ModuleExec(crawler, persister, options, Event())

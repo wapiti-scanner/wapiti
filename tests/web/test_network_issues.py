@@ -25,8 +25,8 @@ def run_around_tests():
 async def test_chunked_timeout():
     url = "http://127.0.0.1:65080/chunked_timeout.php"
 
-    crawler = AsyncCrawler(url, timeout=1)
     request = Request(url)
+    crawler = AsyncCrawler(request, timeout=1)
 
     with pytest.raises(ReadTimeout):
         await crawler.async_send(request)
@@ -37,8 +37,8 @@ async def test_chunked_timeout():
 async def test_timeout():
     url = "http://127.0.0.1:65080/timeout.php"
 
-    crawler = AsyncCrawler(url, timeout=1)
     request = Request(url)
+    crawler = AsyncCrawler(request, timeout=1)
 
     with pytest.raises(ReadTimeout):
         await crawler.async_send(request)

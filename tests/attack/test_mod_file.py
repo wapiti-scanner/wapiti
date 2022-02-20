@@ -30,7 +30,7 @@ async def test_inclusion_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleFile(crawler, persister, options, Event())
@@ -49,7 +49,7 @@ async def test_warning_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
-    crawler = AsyncCrawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleFile(crawler, persister, options, Event())
@@ -78,7 +78,7 @@ async def test_no_crash():
     request.path_id = 2
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://127.0.0.1:65085/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
     options = {"timeout": 10, "level": 2}
 
     module = ModuleFile(crawler, persister, options, Event())

@@ -7,6 +7,7 @@ import respx
 import httpx
 import pytest
 
+from wapitiCore.net.web import Request
 from wapitiCore.main.wapiti import Wapiti
 
 
@@ -42,7 +43,7 @@ async def test_resume_crawling():
     respx.get(url__regex=r"http://perdu\.com/z.*\.html$").mock(return_value=httpx.Response(404))
 
     temp_obj = TemporaryDirectory()
-    wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
+    wapiti = Wapiti(Request("http://perdu.com/"), session_dir=temp_obj.name)
     await wapiti.init_persister()
     await wapiti.load_scan_state()
     await wapiti.browse(stop_event, parallelism=1)
@@ -55,7 +56,7 @@ async def test_resume_crawling():
     assert remaining_urls == {"http://perdu.com/?page=11", "http://perdu.com/?page=12"}
     await wapiti.crawler.close()
 
-    wapiti = Wapiti("http://perdu.com/", session_dir=temp_obj.name)
+    wapiti = Wapiti(Request("http://perdu.com/"), session_dir=temp_obj.name)
     await wapiti.init_persister()
     await wapiti.load_scan_state()
     await wapiti.browse(stop_event)

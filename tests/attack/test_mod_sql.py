@@ -40,7 +40,7 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2}
 
     module = ModuleSql(crawler, persister, options, Event())
@@ -62,7 +62,7 @@ async def test_false_positive():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 1}
 
     module = ModuleSql(crawler, persister, options, Event())
@@ -93,7 +93,7 @@ async def test_true_positive():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 1}
 
     module = ModuleSql(crawler, persister, options, Event())
@@ -150,7 +150,7 @@ async def test_blind_detection():
         request = Request("http://perdu.com/?user_id=1")
         request.path_id = 1
 
-        crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+        crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
         options = {"timeout": 10, "level": 1}
 
         module = ModuleSql(crawler, persister, options, Event())
@@ -173,7 +173,7 @@ async def test_negative_blind():
     request = Request("http://perdu.com/?foo=bar")
     request.path_id = 1
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 1}
 
     module = ModuleSql(crawler, persister, options, Event())
@@ -232,7 +232,7 @@ async def test_blind_detection_parenthesis():
         request = Request("http://perdu.com/?username=admin")
         request.path_id = 1
 
-        crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+        crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
         options = {"timeout": 10, "level": 1}
 
         module = ModuleSql(crawler, persister, options, Event())

@@ -29,7 +29,7 @@ async def test_cookie_dump():
             )
         )
 
-        crawler = AsyncCrawler(url)
+        crawler = AsyncCrawler(Request(url))
         await crawler.async_get(Request(url))
 
         json_cookie.addcookies(crawler.session_cookies)

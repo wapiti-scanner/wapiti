@@ -57,7 +57,7 @@ async def test_unregistered_cname():
             request.path_id = 1
             all_requests.append(request)
 
-            crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+            crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
             options = {"timeout": 10, "level": 2}
 
             module = ModuleTakeover(crawler, persister, options, Event())

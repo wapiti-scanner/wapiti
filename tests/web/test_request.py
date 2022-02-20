@@ -165,7 +165,7 @@ async def test_request_object():
         enctype="application/json"
     )
 
-    crawler = AsyncCrawler("http://127.0.0.1:65084/")
+    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
     page = await crawler.async_send(json_req)
     assert page.json["json"] == {"z": 1, "a": 2}
     assert page.json["headers"]["Content-Type"] == "application/json"
@@ -194,7 +194,7 @@ async def test_redirect():
     respx.get(slyfx).mock(return_value=httpx.Response(301, headers={"Location": disney}, text="Back to disneyland"))
     respx.get(disney).mock(return_value=httpx.Response(200, text="Hello there"))
 
-    crawler = AsyncCrawler(slyfx)
+    crawler = AsyncCrawler(Request(slyfx))
     page = await crawler.async_send(Request(slyfx))
     assert page.url == slyfx
     assert not page.history

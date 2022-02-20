@@ -33,7 +33,7 @@ async def test_whole_stuff():
     # Buster module will get requests from the persister
     persister.get_links.return_value = AsyncIterator([request])
 
-    crawler = AsyncCrawler("http://perdu.com/", timeout=1)
+    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
     options = {"timeout": 10, "level": 2, "tasks": 20}
 
     with patch(
