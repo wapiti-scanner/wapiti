@@ -60,7 +60,7 @@ class ModuleMethods(Attack):
             self.network_errors += 1
             return
 
-        if 200 <= response.status < 400:
+        if response.is_success or response.is_redirect:
             methods = response.headers.get("allow", '').upper().split(',')
             methods = {method.strip() for method in methods if method.strip()}
             interesting_methods = sorted(methods - self.KNOWN_METHODS)

@@ -33,7 +33,7 @@ class ModuleDrupalEnum(Attack):
     async def get_url_hash(self, root_url: str, path: str) -> Tuple[str, str]:
         request = Request(f"{root_url}{path}")
         response = await self.crawler.async_get(request, follow_redirects=True)
-        if response.status != 200:
+        if response.is_error:
             return "", ""
 
         return hashlib.sha256(response.content.encode()).hexdigest(), path
@@ -118,7 +118,7 @@ class ModuleDrupalEnum(Attack):
             except Exception as exception:
                 logging.exception(exception)
             else:
-                if response.status == 200:
+                if response.is_success:
                     return True
         return False
 

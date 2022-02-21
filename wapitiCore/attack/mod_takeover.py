@@ -114,7 +114,7 @@ class TakeoverChecker:
                             try:
                                 async with httpx.AsyncClient() as client:
                                     response = await client.head(f"https://github.com/{username}", timeout=10.)
-                                    if response.status_code == 404:
+                                    if response.is_client_error:
                                         return True
                             except httpx.RequestError:
                                 logging.warning(f"HTTP request to https://github.com/{username} failed")

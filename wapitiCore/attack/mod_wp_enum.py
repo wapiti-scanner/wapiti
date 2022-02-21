@@ -55,7 +55,7 @@ class ModuleWpEnum(Attack):
             req = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}")
             rep: Page = await self.crawler.async_get(req, follow_redirects=True)
 
-            if not rep.content or rep.status != 200:
+            if not rep.content or rep.is_error:
                 continue
             root = ET.fromstring(rep.content)
 
@@ -94,7 +94,7 @@ class ModuleWpEnum(Attack):
             req = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt')
             rep = await self.crawler.async_get(req)
 
-            if rep.status == 200:
+            if rep.is_success:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
 
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
@@ -147,7 +147,7 @@ class ModuleWpEnum(Attack):
 
             req = Request(f'{url}/wp-content/themes/{theme}/readme.txt')
             rep = await self.crawler.async_get(req)
-            if rep.status == 200:
+            if rep.is_success:
                 version = re.search(r'tag:\s*([\d.]+)', rep.content)
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
                 if version:

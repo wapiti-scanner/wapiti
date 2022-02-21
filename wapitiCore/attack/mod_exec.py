@@ -206,7 +206,7 @@ class ModuleExec(Attack):
                         vulnerable_parameter = True
                         continue
 
-                elif response.status == 500 and not saw_internal_error:
+                elif response.is_server_error and not saw_internal_error:
                     saw_internal_error = True
                     if parameter == "QUERY_STRING":
                         anom_msg = Messages.MSG_QS_500

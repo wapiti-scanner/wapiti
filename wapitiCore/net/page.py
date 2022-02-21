@@ -491,6 +491,44 @@ class Page:
         return not self.is_external_to_domain(url)
 
     @property
+    def is_success(self) -> bool:
+        """
+        A property which is `True` for 2xx status codes, `False` otherwise.
+        """
+        return self._response.is_success
+
+    @property
+    def is_redirect(self) -> bool:
+        """
+        A property which is `True` for 3xx status codes, `False` otherwise.
+
+        Note that not all responses with a 3xx status code indicate a URL redirect.
+
+        """
+        return self._response.is_redirect
+
+    @property
+    def is_client_error(self) -> bool:
+        """
+        A property which is `True` for 4xx status codes, `False` otherwise.
+        """
+        return self._response.is_client_error
+
+    @property
+    def is_server_error(self) -> bool:
+        """
+        A property which is `True` for 5xx status codes, `False` otherwise.
+        """
+        return self._response.is_server_error
+
+    @property
+    def is_error(self) -> bool:
+        """
+        A property which is `True` for 4xx and 5xx status codes, `False` otherwise.
+        """
+        return self._response.is_error
+
+    @property
     def title(self):
         """Returns the content of the title HTML tag"""
         if self.soup.head is not None:
