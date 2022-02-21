@@ -269,7 +269,7 @@ class ModulePermanentxss(Attack):
                     continue
 
                 if (
-                        response.status not in (301, 302, 303) and
+                        not response.is_redirect and
                         valid_xss_content_type(evil_request) and
                         check_payload(
                             self.DATA_DIR,
@@ -331,7 +331,7 @@ class ModulePermanentxss(Attack):
 
                     # stop trying payloads and jump to the next parameter
                     break
-                if response.status == 500 and not saw_internal_error:
+                if response.is_server_error and not saw_internal_error:
                     if xss_param == "QUERY_STRING":
                         anom_msg = Messages.MSG_QS_500
                     else:

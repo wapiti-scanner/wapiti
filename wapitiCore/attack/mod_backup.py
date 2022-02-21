@@ -61,7 +61,7 @@ class ModuleBackup(Attack):
                 # Do not put anything in false_positive_directories, another luck for next time
                 return False
 
-            self.false_positive_directories[request.dir_name] = (response and response.status == 200)
+            self.false_positive_directories[request.dir_name] = (response and response.is_success)
 
         return self.false_positive_directories[request.dir_name]
 
@@ -113,7 +113,7 @@ class ModuleBackup(Attack):
                 self.network_errors += 1
                 continue
 
-            if response and response.status == 200:
+            if response and response.is_success:
                 # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
                 # uses the string as a token so we cannot use f string
                 # pylint: disable=consider-using-f-string
