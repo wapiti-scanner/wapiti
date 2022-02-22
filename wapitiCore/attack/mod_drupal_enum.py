@@ -21,7 +21,6 @@ class ModuleDrupalEnum(Attack):
     """Detect Drupal version."""
     name = "drupal_enum"
     PAYLOADS_HASH = "drupal_hash_files.json"
-    PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
 
     versions = []
 
