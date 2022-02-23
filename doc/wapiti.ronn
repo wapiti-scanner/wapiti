@@ -9,7 +9,7 @@ wapiti(1) -- A web application vulnerability scanner in Python
 
 Wapiti allows you to audit the security of your web applications.
 
-It  performs  "black-box" scans, i.e. it does not study the source code of the application but will scans the webpages of the deployed webapp, looking for scripts and forms where it can inject data.
+It performs "black-box" scans, i.e. it does not study the source code of the application but will scan the webpages of the deployed webapp, looking for scripts and forms where it can inject data.
 
 Once it gets this list, Wapiti acts like a fuzzer, injecting payloads to see if a script is vulnerable.
 
@@ -23,6 +23,7 @@ More detail on each option can be found in the following sections.
 TARGET SPECIFICATION:
 
   * `-u` <URL>
+  * `--data` <URL_ENCODED_DATA>
   * `--scope` {page,folder,domain,url,punk}
 
 ATTACK SPECIFICATION:
@@ -100,6 +101,9 @@ OTHER OPTIONS:
   * `-u`, `--url` <URL>  
     The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see --scope for details).  
     This is the only required argument. The scheme part of the URL must be either http or https.
+
+  * `--data` <URL_ENCODED_DATA>  
+    If you need to attack only a specific POST request you can give this option a url-encoded string. It will be used as POST parameters for the URL specified by the `-u` option.  
     
   * `--scope` <SCOPE>  
     Define the scope of the scan and attacks. Valid choices are :
@@ -175,10 +179,10 @@ Following options allows you to bypass this behavior/
   * `--flush-session`  
     Forget everything about the target for the given scope.
     
-  * `--store-session` <PATH>
+  * `--store-session` <PATH>  
     Specify an alternative path for storing session (.db and .pkl) files.
 
-  * `--store-config` <PATH>
+  * `--store-config` <PATH>  
     Specify an alternative path for storing particular module (`apps.json` and `nikto_db`) files.
 
 ## SCAN AND ATTACKS TUNING
@@ -204,36 +208,36 @@ Following options allows you to bypass this behavior/
     
   * `-d`, `--depth` <DEPTH>  
     When Wapiti crawls a website it gives each found URL a depth value.  
-    The base URL, and additionnal starting URLs (-s) are given a depth of 0.  
-    Each link found in thoses URLs got a depth of 1, and so on.  
+    The base URL, and additional starting URLs (-s) are given a depth of 0.  
+    Each link found in those URLs got a depth of 1, and so on.  
     Default maximum depth is 40 and is very large.  
     This limit make sure the scan will stop at some time.  
-    For a fast scan a depth inferior to 5 is recommanded.
+    For a fast scan a depth inferior to 5 is recommended.
     
   * `--max-links-per-page` <MAX>  
     This is another option to be able to reduce the number of URLs discovered by the crawler.  
     Only the first MAX links of each webpage will be extracted.  
     This option is not really effective as the same link may appear on different webpages.  
-    It should be useful is rare conditions, for exeample when there is a lot a webpages without query string.
+    It should be useful is rare conditions, for example when there is a lot a webpages without query string.
     
   * `--max-files-per-dir` <MAX>  
     Limit the number of URLs to crawl under each folder found on the webserver.  
-    Note that an URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.  
+    Note that a URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.  
     Like the previous option it should be useful only in certain situations.
     
-  * `--max-scan-time` <SECONDS>
-    Stop the scan after SECONDS seconds if it is still running.
+  * `--max-scan-time` <SECONDS>  
+    Stop the scan after `SECONDS` seconds if it is still running.
     Should be useful to automatise scanning from another process (continuous testing).
 
-  * `--max-attack-time` <SECONDS>
-    Each attack module will stop after SECONDS seconds if it is still running.
+  * `--max-attack-time` <SECONDS>  
+    Each attack module will stop after `SECONDS` seconds if it is still running.
     Should be useful to automatise scanning from another process (continuous testing).
     
   * `--max-parameters` <MAX>  
     URLs and forms having more than MAX input parameters will be discarded before launching attack modules.
     
   * `-S`, `--scan-force` <FORCE>  
-    The more input parameters an URL or form have, the more requests Wapiti will send.  
+    The more input parameters a URL or form have, the more requests Wapiti will send.  
     The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge amount of time.  
     Wapiti use a mathematical formula to reduce the numbers of URLs scanned for a given pattern (same variables names) when
     the number of parameters grows.  
@@ -244,7 +248,7 @@ Following options allows you to bypass this behavior/
     Insane mode just remove the calculation of those limits, every URL will be attacked.  
     Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).
     
-  * `--tasks` <TASKS>
+  * `--tasks` <TASKS>  
     Set how many concurrent tasks Wapiti should use.  
     Wapiti leverages Python's asyncio framework for this.
     
@@ -258,7 +262,7 @@ On internal pentests this endpoint may not be accessible to the target hence you
   * `--internal-endpoint` <URL>
     You may want to specify an internal endpoint different from the external one.  
     The internal endpoint is used by Wapiti to fetch results of attacks.  
-    If you are behind a NAT it may be an URL for a local server (for example http://192.168.0.1/)
+    If you are behind a NAT it may be a URL for a local server (for example http://192.168.0.1/)
     
   * `--external-endpoint` <URL>
     Set the endpoint URL (the one that the target will fetch in case of vulnerability).  

@@ -104,7 +104,7 @@
 	Timeout in seconds can be set with -t (--timeout) option
 	Fixed bug "crash when no content-type is returned"
 	Fixed an error with 404 webpages
-	Fixed a bug when the only parameter of an url is a forbidden one
+	Fixed a bug when the only parameter of a url is a forbidden one
 
 09/08/2006
 	Version 2.1.2

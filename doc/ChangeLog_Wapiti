@@ -1,3 +1,11 @@
+23/02/2022
+    Wapiti 3.1.1
+    Crawler: Fix a bug preventing Wapiti to scan websites with bad ciphers (SSL 3, TLS 1.0 for example)
+    Report: Add some unicode emojis in the HTML report to indicate the criticality of each vulnerability
+    XXE: more payloads to target non-PHP applications + raise a warning when the DTD file was reached by the target but exfiltration didn't succeed
+    CLI: --update option will only update chosen modules
+    CLI: New --data option allows to launch attacks on a single POST request. This option expect a url-encoded string.
+
 06/02/2022
     Wapiti 3.1.0
     Crawler: Fix passing named "button" tags in HTML forms

@@ -308,6 +308,13 @@ msgstr "Out-Of-Band {0} by sending raw XML in request body"
 msgid "Out-Of-Band {0} via injection in the parameter {1}"
 msgstr "Out-Of-Band {0} via injection in the parameter {1}"
 
+msgid ""
+"The target reached the DTD file on the endpoint but the exploitation didn't "
+"succeed."
+msgstr ""
+"The target reached the DTD file on the endpoint but the exploitation didn't "
+"succeed."
+
 #, python-brace-format
 msgid ""
 "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
@@ -1192,6 +1199,9 @@ msgstr "[*] Today is world backup day! Is your data safe?"
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr "The base URL used to define the scan scope (default scope is folder)"
 
+msgid "Urlencoded data to send with the base URL if it is a POST request"
+msgstr "Urlencoded data to send with the base URL if it is a POST request"
+
 msgid "Set scan scope"
 msgstr "Set scan scope"
 
@@ -1251,11 +1261,11 @@ msgstr "Directory where to store attack history and session data."
 msgid "Directory where to store configuration databases."
 msgstr "Directory where to store configuration databases."
 
-msgid "Adds an url to start scan with"
-msgstr "Adds an url to start scan with"
+msgid "Adds a url to start scan with"
+msgstr "Adds a url to start scan with"
 
-msgid "Adds an url to exclude from the scan"
-msgstr "Adds an url to exclude from the scan"
+msgid "Adds a url to exclude from the scan"
+msgstr "Adds a url to exclude from the scan"
 
 msgid "Remove this parameter from urls"
 msgstr "Remove this parameter from urls"

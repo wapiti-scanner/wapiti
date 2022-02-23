@@ -60,7 +60,7 @@ class TXTReportGenerator(ReportGenerator):
         with codecs.open(output_path, mode="w", encoding="UTF-8") as txt_report_file:
             try:
                 txt_report_file.write(separator)
-                txt_report_file.write(center(f"{self._infos['version']} - wapiti.sourceforge.io\n"))
+                txt_report_file.write(center(f"{self._infos['version']} - wapiti-scanner.github.io\n"))
                 txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
                 txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
                 txt_report_file.write(center(_("Crawled pages : {0}\n").format(self._infos["crawled_pages"])))

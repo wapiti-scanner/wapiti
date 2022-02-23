@@ -302,6 +302,11 @@ msgstr ""
 msgid "Out-Of-Band {0} via injection in the parameter {1}"
 msgstr ""
 
+msgid ""
+"The target reached the DTD file on the endpoint but the exploitation didn't "
+"succeed."
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
@@ -1039,6 +1044,9 @@ msgstr ""
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr ""
 
+msgid "Urlencoded data to send with the base URL if it is a POST request"
+msgstr ""
+
 msgid "Set scan scope"
 msgstr ""
 
@@ -1091,10 +1099,10 @@ msgstr ""
 msgid "Directory where to store configuration databases."
 msgstr ""
 
-msgid "Adds an url to start scan with"
+msgid "Adds a url to start scan with"
 msgstr ""
 
-msgid "Adds an url to exclude from the scan"
+msgid "Adds a url to exclude from the scan"
 msgstr ""
 
 msgid "Remove this parameter from urls"

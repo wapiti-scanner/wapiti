@@ -875,7 +875,7 @@ class Explorer:
             to_explore: deque,
             excluded_urls: list = None
     ):
-        """Explore a single TLD or the whole Web starting with an URL
+        """Explore a single TLD or the whole Web starting with a URL
 
         @param to_explore: A list of Request of URLs (str) to scan the scan with.
         @type to_explore: list

@@ -51,7 +51,7 @@ from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 from wapitiCore.report import GENERATORS, get_report_generator_instance
 
-WAPITI_VERSION = "Wapiti 3.1.0"
+WAPITI_VERSION = "3.1.1"
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
@@ -273,7 +273,7 @@ class Wapiti:
             self.base_request.url,
             self.target_scope,
             gmtime(),
-            WAPITI_VERSION,
+            f"Wapiti {WAPITI_VERSION}",
             self._auth_state,
             await self.count_resources()
         )
@@ -512,7 +512,7 @@ class Wapiti:
                             print_tb(exception_traceback, file=traceback_fd)
                             print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
                             print(f"Occurred in {attack_module.name} on {original_request}", file=traceback_fd)
-                            logging.info(f"{WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
+                            logging.info(f"Wapiti {WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
 
                         try:
                             with open(traceback_file, "rb") as traceback_byte_fd:
@@ -618,11 +618,11 @@ class Wapiti:
         self.crawler.set_proxy(proxy)
 
     def add_start_url(self, url: str):
-        """Specify an URL to start the scan with. Can be called several times."""
+        """Specify a URL to start the scan with. Can be called several times."""
         self._start_urls.append(url)
 
     def add_excluded_url(self, url_or_pattern: str):
-        """Specify an URL to exclude from the scan. Can be called several times."""
+        """Specify a URL to exclude from the scan. Can be called several times."""
         self._excluded_urls.append(url_or_pattern)
 
     def set_cookie_file(self, cookie: str):
@@ -661,7 +661,7 @@ class Wapiti:
         self.crawler.auth_method = auth_method
 
     def add_bad_param(self, param_name: str):
-        """Exclude a parameter from an url (urls with this parameter will be
+        """Exclude a parameter from a url (urls with this parameter will be
         modified. This function can be call several times"""
         self._bad_params.add(param_name)
 
@@ -809,7 +809,7 @@ async def wapiti_main():
     ]
 
     print(choice(banners))
-    print(f"{WAPITI_VERSION} (wapiti.sourceforge.io)")
+    print(f"Wapiti {WAPITI_VERSION} (wapiti-scanner.github.io)")
     moon_phase = phase()
     if moon_phase == "full":
         print(_("[*] You are lucky! Full moon tonight."))
@@ -831,7 +831,7 @@ async def wapiti_main():
     elif datetime.now().month == 3 and datetime.now().day == 31:
         print(_("[*] Today is world backup day! Is your data safe?"))
 
-    parser = argparse.ArgumentParser(description=f"{WAPITI_VERSION}: Web application vulnerability scanner")
+    parser = argparse.ArgumentParser(description=f"Wapiti {WAPITI_VERSION}: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -844,7 +844,7 @@ async def wapiti_main():
 
     parser.add_argument(
         "--data",
-        help=_("Urlencoded data to send with the base URL if it is a POST form"),
+        help=_("Urlencoded data to send with the base URL if it is a POST request"),
         metavar="data", dest="data",
         default=None,
     )
@@ -971,7 +971,7 @@ async def wapiti_main():
         "-s", "--start",
         action="append",
         default=[],
-        help=_("Adds an url to start scan with"),
+        help=_("Adds a url to start scan with"),
         metavar="URL",
         dest="starting_urls"
     )
@@ -980,7 +980,7 @@ async def wapiti_main():
         "-x", "--exclude",
         action="append",
         default=[],
-        help=_("Adds an url to exclude from the scan"),
+        help=_("Adds a url to exclude from the scan"),
         metavar="URL",
         dest="excluded_urls"
     )
