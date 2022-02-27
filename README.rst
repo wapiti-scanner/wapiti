@@ -209,7 +209,14 @@ Licensing
 Wapiti is released under the GNU General Public License version 2 (the GPL).
 Source code is available on `Github <https://github.com/wapiti-scanner/wapiti>`__.
 
-Created by Nicolas SURRIBAS. Sponsored by Cyberwatch https://cyberwatch.fr.
+Created by Nicolas SURRIBAS.
+
+Sponsors
+========
+
+Cyberwatch https://cyberwatch.fr/
+
+Security For Everyone https://securityforeveryone.com/
 
 Disclaimer
 ==========
