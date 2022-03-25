@@ -107,7 +107,7 @@ class ModuleDrupalEnum(Attack):
             self.versions = set.intersection(*[set(versions) for versions in versions.values()])
 
     async def check_drupal(self, url):
-        check_list = ['sites/', 'core/misc/drupal.js', 'misc/drupal.js', 'misc/test/error/404/ispresent.html']
+        check_list = ['core/misc/drupal.js', 'misc/drupal.js']
         for item in check_list:
             request = Request(f'{url}{item}')
             try:
