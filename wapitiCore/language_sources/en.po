@@ -169,6 +169,10 @@ msgstr "URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"
 msgid "URL {0} seems vulnerable to Log4Shell attack"
 msgstr "URL {0} seems vulnerable to Log4Shell attack"
 
+#, python-brace-format
+msgid "URL {0} seems vulnerable to Spring4Shell attack"
+msgstr "URL {0} seems vulnerable to Spring4Shell attack"
+
 msgid "Error: {} is not a valid domain name"
 msgstr "Error: {} is not a valid domain name"
 
