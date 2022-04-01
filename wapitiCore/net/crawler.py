@@ -440,7 +440,7 @@ class AsyncCrawler:
 
                 # ensure logged in
                 if login_response.soup.find_all(
-                    text=re.compile(DISCONNECT_REGEX)
+                        text=re.compile(DISCONNECT_REGEX)
                 ):
                     self.is_logged_in = True
                     logging.success(_("Login success"))
@@ -459,7 +459,12 @@ class AsyncCrawler:
             return False, {}, []
 
     @retry(delay=1, times=3)
-    async def async_get(self, resource: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
+    async def async_get(
+            self,
+            resource: web.Request,
+            follow_redirects: bool = False,
+            headers: dict = None
+    ) -> Tuple[Page, httpx.Headers]:
         """Fetch the given url, returns a Page object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
 
@@ -482,10 +487,15 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Page(response), request.headers
 
     @retry(delay=1, times=3)
-    async def async_post(self, form: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
+    async def async_post(
+            self,
+            form: web.Request,
+            follow_redirects: bool = False,
+            headers: dict = None
+    ) -> Tuple[Page, httpx.Headers]:
         """Submit the given form, returns a Page on success, None otherwise.
 
         @type form: web.Request
@@ -542,11 +552,16 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Page(response), request.headers
 
     @retry(delay=1, times=3)
     async def async_request(
-            self, method: str, form: web.Request, follow_redirects: bool = False, headers: dict = None) -> Page:
+            self,
+            method: str,
+            form: web.Request,
+            follow_redirects: bool = False,
+            headers: dict = None
+    ) -> Tuple[Page, httpx.Headers]:
         """Submit the given form, returns a Page on success, None otherwise.
 
         @type method: str
@@ -594,22 +609,22 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Page(response), request.headers
 
     async def async_send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
         if resource.method == "GET":
-            page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects)
+            page, request_headers = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects)
         elif resource.method == "POST":
-            page = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects)
+            page, request_headers = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects)
         else:
-            page = await self.async_request(
+            page, request_headers = await self.async_request(
                 resource.method, resource, headers=headers, follow_redirects=follow_redirects
             )
 
         resource.status = page.status
         resource.set_cookies(self._cookies)
         resource.set_headers(page.headers)
-        resource.set_sent_headers(httpx.Headers(headers or {}))
+        resource.set_sent_headers(request_headers)
         return page
 
     async def close(self):

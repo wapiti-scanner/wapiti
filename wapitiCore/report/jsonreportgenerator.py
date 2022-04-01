@@ -22,7 +22,7 @@ import json
 
 from httpx import Response
 
-from wapitiCore.net.web import detail_request, detail_response
+from wapitiCore.net.web import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
@@ -57,7 +57,7 @@ class JSONReportGenerator(ReportGenerator):
             "additionals": self._additionals,
             "infos": self._infos
         }
-        with open(output_path, "w", encoding='utf-8') as json_report_file:
+        with open(output_path, "w", encoding="utf-8") as json_report_file:
             json.dump(report_dict, json_report_file, indent=2)
 
     # Vulnerabilities
@@ -102,7 +102,6 @@ class JSONReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             vuln_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._vulns:
@@ -133,7 +132,7 @@ class JSONReportGenerator(ReportGenerator):
         wstg=None,
         response: Response = None
     ):
-        """Store the informations about an anomaly met during the attack."""
+        """Store the information about an anomaly met during the attack."""
         anom_dict = {
             "method": request.method,
             "path": request.file_path,
@@ -148,7 +147,6 @@ class JSONReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             anom_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._anomalies:
@@ -193,7 +191,6 @@ class JSONReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             addition_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._additionals:

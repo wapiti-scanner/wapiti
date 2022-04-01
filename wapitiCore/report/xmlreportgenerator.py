@@ -26,6 +26,7 @@ from xml.dom.minidom import Document, Element
 
 from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
 
+
 class XMLReportGenerator(JSONReportGenerator):
     """
     This class generates a report with the method printToFile(fileName) which contains
@@ -179,58 +180,10 @@ class XMLReportGenerator(JSONReportGenerator):
         Create a section composed of the detail of the request & its response
         """
         detail_section = self._xml_doc.createElement("detail")
-        detail_request_section = self._create_detail_request(flaw["detail"]["request"])
         detail_response_section = self._create_detail_response(flaw["detail"]["response"])
-        if detail_request_section:
-            detail_section.appendChild(detail_request_section)
         if detail_response_section:
             detail_section.appendChild(detail_response_section)
         return detail_section
-
-    def _create_detail_request(self, request: dict) -> Element:
-        """
-        Create a section focused on the exploit's http request
-        """
-        if not request:
-            return None
-        request_section: Element = self._xml_doc.createElement("request")
-        url_node = self._xml_doc.createElement("url")
-        url_node.appendChild(self._xml_doc.createTextNode(request["url"]))
-        request_section.appendChild(url_node)
-
-        method_node = self._xml_doc.createElement("method")
-        method_node.appendChild(self._xml_doc.createTextNode(request["method"]))
-        request_section.appendChild(method_node)
-
-        headers_node = self._xml_doc.createElement("headers")
-        for header in request.get("headers") or []:
-            header_node = self._xml_doc.createElement("header")
-            header_node.setAttribute("name", header[0])
-            header_node.appendChild(self._xml_doc.createTextNode(header[1]))
-            headers_node.appendChild(header_node)
-        request_section.appendChild(headers_node)
-
-        query_node = self._xml_doc.createElement("query")
-        for param in request.get("query") or []:
-            param_node = self._xml_doc.createElement("param")
-            param_node.setAttribute("name", param[0])
-            param_node.appendChild(self._xml_doc.createTextNode(param[1]))
-            query_node.appendChild(param_node)
-        request_section.appendChild(query_node)
-
-        body_node = self._xml_doc.createElement("body")
-        for param in request.get("body") or []:
-            param_node = self._xml_doc.createElement("param")
-            param_node.setAttribute("name", param[0])
-            param_node.appendChild(self._xml_doc.createTextNode(param[1]))
-            body_node.appendChild(param_node)
-        request_section.appendChild(body_node)
-
-        encoding_node = self._xml_doc.createElement("encoding")
-        encoding_node.appendChild(self._xml_doc.createTextNode(request["encoding"]))
-        request_section.appendChild(encoding_node)
-
-        return request_section
 
     def _create_detail_response(self, response: dict) -> Element:
         """
@@ -244,9 +197,8 @@ class XMLReportGenerator(JSONReportGenerator):
         response_section.appendChild(status_code_node)
 
         body_node = self._xml_doc.createElement("body")
-        body_node.appendChild(self._xml_doc.createTextNode(response["body"]))
+        body_node.appendChild(self._xml_doc.createCDATASection(response["body"]))
         response_section.appendChild(body_node)
-
 
         headers_node = self._xml_doc.createElement("headers")
         for header in response.get("headers") or []:
@@ -256,7 +208,6 @@ class XMLReportGenerator(JSONReportGenerator):
             headers_node.appendChild(header_node)
         response_section.appendChild(headers_node)
         return response_section
-
 
     def _create_info_section(self) -> Element:
         """
@@ -339,10 +290,7 @@ class XMLReportGenerator(JSONReportGenerator):
 
         for crawled_page in crawled_pages:
             entry_section = self._xml_doc.createElement("entry")
-            detail_request = self._create_detail_request(crawled_page["request"])
             detail_response = self._create_detail_response(crawled_page["response"])
-            if detail_response:
-                entry_section.appendChild(detail_request)
             if detail_response:
                 entry_section.appendChild(detail_response)
             crawled_pages_node.appendChild(entry_section)

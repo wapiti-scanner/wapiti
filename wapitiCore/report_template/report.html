@@ -106,33 +106,19 @@
                                     ${line | h}
                                     <br>
                                 % endfor
-                                % if detailed_report is True and vulnerability["detail"]["request"] is not None:
-                                    Headers: 
-                                    % if vulnerability["detail"]["request"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
-                                        % for header in vulnerability["detail"]["request"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
-                                        %endfor
-                                    %endif
-                                %endif
                             </pre>
                         </section>
                         % if detailed_report is True and vulnerability["detail"]["response"] is not None:
                             <section id="tab-vuln-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
-                                <pre style="white-space: normal">
-                                    Status code: ${vulnerability["detail"]["response"]["status_code"] | h} <br>
-                                    Body: ${vulnerability["detail"]["response"]["body"] | h} <br>
-                                    Headers: 
-                                    % if vulnerability["detail"]["response"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
+                                <pre style="white-space: nowrap">
+                                    HTTP ${vulnerability["detail"]["response"]["status_code"] | h}<br />
+                                    % if vulnerability["detail"]["response"]["headers"] is not None:
                                         % for header in vulnerability["detail"]["response"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
+                                            ${header[0] | h}: ${header[1] | h}<br />
                                         %endfor
                                     %endif
+                                    <br />
+                                    ${vulnerability["detail"]["response"]["body"] | h}
                                 </pre>
                             </section>
                         % endif
@@ -168,7 +154,7 @@
                         <nav class="tabs" data-kube="tabs" data-equal="true" data-height="equal">
                             <a href="#tab-anom-${i}-${j}-1" class="is-active">Description</a>
                             <a href="#tab-anom-${i}-${j}-2">HTTP Request</a>
-                            % if detailed_report is True and anomaly["detail"]["request"] is not None:
+                            % if detailed_report is True and anomaly["detail"]["response"] is not None:
                                 <a href="#tab-anom-${i}-${j}-3">HTTP Response</a>
                             % endif
                             <a href="#tab-anom-${i}-${j}-4">cURL command line</a>
@@ -183,33 +169,19 @@
                                     ${line | h}
                                     <br>
                                 % endfor
-                                % if detailed_report is True and anomaly["detail"]["request"] is not None:
-                                    Headers: 
-                                    % if anomaly["detail"]["request"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
-                                        % for header in anomaly["detail"]["request"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
-                                        %endfor
-                                    %endif
-                                %endif
                             </pre>
                         </section>
                         % if detailed_report is True and anomaly["detail"]["response"] is not None:
                             <section id="tab-anom-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
-                                <pre style="white-space: normal">
-                                    Status code: ${anomaly["detail"]["response"]["status_code"] | h}<br>
-                                    Body: ${anomaly["detail"]["response"]["body"] | h}<br>
-                                    Headers: 
-                                    % if anomaly["detail"]["response"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
-                                        % for header in anomaly["detail"]["response"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
+                                <pre style="white-space: nowrap">
+                                    HTTP ${vulnerability["detail"]["response"]["status_code"] | h}<br />
+                                    % if vulnerability["detail"]["response"]["headers"] is not None:
+                                        % for header in vulnerability["detail"]["response"]["headers"]:
+                                            ${header[0] | h}: ${header[1] | h}<br />
                                         %endfor
                                     %endif
+                                    <br />
+                                    ${vulnerability["detail"]["response"]["body"] | h}
                                 </pre>
                             </section>
                         % endif
@@ -260,33 +232,19 @@
                                     ${line | h}
                                     <br>
                                 % endfor
-                                % if detailed_report is True and additional["detail"]["request"] is not None:
-                                    Headers: 
-                                    % if additional["detail"]["request"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
-                                        % for header in additional["detail"]["request"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
-                                        %endfor
-                                    %endif
-                                % endif
                             </pre>
                         </section>
                         % if detailed_report is True and additional["detail"]["response"] is not None:
                             <section id="tab-addition-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
-                                <pre style="white-space: normal">
-                                    Status code: ${additional["detail"]["response"]["status_code"] | h}<br>
-                                    Body: ${additional["detail"]["response"]["body"] | h}<br>
-                                    Headers: 
-                                    % if additional["detail"]["response"]["headers"] is None:
-                                        None<br>
-                                    % else:
-                                        <br>
-                                        % for header in additional["detail"]["response"]["headers"]:
-                                            - ${header[0] | h}: ${header[1] | h}<br>
+                                <pre style="white-space: nowrap">
+                                    HTTP ${vulnerability["detail"]["response"]["status_code"] | h}<br />
+                                    % if vulnerability["detail"]["response"]["headers"] is not None:
+                                        % for header in vulnerability["detail"]["response"]["headers"]:
+                                            ${header[0] | h}: ${header[1] | h}<br />
                                         %endfor
                                     %endif
+                                    <br />
+                                    ${vulnerability["detail"]["response"]["body"] | h}
                                 </pre>
                             </section>
                         % endif

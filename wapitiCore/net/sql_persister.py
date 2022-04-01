@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import base64
 import json
 import logging
 import os
@@ -26,7 +25,7 @@ from typing import AsyncGenerator, Iterable, List, Optional, Sequence, Tuple
 from aiocache import cached
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
-                        PickleType, String, Table, Text, and_, func,
+                        PickleType, String, Table, Text, LargeBinary, and_, func,
                         literal_column, or_, select)
 from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import web
@@ -37,6 +36,7 @@ from wapitiCore.main.log import logging
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
 
 Response = namedtuple("Response", "status_code,headers,body")
+
 
 class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
@@ -165,7 +165,7 @@ class SqlPersister:
             Column("url", Text, nullable=False),  # URL, can be huge
             Column("status_code", Integer, nullable=False), # http status code
             Column("headers", Text),  # Pickled HTTP headers, can be huge
-            Column("body", Text, nullable=False) # base64 body
+            Column("body", LargeBinary, nullable=False)  # base64 body
         )
 
     async def create(self):
@@ -328,16 +328,16 @@ class SqlPersister:
     async def save_response(self, response: Page) -> Optional[int]:
         if not response:
             return None
+
         statement = self.responses.insert().values(
             url=response.url,
             status_code=response.status,
-            body=base64.b64encode(response.bytes).decode("ascii"),
+            body=response.bytes,
             headers=json.dumps(response.headers.multi_items())
         )
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.inserted_primary_key[0]
-
 
     async def save_request(self, http_resource: Request, response: Page = None):
         async with self._engine.begin() as conn:
@@ -740,14 +740,16 @@ class SqlPersister:
         if not row:
             return None
 
-        response = None
         try:
-            response = Response(row.status_code, httpx.Headers(json.loads(row.headers)), row.body)
+            response = Response(
+                row.status_code,
+                httpx.Headers(json.loads(row.headers)),
+                row.body
+            )
         except httpx.DecodingError as e:
             logging.error(e)
             return None
         return response
-
 
     async def get_path_by_id(self, path_id):
         path_id = int(path_id)

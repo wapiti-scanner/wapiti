@@ -21,7 +21,7 @@ import codecs
 from httpx import Response
 
 from wapitiCore.language.language import _
-from wapitiCore.net.web import detail_request, detail_response
+from wapitiCore.net.web import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 NB_COLUMNS = 80
@@ -187,7 +187,6 @@ class TXTReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             vuln_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._vulns:
@@ -233,7 +232,6 @@ class TXTReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             anom_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._anomalies:
@@ -287,7 +285,6 @@ class TXTReportGenerator(ReportGenerator):
         }
         if self._infos["detailed_report"]:
             addition_dict["detail"] = {
-                "request": detail_request(request),
                 "response": detail_response(response)
             }
         if category not in self._additionals:
