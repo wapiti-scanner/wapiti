@@ -331,6 +331,9 @@ async def test_extract_disconnect_urls():
     assert len(disconnect_urls) == len(test_disconnect_urls)
     assert all(url in disconnect_urls for url in test_disconnect_urls) is True
 
+
+@respx.mock
+@pytest.mark.asyncio
 async def test_async_send():
     request = Request("http://perdu.com/", "GET")
     headers = {
@@ -343,16 +346,18 @@ async def test_async_send():
     async_http_request.set_result(Page(response))
 
     respx.get("http://perdu.com/").mock(
-                "<div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
-                headers=httpx.Headers([["abc", "123"]])
+        return_value=httpx.Response(
+            status_code=200,
+            text="<div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"abc": "123"}
+        )
     )
-
-    resp = httpx.get("http://perdu.com/", follow_redirects=False)
 
     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
 
-    response = await crawler.async_send(request, headers)
+    await crawler.async_send(request, headers)
 
     assert request.status == 200
     assert request.headers.get("abc") == "123"
+    assert "user-agent" in request.sent_headers
     assert request.sent_headers.get("foo") == "bar"

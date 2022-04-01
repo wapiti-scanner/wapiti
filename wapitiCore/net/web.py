@@ -371,8 +371,9 @@ class Request:
         rel_url = self.url.split('/', 3)[3]
         http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n"
 
-        for header_name, header_value in self._sent_headers.items():
-            http_string += f"{left_margin}{header_name}: {header_value}\n"
+        if self._sent_headers:
+            for header_name, header_value in self._sent_headers.items():
+                http_string += f"{left_margin}{header_name}: {header_value}\n"
 
         if self._file_params:
             boundary = "------------------------boundarystring"
@@ -423,16 +424,32 @@ class Request:
 
         return curl_string
 
+    @property
+    def headers(self) -> httpx.Headers:
+        return self._headers
+
     def set_headers(self, response_headers):
         """Set the HTTP headers received while requesting the resource"""
         self._headers = response_headers
+
+    @property
+    def sent_headers(self) -> httpx.Headers:
+        return self._sent_headers
 
     def set_sent_headers(self, sent_headers: httpx.Headers):
         """Set the sent HTTP headers while requesting the resource"""
         self._sent_headers = sent_headers
 
+    @property
+    def response_content(self) -> str:
+        return self._response_content
+
     def set_response_content(self, content: str):
         self._response_content = content
+
+    @property
+    def cookies(self):
+        return self._cookies
 
     def set_cookies(self, cookies):
         self._cookies = cookies
@@ -535,22 +552,6 @@ class Request:
     @property
     def is_multipart(self) -> bool:
         return "multipart" in self._enctype
-
-    @property
-    def headers(self) -> httpx.Headers:
-        return self._headers
-
-    @property
-    def sent_headers(self) -> httpx.Headers:
-        return self._sent_headers
-
-    @property
-    def response_content(self) -> str:
-        return self._response_content
-
-    @property
-    def cookies(self):
-        return self._cookies
 
     @property
     def referer(self) -> str:

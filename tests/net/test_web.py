@@ -5,7 +5,7 @@ from wapitiCore.net.sql_persister import Response
 
 
 def test_detail_response():
-    response = Response(200, httpx.Headers([["foo", "bar"]]), "body")
+    response = Response(200, httpx.Headers([["foo", "bar"]]), b"body")
 
     detailed_response = detail_response(response)
 
