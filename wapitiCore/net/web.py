@@ -20,9 +20,9 @@ from copy import deepcopy
 import posixpath
 import sys
 from urllib.parse import urlparse, unquote, quote, urljoin
-from httpx import Response
 
 import httpx
+
 
 def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
     """Encode a dict or sequence of two-element tuples into a URL query string.
@@ -369,10 +369,10 @@ class Request:
 
     def http_repr(self, left_margin="    "):
         rel_url = self.url.split('/', 3)[3]
-        http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n{left_margin}Host: {self._hostname}\n"
+        http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n"
 
-        if self._referer:
-            http_string += f"{left_margin}Referer: {self._referer}\n"
+        for header_name, header_value in self._sent_headers.items():
+            http_string += f"{left_margin}{header_name}: {header_value}\n"
 
         if self._file_params:
             boundary = "------------------------boundarystring"
@@ -669,23 +669,13 @@ class Request:
     def path_id(self, value: int):
         self._path_id = value
 
-def detail_response(response: Response) -> dict:
+
+def detail_response(response) -> dict:
     if not response:
         return None
+
     return {
         "status_code": response.status_code,
-        "body": response.body,
+        "body": response.body.decode("utf-8", errors="replace"),
         "headers": response.headers.multi_items()
-    }
-
-def detail_request(request: Request) -> dict:
-    if not request:
-        return None
-    return {
-        "url": request.url,
-        "method": request.method,
-        "headers": (request.sent_headers and request.sent_headers.multi_items()) or [],
-        "query": request.get_params,
-        "body": request.post_params,
-        "encoding": request.encoding,
     }
