@@ -116,6 +116,7 @@ def test_reports():
             if report_format != "csv":
                 assert "123456" in report
 
+
 def test_json_detail_report():
         report_gen = JSONReportGenerator()
 
@@ -142,7 +143,7 @@ def test_json_detail_report():
         )
 
         request = Request("http://perdu.com/", "GET", [["foo", "bar"]])
-        response = Response(status_code=200, headers=httpx.Headers([["abc", "123"]]), body="OK")
+        response = Response(status_code=200, headers=httpx.Headers([["abc", "123"]]), body=b"OK")
 
         report_gen.add_vulnerability("foobar", "category", request=request, response=response)
 
@@ -173,8 +174,5 @@ def test_json_detail_report():
 
             assert vuln["method"] == "GET"
             assert vuln["module"] == "foobar"
-            assert vuln["detail"]["request"]["url"] == "http://perdu.com/?foo=bar"
-            assert vuln["detail"]["request"]["method"] == "GET"
-            assert vuln["detail"]["request"]["query"] == [["foo", "bar"]]
             assert vuln["detail"]["response"]["status_code"] == 200
             assert vuln["detail"]["response"]["headers"] == [["abc", "123"]]

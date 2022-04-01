@@ -464,7 +464,7 @@ class AsyncCrawler:
             resource: web.Request,
             follow_redirects: bool = False,
             headers: dict = None
-    ) -> Tuple[Page, httpx.Headers]:
+    ) -> Page:
         """Fetch the given url, returns a Page object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
 
@@ -487,7 +487,7 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response), request.headers
+        return Page(response)
 
     @retry(delay=1, times=3)
     async def async_post(
@@ -495,7 +495,7 @@ class AsyncCrawler:
             form: web.Request,
             follow_redirects: bool = False,
             headers: dict = None
-    ) -> Tuple[Page, httpx.Headers]:
+    ) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.
 
         @type form: web.Request
@@ -552,7 +552,7 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response), request.headers
+        return Page(response)
 
     @retry(delay=1, times=3)
     async def async_request(
@@ -561,7 +561,7 @@ class AsyncCrawler:
             form: web.Request,
             follow_redirects: bool = False,
             headers: dict = None
-    ) -> Tuple[Page, httpx.Headers]:
+    ) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.
 
         @type method: str
@@ -609,22 +609,22 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response), request.headers
+        return Page(response)
 
     async def async_send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
         if resource.method == "GET":
-            page, request_headers = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects)
+            page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects)
         elif resource.method == "POST":
-            page, request_headers = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects)
+            page = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects)
         else:
-            page, request_headers = await self.async_request(
+            page = await self.async_request(
                 resource.method, resource, headers=headers, follow_redirects=follow_redirects
             )
 
         resource.status = page.status
         resource.set_cookies(self._cookies)
         resource.set_headers(page.headers)
-        resource.set_sent_headers(request_headers)
+        resource.set_sent_headers(page.sent_headers)
         return page
 
     async def close(self):
