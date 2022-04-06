@@ -24,7 +24,7 @@ TYPE = "vulnerability"
 NAME = _("Content Security Policy Configuration")
 SHORT_NAME = _("CSP Configuration")
 
-WSTG_CODE = ["WSTG-CONF-01", "WSTG-CONF-12"]
+WSTG_CODE = ["WSTG-CONF-12"]
 
 DESCRIPTION = _(
     "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types "
@@ -51,13 +51,6 @@ REFERENCES = [
         "title": "OWASP: How to do Content Security Policy (PDF)",
         "url": (
             "https://owasp.org/www-pdf-archive/2019-02-22_-_How_do_I_Content_Security_Policy_-_Print.pdf"
-        )
-    },
-    {
-        "title": "OWASP: Network Infrastructure Configuration",
-        "url": (
-            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
-            "02-Configuration_and_Deployment_Management_Testing/01-Test_Network_Infrastructure_Configuration"
         )
     },
     {
