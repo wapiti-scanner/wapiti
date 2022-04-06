@@ -24,7 +24,7 @@ TYPE = "vulnerability"
 NAME = _("Content Security Policy Configuration")
 SHORT_NAME = _("CSP Configuration")
 
-WSTG_CODE = ["WSTG-CONF-12"]
+WSTG_CODE = ["WSTG-CONF-12", "OSHP-Content-Security-Policy"]
 
 DESCRIPTION = _(
     "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types "
