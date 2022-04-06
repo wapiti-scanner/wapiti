@@ -24,9 +24,9 @@ TYPE = "vulnerability"
 NAME = _("HTTP Secure Headers")
 SHORT_NAME = NAME
 
-WSTG_CODE_FRAME_OPTIONS = ["WSTG-CLNT-09"]
-WSTG_CODE_CONTENT_TYPE_OPTIONS = ["WSTG-ATHN-01"]
-WSTG_CODE_STRICT_TRANSPORT_SECURITY = ["WSTG-CONF-07"]
+WSTG_CODE_FRAME_OPTIONS = ["OSHP-X-Frame-Options"]
+WSTG_CODE_CONTENT_TYPE_OPTIONS = ["OSHP-X-Content-Type-Options"]
+WSTG_CODE_STRICT_TRANSPORT_SECURITY = ["WSTG-CONF-07", "OSHP-HTTP-Strict-Transport-Security"]
 
 WSTG_CODE = (
     WSTG_CODE_FRAME_OPTIONS +
@@ -44,7 +44,7 @@ SOLUTION = _(
 
 REFERENCES = [
     {
-        "title": "OWASP Secure Headers Project Best Practices",
+        "title": "OSHP: OWASP Secure Headers Project Best Practices",
         "url": "https://owasp.org/www-project-secure-headers/#div-bestpractices"
     },
     {
