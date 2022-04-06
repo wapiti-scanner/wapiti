@@ -46,6 +46,10 @@ SOLUTION = _(
 
 REFERENCES = [
     {
+        "title": "OWASP Secure Headers Project Best Practices",
+        "url": "https://owasp.org/www-project-secure-headers/#div-bestpractices"
+    },
+    {
         "title": "Netsparker: HTTP Security Headers: An Easy Way to Harden Your Web Applications",
         "url": "https://www.netsparker.com/blog/web-security/http-security-headers/"
     },
