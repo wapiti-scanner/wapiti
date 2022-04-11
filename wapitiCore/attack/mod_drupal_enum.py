@@ -118,7 +118,11 @@ class ModuleDrupalEnum(Attack):
             except Exception as exception:
                 logging.exception(exception)
             else:
-                if response.is_success:
+                if (
+                    response.is_success
+                    and "content-type" in response.headers
+                    and "application/javascript" in response.headers["content-type"]
+                   ):
                     return True
         return False
 

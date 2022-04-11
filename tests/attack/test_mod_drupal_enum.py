@@ -27,6 +27,9 @@ async def test_no_drupal():
         )
     )
 
+    # Response to check that we have no more false positives
+    respx.get("http://perdu.com/core/misc/drupal.js").mock(return_value=httpx.Response(200))
+
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
     persister = AsyncMock()
@@ -58,7 +61,7 @@ async def test_version_detected():
         data = changelog.read()
 
     # Response to tell that Drupal is used
-    respx.get("http://perdu.com/core/misc/drupal.js").mock(return_value=httpx.Response(200))
+    respx.get("http://perdu.com/core/misc/drupal.js").mock(return_value=httpx.Response(200, headers={"Content-Type": "application/javascript"}))
 
     # Response for changelog.txt
     respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
@@ -104,7 +107,7 @@ async def test_multi_versions_detected():
         data = maintainers.read()
 
     # Response to tell that Drupal is used
-    respx.get("http://perdu.com/core/misc/drupal.js").mock(return_value=httpx.Response(200))
+    respx.get("http://perdu.com/core/misc/drupal.js").mock(return_value=httpx.Response(200, headers={"Content-Type": "application/javascript"}))
 
     # Response for  maintainers.txt
     respx.get("http://perdu.com/core/MAINTAINERS.txt").mock(return_value=httpx.Response(200, text=data))
@@ -146,7 +149,7 @@ async def test_version_not_detected():
         data = changelog.read()
 
     # Response to tell that Drupal is used
-    respx.get("http://perdu.com/misc/drupal.js").mock(return_value=httpx.Response(200))
+    respx.get("http://perdu.com/misc/drupal.js").mock(return_value=httpx.Response(200, headers={"Content-Type": "application/javascript"}))
 
     # Response for edited changelog.txt
     respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
