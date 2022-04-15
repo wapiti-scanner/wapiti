@@ -46,7 +46,8 @@ class ModuleCsrf(Attack):
     TOKEN_FORM_STRINGS = [
         "authenticity_token", "_token", "csrf_token", "csrfname", "csrftoken", "anticsrf",
         "__requestverificationtoken", "token", "csrf", "_csrf_token", "xsrf_token",
-        "_csrf", "csrf-token", "xsrf-token", "_wpnonce", "csrfmiddlewaretoken"
+        "_csrf", "csrf-token", "xsrf-token", "_wpnonce", "csrfmiddlewaretoken",
+        "__csrf_token__", "csrfkey"
     ]
 
     TOKEN_HEADER_STRINGS = [
