@@ -32,4 +32,4 @@ RUN apt update \
 COPY --from=build /usr/local/lib/python3.9/dist-packages/ /usr/local/lib/python3.9/dist-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
 
-CMD ["wapiti"]
+ENTRYPOINT ["wapiti"]
