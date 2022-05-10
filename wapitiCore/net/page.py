@@ -181,6 +181,9 @@ class Page:
         """
         return self._response.elapsed.total_seconds()
 
+    async def close(self):
+        await self._response.aclose()
+
     async def read(self):
         await self._response.aread()
 
@@ -297,7 +300,6 @@ class Page:
         if self._soup is not None:
             self._soup.decompose()
             del self._soup
-        await self._response.aclose()
 
     @property
     @lru_cache(maxsize=2)
