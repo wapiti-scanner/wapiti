@@ -989,10 +989,6 @@ class Explorer:
                             to_explore.append(unfiltered_request)
                             accepted_urls += 1
 
-                        # TODO: fix this, it doesn't looks valid
-                        # if self._max_per_depth and accepted_urls >= self._max_per_depth:
-                        #     break
-
                 # remove the now completed task
                 del task_to_request[task]
 
