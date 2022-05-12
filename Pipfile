@@ -28,7 +28,6 @@ dnspython = "==2.1.0"
 httpcore = ">=0.14.7"
 sslyze = "==5.0.0"
 humanize = "==3.13.1"
-httpx = {git = "https://github.com/encode/httpx.git",ref = "850b4801d6911f3278ab1cefc26b21712faeefa0"}
 
 [requires]
 python_version = "3.8"
