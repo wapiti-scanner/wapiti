@@ -1,3 +1,10 @@
+13/05/2022
+    Wapiti 3.1.2
+    mod_http_headers: Deprecate X-XSS-Protection header
+    mod_drupal_enum: Reduce false positives
+    mod_csp: Rework some WSTG categories
+    Crawler: Fix crash caused by unclosed async httpx responses
+
 23/02/2022
     Wapiti 3.1.1
     Crawler: Fix a bug preventing Wapiti to scan websites with bad ciphers (SSL 3, TLS 1.0 for example)

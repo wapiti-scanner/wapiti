@@ -51,7 +51,7 @@ from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 from wapitiCore.report import GENERATORS, get_report_generator_instance
 
-WAPITI_VERSION = "3.1.1"
+WAPITI_VERSION = "3.1.2"
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
