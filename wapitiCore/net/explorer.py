@@ -190,7 +190,7 @@ class Explorer:
         if "application/x-shockwave-flash" in page.type or request.file_ext == "swf":
             try:
                 swf_links = swf.extract_links_from_swf(page.bytes)
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
         elif "/x-javascript" in page.type or "/x-js" in page.type or "/javascript" in page.type:
             js_links = lamejs.LameJs(page.content).get_links()
@@ -297,12 +297,8 @@ class Explorer:
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, [], None
-            # TODO: what to do of connection errors ? sleep a while before retrying ?
-            except ConnectionError:
-                logging.error(_("[!] Connection error with URL"), resource_url)
-                return False, [], None
-            except httpx.RequestError as error:
-                logging.error(_("[!] {} with url {}").format(error.__class__.__name__, resource_url))
+            except (ConnectionError, httpx.RequestError) as error:
+                logging.error(_("[!] {} with URL {}").format(error.__class__.__name__, resource_url))
                 return False, [], None
 
             if self._max_files_per_dir:
@@ -431,7 +427,7 @@ class Explorer:
                 request = task_to_request[task]
                 try:
                     success, resources, response = await task
-                except Exception as exception:
+                except Exception as exception:    # pylint: disable=broad-except
                     logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                 else:
                     if success:
