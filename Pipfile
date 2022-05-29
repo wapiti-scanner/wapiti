@@ -5,12 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 pytest = ">=6.2.2"
-respx = "==0.19.1"
+respx = "==0.19.2"
 pytest-asyncio = "==0.14.0"
 pytest-cov = ">=2.11.1"
 
 [packages]
-"httpx[brotli, socks]" = "==0.22.0"
+"httpx[brotli, socks]" = "==0.23.0"
 beautifulsoup4 = ">=4.10.0"
 mako = ">=1.1.4"
 markupsafe = "==2.0.1"
@@ -25,7 +25,7 @@ aiocache = "==0.11.1"
 aiosqlite = "==0.17.0"
 loguru = ">=0.5.3"
 dnspython = "==2.1.0"
-httpcore = ">=0.14.7"
+httpcore = ">=0.15.0"
 sslyze = "==5.0.0"
 humanize = "==3.13.1"
 
