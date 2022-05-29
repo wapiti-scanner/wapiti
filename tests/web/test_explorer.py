@@ -10,7 +10,8 @@ import pytest
 import respx
 import httpx
 
-from wapitiCore.net.crawler import AsyncCrawler, Explorer
+from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.web import Request
 
 
