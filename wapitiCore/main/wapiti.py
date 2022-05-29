@@ -47,6 +47,7 @@ from wapitiCore.language.language import _
 from wapitiCore.main.log import logging
 from wapitiCore.moon import phase
 from wapitiCore.net import crawler, jsoncookie
+from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 from wapitiCore.report import GENERATORS, get_report_generator_instance
@@ -383,7 +384,7 @@ class Wapiti:
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
-        explorer = crawler.Explorer(self.crawler, stop_event, parallelism=parallelism)
+        explorer = Explorer(self.crawler, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
         explorer.max_requests_per_depth = self._max_links_per_page

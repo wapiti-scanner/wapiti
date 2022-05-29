@@ -43,7 +43,6 @@ RE_JS_REDIR = re.compile(
     r"\b(window\.|document\.|top\.|self\.)?location(\.href)?\s*=\s*(\"|')(http[s]?://[^'\"]+\.[^'\"]+)\3\s*(;|}|$)"
 )
 
-
 JS_EVENTS = [
     'onabort', 'onblur', 'onchange', 'onclick', 'ondblclick',
     'ondragdrop', 'onerror', 'onfocus', 'onkeydown', 'onkeypress',
@@ -58,7 +57,6 @@ COMMON_JS_STRINGS = {
     "about:blank", "Microsoft.XMLHTTP", "text/plain", "text/javascript",
     "application/x-shockwave-flash"
 }
-
 
 JS_SCHEME_REGEX = re.compile(r"^javascript:", re.I)
 
@@ -173,7 +171,7 @@ class Page:
                     return int(self._response.headers["content-length"].split(";")[0].strip())
 
             return int(self._response.headers["content-length"])
-        # permet de forcer le chargement du body
+        # Force consuming the body when in stream mode
         return len(self.bytes)
 
     @property
@@ -437,19 +435,6 @@ class Page:
             new_path = normpath(current_directory + url_path)
             if url_path.endswith('/') and not new_path.endswith('/'):
                 new_path += '/'
-
-            # links going to a parent directory (..)
-            # while re.search(r"/([~:!,;%a-zA-Z0-9\.\-+_]+)/\.\./", new_path) is not None:
-            #     new_path = re.sub(r"/([~:!,;%a-zA-Z0-9\.\-+_]+)/\.\./", "/", new_path)
-            # while re.search("/\./", new_path) is not None:
-            #     new_path = re.sub("/\./", "/", new_path)
-            # if new_path == "":
-            #     new_path = '/'
-
-            # Fix for path going back up the root directory (eg: http://srv/../../dir/)
-            # new_path = re.sub(r'^(/?\.\.//*)*', '', new_path)
-            # if not new_path.startswith('/'):
-            #     new_path = '/' + new_path
 
             return urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
         # Returns an empty string for everything that we don't want to deal with
