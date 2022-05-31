@@ -174,14 +174,14 @@
                         % if detailed_report is True and anomaly["detail"]["response"] is not None:
                             <section id="tab-anom-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                                 <pre style="white-space: nowrap">
-                                    HTTP ${vulnerability["detail"]["response"]["status_code"] | h}<br />
-                                    % if vulnerability["detail"]["response"]["headers"] is not None:
-                                        % for header in vulnerability["detail"]["response"]["headers"]:
+                                    HTTP ${anomaly["detail"]["response"]["status_code"] | h}<br />
+                                    % if anomaly["detail"]["response"]["headers"] is not None:
+                                        % for header in anomaly["detail"]["response"]["headers"]:
                                             ${header[0] | h}: ${header[1] | h}<br />
                                         %endfor
                                     %endif
                                     <br />
-                                    ${vulnerability["detail"]["response"]["body"] | h}
+                                    ${anomaly["detail"]["response"]["body"] | h}
                                 </pre>
                             </section>
                         % endif
@@ -237,14 +237,14 @@
                         % if detailed_report is True and additional["detail"]["response"] is not None:
                             <section id="tab-addition-${i}-${j}-3" style="min-height: 124px;" class="is-hidden">
                                 <pre style="white-space: nowrap">
-                                    HTTP ${vulnerability["detail"]["response"]["status_code"] | h}<br />
-                                    % if vulnerability["detail"]["response"]["headers"] is not None:
-                                        % for header in vulnerability["detail"]["response"]["headers"]:
+                                    HTTP ${additional["detail"]["response"]["status_code"] | h}<br />
+                                    % if additional["detail"]["response"]["headers"] is not None:
+                                        % for header in additional["detail"]["response"]["headers"]:
                                             ${header[0] | h}: ${header[1] | h}<br />
                                         %endfor
                                     %endif
                                     <br />
-                                    ${vulnerability["detail"]["response"]["body"] | h}
+                                    ${additional["detail"]["response"]["body"] | h}
                                 </pre>
                             </section>
                         % endif
