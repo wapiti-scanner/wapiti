@@ -7,6 +7,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_cookieflags import ModuleCookieflags
 from tests import AsyncMock
 
@@ -29,23 +30,23 @@ async def test_cookieflags():
     request = Request("https://github.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("https://github.com/"), timeout=1)
-    await crawler.async_send(request)  # Put cookies in our crawler object
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("https://github.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        await crawler.async_send(request)  # Put cookies in our crawler object
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleCookieflags(crawler, persister, options, asyncio.Event())
-    await module.attack(request)
+        module = ModuleCookieflags(crawler, persister, options, asyncio.Event())
+        await module.attack(request)
 
-    cookie_flags = []
-    assert persister.add_payload.call_count == 3
-    assert persister.add_payload.call_args_list[0][1]["module"] == "cookieflags"
-    for call in persister.add_payload.call_args_list:
-        description, cookie_name = call[1]["info"].split(":")
-        cookie_flags.append((cookie_name.strip(), re.search(r"(HttpOnly|Secure)", description).group()))
+        cookie_flags = []
+        assert persister.add_payload.call_count == 3
+        assert persister.add_payload.call_args_list[0][1]["module"] == "cookieflags"
+        for call in persister.add_payload.call_args_list:
+            description, cookie_name = call[1]["info"].split(":")
+            cookie_flags.append((cookie_name.strip(), re.search(r"(HttpOnly|Secure)", description).group()))
 
-    assert cookie_flags == [
-        ('_octo', 'HttpOnly'),
-        ('foo', 'HttpOnly'),
-        ('foo', 'Secure')
-    ]
-    await crawler.close()
+        assert cookie_flags == [
+            ('_octo', 'HttpOnly'),
+            ('foo', 'HttpOnly'),
+            ('foo', 'Secure')
+        ]

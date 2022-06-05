@@ -16,6 +16,7 @@ from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.definitions.log4shell import NAME
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, _
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.page import Page
 from wapitiCore.net.web import Request
 
@@ -27,6 +28,7 @@ def get_mock_open(files: Dict[str, str]):
                 return mock_open(read_data=content).return_value
         raise FileNotFoundError('(mock) Unable to open {filename}')
     return MagicMock(side_effect=open_mock)
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -44,30 +46,32 @@ async def test_read_headers():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleLog4Shell(crawler, persister, options, Event())
-    module.DATA_DIR = ""
+        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module.DATA_DIR = ""
 
-    with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers:
-        module.HEADERS_FILE = "headers.txt"
+        with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers:
+            module.HEADERS_FILE = "headers.txt"
 
-        headers = await module.read_headers()
+            headers = await module.read_headers()
 
-        mock_open_headers.assert_called_once()
+            mock_open_headers.assert_called_once()
 
-        assert len(headers) == 2
-        assert headers[0] == "Header1"
-        assert headers[1] == "Header2"
+            assert len(headers) == 2
+            assert headers[0] == "Header1"
+            assert headers[1] == "Header2"
 
-        module.HEADERS_FILE = "empty.txt"
-        headers = await module.read_headers()
+            module.HEADERS_FILE = "empty.txt"
+            headers = await module.read_headers()
 
-        assert len(headers) == 1
+            assert len(headers) == 1
 
 
-def test_get_batch_malicious_headers():
+@pytest.mark.asyncio
+async def test_get_batch_malicious_headers():
     persister = AsyncMock()
     persister.get_root_url.return_value = "http://perdu.com"
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
@@ -77,30 +81,31 @@ def test_get_batch_malicious_headers():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event())
 
-    headers = random.sample(range(0, 100), 100)
-    malicious_headers, headers_uuid_record = module._get_batch_malicious_headers(headers)
+        headers = random.sample(range(0, 100), 100)
+        malicious_headers, headers_uuid_record = module._get_batch_malicious_headers(headers)
 
-    assert len(malicious_headers) == 10
+        assert len(malicious_headers) == 10
 
-    for batch_headers in malicious_headers:
-        for header, payload in batch_headers.items():
-            assert "${jndi:dns://" + module.dns_endpoint in payload
-            assert header in headers
-            assert header in headers_uuid_record
-            assert str(headers_uuid_record.get(header)) in payload
+        for batch_headers in malicious_headers:
+            for header, payload in batch_headers.items():
+                assert "${jndi:dns://" + module.dns_endpoint in payload
+                assert header in headers
+                assert header in headers_uuid_record
+                assert str(headers_uuid_record.get(header)) in payload
+
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_verify_dns():
-    class MockAnswer():
+    class MockAnswer:
         def __init__(self, response: bool) -> None:
             self.strings = [str(response).lower().encode("utf-8")]
-
 
     persister = AsyncMock()
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
@@ -110,17 +115,19 @@ async def test_verify_dns():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleLog4Shell(crawler, persister, options, Event())
-    module._dns_host = ""
+        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module._dns_host = ""
 
-    with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(True),)):
-        assert await module._verify_dns("foobar") is True
+        with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(True),)):
+            assert await module._verify_dns("foobar") is True
 
-    with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(False),)):
-        assert await module._verify_dns("foobar") is False
+        with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(False),)):
+            assert await module._verify_dns("foobar") is False
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -133,24 +140,26 @@ async def test_is_valid_dns():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event())
 
-    good_dns = "foobar"
-    bad_dns = "wrongdns"
+        good_dns = "foobar"
+        bad_dns = "wrongdns"
 
-    # Good DNS
-    with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
-        status = module._is_valid_dns(good_dns)
-        assert status
-        mock_gethostbyname.assert_called_once_with(good_dns)
+        # Good DNS
+        with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
+            status = module._is_valid_dns(good_dns)
+            assert status
+            mock_gethostbyname.assert_called_once_with(good_dns)
 
-    # Bad DNS
-    with patch("socket.gethostbyname", side_effect=OSError("error")) as mock_gethostbyname:
-        status = module._is_valid_dns(bad_dns)
-        assert not status
+        # Bad DNS
+        with patch("socket.gethostbyname", side_effect=OSError("error")) as mock_gethostbyname:
+            status = module._is_valid_dns(bad_dns)
+            assert not status
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -169,34 +178,35 @@ async def test_verify_headers_vuln_found():
         request = Request("http://perdu.com/")
         request.path_id = 1
 
-        crawler = AsyncCrawler(Request("http://perdu.com/"))
-        options = {"timeout": 10, "level": 2}
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+            module = ModuleLog4Shell(crawler, persister, options, Event())
 
-        module._verify_dns = mock_verify_dns
+            module._verify_dns = mock_verify_dns
 
-        modified_request = Request("http://perdu.com/")
-        malicious_headers = {"Header": "payload"}
-        headers_uuid_record = {"Header": "unique_id"}
+            modified_request = Request("http://perdu.com/")
+            malicious_headers = {"Header": "payload"}
+            headers_uuid_record = {"Header": "unique_id"}
 
-        page = Page(Response(200, request=modified_request))
+            page = Page(Response(200, request=modified_request))
 
-        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
-        mock_http_repr.assert_called_once()
-        persister.add_payload.assert_called_once_with(
-            request_id=-1,
-            payload_type=VULN,
-            module="log4shell",
-            category=NAME,
-            level=CRITICAL_LEVEL,
-            request=request,
-            parameter="Header: payload",
-            info=_("URL {0} seems vulnerable to Log4Shell attack by using the header {1}") \
-                        .format(modified_request.url, "Header"),
-            wstg=["WSTG-INPV-11"],
-            response=page
-        )
+            await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
+            mock_http_repr.assert_called_once()
+            persister.add_payload.assert_called_once_with(
+                request_id=-1,
+                payload_type=VULN,
+                module="log4shell",
+                category=NAME,
+                level=CRITICAL_LEVEL,
+                request=request,
+                parameter="Header: payload",
+                info=_("URL {0} seems vulnerable to Log4Shell attack by using the header {1}") \
+                            .format(modified_request.url, "Header"),
+                wstg=["WSTG-INPV-11"],
+                response=page
+            )
 
 
 @pytest.mark.asyncio
@@ -217,22 +227,24 @@ async def test_verify_headers_vuln_not_found():
         request = Request("http://perdu.com/")
         request.path_id = 1
 
-        crawler = AsyncCrawler(Request("http://perdu.com/"))
-        options = {"timeout": 10, "level": 2}
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+            module = ModuleLog4Shell(crawler, persister, options, Event())
 
-        module._verify_dns = mock_verify_dns
+            module._verify_dns = mock_verify_dns
 
-        modified_request = Request("http://perdu.com/")
-        malicious_headers = {"Header": "payload"}
-        headers_uuid_record = {"Header": "unique_id"}
+            modified_request = Request("http://perdu.com/")
+            malicious_headers = {"Header": "payload"}
+            headers_uuid_record = {"Header": "unique_id"}
 
-        page = Page(Response(200, request=modified_request))
+            page = Page(Response(200, request=modified_request))
 
-        await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
-        mock_http_repr.assert_not_called()
-        persister.add_payload.assert_not_called()
+            await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
+            mock_http_repr.assert_not_called()
+            persister.add_payload.assert_not_called()
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -245,18 +257,20 @@ async def test_must_attack():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event())
 
-    module.finished = False
+        module.finished = False
 
-    assert await module.must_attack(Request("foobar"))
+        assert await module.must_attack(Request("foobar"))
 
-    module.finished = True
+        module.finished = True
 
-    assert not await module.must_attack(Request("foobar"))
+        assert not await module.must_attack(Request("foobar"))
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -296,6 +310,7 @@ async def test_attack():
         assert crawler.async_send.call_count == 15
         assert mock_verify_dns.call_count == 105
 
+
 def test_init():
     persister = AsyncMock()
     home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
@@ -328,6 +343,7 @@ def test_init():
 
         assert module.finished
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_attack_apache_struts():
@@ -352,6 +368,7 @@ async def test_attack_apache_struts():
 
         assert crawler.async_send.assert_called_once
         assert mock_verify_url.assert_called_once
+
 
 @pytest.mark.asyncio
 @respx.mock

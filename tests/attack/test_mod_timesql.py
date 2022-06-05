@@ -9,6 +9,7 @@ import pytest
 import respx
 import httpx
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
@@ -34,21 +35,21 @@ async def test_timesql_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?foo=bar&vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65082/"), timeout=1)
-    options = {"timeout": 1, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
 
-    module = ModuleTimesql(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+        module = ModuleTimesql(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["module"] == "timesql"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("SQL Injection")
-    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
-        ['foo', 'bar'],
-        ['vuln1', 'sleep(2)#1']
-    ]
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["module"] == "timesql"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("SQL Injection")
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
+            ['foo', 'bar'],
+            ['vuln1', 'sleep(2)#1']
+        ]
 
 
 @pytest.mark.asyncio
@@ -56,15 +57,15 @@ async def test_timesql_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65082/blind_sql.php?vuln2=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65082/"), timeout=1)
-    options = {"timeout": 1, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
 
-    module = ModuleTimesql(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+        module = ModuleTimesql(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
 
-    assert not persister.add_payload.call_count
-    await crawler.close()
+        assert not persister.add_payload.call_count
 
 
 @pytest.mark.asyncio
@@ -76,18 +77,18 @@ async def test_false_positive_request_count():
     persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 1, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
 
-    module = ModuleTimesql(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+        module = ModuleTimesql(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
 
-    # Due to the retry decorator we should have 6 requests here
-    # First three to make sure the payload generate timeouts each time
-    # then three more requests with timeouts to make sure the original request is a false positive
-    assert respx.calls.call_count == 6
-    await crawler.close()
+        # Due to the retry decorator we should have 6 requests here
+        # First three to make sure the payload generate timeouts each time
+        # then three more requests with timeouts to make sure the original request is a false positive
+        assert respx.calls.call_count == 6
 
 
 @pytest.mark.asyncio
@@ -101,15 +102,15 @@ async def test_true_positive_request_count():
     persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 1, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
 
-    module = ModuleTimesql(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+        module = ModuleTimesql(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
 
-    # Four requests should be made there:
-    # Three ones due to time-based SQL injection (one for injection, two to be sure)
-    # Then one request to verify that the original request doesn't raise a timeout
-    assert respx.calls.call_count == 4
-    await crawler.close()
+        # Four requests should be made there:
+        # Three ones due to time-based SQL injection (one for injection, two to be sure)
+        # Then one request to verify that the original request doesn't raise a timeout
+        assert respx.calls.call_count == 4

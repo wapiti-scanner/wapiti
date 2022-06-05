@@ -19,11 +19,10 @@
 
 # Standard libraries
 import re
-from enum import Enum
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 import asyncio
 import ssl
 
@@ -34,20 +33,13 @@ from tld.exceptions import TldDomainNotFound
 
 # Internal libraries
 from wapitiCore.language.language import _
-from wapitiCore.net import web
+from wapitiCore.net import web, Scope
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
 from wapitiCore.net.page import Page
 from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
-
-
-class Scope(Enum):
-    FOLDER = 1
-    PAGE = 2
-    URL = 3
-    DOMAIN = 4
-    PUNK = 5
 
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
@@ -107,40 +99,84 @@ class AsyncCrawler:
     UNKNOWN_ERROR = 6
 
     def __init__(
-            self, base_request: web.Request, timeout: float = 10.0, secure: bool = False, compression: bool = True):
+            self,
+            base_request: web.Request,
+            client: httpx.AsyncClient,
+            timeout: float = 10.0,
+            scope: Scope = Scope.FOLDER,
+            form_credentials: Tuple[str, str] = None,
+    ):
+        self._base_request = base_request
+        self._client = client
         self._timeout = timeout
-        self.stream = False
-        self._scope = Scope.FOLDER
-        self._base: web.Request = base_request
-        self.auth_url: str = self._base.url
+        self._scope = scope
+        self._auth_credentials = form_credentials
+
         self.is_logged_in = False
-        self._user_agent = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
-        self._headers = {
-            "User-Agent": self._user_agent,
+        self.auth_url: str = self._base_request.url
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+        return False
+
+    @classmethod
+    def with_configuration(cls, configuration: CrawlerConfiguration) -> "AsyncCrawler":
+        headers = {
+            "User-Agent": configuration.user_agent,
             "Accept-Language": "en-US",
             "Accept-Encoding": "gzip, deflate, br",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
         }
 
-        if not compression:
-            self._client.headers["Accept-Encoding"] = "identity"
+        headers.update(configuration.headers or {})
 
-        self._secure = secure
-        self._proxies = None
-        self._transport = None
-        self._drop_cookies = False
-        self._cookies = None
+        if not configuration.compression:
+            headers["Accept-Encoding"] = "identity"
 
-        self._client = None
-        self._auth_credentials = {}
-        self._auth_method = "basic"
-        self._auth = None
+        ssl_context = httpx.create_ssl_context()
+        ssl_context.check_hostname = configuration.secure
+        ssl_context.verify_mode = ssl.CERT_REQUIRED if configuration.secure else ssl.CERT_NONE
 
-    def set_proxy(self, proxy: str):
+        # Allows dead protocols like SSL and TLS1
+        ssl_context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+
+        auth = None
+        form_credentials = tuple()
+        if len(configuration.auth_credentials) == 2:
+            username, password = configuration.auth_credentials
+
+            if configuration.auth_method == "basic":
+                auth = httpx.BasicAuth(username, password)
+            elif configuration.auth_method == "digest":
+                auth = httpx.DigestAuth(username, password)
+            elif configuration.auth_method == "ntlm":
+                # https://github.com/ulodciv/httpx-ntlm
+                from httpx_ntlm import HttpNtlmAuth
+                auth = HttpNtlmAuth(username, password)  # username in the form domain\user
+            elif configuration.auth_method == "post":
+                form_credentials = username, password
+
+        client = httpx.AsyncClient(
+            auth=auth,
+            headers=headers,
+            cookies=configuration.cookies,
+            verify=ssl_context,
+            proxies=cls._proxy_url_to_dict(configuration.proxy),
+            timeout=configuration.timeout,
+            event_hooks={"request": [drop_cookies_from_request]} if configuration.drop_cookies else None,
+        )
+
+        client.max_redirects = 5
+        return cls(configuration.base_request, client, configuration.timeout, configuration.scope, form_credentials)
+
+    @staticmethod
+    def _proxy_url_to_dict(proxy: str) -> Dict[str, str]:
         """Set a proxy to use for HTTP requests."""
-        self._client = None
-        self._transport = None
-        self._proxies = None
+        if not proxy:
+            return {}
 
         url_parts = urlparse(proxy)
         protocol = url_parts.scheme.lower()
@@ -151,104 +187,56 @@ class AsyncCrawler:
         if protocol == "socks":
             protocol = "socks5"
 
-        self._proxies = {
+        return {
             "http://": urlunparse((protocol, url_parts.netloc, '/', '', '', '')),
             "https://": urlunparse((protocol, url_parts.netloc, '/', '', '', '')),
         }
 
     @property
-    def client(self):
-        # Construct or reconstruct an AsyncClient instance using parameters
-        if self._client is None:
-            ssl_context = httpx.create_ssl_context()
-            ssl_context.check_hostname = self._secure
-            ssl_context.verify_mode = ssl.CERT_REQUIRED if self._secure else ssl.CERT_NONE
-
-            # Allows dead protocols like SSL and TLS1
-            ssl_context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
-
-            self._client = httpx.AsyncClient(
-                auth=self._auth,
-                headers=self._headers,
-                cookies=self._cookies,
-                verify=ssl_context,
-                proxies=self._proxies,
-                timeout=self._timeout,
-                event_hooks={"request": [drop_cookies_from_request]} if self._drop_cookies else None,
-                transport=self._transport
-            )
-
-            self._client.max_redirects = 5
-
-        return self._client
-
-    @property
-    def secure(self):
-        return self._secure
-
-    @secure.setter
-    def secure(self, value: bool):
-        if value != self._secure:
-            # We can't set `verify` using a setter so AsyncClient must be created again
-            self._client = None
-            self._secure = value
-
-    @property
     def timeout(self):
         return self._timeout
-
-    @timeout.setter
-    def timeout(self, value: float):
-        # We don't care setting it on _client because timeout is used at each get/post/send call
-        self._timeout = value
 
     @property
     def scope(self):
         return self._scope
 
-    @scope.setter
-    def scope(self, value: int):
-        if value not in Scope:
-            raise ValueError(f"Invalid scope value {value}")
-        self._scope = value
-
     def is_in_scope(self, resource):
-        if self._scope == Scope.PUNK:
+        if self.scope == Scope.PUNK:
             # Life is short
             return True
 
         if isinstance(resource, web.Request):
-            if self._scope == Scope.FOLDER:
-                return resource.url.startswith(self._base.path)
-            if self._scope == Scope.PAGE:
-                return resource.path == self._base.path
-            if self._scope == Scope.URL:
-                return resource.url == self._base.url
+            if self.scope == Scope.FOLDER:
+                return resource.url.startswith(self._base_request.path)
+            if self.scope == Scope.PAGE:
+                return resource.path == self._base_request.path
+            if self.scope == Scope.URL:
+                return resource.url == self._base_request.url
             # Scope.DOMAIN
             try:
-                return get_fld(resource.url) == get_fld(self._base.url)
+                return get_fld(resource.url) == get_fld(self._base_request.url)
             except TldDomainNotFound:
-                return resource.hostname == self._base.hostname
+                return resource.hostname == self._base_request.hostname
         else:
             if not resource:
                 return False
 
-            if self._scope == Scope.FOLDER:
-                return resource.startswith(self._base.path)
-            if self._scope == Scope.PAGE:
-                return resource.split("?")[0] == self._base.path
-            if self._scope == Scope.URL:
-                return resource == self._base.url
+            if self.scope == Scope.FOLDER:
+                return resource.startswith(self._base_request.path)
+            if self.scope == Scope.PAGE:
+                return resource.split("?")[0] == self._base_request.path
+            if self.scope == Scope.URL:
+                return resource == self._base_request.url
             # Scope.DOMAIN
             try:
-                return get_fld(resource) == get_fld(self._base.url)
+                return get_fld(resource) == get_fld(self._base_request.url)
             except TldDomainNotFound:
-                return urlparse(resource).netloc == self._base.hostname
+                return urlparse(resource).netloc == self._base_request.hostname
 
     @property
     def user_agent(self):
         """Getter for user-agent property"""
-        return self._user_agent
+        return self._client.headers["User-Agent"]
 
     @user_agent.setter
     def user_agent(self, value: str):
@@ -256,86 +244,30 @@ class AsyncCrawler:
         if not isinstance(value, str):
             raise TypeError("Invalid type for User-Agent. Type str required.")
 
-        if value != self._user_agent:
-            self._headers["User-Agent"] = value
-            # We can update headers on the client this way. Will instantiate _client if it doesn't exist
-            self.client.headers.update(self._headers)
-
-    def add_custom_header(self, key: str, value: str):
-        """Set a HTTP header to use for every requests"""
-        # We modify our own dict because if another setter rewrite the client we want to reuse the value.
-        self._headers[key] = value
-        # We can update headers on the client this way
-        self.client.headers.update(self._headers)
+        self._client.headers["User-Agent"] = value
 
     @property
     def session_cookies(self):
         """Getter for session cookies (returns a Cookies object)"""
-        return self.client.cookies
+        return self._client.cookies
 
-    @session_cookies.setter
-    def session_cookies(self, value):
-        """Setter for session cookies (value may be a dict or CookieJar object)"""
-        self._client = None
-        self._cookies = value
-
-    @property
-    def drop_cookies(self) -> bool:
-        return self._drop_cookies
-
-    @drop_cookies.setter
-    def drop_cookies(self, value: bool):
-        if self._drop_cookies != value:
-            # Erase current ASyncClient instance as event_hooks must be set at init
-            self._client = None
-            self._drop_cookies = value
-
-    @property
-    def credentials(self):
-        return self._auth_credentials
-
-    @credentials.setter
-    def credentials(self, value):
-        """Set credentials to use if the website require an authentication."""
-        self._auth_credentials = value
-        # Force reload
-        self.auth_method = self._auth_method
-
-    @property
-    def auth_method(self):
-        return self._auth_method
-
-    @auth_method.setter
-    def auth_method(self, value):
-        """Set the authentication method to use for the requests."""
-        self._auth_method = value
-        if len(self._auth_credentials) == 2:
-            username, password = self._auth_credentials
-            self._auth = None
-
-            if self._auth_method == "basic":
-                self._auth = httpx.BasicAuth(username, password)
-            elif self._auth_method == "digest":
-                self._auth = httpx.DigestAuth(username, password)
-            elif self._auth_method == "ntlm":
-                # https://github.com/ulodciv/httpx-ntlm
-                from httpx_ntlm import HttpNtlmAuth
-                self._auth = HttpNtlmAuth(username, password)  # username in the form domain\user
-
-            self.client.auth = self._auth
-
-    async def async_try_login(self, auth_url: str, auth_type: str) -> Tuple[bool, dict, List[str]]:
+    async def async_try_login(
+            self,
+            auth_credentials: Tuple[str, str],
+            auth_url: str,
+            auth_type: str
+    ) -> Tuple[bool, dict, List[str]]:
         """
         Try to authenticate with the provided url and credentials.
         Returns if the the authentication has been successful, the used form variables and the disconnect urls.
         """
-        if len(self._auth_credentials) != 2:
+        if len(auth_credentials) != 2:
             logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
             return False, {}, []
 
-        username, password = self._auth_credentials
+        username, password = auth_credentials
 
-        if auth_type == "post":
+        if auth_type == "post" and auth_url:
             return await self._async_try_login_post(username, password, auth_url)
         return await self._async_try_login_basic_digest_ntlm(auth_url)
 
@@ -421,7 +353,8 @@ class AsyncCrawler:
             self,
             resource: web.Request,
             follow_redirects: bool = False,
-            headers: dict = None
+            headers: dict = None,
+            stream: bool = False
     ) -> Page:
         """Fetch the given url, returns a Page object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
@@ -432,12 +365,13 @@ class AsyncCrawler:
         @type follow_redirects: bool
         @param headers: Dictionary of additional headers to send with the request.
         @type headers: dict
+        @type stream: bool
         @rtype: Page
         """
-        request = self.client.build_request("GET", resource.url, headers=headers, timeout=self._timeout)
+        request = self._client.build_request("GET", resource.url, headers=headers, timeout=self.timeout)
         try:
-            response = await self.client.send(
-                request, stream=self.stream, follow_redirects=follow_redirects
+            response = await self._client.send(
+                request, stream=stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
@@ -452,13 +386,15 @@ class AsyncCrawler:
             self,
             form: web.Request,
             follow_redirects: bool = False,
-            headers: dict = None
+            headers: dict = None,
+            stream: bool = False
     ) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.
 
         @type form: web.Request
         @type follow_redirects: bool
         @type headers: dict
+        @type stream: bool
         @rtype: Page
         """
         form_headers = {}
@@ -490,7 +426,7 @@ class AsyncCrawler:
         else:
             post_params = None
 
-        request = self.client.build_request(
+        request = self._client.build_request(
             "POST",
             form.path,
             params=form.get_params,
@@ -498,11 +434,11 @@ class AsyncCrawler:
             content=content,
             files=file_params or None,
             headers=form_headers,
-            timeout=self._timeout
+            timeout=self.timeout
         )
         try:
-            response = await self.client.send(
-                request, stream=self.stream, follow_redirects=follow_redirects
+            response = await self._client.send(
+                request, stream=stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
@@ -518,7 +454,8 @@ class AsyncCrawler:
             method: str,
             form: web.Request,
             follow_redirects: bool = False,
-            headers: dict = None
+            headers: dict = None,
+            stream: bool = False
     ) -> Page:
         """Submit the given form, returns a Page on success, None otherwise.
 
@@ -526,6 +463,7 @@ class AsyncCrawler:
         @type form: web.Request
         @type follow_redirects: bool
         @type headers: dict
+        @type stream: bool
         @rtype: Page
         """
         form_headers = {}
@@ -548,18 +486,18 @@ class AsyncCrawler:
         else:
             post_params = None
 
-        request = self.client.build_request(
+        request = self._client.build_request(
             method,
             form.url,
             data=post_params,
             content=content,
             files=form.file_params or None,
             headers=form_headers,
-            timeout=self._timeout
+            timeout=self.timeout
         )
         try:
-            response = await self.client.send(
-                request, stream=self.stream, follow_redirects=follow_redirects
+            response = await self._client.send(
+                request, stream=stream, follow_redirects=follow_redirects
             )
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
@@ -569,21 +507,27 @@ class AsyncCrawler:
 
         return Page(response)
 
-    async def async_send(self, resource: web.Request, headers: dict = None, follow_redirects: bool = False) -> Page:
+    async def async_send(
+            self,
+            resource: web.Request,
+            headers: dict = None,
+            follow_redirects: bool = False,
+            stream: bool = False
+    ) -> Page:
         if resource.method == "GET":
-            page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects)
+            page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         elif resource.method == "POST":
-            page = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects)
+            page = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         else:
             page = await self.async_request(
-                resource.method, resource, headers=headers, follow_redirects=follow_redirects
+                resource.method, resource, headers=headers, follow_redirects=follow_redirects, stream=stream
             )
 
         resource.status = page.status
-        resource.set_cookies(self._cookies)
+        resource.set_cookies(self._client.cookies)
         resource.set_headers(page.headers)
         resource.set_sent_headers(page.sent_headers)
         return page
 
     async def close(self):
-        await self.client.aclose()
+        await self._client.aclose()

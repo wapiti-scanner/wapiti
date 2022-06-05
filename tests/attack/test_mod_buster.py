@@ -7,6 +7,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_buster import ModuleBuster
 from wapitiCore.attack.attack import Flags
 from tests import AsyncIterator
@@ -33,18 +34,17 @@ async def test_whole_stuff():
     # Buster module will get requests from the persister
     persister.get_links.return_value = AsyncIterator([request])
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2, "tasks": 20}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    with patch(
-            "wapitiCore.attack.mod_buster.ModuleBuster.payloads",
-            [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
-    ):
-        module = ModuleBuster(crawler, persister, options, Event())
-        module.do_get = True
-        await module.attack(request)
+        with patch(
+                "wapitiCore.attack.mod_buster.ModuleBuster.payloads",
+                [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
+        ):
+            module = ModuleBuster(crawler, persister, options, Event())
+            module.do_get = True
+            await module.attack(request)
 
-        assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
-        assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]
-
-    await crawler.close()
+            assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
+            assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]

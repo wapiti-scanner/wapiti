@@ -8,6 +8,7 @@ import pytest
 import respx
 import httpx
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
@@ -52,16 +53,16 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleExec(crawler, persister, options, Event())
-    module.do_post = True
-    for request in all_requests:
-        await module.attack(request)
+        module = ModuleExec(crawler, persister, options, Event())
+        module.do_post = True
+        for request in all_requests:
+            await module.attack(request)
 
-    assert True
-    await crawler.close()
+        assert True
 
 
 @pytest.mark.asyncio
@@ -80,17 +81,17 @@ async def test_detection():
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
 
-    module = ModuleExec(crawler, persister, options, Event())
-    await module.attack(request)
+        module = ModuleExec(crawler, persister, options, Event())
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
-    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
 
 
 @pytest.mark.asyncio
@@ -109,24 +110,24 @@ async def test_blind_detection():
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 2
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 1, "level": 1}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
 
-    module = ModuleExec(crawler, persister, options, Event())
-    module.do_post = False
+        module = ModuleExec(crawler, persister, options, Event())
+        module.do_post = False
 
-    payloads_until_sleep = 0
-    for payload, __ in module.payloads:
-        if "sleep" in payload:
-            break
-        payloads_until_sleep += 1
+        payloads_until_sleep = 0
+        for payload, __ in module.payloads:
+            if "sleep" in payload:
+                break
+            payloads_until_sleep += 1
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [['vuln', 'a`sleep 60`']]
-    # We should have all payloads till "sleep" ones
-    # then 3 requests for the sleep payload (first then two retries to check random lags)
-    # then 1 request to check state of original request
-    assert respx.calls.call_count == payloads_until_sleep + 3 + 1
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == [['vuln', 'a`sleep 60`']]
+        # We should have all payloads till "sleep" ones
+        # then 3 requests for the sleep payload (first then two retries to check random lags)
+        # then 1 request to check state of original request
+        assert respx.calls.call_count == payloads_until_sleep + 3 + 1

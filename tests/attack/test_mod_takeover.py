@@ -8,6 +8,7 @@ import dns
 import dns.message
 import dns.resolver
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_takeover import ModuleTakeover, TakeoverChecker
@@ -57,18 +58,17 @@ async def test_unregistered_cname():
             request.path_id = 1
             all_requests.append(request)
 
-            crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-            options = {"timeout": 10, "level": 2}
+            crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+            async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                options = {"timeout": 10, "level": 2}
 
-            module = ModuleTakeover(crawler, persister, options, Event())
+                module = ModuleTakeover(crawler, persister, options, Event())
 
-            for request in all_requests:
-                await module.attack(request)
+                for request in all_requests:
+                    await module.attack(request)
 
-            assert persister.add_payload.call_args_list[0][1]["request"].hostname == "admin.perdu.com"
-            assert "unregistered.com" in persister.add_payload.call_args_list[0][1]["info"]
-
-            await crawler.close()
+                assert persister.add_payload.call_args_list[0][1]["request"].hostname == "admin.perdu.com"
+                assert "unregistered.com" in persister.add_payload.call_args_list[0][1]["info"]
 
 
 @pytest.mark.asyncio

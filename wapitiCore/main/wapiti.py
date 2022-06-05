@@ -47,6 +47,7 @@ from wapitiCore.language.language import _
 from wapitiCore.main.log import logging
 from wapitiCore.moon import phase
 from wapitiCore.net import crawler, jsoncookie
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
@@ -175,19 +176,20 @@ class Wapiti:
         self.base_request: Request = scope_request
         self.server: str = scope_request.netloc
 
-        self.crawler = crawler.AsyncCrawler(scope_request)
+        self.crawler_configuration = CrawlerConfiguration(self.base_request)
+        self.crawler = None
 
         self.target_scope = scope
         if scope == "page":
-            self.crawler.scope = crawler.Scope.PAGE
+            self.crawler_configuration.scope = crawler.Scope.PAGE
         elif scope == "folder":
-            self.crawler.scope = crawler.Scope.FOLDER
+            self.crawler_configuration.scope = crawler.Scope.FOLDER
         elif scope == "domain":
-            self.crawler.scope = crawler.Scope.DOMAIN
+            self.crawler_configuration.scope = crawler.Scope.DOMAIN
         elif scope == "punk":
-            self.crawler.scope = crawler.Scope.PUNK
+            self.crawler_configuration.scope = crawler.Scope.PUNK
         else:
-            self.crawler.scope = crawler.Scope.URL
+            self.crawler_configuration.scope = crawler.Scope.URL
 
         self.report_gen = None
         self.report_generator_type = "html"
@@ -263,6 +265,9 @@ class Wapiti:
 
     async def init_persister(self):
         await self.persister.create()
+
+    async def init_crawler(self):
+        self.crawler = crawler.AsyncCrawler.with_configuration(self.crawler_configuration)
 
     @property
     def history_file(self):
@@ -615,15 +620,15 @@ class Wapiti:
 
     def set_timeout(self, timeout: float = 6.0):
         """Set the timeout for the time waiting for a HTTP response"""
-        self.crawler.timeout = timeout
+        self.crawler_configuration.timeout = timeout
 
     def set_verify_ssl(self, verify: bool = False):
         """Set whether SSL must be verified."""
-        self.crawler.secure = verify
+        self.crawler_configuration.secure = verify
 
     def set_proxy(self, proxy: str):
         """Set a proxy to use for HTTP requests."""
-        self.crawler.set_proxy(proxy)
+        self.crawler_configuration.proxy = proxy
 
     def add_start_url(self, url: str):
         """Specify a URL to start the scan with. Can be called several times."""
@@ -639,34 +644,34 @@ class Wapiti:
             json_cookie = jsoncookie.JsonCookie()
             json_cookie.load(cookie)
             cookiejar = json_cookie.cookiejar(self.server)
-            self.crawler.session_cookies = cookiejar
+            self.crawler_configuration.cookies = cookiejar
 
     def load_browser_cookies(self, browser_name: str):
         """Load session cookies from a browser"""
         browser_name = browser_name.lower()
         if browser_name == "firefox":
             cookiejar = browser_cookie3.firefox()
-            self.crawler.session_cookies = cookiejar
+            self.crawler_configuration.cookies = cookiejar
         elif browser_name == "chrome":
             cookiejar = browser_cookie3.chrome()
             # There is a bug with version 0.11.4 of browser_cookie3 and we have to overwrite expiration date
             # Upgrading to latest version gave more errors so let's keep an eye on future releases
             for cookie in cookiejar:
                 cookie.expires = None
-            self.crawler.session_cookies = cookiejar
+            self.crawler_configuration.cookies = cookiejar
         else:
             raise InvalidOptionValue('--cookie', browser_name)
 
     def set_drop_cookies(self):
-        self.crawler.drop_cookies = True
+        self.crawler_configuration.drop_cookies = True
 
-    def set_auth_credentials(self, auth_basic: tuple):
+    def set_auth_credentials(self, credentials: tuple):
         """Set credentials to use if the website require an authentication."""
-        self.crawler.credentials = auth_basic
+        self.crawler_configuration.auth_credentials = credentials
 
     def set_auth_type(self, auth_method: str):
         """Set the authentication method to use."""
-        self.crawler.auth_method = auth_method
+        self.crawler_configuration.auth_method = auth_method
 
     def add_bad_param(self, param_name: str):
         """Exclude a parameter from a url (urls with this parameter will be
@@ -727,7 +732,10 @@ class Wapiti:
         self.output_file = output_file
 
     def add_custom_header(self, key: str, value: str):
-        self.crawler.add_custom_header(key, value)
+        if self.crawler_configuration.headers is None:
+            self.crawler_configuration.headers = {}
+
+        self.crawler_configuration.headers[key] = value
 
     async def flush_attacks(self):
         await self.persister.flush_attacks()
@@ -1282,19 +1290,22 @@ async def wapiti_main():
         if args.drop_set_cookie:
             wap.set_drop_cookies()
 
+        auth_credentials = tuple()
         if "credentials" in args:
             if "auth_type" not in args:
                 raise InvalidOptionValue("--auth-type", "This option is required when -a is used")
             if "%" in args.credentials:
-                wap.set_auth_credentials(args.credentials.split("%", 1))
+                auth_credentials = args.credentials.split("%", 1)
+                wap.set_auth_credentials(auth_credentials)
             else:
                 raise InvalidOptionValue("-a", args.credentials)
 
+        auth_url = ""
         if "auth_type" in args:
             if "credentials" not in args:
                 raise InvalidOptionValue("-a", "This option is required when --auth-type is used")
             if args.auth_type == "post" and args.starting_urls != []:
-                wap.crawler.auth_url = args.starting_urls[0]
+                auth_url = args.starting_urls[0]
             wap.set_auth_type(args.auth_type)
 
         for bad_param in args.excluded_parameters:
@@ -1320,7 +1331,7 @@ async def wapiti_main():
             wap.set_bug_reporting(False)
 
         if "user_agent" in args:
-            wap.add_custom_header("user-agent", args.user_agent)
+            wap.add_custom_header("User-Agent", args.user_agent)
 
         for custom_header in args.headers:
             if ":" in custom_header:
@@ -1378,6 +1389,7 @@ async def wapiti_main():
         wap.set_attack_options(attack_options)
 
         await wap.init_persister()
+        await wap.init_crawler()
         if args.flush_attacks:
             await wap.flush_attacks()
 
@@ -1402,12 +1414,14 @@ async def wapiti_main():
 
                 if "auth_type" in args:
                     is_logged_in, form, excluded_urls = await wap.crawler.async_try_login(
-                        wap.crawler.auth_url,
+                        auth_credentials,
+                        auth_url,
                         args.auth_type
                     )
-                    wap.set_auth_state(is_logged_in, form, wap.crawler.auth_url, args.auth_type)
+                    wap.set_auth_state(is_logged_in, form, auth_url, args.auth_type)
                     for url in excluded_urls:
                         wap.add_excluded_url(url)
+
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
                 await wap.browse(global_stop_event, parallelism=args.tasks)

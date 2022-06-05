@@ -4,6 +4,7 @@ import httpx
 import respx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
@@ -44,42 +45,42 @@ async def test_whole_stuff():
 
     persister.get_path_by_id.side_effect = get_path_by_id
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleSsrf(crawler, persister, options, Event())
-    module.do_post = True
+        module = ModuleSsrf(crawler, persister, options, Event())
+        module.do_post = True
 
-    respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "3": {
-                    "66696c65": [
-                        {
-                            "date": "2019-08-17T16:52:41+00:00",
-                            "url": "https://wapiti3.ovh/ssrf_data/yolo/3/66696c65/31337-0-192.168.2.1.txt",
-                            "ip": "192.168.2.1",
-                            "method": "GET"
-                        }
-                    ]
+        respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    "3": {
+                        "66696c65": [
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/3/66696c65/31337-0-192.168.2.1.txt",
+                                "ip": "192.168.2.1",
+                                "method": "GET"
+                            }
+                        ]
+                    }
                 }
-            }
+            )
         )
-    )
 
-    for request in all_requests:
-        await module.attack(request)
+        for request in all_requests:
+            await module.attack(request)
 
-    assert not persister.add_payload.call_count
-    # We must trigger finish() normally called by wapiti.py
-    await module.finish()
+        assert not persister.add_payload.call_count
+        # We must trigger finish() normally called by wapiti.py
+        await module.finish()
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["module"] == "ssrf"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Server Side Request Forgery")
-    assert persister.add_payload.call_args_list[0][1]["parameter"] == "file"
-    assert persister.add_payload.call_args_list[0][1]["request"].file_params == [
-        ['file', ('http://external.url/page', b'<xml>Hello there</xml', 'application/xml')]
-    ]
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["module"] == "ssrf"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Server Side Request Forgery")
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "file"
+        assert persister.add_payload.call_args_list[0][1]["request"].file_params == [
+            ['file', ('http://external.url/page', b'<xml>Hello there</xml', 'application/xml')]
+        ]

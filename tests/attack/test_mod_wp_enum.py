@@ -8,6 +8,7 @@ from tests import AsyncMock
 from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 
 
@@ -29,16 +30,15 @@ async def test_no_wordpress():
     request.path_id = 1
     # persister.requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    options = {"timeout": 10, "level": 2}
+        module = ModuleWpEnum(crawler, persister, options, Event())
 
-    module = ModuleWpEnum(crawler, persister, options, Event())
+        await module.attack(request)
 
-    await module.attack(request)
-
-    assert not persister.add_payload.call_count
-    await crawler.close()
+        assert not persister.add_payload.call_count
 
 
 @pytest.mark.asyncio
@@ -100,34 +100,33 @@ async def test_plugin():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    options = {"timeout": 10, "level": 2}
+        module = ModuleWpEnum(crawler, persister, options, Event())
 
-    module = ModuleWpEnum(crawler, persister, options, Event())
+        await module.attack(request)
 
-    await module.attack(request)
+        assert persister.add_payload.call_count
 
-    assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["module"] == "wp_enum"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+        )
 
-    assert persister.add_payload.call_args_list[0][1]["module"] == "wp_enum"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
-    )
-
-    assert persister.add_payload.call_args_list[1][1]["module"] == "wp_enum"
-    assert persister.add_payload.call_args_list[1][1]["category"] == _("Fingerprint web technology")
-    assert persister.add_payload.call_args_list[1][1]["info"] == (
-        '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
-    )
-    assert persister.add_payload.call_args_list[2][1]["info"] == (
-        '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
-    )
-    assert persister.add_payload.call_args_list[3][1]["info"] == (
-        '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_args_list[1][1]["module"] == "wp_enum"
+        assert persister.add_payload.call_args_list[1][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -188,26 +187,25 @@ async def test_theme():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    options = {"timeout": 10, "level": 2}
+        module = ModuleWpEnum(crawler, persister, options, Event())
 
-    module = ModuleWpEnum(crawler, persister, options, Event())
+        await module.attack(request)
 
-    await module.attack(request)
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"name": "customify", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[1][1]["info"] == (
-        '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
-    )
-    assert persister.add_payload.call_args_list[2][1]["info"] == (
-        '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
-    )
-    assert persister.add_payload.call_args_list[3][1]["info"] == (
-        '{"name": "customify", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
-    )
-
-    await crawler.close()
 
 @pytest.mark.asyncio
 @respx.mock
@@ -239,25 +237,26 @@ async def test_wp_version():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    options = {"timeout": 10, "level": 2}
+        with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+            mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+            module = ModuleWpEnum(crawler, persister, options, Event())
 
-    with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
-        mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
-        module = ModuleWpEnum(crawler, persister, options, Event())
+            await module.attack(request)
 
-        await module.attack(request)
+            mock_detect_plugin.assert_called_once()
+            mock_detect_theme.assert_called_once()
+            assert persister.add_payload.call_count == 2
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+            )
+            assert persister.add_payload.call_args_list[1][1]["info"] == (
+                '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+            )
 
-        mock_detect_plugin.assert_called_once()
-        mock_detect_theme.assert_called_once()
-        assert persister.add_payload.call_count == 2
-        assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
-        )
-        assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
-        )
 
 @pytest.mark.asyncio
 @respx.mock
@@ -279,16 +278,16 @@ async def test_wp_version_no_file():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    options = {"timeout": 10, "level": 2}
+        with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+            mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+            module = ModuleWpEnum(crawler, persister, options, Event())
 
-    with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
-        mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
-        module = ModuleWpEnum(crawler, persister, options, Event())
+            await module.attack(request)
 
-        await module.attack(request)
-
-        mock_detect_plugin.assert_called_once()
-        mock_detect_theme.assert_called_once()
-        assert persister.add_payload.call_count == 1
+            mock_detect_plugin.assert_called_once()
+            mock_detect_theme.assert_called_once()
+            assert persister.add_payload.call_count == 1

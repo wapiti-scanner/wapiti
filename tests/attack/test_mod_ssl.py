@@ -8,6 +8,7 @@ import ssl
 
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _, CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
@@ -46,65 +47,64 @@ async def test_ssl_scanner():
     persister = AsyncMock()
     request = Request("https://127.0.0.1:4443/")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("https://127.0.0.1:4443/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("https://127.0.0.1:4443/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleSsl(crawler, persister, options, Event())
-    await module.attack(request)
+        module = ModuleSsl(crawler, persister, options, Event())
+        await module.attack(request)
 
-    # Depending on installed python/openssl version different vulnerabilities may be present but the following
-    # vulnerabilities and information should be there everytime
+        # Depending on installed python/openssl version different vulnerabilities may be present but the following
+        # vulnerabilities and information should be there everytime
 
-    persister.add_payload.assert_any_call(
-        request_id=-1,
-        payload_type="additional",
-        module="ssl",
-        category=NAME,
-        level=INFO_LEVEL,
-        request=request,
-        parameter='',
-        wstg=["WSTG-CRYP-01"],
-        info="Certificate subject: yolo.com",
-        response=None
-    )
+        persister.add_payload.assert_any_call(
+            request_id=-1,
+            payload_type="additional",
+            module="ssl",
+            category=NAME,
+            level=INFO_LEVEL,
+            request=request,
+            parameter='',
+            wstg=["WSTG-CRYP-01"],
+            info="Certificate subject: yolo.com",
+            response=None
+        )
 
-    persister.add_payload.assert_any_call(
-        request_id=-1,
-        payload_type="vulnerability",
-        module="ssl",
-        category=NAME,
-        level=CRITICAL_LEVEL,
-        request=request,
-        parameter='',
-        wstg=["WSTG-CRYP-01"],
-        info="Requested hostname doesn't match those in the certificate",
-        response=None
-    )
+        persister.add_payload.assert_any_call(
+            request_id=-1,
+            payload_type="vulnerability",
+            module="ssl",
+            category=NAME,
+            level=CRITICAL_LEVEL,
+            request=request,
+            parameter='',
+            wstg=["WSTG-CRYP-01"],
+            info="Requested hostname doesn't match those in the certificate",
+            response=None
+        )
 
-    persister.add_payload.assert_any_call(
-        request_id=-1,
-        payload_type="vulnerability",
-        module="ssl",
-        category=NAME,
-        level=CRITICAL_LEVEL,
-        request=request,
-        parameter='',
-        wstg=["WSTG-CRYP-01"],
-        info="Certificate is invalid for Mozilla trust store: self signed certificate",
-        response=None
-    )
+        persister.add_payload.assert_any_call(
+            request_id=-1,
+            payload_type="vulnerability",
+            module="ssl",
+            category=NAME,
+            level=CRITICAL_LEVEL,
+            request=request,
+            parameter='',
+            wstg=["WSTG-CRYP-01"],
+            info="Certificate is invalid for Mozilla trust store: self signed certificate",
+            response=None
+        )
 
-    persister.add_payload.assert_any_call(
-        request_id=-1,
-        payload_type="vulnerability",
-        module="ssl",
-        category=NAME,
-        level=HIGH_LEVEL,
-        request=request,
-        parameter='',
-        wstg=["WSTG-CRYP-01"],
-        info="Strict Transport Security (HSTS) is not set",
-        response=None
-    )
-
-    await crawler.close()
+        persister.add_payload.assert_any_call(
+            request_id=-1,
+            payload_type="vulnerability",
+            module="ssl",
+            category=NAME,
+            level=HIGH_LEVEL,
+            request=request,
+            parameter='',
+            wstg=["WSTG-CRYP-01"],
+            info="Strict Transport Security (HSTS) is not set",
+            response=None
+        )
