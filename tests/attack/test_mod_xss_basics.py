@@ -4,6 +4,7 @@ import respx
 import httpx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xss import ModuleXss
@@ -36,13 +37,13 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleXss(crawler, persister, options, Event())
-    module.do_post = True
-    for request in all_requests:
-        await module.attack(request)
+        module = ModuleXss(crawler, persister, options, Event())
+        module.do_post = True
+        for request in all_requests:
+            await module.attack(request)
 
-    assert True
-    await crawler.close()
+        assert True

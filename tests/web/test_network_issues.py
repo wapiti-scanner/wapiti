@@ -7,6 +7,7 @@ import pytest
 from httpx import ReadTimeout
 
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 
 
@@ -26,11 +27,10 @@ async def test_chunked_timeout():
     url = "http://127.0.0.1:65080/chunked_timeout.php"
 
     request = Request(url)
-    crawler = AsyncCrawler(request, timeout=1)
-
-    with pytest.raises(ReadTimeout):
-        await crawler.async_send(request)
-    await crawler.close()
+    crawler_configuration = CrawlerConfiguration(request, timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        with pytest.raises(ReadTimeout):
+            await crawler.async_send(request)
 
 
 @pytest.mark.asyncio
@@ -38,8 +38,7 @@ async def test_timeout():
     url = "http://127.0.0.1:65080/timeout.php"
 
     request = Request(url)
-    crawler = AsyncCrawler(request, timeout=1)
-
-    with pytest.raises(ReadTimeout):
-        await crawler.async_send(request)
-    await crawler.close()
+    crawler_configuration = CrawlerConfiguration(request, timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        with pytest.raises(ReadTimeout):
+            await crawler.async_send(request)

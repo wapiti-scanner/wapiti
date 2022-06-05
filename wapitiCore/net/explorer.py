@@ -293,7 +293,7 @@ class Explorer:
             resource_url = request.url
 
             try:
-                page = await self._crawler.async_send(request)
+                page = await self._crawler.async_send(request, stream=True)
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, [], None
@@ -359,8 +359,6 @@ class Explorer:
                         self._regexes.append(wildcard_translate(bad_request))
                     elif isinstance(bad_request, web.Request):
                         self._processed_requests.append(bad_request)
-
-        self._crawler.stream = True
 
         if self._max_depth < 0:
             return
@@ -454,5 +452,3 @@ class Explorer:
 
             if not task_to_request and (self._stopped.is_set() or not to_explore):
                 break
-
-        self._crawler.stream = False

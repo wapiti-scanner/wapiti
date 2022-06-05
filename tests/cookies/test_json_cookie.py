@@ -5,6 +5,7 @@ import respx
 import httpx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.jsoncookie import JsonCookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.web import Request
@@ -29,37 +30,36 @@ async def test_cookie_dump():
             )
         )
 
-        crawler = AsyncCrawler(Request(url))
-        await crawler.async_get(Request(url))
+        crawler_configuration = CrawlerConfiguration(Request(url))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            await crawler.async_get(Request(url))
 
-        json_cookie.addcookies(crawler.session_cookies)
+            json_cookie.addcookies(crawler.session_cookies)
+            json_cookie.dump()
 
-        await crawler.close()
-        json_cookie.dump()
-
-        data = json.load(open(json_fd.name))
-        assert data == {
-            '.httpbin.org': {
-                '/': {
-                    'foo': {
-                        'expires': None,
-                        'port': None,
-                        'secure': False,
-                        'value': 'bar',
-                        'version': 0
-                    }
-                },
-                '/welcome/': {
-                    'dead': {
-                        'expires': None,
-                        'port': None,
-                        'secure': False,
-                        'value': 'beef',
-                        'version': 0
+            data = json.load(open(json_fd.name))
+            assert data == {
+                '.httpbin.org': {
+                    '/': {
+                        'foo': {
+                            'expires': None,
+                            'port': None,
+                            'secure': False,
+                            'value': 'bar',
+                            'version': 0
+                        }
+                    },
+                    '/welcome/': {
+                        'dead': {
+                            'expires': None,
+                            'port': None,
+                            'secure': False,
+                            'value': 'beef',
+                            'version': 0
+                        }
                     }
                 }
             }
-        }
 
 
 @pytest.mark.asyncio

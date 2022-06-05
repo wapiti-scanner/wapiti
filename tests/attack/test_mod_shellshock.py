@@ -6,6 +6,7 @@ import httpx
 import respx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
@@ -44,16 +45,16 @@ async def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleShellshock(crawler, persister, options, Event())
-    module.do_get = True
-    for request in all_requests:
-        await module.attack(request)
+        module = ModuleShellshock(crawler, persister, options, Event())
+        module.do_get = True
+        for request in all_requests:
+            await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "shellshock"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
-    assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/vuln/"
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "shellshock"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+        assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/vuln/"

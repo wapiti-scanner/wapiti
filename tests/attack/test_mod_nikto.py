@@ -6,6 +6,7 @@ import httpx
 import respx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
@@ -38,23 +39,23 @@ async def test_whole_stuff():
     request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2, "tasks": 20}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = ModuleNikto(crawler, persister, options, Event())
-    module.do_get = True
-    await module.attack(request)
+        module = ModuleNikto(crawler, persister, options, Event())
+        module.do_get = True
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
-    assert persister.add_payload.call_args_list[0][1]["request"].url == (
-        "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
-    )
-    assert (
-               "This CGI allows attackers read arbitrary files on the host"
-           ) in persister.add_payload.call_args_list[0][1]["info"]
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
+        assert persister.add_payload.call_args_list[0][1]["request"].url == (
+            "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
+        )
+        assert (
+                   "This CGI allows attackers read arbitrary files on the host"
+               ) in persister.add_payload.call_args_list[0][1]["info"]
 
 
 @pytest.mark.asyncio
@@ -92,22 +93,22 @@ async def test_false_positives():
     request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2, "tasks": 20}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
 
-    module = ModuleNikto(crawler, persister, options, Event())
-    module.do_get = True
-    module.NIKTO_DB = "temp_nikto_db"
-    await module.attack(request)
-    os.unlink(temp_nikto_db)
+        module = ModuleNikto(crawler, persister, options, Event())
+        module.do_get = True
+        module.NIKTO_DB = "temp_nikto_db"
+        await module.attack(request)
+        os.unlink(temp_nikto_db)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
-    assert persister.add_payload.call_args_list[0][1]["request"].url == (
-        "http://perdu.com/opendir.php?%2Fetc%2Fpasswd"
-    )
-    assert (
-               "This PHP-Nuke CGI allows attackers to read"
-           ) in persister.add_payload.call_args_list[0][1]["info"]
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
+        assert persister.add_payload.call_args_list[0][1]["request"].url == (
+            "http://perdu.com/opendir.php?%2Fetc%2Fpasswd"
+        )
+        assert (
+                   "This PHP-Nuke CGI allows attackers to read"
+               ) in persister.add_payload.call_args_list[0][1]["info"]

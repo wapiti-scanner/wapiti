@@ -8,6 +8,7 @@ import respx
 import httpx
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 
@@ -165,24 +166,24 @@ async def test_request_object():
         enctype="application/json"
     )
 
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65084/"))
-    page = await crawler.async_send(json_req)
-    assert page.json["json"] == {"z": 1, "a": 2}
-    assert page.json["headers"]["Content-Type"] == "application/json"
-    assert page.json["form"] == []  # PHP dictionaries are array too
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65084/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        page = await crawler.async_send(json_req)
+        assert page.json["json"] == {"z": 1, "a": 2}
+        assert page.json["headers"]["Content-Type"] == "application/json"
+        assert page.json["form"] == []  # PHP dictionaries are array too
 
-    page = await crawler.async_send(res12)
-    assert page.json["files"]
+        page = await crawler.async_send(res12)
+        assert page.json["files"]
 
-    res19 = Request(
-        "http://127.0.0.1:65084/httpbin.php?qs1",
-        post_params=[['post1', 'c'], ['post2', 'd']],
-        file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]],
-        enctype="multipart/form-data"
-    )
-    page = await crawler.async_send(res19)
-    assert page.json["files"]
-    await crawler.close()
+        res19 = Request(
+            "http://127.0.0.1:65084/httpbin.php?qs1",
+            post_params=[['post1', 'c'], ['post2', 'd']],
+            file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]],
+            enctype="multipart/form-data"
+        )
+        page = await crawler.async_send(res19)
+        assert page.json["files"]
 
 
 @pytest.mark.asyncio
@@ -194,12 +195,12 @@ async def test_redirect():
     respx.get(slyfx).mock(return_value=httpx.Response(301, headers={"Location": disney}, text="Back to disneyland"))
     respx.get(disney).mock(return_value=httpx.Response(200, text="Hello there"))
 
-    crawler = AsyncCrawler(Request(slyfx))
-    page = await crawler.async_send(Request(slyfx))
-    assert page.url == slyfx
-    assert not page.history
+    crawler_configuration = CrawlerConfiguration(Request(slyfx))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        page = await crawler.async_send(Request(slyfx))
+        assert page.url == slyfx
+        assert not page.history
 
-    page = await crawler.async_send(Request(slyfx), follow_redirects=True)
-    assert page.url == disney
-    assert page.history[0].url == slyfx
-    await crawler.close()
+        page = await crawler.async_send(Request(slyfx), follow_redirects=True)
+        assert page.url == disney
+        assert page.history[0].url == slyfx

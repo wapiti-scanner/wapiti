@@ -6,6 +6,7 @@ import pytest
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_backup import ModuleBackup
 from tests import AsyncMock
 
@@ -24,17 +25,17 @@ async def test_whole_stuff():
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleBackup(crawler, persister, options, Event())
-    module.do_get = True
-    await module.attack(request)
+        module = ModuleBackup(crawler, persister, options, Event())
+        module.do_get = True
+        await module.attack(request)
 
-    assert persister.add_payload.call_args_list[0][1]["module"] == "backup"
-    assert persister.add_payload.call_args_list[0][1]["payload_type"] == "vulnerability"
-    assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/config.php.bak"
-    await crawler.close()
+        assert persister.add_payload.call_args_list[0][1]["module"] == "backup"
+        assert persister.add_payload.call_args_list[0][1]["payload_type"] == "vulnerability"
+        assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/config.php.bak"
 
 
 @pytest.mark.asyncio
@@ -49,11 +50,10 @@ async def test_false_positive():
     request.path_id = 1
     request.set_headers({"content-type": "text/html"})
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleBackup(crawler, persister, options, Event())
-    module.do_get = True
-    assert not await module.must_attack(request)
-
-    await crawler.close()
+        module = ModuleBackup(crawler, persister, options, Event())
+        module.do_get = True
+        assert not await module.must_attack(request)

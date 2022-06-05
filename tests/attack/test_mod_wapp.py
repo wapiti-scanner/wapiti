@@ -8,6 +8,7 @@ from tests import AsyncMock
 from wapitiCore.attack.mod_wapp import ModuleWapp
 from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 
 
@@ -34,15 +35,15 @@ async def test_false_positive():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert not persister.add_payload.call_count
-    await crawler.close()
+        assert not persister.add_payload.call_count
 
 
 @pytest.mark.asyncio
@@ -66,20 +67,20 @@ async def test_url_detection():
     request = Request("http://perdu.com/owa/auth/logon.aspx")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["module"] == "wapp"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
-    assert persister.add_payload.call_args_list[2][1]["info"] == (
-        '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["module"] == "wapp"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -104,18 +105,18 @@ async def test_html_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"], "groups": ["Web development"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"], "groups": ["Web development"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -141,18 +142,18 @@ async def test_script_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"], "groups": ["Web development"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"], "groups": ["Web development"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -178,18 +179,18 @@ async def test_cookies_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"], "groups": ["Web development"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"], "groups": ["Web development"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -215,18 +216,18 @@ async def test_headers_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -253,18 +254,18 @@ async def test_meta_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"], "groups": ["Content"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"], "groups": ["Content"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -293,18 +294,18 @@ async def test_multi_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count
-    assert persister.add_payload.call_args_list[-1][1]["info"] == (
-        '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[-1][1]["info"] == (
+            '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -330,21 +331,21 @@ async def test_implies_detection():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 3
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
-    )
-    assert persister.add_payload.call_args_list[-1][1]["info"] == (
-        '{"versions": [], "name": "PHP", "categories": ["Programming languages"], "groups": ["Web development"]}'
-    )
-    await crawler.close()
+        assert persister.add_payload.call_count == 3
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[-1][1]["info"] == (
+            '{"versions": [], "name": "PHP", "categories": ["Programming languages"], "groups": ["Web development"]}'
+        )
 
 
 @pytest.mark.asyncio
@@ -370,25 +371,25 @@ async def test_vulnerabilities():
     request = Request("http://perdu.com")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 5
-    # FIrst one is an additional
-    assert persister.add_payload.call_args_list[0][1]["info"] == (
-        '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
-    )
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_count == 5
+        # FIrst one is an additional
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
 
-    assert persister.add_payload.call_args_list[3][1]["info"] == (
-        '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
-    )
-    assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
-    await crawler.close()
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
 
 
 @pytest.mark.asyncio
@@ -425,18 +426,17 @@ async def test_merge_with_and_without_redirection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event())
 
-    await module.attack(request)
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 5
+        assert persister.add_payload.call_count == 5
 
-    assert persister.add_payload.call_args_list[3][1]["info"] == (
-        '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
-    )
-    assert persister.add_payload.call_args_list[3][1]["category"] == _("Fingerprint web application framework")
-
-    await crawler.close()
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["category"] == _("Fingerprint web application framework")

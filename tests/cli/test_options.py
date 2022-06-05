@@ -24,6 +24,7 @@ async def test_options():
         stop_event = Event()
         cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
         cli.persister = CustomMock()
+        cli.crawler = mock.MagicMock()
         cli.set_attack_options({"timeout": 10})
 
         cli.set_modules("-all,xxe")

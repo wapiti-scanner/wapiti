@@ -6,6 +6,7 @@ import httpx
 
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_crlf import ModuleCrlf
 from tests import AsyncMock
@@ -25,15 +26,15 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/?a=b&foo=bar")
     request.path_id = 1
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleCrlf(crawler, persister, options, Event())
-    module.do_get = True
-    await module.attack(request)
+        module = ModuleCrlf(crawler, persister, options, Event())
+        module.do_get = True
+        await module.attack(request)
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "crlf"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("CRLF Injection")
-    assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"
-    await crawler.close()
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "crlf"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("CRLF Injection")
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"

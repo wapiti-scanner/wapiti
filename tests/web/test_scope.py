@@ -1,7 +1,10 @@
+import pytest
+
 import httpx
 import respx
 
 from wapitiCore.net.crawler import Page, AsyncCrawler, Scope
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 
 
@@ -22,7 +25,8 @@ def test_domain_scope():
     assert page.is_external_to_domain("http://perdu.com.org/blog/")
 
 
-def test_scopes():
+@pytest.mark.asyncio
+async def test_scopes():
     links = {
         "http://perdu.com/",
         "http://perdu.com/page.html",
@@ -36,46 +40,46 @@ def test_scopes():
         "http://external.tld/external.html"
     }
 
-    crawler = AsyncCrawler(Request("http://perdu.com/subdir/"))
-    crawler.scope = Scope.FOLDER
-    filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-    assert filtered == {
-        "http://perdu.com/subdir/subdirpage.html",
-        "http://perdu.com/subdir/subdir2/subdirpage2.html",
-        "http://perdu.com/subdir/page.html?k=v",
-        "http://perdu.com/subdir/page.html",
-    }
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/"), scope=Scope.FOLDER)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
+        assert filtered == {
+            "http://perdu.com/subdir/subdirpage.html",
+            "http://perdu.com/subdir/subdir2/subdirpage2.html",
+            "http://perdu.com/subdir/page.html?k=v",
+            "http://perdu.com/subdir/page.html",
+        }
 
-    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html"))
-    crawler.scope = Scope.PAGE
-    filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-    assert filtered == {
-        "http://perdu.com/subdir/page.html?k=v",
-        "http://perdu.com/subdir/page.html"
-    }
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html"), scope=Scope.PAGE)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
+        assert filtered == {
+            "http://perdu.com/subdir/page.html?k=v",
+            "http://perdu.com/subdir/page.html"
+        }
 
-    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
-    crawler.scope = Scope.URL
-    filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-    assert filtered == {
-        "http://perdu.com/subdir/page.html?k=v"
-    }
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.URL)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
+        assert filtered == {
+            "http://perdu.com/subdir/page.html?k=v"
+        }
 
-    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
-    crawler.scope = Scope.DOMAIN
-    filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-    assert filtered == {
-        "http://perdu.com/",
-        "http://perdu.com/page.html",
-        "http://perdu.com/subdir/subdirpage.html",
-        "http://perdu.com/subdir/subdir2/subdirpage2.html",
-        "http://sub.perdu.com/page.html",
-        "https://perdu.com/secure.html",
-        "http://perdu.com/subdir/page.html?k=v",
-        "http://perdu.com/subdir/page.html"
-    }
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.DOMAIN)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
+        assert filtered == {
+            "http://perdu.com/",
+            "http://perdu.com/page.html",
+            "http://perdu.com/subdir/subdirpage.html",
+            "http://perdu.com/subdir/subdir2/subdirpage2.html",
+            "http://sub.perdu.com/page.html",
+            "https://perdu.com/secure.html",
+            "http://perdu.com/subdir/page.html?k=v",
+            "http://perdu.com/subdir/page.html"
+        }
 
-    crawler = AsyncCrawler(Request("http://perdu.com/subdir/page.html?k=v"))
-    crawler.scope = Scope.PUNK
-    filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-    assert filtered == links
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.PUNK)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
+        assert filtered == links

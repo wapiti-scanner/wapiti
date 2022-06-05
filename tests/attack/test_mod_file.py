@@ -6,6 +6,7 @@ from asyncio import Event
 
 import pytest
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
@@ -30,18 +31,19 @@ async def test_inclusion_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
-    options = {"timeout": 10, "level": 2}
 
-    module = ModuleFile(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    assert persister.add_payload.call_count == 1
-    assert persister.add_payload.call_args_list[0][1]["module"] == "file"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Path Traversal")
-    assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
-    await crawler.close()
+        module = ModuleFile(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "file"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Path Traversal")
+        assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
 
 
 @pytest.mark.asyncio
@@ -49,16 +51,17 @@ async def test_warning_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
     request.path_id = 42
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
-    options = {"timeout": 10, "level": 2}
 
-    module = ModuleFile(crawler, persister, options, Event())
-    module.do_post = False
-    await module.attack(request)
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    assert persister.add_payload.call_count == 1
-    assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
-    await crawler.close()
+        module = ModuleFile(crawler, persister, options, Event())
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
 
 
 @pytest.mark.asyncio
@@ -78,16 +81,16 @@ async def test_no_crash():
     request.path_id = 2
     all_requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65085/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleFile(crawler, persister, options, Event())
-    module.do_post = False
-    for request in all_requests:
-        await module.attack(request)
+        module = ModuleFile(crawler, persister, options, Event())
+        module.do_post = False
+        for request in all_requests:
+            await module.attack(request)
 
-    assert True
-    await crawler.close()
+        assert True
 
 
 def test_prefix_and_suffix_detection():

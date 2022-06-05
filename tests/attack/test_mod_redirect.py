@@ -8,6 +8,7 @@ import pytest
 import httpx
 import respx
 
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
@@ -30,19 +31,19 @@ def run_around_tests():
 async def test_redirect_detection():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65080/open_redirect.php?yolo=nawak&url=toto")
-    crawler = AsyncCrawler(Request("http://127.0.0.1:65080/"))
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleRedirect(crawler, persister, options, Event())
-    await module.attack(request)
+        module = ModuleRedirect(crawler, persister, options, Event())
+        await module.attack(request)
 
-    assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
-    assert persister.add_payload.call_args_list[0][1]["category"] == _("Open Redirect")
-    assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
-        ['yolo', 'nawak'],
-        ['url', 'https://openbugbounty.org/']
-    ]
-    await crawler.close()
+        assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
+        assert persister.add_payload.call_args_list[0][1]["category"] == _("Open Redirect")
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
+            ['yolo', 'nawak'],
+            ['url', 'https://openbugbounty.org/']
+        ]
 
 
 @pytest.mark.asyncio
@@ -70,13 +71,13 @@ async def test_whole_stuff():
     request.path_id = 3
     all_requests.append(request)
 
-    crawler = AsyncCrawler(Request("http://perdu.com/"), timeout=1)
-    options = {"timeout": 10, "level": 2}
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
 
-    module = ModuleRedirect(crawler, persister, options, Event())
-    module.do_post = True
-    for request in all_requests:
-        await module.attack(request)
+        module = ModuleRedirect(crawler, persister, options, Event())
+        module.do_post = True
+        for request in all_requests:
+            await module.attack(request)
 
-    assert True
-    await crawler.close()
+        assert True
