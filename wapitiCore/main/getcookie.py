@@ -38,6 +38,44 @@ class InvalidOptionValue(Exception):
         return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
 
 
+def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
+    parts = urlparse(arguments.url)
+    base_url = urlunparse((parts.scheme, parts.netloc, parts.path, '', '', ''))
+    crawler_configuration = CrawlerConfiguration(Request(base_url))
+
+    if arguments.proxy:
+        proxy_parts = urlparse(arguments.proxy)
+        if proxy_parts.scheme and proxy_parts.netloc:
+            if proxy_parts.scheme.lower() in ("http", "https", "socks", "socks5"):
+                crawler_configuration.proxy = arguments.proxy
+
+    if arguments.tor:
+        crawler_configuration.proxy = "socks5://127.0.0.1:9050/"
+
+    if "user_agent" in arguments:
+        crawler_configuration.user_agent = arguments.user_agent
+
+    if "credentials" in arguments:
+        if "%" in arguments.credentials:
+            crawler_configuration.auth_credentials = arguments.credentials.split("%", 1)
+        else:
+            raise InvalidOptionValue("-a", arguments.credentials)
+
+    if "auth_type" in arguments:
+        crawler_configuration.auth_method = arguments.auth_type
+
+    headers = {}
+    for custom_header in arguments.headers:
+        if ":" in custom_header:
+            hdr_name, hdr_value = custom_header.split(":", 1)
+            headers[hdr_name.strip()] = hdr_value.strip()
+
+    if headers:
+        crawler_configuration.headers = headers
+
+    return crawler_configuration
+
+
 async def getcookie_main(arguments):
     parser = argparse.ArgumentParser(description="Wapiti-getcookie: An utility to grab cookies from a webpage")
 
@@ -110,40 +148,7 @@ async def getcookie_main(arguments):
         sys.exit()
 
     server = parts.netloc
-    base_url = urlunparse((parts.scheme, parts.netloc, parts.path, '', '', ''))
-    crawler_configuration = CrawlerConfiguration(Request(base_url))
-
-    # crawler = AsyncCrawler(Request(base))
-
-    if args.proxy:
-        proxy_parts = urlparse(args.proxy)
-        if proxy_parts.scheme and proxy_parts.netloc:
-            if proxy_parts.scheme.lower() in ("http", "https", "socks", "socks5"):
-                crawler_configuration.proxy = args.proxy
-
-    if args.tor:
-        crawler_configuration.proxy = "socks5://127.0.0.1:9050/"
-
-    if "user_agent" in args:
-        crawler_configuration.user_agent = args.user_agent
-
-    if "credentials" in args:
-        if "%" in args.credentials:
-            crawler_configuration.auth_credentials = args.credentials.split("%", 1)
-        else:
-            raise InvalidOptionValue("-a", args.credentials)
-
-    if "auth_type" in args:
-        crawler_configuration.auth_method = args.auth_type
-
-    headers = {}
-    for custom_header in args.headers:
-        if ":" in custom_header:
-            hdr_name, hdr_value = custom_header.split(":", 1)
-            headers[hdr_name.strip()] = hdr_value.strip()
-
-    if headers:
-        crawler_configuration.headers = headers
+    crawler_configuration = args_to_crawlerconfiguration(args)
 
     # Open or create the cookie file and delete previous cookies from this server
     json_cookie = jsoncookie.JsonCookie()
