@@ -11,7 +11,7 @@ from wapitiCore.definitions.fingerprint_webserver import \
     NAME as WEB_SERVER_VERSIONED
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("The range for {0} is from {1} to {2}")
@@ -167,7 +167,7 @@ class ModuleHtp(Attack):
 
     async def _download_htp_database(self, htp_dabatabse_url: str, htp_database_path: str):
         request = Request(htp_dabatabse_url)
-        response: Page = await self.crawler.async_send(request, follow_redirects=True)
+        response: Response = await self.crawler.async_send(request, follow_redirects=True)
 
         with open(htp_database_path, 'wb') as file:
             file.write(response.bytes)

@@ -27,7 +27,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red
 
@@ -77,7 +77,7 @@ class ModuleBruteLoginForm(Attack):
                 if password:
                     yield password
 
-    async def send_credentials(self, login_form, username_index, password_index, username, password) -> Page:
+    async def send_credentials(self, login_form, username_index, password_index, username, password) -> Response:
         post_params = login_form.post_params
         get_params = login_form.get_params
 

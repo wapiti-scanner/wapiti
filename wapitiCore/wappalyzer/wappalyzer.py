@@ -3,7 +3,7 @@ import os
 import re
 import warnings
 
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 class ApplicationDataException(Exception):
@@ -182,7 +182,7 @@ class Wappalyzer:
     Python Wappalyzer driver.
     """
 
-    def __init__(self, application_data: ApplicationData, web_content: Page):
+    def __init__(self, application_data: ApplicationData, web_content: Response):
         """
         Initialize a new Wappalyzer object.
         """

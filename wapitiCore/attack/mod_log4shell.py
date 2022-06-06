@@ -11,7 +11,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 
@@ -162,7 +162,7 @@ class ModuleLog4Shell(Attack):
                 continue
             await self._verify_param_vulnerability(malicious_request, param_uuid, param_name, page)
 
-    async def _verify_param_vulnerability(self, request: Request, param_uuid: uuid.UUID, param_name: str, page: Page):
+    async def _verify_param_vulnerability(self, request: Request, param_uuid: uuid.UUID, param_name: str, page: Response):
         if not await self._verify_dns(str(param_uuid)):
             return
         element_type = "query parameter" if request.method == "GET" else "body parameter"
@@ -190,7 +190,7 @@ class ModuleLog4Shell(Attack):
         modified_request: Request,
         malicious_headers: dict,
         headers_uuid_record: dict,
-        page: Page
+        page: Response
     ):
         for header, payload in malicious_headers.items():
             header_uuid = headers_uuid_record.get(header)
@@ -202,7 +202,7 @@ class ModuleLog4Shell(Attack):
         header: str,
         payload: str,
         unique_id: uuid.UUID,
-        page: Page
+        page: Response
     ):
         if await self._verify_dns(str(unique_id)) is True:
             await self.add_vuln_critical(
@@ -223,7 +223,7 @@ class ModuleLog4Shell(Attack):
             log_red(modified_request.http_repr())
             log_red("---")
 
-    async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID, page: Page):
+    async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID, page: Response):
         if not await self._verify_dns(str(param_uuid)):
             return
 

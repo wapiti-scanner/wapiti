@@ -70,15 +70,15 @@ def not_empty(original_function):
     return wrapped
 
 
-class Page:
+class Response:
     def __init__(self, response: httpx.Response, empty: bool = False):
-        """Create a new Page object.
+        """Create a new Response object.
 
         @type response: Response
         @param response: a requests Response instance.
 
         @type empty: bool
-        @param empty: whether the Page is empty (body length == 0)"""
+        @param empty: whether the Response is empty (body length == 0)"""
         self._response = response
         self._base = None
         self._soup = None
@@ -91,7 +91,7 @@ class Page:
 
     @property
     def url(self) -> str:
-        """Returns the URL of the current Page object
+        """Returns the URL of the current Response object
 
         @rtype: str
         """
@@ -103,7 +103,7 @@ class Page:
 
         @rtype: list
         """
-        return [Page(response) for response in self._response.history]
+        return [Response(response) for response in self._response.history]
 
     @property
     def headers(self):
@@ -594,7 +594,7 @@ class Page:
         return md5(self.text_only.encode(errors="ignore")).hexdigest()
 
     async def empty(self):
-        """Modify the current Page object to make it appears as if the content-length was 0."""
+        """Modify the current Response object to make it appears as if the content-length was 0."""
         self._is_empty = True
         await self.clean()
 
@@ -614,7 +614,7 @@ class Page:
 
     @encoding.setter
     def encoding(self, new_encoding):
-        """Change the encoding used for obtaining Page content"""
+        """Change the encoding used for obtaining Response content"""
         self._response.encoding = new_encoding
 
     @property
@@ -753,7 +753,7 @@ class Page:
         return result
 
     def iter_forms(self, autofill=True):
-        """Returns a generator of Request extracted from the Page.
+        """Returns a generator of Request extracted from the Response.
 
         @rtype: generator
         """
@@ -937,7 +937,7 @@ class Page:
                 yield new_form
 
     def find_login_form(self):
-        """Returns the login Request extracted from the Page, the username and password fields."""
+        """Returns the login Request extracted from the Response, the username and password fields."""
 
         for form in self.soup.find_all("form"):
             username_field_idx = []

@@ -24,7 +24,7 @@ from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_blue
 from wapitiCore.attack.attack import Attack
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
@@ -143,7 +143,7 @@ class ModuleWapp(Attack):
                         response=response
                     )
 
-    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Tuple[Dict, Page]:
+    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Tuple[Dict, Response]:
         detected_applications = []
         response = None
 
@@ -183,7 +183,7 @@ class ModuleWapp(Attack):
         # Requesting all technologies one by one
         for technologie_file_name in technologie_files_name:
             request = Request(technologies_base_url + technologie_file_name)
-            response: Page = await self.crawler.async_send(request)
+            response: Response = await self.crawler.async_send(request)
             # Merging all technologies in one object
             for technologie_name in response.json:
                 technologies[technologie_name] = response.json[technologie_name]

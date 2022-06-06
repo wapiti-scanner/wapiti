@@ -6,7 +6,7 @@ import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 
@@ -25,7 +25,7 @@ async def test_extract_disconnect_urls_one_url():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -48,7 +48,7 @@ async def test_extract_disconnect_urls_no_url():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -72,7 +72,7 @@ async def test_extract_disconnect_urls_multiple_urls():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -347,7 +347,7 @@ async def test_extract_disconnect_urls():
 #     response = Response(200, request=request)
 #
 #     async_http_request = Future()
-#     async_http_request.set_result(Page(response))
+#     async_http_request.set_result(Response(response))
 #
 #     respx.get("http://perdu.com/").mock(
 #         return_value=httpx.Response(

@@ -32,7 +32,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
 
@@ -260,7 +260,7 @@ class Attack:
 
     async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
                           level=0, request: Request = None, parameter="", info="", wstg: str = None,
-                          response: Page = None):
+                          response: Response = None):
         await self.persister.add_payload(
             request_id=request_id,
             payload_type=payload_type,

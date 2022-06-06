@@ -5,7 +5,7 @@ from asyncio import Event
 from typing import Dict
 from unittest import mock
 from unittest.mock import MagicMock, mock_open, patch
-from httpx import Response
+from httpx import Response as HttpxResponse
 
 import pytest
 import respx
@@ -17,7 +17,7 @@ from wapitiCore.definitions.log4shell import NAME
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 
@@ -190,7 +190,7 @@ async def test_verify_headers_vuln_found():
             malicious_headers = {"Header": "payload"}
             headers_uuid_record = {"Header": "unique_id"}
 
-            page = Page(Response(200, request=modified_request))
+            page = Response(HttpxResponse(200, request=modified_request))
 
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_called_once()
@@ -239,7 +239,7 @@ async def test_verify_headers_vuln_not_found():
             malicious_headers = {"Header": "payload"}
             headers_uuid_record = {"Header": "unique_id"}
 
-            page = Page(Response(200, request=modified_request))
+            page = Response(HttpxResponse(200, request=modified_request))
 
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_not_called()

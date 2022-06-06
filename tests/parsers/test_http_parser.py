@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 @respx.mock
@@ -21,7 +21,7 @@ def test_http():
     )
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.status == 418
     assert page.headers["X-Men"] == "Wolverine"
@@ -44,5 +44,5 @@ def test_http_redir():
     )
 
     resp = httpx.get(url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert page.is_directory_redirection

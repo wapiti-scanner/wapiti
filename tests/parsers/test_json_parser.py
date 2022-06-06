@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 @respx.mock
@@ -12,6 +12,6 @@ def test_json():
     )
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.json["key"] == "v4lu3"

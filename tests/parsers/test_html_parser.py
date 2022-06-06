@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 @respx.mock
@@ -11,7 +11,7 @@ def test_absolute_root():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Page(resp)
+        page = Response(resp)
 
         assert page.links == [url]
 
@@ -23,7 +23,7 @@ def test_relative_root():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Page(resp)
+        page = Response(resp)
 
         # We will get invalid hostnames with dots. Browsers do that too.
         assert set(page.links) == {url, "http://./", "http://../"}
@@ -36,7 +36,7 @@ def test_relative_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Page(resp)
+        page = Response(resp)
 
         assert set(page.links) == {
             url,
@@ -64,7 +64,7 @@ def test_other_links():
         )
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/frame1.html",
@@ -90,7 +90,7 @@ def test_extra_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/planets.gif",
@@ -124,7 +124,7 @@ def test_meta():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert page.title == "  -  Title :) "
         assert page.description == "Meta page"
@@ -142,7 +142,7 @@ def test_base_relative_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Page(resp)
+        page = Response(resp)
 
         assert set(page.links) == {
             url,
@@ -172,7 +172,7 @@ def test_base_extra_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/blog/",  # extracted from base href
@@ -207,7 +207,7 @@ def test_base_other_links():
         )
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/blog/frame1.html",

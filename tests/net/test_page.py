@@ -6,8 +6,8 @@ from unittest import mock
 import httpx
 import respx
 from bs4 import BeautifulSoup
-from httpx import Request, Response
-from wapitiCore.net.page import Page
+from httpx import Request, Response as HttpxResponse
+from wapitiCore.net.response import Response
 
 
 def test_make_absolute():
@@ -30,8 +30,8 @@ def test_make_absolute():
     ]
 
     request = Request("GET", "http://base.url")
-    response = Response(status_code=200, request=request)
-    page = Page(response)
+    response = HttpxResponse(status_code=200, request=request)
+    page = Response(response)
 
     for base_url, relative_url, expected in TEST_CASES:
         page._base = base_url
@@ -135,7 +135,7 @@ def test_page():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.url == target_url
     assert page.history == []
@@ -224,7 +224,7 @@ def test_size_page():
     )
 
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.size == 229
 
@@ -237,7 +237,7 @@ def test_size_page():
     )
 
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.size == 240
 
@@ -250,7 +250,7 @@ def test_size_page():
     )
 
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.size == 122
 
@@ -301,17 +301,17 @@ def test_raw_size_page():
     )
 
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.raw_size == 229
 
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.raw_size == 240
 
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.size == 122
 
@@ -346,12 +346,12 @@ def test_content_page():
     )
 
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.content == "foobar"
 
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.content == ""
 
@@ -369,7 +369,7 @@ def test_bytes_page():
     )
 
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.bytes == b""
 
@@ -405,19 +405,19 @@ def test_json_page():
     )
 
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.json is None
 
     mock.patch('httpx.Response.json', return_value=ValueError(None))
 
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.json == {'a': 1}
 
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     mock.patch('httpx.Response.json', return_value=ValueError(None))
     mock.patch('ast.literal_eval', return_value=ValueError(None))
     assert page.json is None
@@ -469,29 +469,29 @@ def test_scripts_page():
     )
     # internal url
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "http://perdu.com/javascript.js"
 
     # wrongly formatted url
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert len(page.scripts) == 0
 
     # with scheme & netloc
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "https://user:pass@NetLoc:80/awesome-script.js"
 
     # without scheme but with netloc
     resp = httpx.get(target_url_4, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert len(page.scripts) == 0
 
     # without extension
     resp = httpx.get(target_url_5, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "http://netloc/awesome-script.js"
 
@@ -540,14 +540,14 @@ def test_soup_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.soup is not None
     assert page.soup.find("title").get_text() == "Foobar"
 
     # base tag
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.soup is not None
     assert page.base_url == "https://example.com/"
@@ -583,7 +583,7 @@ def test_iter_frame_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert next(page.iter_frames()) == "http://example.com/"
 
@@ -630,21 +630,21 @@ def test_redirection_url_page():
 
     # No redirect
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.redirection_url == ""
     assert page.is_directory_redirection is False
 
     # Redirection
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.redirection_url == "http://perdu2.com/index.html"
     assert page.is_directory_redirection is False
 
     # Same url
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.redirection_url == "http://perdu3.com/"
     assert page.is_directory_redirection is True
@@ -683,13 +683,13 @@ def test_is_directory_redirection_page():
 
     # No redirect
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.redirection_url == ""
 
     # Redirection
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.redirection_url == "http://perdu2.com/index.html"
 
@@ -718,10 +718,11 @@ def test_title_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     assert page.soup is not None
     assert page.title == "Foobar"
+
 
 @respx.mock
 def test_html_redirection():
@@ -767,8 +768,6 @@ def test_html_redirection():
         </body>
     </html>
     """
-
-
     target_urls = [target_url_1, target_url_2, target_url_3]
     page_contents = [page_content_1, page_content_2, page_content_3]
 
@@ -781,7 +780,7 @@ def test_html_redirection():
         )
 
         resp = httpx.get(target_url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
 
         assert len(page.html_redirections) == 1
         assert page.html_redirections[0] == "http://test.com/"
