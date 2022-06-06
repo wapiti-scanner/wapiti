@@ -5,7 +5,7 @@ import pytest
 from wapitiCore.net.xss_utils import get_context_list, valid_xss_content_type, meet_requirements, \
     find_separator
 from wapitiCore.net.csp_utils import has_csp
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 def test_title_context():
@@ -521,7 +521,7 @@ def test_csp_detection():
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert not has_csp(page)
 
     url = "http://perdu.com/http_csp"
@@ -536,7 +536,7 @@ def test_csp_detection():
     )
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert has_csp(page)
 
     url = "http://perdu.com/meta_csp"
@@ -557,7 +557,7 @@ def test_csp_detection():
     )
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert has_csp(page)
 
 
@@ -567,14 +567,14 @@ def test_valid_content_type():
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert valid_xss_content_type(page)
 
     url = "http://perdu.com/picture.png"
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "image/png"}))
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert not valid_xss_content_type(page)
 
 

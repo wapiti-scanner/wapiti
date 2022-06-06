@@ -36,7 +36,7 @@ from wapitiCore.language.language import _
 from wapitiCore.net import web, Scope
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
@@ -278,7 +278,7 @@ class AsyncCrawler:
             return False, {}, []
         return True, {}, []
 
-    def _extract_disconnect_urls(self, page: Page) -> List[str]:
+    def _extract_disconnect_urls(self, page: Response) -> List[str]:
         """
         Extract all the disconnect urls on the given page and returns them.
         """
@@ -355,8 +355,8 @@ class AsyncCrawler:
             follow_redirects: bool = False,
             headers: dict = None,
             stream: bool = False
-    ) -> Page:
-        """Fetch the given url, returns a Page object on success, None otherwise.
+    ) -> Response:
+        """Fetch the given url, returns a Response object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
 
         @param resource: URL to get.
@@ -366,7 +366,7 @@ class AsyncCrawler:
         @param headers: Dictionary of additional headers to send with the request.
         @type headers: dict
         @type stream: bool
-        @rtype: Page
+        @rtype: Response
         """
         request = self._client.build_request("GET", resource.url, headers=headers, timeout=self.timeout)
         try:
@@ -379,7 +379,7 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Response(response)
 
     @retry(delay=1, times=3)
     async def async_post(
@@ -388,14 +388,14 @@ class AsyncCrawler:
             follow_redirects: bool = False,
             headers: dict = None,
             stream: bool = False
-    ) -> Page:
-        """Submit the given form, returns a Page on success, None otherwise.
+    ) -> Response:
+        """Submit the given form, returns a Response on success, None otherwise.
 
         @type form: web.Request
         @type follow_redirects: bool
         @type headers: dict
         @type stream: bool
-        @rtype: Page
+        @rtype: Response
         """
         form_headers = {}
         if not form.is_multipart:
@@ -446,7 +446,7 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Response(response)
 
     @retry(delay=1, times=3)
     async def async_request(
@@ -456,15 +456,15 @@ class AsyncCrawler:
             follow_redirects: bool = False,
             headers: dict = None,
             stream: bool = False
-    ) -> Page:
-        """Submit the given form, returns a Page on success, None otherwise.
+    ) -> Response:
+        """Submit the given form, returns a Response on success, None otherwise.
 
         @type method: str
         @type form: web.Request
         @type follow_redirects: bool
         @type headers: dict
         @type stream: bool
-        @rtype: Page
+        @rtype: Response
         """
         form_headers = {}
         if isinstance(headers, dict) and headers:
@@ -505,7 +505,7 @@ class AsyncCrawler:
 
             raise exception
 
-        return Page(response)
+        return Response(response)
 
     async def async_send(
             self,
@@ -513,7 +513,7 @@ class AsyncCrawler:
             headers: dict = None,
             follow_redirects: bool = False,
             stream: bool = False
-    ) -> Page:
+    ) -> Response:
         if resource.method == "GET":
             page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         elif resource.method == "POST":

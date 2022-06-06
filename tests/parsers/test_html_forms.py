@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 
 
 @respx.mock
@@ -11,7 +11,7 @@ def test_forms():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Page(resp)
+        page = Response(resp)
         count = 0
         form_action = False
 
@@ -98,7 +98,7 @@ def test_email_input():
     respx.get(url).mock(return_value=httpx.Response(200, text=body))
 
     resp = httpx.get(url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     form = next(page.iter_forms())
     assert "@" in form.post_params[0][1]
@@ -118,7 +118,7 @@ def test_button_without_value():
     respx.get(url).mock(return_value=httpx.Response(200, text=body))
 
     resp = httpx.get(url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     form = next(page.iter_forms())
     assert form.post_params == [["text", "default"], ["btn", ""]]

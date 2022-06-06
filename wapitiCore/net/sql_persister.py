@@ -29,7 +29,7 @@ from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
                         literal_column, or_, select)
 from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import web
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging
 
@@ -198,7 +198,7 @@ class SqlPersister:
         async for path in self._get_paths(method=None, crawled=False):
             yield path
 
-    async def save_requests(self, paths_list: Tuple[Request, Page]):
+    async def save_requests(self, paths_list: Tuple[Request, Response]):
         if not paths_list:
             return
 
@@ -325,7 +325,7 @@ class SqlPersister:
                 if all_param_values:
                     await conn.execute(self.params.insert(), all_param_values)
 
-    async def save_response(self, response: Page) -> Optional[int]:
+    async def save_response(self, response: Response) -> Optional[int]:
         if not response:
             return None
 
@@ -339,7 +339,7 @@ class SqlPersister:
             result = await conn.execute(statement)
             return result.inserted_primary_key[0]
 
-    async def save_request(self, http_resource: Request, response: Page = None):
+    async def save_request(self, http_resource: Request, response: Response = None):
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
@@ -624,7 +624,7 @@ class SqlPersister:
         parameter="",
         info="",
         wstg=None,
-        response: Page = None
+        response: Response = None
     ):
 
         response_id = await self.save_response(response)

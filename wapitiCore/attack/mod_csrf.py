@@ -24,7 +24,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.csrf import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import Page
+from wapitiCore.net.crawler import Response
 from wapitiCore.main.log import log_red
 
 
@@ -99,7 +99,7 @@ class ModuleCsrf(Attack):
         return True
 
     @staticmethod
-    def is_same_response(original_response: Page, mutated_response: Page):
+    def is_same_response(original_response: Response, mutated_response: Response):
         """Check whether mutated_response status and content are identical to those of original_response"""
 
         if original_response.status != mutated_response.status:

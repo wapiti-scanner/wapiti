@@ -23,7 +23,7 @@ from wapitiCore.definitions.http_headers import (
     WSTG_CODE_STRICT_TRANSPORT_SECURITY)
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, log_green, log_red
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 INFO_HSTS = _("Strict-Transport-Security is not set")
@@ -60,7 +60,7 @@ class ModuleHttpHeaders(Attack):
     }
 
     @staticmethod
-    def is_set(response: Page, header_name, check_list):
+    def is_set(response: Response, header_name, check_list):
         if header_name not in response.headers:
             return False
 
@@ -68,7 +68,7 @@ class ModuleHttpHeaders(Attack):
 
     async def check_header(
         self,
-        response: Page,
+        response: Response,
         request: Request,
         header: str,
         check_list: List[str],

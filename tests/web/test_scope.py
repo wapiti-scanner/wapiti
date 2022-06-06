@@ -3,7 +3,7 @@ import pytest
 import httpx
 import respx
 
-from wapitiCore.net.crawler import Page, AsyncCrawler, Scope
+from wapitiCore.net.crawler import Response, AsyncCrawler, Scope
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
 
@@ -14,7 +14,7 @@ def test_domain_scope():
     respx.get(url).mock(return_value=httpx.Response(200, text="Hello world!"))
 
     resp = httpx.get(url)
-    page = Page(resp)
+    page = Response(resp)
     assert page.is_external_to_domain("http://yolo.tld")
     assert page.is_external_to_domain("http://www.google.com/")
     assert page.is_external_to_domain("http://jesuisperdu.com/")

@@ -5,7 +5,7 @@ import respx
 import httpx
 import pytest
 from wapitiCore.wappalyzer.wappalyzer import ApplicationData, Wappalyzer
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 
 
 @respx.mock
@@ -109,7 +109,7 @@ async def test_applicationdata():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Page(resp)
+    page = Response(resp)
 
     wappalyzer = Wappalyzer(application_data, page)
 

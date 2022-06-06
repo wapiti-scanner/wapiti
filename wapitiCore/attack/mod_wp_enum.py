@@ -11,7 +11,7 @@ from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
-from wapitiCore.net.page import Page
+from wapitiCore.net.response import Response
 from wapitiCore.net.web import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
@@ -53,7 +53,7 @@ class ModuleWpEnum(Attack):
 
         for rss_url in rss_urls:
             req = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}", "GET")
-            rep: Page = await self.crawler.async_send(req, follow_redirects=True)
+            rep: Response = await self.crawler.async_send(req, follow_redirects=True)
 
             if not rep.content or rep.is_error:
                 continue
