@@ -162,9 +162,16 @@ class ModuleLog4Shell(Attack):
                 continue
             await self._verify_param_vulnerability(malicious_request, param_uuid, param_name, page)
 
-    async def _verify_param_vulnerability(self, request: Request, param_uuid: uuid.UUID, param_name: str, page: Response):
+    async def _verify_param_vulnerability(
+            self,
+            request: Request,
+            param_uuid: uuid.UUID,
+            param_name: str,
+            page: Response
+    ):
         if not await self._verify_dns(str(param_uuid)):
             return
+
         element_type = "query parameter" if request.method == "GET" else "body parameter"
 
         await self.add_vuln_critical(
