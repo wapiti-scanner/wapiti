@@ -309,16 +309,15 @@ class Explorer:
                 async with self._shared_lock:
                     self._pattern_counts[request.pattern] += 1
 
-            if request.link_depth == self._max_depth:
-                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-                await page.close()
-                return True, [], page
-
             # Above this line we need the content of the page. As we are in stream mode we must force reading the body.
             try:
                 await page.read()
             finally:
                 await page.close()
+
+            if request.link_depth == self._max_depth:
+                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
+                return True, [], page
 
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
