@@ -380,6 +380,8 @@ class Response:
         query_string = parts.query
         url_path = parts.path or '/'
         url_path = normpath(url_path.replace("\\", "/"))
+        # Returns an empty string for everything that we don't want to deal with
+        absolute_url = ""
 
         # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
         url_path = re.sub(r"^/{2,}", "/", url_path)
@@ -408,7 +410,7 @@ class Response:
                     if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
                         # Beware of IPv6 addresses
                         netloc = parts.netloc.rsplit(":", 1)[0]
-                    return urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
+                    absolute_url = urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
         elif link.startswith("//"):
             if parts.netloc:
                 netloc = parts.netloc
@@ -420,13 +422,13 @@ class Response:
                 if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
                     # Beware of IPv6 addresses
                     netloc = parts.netloc.rsplit(":", 1)[0]
-                return urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
+                absolute_url = urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
         elif link.startswith("/"):
-            return urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
+            absolute_url = urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
         elif link.startswith("?"):
-            return urlunparse((scheme, domain, path, params, query_string, ''))
+            absolute_url = urlunparse((scheme, domain, path, params, query_string, ''))
         elif link == "" or link.startswith("#"):
-            return self.url
+            absolute_url = self.url
         else:
             # relative path to file, subdirectory or parent directory
             current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
@@ -436,9 +438,9 @@ class Response:
             if url_path.endswith('/') and not new_path.endswith('/'):
                 new_path += '/'
 
-            return urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
-        # Returns an empty string for everything that we don't want to deal with
-        return ""
+            absolute_url = urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
+
+        return absolute_url
 
     @not_empty
     def _iter_links(self):
@@ -752,6 +754,7 @@ class Response:
         result.update(self.html_redirections)
         return result
 
+    # pylint: disable=too-many-branches
     def iter_forms(self, autofill=True):
         """Returns a generator of Request extracted from the Response.
 
@@ -802,6 +805,7 @@ class Response:
                 if input_type in {"reset", "button"}:
                     # Those input types doesn't send any value
                     continue
+
                 if input_type == "image":
                     if method == "GET":
                         get_params.append([input_field["name"] + ".x", "1"])

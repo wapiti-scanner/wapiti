@@ -361,7 +361,11 @@ async def test_attack_apache_struts():
     future_url_vulnerability = asyncio.Future()
     future_url_vulnerability.set_result(None)
 
-    with patch.object(ModuleLog4Shell, "_verify_url_vulnerability", return_value=future_url_vulnerability) as mock_verify_url:
+    with patch.object(
+            ModuleLog4Shell,
+            "_verify_url_vulnerability",
+            return_value=future_url_vulnerability
+    ) as mock_verify_url:
         module = ModuleLog4Shell(crawler, persister, options, Event())
 
         await module._attack_apache_struts("http://perdu.com/")
