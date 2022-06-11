@@ -30,6 +30,7 @@ from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CO
 from wapitiCore.net.web import Request
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
+from wapitiCore.net.response import Html
 
 
 class ModulePermanentxss(Attack):
@@ -83,6 +84,8 @@ class ModulePermanentxss(Attack):
             self.network_errors += 1
             return
 
+        html = Html(response.content, url)
+
         # Should we look for taint codes sent with GET in the webpages?
         # Exploiting those may imply sending more GET requests
 
@@ -110,7 +113,7 @@ class ModulePermanentxss(Attack):
                         self.PAYLOADS_FILE,
                         self.external_endpoint,
                         self.proto_endpoint,
-                        response,
+                        html,
                         flags,
                         taint
                     ):
@@ -158,7 +161,7 @@ class ModulePermanentxss(Attack):
                                         input_request.path
                                     )
 
-                                if has_strong_csp(response):
+                                if has_strong_csp(response, html):
                                     description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                                 await self.add_vuln_high(
@@ -183,7 +186,7 @@ class ModulePermanentxss(Attack):
                                     parameter
                                 )
 
-                                if has_strong_csp(response):
+                                if has_strong_csp(response, html):
                                     log_red(_("Warning: Content-Security-Policy is present!"))
 
                                 log_red(Messages.MSG_EVIL_REQUEST)
@@ -268,6 +271,8 @@ class ModulePermanentxss(Attack):
                     self.network_errors += 1
                     continue
 
+                html = Html(response.content, output_url)
+
                 if (
                         not response.is_redirect and
                         valid_xss_content_type(evil_request) and
@@ -276,7 +281,7 @@ class ModulePermanentxss(Attack):
                             self.PAYLOADS_FILE,
                             self.external_endpoint,
                             self.proto_endpoint,
-                            response,
+                            html,
                             xss_flags,
                             taint
                         )
@@ -296,7 +301,7 @@ class ModulePermanentxss(Attack):
                             page
                         )
 
-                    if has_strong_csp(response):
+                    if has_strong_csp(response, html):
                         description += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                     await self.add_vuln_high(
@@ -323,7 +328,7 @@ class ModulePermanentxss(Attack):
                         xss_param
                     )
 
-                    if has_strong_csp(response):
+                    if has_strong_csp(response, html):
                         log_red(_("Warning: Content-Security-Policy is present!"))
 
                     log_red(Messages.MSG_EVIL_REQUEST)

@@ -28,6 +28,7 @@ from posixpath import normpath
 from urllib.parse import urlparse, urlunparse
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
+from typing import Iterator, List, Optional, Dict, Set, Tuple
 
 # Third-parties
 import httpx
@@ -36,7 +37,8 @@ from bs4.element import Comment, Doctype
 
 # Internal libraries
 from wapitiCore import parser_name
-from wapitiCore.net import lamejs, web
+from wapitiCore.net import lamejs
+from wapitiCore.net.web import Request
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 RE_JS_REDIR = re.compile(
@@ -70,24 +72,113 @@ def not_empty(original_function):
     return wrapped
 
 
+def make_absolute(base: str, url: str, allow_fragments=True) -> str:
+    """Convert a relative URL to an absolute one (with scheme, host, path, etc) and use the base href if present.
+
+    @type base: str
+    @param base: The base URL
+
+    @type url: str
+    @param url: A relative URL.
+
+    @type allow_fragments: bool
+    @param allow_fragments: Must be set to True if URLs with anchors must be kept
+    @rtype: str
+    """
+    if not url.strip():
+        return ""
+
+    current_url_parts = urlparse(base)
+    scheme = current_url_parts.scheme
+    domain = current_url_parts.netloc
+    path = current_url_parts.path
+    params = current_url_parts.params
+
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
+        return ""
+
+    query_string = parts.query
+    url_path = parts.path or '/'
+    url_path = normpath(url_path.replace("\\", "/"))
+    # Returns an empty string for everything that we don't want to deal with
+    absolute_url = ""
+
+    # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
+    url_path = re.sub(r"^/{2,}", "/", url_path)
+
+    # normpath removes the trailing slash so we must add it if necessary
+    if (parts.path.endswith(('/', '/.')) or parts.path == '.') and not url_path.endswith('/'):
+        url_path += '/'
+
+    # a hack for auto-generated Apache directory index
+    if query_string in [
+            "C=D;O=A", "C=D;O=D", "C=M;O=A", "C=M;O=D",
+            "C=N;O=A", "C=N;O=D", "C=S;O=A", "C=S;O=D"
+    ]:
+        query_string = ""
+
+    if parts.scheme:
+        if parts.scheme in ('http', 'https'):
+            if parts.netloc and parts.netloc != "http:":  # malformed url
+                netloc = parts.netloc
+                try:
+                    # urlparse tries to convert port in base10. an error is raised if port is not digits
+                    port = parts.port
+                except ValueError:
+                    port = None
+
+                if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
+                    # Beware of IPv6 addresses
+                    netloc = parts.netloc.rsplit(":", 1)[0]
+                absolute_url = urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
+    elif url.startswith("//"):
+        if parts.netloc:
+            netloc = parts.netloc
+            try:
+                port = parts.port
+            except ValueError:
+                port = None
+
+            if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
+                # Beware of IPv6 addresses
+                netloc = parts.netloc.rsplit(":", 1)[0]
+            absolute_url = urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
+    elif url.startswith("/"):
+        absolute_url = urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
+    elif url.startswith("?"):
+        absolute_url = urlunparse((scheme, domain, path, params, query_string, ''))
+    elif url.startswith("#"):
+        if  allow_fragments:
+            absolute_url = base + url
+        else:
+            absolute_url = base
+    elif url == "":
+        absolute_url = base
+    else:
+        # relative path to file, subdirectory or parent directory
+        current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
+        # new_path = (current_directory + parts.path).replace("//", "/").replace("/./", "/")
+
+        new_path = normpath(current_directory + url_path)
+        if url_path.endswith('/') and not new_path.endswith('/'):
+            new_path += '/'
+
+        absolute_url = urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
+
+    return absolute_url
+
+
 class Response:
-    def __init__(self, response: httpx.Response, empty: bool = False):
+    def __init__(self, response: httpx.Response):
         """Create a new Response object.
 
         @type response: Response
-        @param response: a requests Response instance.
-
-        @type empty: bool
-        @param empty: whether the Response is empty (body length == 0)"""
+        @param response: a requests Response instance."""
         self._response = response
-        self._base = None
-        self._soup = None
-        self._is_empty = empty
-        try:
-            # TODO: httpx.URL is interesting, reuse that
-            self._fld = get_fld(str(response.url))
-        except TldDomainNotFound:
-            self._fld = urlparse(str(response.url)).netloc
+        # self._base = None
 
     @property
     def url(self) -> str:
@@ -98,7 +189,7 @@ class Response:
         return str(self._response.url)
 
     @property
-    def history(self) -> list:
+    def history(self) -> List["Response"]:
         """Returns a list of precedent webpages in case of redirection
 
         @rtype: list
@@ -176,7 +267,7 @@ class Response:
 
     @property
     @lru_cache(maxsize=2)
-    def delay(self):
+    def delay(self) -> float:
         """Time in seconds it took to fetch the web-page.
 
         @rtype: float
@@ -192,9 +283,6 @@ class Response:
     @property
     def content(self) -> str:
         """HTML source code of the web-page as str"""
-        if self._is_empty:
-            return ""
-
         try:
             return self._response.text
         except (httpx.ConnectError, OSError, IncompleteRead):
@@ -203,13 +291,10 @@ class Response:
     @property
     def bytes(self) -> bytes:
         """HTTP body response as raw bytes"""
-        if self._is_empty:
-            return b""
-
         return self._response.content
 
     @property
-    def json(self):
+    def json(self) -> Optional[dict]:
         if not self.content:
             return None
 
@@ -243,245 +328,22 @@ class Response:
         """Content-Type of the web-page as returned by the server."""
         return self._response.headers.get("content-type", "").lower()
 
-    @not_empty
-    def _scripts(self):
-        url_parts = urlparse(self._base or self.url)
-        scheme = url_parts.scheme
-
-        for tag in self.soup.find_all("script", src=True):
-            parts = urlparse(tag["src"])
-
-            if parts.scheme:
-                if parts.netloc:
-                    # Full absolute URL
-                    script_url = urlunparse((parts.scheme, parts.netloc, parts.path, parts.params, parts.query, ''))
-                else:
-                    # Malformed absolute URL (no host)
-                    continue
-            elif parts.netloc:
-                # Protocol relative URL
-                script_url = urlunparse((scheme, parts.netloc, parts.path, parts.params, parts.query, ''))
-            else:
-                # Internal relative URL
-                script_url = urlunparse(('', '', parts.path, parts.params, parts.query, ''))
-            yield script_url
-
-    @property
-    def soup(self):
-        """Returns a parsable BeautifulSoup representation of the webpage.
-
-        @rtype: BeautifulSoup
-        """
-        if self._soup is None:
-            if "text" in self.type:
-                self._soup = BeautifulSoup(self.content, parser_name)
-                base_tag = self._soup.find("base", href=True)
-                if base_tag:
-                    base_parts = urlparse(base_tag["href"])
-                    current = urlparse(self.url)
-                    base_path = base_parts.path or "/"
-                    base_path = normpath(base_path.replace("\\", "/"))
-                    # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
-                    base_path = re.sub(r"^/{2,}", "/", base_path)
-                    # I guess a base url should always be a directory
-                    if not base_path.endswith('/'):
-                        base_path += '/'
-
-                    self._base = urlunparse(
-                        (
-                            base_parts.scheme or current.scheme,
-                            base_parts.netloc or current.netloc,
-                            base_path, "", "", ""
-                        )
-                    )
-            else:
-                self._soup = BeautifulSoup('', parser_name)
-        return self._soup
-
-    async def clean(self):
-        if self._soup is not None:
-            self._soup.decompose()
-            del self._soup
-
     @property
     @lru_cache(maxsize=2)
-    def scripts(self) -> list:
-        """List of URLs of imported JS scripts. Query strings and anchors are removed.
-
-        @rtype: list
-        """
-        return [self.make_absolute(script_url) for script_url in self._scripts()]
-
-    def iter_frames(self):
-        """Returns the absolute URLs of frames loaded in the webpage."""
-        for tag in self.soup.find_all(["frame", "iframe"], src=True):
-            value = tag["src"].split("#")[0].strip()
-            if value:
-                fixed_url = self.make_absolute(value)
-                if fixed_url:
-                    yield fixed_url
-
-    @property
-    @lru_cache(maxsize=2)
-    def redirection_url(self):
+    def redirection_url(self) -> str:
         """Returns the fixed URL sent through the Location header if set otherwise returns None."""
         if self._response.is_redirect:
             if "location" in self._response.headers:
-                return self.make_absolute(self._response.headers["location"])
+                return make_absolute(self.url, self._response.headers["location"])
         return ""
 
     @property
-    def is_directory_redirection(self):
+    def is_directory_redirection(self) -> bool:
         if not self.redirection_url:
             return False
         if self.url + ("" if self.url.endswith("/") else "/") == self.redirection_url:
             return True
         return False
-
-    @not_empty
-    def _iter_raw_links(self):
-        """Generator returning all raw URLs found in HTML "a href", frame's src tags and redirections."""
-        yield self.redirection_url
-
-        for tag in self.soup.find_all("a", href=True):
-            yield tag["href"].split("#")[0].strip()
-
-        for tag in self.soup.find_all(["frame", "iframe"], src=True):
-            yield tag["src"].split("#")[0].strip()
-
-        for tag in self.soup.find_all("form", action=True):
-            yield tag["action"]
-
-        for tag in self.soup.find_all("button", formaction=True):
-            yield tag["formaction"]
-
-    def make_absolute(self, link: str) -> str:
-        """Convert a relative URL to an absolute one (with scheme, host, path, etc) and use the base href if present.
-
-        @type link: str
-        @param link: A relative URL.
-        @rtype: str
-        """
-        if not link.strip():
-            return ""
-
-        current_url_parts = urlparse(self._base or self.url)
-        scheme = current_url_parts.scheme
-        domain = current_url_parts.netloc
-        path = current_url_parts.path
-        params = current_url_parts.params
-
-        try:
-            parts = urlparse(link)
-        except ValueError:
-            # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
-            return ""
-
-        query_string = parts.query
-        url_path = parts.path or '/'
-        url_path = normpath(url_path.replace("\\", "/"))
-        # Returns an empty string for everything that we don't want to deal with
-        absolute_url = ""
-
-        # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
-        url_path = re.sub(r"^/{2,}", "/", url_path)
-
-        # normpath removes the trailing slash so we must add it if necessary
-        if (parts.path.endswith(('/', '/.')) or parts.path == '.') and not url_path.endswith('/'):
-            url_path += '/'
-
-        # a hack for auto-generated Apache directory index
-        if query_string in [
-                "C=D;O=A", "C=D;O=D", "C=M;O=A", "C=M;O=D",
-                "C=N;O=A", "C=N;O=D", "C=S;O=A", "C=S;O=D"
-        ]:
-            query_string = ""
-
-        if parts.scheme:
-            if parts.scheme in ('http', 'https'):
-                if parts.netloc and parts.netloc != "http:":  # malformed url
-                    netloc = parts.netloc
-                    try:
-                        # urlparse tries to convert port in base10. an error is raised if port is not digits
-                        port = parts.port
-                    except ValueError:
-                        port = None
-
-                    if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
-                        # Beware of IPv6 addresses
-                        netloc = parts.netloc.rsplit(":", 1)[0]
-                    absolute_url = urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
-        elif link.startswith("//"):
-            if parts.netloc:
-                netloc = parts.netloc
-                try:
-                    port = parts.port
-                except ValueError:
-                    port = None
-
-                if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
-                    # Beware of IPv6 addresses
-                    netloc = parts.netloc.rsplit(":", 1)[0]
-                absolute_url = urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
-        elif link.startswith("/"):
-            absolute_url = urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
-        elif link.startswith("?"):
-            absolute_url = urlunparse((scheme, domain, path, params, query_string, ''))
-        elif link == "" or link.startswith("#"):
-            absolute_url = self.url
-        else:
-            # relative path to file, subdirectory or parent directory
-            current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
-            # new_path = (current_directory + parts.path).replace("//", "/").replace("/./", "/")
-
-            new_path = normpath(current_directory + url_path)
-            if url_path.endswith('/') and not new_path.endswith('/'):
-                new_path += '/'
-
-            absolute_url = urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
-
-        return absolute_url
-
-    @not_empty
-    def _iter_links(self):
-        """Generator returning all links in the webpage. Beware of duplicates.
-
-        @rtype: generator
-        """
-        for link in self._iter_raw_links():
-            yield self.make_absolute(link)
-
-    @property
-    def links(self) -> list:
-        """List of unique links in the webpage.
-
-        @rtype: list
-        """
-        return list(set(self._iter_links()))
-
-    def is_external_to_domain(self, url: str) -> bool:
-        """Returns True if url is under another TLD than the crawled URL, False otherwise.
-
-        @type url: str
-        @param url: An absolute URL (with protocol prefix)
-        @rtype: bool
-        """
-        try:
-            fld = get_fld(url)
-        except TldDomainNotFound:
-            # Not yet known TLD or IP address or local hostname
-            fld = urlparse(url).netloc
-        except TldBadUrl:
-            fld = None
-        return fld != self._fld
-
-    def is_internal_to_domain(self, url: str) -> bool:
-        """Returns True if url is under the same TLD as the crawled URL, False otherwise.
-
-        @type url: str
-        @rtype: bool
-        """
-        return not self.is_external_to_domain(url)
 
     @property
     def is_success(self) -> bool:
@@ -522,7 +384,177 @@ class Response:
         return self._response.is_error
 
     @property
-    def title(self):
+    def encoding(self) -> Optional[str]:
+        """Return the detected encoding for the page."""
+        if self._response.encoding:
+            return self._response.encoding.upper()
+        return None
+
+    @property
+    def apparent_encoding(self) -> Optional[str]:
+        """Return the detected encoding for the page."""
+        if self._response.charset_encoding:
+            return self._response.charset_encoding.upper()
+        return None
+
+    @encoding.setter
+    def encoding(self, new_encoding: str):
+        """Change the encoding used for obtaining Response content"""
+        self._response.encoding = new_encoding
+
+
+class Html:
+    def __init__(self, text: str, url: str, encoding: str = "utf-8", allow_fragments: bool = False):
+        self._content = text
+        self._url = url
+        self._base = None
+        self._soup = BeautifulSoup(self._content, parser_name)
+        self._encoding = encoding
+        self._allow_fragments = allow_fragments
+
+        try:
+            # TODO: httpx.URL is interesting, reuse that
+            self._fld = get_fld(url)
+        except TldDomainNotFound:
+            self._fld = urlparse(url).netloc
+
+        base_tag = self._soup.find("base", href=True)
+        if base_tag:
+            base_parts = urlparse(base_tag["href"])
+            current = urlparse(self._url)
+            base_path = base_parts.path or "/"
+            base_path = normpath(base_path.replace("\\", "/"))
+            # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
+            base_path = re.sub(r"^/{2,}", "/", base_path)
+            # I guess a base url should always be a directory
+            if not base_path.endswith('/'):
+                base_path += '/'
+
+            self._base = urlunparse(
+                (
+                    base_parts.scheme or current.scheme,
+                    base_parts.netloc or current.netloc,
+                    base_path, "", "", ""
+                )
+            )
+
+    @not_empty
+    def _scripts(self) -> Iterator[str]:
+        url_parts = urlparse(self._base or self._url)
+        scheme = url_parts.scheme
+
+        for tag in self.soup.find_all("script", src=True):
+            parts = urlparse(tag["src"])
+
+            if parts.scheme:
+                if parts.netloc:
+                    # Full absolute URL
+                    script_url = urlunparse((parts.scheme, parts.netloc, parts.path, parts.params, parts.query, ''))
+                else:
+                    # Malformed absolute URL (no host)
+                    continue
+            elif parts.netloc:
+                # Protocol relative URL
+                script_url = urlunparse((scheme, parts.netloc, parts.path, parts.params, parts.query, ''))
+            else:
+                # Internal relative URL
+                script_url = urlunparse(('', '', parts.path, parts.params, parts.query, ''))
+            yield script_url
+
+    @property
+    def soup(self) -> BeautifulSoup:
+        """Returns a parsable BeautifulSoup representation of the webpage.
+
+        @rtype: BeautifulSoup
+        """
+        return self._soup
+
+    async def clean(self):
+        if self._soup is not None:
+            self._soup.decompose()
+            del self._soup
+
+    def _make_absolute(self, url: str) -> str:
+        return make_absolute(self._base or self._url, url, allow_fragments=self._allow_fragments)
+
+    @property
+    @lru_cache(maxsize=2)
+    def scripts(self) -> List[str]:
+        """List of URLs of imported JS scripts. Query strings and anchors are removed.
+
+        @rtype: list
+        """
+        return [self._make_absolute(script_url) for script_url in self._scripts()]
+
+    def iter_frames(self) -> Iterator[str]:
+        """Returns the absolute URLs of frames loaded in the webpage."""
+        for tag in self.soup.find_all(["frame", "iframe"], src=True):
+            value = tag["src"].split("#")[0].strip()
+            if value:
+                fixed_url = self._make_absolute(value)
+                if fixed_url:
+                    yield fixed_url
+
+    @not_empty
+    def _iter_raw_links(self) -> Iterator[str]:
+        """Generator returning all raw URLs found in HTML "a href", frame's src tags and redirections."""
+        # yield self.redirection_url
+
+        for tag in self.soup.find_all("a", href=True):
+            yield tag["href"].split("#")[0].strip()
+
+        for tag in self.soup.find_all(["frame", "iframe"], src=True):
+            yield tag["src"].split("#")[0].strip()
+
+        for tag in self.soup.find_all("form", action=True):
+            yield tag["action"]
+
+        for tag in self.soup.find_all("button", formaction=True):
+            yield tag["formaction"]
+
+    @not_empty
+    def _iter_links(self) -> Iterator[str]:
+        """Generator returning all links in the webpage. Beware of duplicates.
+
+        @rtype: generator
+        """
+        for link in self._iter_raw_links():
+            yield self._make_absolute(link)
+
+    @property
+    def links(self) -> List[str]:
+        """List of unique links in the webpage.
+
+        @rtype: list
+        """
+        return list(set(self._iter_links()))
+
+    def is_external_to_domain(self, url: str) -> bool:
+        """Returns True if url is under another TLD than the crawled URL, False otherwise.
+
+        @type url: str
+        @param url: An absolute URL (with protocol prefix)
+        @rtype: bool
+        """
+        try:
+            fld = get_fld(url)
+        except TldDomainNotFound:
+            # Not yet known TLD or IP address or local hostname
+            fld = urlparse(url).netloc
+        except TldBadUrl:
+            fld = None
+        return fld != self._fld
+
+    def is_internal_to_domain(self, url: str) -> bool:
+        """Returns True if url is under the same TLD as the crawled URL, False otherwise.
+
+        @type url: str
+        @rtype: bool
+        """
+        return not self.is_external_to_domain(url)
+
+    @property
+    def title(self) -> str:
         """Returns the content of the title HTML tag"""
         if self.soup.head is not None:
             title = self.soup.head.title
@@ -531,13 +563,13 @@ class Response:
         return ""
 
     @property
-    def base_url(self):
+    def base_url(self) -> str:
         """Returns the base URL used for links in the webpage or None if not specified"""
         __ = self.soup
         return self._base
 
     @property
-    def metas(self) -> dict:
+    def metas(self) -> Dict[str, str]:
         """Returns a dictionary of all metas tags with name attribute as the key and content attribute as the value."""
         metas = {}
         if self.soup.head is not None:
@@ -557,7 +589,7 @@ class Response:
         return self.metas.get("description", "")
 
     @property
-    def keywords(self):
+    def keywords(self) -> List[str]:
         """Returns the content of the meta keywords tag in the HTML header.
 
         @rtype: list
@@ -573,51 +605,26 @@ class Response:
         return self.metas.get("generator", "")
 
     @property
-    def text_only(self):
+    def text_only(self) -> str:
         """Returns the displayed text of a webpage (without HTML tags)"""
-        if "text" in self.type and self.size:
-            texts = self.soup.find_all(text=True)
+        # if "text" in self.type and self.size:
+        texts = self.soup.find_all(text=True)
 
-            def is_visible(element):
-                if len(element.strip()) == 0:
-                    return False
-                if isinstance(element, (Comment, Doctype)):
-                    return False
-                if element.parent.name in ["style", "script", "head"]:
-                    return False
-                return True
+        def is_visible(element):
+            if len(element.strip()) == 0:
+                return False
+            if isinstance(element, (Comment, Doctype)):
+                return False
+            if element.parent.name in ["style", "script", "head"]:
+                return False
+            return True
 
-            text = " ".join(filter(is_visible, texts)).replace("\r\n", " ").replace("\n", " ")
-            return text
-        return ""
+        text = " ".join(filter(is_visible, texts)).replace("\r\n", " ").replace("\n", " ")
+        return text
 
     @property
     def text_only_md5(self) -> str:
         return md5(self.text_only.encode(errors="ignore")).hexdigest()
-
-    async def empty(self):
-        """Modify the current Response object to make it appears as if the content-length was 0."""
-        self._is_empty = True
-        await self.clean()
-
-    @property
-    def encoding(self):
-        """Return the detected encoding for the page."""
-        if self._response.encoding:
-            return self._response.encoding.upper()
-        return None
-
-    @property
-    def apparent_encoding(self):
-        """Return the detected encoding for the page."""
-        if self._response.charset_encoding:
-            return self._response.charset_encoding.upper()
-        return None
-
-    @encoding.setter
-    def encoding(self, new_encoding):
-        """Change the encoding used for obtaining Response content"""
-        self._response.encoding = new_encoding
 
     @property
     def favicon_url(self) -> str:
@@ -635,11 +642,11 @@ class Response:
             if icon_uri.startswith("data:"):
                 return ""
 
-            return self.make_absolute(icon_uri)
-        return self.make_absolute("/favicon.ico")
+            return self._make_absolute(icon_uri)
+        return self._make_absolute("/favicon.ico")
 
     @property
-    def images_urls(self):
+    def images_urls(self) -> List[str]:
         """Returns a list of full images URLs found in the webpage.
 
         @rtype: list
@@ -650,36 +657,36 @@ class Response:
             if not image_rel_url or image_rel_url.startswith("#"):
                 continue
 
-            image_url = self.make_absolute(image_rel_url)
+            image_url = self._make_absolute(image_rel_url)
             if image_url:
                 urls.add(image_url)
         return list(urls)
 
     @property
     @not_empty
-    def extra_urls(self):
+    def extra_urls(self) -> Iterator[str]:
         # Extract URLs for special tags attributes that may reference any kind of resource.
         # See http://htmlreference.io/
         for tag in self.soup.find_all(["area", "base", "link"], href=True):
-            yield self.make_absolute(tag["href"])
+            yield self._make_absolute(tag["href"])
         for tag in self.soup.find_all(["audio", "embed", "img", "script", "source", "track", "video"], src=True):
-            yield self.make_absolute(tag["src"])
+            yield self._make_absolute(tag["src"])
         for tag in self.soup.find_all(["blockquote", "del", "ins", "q"], cite=True):
-            yield self.make_absolute(tag["cite"])
+            yield self._make_absolute(tag["cite"])
         for tag in self.soup.find_all("object", data=True):
-            yield self.make_absolute(tag["data"])
+            yield self._make_absolute(tag["data"])
         for tag in self.soup.find_all("param", attrs={"name": "movie", "value": True}):
-            yield self.make_absolute(tag["value"])
+            yield self._make_absolute(tag["value"])
         for tag in self.soup.find_all(["img", "source"], srcset=True):
             for source_desc in tag["srcset"].split(","):
                 url = source_desc.strip().split(" ")[0]
                 if url:
-                    yield self.make_absolute(url)
+                    yield self._make_absolute(url)
 
         for attribute in JS_EVENTS:
             for tag in self.soup.find_all(None, attrs={attribute: True}):
                 for url in lamejs.LameJs(tag[attribute]).get_links():
-                    yield self.make_absolute(url)
+                    yield self._make_absolute(url)
 
         for script in self.soup.find_all("script", string=True):
             urls = lamejs.LameJs(script.string).get_links()
@@ -696,18 +703,18 @@ class Response:
             #                 urls.append(jstr)
             #                 break
             for url in urls:
-                yield self.make_absolute(url)
+                yield self._make_absolute(url)
 
         for tag in self.soup.find_all("a", href=JS_SCHEME_REGEX):
             for url in lamejs.LameJs(tag["href"].split(':', 1)[1]).get_links():
-                yield self.make_absolute(url)
+                yield self._make_absolute(url)
 
         for tag in self.soup.find_all("form", action=JS_SCHEME_REGEX):
             for url in lamejs.LameJs(tag["action"].split(':', 1)[1]).get_links():
-                yield self.make_absolute(url)
+                yield self._make_absolute(url)
 
     @property
-    def js_redirections(self):
+    def js_redirections(self) -> List[str]:
         """Returns a list or redirection URLs found in the javascript code of the webpage.
 
         @rtype: list
@@ -721,13 +728,13 @@ class Response:
 
             search = re.search(RE_JS_REDIR, j_script)
             if search:
-                url = self.make_absolute(search.group(4))
+                url = self._make_absolute(search.group(4))
                 if url:
                     urls.add(url)
         return list(urls)
 
     @property
-    def html_redirections(self):
+    def html_redirections(self) -> List[str]:
         urls = set()
         for meta_tag in self.soup.find_all("meta", attrs={"content": True, "http-equiv": True}):
             if meta_tag and meta_tag["http-equiv"].lower() == "refresh":
@@ -742,26 +749,26 @@ class Response:
                             content_str_length -= 1
                     url = content_str[url_eq_idx + 4:content_str_length]
                     if url:
-                        urls.add(self.make_absolute(url))
+                        urls.add(self._make_absolute(url))
         return [url for url in urls if url]
 
     @property
-    def all_redirections(self):
+    def all_redirections(self) -> Set[str]:
         result = set()
-        if self.redirection_url:
-            result.add(self.redirection_url)
+        # if self.redirection_url:
+        #     result.add(self.redirection_url)
         result.update(self.js_redirections)
         result.update(self.html_redirections)
         return result
 
     # pylint: disable=too-many-branches
-    def iter_forms(self, autofill=True):
+    def iter_forms(self, autofill=True) -> Iterator[Request]:
         """Returns a generator of Request extracted from the Response.
 
         @rtype: generator
         """
         for form in self.soup.find_all("form"):
-            url = self.make_absolute(form.attrs.get("action", "").strip() or self.url)
+            url = self._make_absolute(form.attrs.get("action", "").strip() or self._url)
             # If no method is specified then it's GET. If an invalid method is set it's GET.
             method = "POST" if form.attrs.get("method", "GET").upper() == "POST" else "GET"
             enctype = "" if method == "GET" else form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
@@ -849,7 +856,7 @@ class Response:
 
             # A formaction doesn't need a name
             for input_field in form.find_all("input", attrs={"formaction": True}):
-                form_actions.add(self.make_absolute(input_field["formaction"].strip() or self.url))
+                form_actions.add(self._make_absolute(input_field["formaction"].strip() or self._url))
 
             for button_field in form.find_all("button"):
                 if "name" in button_field.attrs:
@@ -863,7 +870,7 @@ class Response:
                 if "formaction" in button_field.attrs:
                     # If formaction is empty it basically send to the current URL
                     # which can be different from the defined action attribute on the form...
-                    form_actions.add(self.make_absolute(button_field["formaction"].strip() or self.url))
+                    form_actions.add(self._make_absolute(button_field["formaction"].strip() or self._url))
 
             if form.find("input", attrs={"name": False, "type": "image"}):
                 # Unnamed input type file => names will be set as x and y
@@ -914,33 +921,33 @@ class Response:
                 continue
 
             # First raise the form with the URL specified in the action attribute
-            new_form = web.Request(
+            new_form = Request(
                 url,
                 method=method,
                 get_params=get_params,
                 post_params=post_params,
                 file_params=file_params,
-                encoding=self.apparent_encoding,
-                referer=self.url,
+                encoding=self._encoding,
+                referer=self._url,
                 enctype=enctype
             )
             yield new_form
 
             # Then if we saw some formaction attribute, raise the form with the given formaction URL
             for url in form_actions:
-                new_form = web.Request(
+                new_form = Request(
                     url,
                     method=method,
                     get_params=get_params,
                     post_params=post_params,
                     file_params=file_params,
-                    encoding=self.apparent_encoding,
-                    referer=self.url,
+                    encoding=self._encoding,
+                    referer=self._url,
                     enctype=enctype
                 )
                 yield new_form
 
-    def find_login_form(self):
+    def find_login_form(self) -> Tuple[Optional[Request], int, int]:
         """Returns the login Request extracted from the Response, the username and password fields."""
 
         for form in self.soup.find_all("form"):
@@ -967,7 +974,7 @@ class Response:
             if len(username_field_idx) == 1 and len(password_field_idx) == 1:
                 inputs = form.find_all("input", attrs={"name": True})
 
-                url = self.make_absolute(form.attrs.get("action", "").strip() or self.url)
+                url = self._make_absolute(form.attrs.get("action", "").strip() or self._url)
                 method = form.attrs.get("method", "GET").strip().upper()
                 enctype = form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
                 post_params = []
@@ -977,16 +984,16 @@ class Response:
                 else:
                     get_params = [[input_data["name"], input_data.get("value", "")] for input_data in inputs]
 
-                login_form = web.Request(
+                login_form = Request(
                     url,
                     method=method,
                     post_params=post_params,
                     get_params=get_params,
-                    encoding=self.apparent_encoding,
-                    referer=self.url,
+                    encoding=self._encoding,
+                    referer=self._url,
                     enctype=enctype,
                 )
 
                 return login_form, username_field_idx[0], password_field_idx[0]
 
-        return None, "", ""
+        return None, 0, 0

@@ -135,14 +135,14 @@ class ModuleCsrf(Attack):
         )
 
         try:
-            original_response = await self.crawler.async_send(original_request, follow_redirects=True)
+            original_response: Response = await self.crawler.async_send(original_request, follow_redirects=True)
         except RequestError:
             # We can't compare so act like it is secure
             self.network_errors += 1
             return True
 
         try:
-            mutated_response = await self.crawler.async_send(
+            mutated_response: Response = await self.crawler.async_send(
                 mutated_request,
                 headers=special_headers,
                 follow_redirects=True

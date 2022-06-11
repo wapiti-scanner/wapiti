@@ -3,7 +3,7 @@ import os
 import re
 import warnings
 
-from wapitiCore.net.crawler import Response
+from wapitiCore.net.crawler import Response, Html
 
 
 class ApplicationDataException(Exception):
@@ -191,19 +191,20 @@ class Wappalyzer:
         self.groups = application_data.get_groups()
 
         self._url = web_content.url
-        self._html = web_content.content
+        self._html_code = web_content.content
         # Copy some values to make sure they aren't processed more than once
-        self._scripts = web_content.scripts[:]
+        html = Html(self._html_code, self._url)
+        self._scripts = html.scripts[:]
         self._cookies = dict(web_content.cookies)
         self._headers = web_content.headers
-        self._metas = dict(web_content.metas)
+        self._metas = dict(html.metas)
 
     def is_application_detected(self, application: dict):
         """
         Determine whether the web content matches the application regex.
         """
         url_detected = self.is_application_detected_normalize_string(application, 'url', self._url)
-        html_detected = self.is_application_detected_normalize_list(application, 'html', self._html)
+        html_detected = self.is_application_detected_normalize_list(application, 'html', self._html_code)
         scripts_detected = self.is_application_detected_normalize_list(application, 'scriptSrc', self._scripts)
         cookies_detected = self.is_application_detected_normalize_dict(application, 'cookies', self._cookies)
         headers_detected = self.is_application_detected_normalize_dict(application, 'headers', self._headers)

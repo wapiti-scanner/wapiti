@@ -29,6 +29,7 @@ from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WS
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net.web import Request
+from wapitiCore.net.response import Html
 
 
 class ModuleXss(Attack):
@@ -151,6 +152,7 @@ class ModuleXss(Attack):
             except RequestError:
                 self.network_errors += 1
             else:
+                html = Html(response.content, evil_request.url)
                 if (
                         not response.is_redirect and
                         valid_xss_content_type(evil_request) and
@@ -159,14 +161,14 @@ class ModuleXss(Attack):
                             self.PAYLOADS_FILE,
                             self.external_endpoint,
                             self.proto_endpoint,
-                            response,
+                            html,
                             xss_flags,
                             taint
                         )
                 ):
                     self.successful_xss[taint] = (xss_payload, xss_flags)
                     message = _("XSS vulnerability found via injection in the parameter {0}").format(xss_param)
-                    if has_strong_csp(response):
+                    if has_strong_csp(response, html):
                         message += ".\n" + _("Warning: Content-Security-Policy is present!")
 
                     await self.add_vuln_medium(
@@ -192,7 +194,7 @@ class ModuleXss(Attack):
                         xss_param
                     )
 
-                    if has_strong_csp(response):
+                    if has_strong_csp(response, html):
                         log_red(_("Warning: Content-Security-Policy is present!"))
 
                     log_red(Messages.MSG_EVIL_REQUEST)

@@ -20,7 +20,7 @@ import json
 import logging
 import os
 from collections import namedtuple
-from typing import AsyncGenerator, Iterable, List, Optional, Sequence, Tuple
+from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple
 
 from aiocache import cached
 import httpx
@@ -34,9 +34,6 @@ from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging
 
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
-
-Response = namedtuple("Response", "status_code,headers,body")
-
 
 class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
@@ -192,13 +189,13 @@ class SqlPersister:
             return result.fetchone().value
 
     async def set_to_browse(self, to_browse: Sequence):
-        await self.save_requests([[request, None] for request in to_browse])
+        await self.save_requests([(request, None) for request in to_browse])
 
-    async def get_to_browse(self) -> AsyncGenerator:
+    async def get_to_browse(self) -> AsyncIterator[Request]:
         async for path in self._get_paths(method=None, crawled=False):
             yield path
 
-    async def save_requests(self, paths_list: Tuple[Request, Response]):
+    async def save_requests(self, paths_list: List[Tuple[Request, Optional[Response]]]):
         if not paths_list:
             return
 
@@ -437,7 +434,8 @@ class SqlPersister:
                 await conn.execute(self.params.insert(), all_values)
 
     async def _get_paths(
-            self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False) -> AsyncGenerator:
+            self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False
+    ) -> AsyncIterator[Request]:
         conditions = [self.paths.c.evil == evil]
 
         if path and isinstance(path, str):
@@ -525,11 +523,11 @@ class SqlPersister:
 
                 yield http_res
 
-    async def get_links(self, path=None, attack_module: str = "") -> AsyncGenerator:
+    async def get_links(self, path=None, attack_module: str = "") -> AsyncIterator[Request]:
         async for path in self._get_paths(path=path, method="GET", crawled=True, module=attack_module):
             yield path
 
-    async def get_forms(self, path=None, attack_module: str = "") -> AsyncGenerator:
+    async def get_forms(self, path=None, attack_module: str = "") -> AsyncIterator[Request]:
         async for path in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
             yield path
 
@@ -726,7 +724,7 @@ class SqlPersister:
         async with self._engine.begin() as conn:
             await conn.execute(statement)
 
-    async def get_response_by_id(self, response_id: str) -> Response:
+    async def get_response_by_id(self, response_id: str) -> Optional[Response]:
         if not response_id:
             return None
         response_id = int(response_id)
@@ -742,9 +740,11 @@ class SqlPersister:
 
         try:
             response = Response(
-                row.status_code,
-                httpx.Headers(json.loads(row.headers)),
-                row.body
+                httpx.Response(
+                    row.status_code,
+                    headers=httpx.Headers(json.loads(row.headers)),
+                    content=row.body
+                )
             )
         except httpx.DecodingError as e:
             logging.error(e)
@@ -816,7 +816,7 @@ class SqlPersister:
 
             return request
 
-    async def get_payloads(self) -> AsyncGenerator:
+    async def get_payloads(self) -> AsyncIterator[Payload]:
         async with self._engine.begin() as conn:
             result = await conn.execute(select(self.payloads))
 

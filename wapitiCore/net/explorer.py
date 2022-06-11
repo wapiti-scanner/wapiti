@@ -20,7 +20,7 @@ import asyncio
 from collections import deque, defaultdict
 import pickle
 import math
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, AsyncIterator
 from urllib.parse import urlparse
 import re
 
@@ -31,7 +31,8 @@ import httpx
 from wapitiCore.language.language import _
 from wapitiCore.net import web
 
-from wapitiCore.net.response import Response
+from wapitiCore.net.response import Response, Html, make_absolute
+from wapitiCore.net.web import Request
 from wapitiCore.main.log import logging, log_verbose
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import swf
@@ -180,27 +181,28 @@ class Explorer:
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)
 
-    def extract_links(self, page, request) -> List:
+    def extract_links(self, response: Response, request) -> List:
         swf_links = []
         js_links = []
         allowed_links = []
 
         new_requests = []
 
-        if "application/x-shockwave-flash" in page.type or request.file_ext == "swf":
+        if "application/x-shockwave-flash" in response.type or request.file_ext == "swf":
             try:
-                swf_links = swf.extract_links_from_swf(page.bytes)
+                swf_links = swf.extract_links_from_swf(response.bytes)
             except Exception:  # pylint: disable=broad-except
                 pass
-        elif "/x-javascript" in page.type or "/x-js" in page.type or "/javascript" in page.type:
-            js_links = lamejs.LameJs(page.content).get_links()
-            js_links += jsparser_angular.JsParserAngular(page.url, page.content).get_links()
+        elif "/x-javascript" in response.type or "/x-js" in response.type or "/javascript" in response.type:
+            js_links = lamejs.LameJs(response.content).get_links()
+            js_links += jsparser_angular.JsParserAngular(response.url, response.content).get_links()
 
-        elif page.type.startswith(MIME_TEXT_TYPES):
-            allowed_links.extend(filter(self._crawler.is_in_scope, page.links))
-            allowed_links.extend(filter(self._crawler.is_in_scope, page.js_redirections + page.html_redirections))
+        elif response.type.startswith(MIME_TEXT_TYPES):
+            html = Html(response.content, response.url)
+            allowed_links.extend(filter(self._crawler.is_in_scope, html.links))
+            allowed_links.extend(filter(self._crawler.is_in_scope, html.js_redirections + html.html_redirections))
 
-            for extra_url in filter(self._crawler.is_in_scope, page.extra_urls):
+            for extra_url in filter(self._crawler.is_in_scope, html.extra_urls):
                 parts = urlparse(extra_url)
                 # There are often css and js URLs with useless parameters like version or random number
                 # used to prevent caching in browser. So let's exclude those extensions
@@ -214,7 +216,7 @@ class Explorer:
 
                 allowed_links.append(extra_url)
 
-            for form in page.iter_forms():
+            for form in html.iter_forms():
                 # TODO: apply bad_params filtering in form URLs
                 if self._crawler.is_in_scope(form):
                     if form.hostname not in self._hostnames:
@@ -226,7 +228,7 @@ class Explorer:
 
         for url in swf_links + js_links:
             if url:
-                url = page.make_absolute(url)
+                url = make_absolute(response.url, url)
                 if url and self._crawler.is_in_scope(url):
                     allowed_links.append(url)
 
@@ -259,7 +261,7 @@ class Explorer:
                 path = new_url
                 get_params = []
 
-            if page.is_directory_redirection and new_url == page.redirection_url:
+            if response.is_directory_redirection and new_url == response.redirection_url:
                 depth = request.link_depth
             else:
                 depth = request.link_depth + 1
@@ -293,7 +295,7 @@ class Explorer:
             resource_url = request.url
 
             try:
-                page = await self._crawler.async_send(request, stream=True)
+                response: Response = await self._crawler.async_send(request, stream=True)
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, [], None
@@ -311,33 +313,32 @@ class Explorer:
 
             # Above this line we need the content of the page. As we are in stream mode we must force reading the body.
             try:
-                await page.read()
+                await response.read()
             finally:
-                await page.close()
+                await response.close()
 
             if request.link_depth == self._max_depth:
                 # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
-                return True, [], page
+                return True, [], response
 
             # Sur les ressources statiques le content-length est généralement indiqué
             if self._max_page_size > 0:
-                if page.raw_size > self._max_page_size:
-                    await page.clean()
-                    return False, [], page
+                if response.raw_size > self._max_page_size:
+                    return False, [], response
 
             await asyncio.sleep(0)
-            resources = self.extract_links(page, request)
+            resources = self.extract_links(response, request)
             # TODO: there's more situations where we would not want to attack the resource... must check this
-            if page.is_directory_redirection:
-                return False, resources, page
+            if response.is_directory_redirection:
+                return False, resources, response
 
-            return True, resources, page
+            return True, resources, response
 
     async def async_explore(
             self,
             to_explore: deque,
             excluded_urls: list = None
-    ):
+    ) -> AsyncIterator[Tuple[Request, Response]]:
         """Explore a single TLD or the whole Web starting with a URL
 
         @param to_explore: A list of Request of URLs (str) to scan the scan with.
@@ -423,6 +424,9 @@ class Explorer:
             for task in done:
                 request = task_to_request[task]
                 try:
+                    success: bool
+                    resources: List
+                    response: Response
                     success, resources, response = await task
                 except Exception as exception:    # pylint: disable=broad-except
                     logging.error(f"{request} generated an exception: {exception.__class__.__name__}")

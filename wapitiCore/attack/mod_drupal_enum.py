@@ -10,6 +10,7 @@ from httpx import RequestError
 from wapitiCore.net.web import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
+from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue
@@ -32,7 +33,7 @@ class ModuleDrupalEnum(Attack):
 
     async def get_url_hash(self, root_url: str, path: str) -> Tuple[str, str]:
         request = Request(f"{root_url}{path}", "GET")
-        response = await self.crawler.async_send(request, follow_redirects=True)
+        response: Response = await self.crawler.async_send(request, follow_redirects=True)
         if response.is_error:
             return "", ""
 
@@ -112,7 +113,7 @@ class ModuleDrupalEnum(Attack):
         for item in check_list:
             request = Request(f'{url}{item}', 'GET')
             try:
-                response = await self.crawler.async_send(request, follow_redirects=True)
+                response: Response = await self.crawler.async_send(request, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
             except Exception as exception:
@@ -142,17 +143,20 @@ class ModuleDrupalEnum(Attack):
         if await self.check_drupal(request_to_root.url):
             await self.detect_version(request_to_root.url)
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+
             drupal_detected = {
                 "name": "Drupal",
                 "versions": self.versions,
                 "categories": ["CMS Drupal"],
                 "groups": ["Content"]
             }
+
             log_blue(
                 MSG_TECHNO_VERSIONED,
                 "Drupal",
                 self.versions
             )
+
             if self.versions:
                 await self.add_vuln_info(
                     category=WEB_APP_VERSIONED,

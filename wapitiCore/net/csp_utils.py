@@ -16,6 +16,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
 
+from wapitiCore.net.response import Response, Html
+
 POLICY_REGEX = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
 
 CSP_CHECK_LISTS = {
@@ -29,16 +31,34 @@ CSP_CHECK_LISTS = {
 CSP_HEADERS = {"content-security-policy", "x-content-security-policy", "x-webkit-csp"}
 
 
-def has_csp(response):
+def has_csp_header(response: Response):
     headers = {header.lower() for header in response.headers}
     if CSP_HEADERS & headers:
         return True
 
-    for meta_http in response.soup.find_all("meta", attrs={"http-equiv": True}):
+
+def has_csp_meta(page: Html):
+    for meta_http in page.soup.find_all("meta", attrs={"http-equiv": True}):
         if meta_http["http-equiv"].lower().strip() in CSP_HEADERS:
             return True
 
     return False
+
+
+def get_csp_header(response: Response) -> str:
+    for header in CSP_HEADERS:
+        if header in response.headers:
+            return response.headers[header]
+    return ""
+
+
+def get_csp_meta(page: Html) -> str:
+    for meta_http in page.soup.find_all("meta", attrs={"http-equiv": True, "content": True}):
+        for header in CSP_HEADERS:
+            if meta_http["http-equiv"].lower().strip() == header:
+                return meta_http["content"]
+
+    return ""
 
 
 def get_csp(response):
@@ -96,13 +116,13 @@ def check_policy_values(policy_name, csp_dict):
     return 1
 
 
-def has_strong_csp(response):
+def has_strong_csp(response: Response, page: Html) -> bool:
     """Check if the response has a CSP header that may be difficult to bypass (not weak)"""
-    csp_header = get_csp(response)
-    if not csp_header:
+    csp_string = get_csp_header(response) or get_csp_meta(page)
+    if not csp_string:
         return False
 
-    csp_dict = csp_header_to_dict(csp_header)
+    csp_dict = csp_header_to_dict(csp_string)
     if check_policy_values("script-src", csp_dict) == 1:
         return True
 
