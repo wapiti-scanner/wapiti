@@ -293,7 +293,3 @@ async def test_direct_upload():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "calendar"
-
-
-if __name__ == "__main__":
-    test_direct_query_string()

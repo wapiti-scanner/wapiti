@@ -27,6 +27,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
+from wapitiCore.net.response import Html
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
 DBMS_ERROR_PATTERNS = {
@@ -412,7 +413,8 @@ class ModuleSql(Attack):
             good_status = good_response.status
             good_redirect = good_response.redirection_url
             # good_title = response.title
-            good_hash = good_response.text_only_md5
+            html = Html(good_response.content, request.url)
+            good_hash = html.text_only_md5
         except ReadTimeout:
             self.network_errors += 1
             return
@@ -500,10 +502,11 @@ class ModuleSql(Attack):
                 test_results.append(False)
                 continue
 
+            Html(response.content, url=mutated_request.url)
             comparison = (
                 response.status == good_status and
                 response.redirection_url == good_redirect and
-                response.text_only_md5 == good_hash
+                Html(response.content, url=mutated_request.url).text_only_md5 == good_hash
             )
 
             test_results.append(comparison == (flags.section == "True"))

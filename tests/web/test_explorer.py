@@ -154,8 +154,8 @@ async def test_explorer_extract_links():
         )
 
         request = Request("http://perdu.com/")
-        page = await crawler.async_send(request)
-        results = list(explorer.extract_links(page, request))
+        response = await crawler.async_send(request)
+        results = list(explorer.extract_links(response, request))
         # We should get 6 resources as the âth from the form will also be used as url
         assert len(results) == 6
 
@@ -199,14 +199,14 @@ async def test_explorer_extract_links_from_js():
         )
 
         request = Request("http://perdu.com/")
-        page = await crawler.async_send(request)
-        results = list(explorer.extract_links(page, request))
+        response = await crawler.async_send(request)
+        results = list(explorer.extract_links(response, request))
         assert len(results) == 2
 
         request = Request("http://perdu.com/main-es5.1211ab72babef8.js")
-        page = await crawler.async_send(request)
+        response = await crawler.async_send(request)
 
-        results = list(explorer.extract_links(page, request))
+        results = list(explorer.extract_links(response, request))
         # http://host.perdu.com is out of scope since by default scope is folder
         assert len(results) == 12
         assert Request("http://perdu.com/secret/path", "GET", link_depth=1) in results

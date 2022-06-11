@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import logging
 import re
+from typing import List
 
 from wapitiCore.net.jsparser import jsparser3
 
@@ -44,7 +45,7 @@ class LameJs:
     def get_vars(self):
         return self.js_vars
 
-    def get_links(self):
+    def get_links(self) -> List[str]:
         return self.links
 
     def read_node(self, node):

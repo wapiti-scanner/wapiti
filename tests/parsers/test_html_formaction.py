@@ -1,7 +1,7 @@
 import httpx
 import respx
 
-from wapitiCore.net.crawler import Response
+from wapitiCore.net.crawler import Response, Html
 
 
 @respx.mock
@@ -11,7 +11,7 @@ def test_formactions():
         respx.get(url).mock(return_value=httpx.Response(200, text=form_action.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
         count = 0
 
         for form in page.iter_forms():

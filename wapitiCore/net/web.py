@@ -20,11 +20,14 @@ from copy import deepcopy
 import posixpath
 import sys
 from urllib.parse import urlparse, unquote, quote, urljoin
+from typing import Optional, List, Tuple, Union
 
 import httpx
 
+Parameters = Optional[Union[List[List[str]], str]]
 
-def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
+
+def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote) -> str:
     """Encode a dict or sequence of two-element tuples into a URL query string.
 
     If the query arg is a sequence of two-element tuples, the order of the
@@ -89,7 +92,9 @@ def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote):
     return '&'.join(key_value_pair)
 
 
-def parse_qsl(query_string, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None):
+def parse_qsl(
+        query_string, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None
+) -> List[Tuple[str, str]]:
     """Parse a query given as a string argument.
         Arguments:
         query_string: percent-encoded query string to be parsed
@@ -137,7 +142,7 @@ def parse_qsl(query_string, strict_parsing=False, encoding='utf-8', errors='repl
     return result_list
 
 
-def shell_escape(string: str):
+def shell_escape(string: str) -> str:
     string = string.replace('\\', '\\\\')
     string = string.replace('"', '\\"')
     string = string.replace('$', '\\$')
@@ -148,10 +153,17 @@ def shell_escape(string: str):
 
 class Request:
     def __init__(
-            self, path: str, method: str = "",
-            get_params: list = None, post_params: list = None, file_params: list = None,
-            encoding: str = "UTF-8", enctype: str = "",
-            referer: str = "", link_depth: int = 0):
+            self,
+            path: str,
+            method: str = "",
+            get_params: Parameters = None,
+            post_params: Parameters = None,
+            file_params: list = None,
+            encoding: str = "UTF-8",
+            enctype: str = "",
+            referer: str = "",
+            link_depth: int = 0
+    ):
         """Create a new Request object.
 
         Takes the following arguments:
@@ -344,14 +356,14 @@ class Request:
         return False
 
     @property
-    def parameters_count(self):
+    def parameters_count(self) -> int:
         if isinstance(self._post_params, list):
             return len(self.get_params) + len(self._post_params) + len(self._file_params)
 
         return len(self.get_params) + len(self._file_params)
 
     @staticmethod
-    def _encoded_keys(params):
+    def _encoded_keys(params) -> str:
         return "&".join([quote(key, safe='%') for key in sorted(kv[0] for kv in params)])
 
     def __repr__(self):
@@ -367,7 +379,7 @@ class Request:
 
         return buff
 
-    def http_repr(self, left_margin="    "):
+    def http_repr(self, left_margin: str = "    ") -> str:
         rel_url = self.url.split('/', 3)[3]
         http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n"
 
@@ -402,7 +414,7 @@ class Request:
         return http_string.rstrip()
 
     @property
-    def curl_repr(self):
+    def curl_repr(self) -> str:
         curl_string = f"curl \"{shell_escape(self.url)}\""
         if self._referer:
             curl_string += f" -e \"{shell_escape(self._referer)}\""
@@ -455,7 +467,7 @@ class Request:
         self._cookies = cookies
 
     @property
-    def size(self):
+    def size(self) -> int:
         return self._size
 
     @size.setter
@@ -492,15 +504,15 @@ class Request:
         return self._scheme.lower()
 
     @property
-    def port(self):
+    def port(self) -> int:
         return self._port
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self._resource_path
 
     @property
-    def file_path(self):
+    def file_path(self) -> str:
         return self._file_path
 
     @property
@@ -520,7 +532,7 @@ class Request:
         return posixpath.basename(self._file_path)
 
     @property
-    def dir_name(self):
+    def dir_name(self) -> str:
         if self.file_name:
             return posixpath.dirname(self._resource_path) + "/"
         return self._resource_path
@@ -530,7 +542,7 @@ class Request:
         return self.path.endswith("/")
 
     @property
-    def parent_dir(self):
+    def parent_dir(self) -> str:
         if self.file_name:
             return posixpath.dirname(self._resource_path) + "/"
         if self.is_root:
@@ -600,7 +612,7 @@ class Request:
         return ()
 
     @staticmethod
-    def _encode_params(params):
+    def _encode_params(params) -> str:
         if not params:
             return ""
 
@@ -618,20 +630,20 @@ class Request:
         return urlencode(key_values)
 
     @property
-    def encoded_params(self):
+    def encoded_params(self) -> str:
         return self._encode_params(self._get_params)
 
     @property
-    def encoded_data(self):
+    def encoded_data(self) -> str:
         """Return a raw string of key/value parameters for POST requests"""
         return self._encode_params(self._post_params)
 
     @property
-    def encoded_files(self):
+    def encoded_files(self) -> str:
         return self._encode_params(self._file_params)
 
     @property
-    def encoded_get_keys(self):
+    def encoded_get_keys(self) -> str:
         if self._cached_get_keys is None:
             self._cached_get_keys = self._encoded_keys(self._get_params)
         return self._cached_get_keys
@@ -643,17 +655,17 @@ class Request:
         return self._cached_post_keys
 
     @property
-    def encoded_file_keys(self):
+    def encoded_file_keys(self) -> str:
         if self._cached_file_keys is None:
             self._cached_file_keys = self._encoded_keys(self._file_params)
         return self._cached_file_keys
 
     @property
-    def encoded_keys(self):
+    def encoded_keys(self) -> str:
         return f"{self.encoded_get_keys}|{self.encoded_post_keys}|{self.encoded_file_keys}"
 
     @property
-    def pattern(self):
+    def pattern(self) -> str:
         return f"{self.path}?{self.encoded_keys}"
 
     @property
@@ -663,7 +675,7 @@ class Request:
         return self._cached_hash_params
 
     @property
-    def path_id(self):
+    def path_id(self) -> int:
         return self._path_id
 
     @path_id.setter
@@ -671,12 +683,12 @@ class Request:
         self._path_id = value
 
 
-def detail_response(response) -> dict:
+def detail_response(response) -> Optional[dict]:
     if not response:
         return None
 
     return {
-        "status_code": response.status_code,
-        "body": response.body.decode("utf-8", errors="replace"),
+        "status_code": response.status,
+        "body": response.content,
         "headers": response.headers.multi_items()
     }

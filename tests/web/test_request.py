@@ -168,13 +168,13 @@ async def test_request_object():
 
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65084/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        page = await crawler.async_send(json_req)
-        assert page.json["json"] == {"z": 1, "a": 2}
-        assert page.json["headers"]["Content-Type"] == "application/json"
-        assert page.json["form"] == []  # PHP dictionaries are array too
+        response = await crawler.async_send(json_req)
+        assert response.json["json"] == {"z": 1, "a": 2}
+        assert response.json["headers"]["Content-Type"] == "application/json"
+        assert response.json["form"] == []  # PHP dictionaries are array too
 
-        page = await crawler.async_send(res12)
-        assert page.json["files"]
+        response = await crawler.async_send(res12)
+        assert response.json["files"]
 
         res19 = Request(
             "http://127.0.0.1:65084/httpbin.php?qs1",
@@ -182,8 +182,8 @@ async def test_request_object():
             file_params=[['file1', ('fname1', b'content')], ['file2', ('fname2', b'content')]],
             enctype="multipart/form-data"
         )
-        page = await crawler.async_send(res19)
-        assert page.json["files"]
+        response = await crawler.async_send(res19)
+        assert response.json["files"]
 
 
 @pytest.mark.asyncio
@@ -197,10 +197,10 @@ async def test_redirect():
 
     crawler_configuration = CrawlerConfiguration(Request(slyfx))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        page = await crawler.async_send(Request(slyfx))
-        assert page.url == slyfx
-        assert not page.history
+        response = await crawler.async_send(Request(slyfx))
+        assert response.url == slyfx
+        assert not response.history
 
-        page = await crawler.async_send(Request(slyfx), follow_redirects=True)
-        assert page.url == disney
-        assert page.history[0].url == slyfx
+        response = await crawler.async_send(Request(slyfx), follow_redirects=True)
+        assert response.url == disney
+        assert response.history[0].url == slyfx

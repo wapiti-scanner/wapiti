@@ -6,7 +6,7 @@ import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.response import Response
+from wapitiCore.net.response import Response, Html
 from wapitiCore.net.web import Request
 
 
@@ -25,7 +25,7 @@ async def test_extract_disconnect_urls_one_url():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -48,7 +48,7 @@ async def test_extract_disconnect_urls_no_url():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -72,7 +72,7 @@ async def test_extract_disconnect_urls_multiple_urls():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url)
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -252,9 +252,9 @@ async def test_multiple_redirecton():
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        page = await crawler.async_get(Request(target_url), follow_redirects=True)
-        assert page.status == 200
-        assert page.content == "OK"
+        response = await crawler.async_get(Request(target_url), follow_redirects=True)
+        assert response.status == 200
+        assert response.content == "OK"
 
 
 @respx.mock
@@ -319,8 +319,9 @@ async def test_extract_disconnect_urls():
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        page = await crawler.async_get(Request(target_url))
+        response = await crawler.async_get(Request(target_url))
 
+        page = Html(response.content, target_url)
         disconnect_urls = crawler._extract_disconnect_urls(page)
 
         test_disconnect_urls = [
@@ -336,32 +337,28 @@ async def test_extract_disconnect_urls():
         assert all(url in disconnect_urls for url in test_disconnect_urls) is True
 
 
-# @respx.mock
-# @pytest.mark.asyncio
-# async def test_async_send():
-#     request = Request("http://perdu.com/", "GET")
-#     headers = {
-#         "foo": "bar"
-#     }
-#
-#     response = Response(200, request=request)
-#
-#     async_http_request = Future()
-#     async_http_request.set_result(Response(response))
-#
-#     respx.get("http://perdu.com/").mock(
-#         return_value=httpx.Response(
-#             status_code=200,
-#             text="<div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
-#             headers={"abc": "123"}
-#         )
-#     )
-#
-#     crawler = AsyncCrawler("http://perdu.com/", timeout=1)
-#
-#     await crawler.async_send(request, headers)
-#
-#     assert request.status == 200
-#     assert request.headers.get("abc") == "123"
-#     assert "user-agent" in request.sent_headers
-#     assert request.sent_headers.get("foo") == "bar"
+@respx.mock
+@pytest.mark.asyncio
+async def test_async_send():
+    request = Request("http://perdu.com/", "GET")
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            status_code=200,
+            text="<div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"abc": "123"}
+        )
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        headers = {
+            "foo": "bar"
+        }
+
+        await crawler.async_send(request, headers)
+
+        assert request.status == 200
+        assert request.headers.get("abc") == "123"
+        assert "user-agent" in request.sent_headers
+        assert request.sent_headers.get("foo") == "bar"

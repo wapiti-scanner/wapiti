@@ -18,6 +18,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.web import Request
+from wapitiCore.net.response import Response
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
 from wapitiCore.definitions.csp import NAME, WSTG_CODE
@@ -47,7 +48,7 @@ class ModuleCsp(Attack):
         request_to_root = Request(request.url)
 
         try:
-            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
+            response: Response = await self.crawler.async_send(request_to_root, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return

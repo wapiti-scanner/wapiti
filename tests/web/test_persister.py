@@ -8,7 +8,7 @@ import respx
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import AsyncCrawler, Response
+from wapitiCore.net.crawler import AsyncCrawler, Response, Html
 
 
 @pytest.mark.asyncio
@@ -185,7 +185,7 @@ async def test_persister_forms():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         forms = list(page.iter_forms())
 

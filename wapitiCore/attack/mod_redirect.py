@@ -23,6 +23,7 @@ from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
+from wapitiCore.net.response import Html
 
 
 class ModuleRedirect(Attack):
@@ -51,7 +52,9 @@ class ModuleRedirect(Attack):
                 self.network_errors += 1
                 continue
 
-            if any(url.startswith("https://openbugbounty.org/") for url in response.all_redirections):
+            html = Html(response.content, mutated_request.url)
+            all_redirections = {response.redirection_url} | html.all_redirections
+            if any(url.startswith("https://openbugbounty.org/") for url in all_redirections):
                 await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,

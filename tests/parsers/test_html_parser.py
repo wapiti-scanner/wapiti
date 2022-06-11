@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Response
+from wapitiCore.net.crawler import Response, Html
 
 
 @respx.mock
@@ -11,7 +11,7 @@ def test_absolute_root():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert page.links == [url]
 
@@ -23,7 +23,7 @@ def test_relative_root():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         # We will get invalid hostnames with dots. Browsers do that too.
         assert set(page.links) == {url, "http://./", "http://../"}
@@ -36,7 +36,7 @@ def test_relative_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert set(page.links) == {
             url,
@@ -64,7 +64,8 @@ def test_other_links():
         )
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        response = Response(resp)
+        page = Html(response.content, url)
 
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/frame1.html",
@@ -72,7 +73,7 @@ def test_other_links():
             "http://perdu.com/iframe.html"
         ]
         assert page.scripts == ["http://perdu.com/script.js"]
-        assert page.redirection_url == "https://perdu.com/login"
+        assert response.redirection_url == "https://perdu.com/login"
         assert set(page.images_urls) == {
             "http://perdu.com/img/logo.png",
             "http://perdu.com/img/header.png",
@@ -90,7 +91,7 @@ def test_extra_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/planets.gif",
@@ -124,15 +125,16 @@ def test_meta():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        response = Response(resp)
+        assert response.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
 
+        page = Html(response.content, url)
         assert page.title == "  -  Title :) "
         assert page.description == "Meta page"
         assert page.keywords == ["this", "is", " dope"]
         assert page.generator == "YoloCMS 1.0"
         assert page.text_only == "  -  Title :)  This is dope"
         assert page.favicon_url == "http://perdu.com/custom.ico"
-        assert page.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
 
 
 @respx.mock
@@ -142,7 +144,7 @@ def test_base_relative_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert set(page.links) == {
             url,
@@ -172,7 +174,7 @@ def test_base_extra_links():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/blog/",  # extracted from base href
@@ -207,8 +209,10 @@ def test_base_other_links():
         )
 
         resp = httpx.get(url, follow_redirects=False)
-        page = Response(resp)
+        response = Response(resp)
+        assert response.redirection_url == "https://perdu.com/login"
 
+        page = Html(response.content, url)
         assert sorted(page.iter_frames()) == [
             "http://perdu.com/blog/frame1.html",
             "http://perdu.com/blog/frame2.html",
@@ -216,7 +220,7 @@ def test_base_other_links():
         ]
 
         assert page.scripts == ["http://perdu.com/blog/script.js"]
-        assert page.redirection_url == "https://perdu.com/login"
+
         assert set(page.images_urls) == {
             "http://perdu.com/blog/img/logo.png"
         }

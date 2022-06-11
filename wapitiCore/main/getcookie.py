@@ -26,6 +26,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.language import _
 from wapitiCore.net.web import Request
+from wapitiCore.net.response import Response, Html
 
 
 class InvalidOptionValue(Exception):
@@ -156,7 +157,7 @@ async def getcookie_main(arguments):
     json_cookie.delete(server)
 
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        page = await crawler.async_get(Request(args.url), follow_redirects=True)
+        response: Response = await crawler.async_get(Request(args.url), follow_redirects=True)
 
         # A first crawl is sometimes necessary, so let's fetch the webpage
         json_cookie.addcookies(crawler.session_cookies)
@@ -164,7 +165,8 @@ async def getcookie_main(arguments):
         if not args.data:
             # Not data specified, try interactive mode by fetching forms
             forms = []
-            for i, form in enumerate(page.iter_forms(autofill=False)):
+            html = Html(response.content, args.url)
+            for i, form in enumerate(html.iter_forms(autofill=False)):
                 if i == 0:
                     print('')
                     print(_("Choose the form you want to use or enter 'q' to leave :"))

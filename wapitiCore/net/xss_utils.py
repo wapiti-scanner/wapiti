@@ -23,6 +23,7 @@ from os.path import join as path_join
 from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, Flags, random_string
+from wapitiCore.net.response import Html
 
 # Everything under those tags will be treated as text
 NONEXEC_PARENTS = {
@@ -493,7 +494,16 @@ def valid_xss_content_type(http_res):
         return True
     return False
 
-def check_payload(data_dir, payloads_file, external_endpoint, proto_endpoint, response, flags, taint):
+
+def check_payload(
+        data_dir: str,
+        payloads_file: str,
+        external_endpoint: str,
+        proto_endpoint: str,
+        page: Html,
+        flags,
+        taint: str
+):
     config_reader = ConfigParser(interpolation=None)
     with open(path_join(data_dir, payloads_file), encoding='utf-8') as payload_file:
         config_reader.read_file(payload_file)
@@ -510,7 +520,7 @@ def check_payload(data_dir, payloads_file, external_endpoint, proto_endpoint, re
 
             attribute_constraint = {attribute: True} if attribute not in ["full_string", "string"] else {}
 
-            for tag in response.soup.find_all(tag_names, attrs=attribute_constraint):
+            for tag in page.soup.find_all(tag_names, attrs=attribute_constraint):
                 non_exec_parent = find_non_exec_parent(tag)
 
                 if non_exec_parent and not (tag.name == "frame" and non_exec_parent == "frameset"):

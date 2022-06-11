@@ -69,13 +69,13 @@ class ModuleShellshock(Attack):
         evil_req = Request(url)
 
         try:
-            resp = await self.crawler.async_send(evil_req, headers=self.hdrs)
+            response = await self.crawler.async_send(evil_req, headers=self.hdrs)
         except RequestError:
             self.network_errors += 1
             return
 
-        if resp:
-            data = resp.content
+        if response:
+            data = response.content
             if self.rand_string in data:
                 log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
 
@@ -85,5 +85,5 @@ class ModuleShellshock(Attack):
                     request=evil_req,
                     info=_("URL {0} seems vulnerable to Shellshock attack").format(url),
                     wstg=WSTG_CODE,
-                    response=resp
+                    response=response
                 )

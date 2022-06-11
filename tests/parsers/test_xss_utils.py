@@ -4,8 +4,8 @@ import pytest
 
 from wapitiCore.net.xss_utils import get_context_list, valid_xss_content_type, meet_requirements, \
     find_separator
-from wapitiCore.net.csp_utils import has_csp
-from wapitiCore.net.crawler import Response
+from wapitiCore.net.csp_utils import has_csp_header, has_csp_meta
+from wapitiCore.net.crawler import Response, Html
 
 
 def test_title_context():
@@ -520,24 +520,24 @@ def test_csp_detection():
     url = "http://perdu.com/"
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
-    resp = httpx.get(url)
-    page = Response(resp)
-    assert not has_csp(page)
+    response = Response(httpx.get(url))
+    assert not has_csp_header(response)
+    assert not has_csp_meta(Html(response.content, url))
 
     url = "http://perdu.com/http_csp"
     respx.get(url).mock(
         return_value=httpx.Response(
             200,
             headers={
-            "Content-Type": "text/html",
-            "Content-Security-Policy": "blahblah;"
+                "Content-Type": "text/html",
+                "Content-Security-Policy": "blahblah;"
             }
         )
     )
 
-    resp = httpx.get(url)
-    page = Response(resp)
-    assert has_csp(page)
+    response = Response(httpx.get(url))
+    assert has_csp_header(response)
+    assert not has_csp_meta(Html(response.content, url))
 
     url = "http://perdu.com/meta_csp"
 
@@ -556,9 +556,9 @@ def test_csp_detection():
         )
     )
 
-    resp = httpx.get(url)
-    page = Response(resp)
-    assert has_csp(page)
+    response = Response(httpx.get(url))
+    assert not has_csp_header(response)
+    assert has_csp_meta(Html(response.content, url))
 
 
 @respx.mock

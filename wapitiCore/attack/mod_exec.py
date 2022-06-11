@@ -22,6 +22,7 @@ from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack, PayloadType
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
+from wapitiCore.net.response import Response
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
@@ -105,7 +106,7 @@ class ModuleExec(Attack):
             log_verbose(f"[¨] {mutated_request}")
 
             try:
-                response = await self.crawler.async_send(mutated_request)
+                response: Response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 if flags.payload_type == PayloadType.time:
                     if await self.does_timeout(request):

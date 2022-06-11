@@ -36,7 +36,7 @@ from wapitiCore.language.language import _
 from wapitiCore.net import web, Scope
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
-from wapitiCore.net.response import Response
+from wapitiCore.net.response import Response, Html
 from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
@@ -272,13 +272,13 @@ class AsyncCrawler:
         return await self._async_try_login_basic_digest_ntlm(auth_url)
 
     async def _async_try_login_basic_digest_ntlm(self, auth_url: str) -> Tuple[bool, dict, List[str]]:
-        page = await self.async_get(web.Request(auth_url))
+        response = await self.async_get(web.Request(auth_url))
 
-        if page.status in (401, 403, 404):
+        if response.status in (401, 403, 404):
             return False, {}, []
         return True, {}, []
 
-    def _extract_disconnect_urls(self, page: Response) -> List[str]:
+    def _extract_disconnect_urls(self, page: Html) -> List[str]:
         """
         Extract all the disconnect urls on the given page and returns them.
         """
@@ -288,15 +288,17 @@ class AsyncCrawler:
                 continue
 
             if re.search(DISCONNECT_REGEX, link) is not None:
-                disconnect_urls.append(page.make_absolute(link))
+                disconnect_urls.append(link)
         return disconnect_urls
 
     async def _async_try_login_post(self, username: str, password: str, auth_url: str) -> Tuple[bool, dict, List[str]]:
         # Fetch the login page and try to extract the login form
         try:
-            page = await self.async_get(web.Request(auth_url), follow_redirects=True)
+            response: Response = await self.async_get(web.Request(auth_url), follow_redirects=True)
             form = {}
             disconnect_urls = []
+
+            page = Html(response.content, auth_url)
 
             login_form, username_field_idx, password_field_idx = page.find_login_form()
             if login_form:
@@ -328,13 +330,15 @@ class AsyncCrawler:
                     follow_redirects=True
                 )
 
+                html = Html(login_response.content, login_response.url)
+
                 # ensure logged in
-                if login_response.soup.find_all(
+                if html.soup.find_all(
                         text=re.compile(DISCONNECT_REGEX)
                 ):
                     self.is_logged_in = True
                     logging.success(_("Login success"))
-                    disconnect_urls = self._extract_disconnect_urls(login_response)
+                    disconnect_urls = self._extract_disconnect_urls(html)
                 else:
                     logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
             else:
@@ -515,19 +519,19 @@ class AsyncCrawler:
             stream: bool = False
     ) -> Response:
         if resource.method == "GET":
-            page = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
+            response = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         elif resource.method == "POST":
-            page = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
+            response = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         else:
-            page = await self.async_request(
+            response = await self.async_request(
                 resource.method, resource, headers=headers, follow_redirects=follow_redirects, stream=stream
             )
 
-        resource.status = page.status
+        resource.status = response.status
         resource.set_cookies(self._client.cookies)
-        resource.set_headers(page.headers)
-        resource.set_sent_headers(page.sent_headers)
-        return page
+        resource.set_headers(response.headers)
+        resource.set_sent_headers(response.sent_headers)
+        return response
 
     async def close(self):
         await self._client.aclose()

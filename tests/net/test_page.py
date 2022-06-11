@@ -6,8 +6,7 @@ from unittest import mock
 import httpx
 import respx
 from bs4 import BeautifulSoup
-from httpx import Request, Response as HttpxResponse
-from wapitiCore.net.response import Response
+from wapitiCore.net.response import Response, make_absolute, Html
 
 
 def test_make_absolute():
@@ -29,13 +28,8 @@ def test_make_absolute():
         ("http://base.url", "./wrong_folder/../good_folder/", "http://base.url/good_folder/"),
     ]
 
-    request = Request("GET", "http://base.url")
-    response = HttpxResponse(status_code=200, request=request)
-    page = Response(response)
-
     for base_url, relative_url, expected in TEST_CASES:
-        page._base = base_url
-        assert page.make_absolute(relative_url) == expected, \
+        assert make_absolute(base_url, relative_url) == expected, \
             f"Absolute url from base_url='{base_url}' and relative_url='{relative_url}' is not '{expected}'"
 
 
@@ -135,58 +129,61 @@ def test_page():
     )
 
     resp = httpx.get(target_url, follow_redirects=False)
-    page = Response(resp)
+    response = Response(resp)
 
-    assert page.url == target_url
-    assert page.history == []
-    assert len(page.headers) == 3
-    assert page.headers == page_headers
-    assert len(page.cookies) == 0
-    assert page.server == "nginx/1.19.0"
-    assert page.is_plain is True
-    assert page.size == 229
-    assert page.raw_size == 229
-    assert page.content == page_content
-    assert page.bytes == str.encode(page_content)
-    assert page.md5 == md5(str.encode(page_content)).hexdigest()
-    assert page.status == 200
-    assert page.type == "text/plain; charset=utf-8"
-    assert len(page.scripts) == 1
-    assert page.scripts[0] == "http://perdu.com/javascript.js"
-    assert next(page.iter_frames()) == "https://foo.bar/"
-    assert page.redirection_url == ""
-    assert page.is_directory_redirection is False
-    assert len(page.links) == 5
-    assert page.links.count(page_links[0]) == 1
-    assert page.links.count(page_links[1]) == 1
-    assert page.links.count(page_links[2]) == 1
-    assert page.links.count(page_links[3]) == 1
-    assert page.links.count(page_links[4]) == 1
-    assert page.is_external_to_domain('http://perdu.com/blablabla/blablalba/blalba.html') is False
-    assert page.is_external_to_domain('http://p3rdu.com/blablabla/blablalba/blalba.html') is True
-    assert page.is_internal_to_domain('http://perdu.com/blablabla/blablalba/blalba.html') is True
-    assert page.is_internal_to_domain('http://p3rdu.com/blablabla/blablalba/blalba.html') is False
-    assert page.title == "Vous Etes Perdu ?"
-    assert isinstance(page.soup, BeautifulSoup)
-    assert page.base_url is None
-    assert len(page.metas) == 4
-    assert page.metas.get("color-scheme") == "dark light"
-    assert page.description == "test"
-    assert page.keywords == ["lost"]
-    assert page.generator == "gen"
-    assert page.text_only is not None # @fixme later
-    assert page.text_only_md5 is not None # @fixme
-    assert page.favicon_url == target_url + "favicon.ico"
-    assert len(page.images_urls) == 1
-    assert page.images_urls[0] == target_url + "test.jpg"
-    for url in page.extra_urls:
+    assert response.url == target_url
+    assert response.history == []
+    assert len(response.headers) == 3
+    assert response.headers == page_headers
+    assert len(response.cookies) == 0
+    assert response.server == "nginx/1.19.0"
+    assert response.is_plain is True
+    assert response.size == 229
+    assert response.raw_size == 229
+    assert response.content == page_content
+    assert response.bytes == str.encode(page_content)
+    assert response.md5 == md5(str.encode(page_content)).hexdigest()
+    assert response.status == 200
+    assert response.type == "text/plain; charset=utf-8"
+    assert response.redirection_url == ""
+    assert response.is_directory_redirection is False
+
+    html = Html(response.content, target_url)
+    assert len(html.scripts) == 1
+    assert html.scripts[0] == "http://perdu.com/javascript.js"
+    assert next(html.iter_frames()) == "https://foo.bar/"
+
+    assert len(html.links) == 5
+    assert html.links.count(page_links[0]) == 1
+    assert html.links.count(page_links[1]) == 1
+    assert html.links.count(page_links[2]) == 1
+    assert html.links.count(page_links[3]) == 1
+    assert html.links.count(page_links[4]) == 1
+    assert html.is_external_to_domain('http://perdu.com/blablabla/blablalba/blalba.html') is False
+    assert html.is_external_to_domain('http://p3rdu.com/blablabla/blablalba/blalba.html') is True
+    assert html.is_internal_to_domain('http://perdu.com/blablabla/blablalba/blalba.html') is True
+    assert html.is_internal_to_domain('http://p3rdu.com/blablabla/blablalba/blalba.html') is False
+    assert html.title == "Vous Etes Perdu ?"
+    assert isinstance(html.soup, BeautifulSoup)
+    assert html.base_url is None
+    assert len(html.metas) == 4
+    assert html.metas.get("color-scheme") == "dark light"
+    assert html.description == "test"
+    assert html.keywords == ["lost"]
+    assert html.generator == "gen"
+    assert html.text_only is not None # @fixme later
+    assert html.text_only_md5 is not None # @fixme
+    assert html.favicon_url == target_url + "favicon.ico"
+    assert len(html.images_urls) == 1
+    assert html.images_urls[0] == target_url + "test.jpg"
+    for url in html.extra_urls:
         assert url in page_extra_links
-    assert len(page.js_redirections) == 0
-    assert len(page.html_redirections) == 0
-    assert len(page.all_redirections) == 0
-    for request in page.iter_forms():
+    assert len(html.js_redirections) == 0
+    assert len(html.html_redirections) == 0
+    assert len(html.all_redirections) == 0
+    for request in html.iter_forms():
         assert request.url in page_form_requests
-    login_form, username_field, password_field = page.find_login_form()
+    login_form, username_field, password_field = html.find_login_form()
     assert username_field == 0
     assert password_field == 1
     assert login_form.url == "http://perdu.com/userinfo.php"
@@ -469,29 +466,29 @@ def test_scripts_page():
     )
     # internal url
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_1)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "http://perdu.com/javascript.js"
 
     # wrongly formatted url
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_2)
     assert len(page.scripts) == 0
 
     # with scheme & netloc
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_3)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "https://user:pass@NetLoc:80/awesome-script.js"
 
     # without scheme but with netloc
     resp = httpx.get(target_url_4, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_4)
     assert len(page.scripts) == 0
 
     # without extension
     resp = httpx.get(target_url_5, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_5)
     assert len(page.scripts) == 1
     assert page.scripts[0] == "http://netloc/awesome-script.js"
 
@@ -540,14 +537,14 @@ def test_soup_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_1)
 
     assert page.soup is not None
     assert page.soup.find("title").get_text() == "Foobar"
 
     # base tag
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_2)
 
     assert page.soup is not None
     assert page.base_url == "https://example.com/"
@@ -583,7 +580,7 @@ def test_iter_frame_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_1)
 
     assert next(page.iter_frames()) == "http://example.com/"
 
@@ -630,24 +627,24 @@ def test_redirection_url_page():
 
     # No redirect
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Response(resp)
+    response = Response(resp)
 
-    assert page.redirection_url == ""
-    assert page.is_directory_redirection is False
+    assert response.redirection_url == ""
+    assert response.is_directory_redirection is False
 
     # Redirection
     resp = httpx.get(target_url_2, follow_redirects=False)
-    page = Response(resp)
+    response = Response(resp)
 
-    assert page.redirection_url == "http://perdu2.com/index.html"
-    assert page.is_directory_redirection is False
+    assert response.redirection_url == "http://perdu2.com/index.html"
+    assert response.is_directory_redirection is False
 
     # Same url
     resp = httpx.get(target_url_3, follow_redirects=False)
-    page = Response(resp)
+    response = Response(resp)
 
-    assert page.redirection_url == "http://perdu3.com/"
-    assert page.is_directory_redirection is True
+    assert response.redirection_url == "http://perdu3.com/"
+    assert response.is_directory_redirection is True
 
 
 @respx.mock
@@ -718,7 +715,7 @@ def test_title_page():
 
     # basic html
     resp = httpx.get(target_url_1, follow_redirects=False)
-    page = Response(resp)
+    page = Html(Response(resp).content, target_url_1)
 
     assert page.soup is not None
     assert page.title == "Foobar"
@@ -780,7 +777,7 @@ def test_html_redirection():
         )
 
         resp = httpx.get(target_url, follow_redirects=False)
-        page = Response(resp)
+        page = Html(Response(resp).content, target_url)
 
         assert len(page.html_redirections) == 1
         assert page.html_redirections[0] == "http://test.com/"

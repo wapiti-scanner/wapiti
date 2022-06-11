@@ -52,12 +52,12 @@ class ModuleWpEnum(Attack):
         detected_version = None
 
         for rss_url in rss_urls:
-            req = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}", "GET")
-            rep: Response = await self.crawler.async_send(req, follow_redirects=True)
+            request = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}", "GET")
+            response: Response = await self.crawler.async_send(request, follow_redirects=True)
 
-            if not rep.content or rep.is_error:
+            if not response.content or response.is_error:
                 continue
-            root = ET.fromstring(rep.content)
+            root = ET.fromstring(response.content)
 
             if root is None:
                 continue
@@ -81,13 +81,13 @@ class ModuleWpEnum(Attack):
             info_content["versions"].append(detected_version)
             await self.add_vuln_info(
                 category=WEB_APP_VERSIONED,
-                request=req,
+                request=request,
                 info=json.dumps(info_content)
             )
 
         await self.add_addition(
             category=TECHNO_DETECTED,
-            request=req,
+            request=request,
             info=json.dumps(info_content)
         )
 
@@ -202,7 +202,7 @@ class ModuleWpEnum(Attack):
                 )
 
     @staticmethod
-    def check_wordpress(response: object):
+    def check_wordpress(response: Response):
         if re.findall('WordPress.*', response.content):
             return True
         return False

@@ -1,7 +1,7 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Response
+from wapitiCore.net.crawler import Response, Html
 from wapitiCore.net.lamejs import LameJs
 
 
@@ -12,7 +12,7 @@ def test_js_parser():
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url)
-        page = Response(resp)
+        page = Html(Response(resp).content, url)
 
         assert set(page.extra_urls) == {
             "http://perdu.com/onload.html",

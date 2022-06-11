@@ -27,7 +27,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
-from wapitiCore.net.response import Response
+from wapitiCore.net.response import Response, Html
 from wapitiCore.net.web import Request
 from wapitiCore.main.log import log_red
 
@@ -117,11 +117,12 @@ class ModuleBruteLoginForm(Attack):
 
     async def attack(self, request: Request):
         try:
-            page = await self.crawler.async_send(Request(request.referer, "GET"), follow_redirects=True)
+            response = await self.crawler.async_send(Request(request.referer, "GET"), follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
 
+        page = Html(response.content, request.referer)
         login_form, username_field_idx, password_field_idx = page.find_login_form()
         if not login_form:
             return
