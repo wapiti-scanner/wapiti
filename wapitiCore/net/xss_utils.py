@@ -495,6 +495,20 @@ def valid_xss_content_type(http_res):
     return False
 
 
+def compare(left_value: str, right_value: str, method: str, case_sensitive: bool = True):
+    """Compare two strings given a comparison method and case sensitivity"""
+    if not case_sensitive:
+        left_value = left_value.lower()
+        right_value = right_value.lower()
+
+    if method == "exact":
+        return left_value == right_value
+    if method == "starts_with":
+        return left_value.startswith(right_value)
+
+    raise ValueError(f"Unsupported comparison method {method}")
+
+
 def check_payload(
         data_dir: str,
         payloads_file: str,
@@ -534,31 +548,14 @@ def check_payload(
                         if expected_value.lower() in tag.string.lower():
                             return True
                 elif attribute == "full_string" and tag.string:
-                    if case_sensitive:
-                        if match_type == "exact" and expected_value == tag.string.strip():
-                            return True
-                        if match_type == "starts_with" and tag.string.strip().startswith(expected_value):
-                            return True
-                    else:
-                        if match_type == "exact" and expected_value.lower() == tag.string.strip().lower():
-                            return True
-                        if match_type == "starts_with" and \
-                                tag.string.strip().lower().startswith(expected_value.lower()):
-                            return True
+                    if compare(tag.string.strip(), expected_value, match_type, case_sensitive):
+                        return True
                 else:
                     # Found attribute specified in .ini file in attributes of the HTML tag
                     if attribute in tag.attrs:
-                        if case_sensitive:
-                            if match_type == "exact" and tag[attribute] == expected_value:
-                                return True
-                            if match_type == "starts_with" and tag[attribute].startswith(expected_value):
-                                return True
-                        else:
-                            if match_type == "exact" and tag[attribute].lower() == expected_value.lower():
-                                return True
-                            if match_type == "starts_with" and \
-                                    expected_value.lower().startswith(tag[attribute].lower()):
-                                return True
+                        if compare(tag[attribute], expected_value, match_type, case_sensitive):
+                            return True
+
             break
 
     return False

@@ -69,22 +69,19 @@ class ModulePermanentxss(Attack):
 
     async def attack(self, request: Request):
         """This method searches XSS which could be permanently stored in the web application"""
-        url = request.url
-        target_req = Request(url)
-        referer = request.referer
         headers = {}
 
-        if referer:
-            headers["referer"] = referer
+        if request.referer:
+            headers["referer"] = request.referer
 
         try:
-            response = await self.crawler.async_send(target_req, headers=headers)
+            response = await self.crawler.async_send(Request(request.url), headers=headers)
             data = response.content
         except RequestError:
             self.network_errors += 1
             return
 
-        html = Html(response.content, url)
+        html = Html(response.content, request.url)
 
         # Should we look for taint codes sent with GET in the webpages?
         # Exploiting those may imply sending more GET requests
