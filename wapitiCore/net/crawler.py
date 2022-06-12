@@ -521,7 +521,12 @@ class AsyncCrawler:
         if resource.method == "GET":
             response = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
         elif resource.method == "POST":
-            response = await self.async_post(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
+            response = await self.async_post(
+                resource,
+                headers=headers,
+                follow_redirects=follow_redirects,
+                stream=stream
+            )
         else:
             response = await self.async_request(
                 resource.method, resource, headers=headers, follow_redirects=follow_redirects, stream=stream

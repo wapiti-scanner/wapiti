@@ -26,9 +26,10 @@ from hashlib import md5
 from http.client import IncompleteRead
 from posixpath import normpath
 from urllib.parse import urlparse, urlunparse
+from typing import Iterator, List, Optional, Dict, Set, Tuple
+
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
-from typing import Iterator, List, Optional, Dict, Set, Tuple
 
 # Third-parties
 import httpx

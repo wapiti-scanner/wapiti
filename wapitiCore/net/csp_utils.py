@@ -36,6 +36,8 @@ def has_csp_header(response: Response):
     if CSP_HEADERS & headers:
         return True
 
+    return False
+
 
 def has_csp_meta(page: Html):
     for meta_http in page.soup.find_all("meta", attrs={"http-equiv": True}):
