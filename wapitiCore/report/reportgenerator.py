@@ -34,7 +34,7 @@ class ReportGenerator:
 
     def set_report_info(
         self,
-        target,
+        target: str,
         scope,
         date,
         version,
@@ -63,7 +63,7 @@ class ReportGenerator:
         raise NotImplementedError("Must be overridden")
 
     # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
+    def add_vulnerability_type(self, name: str, description: str = "", solution: str = "", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
     def add_vulnerability(

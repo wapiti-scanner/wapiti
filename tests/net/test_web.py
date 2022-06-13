@@ -1,7 +1,6 @@
 import httpx
 
-from wapitiCore.net.web import detail_response
-from wapitiCore.net.sql_persister import Response
+from wapitiCore.net.response import Response, detail_response
 
 
 def test_detail_response():

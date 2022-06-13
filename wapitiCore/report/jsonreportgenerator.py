@@ -22,7 +22,7 @@ import json
 
 from httpx import Response
 
-from wapitiCore.net.web import detail_response
+from wapitiCore.net.response import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 

@@ -681,14 +681,3 @@ class Request:
     @path_id.setter
     def path_id(self, value: int):
         self._path_id = value
-
-
-def detail_response(response) -> Optional[dict]:
-    if not response:
-        return None
-
-    return {
-        "status_code": response.status,
-        "body": response.content,
-        "headers": response.headers.multi_items()
-    }
