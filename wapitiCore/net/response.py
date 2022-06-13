@@ -161,7 +161,6 @@ def make_absolute(base: str, url: str, allow_fragments=True) -> str:
     else:
         # relative path to file, subdirectory or parent directory
         current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
-        # new_path = (current_directory + parts.path).replace("//", "/").replace("/./", "/")
 
         new_path = normpath(current_directory + url_path)
         if url_path.endswith('/') and not new_path.endswith('/'):
@@ -198,7 +197,7 @@ class Response:
         return [Response(response) for response in self._response.history]
 
     @property
-    def headers(self):
+    def headers(self) -> httpx.Headers:
         """Returns the dictionary of HTTP headers as sent by the web-server.
 
         @rtype: dict
@@ -692,17 +691,6 @@ class Html:
         for script in self.soup.find_all("script", string=True):
             urls = lamejs.LameJs(script.string).get_links()
 
-            # too many annoying false positives
-            # candidates = re.findall(r'"([A-Za-z0-9_=#&%.+?/-]*)"', script.string)
-            # candidates += re.findall(r"'([A-Za-z0-9_=#&%.+?/-]*)'", script.string)
-            #
-            # allowed_ext = [".php", ".asp", ".xml", ".js", ".json", ".jsp"]
-            # for jstr in candidates:
-            #     if "." in jstr and jstr not in COMMON_JS_STRINGS:
-            #         for ext in allowed_ext:
-            #             if ext in jstr:
-            #                 urls.append(jstr)
-            #                 break
             for url in urls:
                 yield self._make_absolute(url)
 
@@ -998,3 +986,14 @@ class Html:
                 return login_form, username_field_idx[0], password_field_idx[0]
 
         return None, 0, 0
+
+
+def detail_response(response: Response) -> Optional[dict]:
+    if not response:
+        return None
+
+    return {
+        "status_code": response.status,
+        "body": response.content,
+        "headers": response.headers.multi_items()
+    }

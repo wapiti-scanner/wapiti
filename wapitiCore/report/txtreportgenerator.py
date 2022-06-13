@@ -21,7 +21,7 @@ import codecs
 from httpx import Response
 
 from wapitiCore.language.language import _
-from wapitiCore.net.web import detail_response
+from wapitiCore.net.response import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 NB_COLUMNS = 80
@@ -30,13 +30,13 @@ NB_COLUMNS = 80
 # http://docs.python.org/2/library/string.html#format-specification-mini-language
 
 
-def center(row):
+def center(row: str) -> str:
     if len(row) >= NB_COLUMNS:
         return row
     return row.rjust(len(row) + int((NB_COLUMNS - len(row)) / 2.0))
 
 
-def title(row):
+def title(row: str) -> str:
     return f"{row}\n{'-' * len(row.strip())}\n"
 
 
