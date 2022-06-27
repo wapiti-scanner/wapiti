@@ -35,6 +35,7 @@ from wapitiCore.main.log import logging
 
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
 
+
 class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
     in other to can continue the process in the future.
@@ -744,7 +745,8 @@ class SqlPersister:
                     row.status_code,
                     headers=httpx.Headers(json.loads(row.headers)),
                     content=row.body
-                )
+                ),
+                row.url,
             )
         except httpx.DecodingError as e:
             logging.error(e)
