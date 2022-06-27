@@ -38,6 +38,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import swf
 from wapitiCore.net import lamejs
 from wapitiCore.net import jsparser_angular
+from wapitiCore.net.scope import Scope
 
 
 MIME_TEXT_TYPES = ('text/', 'application/xml')
@@ -80,8 +81,9 @@ def wildcard_translate(pattern):
 
 
 class Explorer:
-    def __init__(self, crawler_instance: AsyncCrawler, stop_event: asyncio.Event, parallelism: int = 8):
+    def __init__(self, crawler_instance: AsyncCrawler, scope: Scope, stop_event: asyncio.Event, parallelism: int = 8):
         self._crawler = crawler_instance
+        self._scope = scope
         self._max_depth = 20
         self._max_page_size = MAX_PAGE_SIZE
         self._bad_params = set()
@@ -199,10 +201,10 @@ class Explorer:
 
         elif response.type.startswith(MIME_TEXT_TYPES):
             html = Html(response.content, response.url)
-            allowed_links.extend(filter(self._crawler.is_in_scope, html.links))
-            allowed_links.extend(filter(self._crawler.is_in_scope, html.js_redirections + html.html_redirections))
+            allowed_links.extend(self._scope.filter(html.links))
+            allowed_links.extend(self._scope.filter(html.js_redirections + html.html_redirections))
 
-            for extra_url in filter(self._crawler.is_in_scope, html.extra_urls):
+            for extra_url in self._scope.filter(html.extra_urls):
                 parts = urlparse(extra_url)
                 # There are often css and js URLs with useless parameters like version or random number
                 # used to prevent caching in browser. So let's exclude those extensions
@@ -218,7 +220,7 @@ class Explorer:
 
             for form in html.iter_forms():
                 # TODO: apply bad_params filtering in form URLs
-                if self._crawler.is_in_scope(form):
+                if self._scope.check(form):
                     if form.hostname not in self._hostnames:
                         form.link_depth = 0
                     else:
@@ -229,13 +231,13 @@ class Explorer:
         for url in swf_links + js_links:
             if url:
                 url = make_absolute(response.url, url)
-                if url and self._crawler.is_in_scope(url):
+                if url and self._scope.check(url):
                     allowed_links.append(url)
 
         for new_url in allowed_links:
             if "?" in new_url:
                 path_only = new_url.split("?")[0]
-                if path_only not in allowed_links and self._crawler.is_in_scope(path_only):
+                if path_only not in allowed_links and self._scope.check(path_only):
                     allowed_links.append(path_only)
 
         for new_url in set(allowed_links):
@@ -440,7 +442,7 @@ class Explorer:
                             # Malformed link due to HTML issues
                             continue
 
-                        if not self._crawler.is_in_scope(unfiltered_request):
+                        if not self._scope.check(unfiltered_request):
                             continue
 
                         if unfiltered_request.hostname not in self._hostnames:

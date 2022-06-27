@@ -3,9 +3,9 @@ import pytest
 import httpx
 import respx
 
-from wapitiCore.net.crawler import Response, AsyncCrawler, Scope, Html
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler import Response, Html
 from wapitiCore.net.web import Request
+from wapitiCore.net.scope import Scope
 
 
 @respx.mock
@@ -40,46 +40,36 @@ async def test_scopes():
         "http://external.tld/external.html"
     }
 
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/"), scope=Scope.FOLDER)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-        assert filtered == {
-            "http://perdu.com/subdir/subdirpage.html",
-            "http://perdu.com/subdir/subdir2/subdirpage2.html",
-            "http://perdu.com/subdir/page.html?k=v",
-            "http://perdu.com/subdir/page.html",
-        }
+    scope = Scope(Request("http://perdu.com/subdir/"), "folder")
+    assert scope.filter(links) == {
+        "http://perdu.com/subdir/subdirpage.html",
+        "http://perdu.com/subdir/subdir2/subdirpage2.html",
+        "http://perdu.com/subdir/page.html?k=v",
+        "http://perdu.com/subdir/page.html",
+    }
 
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html"), scope=Scope.PAGE)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-        assert filtered == {
-            "http://perdu.com/subdir/page.html?k=v",
-            "http://perdu.com/subdir/page.html"
-        }
+    scope = Scope(Request("http://perdu.com/subdir/page.html"), "page")
+    assert scope.filter(links) == {
+        "http://perdu.com/subdir/page.html?k=v",
+        "http://perdu.com/subdir/page.html"
+    }
 
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.URL)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-        assert filtered == {
-            "http://perdu.com/subdir/page.html?k=v"
-        }
+    scope = Scope(Request("http://perdu.com/subdir/page.html?k=v"), "url")
+    assert scope.filter(links) == {
+        "http://perdu.com/subdir/page.html?k=v"
+    }
 
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.DOMAIN)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-        assert filtered == {
-            "http://perdu.com/",
-            "http://perdu.com/page.html",
-            "http://perdu.com/subdir/subdirpage.html",
-            "http://perdu.com/subdir/subdir2/subdirpage2.html",
-            "http://sub.perdu.com/page.html",
-            "https://perdu.com/secure.html",
-            "http://perdu.com/subdir/page.html?k=v",
-            "http://perdu.com/subdir/page.html"
-        }
+    scope = Scope(Request("http://perdu.com/subdir/page.html?k=v"), "domain")
+    assert scope.filter(links) == {
+        "http://perdu.com/",
+        "http://perdu.com/page.html",
+        "http://perdu.com/subdir/subdirpage.html",
+        "http://perdu.com/subdir/subdir2/subdirpage2.html",
+        "http://sub.perdu.com/page.html",
+        "https://perdu.com/secure.html",
+        "http://perdu.com/subdir/page.html?k=v",
+        "http://perdu.com/subdir/page.html"
+    }
 
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/subdir/page.html?k=v"), scope=Scope.PUNK)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        filtered = {link for link in links if crawler.is_in_scope(Request(link))}
-        assert filtered == links
+    scope = Scope(Request("http://perdu.com/subdir/page.html?k=v"), "punk")
+    assert scope.filter(links) == links
