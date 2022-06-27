@@ -14,6 +14,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.web import Request
+from wapitiCore.net.scope import Scope
 
 
 @pytest.fixture(autouse=True)
@@ -30,8 +31,9 @@ def run_around_tests():
 @pytest.mark.asyncio
 async def test_qs_limit():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
+    scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, Event())
+        explorer = Explorer(crawler, scope, Event())
         start_urls = deque(["http://127.0.0.1:65080/"])
         excluded_urls = []
         # We should have root url, huge form page, target and target with POST method
@@ -39,7 +41,7 @@ async def test_qs_limit():
 
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, Event())
+        explorer = Explorer(crawler, scope, Event())
         # Exclude huge POST form with limit of parameters
         explorer.qs_limit = 500
         start_urls = deque(["http://127.0.0.1:65080/"])
@@ -51,8 +53,9 @@ async def test_qs_limit():
 @pytest.mark.asyncio
 async def test_explorer_filtering():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
+    scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, Event())
+        explorer = Explorer(crawler, scope, Event())
         start_urls = deque(["http://127.0.0.1:65080/filters.html"])
         excluded_urls = []
         results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
@@ -108,7 +111,8 @@ def test_save_and_restore_state():
     filename = temp_file.name
     # Delete it
     temp_file.close()
-    explorer = Explorer(None, Event())
+    scope = Scope(Request("http://perdu.com/"), "folder")
+    explorer = Explorer(None, scope, Event())
     # Load on unexisting file
     explorer.load_saved_state(filename)
     assert not explorer._hostnames
@@ -118,8 +122,8 @@ def test_save_and_restore_state():
     # State is the same after saving
     assert explorer._hostnames == {"perdu.com"}
 
-    # New tempty explorer
-    explorer = Explorer(None, Event())
+    # New empty explorer
+    explorer = Explorer(None, scope, Event())
     # Load previous state
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
@@ -130,8 +134,9 @@ def test_save_and_restore_state():
 @respx.mock
 async def test_explorer_extract_links():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
+    scope = Scope(Request("http://perdu.com/"), "folder")
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, Event())
+        explorer = Explorer(crawler, scope, Event())
 
         respx.get("http://perdu.com/").mock(
             return_value=httpx.Response(
@@ -164,8 +169,9 @@ async def test_explorer_extract_links():
 @respx.mock
 async def test_explorer_extract_links_from_js():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
+    scope = Scope(Request("http://perdu.com/"), "folder")
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, Event())
+        explorer = Explorer(crawler, scope, Event())
 
         respx.get("http://perdu.com/").mock(
             return_value=httpx.Response(

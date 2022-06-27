@@ -1,6 +1,5 @@
 from urllib.parse import quote, unquote
 import html
-from enum import Enum
 
 
 def encode(params_list):
@@ -22,11 +21,3 @@ def uqe(self, params_list):  # , encoding = None):
 def escape(url):
     """Change special characters in their html entities representation."""
     return html.escape(url, quote=True).replace("'", "%27")
-
-
-class Scope(Enum):
-    FOLDER = 1
-    PAGE = 2
-    URL = 3
-    DOMAIN = 4
-    PUNK = 5

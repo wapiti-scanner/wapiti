@@ -51,6 +51,7 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
+from wapitiCore.net.scope import Scope
 from wapitiCore.report import GENERATORS, get_report_generator_instance
 
 WAPITI_VERSION = "3.1.2"
@@ -179,17 +180,7 @@ class Wapiti:
         self.crawler_configuration = CrawlerConfiguration(self.base_request)
         self.crawler = None
 
-        self.target_scope = scope
-        if scope == "page":
-            self.crawler_configuration.scope = crawler.Scope.PAGE
-        elif scope == "folder":
-            self.crawler_configuration.scope = crawler.Scope.FOLDER
-        elif scope == "domain":
-            self.crawler_configuration.scope = crawler.Scope.DOMAIN
-        elif scope == "punk":
-            self.crawler_configuration.scope = crawler.Scope.PUNK
-        else:
-            self.crawler_configuration.scope = crawler.Scope.URL
+        self.target_scope = Scope(self.base_request, scope)
 
         self.report_gen = None
         self.report_generator_type = "html"
@@ -228,7 +219,7 @@ class Wapiti:
 
         self._history_file = os.path.join(
             SqlPersister.CRAWLER_DATA_DIR,
-            f"{server_url}_{self.target_scope}_{hashed_root_url}.db"
+            f"{server_url}_{self.target_scope.name}_{hashed_root_url}.db"
         )
 
         if not os.path.isdir(SqlPersister.CRAWLER_DATA_DIR):
@@ -278,7 +269,7 @@ class Wapiti:
 
         self.report_gen.set_report_info(
             self.base_request.url,
-            self.target_scope,
+            self.target_scope.name,
             gmtime(),
             f"Wapiti {WAPITI_VERSION}",
             self._auth_state,
@@ -389,7 +380,7 @@ class Wapiti:
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
-        explorer = Explorer(self.crawler, stop_event, parallelism=parallelism)
+        explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
         explorer.max_requests_per_depth = self._max_links_per_page
@@ -773,7 +764,7 @@ class Wapiti:
 
 
 def fix_url_path(url: str):
-    """Fix the url path if its not defined"""
+    """Fix the url path if it's not defined"""
     return url if urlparse(url).path else url + '/'
 
 

@@ -28,12 +28,10 @@ import ssl
 
 # Third-parties
 import httpx
-from tld import get_fld
-from tld.exceptions import TldDomainNotFound
 
 # Internal libraries
 from wapitiCore.language.language import _
-from wapitiCore.net import web, Scope
+from wapitiCore.net import web
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
 from wapitiCore.net.response import Response, Html
@@ -103,13 +101,11 @@ class AsyncCrawler:
             base_request: web.Request,
             client: httpx.AsyncClient,
             timeout: float = 10.0,
-            scope: Scope = Scope.FOLDER,
             form_credentials: Tuple[str, str] = None,
     ):
         self._base_request = base_request
         self._client = client
         self._timeout = timeout
-        self._scope = scope
         self._auth_credentials = form_credentials
 
         self.is_logged_in = False
@@ -170,7 +166,7 @@ class AsyncCrawler:
         )
 
         client.max_redirects = 5
-        return cls(configuration.base_request, client, configuration.timeout, configuration.scope, form_credentials)
+        return cls(configuration.base_request, client, configuration.timeout, form_credentials)
 
     @staticmethod
     def _proxy_url_to_dict(proxy: str) -> Dict[str, str]:
@@ -197,43 +193,6 @@ class AsyncCrawler:
         return self._timeout
 
     @property
-    def scope(self):
-        return self._scope
-
-    def is_in_scope(self, resource):
-        if self.scope == Scope.PUNK:
-            # Life is short
-            return True
-
-        if isinstance(resource, web.Request):
-            if self.scope == Scope.FOLDER:
-                return resource.url.startswith(self._base_request.path)
-            if self.scope == Scope.PAGE:
-                return resource.path == self._base_request.path
-            if self.scope == Scope.URL:
-                return resource.url == self._base_request.url
-            # Scope.DOMAIN
-            try:
-                return get_fld(resource.url) == get_fld(self._base_request.url)
-            except TldDomainNotFound:
-                return resource.hostname == self._base_request.hostname
-        else:
-            if not resource:
-                return False
-
-            if self.scope == Scope.FOLDER:
-                return resource.startswith(self._base_request.path)
-            if self.scope == Scope.PAGE:
-                return resource.split("?")[0] == self._base_request.path
-            if self.scope == Scope.URL:
-                return resource == self._base_request.url
-            # Scope.DOMAIN
-            try:
-                return get_fld(resource) == get_fld(self._base_request.url)
-            except TldDomainNotFound:
-                return urlparse(resource).netloc == self._base_request.hostname
-
-    @property
     def user_agent(self):
         """Getter for user-agent property"""
         return self._client.headers["User-Agent"]
@@ -251,6 +210,7 @@ class AsyncCrawler:
         """Getter for session cookies (returns a Cookies object)"""
         return self._client.cookies
 
+    # Should be put outside of crawler now that the "scope" was moved
     async def async_try_login(
             self,
             auth_credentials: Tuple[str, str],
@@ -259,7 +219,7 @@ class AsyncCrawler:
     ) -> Tuple[bool, dict, List[str]]:
         """
         Try to authenticate with the provided url and credentials.
-        Returns if the the authentication has been successful, the used form variables and the disconnect urls.
+        Returns if the authentication has been successful, the used form variables and the disconnect urls.
         """
         if len(auth_credentials) != 2:
             logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
@@ -284,9 +244,6 @@ class AsyncCrawler:
         """
         disconnect_urls = []
         for link in page.links:
-            if self.is_in_scope(link) is False:
-                continue
-
             if re.search(DISCONNECT_REGEX, link) is not None:
                 disconnect_urls.append(link)
         return disconnect_urls
