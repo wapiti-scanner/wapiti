@@ -487,7 +487,7 @@ class Request:
             for header_name, header_value in self._sent_headers.items():
                 http_string += f"{left_margin}{header_name}: {header_value}\n"
 
-        if self._file_params:
+        if self.is_multipart:
             boundary = "------------------------boundarystring"
             http_string += f"{left_margin}Content-Type: multipart/form-data; boundary={boundary}\n\n"
             for field_name, field_value in self._post_params:
@@ -519,7 +519,7 @@ class Request:
         if self._referer:
             curl_string += f" -e \"{shell_escape(self._referer)}\""
 
-        if self._file_params:
+        if self.is_multipart:
             # POST with multipart
             for field_name, field_value in self._post_params:
                 curl_string += f" -F \"{shell_escape(f'{field_name}={field_value}')}\""

@@ -35,13 +35,13 @@ warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
 
 class Response:
-    def __init__(self, response: httpx.Response):
+    def __init__(self, response: httpx.Response, url: Optional[str] = None):
         """Create a new Response object.
 
         @type response: Response
         @param response: a requests Response instance."""
         self._response = response
-        # self._base = None
+        self._url = url or str(self._response.url)
 
     @property
     def url(self) -> str:
@@ -49,7 +49,7 @@ class Response:
 
         @rtype: str
         """
-        return str(self._response.url)
+        return self._url
 
     @property
     def history(self) -> List["Response"]:

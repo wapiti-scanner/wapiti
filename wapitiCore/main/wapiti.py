@@ -48,6 +48,7 @@ from wapitiCore.main.log import logging
 from wapitiCore.moon import phase
 from wapitiCore.net import crawler, jsoncookie
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.intercepting_explorer import InterceptingExplorer
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
@@ -206,6 +207,7 @@ class Wapiti:
         self._bug_report = True
         self._logfile = ""
         self._auth_state = None
+        self._mitm_proxy_port = 0
         self.detailed_report = False
 
         if session_dir:
@@ -380,7 +382,16 @@ class Wapiti:
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
-        explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)
+        if self._mitm_proxy_port:
+            explorer = InterceptingExplorer(
+                self.crawler,
+                self.target_scope,
+                stop_event,
+                parallelism=parallelism,
+                mitm_port=self._mitm_proxy_port
+            )
+        else:
+            explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
         explorer.max_requests_per_depth = self._max_links_per_page
@@ -620,6 +631,10 @@ class Wapiti:
     def set_proxy(self, proxy: str):
         """Set a proxy to use for HTTP requests."""
         self.crawler_configuration.proxy = proxy
+
+    def set_intercepting_proxy_port(self, port: int):
+        """Set the listening port for the mitmproxy instance."""
+        self._mitm_proxy_port = port
 
     def add_start_url(self, url: str):
         """Specify a URL to start the scan with. Can be called several times."""
@@ -907,6 +922,15 @@ async def wapiti_main():
         "--tor",
         action="store_true",
         help=_("Use Tor listener (127.0.0.1:9050)")
+    )
+
+    parser.add_argument(
+        "--mitm-port",
+        dest="mitm_port",
+        default=argparse.SUPPRESS,
+        help=_("Instead of crawling, launch an intercepting proxy on the given port"),
+        metavar="PORT",
+        type=int
     )
 
     parser.add_argument(
@@ -1269,6 +1293,9 @@ async def wapiti_main():
 
         if args.tor:
             wap.set_proxy("socks5://127.0.0.1:9050/")
+
+        if "mitm_port" in args:
+            wap.set_intercepting_proxy_port(args.mitm_port)
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):
