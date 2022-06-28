@@ -23,7 +23,7 @@ from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
 from wapitiCore.net.web import Request
-from wapitiCore.net.response import Html
+from wapitiCore.net.html import Html
 
 
 class ModuleRedirect(Attack):

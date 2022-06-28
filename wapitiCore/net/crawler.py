@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Standard libraries
-import re
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
@@ -34,13 +33,11 @@ from wapitiCore.language.language import _
 from wapitiCore.net import web
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
-from wapitiCore.net.response import Response, Html
+from wapitiCore.net.response import Response
+from wapitiCore.net.html import Html
 from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
-
-
-DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
 
 
 def retry(delay=1, times=3):
@@ -238,16 +235,6 @@ class AsyncCrawler:
             return False, {}, []
         return True, {}, []
 
-    def _extract_disconnect_urls(self, page: Html) -> List[str]:
-        """
-        Extract all the disconnect urls on the given page and returns them.
-        """
-        disconnect_urls = []
-        for link in page.links:
-            if re.search(DISCONNECT_REGEX, link) is not None:
-                disconnect_urls.append(link)
-        return disconnect_urls
-
     async def _async_try_login_post(self, username: str, password: str, auth_url: str) -> Tuple[bool, dict, List[str]]:
         # Fetch the login page and try to extract the login form
         try:
@@ -290,12 +277,10 @@ class AsyncCrawler:
                 html = Html(login_response.content, login_response.url)
 
                 # ensure logged in
-                if html.soup.find_all(
-                        text=re.compile(DISCONNECT_REGEX)
-                ):
-                    self.is_logged_in = True
+                self.is_logged_in = html.is_logged_in()
+                if self.is_logged_in:
                     logging.success(_("Login success"))
-                    disconnect_urls = self._extract_disconnect_urls(html)
+                    disconnect_urls = html.extract_disconnect_urls()
                 else:
                     logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
             else:

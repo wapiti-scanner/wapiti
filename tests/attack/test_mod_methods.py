@@ -1,5 +1,4 @@
 from asyncio import Event
-from unittest.mock import Mock
 
 import httpx
 import respx

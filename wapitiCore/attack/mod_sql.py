@@ -27,7 +27,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.web import Request
-from wapitiCore.net.response import Html
+from wapitiCore.net.html import Html
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
 DBMS_ERROR_PATTERNS = {

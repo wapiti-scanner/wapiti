@@ -16,7 +16,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
 
-from wapitiCore.net.response import Response, Html
+from wapitiCore.net.html import Html
+from wapitiCore.net.response import Response
+
 
 POLICY_REGEX = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
 

@@ -3,7 +3,8 @@ import pytest
 import httpx
 import respx
 
-from wapitiCore.net.crawler import Response, Html
+from wapitiCore.net.crawler import Response
+from wapitiCore.net.html import Html
 from wapitiCore.net.web import Request
 from wapitiCore.net.scope import Scope
 

@@ -19,8 +19,10 @@
 from copy import deepcopy
 import posixpath
 import sys
-from urllib.parse import urlparse, unquote, quote, urljoin
+from urllib.parse import urlparse, urlunparse, unquote, quote, urljoin
 from typing import Optional, List, Tuple, Union
+import re
+
 
 import httpx
 
@@ -149,6 +151,104 @@ def shell_escape(string: str) -> str:
     string = string.replace('!', '\\!')
     string = string.replace('`', '\\`')
     return string
+
+
+def make_absolute(base: str, url: str, allow_fragments=True) -> str:
+    """Convert a relative URL to an absolute one (with scheme, host, path, etc) and use the base href if present.
+
+    @type base: str
+    @param base: The base URL
+
+    @type url: str
+    @param url: A relative URL.
+
+    @type allow_fragments: bool
+    @param allow_fragments: Must be set to True if URLs with anchors must be kept
+    @rtype: str
+    """
+    if not url.strip():
+        return ""
+
+    current_url_parts = urlparse(base)
+    scheme = current_url_parts.scheme
+    domain = current_url_parts.netloc
+    path = current_url_parts.path
+    params = current_url_parts.params
+
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
+        return ""
+
+    query_string = parts.query
+    url_path = parts.path or '/'
+    url_path = posixpath.normpath(url_path.replace("\\", "/"))
+    # Returns an empty string for everything that we don't want to deal with
+    absolute_url = ""
+
+    # https://stackoverflow.com/questions/7816818/why-doesnt-os-normpath-collapse-a-leading-double-slash
+    url_path = re.sub(r"^/{2,}", "/", url_path)
+
+    # normpath removes the trailing slash so we must add it if necessary
+    if (parts.path.endswith(('/', '/.')) or parts.path == '.') and not url_path.endswith('/'):
+        url_path += '/'
+
+    # a hack for auto-generated Apache directory index
+    if query_string in [
+            "C=D;O=A", "C=D;O=D", "C=M;O=A", "C=M;O=D",
+            "C=N;O=A", "C=N;O=D", "C=S;O=A", "C=S;O=D"
+    ]:
+        query_string = ""
+
+    if parts.scheme:
+        if parts.scheme in ('http', 'https'):
+            if parts.netloc and parts.netloc != "http:":  # malformed url
+                netloc = parts.netloc
+                try:
+                    # urlparse tries to convert port in base10. an error is raised if port is not digits
+                    port = parts.port
+                except ValueError:
+                    port = None
+
+                if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
+                    # Beware of IPv6 addresses
+                    netloc = parts.netloc.rsplit(":", 1)[0]
+                absolute_url = urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
+    elif url.startswith("//"):
+        if parts.netloc:
+            netloc = parts.netloc
+            try:
+                port = parts.port
+            except ValueError:
+                port = None
+
+            if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
+                # Beware of IPv6 addresses
+                netloc = parts.netloc.rsplit(":", 1)[0]
+            absolute_url = urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
+    elif url.startswith("/"):
+        absolute_url = urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
+    elif url.startswith("?"):
+        absolute_url = urlunparse((scheme, domain, path, params, query_string, ''))
+    elif url.startswith("#"):
+        if allow_fragments:
+            absolute_url = base + url
+        else:
+            absolute_url = base
+    elif url == "":
+        absolute_url = base
+    else:
+        # relative path to file, subdirectory or parent directory
+        current_directory = path if path.endswith("/") else path.rsplit("/", 1)[0] + "/"
+
+        new_path = posixpath.normpath(current_directory + url_path)
+        if url_path.endswith('/') and not new_path.endswith('/'):
+            new_path += '/'
+
+        absolute_url = urlunparse((scheme, domain, new_path, parts.params, query_string, ''))
+
+    return absolute_url
 
 
 class Request:

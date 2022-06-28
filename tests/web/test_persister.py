@@ -6,9 +6,10 @@ import httpx
 import respx
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.html import Html
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.web import Request
-from wapitiCore.net.crawler import AsyncCrawler, Response, Html
+from wapitiCore.net.crawler import AsyncCrawler, Response
 
 
 @pytest.mark.asyncio
