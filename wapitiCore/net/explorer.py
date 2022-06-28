@@ -31,8 +31,9 @@ import httpx
 from wapitiCore.language.language import _
 from wapitiCore.net import web
 
-from wapitiCore.net.response import Response, Html, make_absolute
-from wapitiCore.net.web import Request
+from wapitiCore.net.response import Response
+from wapitiCore.net.web import Request, make_absolute
+from wapitiCore.net.html import Html
 from wapitiCore.main.log import logging, log_verbose
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import swf

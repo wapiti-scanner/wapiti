@@ -2,10 +2,11 @@ import respx
 import httpx
 import pytest
 
+from wapitiCore.net.html import Html
 from wapitiCore.net.xss_utils import get_context_list, valid_xss_content_type, meet_requirements, \
     find_separator
 from wapitiCore.net.csp_utils import has_csp_header, has_csp_meta
-from wapitiCore.net.crawler import Response, Html
+from wapitiCore.net.crawler import Response
 
 
 def test_title_context():

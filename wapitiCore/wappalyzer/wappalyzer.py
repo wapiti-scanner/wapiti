@@ -3,7 +3,8 @@ import os
 import re
 import warnings
 
-from wapitiCore.net.crawler import Response, Html
+from wapitiCore.net.crawler import Response
+from wapitiCore.net.html import Html
 
 
 class ApplicationDataException(Exception):
@@ -23,12 +24,6 @@ class ApplicationData:
     def __init__(self, categories_file_path=None, groups_file_path=None, technologies_file_path=None):
         """
         Initialize a new ApplicationData object.
-
-        Parameters
-        ----------
-
-        data_filename : str
-            File providing application and categorie references (Json format).
         """
         base_dir = os.path.join(os.getenv("HOME") or os.getenv("USERPROFILE"), ".wapiti")
         default_categories_file_path = os.path.join(base_dir, "wappalyzer", "data/categories.json")

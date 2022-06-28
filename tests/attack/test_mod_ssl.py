@@ -10,7 +10,7 @@ import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.web import Request
-from wapitiCore.language.vulnerability import _, CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssl import ModuleSsl, NAME
 from tests import AsyncMock

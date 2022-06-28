@@ -1,7 +1,8 @@
 import respx
 import httpx
 
-from wapitiCore.net.crawler import Response, Html
+from wapitiCore.net.crawler import Response
+from wapitiCore.net.html import Html
 from wapitiCore.net.lamejs import LameJs
 
 

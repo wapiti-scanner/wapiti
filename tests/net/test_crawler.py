@@ -6,78 +6,48 @@ import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.response import Response, Html
+from wapitiCore.net.html import Html
 from wapitiCore.net.web import Request
 
 
-@respx.mock
-@pytest.mark.asyncio
-async def test_extract_disconnect_urls_one_url():
+def test_extract_disconnect_urls_one_url():
     target_url = "http://perdu.com/"
-    respx.get(target_url).mock(
-        return_value=httpx.Response(
-            200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-            <a href='http://perdu.com/foobar/signout'></a></body></html>"
-        )
+    text = (
+        "<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1>"
+        "<h2>Pas de panique, on va vous aider</h2>"
+        "<strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a>"
+        "<a href='http://perdu.com/foobar/signout'></a></body></html>"
     )
 
-    resp = httpx.get(target_url, follow_redirects=False)
-    page = Html(Response(resp).content, target_url)
-
-    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        disconnect_urls = crawler._extract_disconnect_urls(page)
-        assert len(disconnect_urls) == 1
+    page = Html(text, target_url)
+    assert len(page.extract_disconnect_urls()) == 1
 
 
-@respx.mock
-@pytest.mark.asyncio
-async def test_extract_disconnect_urls_no_url():
+def test_extract_disconnect_urls_no_url():
     target_url = "http://perdu.com/"
-    respx.get(target_url).mock(
-        return_value=httpx.Response(
-            200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-            <a href='http://perdu.com/foobar/foobar'></a></body></html>"
-        )
+    text = (
+        "<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1>"
+        "<h2>Pas de panique, on va vous aider</h2>"
+        "<strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a>"
+        "<a href='http://perdu.com/foobar/foobar'></a></body></html>"
     )
 
-    resp = httpx.get(target_url, follow_redirects=False)
-    page = Html(Response(resp).content, target_url)
-
-    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        disconnect_urls = crawler._extract_disconnect_urls(page)
-        assert len(disconnect_urls) == 0
+    page = Html(text, target_url)
+    assert len(page.extract_disconnect_urls()) == 0
 
 
-@respx.mock
-@pytest.mark.asyncio
-async def test_extract_disconnect_urls_multiple_urls():
+def test_extract_disconnect_urls_multiple_urls():
     target_url = "http://perdu.com/"
-    respx.get(target_url).mock(
-        return_value=httpx.Response(
-            200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-            <a href='http://perdu.com/foobar/signout'></a> \
-                <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
-        )
+    text = (
+        "<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1>"
+        "<h2>Pas de panique, on va vous aider</h2>"
+        "<strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a>"
+        "<a href='http://perdu.com/foobar/signout'></a>"
+        "<div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
     )
 
-    resp = httpx.get(target_url, follow_redirects=False)
-    page = Html(Response(resp).content, target_url)
-
-    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        disconnect_urls = crawler._extract_disconnect_urls(page)
-        assert len(disconnect_urls) == 2
+    page = Html(text, target_url)
+    assert len(page.extract_disconnect_urls()) == 2
 
 
 @respx.mock
@@ -297,44 +267,35 @@ async def test_async_try_login_basic_digest_ntlm_wrong_credentials():
             assert len(disconnect_urls) == 0
 
 
-@respx.mock
-@pytest.mark.asyncio
-async def test_extract_disconnect_urls():
+def test_extract_disconnect_urls():
     target_url = "http://perdu.com/"
-    respx.get(target_url).mock(
-        return_value=httpx.Response(
-            200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-            <a href='http://perdu.com/foobar/logout'></a> \
-            <a href='http://perdu.com/foobar/logoff'></a> \
-            <a href='http://perdu.com/foobar/signout'></a> \
-            <a href='http://perdu.com/foobar/signoff'></a> \
-            <a href='http://perdu.com/foobar/disconnect'></a> \
-            <a href='../../foobar/déconnexion'></a> \
-            </div></body></html>"
-        )
+    text = (
+        "<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1>"
+        "<h2>Pas de panique, on va vous aider</h2>"
+        "<strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a>"
+        "<a href='http://perdu.com/foobar/logout'></a>"
+        "<a href='http://perdu.com/foobar/logoff'></a>"
+        "<a href='http://perdu.com/foobar/signout'></a>"
+        "<a href='http://perdu.com/foobar/signoff'></a>"
+        "<a href='http://perdu.com/foobar/disconnect'></a>"
+        "<a href='../../foobar/déconnexion'></a>"
+        "</div></body></html>"
     )
 
-    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        response = await crawler.async_get(Request(target_url))
+    page = Html(text, target_url)
+    disconnect_urls = page.extract_disconnect_urls()
 
-        page = Html(response.content, target_url)
-        disconnect_urls = crawler._extract_disconnect_urls(page)
+    test_disconnect_urls = [
+        "http://perdu.com/foobar/logout",
+        "http://perdu.com/foobar/logoff",
+        "http://perdu.com/foobar/signout",
+        "http://perdu.com/foobar/signoff",
+        "http://perdu.com/foobar/disconnect",
+        "http://perdu.com/foobar/déconnexion"
+    ]
 
-        test_disconnect_urls = [
-            "http://perdu.com/foobar/logout",
-            "http://perdu.com/foobar/logoff",
-            "http://perdu.com/foobar/signout",
-            "http://perdu.com/foobar/signoff",
-            "http://perdu.com/foobar/disconnect",
-            "http://perdu.com/foobar/déconnexion"
-        ]
-
-        assert len(disconnect_urls) == len(test_disconnect_urls)
-        assert all(url in disconnect_urls for url in test_disconnect_urls) is True
+    assert len(disconnect_urls) == len(test_disconnect_urls)
+    assert all(url in disconnect_urls for url in test_disconnect_urls) is True
 
 
 @respx.mock

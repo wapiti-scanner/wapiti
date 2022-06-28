@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-
 from hashlib import md5
 from unittest import mock
 
 import httpx
 import respx
 from bs4 import BeautifulSoup
-from wapitiCore.net.response import Response, make_absolute, Html
+from wapitiCore.net.response import Response
+from wapitiCore.net.html import Html
+from wapitiCore.net.web import make_absolute
 
 
 def test_make_absolute():
-    TEST_CASES = [
+    test_cases = [
         ("http://base.url", "relative", "http://base.url/relative"),
         ("http://base.url", ".", "http://base.url/"),
         ("http://base.url/with_folder", ".", "http://base.url/"),
@@ -28,7 +29,7 @@ def test_make_absolute():
         ("http://base.url", "./wrong_folder/../good_folder/", "http://base.url/good_folder/"),
     ]
 
-    for base_url, relative_url, expected in TEST_CASES:
+    for base_url, relative_url, expected in test_cases:
         assert make_absolute(base_url, relative_url) == expected, \
             f"Absolute url from base_url='{base_url}' and relative_url='{relative_url}' is not '{expected}'"
 

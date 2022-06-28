@@ -23,9 +23,11 @@ from os.path import join as path_join
 from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, Flags, random_string
-from wapitiCore.net.response import Html
+
 
 # Everything under those tags will be treated as text
+from wapitiCore.net.html import Html
+
 NONEXEC_PARENTS = {
     "iframe",
     "noframes",
