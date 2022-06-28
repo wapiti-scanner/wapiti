@@ -7,6 +7,16 @@ from tld.exceptions import TldDomainNotFound
 from wapitiCore.net.web import Request
 
 
+def is_same_domain(url: str, request: Request) -> bool:
+    url_parts = urlparse(url)
+    try:
+        return get_fld(url) == get_fld(request.url)
+    except TldDomainNotFound:
+        # Internal domain of IP
+        # Check hostname instead of netloc to allow other ports
+        return url_parts.hostname == request.hostname
+
+
 class Scope:
     def __init__(self, base_request: Request, scope: str):
         self._scope: str = scope
@@ -29,15 +39,8 @@ class Scope:
         else:
             url = resource
 
-        url_parts = urlparse(url)
-
         if self._scope == "domain":
-            try:
-                return get_fld(url) == get_fld(self._base_request.url)
-            except TldDomainNotFound:
-                # Internal domain of IP
-                # Check hostname instead of netloc to allow other ports
-                return url_parts.hostname == self._base_request.hostname
+            return is_same_domain(url, self._base_request)
 
         if self._scope == "folder":
             return url.startswith(self._base_request.path)
