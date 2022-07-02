@@ -2,7 +2,7 @@
 import asyncio
 import collections
 from http import cookiejar
-from typing import List, Tuple, Dict, Optional  # noqa
+from typing import List, Tuple, Dict  # noqa
 
 from mitmproxy import http
 from mitmproxy.net.http import cookies
@@ -26,7 +26,7 @@ def ckey(attrs: Dict[str, str], f: http.HTTPFlow) -> TOrigin:
 def domain_match(a: str, b: str) -> bool:
     if cookiejar.domain_match(a, b):  # type: ignore
         return True
-    elif cookiejar.domain_match(a, b.strip(".")):  # type: ignore
+    if cookiejar.domain_match(a, b.strip(".")):  # type: ignore
         return True
     return False
 

@@ -85,33 +85,21 @@ class MitmFlowToWapitiRequests:
         content_type = flow.response.headers.get("Content-Type", "text/plain")
         flow.response.stream = False
         if "text" in content_type or "json" in content_type:
-            try:
-                request = mitm_to_wapiti_request(flow.request)
-                request.status = flow.response.status_code
-                request.set_headers(httpx.Headers(decode_key_value_dict(flow.response.headers)))
-            except Exception as exception:
-                logging.exception(exception)
-                return
+            request = mitm_to_wapiti_request(flow.request)
+            request.status = flow.response.status_code
+            request.set_headers(httpx.Headers(decode_key_value_dict(flow.response.headers)))
 
-            try:
-                decoded_headers = decode_key_value_dict(flow.response.headers)
-            except Exception as exception:
-                logging.exception(exception)
-                return
+            decoded_headers = decode_key_value_dict(flow.response.headers)
 
-            try:
-                response = Response(
-                    httpx.Response(
-                        status_code=flow.response.status_code,
-                        headers=decoded_headers,
-                        # httpx expect the raw content (not decompressed)
-                        content=flow.response.raw_content,
-                    ),
-                    url=flow.request.url
-                )
-            except Exception as exception:
-                logging.exception(exception)
-                return
+            response = Response(
+                httpx.Response(
+                    status_code=flow.response.status_code,
+                    headers=decoded_headers,
+                    # httpx expect the raw content (not decompressed)
+                    content=flow.response.raw_content,
+                ),
+                url=flow.request.url
+            )
 
             await self._queue.put(
                 (request, response)
@@ -128,7 +116,7 @@ async def launch_proxy(port: int, data_queue: asyncio.Queue, user_agent: str):
     master.addons.add(addons.proxyserver.Proxyserver())
     master.addons.add(addons.next_layer.NextLayer())
     # mitmproxy will generate an authority cert in the ~/.mitmproxy directory. Load it in your browser.
-    master.addons.add(addons.tlsconfig.TlsConfig()),
+    master.addons.add(addons.tlsconfig.TlsConfig())
     # If ever we want to have both the interception proxy and an automated crawler then we need to sync cookies
     master.addons.add(AsyncStickyCookie())
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
