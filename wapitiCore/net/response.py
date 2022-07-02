@@ -43,6 +43,8 @@ class Response:
         self._response = response
         self._url = url or str(self._response.url)
 
+    # TODO: Should I remove this ? If not set in __init__ returns _response.url which in turns use _response.request.url
+    # and the request attribute may be None...
     @property
     def url(self) -> str:
         """Returns the URL of the current Response object
@@ -67,6 +69,7 @@ class Response:
         """
         return self._response.headers
 
+    # TODO: try to remove this
     @property
     def sent_headers(self) -> httpx.Headers:
         return self._response.request.headers
