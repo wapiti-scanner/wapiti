@@ -143,7 +143,14 @@ def test_json_detail_report():
     )
 
     request = Request("http://perdu.com/", "GET", [["foo", "bar"]])
-    response = Response(httpx.Response(status_code=200, headers=httpx.Headers([["abc", "123"]]), content=b"OK"))
+    response = Response(
+        httpx.Response(
+            status_code=200,
+            headers=httpx.Headers([["abc", "123"]]),
+            content=b"OK"
+        ),
+        url="http://perdu.com/"
+    )
 
     report_gen.add_vulnerability("foobar", "category", request=request, response=response)
 

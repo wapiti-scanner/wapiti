@@ -32,7 +32,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.scope import Scope
-from wapitiCore.main.log import logging, log_verbose
+from wapitiCore.main.log import log_verbose
 
 
 def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
