@@ -536,6 +536,9 @@ class Request:
 
         return curl_string
 
+    # TODO: remove this from Request as those are the response headers.
+    # Since we now store (part of or all) the Response with the persister, modules needing the original response headers
+    # should be fed with the Response object too.
     @property
     def headers(self) -> httpx.Headers:
         return self._headers
@@ -544,6 +547,7 @@ class Request:
         """Set the HTTP headers received while requesting the resource"""
         self._headers = response_headers
 
+    # TODO: should be rename to just headers because we are on the Request object.
     @property
     def sent_headers(self) -> httpx.Headers:
         return self._sent_headers
