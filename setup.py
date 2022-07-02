@@ -120,7 +120,8 @@ if a script is vulnerable.""",
         "loguru>=0.5.3",
         "dnspython==2.1.0",
         "httpcore>=0.15.0",
-        "mitmproxy==8.0.0"
+        "mitmproxy==8.0.0",
+        "h11==0.12",
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
