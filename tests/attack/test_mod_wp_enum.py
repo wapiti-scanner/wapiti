@@ -9,7 +9,7 @@ from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 @pytest.mark.asyncio

@@ -14,7 +14,7 @@ from tld.exceptions import TldBadUrl, TldDomainNotFound
 # Internal libraries
 from wapitiCore import parser_name
 from wapitiCore.net import lamejs
-from wapitiCore.net.web import Request, make_absolute
+from wapitiCore.net import Request, make_absolute
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
 

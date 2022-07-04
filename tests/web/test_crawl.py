@@ -7,7 +7,7 @@ import respx
 import httpx
 import pytest
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.main.wapiti import Wapiti
 
 
@@ -51,7 +51,7 @@ async def test_resume_crawling():
     await wapiti.save_scan_state()
     remaining_requests = set([request async for request in wapiti.persister.get_to_browse()])
     # Got root url + pages 0 to 9
-    all_requests = set([request async for request in wapiti.persister.get_links()])
+    all_requests = set([request async for request, __ in wapiti.persister.get_links()])
     remaining_urls = {request.url for request in remaining_requests - all_requests}
     # Page 10 stops the crawling but gave links to pages 11 and 12 so they will be the remaining urls
     assert remaining_urls == {"http://perdu.com/?page=11", "http://perdu.com/?page=12"}
@@ -64,7 +64,7 @@ async def test_resume_crawling():
     await wapiti.browse(stop_event)
     await wapiti.save_scan_state()
     remaining_requests = set([request async for request in wapiti.persister.get_to_browse()])
-    all_requests = set([request async for request in wapiti.persister.get_links()])
+    all_requests = set([request async for request, __ in wapiti.persister.get_links()])
     # We stop giving new links at page > 20 but page 20 will give urls for 21 and 22
     # so we have 24 paginated pages (23 from 0 to 22) + root url here
     assert len(all_requests) == 24

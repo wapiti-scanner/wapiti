@@ -51,7 +51,7 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.intercepting_explorer import InterceptingExplorer
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.scope import Scope
 from wapitiCore.report import GENERATORS, get_report_generator_instance
 from wapitiCore import WAPITI_VERSION
@@ -361,12 +361,12 @@ class Wapiti:
         logging.success(_("Update done."))
 
     async def load_scan_state(self):
-        async for resource in self.persister.get_to_browse():
-            self._start_urls.append(resource)
-        async for resource in self.persister.get_links():
-            self._excluded_urls.append(resource)
-        async for resource in self.persister.get_forms():
-            self._excluded_urls.append(resource)
+        async for request in self.persister.get_to_browse():
+            self._start_urls.append(request)
+        async for request, __ in self.persister.get_links():
+            self._excluded_urls.append(request)
+        async for request, __ in self.persister.get_forms():
+            self._excluded_urls.append(request)
 
         await self.persister.set_root_url(self.base_request.url)
 
@@ -419,13 +419,13 @@ class Wapiti:
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
 
-    async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, None]:
+    async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, Response]:
         if module.do_get:
-            async for resource in self.persister.get_links(attack_module=module.name):
-                yield resource
+            async for request, response in self.persister.get_links(attack_module=module.name):
+                yield request, response
         if module.do_post:
-            async for resource in self.persister.get_forms(attack_module=module.name):
-                yield resource
+            async for request, response in self.persister.get_forms(attack_module=module.name):
+                yield request, response
 
     async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
@@ -466,7 +466,7 @@ class Wapiti:
 
             answer = "0"
             attacked_ids = set()
-            async for original_request in self.load_resources_for_module(attack_module):
+            async for original_request, original_response in self.load_resources_for_module(attack_module):
                 if stop_event.is_set():
                     print('')
                     print(_("Attack process was interrupted. Do you want to:"))
@@ -496,10 +496,10 @@ class Wapiti:
                         continue
 
                 try:
-                    if await attack_module.must_attack(original_request):
+                    if await attack_module.must_attack(original_request, original_response):
                         logging.info(f"[+] {original_request}")
 
-                        await attack_module.attack(original_request)
+                        await attack_module.attack(original_request, original_response)
 
                     if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
                         # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system

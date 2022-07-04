@@ -18,7 +18,7 @@ from wapitiCore.language.vulnerability import CRITICAL_LEVEL, _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 def get_mock_open(files: Dict[str, str]):

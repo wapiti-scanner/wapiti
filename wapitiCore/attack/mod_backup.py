@@ -23,6 +23,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import splitext
 from urllib.parse import urljoin
+from typing import Optional
 
 from httpx import RequestError
 
@@ -30,7 +31,7 @@ from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.backup import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 class ModuleBackup(Attack):
@@ -65,9 +66,9 @@ class ModuleBackup(Attack):
 
         return self.false_positive_directories[request.dir_name]
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
-        headers = request.headers
+        headers = response.headers
 
         if page in self.attacked_get:
             return False
@@ -82,7 +83,7 @@ class ModuleBackup(Attack):
 
         return not await self.is_false_positive(request)
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
         for payload, __ in self.payloads:

@@ -7,7 +7,7 @@ import json
 from wapitiCore.report import GENERATORS
 from wapitiCore.language.language import _
 from wapitiCore.net.sql_persister import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
 from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
 

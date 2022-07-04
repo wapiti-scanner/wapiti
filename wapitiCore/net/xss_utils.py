@@ -23,6 +23,7 @@ from os.path import join as path_join
 from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, Flags, random_string
+from wapitiCore.net import Response
 
 
 # Everything under those tags will be treated as text
@@ -485,14 +486,14 @@ def generate_payloads(html_code, code, payload_file, external_endpoint="http://w
     return payloads_and_flags
 
 
-def valid_xss_content_type(http_res):
+def valid_xss_content_type(response: Response):
     """Check whether the returned content-type header allow javascript evaluation."""
     # When no content-type is returned, browsers try to display the HTML
-    if "content-type" not in http_res.headers:
+    if "content-type" not in response.headers:
         return True
 
     # else only text/html will allow javascript (maybe text/plain will work for IE...)
-    if "text/html" in http_res.headers["content-type"]:
+    if "text/html" in response.headers["content-type"]:
         return True
     return False
 

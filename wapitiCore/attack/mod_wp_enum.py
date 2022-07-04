@@ -3,7 +3,7 @@ import re
 import xml
 import xml.etree.ElementTree as ET
 from os.path import join as path_join
-from typing import Match
+from typing import Match, Optional
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
@@ -12,7 +12,7 @@ from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_NO_WP = _("No WordPress Detected")
@@ -207,7 +207,7 @@ class ModuleWpEnum(Attack):
             return True
         return False
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -215,7 +215,7 @@ class ModuleWpEnum(Attack):
             return False
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
 
         self.finished = True
         request_to_root = Request(request.url)

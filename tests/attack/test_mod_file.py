@@ -7,7 +7,7 @@ from asyncio import Event
 import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import ModuleFile, has_prefix_or_suffix, find_warning_message, FileWarning

@@ -4,9 +4,10 @@ import sys
 from time import sleep
 from asyncio import Event
 
+import httpx
 import pytest
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_csrf import ModuleCsrf
@@ -30,9 +31,14 @@ async def test_csrf_cases():
     persister = AsyncMock()
     all_requests = []
 
+    response = Response(
+        httpx.Response(status_code=200),
+        url="http://127.0.0.1:65086/",
+    )
+
     request = Request("http://127.0.0.1:65086/")
     request.path_id = 1
-    all_requests.append(request)
+    all_requests.append((request, response))
 
     request = Request(
         "http://127.0.0.1:65086/",
@@ -40,7 +46,7 @@ async def test_csrf_cases():
         post_params=[["email", "wapiti2021@mailinator.com"], ["xsrf_token", "weak"]],
     )
     request.path_id = 2
-    all_requests.append(request)
+    all_requests.append((request, response))
 
     request = Request(
         "http://127.0.0.1:65086/?check=true",
@@ -48,7 +54,7 @@ async def test_csrf_cases():
         post_params=[["email", "wapiti2021@mailinator.com"], ["xsrf_token", "weak"]],
     )
     request.path_id = 3
-    all_requests.append(request)
+    all_requests.append((request, response))
 
     request = Request(
         "http://127.0.0.1:65086/?check=true",
@@ -56,7 +62,7 @@ async def test_csrf_cases():
         post_params=[["name", "Obiwan"]],
     )
     request.path_id = 4
-    all_requests.append(request)
+    all_requests.append((request, response))
 
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65086/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -64,9 +70,9 @@ async def test_csrf_cases():
 
         module = ModuleCsrf(crawler, persister, options, Event())
         module.do_post = True
-        for request in all_requests:
-            if await module.must_attack(request):
-                await module.attack(request)
+        for request, response in all_requests:
+            if await module.must_attack(request, response):
+                await module.attack(request, response)
             else:
                 # Not attacked because of GET verb
                 assert request.path_id == 1

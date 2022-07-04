@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.main.wapiti import Wapiti
 
 

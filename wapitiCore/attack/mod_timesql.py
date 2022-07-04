@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
@@ -23,7 +25,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 class ModuleTimesql(Attack):
@@ -45,7 +47,7 @@ class ModuleTimesql(Attack):
     def set_timeout(self, timeout):
         self.time_to_sleep = str(1 + int(timeout))
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
         saw_internal_error = False
         current_parameter = None

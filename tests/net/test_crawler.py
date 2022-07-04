@@ -7,7 +7,7 @@ import respx
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.html import Html
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 def test_extract_disconnect_urls_one_url():
@@ -317,9 +317,9 @@ async def test_async_send():
             "foo": "bar"
         }
 
-        await crawler.async_send(request, headers)
+        response = await crawler.async_send(request, headers)
 
         assert request.status == 200
-        assert request.headers.get("abc") == "123"
-        assert "user-agent" in request.sent_headers
-        assert request.sent_headers.get("foo") == "bar"
+        assert response.headers.get("abc") == "123"
+        assert "user-agent" in request.headers
+        assert request.headers.get("foo") == "bar"

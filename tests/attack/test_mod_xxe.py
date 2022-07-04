@@ -10,7 +10,7 @@ import respx
 import httpx
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xxe import ModuleXxe
 from wapitiCore.language.vulnerability import _

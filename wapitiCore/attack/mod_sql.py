@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
 from random import randint
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -26,7 +27,7 @@ from wapitiCore.attack.attack import Attack, Flags, Mutator
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.html import Html
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
@@ -321,7 +322,7 @@ class ModuleSql(Attack):
     def set_timeout(self, timeout):
         self.time_to_sleep = str(1 + int(timeout))
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         vulnerable_parameters = await self.error_based_attack(request)
         await self.boolean_based_attack(request, vulnerable_parameters)
 

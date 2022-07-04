@@ -310,7 +310,7 @@ class Wappalyzer:
             implied_applications = self.applications[application_name]['implies']
 
             for regex_params in implied_applications:
-                final_implied_applications.update(set([regex_params['application_pattern']]))
+                final_implied_applications.update({regex_params['application_pattern']})
         return final_implied_applications
 
     def get_categories(self, application_name: str):

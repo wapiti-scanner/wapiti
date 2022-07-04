@@ -19,12 +19,13 @@
 import random
 import string
 from binascii import hexlify
+from typing import Optional
 
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
 from wapitiCore.main.log import log_red
 
@@ -57,11 +58,11 @@ class ModuleShellshock(Attack):
             "cookie": empty_func + cmd
         }
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         # We attempt to attach each script once whatever the method
         return request.path not in self.attacked_get
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         url = request.path
         self.attacked_get.append(url)
 

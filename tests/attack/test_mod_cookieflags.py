@@ -5,7 +5,7 @@ import httpx
 import respx
 import pytest
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_cookieflags import ModuleCookieflags

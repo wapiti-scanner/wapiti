@@ -455,29 +455,28 @@ class AsyncCrawler:
 
     async def async_send(
             self,
-            resource: web.Request,
+            request: web.Request,
             headers: dict = None,
             follow_redirects: bool = False,
             stream: bool = False
     ) -> Response:
-        if resource.method == "GET":
-            response = await self.async_get(resource, headers=headers, follow_redirects=follow_redirects, stream=stream)
-        elif resource.method == "POST":
+        if request.method == "GET":
+            response = await self.async_get(request, headers=headers, follow_redirects=follow_redirects, stream=stream)
+        elif request.method == "POST":
             response = await self.async_post(
-                resource,
+                request,
                 headers=headers,
                 follow_redirects=follow_redirects,
                 stream=stream
             )
         else:
             response = await self.async_request(
-                resource.method, resource, headers=headers, follow_redirects=follow_redirects, stream=stream
+                request.method, request, headers=headers, follow_redirects=follow_redirects, stream=stream
             )
 
-        resource.status = response.status
-        resource.set_cookies(self._client.cookies)
-        resource.set_headers(response.headers)
-        resource.set_sent_headers(response.sent_headers)
+        request.status = response.status
+        request.set_cookies(self._client.cookies)
+        request.set_headers(response.sent_headers)
         return response
 
     async def close(self):

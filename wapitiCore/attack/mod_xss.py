@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import join as path_join
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -28,7 +29,7 @@ from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CO
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.html import Html
 
 
@@ -75,7 +76,7 @@ class ModuleXss(Attack):
     def external_endpoint(self):
         return self.RANDOM_WEBSITE
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         for mutated_request, parameter, taint, flags in self.mutator.mutate(request):
             # We don't display the mutated request here as the payload is not interesting
             try:
@@ -92,7 +93,7 @@ class ModuleXss(Attack):
                 # Reminder: valid_xss_content_type is not called before before content is not necessary
                 # reflected here, may be found in another webpage so we have to inject tainted values
                 # even if the Content-Type seems uninteresting.
-                if taint.lower() in response.content.lower() and valid_xss_content_type(mutated_request):
+                if taint.lower() in response.content.lower() and valid_xss_content_type(response):
                     # Simple text injection worked in HTML response, let's try with JS code
                     payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
 
@@ -155,7 +156,7 @@ class ModuleXss(Attack):
                 html = Html(response.content, evil_request.url)
                 if (
                         not response.is_redirect and
-                        valid_xss_content_type(evil_request) and
+                        valid_xss_content_type(response) and
                         check_payload(
                             self.DATA_DIR,
                             self.PAYLOADS_FILE,

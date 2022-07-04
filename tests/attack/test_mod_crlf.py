@@ -4,7 +4,7 @@ import respx
 import pytest
 import httpx
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.vulnerability import _

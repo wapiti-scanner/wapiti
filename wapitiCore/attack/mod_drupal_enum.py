@@ -3,11 +3,11 @@ import json
 import hashlib
 import logging
 from os.path import join as path_join
-from typing import Tuple
+from typing import Tuple, Optional
 
 from httpx import RequestError
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.response import Response
@@ -127,7 +127,7 @@ class ModuleDrupalEnum(Attack):
                     return True
         return False
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -136,7 +136,7 @@ class ModuleDrupalEnum(Attack):
 
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
 

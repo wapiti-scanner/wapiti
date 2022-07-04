@@ -16,13 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_orange
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.methods import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import _
 
 
@@ -38,10 +40,10 @@ class ModuleMethods(Attack):
     do_post = True
     excluded_path = set()
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         return request.path not in self.excluded_path
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
         self.excluded_path.add(page)
 

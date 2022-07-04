@@ -18,12 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+from typing import Optional
 
 from httpx import RequestError
 
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 class ModuleBuster(Attack):
@@ -121,14 +122,14 @@ class ModuleBuster(Attack):
                     task.cancel()
                     tasks.remove(task)
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         if not self.do_get:
             return
 
         # First we make a list of unique webdirs and webpages without parameters
-        async for resource in self.persister.get_links(attack_module=self.name):
-            path = resource.path
+        async for scanned_request, __ in self.persister.get_links(attack_module=self.name):
+            path = scanned_request.path
             if path.endswith("/"):
                 if path not in self.known_dirs:
                     self.known_dirs.append(path)

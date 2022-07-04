@@ -19,7 +19,7 @@ import json
 import os
 import asyncio
 import string
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_blue
@@ -30,7 +30,7 @@ from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED, WSTG_CODE as WEB_SERVER_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_APP_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_CATEGORIES = _("  -> Categorie(s): {0}")
@@ -74,7 +74,7 @@ class ModuleWapp(Attack):
         except IOError:
             logging.error(_("Error downloading wapp database."))
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -83,7 +83,7 @@ class ModuleWapp(Attack):
 
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
         categories_file_path = os.path.join(self.user_config_dir, self.WAPP_CATEGORIES)

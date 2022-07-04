@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
 from urllib.parse import quote
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
@@ -24,7 +25,7 @@ from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.crlf import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
 
@@ -42,7 +43,7 @@ class ModuleCrlf(Attack):
         super().__init__(crawler, persister, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
         for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):

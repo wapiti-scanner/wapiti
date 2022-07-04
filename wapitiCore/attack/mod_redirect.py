@@ -16,13 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import RequestError
 
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.html import Html
 
 
@@ -40,7 +42,7 @@ class ModuleRedirect(Attack):
         super().__init__(crawler, persister, attack_options, stop_event)
         self.mutator = self.get_mutator()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
         for mutated_request, parameter, __, __ in self.mutator.mutate(request):

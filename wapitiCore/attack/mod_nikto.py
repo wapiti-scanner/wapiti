@@ -22,7 +22,7 @@ import re
 import os
 import random
 from urllib.parse import urlparse
-from typing import List
+from typing import List, Optional
 
 from httpx import RequestError
 
@@ -30,7 +30,7 @@ from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.dangerous_resource import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 # Nikto databases are csv files with the following fields (in order) :
@@ -103,7 +103,7 @@ class ModuleNikto(Attack):
         except IOError:
             logging.error(_("Error downloading nikto database."))
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -129,7 +129,7 @@ class ModuleNikto(Attack):
 
         return self.status_codes[request.path] in expected_status_codes
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         try:
             with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
                 reader = csv.reader(nikto_db_file)

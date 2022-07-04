@@ -2,7 +2,7 @@ from typing import Union, Dict
 from dataclasses import dataclass
 from http.cookiejar import CookieJar
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 DEFAULT_UA = "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
 
