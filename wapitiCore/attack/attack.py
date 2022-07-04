@@ -26,8 +26,8 @@ import random
 from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
-from pkg_resources import resource_filename
 from typing import Optional
+from pkg_resources import resource_filename
 
 from httpx import ReadTimeout, RequestError
 
