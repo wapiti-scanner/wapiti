@@ -35,7 +35,6 @@ async def test_whole_stuff():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    request.status = 200
     persister.get_links.return_value = chain([request])
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
@@ -88,7 +87,6 @@ async def test_false_positives():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    request.status = 200
     persister.get_links.return_value = chain([request])
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

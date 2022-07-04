@@ -20,20 +20,19 @@ def test_http():
         )
     )
 
-    resp = httpx.get(url)
-    page = Response(resp)
+    response = Response(httpx.get(url))
 
-    assert page.status == 418
-    assert page.headers["X-Men"] == "Wolverine"
-    assert page.url == "http://perdu.com/"
-    assert page.server == "nginx"
-    assert page.cookies["session_id"] == "31337"
-    assert page.is_plain
-    assert page.size == page.raw_size != 0
-    assert page.delay > 0
-    assert isinstance(page.bytes, bytes) and page.bytes
-    assert page.type == "text/html; charset=iso-8859-1"
-    assert page.encoding == "ISO-8859-1"  # see https://github.com/encode/httpx/pull/1269
+    assert response.status == 418
+    assert response.headers["X-Men"] == "Wolverine"
+    assert response.url == "http://perdu.com/"
+    assert response.server == "nginx"
+    assert response.cookies["session_id"] == "31337"
+    assert response.is_plain
+    assert response.size == response.raw_size != 0
+    assert response.delay > 0
+    assert isinstance(response.bytes, bytes) and response.bytes
+    assert response.type == "text/html; charset=iso-8859-1"
+    assert response.encoding == "ISO-8859-1"  # see https://github.com/encode/httpx/pull/1269
 
 
 @respx.mock

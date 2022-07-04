@@ -5,7 +5,7 @@ import respx
 import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_methods import ModuleMethods
 from tests import AsyncMock
@@ -28,13 +28,19 @@ async def test_whole_stuff():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    request.status = 200
-    all_requests.append(request)
+    response = Response(
+        httpx.Response(status_code=200),
+        url="http://perdu.com/"
+    )
+    all_requests.append((request, response))
 
     request = Request("http://perdu.com/dav/")
     request.path_id = 2
-    request.status = 200
-    all_requests.append(request)
+    response = Response(
+        httpx.Response(status_code=200),
+        url="http://perdu.com/dav/"
+    )
+    all_requests.append((request, response))
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -42,8 +48,8 @@ async def test_whole_stuff():
 
         module = ModuleMethods(crawler, persister, options, Event())
         module.do_get = True
-        for request in all_requests:
-            await module.attack(request)
+        for request, response in all_requests:
+            await module.attack(request, response)
 
         assert persister.add_payload.call_count == 1
         assert "http://perdu.com/dav/" in persister.add_payload.call_args_list[0][1]["info"]

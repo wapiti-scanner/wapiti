@@ -319,7 +319,7 @@ async def test_async_send():
 
         response = await crawler.async_send(request, headers)
 
-        assert request.status == 200
+        assert response.status == 200
         assert response.headers.get("abc") == "123"
         assert "user-agent" in request.headers
         assert request.headers.get("foo") == "bar"

@@ -96,11 +96,11 @@ class ModuleWpEnum(Attack):
             if self._stop_event.is_set():
                 break
 
-            req = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
-            rep = await self.crawler.async_send(req)
+            request = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
+            response = await self.crawler.async_send(request)
 
-            if rep.is_success:
-                version = re.search(r'tag:\s*([\d.]+)', rep.content)
+            if response.is_success:
+                version = re.search(r'tag:\s*([\d.]+)', response.content)
 
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
                 if version:
@@ -124,12 +124,12 @@ class ModuleWpEnum(Attack):
 
                 await self.add_addition(
                     category=TECHNO_DETECTED,
-                    request=req,
+                    request=request,
                     info=json.dumps(plugin_detected),
                     wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=rep
+                    response=response
                 )
-            elif rep.status == 403:
+            elif response.status == 403:
                 plugin_detected = {
                     "name": plugin,
                     "versions": [""],
@@ -143,10 +143,10 @@ class ModuleWpEnum(Attack):
                 )
                 await self.add_addition(
                     category=TECHNO_DETECTED,
-                    request=req,
+                    request=request,
                     info=json.dumps(plugin_detected),
                     wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=rep
+                    response=response
                 )
 
     async def detect_theme(self, url):
@@ -154,10 +154,10 @@ class ModuleWpEnum(Attack):
             if self._stop_event.is_set():
                 break
 
-            req = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
-            rep = await self.crawler.async_send(req)
-            if rep.is_success:
-                version = re.search(r'tag:\s*([\d.]+)', rep.content)
+            request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
+            response = await self.crawler.async_send(request)
+            if response.is_success:
+                version = re.search(r'tag:\s*([\d.]+)', response.content)
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
                 if version:
                     version = version.group(1)
@@ -176,12 +176,12 @@ class ModuleWpEnum(Attack):
                 )
                 await self.add_addition(
                     category=TECHNO_DETECTED,
-                    request=req,
+                    request=request,
                     info=json.dumps(theme_detected),
                     wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=rep
+                    response=response
                 )
-            elif rep.status == 403:
+            elif response.status == 403:
                 theme_detected = {
                     "name": theme,
                     "versions": [""],
@@ -195,10 +195,10 @@ class ModuleWpEnum(Attack):
                 )
                 await self.add_addition(
                     category=TECHNO_DETECTED,
-                    request=req,
+                    request=request,
                     info=json.dumps(theme_detected),
                     wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=rep
+                    response=response
                 )
 
     @staticmethod

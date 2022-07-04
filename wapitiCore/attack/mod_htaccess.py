@@ -46,11 +46,12 @@ class ModuleHtaccess(Attack):
         if request.path in self.attacked_get:
             return False
 
-        return request.status in (401, 402, 403, 407)
+        return response.status in (401, 402, 403, 407)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         url = request.path
         referer = request.referer
+        original_status = response.status
         headers = {}
         if referer:
             headers["referer"] = referer
@@ -78,7 +79,7 @@ class ModuleHtaccess(Attack):
             )
             log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
             log_red(_("HTTP status code changed from {0} to {1}").format(
-                request.status,
+                original_status,
                 response.status
             ))
 

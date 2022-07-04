@@ -474,7 +474,6 @@ class AsyncCrawler:
                 request.method, request, headers=headers, follow_redirects=follow_redirects, stream=stream
             )
 
-        request.status = response.status
         request.set_cookies(self._client.cookies)
         request.set_headers(response.sent_headers)
         return response
