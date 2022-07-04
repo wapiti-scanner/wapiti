@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 def is_same_domain(url: str, request: Request) -> bool:

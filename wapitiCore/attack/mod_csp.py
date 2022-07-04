@@ -14,10 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
@@ -34,7 +36,7 @@ class ModuleCsp(Attack):
     """Evaluate the security level of Content Security Policies of the web server."""
     name = "csp"
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -43,7 +45,7 @@ class ModuleCsp(Attack):
 
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
 

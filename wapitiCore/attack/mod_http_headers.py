@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import List
+from typing import List, Optional
 
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
@@ -24,7 +24,7 @@ from wapitiCore.definitions.http_headers import (
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, log_green, log_red
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 INFO_HSTS = _("Strict-Transport-Security is not set")
 INFO_XCONTENT_TYPE = _("X-Content-Type-Options is not set")
@@ -89,7 +89,7 @@ class ModuleHttpHeaders(Attack):
         else:
             log_green("OK")
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -98,7 +98,7 @@ class ModuleHttpHeaders(Attack):
 
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         request_to_root = Request(request.url, "GET")
         self.finished = True
 

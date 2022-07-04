@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from asyncio import sleep
+from typing import Optional
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
@@ -26,7 +27,7 @@ from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
 from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
 
@@ -172,7 +173,7 @@ class ModuleSsrf(Attack):
             endpoint=self.external_endpoint
         )
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
         for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):

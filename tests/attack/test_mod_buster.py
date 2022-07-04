@@ -5,7 +5,7 @@ import httpx
 import respx
 import pytest
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_buster import ModuleBuster
@@ -30,9 +30,8 @@ async def test_whole_stuff():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    request.set_headers({"content-type": "text/html"})
     # Buster module will get requests from the persister
-    persister.get_links.return_value = AsyncIterator([request])
+    persister.get_links.return_value = AsyncIterator([(request, None)])
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -44,7 +43,7 @@ async def test_whole_stuff():
         ):
             module = ModuleBuster(crawler, persister, options, Event())
             module.do_get = True
-            await module.attack(request)
+            await module.attack(request, None)
 
             assert module.known_dirs == ["http://perdu.com/", "http://perdu.com/admin/"]
             assert module.known_pages == ["http://perdu.com/config.inc", "http://perdu.com/admin/authconfig.php"]

@@ -28,9 +28,7 @@ from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_, func,
                         literal_column, or_, select)
 from sqlalchemy.ext.asyncio import create_async_engine
-from wapitiCore.net import web
-from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging
 
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
@@ -117,11 +115,10 @@ class SqlPersister:
             Column("depth", Integer, nullable=False),
             Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
             Column("http_status", Integer),
-            Column("headers", PickleType),  # Pickled HTTP headers, can be huge
+            Column("headers", PickleType),  # Pickled sent HTTP headers, can be huge
             Column("referer", Text),  # Another URL so potentially huge
             Column("evil", Boolean, nullable=False),
             Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True),
-            Column("sent_headers", PickleType),  # Pickled HTTP headers, can be huge
         )
 
         self.params = Table(
@@ -193,7 +190,7 @@ class SqlPersister:
         await self.save_requests([(request, None) for request in to_browse])
 
     async def get_to_browse(self) -> AsyncIterator[Request]:
-        async for path in self._get_paths(method=None, crawled=False):
+        async for path, __ in self._get_paths(method=None, crawled=False):
             yield path
 
     async def save_requests(self, paths_list: List[Tuple[Request, Optional[Response]]]):
@@ -250,7 +247,6 @@ class SqlPersister:
                         "encoding": http_resource.encoding,
                         "http_status": http_resource.status if isinstance(http_resource.status, int) else None,
                         "headers": http_resource.headers,
-                        "sent_headers": http_resource.sent_headers,
                         "referer": http_resource.referer,
                         "response_id": response_id,
                         "evil": False
@@ -361,7 +357,6 @@ class SqlPersister:
                 encoding=http_resource.encoding,
                 http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                 headers=http_resource.headers,
-                sent_headers=http_resource.sent_headers,
                 referer=http_resource.referer,
                 response_id=response_id,
                 evil=False
@@ -436,7 +431,7 @@ class SqlPersister:
 
     async def _get_paths(
             self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False
-    ) -> AsyncIterator[Request]:
+    ) -> AsyncIterator[Tuple[Request, Response]]:
         conditions = [self.paths.c.evil == evil]
 
         if path and isinstance(path, str):
@@ -455,6 +450,7 @@ class SqlPersister:
 
         for row in result.fetchall():
             path_id = row[0]
+            response_id = row[10]
 
             if module:
                 # Exclude requests matching the attack module, we want requests that aren't attacked yet
@@ -499,7 +495,7 @@ class SqlPersister:
                     else:
                         raise ValueError(f"Unknown param type {param_row[0]}")
 
-                http_res = web.Request(
+                request = Request(
                     row[1],
                     method=row[2],
                     encoding=row[5],
@@ -511,26 +507,24 @@ class SqlPersister:
                 )
 
                 if row[6]:
-                    http_res.status = row[6]
+                    request.status = row[6]
 
                 if row[7]:
-                    http_res.set_headers(row[7])
+                    request.set_headers(row[7])
 
-                if row[11]:
-                    http_res.set_sent_headers(row[11])
+                request.link_depth = row[4]
+                request.path_id = path_id
+                response = await self.get_response_by_id(response_id)
 
-                http_res.link_depth = row[4]
-                http_res.path_id = path_id
+                yield request, response
 
-                yield http_res
+    async def get_links(self, path=None, attack_module: str = "") -> AsyncIterator[Tuple[Request, Response]]:
+        async for request, response in self._get_paths(path=path, method="GET", crawled=True, module=attack_module):
+            yield request, response
 
-    async def get_links(self, path=None, attack_module: str = "") -> AsyncIterator[Request]:
-        async for path in self._get_paths(path=path, method="GET", crawled=True, module=attack_module):
-            yield path
-
-    async def get_forms(self, path=None, attack_module: str = "") -> AsyncIterator[Request]:
-        async for path in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
-            yield path
+    async def get_forms(self, path=None, attack_module: str = "") -> AsyncIterator[Tuple[Request, Response]]:
+        async for request, response in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
+            yield request, response
 
     async def get_all_paths(self) -> List:
         statement = select(self.paths, self.responses.c.body) \
@@ -547,7 +541,7 @@ class SqlPersister:
                 "request": {
                     "url": row.path,
                     "method": row.method,
-                    "headers": [[key, value] for key, value in (row.sent_headers or {}).items()],
+                    "headers": [[key, value] for key, value in (row.headers or {}).items()],
                     "referer": row.referer,
                     "enctype": row.enctype,
                     "encoding": row.encoding,
@@ -619,7 +613,7 @@ class SqlPersister:
         module: str,
         category=None,
         level=0,
-        request: web.Request = None,
+        request: Request = None,
         parameter="",
         info="",
         wstg=None,
@@ -640,7 +634,6 @@ class SqlPersister:
             referer=request.referer,
             response_id=response_id,
             evil=True,
-            sent_headers=request.sent_headers
         )
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
@@ -793,7 +786,7 @@ class SqlPersister:
                 else:
                     raise ValueError(f"Unknown param type {param_row[0]}")
 
-            request = web.Request(
+            request = Request(
                 row[1],
                 method=row[2],
                 encoding=row[5],
@@ -809,9 +802,6 @@ class SqlPersister:
 
             if row[7]:
                 request.set_headers(row[7])
-
-            if row[11]:
-                request.set_sent_headers(row[11])
 
             request.link_depth = row[4]
             request.path_id = path_id

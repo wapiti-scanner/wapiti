@@ -3,7 +3,7 @@ import itertools
 import socket
 import uuid
 from os.path import join as path_join
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Tuple, Optional
 
 import dns.resolver
 from httpx import RequestError
@@ -12,7 +12,7 @@ from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 class ModuleLog4Shell(Attack):
@@ -35,7 +35,7 @@ class ModuleLog4Shell(Attack):
         if not self._is_valid_dns(attack_options.get("dns_endpoint")):
             self.finished = True
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished is True:
             return False
         return True
@@ -133,7 +133,7 @@ class ModuleLog4Shell(Attack):
             await self.attack_apache_solr_url(current_url + self.SOLR_URL)
         await self._attack_vsphere_url(request)
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         await self._attack_specific_cases(request)
         headers = await self.read_headers()
 

@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from urllib.parse import quote
 from os.path import join as path_join
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -27,7 +28,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.stored_xss import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net.html import Html
@@ -59,15 +60,15 @@ class ModulePermanentxss(Attack):
     def external_endpoint(self):
         return self.RANDOM_WEBSITE
 
-    async def must_attack(self, request: Request):
-        if not valid_xss_content_type(request) or request.status in (301, 302, 303):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
+        if not valid_xss_content_type(response) or response.status in (301, 302, 303):
             # If that content-type can't be interpreted as HTML by browsers then it is useless
             # Same goes for redirections
             return False
 
         return True
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         """This method searches XSS which could be permanently stored in the web application"""
         headers = {}
 
@@ -232,7 +233,7 @@ class ModulePermanentxss(Attack):
             log_verbose(f"[¨] {evil_request}")
 
             try:
-                await self.crawler.async_send(evil_request)
+                evil_response = await self.crawler.async_send(evil_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
@@ -272,7 +273,7 @@ class ModulePermanentxss(Attack):
 
                 if (
                         not response.is_redirect and
-                        valid_xss_content_type(evil_request) and
+                        valid_xss_content_type(evil_response) and  # TODO: check this twice
                         check_payload(
                             self.DATA_DIR,
                             self.PAYLOADS_FILE,

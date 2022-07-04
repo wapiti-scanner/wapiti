@@ -7,7 +7,7 @@ import respx
 import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_nikto import ModuleNikto
@@ -36,7 +36,6 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.status = 200
-    request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
@@ -90,7 +89,6 @@ async def test_false_positives():
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.status = 200
-    request.set_headers({"content-type": "text/html"})
     persister.get_links.return_value = chain([request])
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

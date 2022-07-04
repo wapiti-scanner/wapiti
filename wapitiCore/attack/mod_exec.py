@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_verbose, log_orange
@@ -25,7 +27,7 @@ from wapitiCore.definitions.exec import NAME, WSTG_CODE
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 class ModuleExec(Attack):
@@ -81,7 +83,7 @@ class ModuleExec(Attack):
             warned = True
         return vuln_info, executed, warned
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         warned = False
         timeouted = False
         page = request.path

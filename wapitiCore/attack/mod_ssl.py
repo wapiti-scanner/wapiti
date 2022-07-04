@@ -18,7 +18,7 @@ from datetime import datetime
 import json
 import asyncio
 from os.path import join as path_join
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from collections import defaultdict
 
 import humanize
@@ -31,7 +31,7 @@ from sslyze import ServerNetworkLocation, ServerNetworkConfiguration, ScanComman
 from sslyze.errors import ServerHostnameCouldNotBeResolved
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import _, CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
 from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
 from wapitiCore.definitions.ssl import NAME, WSTG_CODE
@@ -351,7 +351,7 @@ class ModuleSsl(Attack):
         # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
         self.tested_targets = set()
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if request.scheme != "https":
             return False
 
@@ -361,7 +361,7 @@ class ModuleSsl(Attack):
         self.tested_targets.add(request.hostname)
         return True
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         loop = asyncio.get_running_loop()
         # sslyze use threads to launch scanners concurrently so we put those inside an asyncio executor
         scan_results = await loop.run_in_executor(None, analyze, request.hostname, request.port)

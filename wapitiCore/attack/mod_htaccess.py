@@ -21,12 +21,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
+
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.htaccess import NAME, WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.main.log import log_red, log_verbose
 
 
@@ -40,13 +42,13 @@ class ModuleHtaccess(Attack):
     do_get = True
     do_post = True
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if request.path in self.attacked_get:
             return False
 
         return request.status in (401, 402, 403, 407)
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         url = request.path
         referer = request.referer
         headers = {}

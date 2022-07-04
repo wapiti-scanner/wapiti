@@ -20,6 +20,7 @@ from configparser import ConfigParser
 from os.path import join as path_join
 from collections import defaultdict, namedtuple
 import re
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -29,7 +30,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.file import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 PHP_WARNING_REGEXES = [
@@ -164,7 +165,7 @@ class ModuleFile(Attack):
 
         return False
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         warned = False
         timeouted = False
         page = request.path

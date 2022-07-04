@@ -1,5 +1,5 @@
 from wapitiCore.attack.attack import Mutator, Flags
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 def test_mutations():

@@ -7,14 +7,14 @@ import respx
 import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_shellshock import ModuleShellshock
 from tests import AsyncMock
 
 
-def shellshock_callback(request):
+def shellshock_callback(request: httpx.Request):
     if "user-agent" in request.headers:
         search = re.search(r"(\\x[0-9a-f]{2})+", request.headers["user-agent"])
         if search:
@@ -36,13 +36,11 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.status = 200
-    request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
     request = Request("http://perdu.com/vuln/")
     request.path_id = 2
     request.status = 200
-    request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

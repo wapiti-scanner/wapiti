@@ -26,7 +26,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.language import _
 from wapitiCore.net.html import Html
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 
 

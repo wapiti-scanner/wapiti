@@ -20,7 +20,7 @@
 import asyncio
 import json
 import os
-from typing import List, Iterator, Set
+from typing import List, Iterator, Set, Optional
 import re
 from itertools import cycle
 from functools import lru_cache
@@ -36,7 +36,7 @@ import dns.name
 import dns.resolver
 
 from wapitiCore.main.log import log_red, logging, log_verbose
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.subdomain_takeovers import NAME, WSTG_CODE
@@ -202,7 +202,7 @@ class ModuleTakeover(Attack):
         self.processed_domains = set()
         self.takeover = TakeoverChecker()
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         try:
             root_domain = get_root_domain(request.hostname)
         except (TldDomainNotFound, TldBadUrl):
@@ -296,7 +296,7 @@ class ModuleTakeover(Attack):
                             wstg=WSTG_CODE
                         )
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         tasks = []
         sub_queue = asyncio.Queue(maxsize=CONCURRENT_TASKS)
         tasks.append(asyncio.create_task(self.feed_queue(sub_queue, request.hostname)))

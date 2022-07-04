@@ -69,7 +69,7 @@ class Response:
         """
         return self._response.headers
 
-    # TODO: try to remove this
+    # TODO: try to remove this?
     @property
     def sent_headers(self) -> httpx.Headers:
         return self._response.request.headers

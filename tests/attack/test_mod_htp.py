@@ -12,7 +12,7 @@ from wapitiCore.attack.mod_htp import ModuleHtp
 from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 @pytest.mark.asyncio

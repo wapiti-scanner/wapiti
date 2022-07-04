@@ -1,6 +1,9 @@
 from urllib.parse import quote, unquote
 import html
 
+from wapitiCore.net.web import Request, make_absolute
+from wapitiCore.net.response import Response
+
 
 def encode(params_list):
     """Encode a sequence of two-element lists or dictionary into a URL query string."""

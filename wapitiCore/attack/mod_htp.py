@@ -3,7 +3,7 @@ import json
 import os
 import re
 import sqlite3
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
@@ -12,7 +12,7 @@ from wapitiCore.definitions.fingerprint_webserver import \
 from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 MSG_TECHNO_VERSIONED = _("The range for {0} is from {1} to {2}")
 
@@ -55,12 +55,12 @@ class ModuleHtp(Attack):
         except IOError:
             logging.error(_("Error downloading htp database."))
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if request.method == "POST":
             return False
         return True
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         await self._init_db()
         root_url = await self.persister.get_root_url()
 

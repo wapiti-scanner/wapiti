@@ -27,6 +27,7 @@ from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
 from pkg_resources import resource_filename
+from typing import Optional
 
 from httpx import ReadTimeout, RequestError
 
@@ -34,7 +35,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 
 
 all_modules = {
@@ -317,14 +318,14 @@ class Attack:
         parts = urlparse(self.external_endpoint)
         return parts.netloc + parts.path
 
-    async def must_attack(self, request: Request):  # pylint: disable=unused-argument
+    async def must_attack(self, request: Request, response: Optional[Response] = None):  # pylint: disable=unused-argument
         return not self.finished
 
     @property
     def must_attack_query_string(self):
         return self.attack_level == 2
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         raise NotImplementedError("Override me bro")
 
     def get_mutator(self):

@@ -21,6 +21,7 @@
 from os.path import join as path_join
 from itertools import product
 import asyncio
+from typing import Optional
 
 from httpx import RequestError
 
@@ -29,7 +30,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
 from wapitiCore.net.html import Html
 from wapitiCore.net.response import Response
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.main.log import log_red
 
 
@@ -105,7 +106,7 @@ class ModuleBruteLoginForm(Attack):
 
         return login_response
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         # We leverage the fact that the crawler will fill password entries with a known placeholder
         if "Letm3in_" not in request.encoded_data + request.encoded_params:
             return False
@@ -116,7 +117,7 @@ class ModuleBruteLoginForm(Attack):
 
         return True
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         try:
             response = await self.crawler.async_send(Request(request.referer, "GET"), follow_redirects=True)
         except RequestError:

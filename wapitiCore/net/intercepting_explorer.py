@@ -26,7 +26,7 @@ from mitmproxy.options import Options
 from mitmproxy.http import Request as MitmRequest
 import httpx
 
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
@@ -68,7 +68,7 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
         post_params=post_params or None,
         enctype=enctype
     )
-    request.set_sent_headers(httpx.Headers(decode_key_value_dict(mitm_request.headers)))
+    request.set_headers(httpx.Headers(decode_key_value_dict(mitm_request.headers)))
     return request
 
 
@@ -87,7 +87,6 @@ class MitmFlowToWapitiRequests:
         if "text" in content_type or "json" in content_type:
             request = mitm_to_wapiti_request(flow.request)
             request.status = flow.response.status_code
-            request.set_headers(httpx.Headers(decode_key_value_dict(flow.response.headers)))
 
             decoded_headers = decode_key_value_dict(flow.response.headers)
 

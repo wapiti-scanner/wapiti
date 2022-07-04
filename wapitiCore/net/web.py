@@ -374,7 +374,6 @@ class Request:
         elif parsed.scheme == "https":
             self._port = 443
         self._headers = None
-        self._sent_headers = None
         self._response_content = None
         self._start_time = None
         self._size = 0
@@ -483,8 +482,8 @@ class Request:
         rel_url = self.url.split('/', 3)[3]
         http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n"
 
-        if self._sent_headers:
-            for header_name, header_value in self._sent_headers.items():
+        if self._headers:
+            for header_name, header_value in self._headers.items():
                 http_string += f"{left_margin}{header_name}: {header_value}\n"
 
         if self.is_multipart:
@@ -536,25 +535,13 @@ class Request:
 
         return curl_string
 
-    # TODO: remove this from Request as those are the response headers.
-    # Since we now store (part of or all) the Response with the persister, modules needing the original response headers
-    # should be fed with the Response object too.
     @property
     def headers(self) -> httpx.Headers:
         return self._headers
 
-    def set_headers(self, response_headers):
-        """Set the HTTP headers received while requesting the resource"""
-        self._headers = response_headers
-
-    # TODO: should be rename to just headers because we are on the Request object.
-    @property
-    def sent_headers(self) -> httpx.Headers:
-        return self._sent_headers
-
-    def set_sent_headers(self, sent_headers: httpx.Headers):
+    def set_headers(self, sent_headers: httpx.Headers):
         """Set the sent HTTP headers while requesting the resource"""
-        self._sent_headers = sent_headers
+        self._headers = sent_headers
 
     @property
     def response_content(self) -> str:

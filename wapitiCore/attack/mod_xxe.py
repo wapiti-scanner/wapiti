@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from binascii import unhexlify
 from asyncio import sleep
+from typing import Optional
 from urllib.parse import quote
 from configparser import ConfigParser
 from os.path import join as path_join
@@ -30,7 +31,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.xxe import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 
 
 def search_pattern(content: str, patterns: list) -> str:
@@ -113,7 +114,7 @@ class ModuleXxe(Attack):
         except AttributeError:
             return []
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         timeouted = False
         page = request.path
         saw_internal_error = False

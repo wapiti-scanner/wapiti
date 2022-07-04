@@ -5,7 +5,7 @@ import respx
 import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_htaccess import ModuleHtaccess
@@ -30,13 +30,11 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/")
     request.path_id = 1
     request.status = 200
-    request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
     request = Request("http://perdu.com/admin/")
     request.path_id = 2
     request.status = 401
-    request.set_headers({"content-type": "text/html"})
     all_requests.append(request)
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

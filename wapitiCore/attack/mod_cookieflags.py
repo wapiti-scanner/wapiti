@@ -15,8 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from http.cookiejar import Cookie
+from typing import Optional
+
 from wapitiCore.attack.attack import Attack
-from wapitiCore.net.web import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.secure_cookie import NAME as COOKIE_SECURE_DISABLED, WSTG_CODE as COOKIE_SECURE_WSTG
 from wapitiCore.definitions.http_only import NAME as COOKIE_HTTPONLY_DISABLED, WSTG_CODE as COOKIE_HTTPONLY_WSTG
@@ -39,7 +41,7 @@ class ModuleCookieflags(Attack):
     def check_httponly_flag(cookie: Cookie):
         return cookie.has_nonstandard_attr("HttpOnly") or cookie.has_nonstandard_attr("httponly")
 
-    async def must_attack(self, request: Request):
+    async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
             return False
 
@@ -48,7 +50,7 @@ class ModuleCookieflags(Attack):
 
         return request.url == await self.persister.get_root_url()
 
-    async def attack(self, request: Request):
+    async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         cookies = self.crawler.session_cookies
 
