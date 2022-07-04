@@ -35,12 +35,10 @@ async def test_whole_stuff():
 
     request = Request("http://perdu.com/")
     request.path_id = 1
-    request.status = 200
     all_requests.append(request)
 
     request = Request("http://perdu.com/vuln/")
     request.path_id = 2
-    request.status = 200
     all_requests.append(request)
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

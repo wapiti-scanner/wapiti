@@ -114,7 +114,6 @@ class SqlPersister:
             Column("enctype", String(length=255), nullable=False),  # HTTP request encoding (like multipart...)
             Column("depth", Integer, nullable=False),
             Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
-            Column("http_status", Integer),
             Column("headers", PickleType),  # Pickled sent HTTP headers, can be huge
             Column("referer", Text),  # Another URL so potentially huge
             Column("evil", Boolean, nullable=False),
@@ -214,7 +213,6 @@ class SqlPersister:
                     statement = self.paths.update().where(
                         self.paths.c.path_id == http_resource.path_id
                     ).values(
-                        http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                         headers=http_resource.headers,
                         response_id=response_id
                     )
@@ -245,7 +243,6 @@ class SqlPersister:
                         "enctype": http_resource.enctype,
                         "depth": http_resource.link_depth,
                         "encoding": http_resource.encoding,
-                        "http_status": http_resource.status if isinstance(http_resource.status, int) else None,
                         "headers": http_resource.headers,
                         "referer": http_resource.referer,
                         "response_id": response_id,
@@ -334,13 +331,13 @@ class SqlPersister:
             return result.inserted_primary_key[0]
 
     async def save_request(self, http_resource: Request, response: Response = None):
+        # TODO: what if a request is saved without a Response then updated later?
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
                 statement = self.paths.update().where(
                     self.paths.c.path_id == http_resource.path_id
                 ).values(
-                    http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                     headers=http_resource.headers
                 )
                 await conn.execute(statement)
@@ -355,7 +352,6 @@ class SqlPersister:
                 enctype=http_resource.enctype,
                 depth=http_resource.link_depth,
                 encoding=http_resource.encoding,
-                http_status=http_resource.status if isinstance(http_resource.status, int) else None,
                 headers=http_resource.headers,
                 referer=http_resource.referer,
                 response_id=response_id,
@@ -450,7 +446,7 @@ class SqlPersister:
 
         for row in result.fetchall():
             path_id = row[0]
-            response_id = row[10]
+            response_id = row[9]
 
             if module:
                 # Exclude requests matching the attack module, we want requests that aren't attacked yet
@@ -500,17 +496,14 @@ class SqlPersister:
                     method=row[2],
                     encoding=row[5],
                     enctype=row[3],
-                    referer=row[8],
+                    referer=row[7],
                     get_params=get_params,
                     post_params=post_params,
                     file_params=file_params
                 )
 
                 if row[6]:
-                    request.status = row[6]
-
-                if row[7]:
-                    request.set_headers(row[7])
+                    request.set_headers(row[6])
 
                 request.link_depth = row[4]
                 request.path_id = path_id
@@ -629,7 +622,6 @@ class SqlPersister:
             enctype=request.enctype,
             depth=request.link_depth,
             encoding=request.encoding,
-            http_status=request.status if isinstance(request.status, int) else None,
             headers=request.headers,
             referer=request.referer,
             response_id=response_id,
@@ -791,17 +783,14 @@ class SqlPersister:
                 method=row[2],
                 encoding=row[5],
                 enctype=row[3],
-                referer=row[8],
+                referer=row[7],
                 get_params=get_params,
                 post_params=post_params,
                 file_params=file_params
             )
 
             if row[6]:
-                request.status = row[6]
-
-            if row[7]:
-                request.set_headers(row[7])
+                request.set_headers(row[6])
 
             request.link_depth = row[4]
             request.path_id = path_id

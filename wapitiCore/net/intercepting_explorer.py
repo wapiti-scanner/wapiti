@@ -86,7 +86,6 @@ class MitmFlowToWapitiRequests:
         flow.response.stream = False
         if "text" in content_type or "json" in content_type:
             request = mitm_to_wapiti_request(flow.request)
-            request.status = flow.response.status_code
 
             decoded_headers = decode_key_value_dict(flow.response.headers)
 

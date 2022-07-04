@@ -566,14 +566,6 @@ class Request:
         self._size = value
 
     @property
-    def status(self) -> int:
-        return self._status
-
-    @status.setter
-    def status(self, value: int):
-        self._status = value
-
-    @property
     def url(self) -> str:
         if not self._cached_url:
             if self._get_params:
