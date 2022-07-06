@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
-import logging
 import os
 from collections import namedtuple
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple
@@ -29,7 +28,6 @@ from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
                         literal_column, or_, select)
 from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import Request, Response
-from wapitiCore.main.log import logging
 
 Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
 
@@ -727,18 +725,20 @@ class SqlPersister:
         if not row:
             return None
 
-        try:
-            response = Response(
-                httpx.Response(
-                    row.status_code,
-                    headers=httpx.Headers(json.loads(row.headers)),
-                    content=row.body
-                ),
-                row.url,
-            )
-        except httpx.DecodingError as e:
-            logging.error(e)
-            return None
+        headers = httpx.Headers(json.loads(row.headers))
+        if "content-encoding" in headers:
+            # httpx will try to decompress the content if it sees the following header, leading to an exception
+            del headers["content-encoding"]
+
+        response = Response(
+            httpx.Response(
+                row.status_code,
+                headers=headers,
+                content=row.body
+            ),
+            row.url,
+        )
+
         return response
 
     async def get_path_by_id(self, path_id):
