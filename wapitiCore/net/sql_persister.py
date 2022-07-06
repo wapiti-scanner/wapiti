@@ -197,6 +197,7 @@ class SqlPersister:
             return
 
         if len(paths_list) == 1:
+            # Save the unique request and response objects
             await self.save_request(paths_list[0][0], paths_list[0][1])
             return
 
@@ -232,7 +233,7 @@ class SqlPersister:
                 # Save the request along with its parameters
                 # Beware: https://docs.sqlalchemy.org/en/14/core/tutorial.html#executing-multiple-statements
                 # When executing multiple sets of parameters, each dictionary must have the same set of keys;
-                # i.e. you cant have fewer keys in some dictionaries than others.
+                # i.e. you can't have fewer keys in some dictionaries than others.
                 # This is because the Insert statement is compiled against the first dictionary in the list,
                 # and it’s assumed that all subsequent argument dictionaries are compatible with that statement.
                 all_path_values.append(
@@ -331,7 +332,6 @@ class SqlPersister:
             return result.inserted_primary_key[0]
 
     async def save_request(self, http_resource: Request, response: Response = None):
-        # TODO: what if a request is saved without a Response then updated later?
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
@@ -343,6 +343,9 @@ class SqlPersister:
                 await conn.execute(statement)
                 return
 
+            # We should never have a situation where we overwrite an existing response ID because a request can only be
+            # saved once without response (from the to_browse list) and once when crawled. After, the request should be
+            # removed as a duplicate by the Explorer class.
             response_id = await self.save_response(response)
 
             # as we have a unique request let's do insertion the classic way
