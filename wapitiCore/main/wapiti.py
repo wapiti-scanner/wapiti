@@ -208,6 +208,7 @@ class Wapiti:
         self._logfile = ""
         self._auth_state = None
         self._mitm_proxy_port = 0
+        self._proxy = None
         self.detailed_report = False
 
         if session_dir:
@@ -388,7 +389,8 @@ class Wapiti:
                 self.target_scope,
                 stop_event,
                 parallelism=parallelism,
-                mitm_port=self._mitm_proxy_port
+                mitm_port=self._mitm_proxy_port,
+                proxy=self._proxy
             )
         else:
             explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)
@@ -630,11 +632,21 @@ class Wapiti:
 
     def set_proxy(self, proxy: str):
         """Set a proxy to use for HTTP requests."""
+        self._proxy = proxy
         self.crawler_configuration.proxy = proxy
+        # Chech mitm proxy settings
+        self.set_intercepting_proxy_port(self._mitm_proxy_port)
 
     def set_intercepting_proxy_port(self, port: int):
         """Set the listening port for the mitmproxy instance."""
         self._mitm_proxy_port = port
+        # self.crawler_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port}/"
+        if self._proxy:
+            parts = urlparse(self._proxy)
+            if parts.scheme not in ("http", "https"):
+                raise InvalidOptionValue(
+                    "--proxy", f"The proxy protocol '{parts.scheme}' is not supported by mitmproxy"
+                )
 
     def add_start_url(self, url: str):
         """Specify a URL to start the scan with. Can be called several times."""
