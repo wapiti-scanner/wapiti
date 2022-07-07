@@ -203,6 +203,11 @@ class AsyncCrawler:
         self._client.headers["User-Agent"] = value
 
     @property
+    def headers(self) -> httpx.Headers:
+        """Returns the headers kept on the HTTP client"""
+        return self._client.headers
+
+    @property
     def session_cookies(self):
         """Getter for session cookies (returns a Cookies object)"""
         return self._client.cookies

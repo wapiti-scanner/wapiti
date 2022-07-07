@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from collections import deque
-from typing import Tuple, List, AsyncIterator, Dict
+from typing import Tuple, List, AsyncIterator, Dict, Optional
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -32,7 +32,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.scope import Scope
-from wapitiCore.main.log import log_verbose
+from wapitiCore.main.log import log_verbose, log_blue
 
 
 def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
@@ -73,13 +73,14 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
 
 
 class MitmFlowToWapitiRequests:
-    def __init__(self, data_queue: asyncio.Queue, user_agent: str):
+    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers):
         self._queue = data_queue
-        self._user_agent = user_agent
+        self._headers = headers
 
     async def request(self, flow):
-        # Let's overwrite the user-agent so every client using the proxy will share the same value
-        flow.request.headers["User-Agent"] = self._user_agent
+        for key, value in self._headers.items():
+            # This will use our user-agent too
+            flow.request.headers[key] = value
 
     async def response(self, flow):
         content_type = flow.response.headers.get("Content-Type", "text/plain")
@@ -104,10 +105,15 @@ class MitmFlowToWapitiRequests:
             )
 
 
-async def launch_proxy(port: int, data_queue: asyncio.Queue, user_agent: str):
+async def launch_proxy(port: int, data_queue: asyncio.Queue, headers: httpx.Headers, proxy: Optional[str] = None):
+    log_blue(
+        f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done."
+    )
     opt = Options()
     # We can use an upstream proxy that way but socks is not supported
-    # opt.update(mode="upstream:http://127.0.0.1:8888/")
+    if proxy:
+        log_blue(f"Using upstream proxy {proxy}")
+        opt.update(mode=f"upstream:{proxy}")
     opt.update(listen_port=port)
     master = Master(opt)
     master.addons.add(addons.core.Core())
@@ -118,8 +124,8 @@ async def launch_proxy(port: int, data_queue: asyncio.Queue, user_agent: str):
     # If ever we want to have both the interception proxy and an automated crawler then we need to sync cookies
     master.addons.add(AsyncStickyCookie())
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
-    master.addons.add(MitmFlowToWapitiRequests(data_queue, user_agent))
-    print(f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done.")
+    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers))
+
     await master.run()
 
 
@@ -133,10 +139,12 @@ class InterceptingExplorer(Explorer):
             scope: Scope,
             stop_event: asyncio.Event,
             parallelism: int = 8,
-            mitm_port: int = 8080
+            mitm_port: int = 8080,
+            proxy: Optional[str] = None
     ):
         super().__init__(crawler_instance, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
+        self._proxy = proxy
 
     async def async_explore(
             self,
@@ -147,7 +155,7 @@ class InterceptingExplorer(Explorer):
         # We don't use to_explore here, clear it.
         to_explore.clear()
         # Launch proxy as asyncio task
-        asyncio.create_task(launch_proxy(self._mitm_port, queue, self._crawler.user_agent))
+        asyncio.create_task(launch_proxy(self._mitm_port, queue, self._crawler.headers, proxy=self._proxy))
         while True:
             try:
                 request, response = queue.get_nowait()
