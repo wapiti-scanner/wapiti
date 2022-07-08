@@ -390,7 +390,8 @@ class Wapiti:
                 stop_event,
                 parallelism=parallelism,
                 mitm_port=self._mitm_proxy_port,
-                proxy=self._proxy
+                proxy=self._proxy,
+                drop_cookies=self.crawler_configuration.drop_cookies,
             )
         else:
             explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)

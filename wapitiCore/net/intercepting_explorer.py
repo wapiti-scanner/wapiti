@@ -73,9 +73,10 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
 
 
 class MitmFlowToWapitiRequests:
-    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers):
+    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, drop_cookies: bool = False):
         self._queue = data_queue
         self._headers = headers
+        self._drop_cookies = drop_cookies
 
     async def request(self, flow):
         for key, value in self._headers.items():
@@ -83,6 +84,10 @@ class MitmFlowToWapitiRequests:
             flow.request.headers[key] = value
 
     async def response(self, flow):
+        if self._drop_cookies:
+            if "set-cookie" in flow.response.headers:
+                del flow.response.headers["set-cookie"]
+
         content_type = flow.response.headers.get("Content-Type", "text/plain")
         flow.response.stream = False
         if "text" in content_type or "json" in content_type:
@@ -105,7 +110,13 @@ class MitmFlowToWapitiRequests:
             )
 
 
-async def launch_proxy(port: int, data_queue: asyncio.Queue, headers: httpx.Headers, proxy: Optional[str] = None):
+async def launch_proxy(
+        port: int,
+        data_queue: asyncio.Queue,
+        headers: httpx.Headers,
+        proxy: Optional[str] = None,
+        drop_cookies: bool = False
+):
     log_blue(
         f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done."
     )
@@ -114,6 +125,7 @@ async def launch_proxy(port: int, data_queue: asyncio.Queue, headers: httpx.Head
     if proxy:
         log_blue(f"Using upstream proxy {proxy}")
         opt.update(mode=f"upstream:{proxy}")
+
     opt.update(listen_port=port)
     master = Master(opt)
     master.addons.add(addons.core.Core())
@@ -124,8 +136,7 @@ async def launch_proxy(port: int, data_queue: asyncio.Queue, headers: httpx.Head
     # If ever we want to have both the interception proxy and an automated crawler then we need to sync cookies
     master.addons.add(AsyncStickyCookie())
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
-    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers))
-
+    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, drop_cookies))
     await master.run()
 
 
@@ -140,11 +151,13 @@ class InterceptingExplorer(Explorer):
             stop_event: asyncio.Event,
             parallelism: int = 8,
             mitm_port: int = 8080,
-            proxy: Optional[str] = None
+            proxy: Optional[str] = None,
+            drop_cookies: bool = False
     ):
         super().__init__(crawler_instance, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
         self._proxy = proxy
+        self._drop_cookies = drop_cookies
 
     async def async_explore(
             self,
@@ -155,7 +168,15 @@ class InterceptingExplorer(Explorer):
         # We don't use to_explore here, clear it.
         to_explore.clear()
         # Launch proxy as asyncio task
-        asyncio.create_task(launch_proxy(self._mitm_port, queue, self._crawler.headers, proxy=self._proxy))
+        asyncio.create_task(
+            launch_proxy(
+                self._mitm_port,
+                queue,
+                self._crawler.headers,
+                proxy=self._proxy,
+                drop_cookies=self._drop_cookies
+            )
+        )
         while True:
             try:
                 request, response = queue.get_nowait()
