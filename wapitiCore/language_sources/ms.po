@@ -143,16 +143,10 @@ msgstr ""
 msgid "X-Content-Type-Options is not set"
 msgstr ""
 
-msgid "X-XSS-Protection is not set"
-msgstr ""
-
 msgid "X-Frame-Options is not set"
 msgstr ""
 
 msgid "Checking X-Frame-Options :"
-msgstr ""
-
-msgid "Checking X-XSS-Protection :"
 msgstr ""
 
 msgid "Checking X-Content-Type-Options :"
@@ -1041,6 +1035,112 @@ msgstr ""
 msgid "[*] Today is world backup day! Is your data safe?"
 msgstr ""
 
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr ""
+
+msgid "[*] Do you feel lucky punk?"
+msgstr ""
+
+msgid "[*] Available modules:"
+msgstr ""
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+msgstr ""
+
+msgid "[*] Updating modules"
+msgstr ""
+
+msgid "Error: File given with the -s option must be UTF-8 encoded !"
+msgstr ""
+
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
+msgstr ""
+
+msgid "[*] Resuming scan from previous session, please wait"
+msgstr ""
+
+#, python-brace-format
+msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
+msgstr ""
+
+#, python-brace-format
+msgid "[*] Wapiti found {0} URLs and forms during the scan"
+msgstr ""
+
+msgid ""
+"[!] Can't store information in persister. SQLite database must have been "
+"locked by another process"
+msgstr ""
+
+msgid "[!] You should unlock and launch Wapiti again."
+msgstr ""
+
+msgid "Login failed"
+msgstr ""
+
+msgid "Invalid credentials format"
+msgstr ""
+
+msgid "Login success"
+msgstr ""
+
+msgid "Credentials might be invalid"
+msgstr ""
+
+msgid "No login form detected"
+msgstr ""
+
+msgid "[!] Connection error with URL"
+msgstr ""
+
+msgid "[!] {} with URL {}"
+msgstr ""
+
+#, python-brace-format
+msgid "Report for {0}\n"
+msgstr "Laporan untuk {0}\n"
+
+#, python-brace-format
+msgid "Date of the scan : {0}\n"
+msgstr "Tarikh imbasan : {0}\n"
+
+#, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr ""
+
+#, python-brace-format
+msgid "Scope of the scan : {0}\n"
+msgstr "Skop imbasan : {0}\n"
+
+msgid "Summary of vulnerabilities :"
+msgstr "Rumusan kelemahan :"
+
+#, python-brace-format
+msgid "{0} : {1:>3}\n"
+msgstr "{0} : {1:>3}\n"
+
+#, python-brace-format
+msgid "WSTG code: {0}"
+msgstr ""
+
+msgid "Evil request:\n"
+msgstr "Permintaan berbahaya:\n"
+
+#, python-brace-format
+msgid "cURL command PoC : \"{0}\""
+msgstr "Perintah cURL PoC : \"{0}\""
+
+msgid "Summary of anomalies :"
+msgstr ""
+
+msgid "Summary of additionals :"
+msgstr ""
+
+msgid "Authentication :"
+msgstr ""
+
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr ""
 
@@ -1056,13 +1156,13 @@ msgstr ""
 msgid "List Wapiti attack modules and exit"
 msgstr ""
 
-msgid "Update Wapiti attack modules and exit"
-msgstr ""
-
 msgid "Set attack level"
 msgstr ""
 
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
+msgstr ""
+
+msgid "Instead of crawling, launch an intercepting proxy on the given port"
 msgstr ""
 
 msgid "Set a JSON cookie file to use."
@@ -1178,114 +1278,14 @@ msgstr ""
 msgid "Output file or folder"
 msgstr ""
 
+msgid "HTTP responses will appear in the generated report"
+msgstr ""
+
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr ""
 
+msgid "Update Wapiti attack modules and exit"
+msgstr ""
+
 msgid "Show program's version number and exit"
-msgstr ""
-
-msgid "Number of concurrent tasks must be 1 or above!"
-msgstr ""
-
-msgid "[*] Do you feel lucky punk?"
-msgstr ""
-
-msgid "[*] Available modules:"
-msgstr ""
-
-msgid ""
-"Invalid base URL was specified, please give a complete URL with protocol "
-"scheme."
-msgstr ""
-
-msgid "[*] Updating modules"
-msgstr ""
-
-msgid "Error: File given with the -s option must be UTF-8 encoded !"
-msgstr ""
-
-msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
-msgstr ""
-
-msgid "[*] Resuming scan from previous session, please wait"
-msgstr ""
-
-#, python-brace-format
-msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
-msgstr ""
-
-#, python-brace-format
-msgid "[*] Wapiti found {0} URLs and forms during the scan"
-msgstr ""
-
-msgid ""
-"[!] Can't store information in persister. SQLite database must have been "
-"locked by another process"
-msgstr ""
-
-msgid "[!] You should unlock and launch Wapiti again."
-msgstr ""
-
-msgid "Login failed"
-msgstr ""
-
-msgid "Invalid credentials format"
-msgstr ""
-
-msgid "Login success"
-msgstr ""
-
-msgid "Credentials might be invalid"
-msgstr ""
-
-msgid "No login form detected"
-msgstr ""
-
-msgid "[!] Connection error with URL"
-msgstr ""
-
-msgid "[!] {} with url {}"
-msgstr ""
-
-#, python-brace-format
-msgid "Report for {0}\n"
-msgstr "Laporan untuk {0}\n"
-
-#, python-brace-format
-msgid "Date of the scan : {0}\n"
-msgstr "Tarikh imbasan : {0}\n"
-
-#, python-brace-format
-msgid "Crawled pages : {0}\n"
-msgstr ""
-
-#, python-brace-format
-msgid "Scope of the scan : {0}\n"
-msgstr "Skop imbasan : {0}\n"
-
-msgid "Summary of vulnerabilities :"
-msgstr "Rumusan kelemahan :"
-
-#, python-brace-format
-msgid "{0} : {1:>3}\n"
-msgstr "{0} : {1:>3}\n"
-
-#, python-brace-format
-msgid "WSTG code: {0}"
-msgstr ""
-
-msgid "Evil request:\n"
-msgstr "Permintaan berbahaya:\n"
-
-#, python-brace-format
-msgid "cURL command PoC : \"{0}\""
-msgstr "Perintah cURL PoC : \"{0}\""
-
-msgid "Summary of anomalies :"
-msgstr ""
-
-msgid "Summary of additionals :"
-msgstr ""
-
-msgid "Authentication :"
 msgstr ""

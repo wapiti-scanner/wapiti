@@ -143,17 +143,11 @@ msgstr "L'entête Strict-Transport-Security n'est pas défini"
 msgid "X-Content-Type-Options is not set"
 msgstr "L'entête X-Content-Type-Options n'est pas défini"
 
-msgid "X-XSS-Protection is not set"
-msgstr "L'entête X-XSS-Protection n'est pas défini"
-
 msgid "X-Frame-Options is not set"
 msgstr "L'entête X-Frame-Options n'est pas défini"
 
 msgid "Checking X-Frame-Options :"
 msgstr "Vérification de X-Frame-Options :"
-
-msgid "Checking X-XSS-Protection :"
-msgstr "Vérification de X-XSS-Protection :"
 
 msgid "Checking X-Content-Type-Options :"
 msgstr "Vérification de X-Content-Type-Options :"
@@ -318,7 +312,8 @@ msgid ""
 "The target reached the DTD file on the endpoint but the exploitation didn't "
 "succeed."
 msgstr ""
-"La cible a téléchargé le fichier DTD sur le endpoint mais l'exploitation a échouée."
+"La cible a téléchargé le fichier DTD sur le endpoint mais l'exploitation a "
+"échouée."
 
 #, python-brace-format
 msgid ""
@@ -1250,13 +1245,127 @@ msgstr ""
 "[*] Aujourd'hui est la journée mondiale de la sauvegarde! Avez-vous pensé à "
 "sauvegarder vos données?"
 
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr "Le nombre de taches concurrentes doit être supérieur ou égal à 1!"
+
+msgid "[*] Do you feel lucky punk?"
+msgstr "[*] Est-ce que tu tentes ta chance punk ?"
+
+msgid "[*] Available modules:"
+msgstr "[*] Modules disponibles :"
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+msgstr ""
+"URL de base spécifiée invalide, merci de fournir une URL disposant d'un "
+"protocole."
+
+msgid "[*] Updating modules"
+msgstr "[*] Mise à jour des modules"
+
+msgid "Error: File given with the -s option must be UTF-8 encoded !"
+msgstr ""
+"Erreur: les fichiers passés via le paramètre -s doivent être encodés en UTF-8"
+
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
+msgstr "Erreur: l'URL endpoint interne doit pouvoir être accédée par Wapiti!"
+
+msgid "[*] Resuming scan from previous session, please wait"
+msgstr "[*] Reprise du scan depuis la session enregistrée, veuillez patienter"
+
+#, python-brace-format
+msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
+msgstr ""
+"[*] {0} URLs et formulaires avec plus de {1} paramètres ont été supprimés"
+
+#, python-brace-format
+msgid "[*] Wapiti found {0} URLs and forms during the scan"
+msgstr "[*] Wapiti a trouvé {0} URLs et formulaires lors du scan"
+
+msgid ""
+"[!] Can't store information in persister. SQLite database must have been "
+"locked by another process"
+msgstr ""
+"[!] Erreur lors du stockage des informations. La base de données SQLite est "
+"certainement vérouillée par un autre processus"
+
+msgid "[!] You should unlock and launch Wapiti again."
+msgstr "[!] Veuillez libérer l'accès et relancer Wapiti."
+
+msgid "Login failed"
+msgstr "Authentification échouée"
+
+msgid "Invalid credentials format"
+msgstr "Format d'identifiants invalide"
+
+msgid "Login success"
+msgstr "Authentification réussie"
+
+msgid "Credentials might be invalid"
+msgstr "Les identifiants semblent invalides"
+
+msgid "No login form detected"
+msgstr "Aucun formulaire de connexion n'a été détecté"
+
+msgid "[!] Connection error with URL"
+msgstr "[!] Impossible de se connecter à l'URL"
+
+msgid "[!] {} with URL {}"
+msgstr "[!] {} avec l'URL {}"
+
+#, python-brace-format
+msgid "Report for {0}\n"
+msgstr "Rapport pour {0}\n"
+
+#, python-brace-format
+msgid "Date of the scan : {0}\n"
+msgstr "Date du scan : {0}\n"
+
+#, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr "Pages explorées : {0}\n"
+
+#, python-brace-format
+msgid "Scope of the scan : {0}\n"
+msgstr "Portée de ce scan : {0}\n"
+
+msgid "Summary of vulnerabilities :"
+msgstr "Résumé des vulnérabilités :"
+
+#, python-brace-format
+msgid "{0} : {1:>3}\n"
+msgstr "{0} : {1:>3}\n"
+
+#, python-brace-format
+msgid "WSTG code: {0}"
+msgstr "Code WSTG: {0}"
+
+msgid "Evil request:\n"
+msgstr "Evil request:\n"
+
+#, python-brace-format
+msgid "cURL command PoC : \"{0}\""
+msgstr "PoC en commande cURL : \"{0}\""
+
+msgid "Summary of anomalies :"
+msgstr "Résumé des anomalies :"
+
+msgid "Summary of additionals :"
+msgstr "Résumé des informations complémentaires :"
+
+msgid "Authentication :"
+msgstr "Authentification :"
+
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr ""
 "L'URL de base utilisée pour définir le périmètre de scan (le périmètre par "
 "défaut est folder)"
 
 msgid "Urlencoded data to send with the base URL if it is a POST request"
-msgstr "Données url-encodées à envoyer avec l'URL de base s'il s'agit d'une requête POST"
+msgstr ""
+"Données url-encodées à envoyer avec l'URL de base s'il s'agit d'une requête "
+"POST"
 
 msgid "Set scan scope"
 msgstr "Définir le périmètre de scan"
@@ -1267,9 +1376,6 @@ msgstr "La liste des modules à utiliser"
 msgid "List Wapiti attack modules and exit"
 msgstr "Lister les modules d'attaque de Wapiti et quitter"
 
-msgid "Update Wapiti attack modules and exit"
-msgstr "Mettre à jour les modules d'attaque de Wapiti et quitter"
-
 msgid "Set attack level"
 msgstr "Définir le niveau d'attaque"
 
@@ -1277,6 +1383,9 @@ msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr ""
 "Définir le proxy HTTP(S) à utiliser. Les proxies http(s) et socks sont "
 "supportés."
+
+msgid "Instead of crawling, launch an intercepting proxy on the given port"
+msgstr "Au lieu de crawler, lance un proxy interceptant sur le port spécifié"
 
 msgid "Set a JSON cookie file to use."
 msgstr "Définir le fichier JSON de cookie à utiliser."
@@ -1417,120 +1526,14 @@ msgstr "Html est le format par défaut."
 msgid "Output file or folder"
 msgstr "Fichier ou dossier de destination"
 
+msgid "HTTP responses will appear in the generated report"
+msgstr "Les réponses HTTP apparaitront dans le rapport généré"
+
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Ne pas envoyer de rapport de bugs quand un module d'attaque échoue"
 
+msgid "Update Wapiti attack modules and exit"
+msgstr "Mettre à jour les modules d'attaque de Wapiti et quitter"
+
 msgid "Show program's version number and exit"
 msgstr "Afficher la version du programme et quitter"
-
-msgid "Number of concurrent tasks must be 1 or above!"
-msgstr "Le nombre de taches concurrentes doit être supérieur ou égal à 1!"
-
-msgid "[*] Do you feel lucky punk?"
-msgstr "[*] Est-ce que tu tentes ta chance punk ?"
-
-msgid "[*] Available modules:"
-msgstr "[*] Modules disponibles :"
-
-msgid ""
-"Invalid base URL was specified, please give a complete URL with protocol "
-"scheme."
-msgstr ""
-"URL de base spécifiée invalide, merci de fournir une URL disposant d'un "
-"protocole."
-
-msgid "[*] Updating modules"
-msgstr "[*] Mise à jour des modules"
-
-msgid "Error: File given with the -s option must be UTF-8 encoded !"
-msgstr ""
-"Erreur: les fichiers passés via le paramètre -s doivent être encodés en UTF-8"
-
-msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
-msgstr "Erreur: l'URL endpoint interne doit pouvoir être accédée par Wapiti!"
-
-msgid "[*] Resuming scan from previous session, please wait"
-msgstr "[*] Reprise du scan depuis la session enregistrée, veuillez patienter"
-
-#, python-brace-format
-msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
-msgstr ""
-"[*] {0} URLs et formulaires avec plus de {1} paramètres ont été supprimés"
-
-#, python-brace-format
-msgid "[*] Wapiti found {0} URLs and forms during the scan"
-msgstr "[*] Wapiti a trouvé {0} URLs et formulaires lors du scan"
-
-msgid ""
-"[!] Can't store information in persister. SQLite database must have been "
-"locked by another process"
-msgstr ""
-"[!] Erreur lors du stockage des informations. La base de données SQLite est "
-"certainement vérouillée par un autre processus"
-
-msgid "[!] You should unlock and launch Wapiti again."
-msgstr "[!] Veuillez libérer l'accès et relancer Wapiti."
-
-msgid "Login failed"
-msgstr "Authentification échouée"
-
-msgid "Invalid credentials format"
-msgstr "Format d'identifiants invalide"
-
-msgid "Login success"
-msgstr "Authentification réussie"
-
-msgid "Credentials might be invalid"
-msgstr "Les identifiants semblent invalides"
-
-msgid "No login form detected"
-msgstr "Aucun formulaire de connexion n'a été détecté"
-
-msgid "[!] Connection error with URL"
-msgstr "[!] Impossible de se connecter à l'URL"
-
-msgid "[!] {} with url {}"
-msgstr "[!] {} avec l'URL {}"
-
-#, python-brace-format
-msgid "Report for {0}\n"
-msgstr "Rapport pour {0}\n"
-
-#, python-brace-format
-msgid "Date of the scan : {0}\n"
-msgstr "Date du scan : {0}\n"
-
-#, python-brace-format
-msgid "Crawled pages : {0}\n"
-msgstr "Pages explorées : {0}\n"
-
-#, python-brace-format
-msgid "Scope of the scan : {0}\n"
-msgstr "Portée de ce scan : {0}\n"
-
-msgid "Summary of vulnerabilities :"
-msgstr "Résumé des vulnérabilités :"
-
-#, python-brace-format
-msgid "{0} : {1:>3}\n"
-msgstr "{0} : {1:>3}\n"
-
-#, python-brace-format
-msgid "WSTG code: {0}"
-msgstr "Code WSTG: {0}"
-
-msgid "Evil request:\n"
-msgstr "Evil request:\n"
-
-#, python-brace-format
-msgid "cURL command PoC : \"{0}\""
-msgstr "PoC en commande cURL : \"{0}\""
-
-msgid "Summary of anomalies :"
-msgstr "Résumé des anomalies :"
-
-msgid "Summary of additionals :"
-msgstr "Résumé des informations complémentaires :"
-
-msgid "Authentication :"
-msgstr "Authentification :"

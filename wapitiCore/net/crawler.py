@@ -296,7 +296,7 @@ class AsyncCrawler:
             logging.error(_("[!] Connection error with URL"), auth_url)
             return False, {}, []
         except httpx.RequestError as error:
-            logging.error(_("[!] {} with url {}").format(error.__class__.__name__, auth_url))
+            logging.error(_("[!] {} with URL {}").format(error.__class__.__name__, auth_url))
             return False, {}, []
 
     @retry(delay=1, times=3)
