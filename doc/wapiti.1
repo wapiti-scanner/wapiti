@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "February 2022" "" ""
+.TH "WAPITI" "1" "July 2022" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -28,7 +28,7 @@ Here is a summary of options\. It is essentially what you will get when you laun
 TARGET SPECIFICATION:
 .
 .IP "\(bu" 4
-\fB\-u\fR \fIURL\fR
+\fB\-u\fR, \fB\-\-url\fR \fIURL\fR
 .
 .IP "\(bu" 4
 \fB\-\-data\fR \fIURL_ENCODED_DATA\fR
@@ -48,7 +48,7 @@ ATTACK SPECIFICATION:
 \fB\-\-list\-modules\fR
 .
 .IP "\(bu" 4
-\fB\-l\fR \fILEVEL\fR
+\fB\-l\fR, \fB\-\-level\fR \fILEVEL\fR
 .
 .IP "" 0
 .
@@ -56,16 +56,22 @@ ATTACK SPECIFICATION:
 PROXY AND AUTHENTICATION OPTIONS:
 .
 .IP "\(bu" 4
-\fB\-p\fR \fIPROXY_URL\fR
+\fB\-p\fR, \fB\-\-proxy\fR \fIPROXY_URL\fR
 .
 .IP "\(bu" 4
-\fB\-a\fR \fICREDENTIALS\fR
+\fB\-\-tor\fR
+.
+.IP "\(bu" 4
+\fB\-\-mitm\-port\fR \fIPORT\fR
+.
+.IP "\(bu" 4
+\fB\-a\fR, \fB\-\-auth\-cred\fR \fICREDENTIALS\fR
 .
 .IP "\(bu" 4
 \fB\-\-auth\-type\fR {basic,digest,ntlm,post}
 .
 .IP "\(bu" 4
-\fB\-c\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
+\fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
 .
 .IP "\(bu" 4
 \fB\-\-drop\-set\-cookie\fR
@@ -99,19 +105,19 @@ SESSION OPTIONS:
 SCAN AND ATTACKS TUNING:
 .
 .IP "\(bu" 4
-\fB\-s\fR \fIURL\fR
+\fB\-s\fR, \fB\-\-start\fR \fIURL\fR
 .
 .IP "\(bu" 4
-\fB\-x\fR \fIURL\fR
+\fB\-x\fR, \fB\-\-exclude\fR \fIURL\fR
 .
 .IP "\(bu" 4
-\fB\-r\fR \fIPARAMETER\fR
+\fB\-r\fR, \fB\-\-remove\fR \fIPARAMETER\fR
 .
 .IP "\(bu" 4
 \fB\-\-skip\fR \fIPARAMETER\fR
 .
 .IP "\(bu" 4
-\fB\-d\fR \fIDEPTH\fR
+\fB\-d\fR, \fB\-\-depth\fR \fIDEPTH\fR
 .
 .IP "\(bu" 4
 \fB\-\-max\-links\-per\-page\fR \fIMAX_LINKS_PER_PAGE\fR
@@ -157,13 +163,13 @@ ENDPOINT OPTIONS:
 HTTP AND NETWORK OPTIONS:
 .
 .IP "\(bu" 4
-\fB\-t\fR \fISECONDS\fR
+\fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR
 .
 .IP "\(bu" 4
-\fB\-H\fR \fIHEADER\fR
+\fB\-H\fR, \fB\-\-header\fR \fIHEADER\fR
 .
 .IP "\(bu" 4
-\fB\-A\fR \fIAGENT\fR
+\fB\-A\fR, \fB\-\-user\-agent\fR \fIAGENT\fR
 .
 .IP "\(bu" 4
 \fB\-\-verify\-ssl\fR {0,1}
@@ -177,7 +183,7 @@ OUTPUT OPTIONS:
 \fB\-\-color\fR
 .
 .IP "\(bu" 4
-\fB\-v\fR \fILEVEL\fR
+\fB\-v\fR, \fB\-\-verbose\fR \fILEVEL\fR
 .
 .IP "\(bu" 4
 \fB\-\-log\fR \fIOUTPUT_PATH\fR
@@ -188,10 +194,13 @@ OUTPUT OPTIONS:
 REPORT OPTIONS:
 .
 .IP "\(bu" 4
-\fB\-f\fR {json,html,txt,xml}
+\fB\-f\fR, \fB\-\-format\fR {json,html,txt,xml}
 .
 .IP "\(bu" 4
-\fB\-o\fR \fIOUTPUT_PATH\fR
+\fB\-o\fR, \fB\-\-output\fR \fIOUTPUT_PATH\fR
+.
+.IP "\(bu" 4
+\fB\-dr\fR, \fB\-\-detailed\-report\fR
 .
 .IP "" 0
 .
@@ -320,6 +329,9 @@ The given URL will be used as a proxy for HTTP and HTTPS requests\. This URL can
 .
 .br
 Make Wapiti use a Tor listener (same as \-\-proxy socks://127\.0\.0\.1:9050/)
+.
+.IP "\(bu" 4
+\fB\-\-mitm\-port\fR \fIPORT\fR If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target\. Configure your browser to use the intercepting proxy then explore the target manually\. Ctrl+C in the console when you are done\.
 .
 .IP "\(bu" 4
 \fB\-a\fR, \fB\-\-auth\-cred\fR \fICREDENTIALS\fR
@@ -598,10 +610,7 @@ The default value is dns\.wapiti3\.ovh
 .SH "HTTP AND NETWORK OPTIONS"
 .
 .IP "\(bu" 4
-\fB\-t\fR, \fB\-\-timemout\fR \fISECONDS\fR
-.
-.br
-Time to wait (in seconds) for a HTTP response before considering failure\.
+\fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR Time to wait (in seconds) for a HTTP response before considering failure\.
 .
 .IP "\(bu" 4
 \fB\-H\fR, \fB\-\-header\fR \fIHEADER\fR
@@ -669,6 +678,9 @@ Although the HTML reports were rewritten to be more responsive, they still are i
 .
 .br
 Set the path were the report will be generated\.
+.
+.IP "\(bu" 4
+\fB\-dr\fR, \fB\-\-detailed\-report\fR HTTP responses (headers and bodies) will appear in the report\.
 .
 .IP "" 0
 .

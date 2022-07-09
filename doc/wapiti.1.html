@@ -108,7 +108,7 @@ More detail on each option can be found in the following sections.</p>
 <p>TARGET SPECIFICATION:</p>
 
 <ul>
-<li><code>-u</code> <var>URL</var></li>
+<li><code>-u</code>, <code>--url</code> <var>URL</var></li>
 <li><code>--data</code> <var>URL_ENCODED_DATA</var></li>
 <li><code>--scope</code> {page,folder,domain,url,punk}</li>
 </ul>
@@ -119,17 +119,19 @@ More detail on each option can be found in the following sections.</p>
 <ul>
 <li><code>-m</code> <var>MODULES_LIST</var></li>
 <li><code>--list-modules</code></li>
-<li><code>-l</code> <var>LEVEL</var></li>
+<li><code>-l</code>, <code>--level</code> <var>LEVEL</var></li>
 </ul>
 
 
 <p>PROXY AND AUTHENTICATION OPTIONS:</p>
 
 <ul>
-<li><code>-p</code> <var>PROXY_URL</var></li>
-<li><code>-a</code> <var>CREDENTIALS</var></li>
+<li><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var></li>
+<li><code>--tor</code></li>
+<li><code>--mitm-port</code> <var>PORT</var></li>
+<li><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var></li>
 <li><code>--auth-type</code> {basic,digest,ntlm,post}</li>
-<li><code>-c</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
+<li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
 <li><code>--drop-set-cookie</code></li>
 </ul>
 
@@ -149,11 +151,11 @@ More detail on each option can be found in the following sections.</p>
 <p>SCAN AND ATTACKS TUNING:</p>
 
 <ul>
-<li><code>-s</code> <var>URL</var></li>
-<li><code>-x</code> <var>URL</var></li>
-<li><code>-r</code> <var>PARAMETER</var></li>
+<li><code>-s</code>, <code>--start</code> <var>URL</var></li>
+<li><code>-x</code>, <code>--exclude</code> <var>URL</var></li>
+<li><code>-r</code>, <code>--remove</code> <var>PARAMETER</var></li>
 <li><code>--skip</code> <var>PARAMETER</var></li>
-<li><code>-d</code> <var>DEPTH</var></li>
+<li><code>-d</code>, <code>--depth</code> <var>DEPTH</var></li>
 <li><code>--max-links-per-page</code> <var>MAX_LINKS_PER_PAGE</var></li>
 <li><code>--max-files-per-dir</code> <var>MAX_FILES_PER_DIR</var></li>
 <li><code>--max-scan-time</code> <var>MAX_SCAN_TIME</var></li>
@@ -177,9 +179,9 @@ More detail on each option can be found in the following sections.</p>
 <p>HTTP AND NETWORK OPTIONS:</p>
 
 <ul>
-<li><code>-t</code> <var>SECONDS</var></li>
-<li><code>-H</code> <var>HEADER</var></li>
-<li><code>-A</code> <var>AGENT</var></li>
+<li><code>-t</code>, <code>--timeout</code> <var>SECONDS</var></li>
+<li><code>-H</code>, <code>--header</code> <var>HEADER</var></li>
+<li><code>-A</code>, <code>--user-agent</code> <var>AGENT</var></li>
 <li> <code>--verify-ssl</code> {0,1}</li>
 </ul>
 
@@ -188,7 +190,7 @@ More detail on each option can be found in the following sections.</p>
 
 <ul>
 <li><code>--color</code></li>
-<li><code>-v</code> <var>LEVEL</var></li>
+<li><code>-v</code>, <code>--verbose</code> <var>LEVEL</var></li>
 <li><code>--log</code> <var>OUTPUT_PATH</var></li>
 </ul>
 
@@ -196,8 +198,9 @@ More detail on each option can be found in the following sections.</p>
 <p>REPORT OPTIONS:</p>
 
 <ul>
-<li><code>-f</code> {json,html,txt,xml}</li>
-<li><code>-o</code> <var>OUTPUT_PATH</var></li>
+<li><code>-f</code>, <code>--format</code> {json,html,txt,xml}</li>
+<li><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var></li>
+<li><code>-dr</code>, <code>--detailed-report</code></li>
 </ul>
 
 
@@ -262,6 +265,9 @@ Default value for this option is 1.</p></li>
 The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.</p></li>
 <li><p><code>--tor</code><br />
 Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li>
+<li><p><code>--mitm-port</code> <var>PORT</var>
+If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
+Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p></li>
 <li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
 Set credentials to use for authentication on the target.<br />
 Given value should be in the form login%password (% is used as a separator)</p></li>
@@ -387,7 +393,7 @@ The default value is dns.wapiti3.ovh</p></li>
 <h2 id="HTTP-AND-NETWORK-OPTIONS">HTTP AND NETWORK OPTIONS</h2>
 
 <ul>
-<li><p><code>-t</code>, <code>--timemout</code> <var>SECONDS</var><br />
+<li><p><code>-t</code>, <code>--timeout</code> <var>SECONDS</var>
 Time to wait (in seconds) for a HTTP response before considering failure.</p></li>
 <li><p><code>-H</code>, <code>--header</code> <var>HEADER</var><br />
 Set a custom HTTM header to inject in every request sent by Wapiti.
@@ -427,6 +433,8 @@ Set the format of the report. Valid choices are json, html, txt and xml.<br />
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p></li>
 <li><p><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var><br />
 Set the path were the report will be generated.</p></li>
+<li><p><code>-dr</code>, <code>--detailed-report</code>
+HTTP responses (headers and bodies) will appear in the report.</p></li>
 </ul>
 
 
@@ -474,7 +482,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>February 2022</li>
+    <li class='tc'>July 2022</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

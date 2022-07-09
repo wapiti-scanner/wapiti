@@ -22,7 +22,7 @@ More detail on each option can be found in the following sections.
 
 TARGET SPECIFICATION:
 
-  * `-u` <URL>
+  * `-u`, `--url` <URL>
   * `--data` <URL_ENCODED_DATA>
   * `--scope` {page,folder,domain,url,punk}
 
@@ -30,14 +30,16 @@ ATTACK SPECIFICATION:
 
   * `-m` <MODULES_LIST>
   * `--list-modules`
-  * `-l` <LEVEL>
+  * `-l`, `--level` <LEVEL>
 
 PROXY AND AUTHENTICATION OPTIONS:
 
-  * `-p` <PROXY_URL>
-  * `-a` <CREDENTIALS>
+  * `-p`, `--proxy` <PROXY_URL>
+  * `--tor`
+  * `--mitm-port` <PORT>
+  * `-a`, `--auth-cred` <CREDENTIALS>
   * `--auth-type` {basic,digest,ntlm,post}
-  * `-c` <COOKIE_FILE_OR_BROWSER_NAME>
+  * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `--drop-set-cookie`
 
 SESSION OPTIONS:
@@ -51,11 +53,11 @@ SESSION OPTIONS:
 
 SCAN AND ATTACKS TUNING:
 
-  * `-s` <URL>
-  * `-x` <URL>
-  * `-r` <PARAMETER>
+  * `-s`, `--start` <URL>
+  * `-x`, `--exclude` <URL>
+  * `-r`, `--remove` <PARAMETER>
   * `--skip` <PARAMETER>
-  * `-d` <DEPTH>
+  * `-d`, `--depth` <DEPTH>
   * `--max-links-per-page` <MAX_LINKS_PER_PAGE>
   * `--max-files-per-dir` <MAX_FILES_PER_DIR>
   * `--max-scan-time` <MAX_SCAN_TIME>
@@ -73,21 +75,22 @@ ENDPOINT OPTIONS:
 
 HTTP AND NETWORK OPTIONS:
 
-  * `-t` <SECONDS>
-  * `-H` <HEADER>
-  * `-A` <AGENT>
+  * `-t`, `--timeout` <SECONDS>
+  * `-H`, `--header` <HEADER>
+  * `-A`, `--user-agent` <AGENT>
   *  `--verify-ssl` {0,1}
 
 OUTPUT OPTIONS:
 
   * `--color`
-  * `-v` <LEVEL>
+  * `-v`, `--verbose` <LEVEL>
   * `--log` <OUTPUT_PATH>
 
 REPORT OPTIONS:
 
-  * `-f` {json,html,txt,xml}
-  * `-o` <OUTPUT_PATH>
+  * `-f`, `--format` {json,html,txt,xml}
+  * `-o`, `--output` <OUTPUT_PATH>
+  * `-dr`, `--detailed-report`
 
 OTHER OPTIONS:
 
@@ -141,6 +144,10 @@ OTHER OPTIONS:
     
   * `--tor`  
     Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
+
+  * `--mitm-port` <PORT>
+    If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
+    Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
     Set credentials to use for authentication on the target.  
@@ -277,7 +284,7 @@ On internal pentests this endpoint may not be accessible to the target hence you
     
 ## HTTP AND NETWORK OPTIONS
 
-  * `-t`, `--timemout` <SECONDS>  
+  * `-t`, `--timeout` <SECONDS>
     Time to wait (in seconds) for a HTTP response before considering failure.
     
   * `-H`, `--header` <HEADER>  
@@ -318,6 +325,9 @@ Wapiti will generate a report at the end of the attack process. Several formats 
     
   * `-o`, `--output` <OUTPUT_PATH>  
     Set the path were the report will be generated.
+
+  * `-dr`, `--detailed-report`
+    HTTP responses (headers and bodies) will appear in the report.
 
 ## OTHER OPTIONS
 

@@ -143,16 +143,10 @@ msgstr ""
 msgid "X-Content-Type-Options is not set"
 msgstr ""
 
-msgid "X-XSS-Protection is not set"
-msgstr ""
-
 msgid "X-Frame-Options is not set"
 msgstr ""
 
 msgid "Checking X-Frame-Options :"
-msgstr ""
-
-msgid "Checking X-XSS-Protection :"
 msgstr ""
 
 msgid "Checking X-Content-Type-Options :"
@@ -1029,6 +1023,112 @@ msgstr ""
 msgid "[*] Today is world backup day! Is your data safe?"
 msgstr ""
 
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr ""
+
+msgid "[*] Do you feel lucky punk?"
+msgstr ""
+
+msgid "[*] Available modules:"
+msgstr ""
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+msgstr ""
+
+msgid "[*] Updating modules"
+msgstr ""
+
+msgid "Error: File given with the -s option must be UTF-8 encoded !"
+msgstr "Error: 使用 -s 参数的文件必须使用UTF-8编码"
+
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
+msgstr ""
+
+msgid "[*] Resuming scan from previous session, please wait"
+msgstr "[*] 正在从之前的session中恢复扫描，请稍等"
+
+#, python-brace-format
+msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
+msgstr "[*] {0} 拥有超过 {1} 个参数的URL和表单已被删除。"
+
+#, python-brace-format
+msgid "[*] Wapiti found {0} URLs and forms during the scan"
+msgstr "[*] Wapiti 在扫描中共发现 {0} 条URL和表单"
+
+msgid ""
+"[!] Can't store information in persister. SQLite database must have been "
+"locked by another process"
+msgstr ""
+
+msgid "[!] You should unlock and launch Wapiti again."
+msgstr "[!] 您应该解锁并重启Wapiti。"
+
+msgid "Login failed"
+msgstr ""
+
+msgid "Invalid credentials format"
+msgstr ""
+
+msgid "Login success"
+msgstr ""
+
+msgid "Credentials might be invalid"
+msgstr ""
+
+msgid "No login form detected"
+msgstr ""
+
+msgid "[!] Connection error with URL"
+msgstr "[!] URL连接错误"
+
+msgid "[!] {} with URL {}"
+msgstr ""
+
+#, python-brace-format
+msgid "Report for {0}\n"
+msgstr "报告 {0}\n"
+
+#, python-brace-format
+msgid "Date of the scan : {0}\n"
+msgstr "扫描日期： {0}\n"
+
+#, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr ""
+
+#, python-brace-format
+msgid "Scope of the scan : {0}\n"
+msgstr "扫描范围： {0}\n"
+
+msgid "Summary of vulnerabilities :"
+msgstr "脆弱性汇总："
+
+#, python-brace-format
+msgid "{0} : {1:>3}\n"
+msgstr "{0} : {1:>3}\n"
+
+#, python-brace-format
+msgid "WSTG code: {0}"
+msgstr ""
+
+msgid "Evil request:\n"
+msgstr "恶意请求：\n"
+
+#, python-brace-format
+msgid "cURL command PoC : \"{0}\""
+msgstr "cURL 命令 PoC : \"{0}\""
+
+msgid "Summary of anomalies :"
+msgstr "问题汇总："
+
+msgid "Summary of additionals :"
+msgstr ""
+
+msgid "Authentication :"
+msgstr ""
+
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr "定义扫描范围的基础URL（默认扫描范围是folder）"
 
@@ -1044,14 +1144,14 @@ msgstr "加载模块列表"
 msgid "List Wapiti attack modules and exit"
 msgstr ""
 
-msgid "Update Wapiti attack modules and exit"
-msgstr ""
-
 msgid "Set attack level"
 msgstr "设置攻击等级"
 
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "设置HTTP(S)代理，支持HTTP(S),SOCKS"
+
+msgid "Instead of crawling, launch an intercepting proxy on the given port"
+msgstr ""
 
 msgid "Set a JSON cookie file to use."
 msgstr ""
@@ -1168,114 +1268,17 @@ msgstr ""
 msgid "Output file or folder"
 msgstr "输出文件或目录"
 
+msgid "HTTP responses will appear in the generated report"
+msgstr ""
+
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "当攻击模块失败时不发送Bug报告"
+
+msgid "Update Wapiti attack modules and exit"
+msgstr ""
 
 msgid "Show program's version number and exit"
 msgstr "打印程序版本号"
 
-msgid "Number of concurrent tasks must be 1 or above!"
-msgstr ""
-
-msgid "[*] Do you feel lucky punk?"
-msgstr ""
-
-msgid "[*] Available modules:"
-msgstr ""
-
-msgid ""
-"Invalid base URL was specified, please give a complete URL with protocol "
-"scheme."
-msgstr ""
-
-msgid "[*] Updating modules"
-msgstr ""
-
-msgid "Error: File given with the -s option must be UTF-8 encoded !"
-msgstr "Error: 使用 -s 参数的文件必须使用UTF-8编码"
-
-msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
-msgstr ""
-
-msgid "[*] Resuming scan from previous session, please wait"
-msgstr "[*] 正在从之前的session中恢复扫描，请稍等"
-
-#, python-brace-format
-msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
-msgstr "[*] {0} 拥有超过 {1} 个参数的URL和表单已被删除。"
-
-#, python-brace-format
-msgid "[*] Wapiti found {0} URLs and forms during the scan"
-msgstr "[*] Wapiti 在扫描中共发现 {0} 条URL和表单"
-
-msgid ""
-"[!] Can't store information in persister. SQLite database must have been "
-"locked by another process"
-msgstr ""
-
-msgid "[!] You should unlock and launch Wapiti again."
-msgstr "[!] 您应该解锁并重启Wapiti。"
-
-msgid "Login failed"
-msgstr ""
-
-msgid "Invalid credentials format"
-msgstr ""
-
-msgid "Login success"
-msgstr ""
-
-msgid "Credentials might be invalid"
-msgstr ""
-
-msgid "No login form detected"
-msgstr ""
-
-msgid "[!] Connection error with URL"
-msgstr "[!] URL连接错误"
-
-msgid "[!] {} with url {}"
-msgstr "[!] {} with url {}"
-
-#, python-brace-format
-msgid "Report for {0}\n"
-msgstr "报告 {0}\n"
-
-#, python-brace-format
-msgid "Date of the scan : {0}\n"
-msgstr "扫描日期： {0}\n"
-
-#, python-brace-format
-msgid "Crawled pages : {0}\n"
-msgstr ""
-
-#, python-brace-format
-msgid "Scope of the scan : {0}\n"
-msgstr "扫描范围： {0}\n"
-
-msgid "Summary of vulnerabilities :"
-msgstr "脆弱性汇总："
-
-#, python-brace-format
-msgid "{0} : {1:>3}\n"
-msgstr "{0} : {1:>3}\n"
-
-#, python-brace-format
-msgid "WSTG code: {0}"
-msgstr ""
-
-msgid "Evil request:\n"
-msgstr "恶意请求：\n"
-
-#, python-brace-format
-msgid "cURL command PoC : \"{0}\""
-msgstr "cURL 命令 PoC : \"{0}\""
-
-msgid "Summary of anomalies :"
-msgstr "问题汇总："
-
-msgid "Summary of additionals :"
-msgstr ""
-
-msgid "Authentication :"
-msgstr ""
+#~ msgid "[!] {} with url {}"
+#~ msgstr "[!] {} with url {}"

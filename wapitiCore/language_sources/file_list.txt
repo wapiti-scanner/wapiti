@@ -58,4 +58,6 @@
 ../main/getcookie.py
 ../main/wapiti.py
 ../net/crawler.py
+../net/explorer.py
 ../report/txtreportgenerator.py
+../parsers/commandline.py

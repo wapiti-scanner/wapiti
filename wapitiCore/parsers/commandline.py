@@ -44,12 +44,6 @@ def parse_args():
         help=_("List Wapiti attack modules and exit")
     )
 
-    group.add_argument(
-        "--update",
-        action="store_true",
-        help=_("Update Wapiti attack modules and exit")
-    )
-
     parser.add_argument(
         "-l", "--level",
         metavar="LEVEL",
@@ -348,7 +342,7 @@ def parse_args():
     parser.add_argument(
         "-dr", "--detailed-report",
         action="store_true",
-        help=_("Adds more details to requests and responses")
+        help=_("HTTP responses will appear in the generated report")
     )
 
     parser.add_argument(
@@ -356,6 +350,13 @@ def parse_args():
         action="store_true",
         help=_("Don't send automatic bug report when an attack module fails")
     )
+
+    group.add_argument(
+        "--update",
+        action="store_true",
+        help=_("Update Wapiti attack modules and exit")
+    )
+
 
     parser.add_argument(
         "--version",

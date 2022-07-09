@@ -143,17 +143,11 @@ msgstr "Strict-Transport-Security is not set"
 msgid "X-Content-Type-Options is not set"
 msgstr "X-Content-Type-Options is not set"
 
-msgid "X-XSS-Protection is not set"
-msgstr "X-XSS-Protection is not set"
-
 msgid "X-Frame-Options is not set"
 msgstr "X-Frame-Options is not set"
 
 msgid "Checking X-Frame-Options :"
 msgstr "Checking X-Frame-Options :"
-
-msgid "Checking X-XSS-Protection :"
-msgstr "Checking X-XSS-Protection :"
 
 msgid "Checking X-Content-Type-Options :"
 msgstr "Checking X-Content-Type-Options :"
@@ -1196,6 +1190,116 @@ msgstr "[*] Merry christmas!"
 msgid "[*] Today is world backup day! Is your data safe?"
 msgstr "[*] Today is world backup day! Is your data safe?"
 
+msgid "Number of concurrent tasks must be 1 or above!"
+msgstr "Number of concurrent tasks must be 1 or above!"
+
+msgid "[*] Do you feel lucky punk?"
+msgstr "[*] Do you feel lucky punk?"
+
+msgid "[*] Available modules:"
+msgstr "[*] Available modules:"
+
+msgid ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+msgstr ""
+"Invalid base URL was specified, please give a complete URL with protocol "
+"scheme."
+
+msgid "[*] Updating modules"
+msgstr "[*] Updating modules"
+
+msgid "Error: File given with the -s option must be UTF-8 encoded !"
+msgstr "Error: File given with the -s option must be UTF-8 encoded !"
+
+msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
+msgstr "Error: Internal endpoint URL must be accessible from Wapiti!"
+
+msgid "[*] Resuming scan from previous session, please wait"
+msgstr "[*] Resuming scan from previous session, please wait"
+
+#, python-brace-format
+msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
+msgstr "[*] {0} URLs and forms having more than {1} parameters were removed."
+
+#, python-brace-format
+msgid "[*] Wapiti found {0} URLs and forms during the scan"
+msgstr "[*] Wapiti found {0} URLs and forms during the scan"
+
+msgid ""
+"[!] Can't store information in persister. SQLite database must have been "
+"locked by another process"
+msgstr ""
+"[!] Can't store information in persister. SQLite database must have been "
+"locked by another process"
+
+msgid "[!] You should unlock and launch Wapiti again."
+msgstr "[!] You should unlock and launch Wapiti again."
+
+msgid "Login failed"
+msgstr "Login failed"
+
+msgid "Invalid credentials format"
+msgstr "Invalid credentials format"
+
+msgid "Login success"
+msgstr "Login success"
+
+msgid "Credentials might be invalid"
+msgstr "Credentials might be invalid"
+
+msgid "No login form detected"
+msgstr "No login form detected"
+
+msgid "[!] Connection error with URL"
+msgstr "[!] Connection error with URL"
+
+msgid "[!] {} with URL {}"
+msgstr "[!] {} with URL {}"
+
+#, python-brace-format
+msgid "Report for {0}\n"
+msgstr "Report for {0}\n"
+
+#, python-brace-format
+msgid "Date of the scan : {0}\n"
+msgstr "Date of the scan : {0}\n"
+
+#, python-brace-format
+msgid "Crawled pages : {0}\n"
+msgstr "Crawled pages : {0}\n"
+
+#, python-brace-format
+msgid "Scope of the scan : {0}\n"
+msgstr "Scope of the scan : {0}\n"
+
+msgid "Summary of vulnerabilities :"
+msgstr "Summary of vulnerabilities :"
+
+#, python-brace-format
+msgid "{0} : {1:>3}\n"
+msgstr "{0} : {1:>3}\n"
+
+#, python-brace-format
+msgid "WSTG code: {0}"
+msgstr "WSTG code: {0}"
+
+msgid "Evil request:\n"
+msgstr "Evil request:\n"
+
+#, python-brace-format
+msgid "cURL command PoC : \"{0}\""
+msgstr "cURL command PoC : \"{0}\""
+
+msgid "Summary of anomalies :"
+msgstr "Summary of anomalies :"
+
+msgid "Summary of additionals :"
+msgstr "Summary of additionals :"
+
+msgid "Authentication :"
+msgstr "Authentication :"
+
 msgid "The base URL used to define the scan scope (default scope is folder)"
 msgstr "The base URL used to define the scan scope (default scope is folder)"
 
@@ -1211,14 +1315,14 @@ msgstr "List of modules to load"
 msgid "List Wapiti attack modules and exit"
 msgstr "List Wapiti attack modules and exit"
 
-msgid "Update Wapiti attack modules and exit"
-msgstr "Update Wapiti attack modules and exit"
-
 msgid "Set attack level"
 msgstr "Set attack level"
 
 msgid "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
 msgstr "Set the HTTP(S) proxy to use. Supported: http(s) and socks proxies"
+
+msgid "Instead of crawling, launch an intercepting proxy on the given port"
+msgstr "Instead of crawling, launch an intercepting proxy on the given port"
 
 msgid "Set a JSON cookie file to use."
 msgstr "Set a JSON cookie file to use."
@@ -1347,118 +1451,14 @@ msgstr "Default is html."
 msgid "Output file or folder"
 msgstr "Output file or folder"
 
+msgid "HTTP responses will appear in the generated report"
+msgstr "HTTP responses will appear in the generated report"
+
 msgid "Don't send automatic bug report when an attack module fails"
 msgstr "Don't send automatic bug report when an attack module fails"
 
+msgid "Update Wapiti attack modules and exit"
+msgstr "Update Wapiti attack modules and exit"
+
 msgid "Show program's version number and exit"
 msgstr "Show program's version number and exit"
-
-msgid "Number of concurrent tasks must be 1 or above!"
-msgstr "Number of concurrent tasks must be 1 or above!"
-
-msgid "[*] Do you feel lucky punk?"
-msgstr "[*] Do you feel lucky punk?"
-
-msgid "[*] Available modules:"
-msgstr "[*] Available modules:"
-
-msgid ""
-"Invalid base URL was specified, please give a complete URL with protocol "
-"scheme."
-msgstr ""
-"Invalid base URL was specified, please give a complete URL with protocol "
-"scheme."
-
-msgid "[*] Updating modules"
-msgstr "[*] Updating modules"
-
-msgid "Error: File given with the -s option must be UTF-8 encoded !"
-msgstr "Error: File given with the -s option must be UTF-8 encoded !"
-
-msgid "Error: Internal endpoint URL must be accessible from Wapiti!"
-msgstr "Error: Internal endpoint URL must be accessible from Wapiti!"
-
-msgid "[*] Resuming scan from previous session, please wait"
-msgstr "[*] Resuming scan from previous session, please wait"
-
-#, python-brace-format
-msgid "[*] {0} URLs and forms having more than {1} parameters were removed."
-msgstr "[*] {0} URLs and forms having more than {1} parameters were removed."
-
-#, python-brace-format
-msgid "[*] Wapiti found {0} URLs and forms during the scan"
-msgstr "[*] Wapiti found {0} URLs and forms during the scan"
-
-msgid ""
-"[!] Can't store information in persister. SQLite database must have been "
-"locked by another process"
-msgstr ""
-"[!] Can't store information in persister. SQLite database must have been "
-"locked by another process"
-
-msgid "[!] You should unlock and launch Wapiti again."
-msgstr "[!] You should unlock and launch Wapiti again."
-
-msgid "Login failed"
-msgstr "Login failed"
-
-msgid "Invalid credentials format"
-msgstr "Invalid credentials format"
-
-msgid "Login success"
-msgstr "Login success"
-
-msgid "Credentials might be invalid"
-msgstr "Credentials might be invalid"
-
-msgid "No login form detected"
-msgstr "No login form detected"
-
-msgid "[!] Connection error with URL"
-msgstr "[!] Connection error with URL"
-
-msgid "[!] {} with url {}"
-msgstr "[!] {} with url {}"
-
-#, python-brace-format
-msgid "Report for {0}\n"
-msgstr "Report for {0}\n"
-
-#, python-brace-format
-msgid "Date of the scan : {0}\n"
-msgstr "Date of the scan : {0}\n"
-
-#, python-brace-format
-msgid "Crawled pages : {0}\n"
-msgstr ""
-
-#, python-brace-format
-msgid "Scope of the scan : {0}\n"
-msgstr "Scope of the scan : {0}\n"
-
-msgid "Summary of vulnerabilities :"
-msgstr "Summary of vulnerabilities :"
-
-#, python-brace-format
-msgid "{0} : {1:>3}\n"
-msgstr "{0} : {1:>3}\n"
-
-#, python-brace-format
-msgid "WSTG code: {0}"
-msgstr "WSTG code: {0}"
-
-msgid "Evil request:\n"
-msgstr "Evil request:\n"
-
-#, python-brace-format
-msgid "cURL command PoC : \"{0}\""
-msgstr "cURL command PoC : \"{0}\""
-
-msgid "Summary of anomalies :"
-msgstr "Summary of anomalies :"
-
-msgid "Summary of additionals :"
-msgstr "Summary of additionals :"
-
-msgid "Authentication :"
-msgstr "Authentication :"
