@@ -155,8 +155,8 @@ class SqlPersister:
             f"{table_prefix}responses", self.metadata,
             Column("response_id", Integer, primary_key=True),
             Column("url", Text, nullable=False),  # URL, can be huge
-            Column("status_code", Integer, nullable=False), # http status code
-            Column("headers", Text),  # Pickled HTTP headers, can be huge
+            Column("status_code", Integer, nullable=False),  # HTTP status code
+            Column("headers", PickleType),  # Pickled HTTP headers, can be huge
             Column("body", LargeBinary, nullable=False)  # base64 body
         )
 
@@ -323,7 +323,7 @@ class SqlPersister:
             url=response.url,
             status_code=response.status,
             body=response.bytes,
-            headers=json.dumps(response.headers.multi_items())
+            headers=response.headers
         )
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
@@ -521,13 +521,17 @@ class SqlPersister:
             yield request, response
 
     async def get_all_paths(self) -> List:
-        statement = select(self.paths, self.responses.c.body) \
-                    .select_from(
-                        self.paths.join(
-                            self.responses,
-                            self.paths.c.response_id == self.responses.c.response_id,
-                        )
-                    )
+        statement = select(
+            self.paths,
+            self.responses.c.status_code,
+            self.responses.c.body,
+            self.responses.c.headers.label("response_headers")
+        ).select_from(
+            self.paths.join(
+                self.responses,
+                self.paths.c.response_id == self.responses.c.response_id,
+            )
+        )
 
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
@@ -542,9 +546,9 @@ class SqlPersister:
                     "depth": row.depth,
                 },
                 "response": {
-                    "status_code": row.http_status,
+                    "status_code": row.status_code,
                     "body": row.body,
-                    "headers": [[key, value] for key, value in (row.headers or {}).items()]
+                    "headers": [[key, value] for key, value in (row.response_headers or {}).items()]
                 },
             } for row in result.fetchall()]
 
@@ -601,17 +605,17 @@ class SqlPersister:
             return False
 
     async def add_payload(
-        self,
-        request_id: int,
-        payload_type: str,
-        module: str,
-        category=None,
-        level=0,
-        request: Request = None,
-        parameter="",
-        info="",
-        wstg=None,
-        response: Response = None
+            self,
+            request_id: int,
+            payload_type: str,
+            module: str,
+            category=None,
+            level=0,
+            request: Request = None,
+            parameter="",
+            info="",
+            wstg=None,
+            response: Response = None
     ):
 
         response_id = await self.save_response(response)
@@ -717,15 +721,15 @@ class SqlPersister:
         response_id = int(response_id)
 
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(self.responses)
-                            .where(self.responses.c.response_id == response_id)
-                            .limit(1))
+            result = await conn.execute(
+                select(self.responses).where(self.responses.c.response_id == response_id).limit(1)
+            )
 
         row = result.fetchone()
         if not row:
             return None
 
-        headers = httpx.Headers(json.loads(row.headers))
+        headers = row.headers
         if "content-encoding" in headers:
             # httpx will try to decompress the content if it sees the following header, leading to an exception
             del headers["content-encoding"]
