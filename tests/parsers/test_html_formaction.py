@@ -2,7 +2,7 @@ import httpx
 import respx
 
 from wapitiCore.net.crawler import Response
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 
 
 @respx.mock

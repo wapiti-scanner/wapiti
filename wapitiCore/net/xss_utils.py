@@ -27,7 +27,7 @@ from wapitiCore.net import Response
 
 
 # Everything under those tags will be treated as text
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 
 NONEXEC_PARENTS = {
     "iframe",

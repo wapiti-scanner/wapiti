@@ -28,7 +28,7 @@ from wapitiCore.language.vulnerability import Messages, _
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net import Request, Response
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
 DBMS_ERROR_PATTERNS = {
@@ -146,6 +146,7 @@ DBMS_ERROR_PATTERNS = {
         re.compile(r"(Microsoft|System)\.Data\.SQLite\.SQLiteException"),
         re.compile(r"Warning.*?\W(sqlite_|SQLite3::)"),
         re.compile(r"\[SQLITE_ERROR\]"),
+        re.compile(r"Error: SQLITE_ERROR:"),  # OWASP Juice Shop
         re.compile(r"SQLite error \d+:"),
         re.compile(r"sqlite3.OperationalError:"),
         re.compile(r"SQLite3::SQLException"),

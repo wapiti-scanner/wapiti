@@ -34,7 +34,7 @@ async def test_cookie_dump():
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             await crawler.async_get(Request(url))
 
-            json_cookie.addcookies(crawler.session_cookies)
+            json_cookie.addcookies(crawler.cookie_jar)
             json_cookie.dump()
 
             data = json.load(open(json_fd.name))

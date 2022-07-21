@@ -34,6 +34,8 @@ from traceback import print_tb
 from typing import AsyncGenerator, Dict, List, Deque, Union
 from urllib.parse import urlparse
 from uuid import uuid1
+from dataclasses import replace
+from http.cookiejar import CookieJar
 
 import browser_cookie3
 import httpx
@@ -46,9 +48,11 @@ from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.language.language import _
 from wapitiCore.main.log import logging
 from wapitiCore.moon import phase
-from wapitiCore.net import crawler, jsoncookie
+from wapitiCore.net import jsoncookie
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.intercepting_explorer import InterceptingExplorer
+from wapitiCore.net.auth import async_try_login
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request, Response
@@ -179,7 +183,7 @@ class Wapiti:
         self.server: str = scope_request.netloc
 
         self.crawler_configuration = CrawlerConfiguration(self.base_request)
-        self.crawler = None
+        # self.crawler = None
 
         self.target_scope = Scope(self.base_request, scope)
 
@@ -189,7 +193,6 @@ class Wapiti:
 
         self.urls = []
         self.forms = []
-        self.attacks = []
 
         self.color_enabled = False
         self.verbose = 0
@@ -210,6 +213,7 @@ class Wapiti:
         self._mitm_proxy_port = 0
         self._proxy = None
         self.detailed_report = False
+        self._headless = True
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -261,7 +265,8 @@ class Wapiti:
         await self.persister.create()
 
     async def init_crawler(self):
-        self.crawler = crawler.AsyncCrawler.with_configuration(self.crawler_configuration)
+        self.crawler_configuration.cookies = self.cookie_jar
+        self.crawler = AsyncCrawler.with_configuration(self.crawler_configuration)
 
     @property
     def history_file(self):
@@ -308,7 +313,7 @@ class Wapiti:
                 additional.WSTG_CODE
             )
 
-    async def _init_attacks(self, stop_event: asyncio.Event):
+    async def _load_attack_modules(self, stop_event: asyncio.Event, crawler: AsyncCrawler) -> List[Attack]:
         await self._init_report()
         stop_event.clear()
 
@@ -325,9 +330,9 @@ class Wapiti:
                     continue
 
                 class_name = module_to_class_name(mod_name)
-                class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
+                class_instance = getattr(mod, class_name)(crawler, self.persister, self.attack_options, stop_event)
                 if hasattr(class_instance, "set_timeout"):
-                    class_instance.set_timeout(self.crawler.timeout)
+                    class_instance.set_timeout(crawler.timeout)
 
             except Exception as exception:
                 # Catch every possible exceptions and print it
@@ -337,27 +342,28 @@ class Wapiti:
 
             modules[mod_name] = class_instance
 
-        self.attacks = filter_modules_with_options(self.module_options, modules)
+        return filter_modules_with_options(self.module_options, modules)
 
     async def update(self, requested_modules: str = "all"):
         """Update modules that implement an update method"""
         stop_event = asyncio.Event()
         modules = all_modules if (not requested_modules or requested_modules == "all") else requested_modules.split(",")
 
-        for mod_name in modules:
-            try:
-                mod = import_module("wapitiCore.attack.mod_" + mod_name)
-                class_name = module_to_class_name(mod_name)
-                class_instance = getattr(mod, class_name)(self.crawler, self.persister, self.attack_options, stop_event)
-                if hasattr(class_instance, "update"):
-                    logging.info(_("Updating module {0}").format(mod_name))
-                    await class_instance.update()
-            except ImportError:
-                continue
-            except Exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                logging.error(_("[!] Module {0} seems broken and will be skipped").format(mod_name))
-                continue
+        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
+            for mod_name in modules:
+                try:
+                    mod = import_module("wapitiCore.attack.mod_" + mod_name)
+                    class_name = module_to_class_name(mod_name)
+                    class_instance = getattr(mod, class_name)(crawler, self.persister, self.attack_options, stop_event)
+                    if hasattr(class_instance, "update"):
+                        logging.info(_("Updating module {0}").format(mod_name))
+                        await class_instance.update()
+                except ImportError:
+                    continue
+                except Exception:  # pylint: disable=broad-except
+                    # Catch every possible exceptions and print it
+                    logging.error(_("[!] Module {0} seems broken and will be skipped").format(mod_name))
+                    continue
 
         logging.success(_("Update done."))
 
@@ -383,18 +389,24 @@ class Wapiti:
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
-        if self._mitm_proxy_port:
+
+        if self._mitm_proxy_port or self._headless:
+            modified_configuration = replace(self.crawler_configuration)
+            modified_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port or 8080}/"
+
             explorer = InterceptingExplorer(
-                self.crawler,
+                modified_configuration,
                 self.target_scope,
                 stop_event,
                 parallelism=parallelism,
-                mitm_port=self._mitm_proxy_port,
+                mitm_port=self._mitm_proxy_port or 8080,
                 proxy=self._proxy,
                 drop_cookies=self.crawler_configuration.drop_cookies,
+                headless=self._headless
             )
         else:
-            explorer = Explorer(self.crawler, self.target_scope, stop_event, parallelism=parallelism)
+            explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
+
         explorer.max_depth = self._max_depth
         explorer.max_files_per_dir = self._max_files_per_dir
         explorer.max_requests_per_depth = self._max_links_per_page
@@ -421,6 +433,8 @@ class Wapiti:
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
+        # Overwrite cookies for next step
+        self.crawler_configuration.cookies = explorer.cookie_jar
 
     async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, Response]:
         if module.do_get:
@@ -432,145 +446,137 @@ class Wapiti:
 
     async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
-        await self._init_attacks(stop_event)
-        answer = "0"
+        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
+            attack_modules = await self._load_attack_modules(stop_event, crawler)
+            answer = "0"
 
-        for attack_module in self.attacks:
-            if stop_event.is_set():
-                break
+            for attack_module in attack_modules:
+                if stop_event.is_set():
+                    break
 
-            start = datetime.utcnow()
-            if attack_module.do_get is False and attack_module.do_post is False:
-                continue
-
-            print('')
-            if attack_module.require:
-                attack_name_list = [attack.name for attack in self.attacks if attack.name in attack_module.require and
-                                    (attack.do_get or attack.do_post)]
-                if attack_module.require != attack_name_list:
-                    logging.error(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
-                    logging.error("  {0}", ",".join(
-                        [attack for attack in attack_module.require if attack not in attack_name_list]
-                    ))
+                start = datetime.utcnow()
+                if attack_module.do_get is False and attack_module.do_post is False:
                     continue
 
-                attack_module.load_require(
-                    [attack for attack in self.attacks if attack.name in attack_module.require]
-                )
+                print('')
+                if attack_module.require:
+                    attack_name_list = [
+                        attack.name for attack in attack_modules
+                        if attack.name in attack_module.require and (attack.do_get or attack.do_post)
+                    ]
 
-            logging.log("GREEN", _("[*] Launching module {0}"), attack_module.name)
-
-            already_attacked = await self.persister.count_attacked(attack_module.name)
-            if already_attacked:
-                logging.success(
-                    _("[*] {0} pages were previously attacked and will be skipped"),
-                    already_attacked
-                )
-
-            answer = "0"
-            attacked_ids = set()
-            async for original_request, original_response in self.load_resources_for_module(attack_module):
-                if stop_event.is_set():
-                    print('')
-                    print(_("Attack process was interrupted. Do you want to:"))
-                    print(_("\tr) stop everything here and generate the (R)eport"))
-                    print(_("\tn) move to the (N)ext attack module (if any)"))
-                    print(_("\tq) (Q)uit without generating the report"))
-                    print(_("\tc) (C)ontinue the current attack"))
-
-                    while True:
-                        try:
-                            answer = input("? ").strip().lower()
-                        except UnicodeDecodeError:
-                            pass
-
-                        if answer not in ("r", "n", "q", "c"):
-                            print(_("Invalid choice. Valid choices are r, n, q and c."))
-                        else:
-                            break
-
-                    if answer in ("n", "c"):
-                        stop_event.clear()
-
-                    if answer in ("r", "n", "q"):
-                        break
-
-                    if answer == "c":
+                    if attack_module.require != attack_name_list:
+                        logging.error(_("[!] Missing dependencies for module {0}:").format(attack_module.name))
+                        logging.error("  {0}", ",".join(
+                            [attack for attack in attack_module.require if attack not in attack_name_list]
+                        ))
                         continue
 
-                try:
-                    if await attack_module.must_attack(original_request, original_response):
-                        logging.info(f"[+] {original_request}")
+                    attack_module.load_require(
+                        [attack for attack in attack_modules if attack.name in attack_module.require]
+                    )
 
-                        await attack_module.attack(original_request, original_response)
+                logging.log("GREEN", _("[*] Launching module {0}"), attack_module.name)
 
-                    if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
-                        # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
-                        # uses the string as a token so we cannot use f string
-                        # pylint: disable=consider-using-f-string
-                        logging.info(
-                            _("Max attack time was reached for module {0}, stopping.".format(attack_module.name))
-                        )
-                        break
-                except RequestError:
-                    # Hmmm it should be caught inside the module
-                    await asyncio.sleep(1)
-                    continue
-                except Exception as exception:
-                    # Catch every possible exceptions and print it
-                    exception_traceback = sys.exc_info()[2]
-                    logging.exception(exception.__class__.__name__, exception)
+                already_attacked = await self.persister.count_attacked(attack_module.name)
+                if already_attacked:
+                    logging.success(
+                        _("[*] {0} pages were previously attacked and will be skipped"),
+                        already_attacked
+                    )
 
-                    if self._bug_report:
-                        traceback_file = str(uuid1())
-                        with open(traceback_file, "w", encoding='utf-8') as traceback_fd:
-                            print_tb(exception_traceback, file=traceback_fd)
-                            print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
-                            print(f"Occurred in {attack_module.name} on {original_request}", file=traceback_fd)
-                            logging.info(f"Wapiti {WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
+                answer = "0"
+                attacked_ids = set()
+                async for original_request, original_response in self.load_resources_for_module(attack_module):
+                    if stop_event.is_set():
+                        print('')
+                        print(_("Attack process was interrupted. Do you want to:"))
+                        print(_("\tr) stop everything here and generate the (R)eport"))
+                        print(_("\tn) move to the (N)ext attack module (if any)"))
+                        print(_("\tq) (Q)uit without generating the report"))
+                        print(_("\tc) (C)ontinue the current attack"))
 
-                        try:
-                            with open(traceback_file, "rb") as traceback_byte_fd:
-                                upload_request = Request(
-                                    "https://wapiti3.ovh/upload.php",
-                                    file_params=[
-                                        ["crash_report", (traceback_file, traceback_byte_fd.read(), "text/plain")]
-                                    ]
-                                )
-                            page = await self.crawler.async_send(upload_request)
-                            logging.success(_("Sending crash report {} ... {}").format(traceback_file, page.content))
-                        except RequestError:
-                            logging.error(_("Error sending crash report"))
-                        os.unlink(traceback_file)
-                else:
-                    if original_request.path_id is not None:
-                        attacked_ids.add(original_request.path_id)
+                        while True:
+                            try:
+                                answer = input("? ").strip().lower()
+                            except UnicodeDecodeError:
+                                pass
 
-            await self.persister.set_attacked(attacked_ids, attack_module.name)
+                            if answer not in ("r", "n", "q", "c"):
+                                print(_("Invalid choice. Valid choices are r, n, q and c."))
+                            else:
+                                break
 
-            if hasattr(attack_module, "finish"):
-                await attack_module.finish()
+                        if answer in ("n", "c"):
+                            stop_event.clear()
 
-            if attack_module.network_errors:
-                logging.warning(
-                    _("{} requests were skipped due to network issues").format(attack_module.network_errors)
-                )
+                        if answer in ("r", "n", "q"):
+                            break
 
-            if answer == "r":
-                # Do not process remaining modules
-                break
+                        if answer == "c":
+                            continue
 
-        if answer == "q":
-            await self.crawler.close()
-            await self.persister.close()
-            return
+                    try:
+                        if await attack_module.must_attack(original_request, original_response):
+                            logging.info(f"[+] {original_request}")
 
-        # if self.crawler.get_uploads():
-        #     print('')
-        #     print(_("Upload scripts found:"))
-        #     print("----------------------")
-        #     for upload_form in self.crawler.get_uploads():
-        #         print(upload_form)
+                            await attack_module.attack(original_request, original_response)
+
+                        if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
+                            # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
+                            # uses the string as a token so we cannot use f string
+                            # pylint: disable=consider-using-f-string
+                            logging.info(
+                                _("Max attack time was reached for module {0}, stopping.".format(attack_module.name))
+                            )
+                            break
+                    except RequestError:
+                        # Hmmm it should be caught inside the module
+                        await asyncio.sleep(1)
+                        continue
+                    except Exception as exception:
+                        # Catch every possible exceptions and print it
+                        exception_traceback = sys.exc_info()[2]
+                        logging.exception(exception.__class__.__name__, exception)
+
+                        if self._bug_report:
+                            await self.send_bug_report(
+                                exception,
+                                exception_traceback,
+                                attack_module.name,
+                                original_request
+                            )
+                    else:
+                        if original_request.path_id is not None:
+                            attacked_ids.add(original_request.path_id)
+
+                await self.persister.set_attacked(attacked_ids, attack_module.name)
+
+                if hasattr(attack_module, "finish"):
+                    await attack_module.finish()
+
+                if attack_module.network_errors:
+                    logging.warning(
+                        _("{} requests were skipped due to network issues").format(attack_module.network_errors)
+                    )
+
+                if answer == "r":
+                    # Do not process remaining modules
+                    break
+
+            if answer == "q":
+                await self.persister.close()
+                return
+
+            # if self.crawler.get_uploads():
+            #     print('')
+            #     print(_("Upload scripts found:"))
+            #     print("----------------------")
+            #     for upload_form in self.crawler.get_uploads():
+            #         print(upload_form)
+            await self.write_report()
+
+    async def write_report(self):
         if not self.output_file:
             if self.report_generator_type == "html":
                 self.output_file = self.COPY_REPORT_DIR
@@ -620,8 +626,30 @@ class Wapiti:
         if self.report_generator_type == "html":
             logging.success(_("Open {0} with a browser to see this report.").format(self.report_gen.final_path))
 
-        await self.crawler.close()
         await self.persister.close()
+
+    async def send_bug_report(self, exception: Exception, traceback_, module_name: str, original_request: Request):
+        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
+            traceback_file = str(uuid1())
+            with open(traceback_file, "w", encoding='utf-8') as traceback_fd:
+                print_tb(traceback_, file=traceback_fd)
+                print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
+                print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)
+                logging.info(f"Wapiti {WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
+
+            try:
+                with open(traceback_file, "rb") as traceback_byte_fd:
+                    upload_request = Request(
+                        "https://wapiti3.ovh/upload.php",
+                        file_params=[
+                            ["crash_report", (traceback_file, traceback_byte_fd.read(), "text/plain")]
+                        ]
+                    )
+                page = await crawler.async_send(upload_request)
+                logging.success(_("Sending crash report {} ... {}").format(traceback_file, page.content))
+            except RequestError:
+                logging.error(_("Error sending crash report"))
+            os.unlink(traceback_file)
 
     def set_timeout(self, timeout: float = 6.0):
         """Set the timeout for the time waiting for a HTTP response"""
@@ -919,7 +947,6 @@ async def wapiti_main():
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
         await wap.update(args.modules)
-        await wap.crawler.close()
         sys.exit()
 
     try:
@@ -1064,7 +1091,6 @@ async def wapiti_main():
         wap.set_attack_options(attack_options)
 
         await wap.init_persister()
-        await wap.init_crawler()
         if args.flush_attacks:
             await wap.flush_attacks()
 
@@ -1088,10 +1114,9 @@ async def wapiti_main():
                     logging.info(_("[*] Resuming scan from previous session, please wait"))
 
                 if "auth_type" in args:
-                    is_logged_in, form, excluded_urls = await wap.crawler.async_try_login(
-                        auth_credentials,
+                    is_logged_in, form, excluded_urls = await async_try_login(
+                        wap.crawler_configuration,
                         auth_url,
-                        args.auth_type
                     )
                     wap.set_auth_state(is_logged_in, form, auth_url, args.auth_type)
                     for url in excluded_urls:

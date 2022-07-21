@@ -25,7 +25,7 @@ from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.language import _
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 
@@ -161,7 +161,7 @@ async def getcookie_main(arguments):
         response: Response = await crawler.async_get(Request(args.url), follow_redirects=True)
 
         # A first crawl is sometimes necessary, so let's fetch the webpage
-        json_cookie.addcookies(crawler.session_cookies)
+        json_cookie.addcookies(crawler.cookie_jar)
 
         if not args.data:
             # Not data specified, try interactive mode by fetching forms
@@ -207,12 +207,12 @@ async def getcookie_main(arguments):
                     request = Request(form.url, post_params=post_params)
                     await crawler.async_send(request, follow_redirects=True)
 
-                    json_cookie.addcookies(crawler.session_cookies)
+                    json_cookie.addcookies(crawler.cookie_jar)
         else:
             request = Request(args.url, post_params=args.data)
             await crawler.async_send(request, follow_redirects=True)
 
-            json_cookie.addcookies(crawler.session_cookies)
+            json_cookie.addcookies(crawler.cookie_jar)
 
         json_cookie.dump()
 
