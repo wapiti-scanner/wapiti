@@ -52,9 +52,7 @@ class ModuleCookieflags(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
-        cookies = self.crawler.session_cookies
-
-        for cookie in cookies.jar:
+        for cookie in self.crawler.cookie_jar:
             log_blue(_("Checking cookie : {}").format(cookie.name))
             if not self.check_httponly_flag(cookie):
                 log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))

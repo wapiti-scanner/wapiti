@@ -29,63 +29,63 @@ async def test_options():
         cli.set_attack_options({"timeout": 10})
 
         cli.set_modules("-all,xxe")
-        await cli._init_attacks(stop_event)
-        assert {module.name for module in cli.attacks if module.do_get or module.do_post} == {"xxe"}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
         cli.set_modules("xxe")
-        await cli._init_attacks(stop_event)
-        assert {module.name for module in cli.attacks if module.do_get or module.do_post} == {"xxe"}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
         cli.set_modules("common,xxe")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) + 1
 
         cli.set_modules("common,-exec")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) - 1
 
         cli.set_modules("all,-xxe")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - 1
 
         cli.set_modules("all,-common")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - len(common_modules)
 
         cli.set_modules("common,-all,xss")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == 1
 
         cli.set_modules("passive")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules)
 
         cli.set_modules("passive,xxe")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) + 1
 
         cli.set_modules("passive,-wapp")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) - 1
 
         # Empty module list: no modules will be used
         cli.set_modules("")
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert not activated_modules
 
         # Use default settings: only use "commons" modules
         cli.set_modules(None)
-        await cli._init_attacks(stop_event)
-        activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
+        attak_modules = await cli._load_attack_modules(stop_event)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
 
 @pytest.mark.asyncio

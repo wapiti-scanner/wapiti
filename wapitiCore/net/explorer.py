@@ -23,6 +23,7 @@ import math
 from typing import Tuple, List, Optional, AsyncIterator
 from urllib.parse import urlparse
 import re
+from http.cookiejar import CookieJar
 
 # Third-parties
 import httpx
@@ -33,8 +34,9 @@ from wapitiCore.net import web
 
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request, make_absolute
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 from wapitiCore.main.log import logging, log_verbose
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import swf
 from wapitiCore.net import lamejs
@@ -82,8 +84,14 @@ def wildcard_translate(pattern):
 
 
 class Explorer:
-    def __init__(self, crawler_instance: AsyncCrawler, scope: Scope, stop_event: asyncio.Event, parallelism: int = 8):
-        self._crawler = crawler_instance
+    def __init__(
+            self,
+            crawler_configuration: CrawlerConfiguration,
+            scope: Scope,
+            stop_event: asyncio.Event,
+            parallelism: int = 8
+    ):
+        self._crawler = AsyncCrawler.with_configuration(crawler_configuration)
         self._scope = scope
         self._max_depth = 20
         self._max_page_size = MAX_PAGE_SIZE
@@ -94,6 +102,7 @@ class Explorer:
         self._hostnames = set()
         self._regexes = []
         self._processed_requests = []
+        self._cookiejar = CookieJar()
 
         # Locking required for writing to the following structures
         self._file_counts = defaultdict(int)
@@ -273,7 +282,7 @@ class Explorer:
 
         return new_requests
 
-    async def async_analyze(self, request) -> Tuple[bool, List, Optional[Response]]:
+    async def _async_analyze(self, request) -> Tuple[bool, List, Optional[Response]]:
         async with self._sem:
             self._processed_requests.append(request)  # thread safe
 
@@ -411,7 +420,7 @@ class Explorer:
                 if self.is_forbidden(resource_url):
                     continue
 
-                task = asyncio.create_task(self.async_analyze(request))
+                task = asyncio.create_task(self._async_analyze(request))
                 task_to_request[task] = request
 
             if task_to_request:
@@ -458,3 +467,10 @@ class Explorer:
 
             if not task_to_request and (self._stopped.is_set() or not to_explore):
                 break
+
+        self._cookiejar = self._crawler.cookie_jar
+        await self._crawler.close()
+
+    @property
+    def cookie_jar(self):
+        return self._cookiejar

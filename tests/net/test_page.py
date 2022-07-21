@@ -6,7 +6,7 @@ import httpx
 import respx
 from bs4 import BeautifulSoup
 from wapitiCore.net.response import Response
-from wapitiCore.net.html import Html
+from wapitiCore.parsers.html import Html
 from wapitiCore.net.web import make_absolute
 
 
