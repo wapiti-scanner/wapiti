@@ -30,6 +30,7 @@ sslyze = "==5.0.1"
 humanize = "==3.13.1"
 mitmproxy = "==8.0.0"
 h11 = "==0.12"
+arsenic = "==21.8"
 
 [requires]
 python_version = "3.8"
