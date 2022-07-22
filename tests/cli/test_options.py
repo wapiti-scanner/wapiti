@@ -1,10 +1,11 @@
+import sys
 from asyncio import Event
 from unittest import mock
 
 import pytest
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
 from wapitiCore.net import Request
-from wapitiCore.main.wapiti import Wapiti
+from wapitiCore.main.wapiti import Wapiti, wapiti_main
 
 
 @pytest.mark.asyncio
@@ -86,3 +87,23 @@ async def test_options():
         await cli._init_attacks(stop_event)
         activated_modules = {module.name for module in cli.attacks if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("sys.exit")
+async def test_update_with_modules(mock_update, _):
+    testargs = ["wapiti", "--update", "-m", "wapp,nikto"]
+    with mock.patch.object(sys, 'argv', testargs):
+        with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
+            await wapiti_main()
+            mock_update.assert_called_once_with("wapp,nikto")
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("sys.exit")
+async def test_update_without_modules(mock_update, _):
+    testargs = ["wapiti", "--update"]
+    with mock.patch.object(sys, 'argv', testargs):
+        with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
+            await wapiti_main()
+            mock_update.assert_called_once_with(None)
