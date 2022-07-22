@@ -913,6 +913,8 @@ async def wapiti_main():
         wap.set_logfile(args.log)
 
     if args.update:
+        await wap.init_persister()
+        await wap.init_crawler()
         logging.log("GREEN", _("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
