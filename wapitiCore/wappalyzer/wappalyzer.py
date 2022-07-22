@@ -55,7 +55,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["cats", "html", "implies", "scriptSrc"]:
+            for list_field in ["url", "cats", "html", "implies", "scriptSrc"]:
                 if list_field not in self.applications[application_name]:
                     # Complete with empty elements if not already present
                     self.applications[application_name][list_field] = []
@@ -77,7 +77,7 @@ class ApplicationData:
                 dict_items = self.applications[application_name][dict_field].items()
                 self.applications[application_name][dict_field] = {key.lower(): value for (key, value) in dict_items}
 
-            for string_field in ["url", "icon", "website", "cpe"]:
+            for string_field in ["icon", "website", "cpe"]:
                 if string_field not in self.applications[application_name]:
                     # Complete with empty elements if not already present
                     self.applications[application_name][string_field] = ""
@@ -110,7 +110,7 @@ class ApplicationData:
         """
         for application_name in self.applications:
 
-            for list_field in ["html", "implies", "scriptSrc"]:
+            for list_field in ["url", "html", "implies", "scriptSrc"]:
                 self.applications[application_name][list_field] = [
                     self.normalize_regex(pattern) for pattern in self.applications[application_name][list_field]
                 ]
@@ -128,11 +128,6 @@ class ApplicationData:
 
                     for i, pattern in enumerate(self.applications[application_name][dict_field][key]):
                         self.applications[application_name][dict_field][key][i] = self.normalize_regex(pattern)
-
-            for string_field in ["url"]:
-                regex = self.applications[application_name][string_field]
-                if regex != '':
-                    self.applications[application_name][string_field] = self.normalize_regex(regex)
 
     @staticmethod
     def normalize_regex(pattern: str):
@@ -198,7 +193,7 @@ class Wappalyzer:
         """
         Determine whether the web content matches the application regex.
         """
-        url_detected = self.is_application_detected_normalize_string(application, 'url', self._url)
+        url_detected = self.is_application_detected_normalize_list(application, 'url', self._url)
         html_detected = self.is_application_detected_normalize_list(application, 'html', self._html_code)
         scripts_detected = self.is_application_detected_normalize_list(application, 'scriptSrc', self._scripts)
         cookies_detected = self.is_application_detected_normalize_dict(application, 'cookies', self._cookies)
@@ -208,19 +203,6 @@ class Wappalyzer:
         is_detected = (
             url_detected or html_detected or scripts_detected or cookies_detected or headers_detected or meta_detected
         )
-
-        return is_detected
-
-    def is_application_detected_normalize_string(self, application: dict, content_type: str, contents):
-        """
-        Determine whether the content matches the application regex
-        Add a new version of application if the content matches
-        """
-        is_detected = False
-        if application[content_type] != '':
-            if re.search(application[content_type]['regex'], contents):
-                is_detected = True
-                self.update_version_detected(application, application[content_type], contents)
 
         return is_detected
 
