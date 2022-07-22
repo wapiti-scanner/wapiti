@@ -75,12 +75,24 @@ async def test_url_detection():
 
         await module.attack(request)
 
-        assert persister.add_payload.call_count
-        assert persister.add_payload.call_args_list[0][1]["module"] == "wapp"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
-        assert persister.add_payload.call_args_list[2][1]["info"] == (
-            '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
-        )
+        persister.add_payload.assert_called
+
+        results = [(args[1]["payload_type"], args[1]["info"], args[1]["category"]) for args in persister.add_payload.call_args_list]
+        expected_results = [
+            (
+                'additional',
+                '{"versions": [], "name": "Microsoft ASP.NET", "categories": ["Web frameworks"], "groups": ["Web development"]}',
+                _("Fingerprint web technology")
+            ),
+            (
+                'additional',
+                '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
+                _("Fingerprint web technology")
+            )
+        ]
+
+        for expected_result in expected_results:
+            assert expected_result in results
 
 
 @pytest.mark.asyncio
@@ -434,9 +446,26 @@ async def test_merge_with_and_without_redirection():
 
         await module.attack(request)
 
-        assert persister.add_payload.call_count == 5
+        persister.add_payload.assert_called
 
-        assert persister.add_payload.call_args_list[3][1]["info"] == (
-            '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}'
-        )
-        assert persister.add_payload.call_args_list[3][1]["category"] == _("Fingerprint web application framework")
+        results = [(args[1]["payload_type"], args[1]["info"], args[1]["category"]) for args in persister.add_payload.call_args_list]
+        expected_results = [
+            (
+                'additional',
+                '{"versions": [], "name": "Microsoft ASP.NET", "categories": ["Web frameworks"], "groups": ["Web development"]}',
+                _("Fingerprint web technology")
+            ),
+            (
+                'additional',
+                '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
+                _("Fingerprint web technology")
+            ),
+            (
+                'vulnerability',
+                '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
+                _("Fingerprint web application framework")
+            )
+        ]
+
+        for result in expected_results:
+            assert result in results
