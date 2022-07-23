@@ -231,7 +231,7 @@ async def launch_headless_explorer(
     )
     try:
         async with get_session(service, browser) as headless_client:
-            while to_explore:
+            while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
                 excluded_urls.append(request)
                 if request.method == "GET":
@@ -344,17 +344,14 @@ class InterceptingExplorer(Explorer):
             if self._stopped.is_set():
                 break
 
-        print("Joining queue")
         await queue.join()
-        print("Join done")
-        if headless_task:
-            headless_task.cancel()
-            await headless_task
-            print("Stopped headless browser")
+        # The headless crawler must stop when the stop event is set, let's just wait for it
+        await headless_task
 
+        # We are canceling the mitm proxy, but we could have used a special request to shut down the master to.
+        # https://docs.mitmproxy.org/stable/addons-examples/#shutdown
         mitm_task.cancel()
         self._cookies = await mitm_task
-        print("mitm task done")
         await self._crawler.close()
 
     @property
