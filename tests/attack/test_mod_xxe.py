@@ -4,6 +4,7 @@ import sys
 from time import sleep
 import logging
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import pytest
 import respx
@@ -14,7 +15,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xxe import ModuleXxe
 from wapitiCore.language.vulnerability import _
-from tests import AsyncMock
 
 
 logging.basicConfig(level=logging.DEBUG)

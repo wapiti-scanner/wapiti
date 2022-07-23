@@ -1,6 +1,7 @@
 import os
 from asyncio import Event
 from itertools import chain
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -11,7 +12,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_nikto import ModuleNikto
-from tests import AsyncMock
 
 
 @pytest.mark.asyncio

@@ -1,13 +1,12 @@
 import asyncio
 import os
 from asyncio import Event
-from unittest import mock
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock, PropertyMock, AsyncMock
 
 import httpx
 import pytest
 import respx
-from tests import AsyncMock
+
 from wapitiCore.attack.mod_htp import ModuleHtp
 from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler
@@ -56,7 +55,7 @@ async def test_analyze_file_detection():
     techno = "techno"
     techno_versions = '"{\\"versions\\": [\\"1.2\\", \\"1.2.1\\"]}"'  # '{"versions": ["1.2", "1.2.1"]}'
 
-    with mock.patch.object(ModuleHtp, "_find_technology", return_value=(techno, techno_versions)):
+    with patch.object(ModuleHtp, "_find_technology", return_value=(techno, techno_versions)):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -87,7 +86,7 @@ async def test_analyze_file_no_detection():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    with mock.patch.object(ModuleHtp, "_find_technology", return_value=None):
+    with patch.object(ModuleHtp, "_find_technology", return_value=None):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -96,6 +95,7 @@ async def test_analyze_file_no_detection():
             await module_htp._analyze_file(Request("http://perdu.com"))
 
             assert len(module_htp.tech_versions) == 0
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -166,8 +166,8 @@ async def test_finish_no_technologies():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
-        mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db:
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+            patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db:
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -199,16 +199,16 @@ async def test_finish_one_range():
     request.path_id = 1
 
     techno = "techno"
-    techno_versions = '["1.2", "1.2.1", "1.3"]'
 
     versions = ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4"]
 
     async def async_magic():
         pass
+
     MagicMock.__await__ = lambda x: async_magic().__await__()
-    with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
-        mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
-        mock.patch.object(ModuleHtp, "_get_versions", return_value=versions):
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+            patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
+            patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -252,10 +252,11 @@ async def test_finish_two_ranges():
 
     async def async_magic():
         pass
+
     MagicMock.__await__ = lambda x: async_magic().__await__()
-    with mock.patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
-        mock.patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
-        mock.patch.object(ModuleHtp, "_get_versions", return_value=versions):
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+            patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
+            patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -300,15 +301,15 @@ async def test_root_attack_root_url():
         "index.html"
     ]
 
-    with mock.patch.object(
-        ModuleHtp, "_get_static_files", return_value=static_files, autospec=True
+    with patch.object(
+            ModuleHtp, "_get_static_files", return_value=static_files, autospec=True
     ) as mock_get_static_files, \
-    mock.patch.object(
-        ModuleHtp, "_analyze_file", autospec=True
-    ) as mock_analyze_file, \
-    mock.patch.object(
-        ModuleHtp, "_init_db", autospec=True
-    ) as mock_init_db:
+            patch.object(
+                ModuleHtp, "_analyze_file", autospec=True
+            ) as mock_analyze_file, \
+            patch.object(
+                ModuleHtp, "_init_db", autospec=True
+            ) as mock_init_db:
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
@@ -352,13 +353,13 @@ async def test_attack():
     future_init_db = asyncio.Future()
     future_init_db.set_result(None)
 
-    with mock.patch.object(
-        ModuleHtp, "_get_static_files", return_value=static_files, autospec=True
+    with patch.object(
+            ModuleHtp, "_get_static_files", return_value=static_files, autospec=True
     ) as mock_get_static_files, \
-    mock.patch.object(
-        ModuleHtp, "_analyze_file", autospec=True
-    ) as mock_analyze_file, \
-    mock.patch.object(ModuleHtp, "_init_db", return_value=future_init_db):
+            patch.object(
+                ModuleHtp, "_analyze_file", autospec=True
+            ) as mock_analyze_file, \
+            patch.object(ModuleHtp, "_init_db", return_value=future_init_db):
         crawler_configuration = CrawlerConfiguration(Request(target_url))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}

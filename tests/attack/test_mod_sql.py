@@ -2,6 +2,7 @@ from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -12,7 +13,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_sql import ModuleSql
-from tests import AsyncMock
 
 
 @pytest.mark.asyncio

@@ -1,4 +1,5 @@
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -9,7 +10,6 @@ from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_htaccess import ModuleHtaccess
-from tests import AsyncMock
 
 
 @pytest.mark.asyncio

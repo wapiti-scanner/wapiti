@@ -1,10 +1,10 @@
 from asyncio import Event
-from unittest import mock
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 import respx
-from tests import AsyncMock
+
 from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
@@ -241,8 +241,8 @@ async def test_wp_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
-            mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+        with patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+                patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
             module = ModuleWpEnum(crawler, persister, options, Event())
 
             await module.attack(request)
@@ -282,8 +282,8 @@ async def test_wp_version_no_file():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        with mock.patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
-            mock.patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
+        with patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
+                patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
             module = ModuleWpEnum(crawler, persister, options, Event())
 
             await module.attack(request)

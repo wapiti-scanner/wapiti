@@ -5,6 +5,7 @@ from time import sleep
 from asyncio import Event
 import http.server
 import ssl
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -13,7 +14,6 @@ from wapitiCore.net import Request
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssl import ModuleSsl, NAME
-from tests import AsyncMock
 
 
 def https_server(cert_directory: str):
