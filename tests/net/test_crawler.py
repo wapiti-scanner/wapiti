@@ -8,6 +8,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
+from wapitiCore.net.auth import _async_try_login_post, _async_try_login_basic_digest_ntlm
 
 
 def test_extract_disconnect_urls_one_url():
@@ -65,7 +66,7 @@ async def test_async_try_login_post_good_credentials():
                 <table cellpadding='4' cellspacing='1'> \
                     <tbody><tr><td>Username : </td><td><input name='uname' type='text' size='20'></td></tr> \
                     <tr><td>Password : </td><td><input name='pass' type='password' size='20'></td></tr> \
-                    <tr><td colspan='2' align='right'><input type='submit' value='login' style='width:75px;'></td></tr> \
+                    <tr><td colspan='2' align='right'><input type='submit' value='login'></td></tr> \
                 </tbody></table> \
             </form> \
             <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
@@ -84,16 +85,14 @@ async def test_async_try_login_post_good_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        crawler._auth_credentials = ["username", "password"]
+    crawler_configuration.auth_credentials = ("username", "password")
+    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
 
-        is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
-
-        assert form == {'login_field': 'uname', 'password_field': 'pass'}
-        assert len(disconnect_urls) == 2
-        assert "http://perdu.com/foobar/signout" in disconnect_urls
-        assert "http://perdu.com/a/b/signout" in disconnect_urls
-        assert is_logged_in is True
+    assert form == {'login_field': 'uname', 'password_field': 'pass'}
+    assert len(disconnect_urls) == 2
+    assert "http://perdu.com/foobar/signout" in disconnect_urls
+    assert "http://perdu.com/a/b/signout" in disconnect_urls
+    assert is_logged_in is True
 
 
 @respx.mock
@@ -111,7 +110,7 @@ async def test_async_try_login_post_wrong_credentials():
                 <table cellpadding='4' cellspacing='1'> \
                     <tbody><tr><td>Username : </td><td><input name='uname' type='text' size='20'></td></tr> \
                     <tr><td>Password : </td><td><input name='pass' type='password' size='20'></td></tr> \
-                    <tr><td colspan='2' align='right'><input type='submit' value='login' style='width:75px;'></td></tr> \
+                    <tr><td colspan='2' align='right'><input type='submit' value='login'></td></tr> \
                 </tbody></table> \
             </form> \
             <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
@@ -129,14 +128,14 @@ async def test_async_try_login_post_wrong_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        crawler._auth_credentials = ["username", "password"]
 
-        is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
+    crawler_configuration.auth_credentials = ("username", "password")
 
-        assert form == {'login_field': 'uname', 'password_field': 'pass'}
-        assert len(disconnect_urls) == 0
-        assert is_logged_in is False
+    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
+
+    assert form == {'login_field': 'uname', 'password_field': 'pass'}
+    assert len(disconnect_urls) == 0
+    assert is_logged_in is False
 
 
 @respx.mock
@@ -155,14 +154,13 @@ async def test_async_try_login_post_form_not_detected():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        crawler._auth_credentials = ["username", "password"]
+    crawler_configuration.auth_credentials = ("username", "password")
 
-        is_logged_in, form, disconnect_urls = await crawler._async_try_login_post("username", "password", target_url)
+    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
 
-        assert form == {}
-        assert len(disconnect_urls) == 0
-        assert is_logged_in is False
+    assert form == {}
+    assert len(disconnect_urls) == 0
+    assert is_logged_in is False
 
 
 @respx.mock
@@ -189,14 +187,13 @@ async def test_async_try_login_basic_digest_ntlm_good_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        crawler._auth_credentials = ["username", "password"]
+    crawler_configuration.auth_credentials = ("username", "password")
 
-        is_logged_in, form, disconnect_urls = await crawler._async_try_login_basic_digest_ntlm(auth_url)
+    is_logged_in, form, disconnect_urls = await _async_try_login_basic_digest_ntlm(crawler_configuration, auth_url)
 
-        assert is_logged_in is True
-        assert len(form) == 0
-        assert len(disconnect_urls) == 0
+    assert is_logged_in is True
+    assert len(form) == 0
+    assert len(disconnect_urls) == 0
 
 
 @respx.mock
@@ -249,22 +246,21 @@ async def test_async_try_login_basic_digest_ntlm_wrong_credentials():
     ]
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        crawler._auth_credentials = ["username", "password"]
+    crawler_configuration.auth_credentials = ("username", "password")
 
-        for auth_url, status_code in auth_urls:
-            respx.get(auth_url).mock(
-                return_value=httpx.Response(
-                    status_code,
-                    text="KO"
-                )
+    for auth_url, status_code in auth_urls:
+        respx.get(auth_url).mock(
+            return_value=httpx.Response(
+                status_code,
+                text="KO"
             )
+        )
 
-            is_logged_in, form, disconnect_urls = await crawler._async_try_login_basic_digest_ntlm(auth_url)
+        is_logged_in, form, disconnect_urls = await _async_try_login_basic_digest_ntlm(crawler_configuration, auth_url)
 
-            assert is_logged_in is False
-            assert len(form) == 0
-            assert len(disconnect_urls) == 0
+        assert is_logged_in is False
+        assert len(form) == 0
+        assert len(disconnect_urls) == 0
 
 
 def test_extract_disconnect_urls():

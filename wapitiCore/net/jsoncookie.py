@@ -20,8 +20,6 @@ import json
 import re
 from http.cookiejar import Cookie, CookieJar
 
-from httpx import Cookies
-
 # Regex to check whether the domain returned by CookieJar is an IP address
 # IPv6 addresses seems to have a ".local" suffix.
 IP_REGEX = re.compile(r"^(?P<ip>(\d+\.\d+\.\d+.\d+)|(\[([\da-f:]+)\])(\.local)?)(?P<port>:\d+)?$")

@@ -32,36 +32,33 @@ def run_around_tests():
 async def test_qs_limit():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, scope, Event())
-        start_urls = deque(["http://127.0.0.1:65080/"])
-        excluded_urls = []
-        # We should have root url, huge form page, target and target with POST method
-        assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
+    explorer = Explorer(crawler_configuration, scope, Event())
+    start_urls = deque(["http://127.0.0.1:65080/"])
+    excluded_urls = []
+    # We should have root url, huge form page, target and target with POST method
+    assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
 
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, scope, Event())
-        # Exclude huge POST form with limit of parameters
-        explorer.qs_limit = 500
-        start_urls = deque(["http://127.0.0.1:65080/"])
-        excluded_urls = []
-        # We should have root url, huge form page, target and target with POST method
-        assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 3
+    explorer = Explorer(crawler_configuration, scope, Event())
+    # Exclude huge POST form with limit of parameters
+    explorer.qs_limit = 500
+    start_urls = deque(["http://127.0.0.1:65080/"])
+    excluded_urls = []
+    # We should have root url, huge form page, target and target with POST method
+    assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 3
 
 
 @pytest.mark.asyncio
 async def test_explorer_filtering():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, scope, Event())
-        start_urls = deque(["http://127.0.0.1:65080/filters.html"])
-        excluded_urls = []
-        results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
-        # We should have current URL and JS URL but without query string.
-        # CSS URL should be excluded
-        assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
+    explorer = Explorer(crawler_configuration, scope, Event())
+    start_urls = deque(["http://127.0.0.1:65080/filters.html"])
+    excluded_urls = []
+    results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
+    # We should have current URL and JS URL but without query string.
+    # CSS URL should be excluded
+    assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
 
 
 @pytest.mark.asyncio
@@ -111,8 +108,9 @@ def test_save_and_restore_state():
     filename = temp_file.name
     # Delete it
     temp_file.close()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     scope = Scope(Request("http://perdu.com/"), "folder")
-    explorer = Explorer(None, scope, Event())
+    explorer = Explorer(crawler_configuration, scope, Event())
     # Load on unexisting file
     explorer.load_saved_state(filename)
     assert not explorer._hostnames
@@ -123,7 +121,8 @@ def test_save_and_restore_state():
     assert explorer._hostnames == {"perdu.com"}
 
     # New empty explorer
-    explorer = Explorer(None, scope, Event())
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    explorer = Explorer(crawler_configuration, scope, Event())
     # Load previous state
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
@@ -135,30 +134,30 @@ def test_save_and_restore_state():
 async def test_explorer_extract_links():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
     scope = Scope(Request("http://perdu.com/"), "folder")
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, scope, Event())
+    explorer = Explorer(crawler_configuration, scope, Event())
 
-        respx.get("http://perdu.com/").mock(
-            return_value=httpx.Response(
-                200,
-                text="""<html><body>
-                <a href="http://perdu.com/index.html"></a>
-                <a href="https://perdu.com/secure_index.html"></a>
-                <a href="//perdu.com/protocol_relative.html"></a>
-                <a href="//lol.com/protocol_relative.html"></a>
-                <a href="http://perdu.com:8000/other_port.html"></a>
-                <a href="http://microsoft.com/other_domain.html"></a>
-                <a href="welcome.html"></a>
-                <a href="/about.html"></a>
-                <form method="POST" action="http://perdu.com/valid_form.html">
-                <input name="field" type="hidden" value="hello"/></form>
-                <form method="POST" action="http://external.com/external_form.html">
-                <input name="field" type="hidden" value="hello"/></form>
-                """
-            )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="""<html><body>
+            <a href="http://perdu.com/index.html"></a>
+            <a href="https://perdu.com/secure_index.html"></a>
+            <a href="//perdu.com/protocol_relative.html"></a>
+            <a href="//lol.com/protocol_relative.html"></a>
+            <a href="http://perdu.com:8000/other_port.html"></a>
+            <a href="http://microsoft.com/other_domain.html"></a>
+            <a href="welcome.html"></a>
+            <a href="/about.html"></a>
+            <form method="POST" action="http://perdu.com/valid_form.html">
+            <input name="field" type="hidden" value="hello"/></form>
+            <form method="POST" action="http://external.com/external_form.html">
+            <input name="field" type="hidden" value="hello"/></form>
+            """
         )
+    )
 
-        request = Request("http://perdu.com/")
+    request = Request("http://perdu.com/")
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         response = await crawler.async_send(request)
         results = list(explorer.extract_links(response, request))
         # We should get 6 resources as the âth from the form will also be used as url
@@ -170,40 +169,40 @@ async def test_explorer_extract_links():
 async def test_explorer_extract_links_from_js():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
     scope = Scope(Request("http://perdu.com/"), "folder")
+    explorer = Explorer(crawler_configuration, scope, Event())
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="""Hello there!
+        <a href="http://perdu.com/index.html"></a>
+        <script src="main-es5.1211ab72babef8.js"></script>
+        """
+        )
+    )
+
+    respx.get("http://perdu.com/main-es5.1211ab72babef8.js").mock(
+        return_value=httpx.Response(
+            200,
+            text="""
+            AytR: function (e, t, n) {
+                'use strict';n.d(t, 'a', (function () {return r}));
+                const r = {
+                    web: "http://perdu.com/",
+                    host: "http://host.perdu.com/",
+                    api: "http://perdu.com/api",
+                }
+            };
+            const Ke = [{path: "/admin",submenu: [{path: "/admin/profile",submenu: []},{path: "/admin/users/add",submenu: []}]}],
+            Ye = [{path: "/dashboard",submenu: [{path: "/dashboard/results",submenu: []},{path: "/dashboard/result.json",submenu: []}]}];
+            router.navigate(["secret", "path"]); router.createUrlTree(["this", "is", "my" + "_path"]);
+            router.navigateByUrl(this.url + "/api/admin"); router.parseUrl(this.url + "/test");
+            """,
+            headers={"content-type": "application/javascript"}
+        )
+    )
+
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        explorer = Explorer(crawler, scope, Event())
-
-        respx.get("http://perdu.com/").mock(
-            return_value=httpx.Response(
-                200,
-                text="""Hello there!
-            <a href="http://perdu.com/index.html"></a>
-            <script src="main-es5.1211ab72babef8.js"></script>
-            """
-            )
-        )
-
-        respx.get("http://perdu.com/main-es5.1211ab72babef8.js").mock(
-            return_value=httpx.Response(
-                200,
-                text="""
-                AytR: function (e, t, n) {
-                    'use strict';n.d(t, 'a', (function () {return r}));
-                    const r = {
-                        web: "http://perdu.com/",
-                        host: "http://host.perdu.com/",
-                        api: "http://perdu.com/api",
-                    }
-                };
-                const Ke = [{path: "/admin",submenu: [{path: "/admin/profile",submenu: []},{path: "/admin/users/add",submenu: []}]}],
-                Ye = [{path: "/dashboard",submenu: [{path: "/dashboard/results",submenu: []},{path: "/dashboard/result.json",submenu: []}]}];
-                router.navigate(["secret", "path"]); router.createUrlTree(["this", "is", "my" + "_path"]);
-                router.navigateByUrl(this.url + "/api/admin"); router.parseUrl(this.url + "/test");
-                """,
-                headers={"content-type": "application/javascript"}
-            )
-        )
-
         request = Request("http://perdu.com/")
         response = await crawler.async_send(request)
         results = list(explorer.extract_links(response, request))

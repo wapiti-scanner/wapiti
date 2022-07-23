@@ -31,11 +31,10 @@ from random import choice
 from sqlite3 import OperationalError
 from time import gmtime, strftime
 from traceback import print_tb
-from typing import AsyncGenerator, Dict, List, Deque, Union
+from typing import AsyncGenerator, Dict, List, Deque, Union, Optional
 from urllib.parse import urlparse
 from uuid import uuid1
 from dataclasses import replace
-from http.cookiejar import CookieJar
 
 import browser_cookie3
 import httpx
@@ -213,7 +212,7 @@ class Wapiti:
         self._mitm_proxy_port = 0
         self._proxy = None
         self.detailed_report = False
-        self._headless = True
+        self._headless = False
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -766,7 +765,7 @@ class Wapiti:
     def set_attack_options(self, options: dict = None):
         self.attack_options = options if isinstance(options, dict) else {}
 
-    def set_modules(self, options: str = ""):
+    def set_modules(self, options: Optional[str] = ""):
         """Activate or deactivate (default) all attacks"""
         self.module_options = options
 
