@@ -10,9 +10,7 @@ from wapitiCore.main.wapiti import Wapiti, wapiti_main
 
 @pytest.mark.asyncio
 async def test_options():
-
     class CustomMock:
-
         CONFIG_DIR = ""
 
         def __init__(self):
@@ -88,6 +86,7 @@ async def test_options():
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
 
+
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")
 @mock.patch("sys.exit")
@@ -97,6 +96,7 @@ async def test_update_with_modules(mock_update, _):
         with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
             await wapiti_main()
             mock_update.assert_called_once_with("wapp,nikto")
+
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")

@@ -263,10 +263,6 @@ class Wapiti:
     async def init_persister(self):
         await self.persister.create()
 
-    async def init_crawler(self):
-        self.crawler_configuration.cookies = self.cookie_jar
-        self.crawler = AsyncCrawler.with_configuration(self.crawler_configuration)
-
     @property
     def history_file(self):
         return self._history_file
@@ -941,7 +937,6 @@ async def wapiti_main():
 
     if args.update:
         await wap.init_persister()
-        await wap.init_crawler()
         logging.log("GREEN", _("[*] Updating modules"))
         attack_options = {"level": args.level, "timeout": args.timeout}
         wap.set_attack_options(attack_options)
