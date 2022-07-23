@@ -1,4 +1,5 @@
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import respx
 import pytest
@@ -9,7 +10,6 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_crlf import ModuleCrlf
-from tests import AsyncMock
 
 
 @pytest.mark.asyncio

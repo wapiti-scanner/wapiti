@@ -2,6 +2,7 @@ import os
 import sys
 from os.path import join as path_join
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -12,7 +13,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import ModuleDrupalEnum
 from wapitiCore.language.vulnerability import _
-from tests import AsyncMock
 
 
 # Test no Drupal detected

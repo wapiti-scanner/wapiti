@@ -1,4 +1,5 @@
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -12,7 +13,7 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_takeover import ModuleTakeover, TakeoverChecker
-from tests import AsyncMock
+
 
 CNAME_TEMPLATE = """id 5395
 opcode QUERY

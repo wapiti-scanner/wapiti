@@ -4,13 +4,13 @@ import random
 from asyncio import Event
 from typing import Dict
 from unittest import mock
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch, AsyncMock
 from httpx import Response as HttpxResponse
 
 import pytest
 import respx
 from dns.resolver import Resolver
-from tests import AsyncMock
+
 from wapitiCore.attack.attack import VULN
 from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.definitions.log4shell import NAME

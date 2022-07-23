@@ -1,10 +1,11 @@
 import os
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 import respx
-from tests import AsyncMock
+
 from wapitiCore.attack.mod_wapp import ModuleWapp
 from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler

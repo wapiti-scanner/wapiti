@@ -1,6 +1,7 @@
 import re
 from binascii import unhexlify
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import respx
@@ -11,7 +12,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_shellshock import ModuleShellshock
-from tests import AsyncMock
 
 
 def shellshock_callback(request: httpx.Request):

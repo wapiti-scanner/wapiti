@@ -3,6 +3,7 @@ import os
 import sys
 from time import sleep
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import pytest
 import respx
@@ -13,7 +14,6 @@ from wapitiCore.net import Request
 from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_exec import ModuleExec
-from tests import AsyncMock
 
 
 @pytest.fixture(autouse=True)

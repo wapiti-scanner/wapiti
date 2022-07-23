@@ -3,6 +3,7 @@ import os
 import sys
 from time import sleep
 from asyncio import Event
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
@@ -12,7 +13,6 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_csrf import ModuleCsrf
 from wapitiCore.language.vulnerability import _
-from tests import AsyncMock
 
 
 @pytest.fixture(autouse=True)
