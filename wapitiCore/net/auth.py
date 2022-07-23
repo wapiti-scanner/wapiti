@@ -47,6 +47,7 @@ async def _async_try_login_post(
         # Fetch the login page and try to extract the login form
         try:
             response: Response = await crawler.async_get(Request(auth_url), follow_redirects=True)
+            is_logged_in = False
             form = {}
             disconnect_urls = []
 

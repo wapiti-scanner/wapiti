@@ -1,10 +1,9 @@
 from typing import Dict
-from http.cookiejar import CookieJar
+from http.cookiejar import CookieJar, Cookie
 from unittest import mock
 from unittest.mock import MagicMock, mock_open
 import pytest
 import respx
-from httpx import Cookies
 from wapitiCore.net.jsoncookie import JsonCookie
 
 json_cookie_path = "./cookie.txt"
@@ -53,6 +52,7 @@ def get_mock_open(files: Dict[str, str]):
         raise FileNotFoundError('(mock) Unable to open {filename}')
     return MagicMock(side_effect=open_mock)
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_jsoncookie():
@@ -78,11 +78,30 @@ async def test_jsoncookie():
     assert cookie_jar is not None
     assert cookie_jar.__len__() == 1
 
-    cookies = Cookies()
-    cookies.set("secret_cookie", "secret", cookie_domain_1, "/")
-    cookies.set("secret_cookie", "secret", cookie_domain_2, "/")
+    new_cookie_jar = CookieJar()
+    for domain in (cookie_domain_1, cookie_domain_2):
+        cookie = Cookie(
+            version=0,
+            name="secret_cookie",
+            value="secret",
+            port=None,
+            port_specified=False,
+            domain=domain,
+            domain_specified=True,
+            domain_initial_dot=False,
+            path="/",
+            path_specified=True,
+            secure=False,
+            expires=None,
+            discard=True,
+            comment=None,
+            comment_url=None,
+            rest={'HttpOnly': None},
+            rfc2109=False
+        )
+        new_cookie_jar.set_cookie(cookie)
 
-    assert json_cookie.addcookies(cookies) is not False
+    assert json_cookie.addcookies(new_cookie_jar) is not False
 
     cookie_jar = json_cookie.cookiejar(cookie_domain_1)
 
@@ -107,6 +126,7 @@ async def test_jsoncookie():
             open_mock.assert_called_once_with(json_cookie_path, "r+", encoding='utf-8')
         except (IOError, ValueError):
             pytest.fail("Unexpected IOError ..")
+
 
 @pytest.mark.asyncio
 async def test_exception_jsoncookie():
