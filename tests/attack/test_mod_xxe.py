@@ -104,7 +104,7 @@ async def test_out_of_band_body():
     request.path_id = 42
     persister.get_path_by_id.return_value = request
 
-    persister.requests.append(request)
+    persister.requests.return_value = [request]
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65084/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {
