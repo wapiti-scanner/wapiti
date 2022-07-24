@@ -212,7 +212,7 @@ class Wapiti:
         self._mitm_proxy_port = 0
         self._proxy = None
         self.detailed_report = False
-        self._headless = False
+        self._headless_mode = "no"
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -385,7 +385,7 @@ class Wapiti:
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
 
-        if self._mitm_proxy_port or self._headless:
+        if self._mitm_proxy_port or self._headless_mode != "no":
             modified_configuration = replace(self.crawler_configuration)
             modified_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port or 8080}/"
 
@@ -397,7 +397,7 @@ class Wapiti:
                 mitm_port=self._mitm_proxy_port or 8080,
                 proxy=self._proxy,
                 drop_cookies=self.crawler_configuration.drop_cookies,
-                headless=self._headless
+                headless=self._headless_mode
             )
         else:
             explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
@@ -671,6 +671,10 @@ class Wapiti:
                 raise InvalidOptionValue(
                     "--proxy", f"The proxy protocol '{parts.scheme}' is not supported by mitmproxy"
                 )
+
+    def set_headless(self, headless_mode: str):
+        """Set the headless mode used for browsing"""
+        self._headless_mode = headless_mode
 
     def add_start_url(self, url: str):
         """Specify a URL to start the scan with. Can be called several times."""
@@ -975,6 +979,8 @@ async def wapiti_main():
         if "mitm_port" in args:
             wap.set_intercepting_proxy_port(args.mitm_port)
 
+        wap.set_headless(args.headless)
+
         if "cookie" in args:
             if os.path.isfile(args.cookie):
                 wap.set_cookie_file(args.cookie)
@@ -1111,6 +1117,7 @@ async def wapiti_main():
                     is_logged_in, form, excluded_urls = await async_try_login(
                         wap.crawler_configuration,
                         auth_url,
+                        args.headless,
                     )
                     wap.set_auth_state(is_logged_in, form, auth_url, args.auth_type)
                     for url in excluded_urls:

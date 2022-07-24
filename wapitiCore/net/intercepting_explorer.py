@@ -20,7 +20,6 @@ import asyncio
 from collections import deque
 from typing import Tuple, List, AsyncIterator, Dict, Optional
 import logging
-from http.cookiejar import Cookie, CookieJar
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -31,6 +30,7 @@ from arsenic import get_session, browsers, services
 import structlog
 
 from wapitiCore.net import Request
+from wapitiCore.net.cookies import mitm_jar_to_cookiejar
 from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
@@ -39,9 +39,6 @@ from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.scope import Scope
 from wapitiCore.main.log import log_verbose, log_blue
 from wapitiCore.parsers.html import Html
-
-
-GECKODRIVER = "/home/sirius/bin/geckodriver"
 
 
 def set_arsenic_log_level(level: int = logging.WARNING):
@@ -165,41 +162,8 @@ async def launch_proxy(
     try:
         await master.run()
     except asyncio.CancelledError:
-        print("Stopping mitmproxy")
+        log_blue("Stopping mitmproxy")
     return master.addons.get("asyncstickycookie").jar
-
-
-def mitm_jar_to_cookiejar(cookies: dict) -> CookieJar:
-    cookie_jar = CookieJar()
-    for scope in cookies:
-        hostname: str
-        port: int
-        path: str
-
-        hostname, port, path = scope
-        for key, value in cookies[scope].items():
-            print(scope, key, value)
-            cookie = Cookie(
-                version=0,
-                name=key,
-                value=value,
-                port=str(port),
-                port_specified=False,
-                domain=hostname if hostname.startswith(".") else "." + hostname,
-                domain_specified=True,
-                domain_initial_dot=False,
-                path=path,
-                path_specified=True,
-                secure=True,
-                expires=None,
-                discard=True,
-                comment=None,
-                comment_url=None,
-                rest={'HttpOnly': None},
-                rfc2109=False
-            )
-            cookie_jar.set_cookie(cookie)
-    return cookie_jar
 
 
 async def launch_headless_explorer(
@@ -208,10 +172,14 @@ async def launch_headless_explorer(
         to_explore: deque,
         scope: Scope,
         proxy_port: int,
-        excluded_urls: list = None
+        excluded_urls: list = None,
+        visibility: str = "hidden",
 ):
     stop_event = stop_event
     crawler = crawler
+    # The headless browser will be configured to use the MITM proxy
+    # The intercepting will be in charge of generating Request objects.
+    # This is the only way as a headless browser can't provide us response headers.
     proxy = f"127.0.0.1:{proxy_port}"
     proxy_settings = {
         "proxyType": "manual",
@@ -222,12 +190,12 @@ async def launch_headless_explorer(
     browser = browsers.Firefox(
         proxy=proxy_settings,
         acceptInsecureCerts=True,
-        # **{
-        #     "moz:firefoxOptions": {
-        #         "prefs": {"security.cert_pinning.enforcement_level": 0},
-        #         # "args": ["-headless"]
-        #     }
-        # }
+        **{
+            "moz:firefoxOptions": {
+                # "prefs": {"security.cert_pinning.enforcement_level": 0},
+                "args": ["-headless"] if visibility == "hidden" else []
+            }
+        }
     )
     try:
         async with get_session(service, browser) as headless_client:
@@ -236,7 +204,6 @@ async def launch_headless_explorer(
                 excluded_urls.append(request)
                 if request.method == "GET":
                     try:
-                        print(f"Fetching {request.url}")
                         await headless_client.get(request.url, timeout=5)
                     except Exception:
                         continue
@@ -282,7 +249,7 @@ class InterceptingExplorer(Explorer):
             mitm_port: int = 8080,
             proxy: Optional[str] = None,
             drop_cookies: bool = False,
-            headless: bool = False,
+            headless: str = "no",
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -310,7 +277,7 @@ class InterceptingExplorer(Explorer):
         )
 
         headless_task = None
-        if self._headless:
+        if self._headless != "no":
             headless_task = asyncio.create_task(
                 launch_headless_explorer(
                     self._stopped,
@@ -319,6 +286,7 @@ class InterceptingExplorer(Explorer):
                     scope=self._scope,
                     proxy_port=self._mitm_port,
                     excluded_urls=excluded_urls,
+                    visibility=self._headless,
                 )
             )
         else:
@@ -346,7 +314,8 @@ class InterceptingExplorer(Explorer):
 
         await queue.join()
         # The headless crawler must stop when the stop event is set, let's just wait for it
-        await headless_task
+        if headless_task:
+            await headless_task
 
         # We are canceling the mitm proxy, but we could have used a special request to shut down the master to.
         # https://docs.mitmproxy.org/stable/addons-examples/#shutdown

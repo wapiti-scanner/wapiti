@@ -78,6 +78,15 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--headless",
+        dest="headless",
+        default="no",
+        help=_("Use a Firefox headless crawler for browsing (slower)"),
+        metavar="PORT",
+        choices=["no", "hidden", "visible"]
+    )
+
+    parser.add_argument(
         "-a", "--auth-cred",
         dest="credentials",
         default=argparse.SUPPRESS,
@@ -356,7 +365,6 @@ def parse_args():
         action="store_true",
         help=_("Update Wapiti attack modules and exit")
     )
-
 
     parser.add_argument(
         "--version",
