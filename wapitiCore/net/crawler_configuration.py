@@ -1,4 +1,3 @@
-from typing import Union, Dict
 from dataclasses import dataclass
 from http.cookiejar import CookieJar
 
@@ -17,7 +16,7 @@ class CrawlerConfiguration:
     proxy: str = None
     auth_credentials: tuple = tuple()
     auth_method: str = "basic"
-    cookies: Union[Dict, CookieJar] = None
+    cookies: CookieJar = CookieJar()
     stream: bool = False
     headers: dict = None
     drop_cookies: bool = False

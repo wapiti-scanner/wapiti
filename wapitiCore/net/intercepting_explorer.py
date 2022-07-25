@@ -19,7 +19,8 @@
 import asyncio
 from collections import deque
 from typing import Tuple, List, AsyncIterator, Dict, Optional
-import logging
+from logging import getLogger, WARNING, ERROR
+from http.cookiejar import CookieJar
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -37,13 +38,13 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.scope import Scope
-from wapitiCore.main.log import log_verbose, log_blue
+from wapitiCore.main.log import log_verbose, log_blue, logging
 from wapitiCore.parsers.html import Html
 
 
-def set_arsenic_log_level(level: int = logging.WARNING):
+def set_arsenic_log_level(level: int = WARNING):
     # Create logger
-    logger = logging.getLogger('arsenic')
+    logger = getLogger('arsenic')
 
     # We need factory, to return application-wide logger
     def logger_factory():
@@ -53,7 +54,7 @@ def set_arsenic_log_level(level: int = logging.WARNING):
     logger.setLevel(level)
 
 
-set_arsenic_log_level(logging.ERROR)
+set_arsenic_log_level(ERROR)
 
 
 def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
@@ -105,13 +106,17 @@ class MitmFlowToWapitiRequests:
             flow.request.headers[key] = value
 
     async def response(self, flow):
+        if 400 <= flow.response.status_code < 500:
+            # Those are certainly broken links, and we don't want to deal with that
+            return
+
         if self._drop_cookies:
             if "set-cookie" in flow.response.headers:
                 del flow.response.headers["set-cookie"]
 
         content_type = flow.response.headers.get("Content-Type", "text/plain")
         flow.response.stream = False
-        # TODO: discard on status code too
+
         if "text" in content_type or "json" in content_type:
             request = mitm_to_wapiti_request(flow.request)
 
@@ -136,8 +141,9 @@ async def launch_proxy(
         port: int,
         data_queue: asyncio.Queue,
         headers: httpx.Headers,
+        cookies: CookieJar,
         proxy: Optional[str] = None,
-        drop_cookies: bool = False
+        drop_cookies: bool = False,
 ):
     log_blue(
         f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done."
@@ -156,7 +162,8 @@ async def launch_proxy(
     # mitmproxy will generate an authority cert in the ~/.mitmproxy directory. Load it in your browser.
     master.addons.add(addons.tlsconfig.TlsConfig())
     # If ever we want to have both the interception proxy and an automated crawler then we need to sync cookies
-    master.addons.add(AsyncStickyCookie())
+    # This mitmproxy module will do that and also load init cookies in the internal jar
+    master.addons.add(AsyncStickyCookie(cookies))
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
     master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, drop_cookies))
     try:
@@ -201,11 +208,16 @@ async def launch_headless_explorer(
         async with get_session(service, browser) as headless_client:
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
+                if not isinstance(request, Request):
+                    # We treat start_urls as if they are all valid URLs (ie in scope)
+                    request = Request(request, link_depth=0)
+
                 excluded_urls.append(request)
                 if request.method == "GET":
                     try:
                         await headless_client.get(request.url, timeout=5)
-                    except Exception:
+                    except Exception as exception:
+                        logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
                     await asyncio.sleep(.1)
@@ -214,7 +226,7 @@ async def launch_headless_explorer(
                     try:
                         response = await crawler.async_send(request)
                     except Exception as exception:
-                        print(exception)
+                        logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
                     page_source = response.content
@@ -232,7 +244,8 @@ async def launch_headless_explorer(
                 for form in html.iter_forms():
                     if scope.check(form) and form not in to_explore and form not in excluded_urls:
                         to_explore.append(form)
-    except:
+    except Exception as exception:
+        logging.error(f"Headless browser stopped prematurely due to exception: {exception.__class__.__name__}")
         pass
 
     await asyncio.sleep(1)
@@ -250,13 +263,15 @@ class InterceptingExplorer(Explorer):
             proxy: Optional[str] = None,
             drop_cookies: bool = False,
             headless: str = "no",
+            cookies: CookieJar = CookieJar(),
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
         self._proxy = proxy
         self._drop_cookies = drop_cookies
         self._headless = headless
-        self._cookies = None
+        self._final_cookies = None
+        self._cookies = cookies
 
     async def async_explore(
             self,
@@ -272,12 +287,16 @@ class InterceptingExplorer(Explorer):
                 queue,
                 self._crawler.headers,
                 proxy=self._proxy,
-                drop_cookies=self._drop_cookies
+                drop_cookies=self._drop_cookies,
+                cookies=self._cookies,
             )
         )
 
         headless_task = None
-        if self._headless != "no":
+        if self._headless == "no":
+            # No headless crawler, just intercepting mode so no starting URLs
+            to_explore.clear()
+        else:
             headless_task = asyncio.create_task(
                 launch_headless_explorer(
                     self._stopped,
@@ -289,9 +308,6 @@ class InterceptingExplorer(Explorer):
                     visibility=self._headless,
                 )
             )
-        else:
-            # We don't use to_explore here, clear it.
-            to_explore.clear()
 
         while True:
             try:
@@ -320,9 +336,9 @@ class InterceptingExplorer(Explorer):
         # We are canceling the mitm proxy, but we could have used a special request to shut down the master to.
         # https://docs.mitmproxy.org/stable/addons-examples/#shutdown
         mitm_task.cancel()
-        self._cookies = await mitm_task
+        self._final_cookies = await mitm_task
         await self._crawler.close()
 
     @property
     def cookie_jar(self):
-        return mitm_jar_to_cookiejar(self._cookies)
+        return mitm_jar_to_cookiejar(self._final_cookies)
