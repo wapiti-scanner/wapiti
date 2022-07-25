@@ -1,8 +1,8 @@
-# This is just a rewrite of the mitmproxy stickycookie addon with async methods
+# Based on the original mitmproxy stickycookie addon
 import asyncio
 import collections
 from http import cookiejar
-from typing import List, Tuple, Dict  # noqa
+from typing import List, Tuple, Dict
 
 from mitmproxy import http
 from mitmproxy.net.http import cookies
@@ -32,8 +32,14 @@ def domain_match(a: str, b: str) -> bool:
 
 
 class AsyncStickyCookie:
-    def __init__(self):
+    def __init__(self, cookies: cookiejar.CookieJar):
+        # Structure looks like defaultdict(<class 'dict'>, {('httpbin.org', 80, '/'): {'foo': 'bar'}})
         self.jar: Dict[TOrigin, Dict[str, str]] = collections.defaultdict(dict)
+        for cookie in cookies:
+            domain = cookie.domain.strip(".")
+            # Port is not always specified in real cases
+            port = 0 if not cookie.port else int(cookie.port)
+            self.jar[(domain, port, cookie.path)][cookie.name] = cookie.value
 
     async def response(self, flow: http.HTTPFlow):
         await asyncio.sleep(.1)
@@ -59,11 +65,12 @@ class AsyncStickyCookie:
         for (domain, port, path), c in self.jar.items():
             match = [
                 domain_match(flow.request.host, domain),
-                flow.request.port == port,
+                flow.request.port == port or not port,
                 flow.request.path.startswith(path)
             ]
             if all(match):
                 cookie_list.extend(c.items())
+
         if cookie_list:
             flow.metadata["stickycookie"] = True
             flow.request.headers["cookie"] = cookies.format_cookie_header(cookie_list)

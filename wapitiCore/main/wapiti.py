@@ -397,7 +397,8 @@ class Wapiti:
                 mitm_port=self._mitm_proxy_port or 8080,
                 proxy=self._proxy,
                 drop_cookies=self.crawler_configuration.drop_cookies,
-                headless=self._headless_mode
+                headless=self._headless_mode,
+                cookies=self.crawler_configuration.cookies,
             )
         else:
             explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
@@ -428,7 +429,7 @@ class Wapiti:
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
-        # Overwrite cookies for next step
+        # Overwrite cookies for next (attack) step
         self.crawler_configuration.cookies = explorer.cookie_jar
 
     async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, Response]:
