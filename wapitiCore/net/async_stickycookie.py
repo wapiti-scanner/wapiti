@@ -32,10 +32,10 @@ def domain_match(a: str, b: str) -> bool:
 
 
 class AsyncStickyCookie:
-    def __init__(self, cookies: cookiejar.CookieJar):
+    def __init__(self, cookie_jar: cookiejar.CookieJar):
         # Structure looks like defaultdict(<class 'dict'>, {('httpbin.org', 80, '/'): {'foo': 'bar'}})
         self.jar: Dict[TOrigin, Dict[str, str]] = collections.defaultdict(dict)
-        for cookie in cookies:
+        for cookie in cookie_jar:
             domain = cookie.domain.strip(".")
             # Port is not always specified in real cases
             port = 0 if not cookie.port else int(cookie.port)
