@@ -12,7 +12,7 @@ from wapitiCore.main.getcookie import getcookie_main
 @respx.mock
 async def test_command():
     with NamedTemporaryFile("w") as json_fd:
-        url = "http://httpbin.org/welcome/"
+        url = "https://www.amylandthesniffers.com/welcome/"
         respx.get(url).mock(
             return_value=httpx.Response(
                 200,
@@ -23,11 +23,11 @@ async def test_command():
             )
         )
 
-        await getcookie_main(["-u", "http://httpbin.org/welcome/", "-c", json_fd.name])
+        await getcookie_main(["-u", "https://www.amylandthesniffers.com/welcome/", "-c", json_fd.name])
 
         data = json.load(open(json_fd.name))
         assert data == {
-            '.httpbin.org': {
+            '.www.amylandthesniffers.com': {
                 '/': {
                     'foo': {
                         'expires': None,

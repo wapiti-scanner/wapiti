@@ -21,7 +21,7 @@
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 import asyncio
 import ssl
 
@@ -29,13 +29,10 @@ import ssl
 import httpx
 
 # Internal libraries
-from wapitiCore.language.language import _
 from wapitiCore.net import web
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
 from wapitiCore.net.response import Response
-from wapitiCore.parsers.html import Html
-from wapitiCore.main.log import logging
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 

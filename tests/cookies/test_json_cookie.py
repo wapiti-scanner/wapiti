@@ -17,9 +17,9 @@ async def test_cookie_dump():
     with NamedTemporaryFile() as json_fd:
         json_cookie = JsonCookie()
         json_cookie.load(json_fd.name)
-        json_cookie.delete("httpbin.org")
+        json_cookie.delete("www.destroydestroyboys.com")
 
-        url = "http://httpbin.org/welcome/"
+        url = "https://www.destroydestroyboys.com/welcome/"
         respx.get(url).mock(
             return_value=httpx.Response(
                 200,
@@ -39,7 +39,7 @@ async def test_cookie_dump():
 
             data = json.load(open(json_fd.name))
             assert data == {
-                '.httpbin.org': {
+                '.www.destroydestroyboys.com': {
                     '/': {
                         'foo': {
                             'expires': None,

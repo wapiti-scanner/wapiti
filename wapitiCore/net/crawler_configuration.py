@@ -16,7 +16,7 @@ class CrawlerConfiguration:
     proxy: str = None
     auth_credentials: tuple = tuple()
     auth_method: str = "basic"
-    cookies: CookieJar = CookieJar()
+    cookies: CookieJar = None
     stream: bool = False
     headers: dict = None
     drop_cookies: bool = False

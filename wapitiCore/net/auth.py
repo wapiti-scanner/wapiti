@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from httpx import RequestError
 from arsenic import get_session, browsers, services
+from arsenic.errors import ArsenicError
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html import Html
@@ -107,7 +108,7 @@ async def _async_try_login_post(
                 await asyncio.sleep(.1)
                 page_source = await headless_client.get_page_source()
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
-        except Exception as exception:
+        except ArsenicError as exception:
             logging.error(_("[!] {} with URL {}").format(exception.__class__.__name__, auth_url))
             return False, {}, []
     else:
@@ -160,5 +161,3 @@ async def _async_try_login_post(
 
     logging.warning(_("Login failed") + " : " + _("No login form detected"))
     return False, {}, []
-
-

@@ -28,6 +28,7 @@ from mitmproxy.options import Options
 from mitmproxy.http import Request as MitmRequest
 import httpx
 from arsenic import get_session, browsers, services
+from arsenic.errors import ArsenicError
 import structlog
 
 from wapitiCore.net import Request
@@ -182,8 +183,6 @@ async def launch_headless_explorer(
         excluded_urls: list = None,
         visibility: str = "hidden",
 ):
-    stop_event = stop_event
-    crawler = crawler
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
     # This is the only way as a headless browser can't provide us response headers.
@@ -216,7 +215,7 @@ async def launch_headless_explorer(
                 if request.method == "GET":
                     try:
                         await headless_client.get(request.url, timeout=5)
-                    except Exception as exception:
+                    except ArsenicError as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
@@ -225,7 +224,7 @@ async def launch_headless_explorer(
                 else:
                     try:
                         response = await crawler.async_send(request)
-                    except Exception as exception:
+                    except httpx.RequestError as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
@@ -244,9 +243,8 @@ async def launch_headless_explorer(
                 for form in html.iter_forms():
                     if scope.check(form) and form not in to_explore and form not in excluded_urls:
                         to_explore.append(form)
-    except Exception as exception:
+    except Exception as exception:  # pylint: disable=broad-except
         logging.error(f"Headless browser stopped prematurely due to exception: {exception.__class__.__name__}")
-        pass
 
     await asyncio.sleep(1)
     stop_event.set()
@@ -263,7 +261,7 @@ class InterceptingExplorer(Explorer):
             proxy: Optional[str] = None,
             drop_cookies: bool = False,
             headless: str = "no",
-            cookies: CookieJar = CookieJar(),
+            cookies: Optional[CookieJar] = None,
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -271,7 +269,7 @@ class InterceptingExplorer(Explorer):
         self._drop_cookies = drop_cookies
         self._headless = headless
         self._final_cookies = None
-        self._cookies = cookies
+        self._cookies = cookies or CookieJar()
 
     async def async_explore(
             self,
