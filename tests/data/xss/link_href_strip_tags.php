@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <body>
 <form>
-<a href="<?=$url ?>" />
+<a href="something?<?=$url ?>">clickme</a>
 </form>
 </body>
 </html>
