@@ -19,7 +19,7 @@ from wapitiCore.net import Request
 @respx.mock
 async def test_must_attack():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -46,7 +46,7 @@ async def test_analyze_file_detection():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -80,7 +80,7 @@ async def test_analyze_file_no_detection():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -105,7 +105,7 @@ async def test_analyze_file_none_content():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -130,7 +130,7 @@ async def test_analyze_file_request_error():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -159,7 +159,7 @@ async def test_finish_no_technologies():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -190,7 +190,7 @@ async def test_finish_one_range():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
     persister.get_root_url.return_value = "http://perdu.com/"
@@ -238,7 +238,7 @@ async def test_finish_two_ranges():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
     persister.get_root_url.return_value = "http://perdu.com/"
@@ -287,7 +287,7 @@ async def test_root_attack_root_url():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
     persister.get_root_url.return_value = "http://perdu.com/"
@@ -336,7 +336,7 @@ async def test_attack():
     )
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
     persister.get_root_url.return_value = "http://perdu.com/"

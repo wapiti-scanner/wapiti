@@ -171,7 +171,7 @@ class Wapiti:
     Launch wapiti without arguments or with the "-h" option for more information."""
 
     REPORT_DIR = "report"
-    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     COPY_REPORT_DIR = os.path.join(HOME_DIR, ".wapiti", "generated_report")
 
     def __init__(self, scope_request: Request, scope="folder", session_dir=None, config_dir=None):

@@ -39,7 +39,7 @@ class SqlPersister:
 
     CRAWLER_DATA_DIR_NAME = "scans"
     CONFIG_DIR_NAME = "config"
-    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     BASE_DIR = os.path.join(HOME_DIR, ".wapiti")
     CRAWLER_DATA_DIR = os.path.join(BASE_DIR, CRAWLER_DATA_DIR_NAME)
     CONFIG_DIR = os.path.join(BASE_DIR, CONFIG_DIR_NAME)

@@ -25,7 +25,7 @@ class ApplicationData:
         """
         Initialize a new ApplicationData object.
         """
-        base_dir = os.path.join(os.getenv("HOME") or os.getenv("USERPROFILE"), ".wapiti")
+        base_dir = os.path.join(os.getenv("HOME") or os.getenv("USERPROFILE") or "/home", ".wapiti")
         default_categories_file_path = os.path.join(base_dir, "wappalyzer", "data/categories.json")
         default_groups_file_path = os.path.join(base_dir, "wappalyzer", "data/groups.json")
         default_technologies_file_path = os.path.join(base_dir, "wappalyzer", "data/technologies.json")
