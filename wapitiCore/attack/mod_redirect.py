@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Optional
+from urllib.parse import urlparse
 
 from httpx import RequestError
 
@@ -36,7 +37,7 @@ class ModuleRedirect(Attack):
     MSG_VULN = _("Open Redirect")
     do_get = True
     do_post = False
-    payloads = ("https://openbugbounty.org/", Flags())
+    payloads = [("https://openbugbounty.org/", Flags()), ("//openbugbounty.org/", Flags())]
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -56,7 +57,7 @@ class ModuleRedirect(Attack):
 
             html = Html(response.content, mutated_request.url)
             all_redirections = {response.redirection_url} | html.all_redirections
-            if any(url.startswith("https://openbugbounty.org/") for url in all_redirections):
+            if any(urlparse(url).netloc.endswith("openbugbounty.org") for url in all_redirections):
                 await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
