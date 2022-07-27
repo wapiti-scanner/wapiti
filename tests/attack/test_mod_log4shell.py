@@ -39,7 +39,7 @@ async def test_read_headers():
     }
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -74,7 +74,7 @@ async def test_read_headers():
 async def test_get_batch_malicious_headers():
     persister = AsyncMock()
     persister.get_root_url.return_value = "http://perdu.com"
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -108,7 +108,7 @@ async def test_verify_dns():
             self.strings = [str(response).lower().encode("utf-8")]
 
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -133,7 +133,7 @@ async def test_verify_dns():
 @respx.mock
 async def test_is_valid_dns():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -171,7 +171,7 @@ async def test_verify_headers_vuln_found():
     # When a vuln has been found
     with patch.object(Request, "http_repr", autospec=True) as mock_http_repr:
         persister = AsyncMock()
-        home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+        home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
         base_dir = os.path.join(home_dir, ".wapiti")
         persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -220,7 +220,7 @@ async def test_verify_headers_vuln_not_found():
     with patch.object(Request, "http_repr", autospec=True) as mock_http_repr:
 
         persister = AsyncMock()
-        home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+        home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
         base_dir = os.path.join(home_dir, ".wapiti")
         persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -250,7 +250,7 @@ async def test_verify_headers_vuln_not_found():
 @respx.mock
 async def test_must_attack():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -281,7 +281,7 @@ async def test_attack():
 
     persister = AsyncMock()
     persister.get_root_url.return_value = "http://perdu.com/"
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -314,7 +314,7 @@ async def test_attack():
 
 def test_init():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -350,7 +350,7 @@ def test_init():
 @respx.mock
 async def test_attack_apache_struts():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
@@ -381,7 +381,7 @@ async def test_attack_apache_struts():
 @respx.mock
 async def test_attack_apache_druid():
     persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE")
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
     base_dir = os.path.join(home_dir, ".wapiti")
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 

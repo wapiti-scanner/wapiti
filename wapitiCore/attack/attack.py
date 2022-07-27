@@ -212,7 +212,7 @@ class Attack:
     require = []
 
     DATA_DIR = resource_filename("wapitiCore", os.path.join("data", "attacks"))
-    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE")
+    HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE") or "home"
 
     PAYLOADS_FILE = None
 
