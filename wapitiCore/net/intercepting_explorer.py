@@ -107,6 +107,9 @@ class MitmFlowToWapitiRequests:
             flow.request.headers[key] = value
 
     async def response(self, flow):
+        if flow.request.method.upper() == "CONNECT":
+            return
+
         if 400 <= flow.response.status_code < 500:
             # Those are certainly broken links, and we don't want to deal with that
             return
@@ -219,7 +222,7 @@ async def launch_headless_explorer(
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
-                    await asyncio.sleep(.1)
+                    await asyncio.sleep(1)
                     page_source = await headless_client.get_page_source()
                 else:
                     try:
