@@ -87,6 +87,15 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--wait",
+        dest="wait_time",
+        default=1.,
+        help=_("Wait the specified amount of seconds before analyzing a webpage (headless mode only)"),
+        metavar="TIME",
+        type=float
+    )
+
+    parser.add_argument(
         "-a", "--auth-cred",
         dest="credentials",
         default=argparse.SUPPRESS,

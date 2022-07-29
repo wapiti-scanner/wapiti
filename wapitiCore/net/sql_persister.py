@@ -183,7 +183,7 @@ class SqlPersister:
             result = await conn.execute(statement)
             return result.fetchone().value
 
-    async def set_to_browse(self, to_browse: Sequence):
+    async def set_to_browse(self, to_browse: Sequence[Request]):
         await self.save_requests([(request, None) for request in to_browse])
 
     async def get_to_browse(self) -> AsyncIterator[Request]:

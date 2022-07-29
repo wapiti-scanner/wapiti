@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
-from collections import deque, defaultdict
+from collections import defaultdict
 import pickle
 import math
-from typing import Tuple, List, Optional, AsyncIterator
+from typing import Tuple, List, Optional, AsyncIterator, Deque
 from urllib.parse import urlparse
 import re
 from http.cookiejar import CookieJar
@@ -348,7 +348,7 @@ class Explorer:
 
     async def async_explore(
             self,
-            to_explore: deque,
+            to_explore: Deque[Request],
             excluded_urls: list = None
     ) -> AsyncIterator[Tuple[Request, Response]]:
         """Explore a single TLD or the whole Web starting with a URL
@@ -388,15 +388,10 @@ class Explorer:
                     break
 
                 request = to_explore.popleft()
-                if not isinstance(request, web.Request):
-                    # We treat start_urls as if they are all valid URLs (ie in scope)
-                    request = web.Request(request, link_depth=0)
-
                 if request in self._processed_requests:
                     continue
 
                 resource_url = request.url
-
                 if request.link_depth > self._max_depth:
                     continue
 

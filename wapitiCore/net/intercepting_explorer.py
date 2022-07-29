@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from collections import deque
-from typing import Tuple, List, AsyncIterator, Dict, Optional
+from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, ERROR
 from http.cookiejar import CookieJar
 
@@ -180,11 +180,12 @@ async def launch_proxy(
 async def launch_headless_explorer(
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
-        to_explore: deque,
+        to_explore: Deque[Request],
         scope: Scope,
         proxy_port: int,
         excluded_urls: list = None,
         visibility: str = "hidden",
+        wait_time: float = 1.,
 ):
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
@@ -210,11 +211,8 @@ async def launch_headless_explorer(
         async with get_session(service, browser) as headless_client:
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
-                if not isinstance(request, Request):
-                    # We treat start_urls as if they are all valid URLs (ie in scope)
-                    request = Request(request, link_depth=0)
-
                 excluded_urls.append(request)
+
                 if request.method == "GET":
                     try:
                         await headless_client.get(request.url, timeout=5)
@@ -222,7 +220,7 @@ async def launch_headless_explorer(
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
 
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(wait_time)
                     page_source = await headless_client.get_page_source()
                 else:
                     try:
@@ -265,6 +263,7 @@ class InterceptingExplorer(Explorer):
             drop_cookies: bool = False,
             headless: str = "no",
             cookies: Optional[CookieJar] = None,
+            wait_time: float = 1.
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -273,10 +272,11 @@ class InterceptingExplorer(Explorer):
         self._headless = headless
         self._final_cookies = None
         self._cookies = cookies or CookieJar()
+        self._wait_time = wait_time
 
     async def async_explore(
             self,
-            to_explore: deque,
+            to_explore: Deque[Request],
             excluded_urls: list = None
     ) -> AsyncIterator[Tuple[Request, Response]]:
         queue = asyncio.Queue()
@@ -307,6 +307,7 @@ class InterceptingExplorer(Explorer):
                     proxy_port=self._mitm_port,
                     excluded_urls=excluded_urls,
                     visibility=self._headless,
+                    wait_time=self._wait_time,
                 )
             )
 
