@@ -197,7 +197,7 @@ class Wapiti:
         self.verbose = 0
         self.module_options = None
         self.attack_options = {}
-        self._start_urls: Deque[Union[str, Request]] = deque([self.base_request])
+        self._start_urls: Deque[Request] = deque([self.base_request])
         self._excluded_urls = []
         self._bad_params = set()
         self._max_depth = 40
@@ -213,6 +213,7 @@ class Wapiti:
         self._proxy = None
         self.detailed_report = False
         self._headless_mode = "no"
+        self._wait_time = 1.
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -399,6 +400,7 @@ class Wapiti:
                 drop_cookies=self.crawler_configuration.drop_cookies,
                 headless=self._headless_mode,
                 cookies=self.crawler_configuration.cookies,
+                wait_time=self._wait_time,
             )
         else:
             explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
@@ -677,9 +679,13 @@ class Wapiti:
         """Set the headless mode used for browsing"""
         self._headless_mode = headless_mode
 
-    def add_start_url(self, url: str):
+    def set_wait_time(self, wait_time: float):
+        """Set the time to wait before processing a webpage content (headless mode only)"""
+        self._wait_time = wait_time
+
+    def add_start_url(self, request: Request):
         """Specify a URL to start the scan with. Can be called several times."""
-        self._start_urls.append(url)
+        self._start_urls.append(request)
 
     def add_excluded_url(self, url_or_pattern: str):
         """Specify a URL to exclude from the scan. Can be called several times."""
@@ -951,14 +957,14 @@ async def wapiti_main():
     try:
         for start_url in args.starting_urls:
             if start_url.startswith(("http://", "https://")):
-                wap.add_start_url(start_url)
+                wap.add_start_url(Request(start_url))
             elif os.path.isfile(start_url):
                 try:
                     with codecs.open(start_url, encoding="UTF-8") as urlfd:
                         for urlline in urlfd:
                             urlline = urlline.strip()
                             if urlline.startswith(("http://", "https://")):
-                                wap.add_start_url(urlline)
+                                wap.add_start_url(Request(urlline))
                 except UnicodeDecodeError as exception:
                     logging.error(_("Error: File given with the -s option must be UTF-8 encoded !"))
                     raise InvalidOptionValue("-s", start_url) from exception
@@ -981,6 +987,7 @@ async def wapiti_main():
             wap.set_intercepting_proxy_port(args.mitm_port)
 
         wap.set_headless(args.headless)
+        wap.set_wait_time(args.wait_time)
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):
