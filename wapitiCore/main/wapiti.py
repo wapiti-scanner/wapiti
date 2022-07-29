@@ -31,7 +31,7 @@ from random import choice
 from sqlite3 import OperationalError
 from time import gmtime, strftime
 from traceback import print_tb
-from typing import AsyncGenerator, Dict, List, Deque, Union, Optional
+from typing import AsyncGenerator, Dict, List, Deque, Optional
 from urllib.parse import urlparse
 from uuid import uuid1
 from dataclasses import replace

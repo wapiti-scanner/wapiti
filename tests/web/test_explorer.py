@@ -33,7 +33,7 @@ async def test_qs_limit():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
     explorer = Explorer(crawler_configuration, scope, Event())
-    start_urls = deque(["http://127.0.0.1:65080/"])
+    start_urls = deque([Request("http://127.0.0.1:65080/")])
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 4
@@ -42,7 +42,7 @@ async def test_qs_limit():
     explorer = Explorer(crawler_configuration, scope, Event())
     # Exclude huge POST form with limit of parameters
     explorer.qs_limit = 500
-    start_urls = deque(["http://127.0.0.1:65080/"])
+    start_urls = deque([Request("http://127.0.0.1:65080/")])
     excluded_urls = []
     # We should have root url, huge form page, target and target with POST method
     assert len([__ async for __ in explorer.async_explore(start_urls, excluded_urls)]) == 3
@@ -53,7 +53,7 @@ async def test_explorer_filtering():
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
     explorer = Explorer(crawler_configuration, scope, Event())
-    start_urls = deque(["http://127.0.0.1:65080/filters.html"])
+    start_urls = deque([Request("http://127.0.0.1:65080/filters.html")])
     excluded_urls = []
     results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
     # We should have current URL and JS URL but without query string.
