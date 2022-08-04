@@ -20,6 +20,7 @@ import asyncio
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, ERROR
 from http.cookiejar import CookieJar
+from urllib.parse import urlparse
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -36,7 +37,7 @@ from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
-from wapitiCore.net.explorer import Explorer
+from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS
 from wapitiCore.net.scope import Scope
 from wapitiCore.main.log import log_verbose, log_blue, logging
 from wapitiCore.parsers.html import Html
@@ -231,9 +232,17 @@ async def launch_headless_explorer(
                     page_source = response.content
 
                 html = Html(page_source, request.url, allow_fragments=True)
+                candidates = html.links + html.js_redirections + html.html_redirections + list(html.extra_urls)
 
-                for link in html.links:
+                for link in candidates:
                     if not scope.check(link):
+                        continue
+
+                    url_parts = urlparse(link)
+                    if url_parts.path.endswith((".css", ".js")):
+                        continue
+
+                    if not url_parts.query and url_parts.path.endswith(EXCLUDED_MEDIA_EXTENSIONS):
                         continue
 
                     next_request = Request(link)
