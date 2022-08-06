@@ -89,7 +89,7 @@ def parse_args():
     parser.add_argument(
         "--wait",
         dest="wait_time",
-        default=1.,
+        default=2.,
         help=_("Wait the specified amount of seconds before analyzing a webpage (headless mode only)"),
         metavar="TIME",
         type=float

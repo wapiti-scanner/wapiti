@@ -213,7 +213,7 @@ class Wapiti:
         self._proxy = None
         self.detailed_report = False
         self._headless_mode = "no"
-        self._wait_time = 1.
+        self._wait_time = 2.
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
