@@ -65,7 +65,7 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
 
 
-def wildcard_translate(pattern):
+def wildcard_translate(pattern: str) -> re.Pattern:
     """Translate a wildcard PATTERN to a regular expression object.
 
     This is largely inspired by fnmatch.translate.

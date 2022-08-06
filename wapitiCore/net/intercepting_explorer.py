@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+import re
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, ERROR
 from http.cookiejar import CookieJar
@@ -37,7 +38,7 @@ from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
-from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS
+from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS, wildcard_translate
 from wapitiCore.net.scope import Scope
 from wapitiCore.main.log import log_verbose, log_blue, logging
 from wapitiCore.parsers.html import Html
@@ -183,9 +184,10 @@ async def launch_headless_explorer(
         to_explore: Deque[Request],
         scope: Scope,
         proxy_port: int,
-        excluded_urls: list = None,
+        excluded_requests: List[Request],
+        exclusion_regexes: List[re.Pattern],
         visibility: str = "hidden",
-        wait_time: float = 1.,
+        wait_time: float = 2.,
 ):
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
@@ -207,11 +209,12 @@ async def launch_headless_explorer(
             }
         }
     )
+
     try:
         async with get_session(service, browser) as headless_client:
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
-                excluded_urls.append(request)
+                excluded_requests.append(request)
 
                 if request.method == "GET":
                     try:
@@ -245,12 +248,15 @@ async def launch_headless_explorer(
                     if not url_parts.query and url_parts.path.endswith(EXCLUDED_MEDIA_EXTENSIONS):
                         continue
 
+                    if any(regex.match(link) for regex in exclusion_regexes):
+                        continue
+
                     next_request = Request(link)
-                    if next_request not in to_explore and next_request not in excluded_urls:
+                    if next_request not in to_explore and next_request not in excluded_requests:
                         to_explore.append(next_request)
 
                 for form in html.iter_forms():
-                    if scope.check(form) and form not in to_explore and form not in excluded_urls:
+                    if scope.check(form) and form not in to_explore and form not in excluded_requests:
                         to_explore.append(form)
     except Exception as exception:  # pylint: disable=broad-except
         logging.error(f"Headless browser stopped prematurely due to exception: {exception.__class__.__name__}")
@@ -271,7 +277,7 @@ class InterceptingExplorer(Explorer):
             drop_cookies: bool = False,
             headless: str = "no",
             cookies: Optional[CookieJar] = None,
-            wait_time: float = 1.
+            wait_time: float = 2.
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -288,6 +294,21 @@ class InterceptingExplorer(Explorer):
             excluded_urls: list = None
     ) -> AsyncIterator[Tuple[Request, Response]]:
         queue = asyncio.Queue()
+
+        exclusion_regexes = []
+        excluded_requests = []
+
+        if isinstance(excluded_urls, list):
+            while True:
+                try:
+                    bad_request = excluded_urls.pop()
+                except IndexError:
+                    break
+                else:
+                    if isinstance(bad_request, str):
+                        exclusion_regexes.append(wildcard_translate(bad_request))
+                    elif isinstance(bad_request, Request):
+                        excluded_requests.append(bad_request)
 
         # Launch proxy as asyncio task
         mitm_task = asyncio.create_task(
@@ -313,7 +334,8 @@ class InterceptingExplorer(Explorer):
                     to_explore,
                     scope=self._scope,
                     proxy_port=self._mitm_port,
-                    excluded_urls=excluded_urls,
+                    excluded_requests=excluded_requests,
+                    exclusion_regexes=exclusion_regexes,
                     visibility=self._headless,
                     wait_time=self._wait_time,
                 )
@@ -330,10 +352,16 @@ class InterceptingExplorer(Explorer):
                 queue.task_done()
 
                 # Scope check and deduplication are made here
-                if self._scope.check(request) and request not in self._processed_requests:
-                    yield request, response
-                    self._processed_requests.append(request)
-                    log_verbose(f"[+] {request}")
+                if not self._scope.check(request) or request in self._processed_requests:
+                    continue
+
+                # Check for exclusion here because we don't have full control over the headless browser
+                if request in excluded_requests or any(regex.match(request.url) for regex in exclusion_regexes):
+                    continue
+
+                yield request, response
+                self._processed_requests.append(request)
+                log_verbose(f"[+] {request}")
 
             if self._stopped.is_set():
                 break
