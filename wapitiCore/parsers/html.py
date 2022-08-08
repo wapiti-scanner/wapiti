@@ -135,11 +135,16 @@ class Html:
     def iter_frames(self) -> Iterator[str]:
         """Returns the absolute URLs of frames loaded in the webpage."""
         for tag in self.soup.find_all(["frame", "iframe"], src=True):
-            value = tag["src"].split("#")[0].strip()
+            value = self._cleanup_fragment(tag["src"]).strip()
             if value:
                 fixed_url = self._make_absolute(value)
                 if fixed_url:
                     yield fixed_url
+
+    def _cleanup_fragment(self, url: str) -> str:
+        if self._allow_fragments:
+            return url
+        return url.split("#")[0]
 
     @not_empty
     def _iter_raw_links(self) -> Iterator[str]:
@@ -147,10 +152,10 @@ class Html:
         # yield self.redirection_url
 
         for tag in self.soup.find_all("a", href=True):
-            yield tag["href"].split("#")[0].strip()
+            yield self._cleanup_fragment(tag["href"]).strip()
 
         for tag in self.soup.find_all(["frame", "iframe"], src=True):
-            yield tag["src"].split("#")[0].strip()
+            yield self._cleanup_fragment(tag["src"]).strip()
 
         for tag in self.soup.find_all("form", action=True):
             yield tag["action"]

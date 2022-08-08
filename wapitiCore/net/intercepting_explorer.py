@@ -218,13 +218,16 @@ async def launch_headless_explorer(
 
                 if request.method == "GET":
                     try:
-                        await headless_client.get(request.url, timeout=5)
+                        await headless_client.get(request.url_with_fragment, timeout=5)
+                        await asyncio.sleep(wait_time)
+                        # We may be redirected outside our target so let's check the URL first
+                        if not scope.check(await headless_client.get_url()):
+                            continue
+
+                        page_source = await headless_client.get_page_source()
                     except ArsenicError as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
-
-                    await asyncio.sleep(wait_time)
-                    page_source = await headless_client.get_page_source()
                 else:
                     try:
                         response = await crawler.async_send(request)
@@ -258,6 +261,7 @@ async def launch_headless_explorer(
                 for form in html.iter_forms():
                     if scope.check(form) and form not in to_explore and form not in excluded_requests:
                         to_explore.append(form)
+
     except Exception as exception:  # pylint: disable=broad-except
         logging.error(f"Headless browser stopped prematurely due to exception: {exception.__class__.__name__}")
 
