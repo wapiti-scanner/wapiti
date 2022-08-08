@@ -188,6 +188,7 @@ async def launch_headless_explorer(
         exclusion_regexes: List[re.Pattern],
         visibility: str = "hidden",
         wait_time: float = 2.,
+        max_depth: int = 20,
 ):
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
@@ -244,6 +245,9 @@ async def launch_headless_explorer(
 
                     page_source = response.content
 
+                if request.link_depth == max_depth:
+                    continue
+
                 html = Html(page_source, request.url, allow_fragments=True)
                 candidates = html.links + html.js_redirections + html.html_redirections + list(html.extra_urls)
 
@@ -261,17 +265,18 @@ async def launch_headless_explorer(
                     if any(regex.match(link) for regex in exclusion_regexes):
                         continue
 
-                    next_request = Request(link)
+                    next_request = Request(link, link_depth=request.link_depth + 1)
                     if next_request not in to_explore and next_request not in excluded_requests:
                         to_explore.append(next_request)
 
                     if "?" in link:
-                        next_request = Request(link.split("?")[0])
+                        next_request = Request(link.split("?")[0], link_depth=request.link_depth + 1)
                         if next_request not in to_explore and next_request not in excluded_requests:
                             to_explore.append(next_request)
 
                 for form in html.iter_forms():
                     if scope.check(form) and form not in to_explore and form not in excluded_requests:
+                        form.link_depth = request.link_depth + 1
                         to_explore.append(form)
 
     except Exception as exception:  # pylint: disable=broad-except
@@ -354,6 +359,7 @@ class InterceptingExplorer(Explorer):
                     exclusion_regexes=exclusion_regexes,
                     visibility=self._headless,
                     wait_time=self._wait_time,
+                    max_depth=self._max_depth,
                 )
             )
 
