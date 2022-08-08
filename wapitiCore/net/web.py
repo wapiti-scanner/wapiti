@@ -277,6 +277,10 @@ class Request:
             referer : The URL from which the current Request was found.
         """
         self._resource_path = path.split("#")[0]
+        if "#" in path:
+            self._fragment = path.split("#", 1)[1]
+        else:
+            self._fragment = ""
 
         # Most of the members of a Request object are immutable so we compute
         # the data only one time (when asked for) and we keep it in memory for less
@@ -401,6 +405,9 @@ class Request:
             return False
 
         if self._resource_path != other.path:
+            return False
+
+        if self._fragment != other.fragment:
             return False
 
         return hash(self) == hash(other)
@@ -573,6 +580,16 @@ class Request:
             else:
                 self._cached_url = self._resource_path
         return self._cached_url
+
+    @property
+    def fragment(self) -> str:
+        return self._fragment
+
+    @property
+    def url_with_fragment(self) -> str:
+        if self._fragment:
+            return f"{self.url}#{self._fragment}"
+        return self.url
 
     @property
     def hostname(self) -> str:
