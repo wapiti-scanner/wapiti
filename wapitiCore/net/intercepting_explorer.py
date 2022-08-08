@@ -204,11 +204,18 @@ async def launch_headless_explorer(
         acceptInsecureCerts=True,
         **{
             "moz:firefoxOptions": {
-                # "prefs": {"security.cert_pinning.enforcement_level": 0},
+                # "prefs": {
+                #     "security.cert_pinning.enforcement_level": 0,
+                #     "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
+                # },
                 "args": ["-headless"] if visibility == "hidden" else []
             }
         }
     )
+
+    # We need to make a copy of this list otherwise requests won't make their way into async_explore (because list is
+    # shared). Also, we want our own list here because we will see URLs with anchors that the proxy can't catch.
+    excluded_requests = list(excluded_requests)
 
     try:
         async with get_session(service, browser) as headless_client:
@@ -257,6 +264,11 @@ async def launch_headless_explorer(
                     next_request = Request(link)
                     if next_request not in to_explore and next_request not in excluded_requests:
                         to_explore.append(next_request)
+
+                    if "?" in link:
+                        next_request = Request(link.split("?")[0])
+                        if next_request not in to_explore and next_request not in excluded_requests:
+                            to_explore.append(next_request)
 
                 for form in html.iter_forms():
                     if scope.check(form) and form not in to_explore and form not in excluded_requests:
