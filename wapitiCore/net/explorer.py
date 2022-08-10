@@ -193,6 +193,20 @@ class Explorer:
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)
 
+    def has_too_many_parameters(self, request: Request) -> bool:
+        if self._qs_limit:
+            if request.parameters_count:
+                try:
+                    if self._pattern_counts[
+                        request.pattern
+                    ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
+                        return True
+                except OverflowError:
+                    # Oh boy... that's not good to try to attack a form with more than 600 input fields
+                    # but I guess insane mode can do it as it is insane
+                    return True
+        return False
+
     def extract_links(self, response: Response, request) -> List:
         swf_links = []
         js_links = []
@@ -400,17 +414,8 @@ class Explorer:
                     continue
 
                 # Won't enter if qs_limit is 0 (aka insane mode)
-                if self._qs_limit:
-                    if request.parameters_count:
-                        try:
-                            if self._pattern_counts[
-                                request.pattern
-                            ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
-                                continue
-                        except OverflowError:
-                            # Oh boy... that's not good to try to attack a form with more than 600 input fields
-                            # but I guess insane mode can do it as it is insane
-                            continue
+                if self.has_too_many_parameters(request):
+                    continue
 
                 if self.is_forbidden(resource_url):
                     continue

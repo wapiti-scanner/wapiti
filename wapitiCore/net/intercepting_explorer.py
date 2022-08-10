@@ -381,6 +381,18 @@ class InterceptingExplorer(Explorer):
                 if request in excluded_requests or any(regex.match(request.url) for regex in exclusion_regexes):
                     continue
 
+                dir_name = request.dir_name
+                if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
+                    continue
+
+                self._file_counts[dir_name] += 1
+
+                if self.has_too_many_parameters(request):
+                    continue
+
+                if self._qs_limit and request.parameters_count:
+                    self._pattern_counts[request.pattern] += 1
+
                 yield request, response
                 self._processed_requests.append(request)
                 log_verbose(f"[+] {request}")
