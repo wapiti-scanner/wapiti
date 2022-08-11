@@ -124,6 +124,7 @@ if a script is vulnerable.""",
         "h11==0.12",
         "pyasn1==0.4.8"
         "arsenic==21.8",
+        "pyasn1==0.4.8",
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
