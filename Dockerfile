@@ -12,6 +12,8 @@ RUN apt update \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
+RUN pip3 install pyasn1 
+
 COPY . .
 
 RUN python3 setup.py install
