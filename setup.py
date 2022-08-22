@@ -122,6 +122,7 @@ if a script is vulnerable.""",
         "httpcore>=0.15.0",
         "mitmproxy==8.0.0",
         "h11==0.12",
+        "pyasn1==0.4.8"
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
