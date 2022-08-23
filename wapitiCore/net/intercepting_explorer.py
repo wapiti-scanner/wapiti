@@ -215,13 +215,11 @@ async def launch_headless_explorer(
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
     # This is the only way as a headless browser can't provide us response headers.
-    proxy = f"127.0.0.1:{proxy_port}"
     proxy_settings = {
         "proxyType": "manual",
-        "httpProxy": proxy,
-        "sslProxy": proxy
+        "httpProxy": f"127.0.0.1:{proxy_port}",
+        "sslProxy": f"127.0.0.1:{proxy_port}"
     }
-    service = services.Geckodriver()
     browser = browsers.Firefox(
         proxy=proxy_settings,
         acceptInsecureCerts=True,
@@ -241,7 +239,7 @@ async def launch_headless_explorer(
     excluded_requests = list(excluded_requests)
 
     try:
-        async with get_session(service, browser) as headless_client:
+        async with get_session(services.Geckodriver(), browser) as headless_client:
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
                 excluded_requests.append(request)
