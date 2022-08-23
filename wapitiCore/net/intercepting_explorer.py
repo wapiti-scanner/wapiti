@@ -22,6 +22,7 @@ from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, ERROR
 from http.cookiejar import CookieJar
 from urllib.parse import urlparse
+import inspect
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -42,6 +43,21 @@ from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS, wildcar
 from wapitiCore.net.scope import Scope
 from wapitiCore.main.log import log_verbose, log_blue, logging
 from wapitiCore.parsers.html import Html
+
+# Mime types that a browser will commonly display instead of downloading
+KNOWN_INTERPRETED_TYPES = (
+    "text/plain", "text/html", "application/javascript", "text/javascript", "text/css", "application/json",
+    "application/x-javascript", "image/webp", "application/manifest+json", "application/json+protobuf",
+    "image/avif", "image/png", "image/gif", "image/x-icon", "font/woff2", "image/jpeg", "image/svg+xml",
+    "application/ld+json", "font/ttf", "font/woff", "application/xhtml+xml",
+)
+
+
+def is_interpreted_type(mime_type: str) -> bool:
+    for known_mime_type in KNOWN_INTERPRETED_TYPES:
+        if mime_type.startswith(known_mime_type):
+            return True
+    return False
 
 
 def set_arsenic_log_level(level: int = WARNING):
@@ -119,10 +135,16 @@ class MitmFlowToWapitiRequests:
             if "set-cookie" in flow.response.headers:
                 del flow.response.headers["set-cookie"]
 
-        content_type = flow.response.headers.get("Content-Type", "text/plain")
+        content_type = flow.response.headers.get("Content-Type", "text/plain").split(";")[0]
         flow.response.stream = False
 
-        if "text" in content_type or "json" in content_type:
+        if not is_interpreted_type(content_type):
+            flow.response.status_code = 404
+            flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
+            flow.response.headers["content-type"] = "text/plain"
+            return
+
+        if "text" in content_type or "json" in content_type or "html" in content_type or "xml" in content_type:
             request = mitm_to_wapiti_request(flow.request)
 
             decoded_headers = decode_key_value_dict(flow.response.headers)
@@ -280,7 +302,11 @@ async def launch_headless_explorer(
                         to_explore.append(form)
 
     except Exception as exception:  # pylint: disable=broad-except
-        logging.error(f"Headless browser stopped prematurely due to exception: {exception.__class__.__name__}")
+        frm = inspect.trace()[-1]
+        mod = inspect.getmodule(frm[0])
+        logging.error(
+            f"Headless browser stopped prematurely due to exception: {mod.__name__}.{exception.__class__.__name__}"
+        )
 
     await asyncio.sleep(1)
     stop_event.set()
