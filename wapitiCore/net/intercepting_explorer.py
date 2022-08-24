@@ -113,10 +113,11 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
 
 
 class MitmFlowToWapitiRequests:
-    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, drop_cookies: bool = False):
+    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, scope: Scope, drop_cookies: bool = False):
         self._queue = data_queue
         self._headers = headers
         self._drop_cookies = drop_cookies
+        self._scope = scope
 
     async def request(self, flow):
         for key, value in self._headers.items():
@@ -139,7 +140,14 @@ class MitmFlowToWapitiRequests:
         flow.response.stream = False
 
         if not is_interpreted_type(content_type):
-            flow.response.status_code = 404
+            flow.response.status_code = 200
+            flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
+            flow.response.headers["content-type"] = "text/plain"
+            return
+
+        redirection = flow.response.headers.get("location", "")
+        if redirection.startswith(("http://", "https://")) and not self._scope.check(redirection):
+            flow.response.status_code = 200
             flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
             flow.response.headers["content-type"] = "text/plain"
             return
@@ -169,6 +177,7 @@ async def launch_proxy(
         data_queue: asyncio.Queue,
         headers: httpx.Headers,
         cookies: CookieJar,
+        scope: Scope,
         proxy: Optional[str] = None,
         drop_cookies: bool = False,
 ):
@@ -192,7 +201,7 @@ async def launch_proxy(
     # This mitmproxy module will do that and also load init cookies in the internal jar
     master.addons.add(AsyncStickyCookie(cookies))
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
-    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, drop_cookies))
+    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, scope, drop_cookies))
     try:
         await master.run()
     except asyncio.CancelledError:
@@ -228,6 +237,9 @@ async def launch_headless_explorer(
                 # "prefs": {
                 #     "security.cert_pinning.enforcement_level": 0,
                 #     "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
+                #     "browser.download.folderList": 2,
+                #     "browser.download.manager.showWhenStarting": False,
+                #     "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream",
                 # },
                 "args": ["-headless"] if visibility == "hidden" else []
             }
@@ -361,9 +373,10 @@ class InterceptingExplorer(Explorer):
                 self._mitm_port,
                 queue,
                 self._crawler.headers,
+                self._cookies,
+                self._scope,
                 proxy=self._proxy,
                 drop_cookies=self._drop_cookies,
-                cookies=self._cookies,
             )
         )
 
