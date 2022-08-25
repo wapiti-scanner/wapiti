@@ -23,6 +23,8 @@ from logging import getLogger, WARNING, ERROR
 from http.cookiejar import CookieJar
 from urllib.parse import urlparse
 import inspect
+# import sys
+# from traceback import print_tb
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -30,7 +32,8 @@ from mitmproxy.options import Options
 from mitmproxy.http import Request as MitmRequest
 import httpx
 from arsenic import get_session, browsers, services
-from arsenic.errors import ArsenicError
+from arsenic.constants import SelectorType
+from arsenic.errors import ArsenicError, ElementNotInteractable, UnknownArsenicError, NoSuchElement
 import structlog
 
 from wapitiCore.net import Request
@@ -311,7 +314,32 @@ async def launch_headless_explorer(
                         form.link_depth = request.link_depth + 1
                         to_explore.append(form)
 
+                # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
+                for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
+                    button_index = 1
+                    while True:
+                        try:
+                            element = await headless_client.get_element(
+                                f"({xpath_selector})[{button_index}]",
+                                selector_type=SelectorType.xpath,
+                            )
+                            await element.click()
+                        except (ElementNotInteractable, UnknownArsenicError):
+                            button_index += 1
+                            continue
+                        except NoSuchElement:
+                            # No more buttons
+                            break
+                        else:
+                            button_index += 1
+                            await asyncio.sleep(wait_time)
+                            current_url = await headless_client.get_url()
+                            if current_url != request.url_with_fragment:
+                                await headless_client.get(request.url_with_fragment, timeout=5)
+
     except Exception as exception:  # pylint: disable=broad-except
+        # exception_traceback = sys.exc_info()[2]
+        # print_tb(exception_traceback)
         frm = inspect.trace()[-1]
         mod = inspect.getmodule(frm[0])
         logging.error(
