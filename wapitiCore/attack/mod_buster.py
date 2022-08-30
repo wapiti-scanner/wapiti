@@ -39,8 +39,8 @@ class ModuleBuster(Attack):
     do_get = True
     do_post = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.known_dirs = []
         self.known_pages = []
         self.new_resources = []

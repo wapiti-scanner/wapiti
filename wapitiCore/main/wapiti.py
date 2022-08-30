@@ -326,7 +326,13 @@ class Wapiti:
                     continue
 
                 class_name = module_to_class_name(mod_name)
-                class_instance = getattr(mod, class_name)(crawler, self.persister, self.attack_options, stop_event)
+                class_instance = getattr(mod, class_name)(
+                    crawler,
+                    self.persister,
+                    self.attack_options,
+                    stop_event,
+                    self.crawler_configuration,
+                )
                 if hasattr(class_instance, "set_timeout"):
                     class_instance.set_timeout(crawler.timeout)
 

@@ -284,8 +284,8 @@ class ModuleSql(Attack):
     payloads = ("[VALUE]\xBF'\"(", Flags())
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        super().__init__(crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.mutator = self.get_mutator()
 
     @staticmethod

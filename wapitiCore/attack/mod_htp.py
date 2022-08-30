@@ -37,8 +37,8 @@ class ModuleHtp(Attack):
     HTP_DATABASE = "hashtheplanet.db"
     HTP_DATABASE_URL = "https://github.com/Cyberwatch/HashThePlanet/releases/download/latest/hashtheplanet.db"
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.tech_versions: Dict[Technology, List[Version]] = {}
         self.user_config_dir = self.persister.CONFIG_DIR
 

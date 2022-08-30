@@ -30,8 +30,8 @@ class ModuleLog4Shell(Attack):
     DRUID_URL = "druid/coordinator/v1/lookups/config/"
     SOLR_URL = "solr/admin/cores"
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         if not self._is_valid_dns(attack_options.get("dns_endpoint")):
             self.finished = True
 

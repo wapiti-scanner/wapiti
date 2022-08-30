@@ -46,8 +46,8 @@ class ModuleBackup(Attack):
     do_get = True
     do_post = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        super().__init__(crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.false_positive_directories = {}
 
     async def is_false_positive(self, request: Request):

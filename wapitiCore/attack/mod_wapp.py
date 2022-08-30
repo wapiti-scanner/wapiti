@@ -20,7 +20,13 @@ import os
 import asyncio
 import string
 from typing import Dict, Tuple, Optional
+import re
+from urllib.parse import urlparse
+
 from httpx import RequestError
+
+from arsenic import get_session, browsers, services
+from arsenic.errors import JavascriptError, UnknownError, ArsenicError
 
 from wapitiCore.main.log import logging, log_blue
 from wapitiCore.attack.attack import Attack
@@ -35,6 +41,40 @@ from wapitiCore.net import Request
 MSG_TECHNO_VERSIONED = _("{0} {1} detected")
 MSG_CATEGORIES = _("  -> Categorie(s): {0}")
 MSG_GROUPS = _("  -> Group(s): {0}")
+
+BULK_SIZE = 50
+VERSION_REGEX = re.compile(r"\d[\d.]*")
+
+SCRIPT = (
+    "wapiti_results = {};\n"
+    "for (var js_tech in wapiti_tests) {\n"
+    "  for (var i in wapiti_tests[js_tech]) {\n"
+    "    try {\n"
+    "      wapiti_results[js_tech] = [String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]; break;\n"
+    "    } catch(wapiti_error) {\n"
+    "      continue;\n"
+    "    }\n"
+    "  }\n"
+    "}\n"
+    "return wapiti_results;\n"
+)
+
+
+def get_tests(data: dict):
+    tests = {}
+
+    for i, tech in enumerate(data):
+        if "js" not in data[tech] or not data[tech]["js"]:
+            continue
+
+        tuples = sorted(data[tech]["js"].items(), key=lambda x: len(x[1]), reverse=True)
+        tests[tech] = [key_value[0] for key_value in tuples]
+        if len(tests) >= BULK_SIZE:
+            yield tests
+            tests = {}
+
+    if tests:
+        yield tests
 
 
 class ModuleWapp(Attack):
@@ -56,8 +96,8 @@ class ModuleWapp(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
@@ -104,7 +144,7 @@ class ModuleWapp(Attack):
 
         detected_applications, response = await self._detect_applications(request.url, application_data)
 
-        if len(detected_applications) > 0:
+        if detected_applications:
             log_blue("---")
 
         for application_name in sorted(detected_applications, key=lambda x: x.lower()):
@@ -143,9 +183,15 @@ class ModuleWapp(Attack):
                         response=response
                     )
 
-    async def _detect_applications(self, url: str, application_data: ApplicationData) -> Tuple[Dict, Response]:
-        detected_applications = []
+    async def _detect_applications(
+            self,
+            url: str,
+            application_data: ApplicationData
+    ) -> Tuple[Dict, Optional[Response]]:
+        detected_applications = {}
         response = None
+
+        headless_results = await self._detect_applications_headless(url)
 
         # Detecting the applications for the url with and without the follow_redirects flag
         for follow_redirect in [True, False]:
@@ -157,14 +203,10 @@ class ModuleWapp(Attack):
                 self.network_errors += 1
                 continue
 
-            wappalyzer = Wappalyzer(application_data, response)
-            detected_applications.append(wappalyzer.detect_with_versions_and_categories_and_groups())
+            wappalyzer = Wappalyzer(application_data, response, headless_results)
+            detected_applications.update(wappalyzer.detect())
 
-        if not detected_applications:
-            return {}, response
-        if len(detected_applications) == 1:
-            return detected_applications[0], response
-        return {**detected_applications[0], **detected_applications[1]}, response
+        return detected_applications, response
 
     async def _dump_url_content_to_file(self, url: str, file_path: str):
         request = Request(url)
@@ -177,16 +219,16 @@ class ModuleWapp(Attack):
         categories_file_path = os.path.join(self.user_config_dir, self.WAPP_CATEGORIES)
         groups_file_path = os.path.join(self.user_config_dir, self.WAPP_GROUPS)
         technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
-        technologie_files_name = list(map(lambda file_name: file_name + ".json", list("_" + string.ascii_lowercase)))
+        technology_files_names = list(map(lambda file_name: file_name + ".json", list("_" + string.ascii_lowercase)))
         technologies = {}
 
         # Requesting all technologies one by one
-        for technologie_file_name in technologie_files_name:
-            request = Request(technologies_base_url + technologie_file_name)
+        for technology_file_name in technology_files_names:
+            request = Request(technologies_base_url + technology_file_name)
             response: Response = await self.crawler.async_send(request)
             # Merging all technologies in one object
-            for technologie_name in response.json:
-                technologies[technologie_name] = response.json[technologie_name]
+            for technology_name in response.json:
+                technologies[technology_name] = response.json[technology_name]
 
         # Saving categories & groups
         await asyncio.gather(
@@ -215,3 +257,61 @@ class ModuleWapp(Attack):
             logging.warning(_("Problem with local wapp database."))
             logging.info(_("Downloading from the web..."))
             await self.update()
+
+    async def _detect_applications_headless(self, url: str) -> dict:
+        proxy_settings = None
+        if self.crawler_configuration.proxy:
+            proxy = urlparse(self.crawler_configuration.proxy).netloc
+            proxy_settings = {
+                "proxyType": 'manual',
+                "httpProxy": proxy,
+                "sslProxy": proxy
+            }
+
+        service = services.Geckodriver()
+        browser = browsers.Firefox(
+            proxy=proxy_settings,
+            acceptInsecureCerts=True,
+            **{
+                "moz:firefoxOptions": {
+                    "args": ["-headless"]
+                }
+            }
+        )
+
+        technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
+        final_results = {}
+
+        with open(technologies_file_path) as fd:
+            data = json.load(fd)
+            try:
+                async with get_session(service, browser) as headless_client:
+                    await headless_client.get(url, timeout=self.crawler_configuration.timeout)
+                    await asyncio.sleep(5)
+                    for tests in get_tests(data):
+                        script = f"wapiti_tests = {json.dumps(tests)};\n" + SCRIPT
+                        try:
+                            results = await headless_client.execute_script(script)
+                            for software, version_and_js in results.items():
+                                version, js = version_and_js
+                                expected_format = data[software]["js"][js]
+                                if version == "undefined":
+                                    continue
+
+                                if not expected_format:
+                                    if VERSION_REGEX.match(version):
+                                        final_results[software] = [version]
+                                    else:
+                                        final_results[software] = []
+                                elif isinstance(version, str):
+                                    final_results[software] = [version]
+                                # Other cases seems to be some kind of false positives
+                            # final_results.update(results)
+                        except (JavascriptError, UnknownError) as exception:
+                            logging.exception(exception)
+                            continue
+
+            except ArsenicError:
+                pass
+
+        return final_results
