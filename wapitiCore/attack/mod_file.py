@@ -107,8 +107,8 @@ class ModuleFile(Attack):
 
     name = "file"
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.rules_to_messages = {}
         self.payload_to_rules = {}
         self.known_false_positives = defaultdict(set)

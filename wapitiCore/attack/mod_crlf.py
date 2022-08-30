@@ -39,8 +39,8 @@ class ModuleCrlf(Attack):
     do_post = True
     payloads = (quote("http://www.google.fr\r\nwapiti: 3.1.3 version"), Flags())
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        super().__init__(crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.mutator = self.get_mutator()
 
     async def attack(self, request: Request, response: Optional[Response] = None):

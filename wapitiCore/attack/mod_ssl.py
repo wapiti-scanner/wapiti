@@ -346,8 +346,8 @@ class ModuleSsl(Attack):
     """Evaluate the security of SSL/TLS certificate configuration."""
     name = "ssl"
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         # list to ensure only one occurrence per (vulnerable url/post_keys) tuple
         self.tested_targets = set()
 

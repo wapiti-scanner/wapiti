@@ -67,8 +67,8 @@ class ModuleNikto(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.user_config_dir = self.persister.CONFIG_DIR
         self.junk_string = "w" + "".join(
             [random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)]

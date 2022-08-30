@@ -51,8 +51,8 @@ class ModuleXxe(Attack):
     PAYLOADS_FILE = "xxePayloads.ini"
     MSG_VULN = _("XXE vulnerability")
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.vulnerables = set()
         self.attacked_urls = set()
         self.payload_to_rules = {}

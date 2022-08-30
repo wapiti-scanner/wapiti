@@ -197,8 +197,8 @@ class ModuleTakeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
 
-    def __init__(self, crawler, persister, attack_options, stop_event):
-        super().__init__(crawler, persister, attack_options, stop_event)
+    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.processed_domains = set()
         self.takeover = TakeoverChecker()
 

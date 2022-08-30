@@ -28,10 +28,12 @@ from binascii import hexlify
 from functools import partialmethod
 from typing import Optional
 from pkg_resources import resource_filename
+from asyncio import Event
 
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
@@ -239,7 +241,13 @@ class Attack:
     def get_resource(resource_path: str):
         return resource_filename("wapitiCore", path_join("data", "attacks", resource_path))
 
-    def __init__(self, crawler: AsyncCrawler, persister: SqlPersister, attack_options, stop_event):
+    def __init__(
+            self,
+            crawler: AsyncCrawler,
+            persister: SqlPersister,
+            attack_options: dict,
+            stop_event: Event,
+            crawler_configuration: CrawlerConfiguration):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
@@ -247,6 +255,7 @@ class Attack:
         self._stop_event = stop_event
         self.payload_reader = PayloadReader(attack_options)
         self.options = attack_options
+        self.crawler_configuration = crawler_configuration
 
         # List of attack urls already launched in the current module
         self.attacked_get = []
