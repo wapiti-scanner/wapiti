@@ -83,21 +83,31 @@ async def test_url_detection():
                 args[1]["payload_type"], args[1]["info"], args[1]["category"]
             ) for args in persister.add_payload.call_args_list
         ]
+
         expected_results = [
             (
                 'additional',
-                '{"versions": [], "name": "Microsoft ASP.NET", "categories": ["Web frameworks"], "groups": ["Web development"]}',
-                _("Fingerprint web technology")
+                '{"name": "IIS", "versions": [], "categories": ["Web servers"], "groups": ["Servers"]}',
+                'Technologie web identifiée'
             ),
             (
                 'additional',
-                '{"versions": [], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
-                _("Fingerprint web technology")
+                '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web frameworks"], "groups": ["Web development"]}',
+                'Technologie web identifiée'
+            ),
+            (
+                'additional',
+                '{"name": "Outlook Web App", "versions": [], "categories": ["Webmail"], "groups": ["Communication"]}',
+                'Technologie web identifiée'
+            ),
+            (
+                'additional',
+                '{"name": "Windows Server", "versions": [], "categories": ["Operating systems"], "groups": ["Servers"]}',
+                'Technologie web identifiée'
             )
         ]
 
-        for expected_result in expected_results:
-            assert expected_result in results
+        assert sorted(expected_results) == sorted(results)
 
 
 @pytest.mark.asyncio
