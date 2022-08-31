@@ -50,7 +50,7 @@ async def test_read_headers():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
         module.DATA_DIR = ""
 
         with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers:
@@ -85,7 +85,7 @@ async def test_get_batch_malicious_headers():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         headers = random.sample(range(0, 100), 100)
         malicious_headers, headers_uuid_record = module._get_batch_malicious_headers(headers)
@@ -119,7 +119,7 @@ async def test_verify_dns():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
         module._dns_host = ""
 
         with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(True),)):
@@ -144,7 +144,7 @@ async def test_is_valid_dns():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         good_dns = "foobar"
         bad_dns = "wrongdns"
@@ -182,7 +182,7 @@ async def test_verify_headers_vuln_found():
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
 
-            module = ModuleLog4Shell(crawler, persister, options, Event())
+            module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
             module._verify_dns = mock_verify_dns
 
@@ -231,7 +231,7 @@ async def test_verify_headers_vuln_not_found():
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
 
-            module = ModuleLog4Shell(crawler, persister, options, Event())
+            module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
             module._verify_dns = mock_verify_dns
 
@@ -261,7 +261,7 @@ async def test_must_attack():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         module.finished = False
 
@@ -289,6 +289,7 @@ async def test_attack():
     request.path_id = 1
 
     crawler = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2}
 
     request_to_attack = Request("http://perdu.com/", "GET")
@@ -298,7 +299,7 @@ async def test_attack():
 
     with mock.patch("builtins.open", get_mock_open(files)) as mock_open_headers, \
         patch.object(ModuleLog4Shell, "_verify_dns", return_value=future_verify_dns) as mock_verify_dns:
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         module.DATA_DIR = ""
         module.HEADERS_FILE = "headers.txt"
@@ -321,25 +322,26 @@ def test_init():
     request.path_id = 1
 
     crawler = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2, "dns_endpoint": None}
 
     # When the dns_endpoint is valid
     with patch.object(ModuleLog4Shell, "_is_valid_dns", return_value=True), \
         patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         assert mock_gethostbyname.assert_called_once
         assert not module.finished
 
     # When the dns_endpoint is not valid
     with patch.object(ModuleLog4Shell, "_is_valid_dns", return_value=False):
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         assert module.finished
 
     # When the dns_endpoint is None
     with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         assert module.finished
 
@@ -356,6 +358,7 @@ async def test_attack_apache_struts():
     request.path_id = 1
 
     crawler = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2, "dns_endpoint": None}
 
     future_url_vulnerability = asyncio.Future()
@@ -366,7 +369,7 @@ async def test_attack_apache_struts():
             "_verify_url_vulnerability",
             return_value=future_url_vulnerability
     ) as mock_verify_url:
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         await module._attack_apache_struts("http://perdu.com/")
 
@@ -386,13 +389,18 @@ async def test_attack_apache_druid():
     request.path_id = 1
 
     crawler = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     options = {"timeout": 10, "level": 2, "dns_endpoint": None}
 
     future_url_vulnerability = asyncio.Future()
     future_url_vulnerability.set_result(None)
 
-    with patch.object(ModuleLog4Shell, "_verify_url_vulnerability", return_value=future_url_vulnerability) as mock_verify_url:
-        module = ModuleLog4Shell(crawler, persister, options, Event())
+    with patch.object(
+            ModuleLog4Shell,
+            "_verify_url_vulnerability",
+            return_value=future_url_vulnerability
+    ) as mock_verify_url:
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         await module._attack_apache_druid_url("http://perdu.com/")
 

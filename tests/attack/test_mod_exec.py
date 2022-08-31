@@ -57,7 +57,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleExec(crawler, persister, options, Event())
+        module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = True
         for request in all_requests:
             await module.attack(request)
@@ -85,7 +85,7 @@ async def test_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleExec(crawler, persister, options, Event())
+        module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_count == 1
@@ -114,7 +114,7 @@ async def test_blind_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 1, "level": 1}
 
-        module = ModuleExec(crawler, persister, options, Event())
+        module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
 
         payloads_until_sleep = 0

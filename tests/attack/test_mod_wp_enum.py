@@ -34,7 +34,7 @@ async def test_no_wordpress():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWpEnum(crawler, persister, options, Event())
+        module = ModuleWpEnum(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -104,7 +104,7 @@ async def test_plugin():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWpEnum(crawler, persister, options, Event())
+        module = ModuleWpEnum(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -191,7 +191,7 @@ async def test_theme():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWpEnum(crawler, persister, options, Event())
+        module = ModuleWpEnum(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -243,7 +243,7 @@ async def test_wp_version():
 
         with patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
                 patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
-            module = ModuleWpEnum(crawler, persister, options, Event())
+            module = ModuleWpEnum(crawler, persister, options, Event(), crawler_configuration)
 
             await module.attack(request)
 
@@ -284,7 +284,7 @@ async def test_wp_version_no_file():
 
         with patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()) as mock_detect_plugin, \
                 patch.object(ModuleWpEnum, "detect_theme", AsyncMock()) as mock_detect_theme:
-            module = ModuleWpEnum(crawler, persister, options, Event())
+            module = ModuleWpEnum(crawler, persister, options, Event(), crawler_configuration)
 
             await module.attack(request)
 

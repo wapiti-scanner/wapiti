@@ -63,7 +63,7 @@ SCRIPT = (
 def get_tests(data: dict):
     tests = {}
 
-    for i, tech in enumerate(data):
+    for tech in data:
         if "js" not in data[tech] or not data[tech]["js"]:
             continue
 
@@ -282,7 +282,7 @@ class ModuleWapp(Attack):
         technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
         final_results = {}
 
-        with open(technologies_file_path) as fd:
+        with open(technologies_file_path, encoding="utf-8") as fd:
             data = json.load(fd)
             try:
                 async with get_session(service, browser) as headless_client:
@@ -311,7 +311,8 @@ class ModuleWapp(Attack):
                             logging.exception(exception)
                             continue
 
-            except ArsenicError:
+            except (ArsenicError, FileNotFoundError):
+                # Geckodriver may be missing, etc
                 pass
 
         return final_results

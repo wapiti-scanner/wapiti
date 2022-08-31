@@ -40,7 +40,7 @@ async def test_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -72,13 +72,17 @@ async def test_url_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
         persister.add_payload.assert_called
 
-        results = [(args[1]["payload_type"], args[1]["info"], args[1]["category"]) for args in persister.add_payload.call_args_list]
+        results = [
+            (
+                args[1]["payload_type"], args[1]["info"], args[1]["category"]
+            ) for args in persister.add_payload.call_args_list
+        ]
         expected_results = [
             (
                 'additional',
@@ -122,7 +126,7 @@ async def test_html_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -159,7 +163,7 @@ async def test_script_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -196,7 +200,7 @@ async def test_cookies_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -233,7 +237,7 @@ async def test_headers_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -271,7 +275,7 @@ async def test_meta_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -311,7 +315,7 @@ async def test_multi_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -348,7 +352,7 @@ async def test_implies_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -388,7 +392,7 @@ async def test_vulnerabilities():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
@@ -443,13 +447,17 @@ async def test_merge_with_and_without_redirection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event())
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
         await module.attack(request)
 
         persister.add_payload.assert_called
 
-        results = [(args[1]["payload_type"], args[1]["info"], args[1]["category"]) for args in persister.add_payload.call_args_list]
+        results = [
+            (
+                args[1]["payload_type"], args[1]["info"], args[1]["category"]
+            ) for args in persister.add_payload.call_args_list
+        ]
         expected_results = [
             (
                 'additional',
