@@ -35,7 +35,7 @@ async def test_redirect_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event())
+        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -75,7 +75,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event())
+        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = True
         for request in all_requests:
             await module.attack(request)

@@ -49,7 +49,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsrf(crawler, persister, options, Event())
+        module = ModuleSsrf(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = True
 
         respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(

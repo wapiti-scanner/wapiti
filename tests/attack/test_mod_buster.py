@@ -41,7 +41,7 @@ async def test_whole_stuff():
                 "wapitiCore.attack.mod_buster.ModuleBuster.payloads",
                 [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
         ):
-            module = ModuleBuster(crawler, persister, options, Event())
+            module = ModuleBuster(crawler, persister, options, Event(), crawler_configuration)
             module.do_get = True
             await module.attack(request, None)
 

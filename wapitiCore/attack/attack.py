@@ -27,9 +27,9 @@ from types import GeneratorType, FunctionType
 from binascii import hexlify
 from functools import partialmethod
 from typing import Optional
-from pkg_resources import resource_filename
 from asyncio import Event
 
+from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.net.crawler import AsyncCrawler

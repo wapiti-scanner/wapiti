@@ -111,9 +111,8 @@ async def test_applicationdata():
     resp = httpx.get(target_url, follow_redirects=False)
     page = Response(resp)
 
-    wappalyzer = Wappalyzer(application_data, page)
-
-    result = wappalyzer.detect_with_versions_and_categories_and_groups()
+    wappalyzer = Wappalyzer(application_data, page, {})
+    result = wappalyzer.detect()
 
     assert len(result) == 1
     assert result.get("PHP") is not None

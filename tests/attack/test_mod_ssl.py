@@ -51,7 +51,7 @@ async def test_ssl_scanner():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsl(crawler, persister, options, Event())
+        module = ModuleSsl(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
 
         # Depending on installed python/openssl version different vulnerabilities may be present but the following
