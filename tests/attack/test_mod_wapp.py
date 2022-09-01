@@ -87,27 +87,23 @@ async def test_url_detection():
         expected_results = [
             (
                 'additional',
-                '{"name": "IIS", "versions": [], "categories": ["Web servers"], "groups": ["Servers"]}',
-                'Technologie web identifiée'
+                (
+                    '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web '
+                    'frameworks"], "groups": ["Web development"]}'
+                ),
+                _("Fingerprint web technology"),
             ),
             (
                 'additional',
-                '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web frameworks"], "groups": ["Web development"]}',
-                'Technologie web identifiée'
-            ),
-            (
-                'additional',
-                '{"name": "Outlook Web App", "versions": [], "categories": ["Webmail"], "groups": ["Communication"]}',
-                'Technologie web identifiée'
-            ),
-            (
-                'additional',
-                '{"name": "Windows Server", "versions": [], "categories": ["Operating systems"], "groups": ["Servers"]}',
-                'Technologie web identifiée'
+                (
+                    '{"name": "Outlook Web App", "versions": [], "categories": ["Webmail"], '
+                    '"groups": ["Communication"]}'
+                ),
+                _("Fingerprint web technology"),
             )
         ]
 
-        assert sorted(expected_results) == sorted(results)
+        assert sorted(results) == sorted(expected_results)
 
 
 @pytest.mark.asyncio
@@ -334,7 +330,8 @@ async def test_multi_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[-1][1]["info"] == (
-            '{"versions": ["5.6.1"], "name": "WordPress", "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+            '{"name": "WordPress", "versions": ["5.6.1"], "categories": ["CMS", "Blogs"], '
+            '"groups": ["Content"]}'
         )
 
 
@@ -371,10 +368,12 @@ async def test_implies_detection():
 
         assert persister.add_payload.call_count == 3
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
+            '{"name": "Backdrop", "versions": ["4.5"], "categories": ["CMS"], "groups": '
+            '["Content"]}'
         )
         assert persister.add_payload.call_args_list[-1][1]["info"] == (
-            '{"versions": [], "name": "PHP", "categories": ["Programming languages"], "groups": ["Web development"]}'
+            '{"name": "PHP", "versions": [], "categories": ["Programming languages"], '
+            '"groups": ["Web development"]}'
         )
 
 
@@ -412,12 +411,12 @@ async def test_vulnerabilities():
         assert persister.add_payload.call_count == 5
         # FIrst one is an additional
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["4.5"], "name": "Backdrop", "categories": ["CMS"], "groups": ["Content"]}'
+            '{"name": "Backdrop", "versions": ["4.5"], "categories": ["CMS"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
 
         assert persister.add_payload.call_args_list[3][1]["info"] == (
-            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
+            '{"name": "Cherokee", "versions": ["1.3.4"], "categories": ["Web servers"], "groups": ["Servers"]}'
         )
         assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
 
@@ -471,23 +470,23 @@ async def test_merge_with_and_without_redirection():
                 args[1]["payload_type"], args[1]["info"], args[1]["category"]
             ) for args in persister.add_payload.call_args_list
         ]
+
         expected_results = [
             (
                 'additional',
-                '{"versions": [], "name": "Microsoft ASP.NET", "categories": ["Web frameworks"], "groups": ["Web development"]}',
+                '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web frameworks"], "groups": ["Web development"]}',
                 _("Fingerprint web technology")
             ),
             (
                 'additional',
-                '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
+                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "categories": ["Webmail"], "groups": ["Communication"]}',
                 _("Fingerprint web technology")
             ),
             (
                 'vulnerability',
-                '{"versions": ["15.0.1497", "15.0.1497.26"], "name": "Outlook Web App", "categories": ["Webmail"], "groups": ["Communication"]}',
+                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "categories": ["Webmail"], "groups": ["Communication"]}',
                 _("Fingerprint web application framework")
-            )
+            ),
         ]
 
-        for result in expected_results:
-            assert result in results
+        assert sorted(results) == sorted(expected_results)
