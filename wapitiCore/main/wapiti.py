@@ -356,7 +356,13 @@ class Wapiti:
                 try:
                     mod = import_module("wapitiCore.attack.mod_" + mod_name)
                     class_name = module_to_class_name(mod_name)
-                    class_instance = getattr(mod, class_name)(crawler, self.persister, self.attack_options, stop_event)
+                    class_instance = getattr(mod, class_name)(
+                        crawler,
+                        self.persister,
+                        self.attack_options,
+                        stop_event,
+                        self.crawler_configuration,
+                    )
                     if hasattr(class_instance, "update"):
                         logging.info(_("Updating module {0}").format(mod_name))
                         await class_instance.update()
