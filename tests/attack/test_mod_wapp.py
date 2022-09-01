@@ -142,7 +142,8 @@ async def test_html_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["2.8.4"], "name": "Atlassian FishEye", "categories": ["Development"], "groups": ["Web development"]}'
+            '{"name": "Atlassian FishEye", "versions": ["2.8.4"], "categories": '
+            '["Development"], "groups": ["Web development"]}'
         )
 
 
@@ -179,7 +180,8 @@ async def test_script_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["1.4.2"], "name": "Chart.js", "categories": ["JavaScript graphics"], "groups": ["Web development"]}'
+            '{"name": "Chart.js", "versions": ["1.4.2"], "categories": ["JavaScript '
+            'graphics"], "groups": ["Web development"]}'
         )
 
 
@@ -216,7 +218,8 @@ async def test_cookies_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["2+"], "name": "CodeIgniter", "categories": ["Web frameworks"], "groups": ["Web development"]}'
+            '{"name": "CodeIgniter", "versions": ["2+"], "categories": ["Web '
+            'frameworks"], "groups": ["Web development"]}'
         )
 
 
@@ -253,7 +256,7 @@ async def test_headers_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["1.3.4"], "name": "Cherokee", "categories": ["Web servers"], "groups": ["Servers"]}'
+            '{"name": "Cherokee", "versions": ["1.3.4"], "categories": ["Web servers"], "groups": ["Servers"]}'
         )
 
 
@@ -291,7 +294,7 @@ async def test_meta_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"versions": ["1.6.2"], "name": "Planet", "categories": ["Feed readers"], "groups": ["Content"]}'
+            '{"name": "Planet", "versions": ["1.6.2"], "categories": ["Feed readers"], "groups": ["Content"]}'
         )
 
 
