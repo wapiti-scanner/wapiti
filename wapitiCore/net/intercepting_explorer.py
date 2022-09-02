@@ -212,6 +212,55 @@ async def launch_proxy(
     return master.addons.get("asyncstickycookie").jar
 
 
+def extract_requests(html: Html, request: Request):
+    candidates = html.links + html.js_redirections + html.html_redirections + list(html.extra_urls)
+
+    for link in candidates:
+        url_parts = urlparse(link)
+        if url_parts.path.endswith((".css", ".js")):
+            continue
+
+        if not url_parts.query and url_parts.path.endswith(EXCLUDED_MEDIA_EXTENSIONS):
+            continue
+
+        next_request = Request(link, link_depth=request.link_depth + 1)
+        yield next_request
+
+        if "?" in link:
+            next_request = Request(link.split("?")[0], link_depth=request.link_depth + 1)
+            yield next_request
+
+    for form in html.iter_forms():
+        # if scope.check(form) and form not in to_explore and form not in excluded_requests:
+        form.link_depth = request.link_depth + 1
+        yield form
+
+
+async def click_in_webpage(headless_client, request: Request, wait_time: float):
+    # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
+    for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
+        button_index = 1
+        while True:
+            try:
+                element = await headless_client.get_element(
+                    f"({xpath_selector})[{button_index}]",
+                    selector_type=SelectorType.xpath,
+                )
+                await element.click()
+            except (ElementNotInteractable, UnknownArsenicError):
+                button_index += 1
+                continue
+            except NoSuchElement:
+                # No more buttons
+                break
+            else:
+                button_index += 1
+                await asyncio.sleep(wait_time)
+                current_url = await headless_client.get_url()
+                if current_url != request.url_with_fragment:
+                    await headless_client.get(request.url_with_fragment, timeout=5)
+
+
 async def launch_headless_explorer(
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
@@ -268,6 +317,7 @@ async def launch_headless_explorer(
                             continue
 
                         page_source = await headless_client.get_page_source()
+                        await click_in_webpage(headless_client, request, wait_time)
                     except ArsenicError as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
@@ -284,58 +334,16 @@ async def launch_headless_explorer(
                     continue
 
                 html = Html(page_source, request.url, allow_fragments=True)
-                candidates = html.links + html.js_redirections + html.html_redirections + list(html.extra_urls)
 
-                for link in candidates:
-                    if not scope.check(link):
+                for next_request in extract_requests(html, request):
+                    if not scope.check(next_request):
                         continue
 
-                    url_parts = urlparse(link)
-                    if url_parts.path.endswith((".css", ".js")):
+                    if any(regex.match(next_request.url) for regex in exclusion_regexes):
                         continue
 
-                    if not url_parts.query and url_parts.path.endswith(EXCLUDED_MEDIA_EXTENSIONS):
-                        continue
-
-                    if any(regex.match(link) for regex in exclusion_regexes):
-                        continue
-
-                    next_request = Request(link, link_depth=request.link_depth + 1)
                     if next_request not in to_explore and next_request not in excluded_requests:
                         to_explore.append(next_request)
-
-                    if "?" in link:
-                        next_request = Request(link.split("?")[0], link_depth=request.link_depth + 1)
-                        if next_request not in to_explore and next_request not in excluded_requests:
-                            to_explore.append(next_request)
-
-                for form in html.iter_forms():
-                    if scope.check(form) and form not in to_explore and form not in excluded_requests:
-                        form.link_depth = request.link_depth + 1
-                        to_explore.append(form)
-
-                # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
-                for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
-                    button_index = 1
-                    while True:
-                        try:
-                            element = await headless_client.get_element(
-                                f"({xpath_selector})[{button_index}]",
-                                selector_type=SelectorType.xpath,
-                            )
-                            await element.click()
-                        except (ElementNotInteractable, UnknownArsenicError):
-                            button_index += 1
-                            continue
-                        except NoSuchElement:
-                            # No more buttons
-                            break
-                        else:
-                            button_index += 1
-                            await asyncio.sleep(wait_time)
-                            current_url = await headless_client.get_url()
-                            if current_url != request.url_with_fragment:
-                                await headless_client.get(request.url_with_fragment, timeout=5)
 
     except Exception as exception:  # pylint: disable=broad-except
         # exception_traceback = sys.exc_info()[2]
