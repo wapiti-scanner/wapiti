@@ -19,10 +19,11 @@
 import asyncio
 import re
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
-from logging import getLogger, WARNING, ERROR
+from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
 from urllib.parse import urlparse
 import inspect
+import os
 # import sys
 # from traceback import print_tb
 
@@ -75,7 +76,7 @@ def set_arsenic_log_level(level: int = WARNING):
     logger.setLevel(level)
 
 
-set_arsenic_log_level(ERROR)
+set_arsenic_log_level(CRITICAL)
 
 
 def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
@@ -142,7 +143,8 @@ class MitmFlowToWapitiRequests:
         content_type = flow.response.headers.get("Content-Type", "text/plain").split(";")[0]
         flow.response.stream = False
 
-        if not is_interpreted_type(content_type):
+        is_forced_download = flow.response.headers.get("content-disposition", "").startswith("attachment")
+        if not is_interpreted_type(content_type) or is_forced_download:
             flow.response.status_code = 200
             flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
             flow.response.headers["content-type"] = "text/plain"
@@ -303,7 +305,7 @@ async def launch_headless_explorer(
     excluded_requests = list(excluded_requests)
 
     try:
-        async with get_session(services.Geckodriver(), browser) as headless_client:
+        async with get_session(services.Geckodriver(log_file=os.devnull), browser) as headless_client:
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
                 excluded_requests.append(request)
