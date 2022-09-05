@@ -191,7 +191,7 @@ class ModuleWapp(Attack):
         detected_applications = {}
         response = None
 
-        if self.options["headless"] != "no":
+        if self.options.get("headless", "no") != "no":
             headless_results = await self._detect_applications_headless(url)
         else:
             headless_results = {}
