@@ -191,7 +191,10 @@ class ModuleWapp(Attack):
         detected_applications = {}
         response = None
 
-        headless_results = await self._detect_applications_headless(url)
+        if self.options["headless"] != "no":
+            headless_results = await self._detect_applications_headless(url)
+        else:
+            headless_results = {}
 
         # Detecting the applications for the url with and without the follow_redirects flag
         for follow_redirect in [True, False]:
@@ -268,7 +271,7 @@ class ModuleWapp(Attack):
                 "sslProxy": proxy
             }
 
-        service = services.Geckodriver()
+        service = services.Geckodriver(log_file=os.devnull)
         browser = browsers.Firefox(
             proxy=proxy_settings,
             acceptInsecureCerts=True,

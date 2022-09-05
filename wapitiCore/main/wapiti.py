@@ -1073,7 +1073,8 @@ async def wapiti_main():
         attack_options = {
             "level": args.level,
             "timeout": args.timeout,
-            "tasks": args.tasks
+            "tasks": args.tasks,
+            "headless": args.headless,
         }
 
         if "dns_endpoint" in args:
