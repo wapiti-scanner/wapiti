@@ -19,6 +19,7 @@
 import asyncio
 import codecs
 import os
+import shutil
 import signal
 import sys
 from collections import deque
@@ -689,7 +690,10 @@ class Wapiti:
 
     def set_headless(self, headless_mode: str):
         """Set the headless mode used for browsing"""
-        self._headless_mode = headless_mode
+        if not shutil.which("geckodriver"):
+            logging.error("Headless mode won't be activated because geckodriver is missing on the system")
+        else:
+            self._headless_mode = headless_mode
 
     def set_wait_time(self, wait_time: float):
         """Set the time to wait before processing a webpage content (headless mode only)"""
