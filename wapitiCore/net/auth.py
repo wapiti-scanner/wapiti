@@ -97,7 +97,10 @@ async def _async_try_login_post(
             acceptInsecureCerts=True,
             **{
                 "moz:firefoxOptions": {
-                    # "prefs": {"security.cert_pinning.enforcement_level": 0},
+                    "prefs": {
+                        "network.proxy.allow_hijacking_localhost": True,
+                        # "security.cert_pinning.enforcement_level": 0,
+                    },
                     "args": ["-headless"] if headless_mode == "hidden" else []
                 }
             }

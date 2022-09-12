@@ -277,6 +277,9 @@ class ModuleWapp(Attack):
             acceptInsecureCerts=True,
             **{
                 "moz:firefoxOptions": {
+                    "prefs": {
+                        "network.proxy.allow_hijacking_localhost": True,
+                    },
                     "args": ["-headless"]
                 }
             }
