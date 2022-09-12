@@ -288,13 +288,14 @@ async def launch_headless_explorer(
         acceptInsecureCerts=True,
         **{
             "moz:firefoxOptions": {
-                # "prefs": {
-                #     "security.cert_pinning.enforcement_level": 0,
-                #     "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
-                #     "browser.download.folderList": 2,
-                #     "browser.download.manager.showWhenStarting": False,
-                #     "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream",
-                # },
+                "prefs": {
+                    "network.proxy.allow_hijacking_localhost": True,
+                    # "security.cert_pinning.enforcement_level": 0,
+                    # "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
+                    # "browser.download.folderList": 2,
+                    # "browser.download.manager.showWhenStarting": False,
+                    # "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream",
+                },
                 "args": ["-headless"] if visibility == "hidden" else []
             }
         }
