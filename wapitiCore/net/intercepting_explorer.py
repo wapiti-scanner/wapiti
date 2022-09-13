@@ -290,6 +290,7 @@ async def launch_headless_explorer(
             "moz:firefoxOptions": {
                 "prefs": {
                     "network.proxy.allow_hijacking_localhost": True,
+                    "devtools.jsonview.enabled": False,
                     # "security.cert_pinning.enforcement_level": 0,
                     # "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
                     # "browser.download.folderList": 2,

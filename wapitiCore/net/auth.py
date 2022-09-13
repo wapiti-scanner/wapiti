@@ -99,6 +99,7 @@ async def _async_try_login_post(
                 "moz:firefoxOptions": {
                     "prefs": {
                         "network.proxy.allow_hijacking_localhost": True,
+                        "devtools.jsonview.enabled": False,
                         # "security.cert_pinning.enforcement_level": 0,
                     },
                     "args": ["-headless"] if headless_mode == "hidden" else []
