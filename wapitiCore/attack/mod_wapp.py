@@ -279,6 +279,7 @@ class ModuleWapp(Attack):
                 "moz:firefoxOptions": {
                     "prefs": {
                         "network.proxy.allow_hijacking_localhost": True,
+                        "devtools.jsonview.enabled": False,
                     },
                     "args": ["-headless"]
                 }
