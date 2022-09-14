@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 import re
+import sys
+from traceback import print_tb
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
@@ -322,7 +324,7 @@ async def launch_headless_explorer(
 
                         page_source = await headless_client.get_page_source()
                         await click_in_webpage(headless_client, request, wait_time)
-                    except ArsenicError as exception:
+                    except (ArsenicError, asyncio.TimeoutError) as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
                 else:
@@ -350,8 +352,8 @@ async def launch_headless_explorer(
                         to_explore.append(next_request)
 
     except Exception as exception:  # pylint: disable=broad-except
-        # exception_traceback = sys.exc_info()[2]
-        # print_tb(exception_traceback)
+        exception_traceback = sys.exc_info()[2]
+        print_tb(exception_traceback)
         frm = inspect.trace()[-1]
         mod = inspect.getmodule(frm[0])
         logging.error(
