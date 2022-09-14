@@ -318,7 +318,7 @@ class ModuleWapp(Attack):
                             logging.exception(exception)
                             continue
 
-            except (ArsenicError, FileNotFoundError):
+            except (ArsenicError, FileNotFoundError, asyncio.TimeoutError):
                 # Geckodriver may be missing, etc
                 pass
 

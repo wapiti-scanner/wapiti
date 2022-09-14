@@ -112,7 +112,7 @@ async def _async_try_login_post(
                 await asyncio.sleep(.1)
                 page_source = await headless_client.get_page_source()
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
-        except ArsenicError as exception:
+        except (ArsenicError, asyncio.TimeoutError) as exception:
             logging.error(_("[!] {} with URL {}").format(exception.__class__.__name__, auth_url))
             return False, {}, []
     else:
