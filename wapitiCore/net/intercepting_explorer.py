@@ -150,6 +150,7 @@ class MitmFlowToWapitiRequests:
             flow.response.status_code = 200
             flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
             flow.response.headers["content-type"] = "text/plain"
+            flow.response.headers.pop("content-disposition", "")
             return
 
         redirection = flow.response.headers.get("location", "")
