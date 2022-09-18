@@ -145,6 +145,8 @@ class MitmFlowToWapitiRequests:
         content_type = flow.response.headers.get("Content-Type", "text/plain").split(";")[0]
         flow.response.stream = False
 
+        # We only need this for the automated part, a human without the headless crawler will be able to deal
+        # with download popups. Let's keep in mind we should tweak that later.
         is_forced_download = flow.response.headers.get("content-disposition", "").startswith("attachment")
         if not is_interpreted_type(content_type) or is_forced_download:
             flow.response.status_code = 200
