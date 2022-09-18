@@ -1016,7 +1016,6 @@ async def wapiti_main():
         if args.drop_set_cookie:
             wap.set_drop_cookies()
 
-        auth_credentials = tuple()
         if "credentials" in args:
             if "auth_type" not in args:
                 raise InvalidOptionValue("--auth-type", "This option is required when -a is used")
@@ -1030,8 +1029,12 @@ async def wapiti_main():
         if "auth_type" in args:
             if "credentials" not in args:
                 raise InvalidOptionValue("-a", "This option is required when --auth-type is used")
-            if args.auth_type == "post" and args.starting_urls != []:
+
+            if args.auth_type == "post":
+                if not args.starting_urls:
+                    raise InvalidOptionValue("-s", "This option is required when --auth-type of type 'post' is used")
                 auth_url = args.starting_urls[0]
+
             wap.set_auth_type(args.auth_type)
 
         for bad_param in args.excluded_parameters:

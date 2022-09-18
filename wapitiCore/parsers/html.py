@@ -149,8 +149,6 @@ class Html:
     @not_empty
     def _iter_raw_links(self) -> Iterator[str]:
         """Generator returning all raw URLs found in HTML "a href", frame's src tags and redirections."""
-        # yield self.redirection_url
-
         for tag in self.soup.find_all("a", href=True):
             yield self._cleanup_fragment(tag["href"]).strip()
 
@@ -395,8 +393,6 @@ class Html:
     @property
     def all_redirections(self) -> Set[str]:
         result = set()
-        # if self.redirection_url:
-        #     result.add(self.redirection_url)
         result.update(self.js_redirections)
         result.update(self.html_redirections)
         return result

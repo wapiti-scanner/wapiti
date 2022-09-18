@@ -214,6 +214,9 @@ class Explorer:
 
         new_requests = []
 
+        if response.is_redirect and self._scope.check(response.redirection_url):
+            allowed_links.append(response.redirection_url)
+
         if "application/x-shockwave-flash" in response.type or request.file_ext == "swf":
             try:
                 swf_links = swf.extract_links_from_swf(response.bytes)
