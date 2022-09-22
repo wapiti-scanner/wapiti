@@ -46,7 +46,6 @@ async def test_redirect_detection():
         ]
 
 
-
 @pytest.mark.asyncio
 async def test_redirect_detection_no_url():
     persister = AsyncMock()
@@ -55,7 +54,7 @@ async def test_redirect_detection_no_url():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event())
+        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -63,6 +62,7 @@ async def test_redirect_detection_no_url():
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
             ['url', '//openbugbounty.org/']
         ]
+
 
 @pytest.mark.asyncio
 @respx.mock
