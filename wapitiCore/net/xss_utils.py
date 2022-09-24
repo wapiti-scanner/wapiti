@@ -306,7 +306,10 @@ def apply_attrval_context(context, payloads, code):
                 else:
                     attr_separator = value_separator = context["separator"]
 
-                if payload_infos["tag"][0] in ["frame", "a", "iframe"] and payload_infos["attribute"] in ["href", "src"]:
+                if (
+                        (set(payload_infos["tag"]) & {"frame", "iframe"} and payload_infos["attribute"] == "src") or
+                        (payload_infos["tag"] == ["a"] and payload_infos["attribute"] == "href")
+                ):
                     # This is a special case... Maybe we should improve that kind of behavior by having something
                     # similar to the match_type (from xssPayloads.ini) in the context
                     js_code = payload_infos["payload"].replace("__XSS__", code)

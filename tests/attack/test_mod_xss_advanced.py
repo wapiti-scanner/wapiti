@@ -238,6 +238,7 @@ async def test_xss_inside_tag_link():
         used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
         assert "<" not in used_payload and ">" not in used_payload and "autofocus href onfocus" in used_payload
 
+
 @pytest.mark.asyncio
 async def test_xss_inside_href_link():
     persister = AsyncMock()
@@ -247,7 +248,7 @@ async def test_xss_inside_href_link():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event())
+        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -255,6 +256,7 @@ async def test_xss_inside_href_link():
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "url"
         used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
         assert "<" not in used_payload and ">" not in used_payload and "javascript:alert" in used_payload
+
 
 @pytest.mark.asyncio
 async def test_xss_inside_src_iframe():
@@ -265,7 +267,7 @@ async def test_xss_inside_src_iframe():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event())
+        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -273,6 +275,7 @@ async def test_xss_inside_src_iframe():
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "url"
         used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
         assert "<" not in used_payload and ">" not in used_payload and "javascript:alert" in used_payload
+
 
 @pytest.mark.asyncio
 async def test_xss_uppercase_no_script():
