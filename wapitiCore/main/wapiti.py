@@ -52,7 +52,7 @@ from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.intercepting_explorer import InterceptingExplorer
-from wapitiCore.net.auth import async_try_login
+from wapitiCore.net.auth import async_try_login, load_auth_script
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request, Response
@@ -1150,6 +1150,9 @@ async def wapiti_main():
                     wap.set_auth_state(is_logged_in, form, auth_url, args.auth_type)
                     for url in excluded_urls:
                         wap.add_excluded_url(url)
+
+                if "auth_script" in args:
+                    await load_auth_script(args.auth_script, wap.crawler_configuration, auth_url, args.headless)
 
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
