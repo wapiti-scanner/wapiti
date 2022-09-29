@@ -1,6 +1,7 @@
 from typing import Tuple, List, Dict
 import asyncio
 from urllib.parse import urlparse
+import importlib.util
 
 from httpx import RequestError
 from arsenic import get_session, browsers, services
@@ -165,3 +166,19 @@ async def _async_try_login_post(
 
     logging.warning(_("Login failed") + " : " + _("No login form detected"))
     return False, {}, []
+
+
+async def load_auth_script(
+        filepath: str,
+        crawler_configuration: CrawlerConfiguration,
+        auth_url: str,
+        headless: str = "no"
+):
+    """Load the Python script at filepath and call the run function in it with several parameters"""
+    spec = importlib.util.spec_from_file_location("plugin", filepath)
+
+    module = importlib.util.module_from_spec(spec)
+
+    spec.loader.exec_module(module)
+    # We expect the auth script to set cookies on the crawler_configuration object but everything can be done here
+    await module.run(crawler_configuration, auth_url, headless)

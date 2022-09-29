@@ -111,6 +111,14 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--auth-script",
+        dest="auth_script",
+        default=argparse.SUPPRESS,
+        help=_("Use a custom Python authentication plugin"),
+        metavar="FILENAME"
+    )
+
+    parser.add_argument(
         "-c", "--cookie",
         help=_("Set a JSON cookie file to use.") + " " + _(
             "You can also pass 'firefox' or 'chrome' to load cookies from your browser."
