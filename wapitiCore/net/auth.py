@@ -189,7 +189,7 @@ async def load_auth_script(
     try:
         await module.run(crawler_configuration, auth_url, headless)
     except AttributeError:
-        logging.error(f"run() method seems to be missing in your auth script")
+        logging.error("run() method seems to be missing in your auth script")
         sys.exit(1)
     except TypeError as exception:
-        raise RuntimeError(f"The provided auth script seems to have some syntax issues") from exception
+        raise RuntimeError("The provided auth script seems to have some syntax issues") from exception
