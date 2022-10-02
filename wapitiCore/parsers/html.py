@@ -13,31 +13,10 @@ from tld.exceptions import TldBadUrl, TldDomainNotFound
 
 # Internal libraries
 from wapitiCore import parser_name
-from wapitiCore.net import lamejs
 from wapitiCore.net import Request, make_absolute
+from wapitiCore.parsers.javascript import extract_js_redirections
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
-
-RE_JS_REDIR = re.compile(
-    r"\b(window\.|document\.|top\.|self\.)?location(\.href)?\s*=\s*(\"|')(http[s]?://[^'\"]+\.[^'\"]+)\3\s*(;|}|$)"
-)
-
-JS_EVENTS = [
-    'onabort', 'onblur', 'onchange', 'onclick', 'ondblclick',
-    'ondragdrop', 'onerror', 'onfocus', 'onkeydown', 'onkeypress',
-    'onkeyup', 'onload', 'onmousedown', 'onmousemove', 'onmouseout',
-    'onmouseover', 'onmouseup', 'onmove', 'onreset', 'onresize',
-    'onselect', 'onsubmit', 'onunload'
-]
-
-# This is ugly but let's keep it while there is not a js parser
-COMMON_JS_STRINGS = {
-    "Msxml2.XMLHTTP", "application/x-www-form-urlencoded", ".php", "text/xml",
-    "about:blank", "Microsoft.XMLHTTP", "text/plain", "text/javascript",
-    "application/x-shockwave-flash"
-}
-
-JS_SCHEME_REGEX = re.compile(r"^javascript:", re.I)
 
 
 def not_empty(original_function):
@@ -332,43 +311,17 @@ class Html:
                 if url:
                     yield self._make_absolute(url)
 
-        for attribute in JS_EVENTS:
-            for tag in self.soup.find_all(None, attrs={attribute: True}):
-                for url in lamejs.LameJs(tag[attribute]).get_links():
-                    yield self._make_absolute(url)
-
-        for script in self.soup.find_all("script", string=True):
-            urls = lamejs.LameJs(script.string).get_links()
-
-            for url in urls:
-                yield self._make_absolute(url)
-
-        for tag in self.soup.find_all("a", href=JS_SCHEME_REGEX):
-            for url in lamejs.LameJs(tag["href"].split(':', 1)[1]).get_links():
-                yield self._make_absolute(url)
-
-        for tag in self.soup.find_all("form", action=JS_SCHEME_REGEX):
-            for url in lamejs.LameJs(tag["action"].split(':', 1)[1]).get_links():
-                yield self._make_absolute(url)
-
     @property
     def js_redirections(self) -> List[str]:
         """Returns a list or redirection URLs found in the javascript code of the webpage.
 
         @rtype: list
         """
-        urls = set()
+        # We search directly in the full webpage, so we will be able to find commented redirections or those in events
+        urls = {self._make_absolute(redirection) for redirection in extract_js_redirections(self._content)}
+        if "" in urls:
+            urls.remove("")
 
-        for script in self.soup.find_all("script", text=True):
-            j_script = script.string.strip()
-            if not j_script:
-                continue
-
-            search = re.search(RE_JS_REDIR, j_script)
-            if search:
-                url = self._make_absolute(search.group(4))
-                if url:
-                    urls.add(url)
         return list(urls)
 
     @property

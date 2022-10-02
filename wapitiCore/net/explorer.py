@@ -35,11 +35,11 @@ from wapitiCore.net import web
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request, make_absolute
 from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.javascript import extract_js_redirections
 from wapitiCore.main.log import logging, log_verbose
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import swf
-from wapitiCore.net import lamejs
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.scope import Scope
 
@@ -223,7 +223,7 @@ class Explorer:
             except Exception:  # pylint: disable=broad-except
                 pass
         elif "/x-javascript" in response.type or "/x-js" in response.type or "/javascript" in response.type:
-            js_links = lamejs.LameJs(response.content).get_links()
+            js_links = extract_js_redirections(response.content)
             js_links += jsparser_angular.JsParserAngular(response.url, response.content).get_links()
 
         elif response.type.startswith(MIME_TEXT_TYPES):
