@@ -1,3 +1,4 @@
+import sys
 from typing import Tuple, List, Dict
 import asyncio
 from urllib.parse import urlparse
@@ -177,8 +178,18 @@ async def load_auth_script(
     """Load the Python script at filepath and call the run function in it with several parameters"""
     spec = importlib.util.spec_from_file_location("plugin", filepath)
 
-    module = importlib.util.module_from_spec(spec)
+    try:
+        module = importlib.util.module_from_spec(spec)
+    except (FileNotFoundError, AttributeError):
+        logging.error(f"Unable to load auth script '{filepath}'. Check path, access rights or syntax.")
+        sys.exit(1)
 
     spec.loader.exec_module(module)
     # We expect the auth script to set cookies on the crawler_configuration object but everything can be done here
-    await module.run(crawler_configuration, auth_url, headless)
+    try:
+        await module.run(crawler_configuration, auth_url, headless)
+    except AttributeError:
+        logging.error(f"run() method seems to be missing in your auth script")
+        sys.exit(1)
+    except TypeError as exception:
+        raise RuntimeError(f"The provided auth script seems to have some syntax issues") from exception
