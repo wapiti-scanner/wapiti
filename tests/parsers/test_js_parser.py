@@ -1,28 +1,15 @@
 import respx
-import httpx
 
-from wapitiCore.net.crawler import Response
-from wapitiCore.parsers.html import Html
-from wapitiCore.net.lamejs import LameJs
+from wapitiCore.parsers.html import Html, extract_js_redirections
 
 
 @respx.mock
 def test_js_parser():
-    with open("tests/data/js_links.html") as data_body:
+    with open("tests/data/js_links.html") as fd:
         url = "http://perdu.com/"
-        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
+        page = Html(fd.read(), url)
 
-        resp = httpx.get(url)
-        page = Html(Response(resp).content, url)
-
-        assert set(page.extra_urls) == {
-            "http://perdu.com/onload.html",
-            "http://perdu.com/popup.html",
-            "http://perdu.com/redir.html",
-            "http://perdu.com/concat.html",
-            "http://perdu.com/concat.html?var=value",
-            "http://perdu.com/link.html",
-        }
+        assert set(page.js_redirections) == {"http://perdu.com/onload.html", "http://perdu.com/redir.html"}
 
 
 def test_js_false_positives():
@@ -62,13 +49,13 @@ def test_js_false_positives():
         """window.location.href = this.value;"""
     ]
     for script in scripts:
-        lame_js = LameJs(script)
-        assert not lame_js.get_links()
+        assert not extract_js_redirections(script)
 
 
 def test_html_comments():
-    lame_js = LameJs("""<!--
-    window.location = "http://perdu.com/";
-    -->
-    """)
-    assert lame_js.get_links() == ["http://perdu.com/"]
+    page = Html(
+        """<!-- window.location = "http://perdu.com/secret"; -->""",
+        "http://perdu.com/"
+    )
+
+    assert page.js_redirections == ["http://perdu.com/secret"]
