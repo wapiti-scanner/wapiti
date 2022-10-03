@@ -1,15 +1,17 @@
-import respx
-
 from wapitiCore.parsers.html import Html, extract_js_redirections
 
 
-@respx.mock
 def test_js_parser():
     with open("tests/data/js_links.html") as fd:
         url = "http://perdu.com/"
         page = Html(fd.read(), url)
 
-        assert set(page.js_redirections) == {"http://perdu.com/onload.html", "http://perdu.com/redir.html"}
+        assert {
+           "http://perdu.com/link.html",
+           "http://perdu.com/onload.html",
+           "http://perdu.com/popup.html",
+           "http://perdu.com/redir.html",
+        } == set(page.js_redirections)
 
 
 def test_js_false_positives():
@@ -46,7 +48,10 @@ def test_js_false_positives():
         function openBrWindow(theURL,winName,features) { //v2.0
         window.open(theURL,winName,features);
         }""",
-        """window.location.href = this.value;"""
+        """window.location.href = this.value;""",
+        # Attempt to concat strings was removed
+        """window.open("http://perdu.com/" + "abcd.html");""",
+        """document.href="http://httpbin.org/" + "test";"""
     ]
     for script in scripts:
         assert not extract_js_redirections(script)
