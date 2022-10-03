@@ -22,7 +22,6 @@ import math
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.csrf import NAME, WSTG_CODE
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import Response
@@ -170,11 +169,11 @@ class ModuleCsrf(Attack):
 
         # check if token is present
         if not csrf_value:
-            vuln_message = _("Lack of anti CSRF token")
+            vuln_message = "Lack of anti CSRF token"
         elif not await self.is_csrf_verified(request, response):
-            vuln_message = _("CSRF token '{}' is not properly checked in backend").format(self.csrf_string)
+            vuln_message = f"CSRF token '{self.csrf_string}' is not properly checked in backend"
         elif not self.is_csrf_robust(csrf_value):
-            vuln_message = _("CSRF token '{}' might be easy to predict").format(self.csrf_string)
+            vuln_message = f"CSRF token '{self.csrf_string}' might be easy to predict"
         else:
             return
 

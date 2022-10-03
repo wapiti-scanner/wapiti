@@ -22,7 +22,7 @@ from urllib.parse import quote
 from httpx import ReadTimeout, HTTPStatusError, RequestError
 
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.crlf import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.net import Request, Response
@@ -34,7 +34,7 @@ class ModuleCrlf(Attack):
     # Won't work with PHP >= 4.4.2
 
     name = "crlf"
-    MSG_VULN = _("CRLF Injection")
+    MSG_VULN = "CRLF Injection"
     do_get = True
     do_post = True
     payloads = (quote("http://www.google.fr\r\nwapiti: 3.1.3 version"), Flags())
@@ -69,7 +69,7 @@ class ModuleCrlf(Attack):
                 log_orange("---")
             except HTTPStatusError:
                 self.network_errors += 1
-                logging.error(_("Error: The server did not understand this request"))
+                logging.error("Error: The server did not understand this request")
             except RequestError:
                 self.network_errors += 1
             else:
@@ -79,7 +79,7 @@ class ModuleCrlf(Attack):
                         category=NAME,
                         request=mutated_request,
                         parameter=parameter,
-                        info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
+                        info=f"{self.MSG_VULN} via injection in the parameter {parameter}",
                         wstg=WSTG_CODE,
                         response=response
                     )

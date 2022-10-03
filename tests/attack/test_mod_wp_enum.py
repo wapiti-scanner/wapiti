@@ -6,7 +6,6 @@ import pytest
 import respx
 
 from wapitiCore.attack.mod_wp_enum import ModuleWpEnum
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -111,13 +110,13 @@ async def test_plugin():
         assert persister.add_payload.call_count
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "wp_enum"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
         )
 
         assert persister.add_payload.call_args_list[1][1]["module"] == "wp_enum"
-        assert persister.add_payload.call_args_list[1][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[1][1]["info"] == (
             '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
         )

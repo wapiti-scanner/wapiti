@@ -9,14 +9,13 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
-from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
-MSG_TECHNO_VERSIONED = _("{0} {1} detected")
-MSG_NO_WP = _("No WordPress Detected")
-MSG_WP_VERSION = _("WordPress Version : {0}")
+MSG_TECHNO_VERSIONED = "{0} {1} detected"
+MSG_NO_WP = "No WordPress Detected"
+MSG_WP_VERSION = "WordPress Version : {0}"
 
 
 class ModuleWpEnum(Attack):
@@ -224,10 +223,10 @@ class ModuleWpEnum(Attack):
         if self.check_wordpress(response):
             await self.detect_version(request_to_root.url)
             log_blue("----")
-            log_blue(_("Enumeration of WordPress Plugins :"))
+            log_blue("Enumeration of WordPress Plugins :")
             await self.detect_plugin(request_to_root.url)
             log_blue("----")
-            log_blue(_("Enumeration of WordPress Themes :"))
+            log_blue("Enumeration of WordPress Themes :")
             await self.detect_theme(request_to_root.url)
         else:
             log_blue(MSG_NO_WP)

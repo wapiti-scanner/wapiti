@@ -11,7 +11,6 @@ import pytest
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_sql import ModuleSql
 
 
@@ -104,7 +103,7 @@ async def test_true_positive():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "sql"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("SQL Injection")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection"
 
 
 @pytest.mark.asyncio

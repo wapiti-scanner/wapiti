@@ -12,7 +12,6 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_drupal_enum import ModuleDrupalEnum
-from wapitiCore.language.vulnerability import _
 
 
 # Test no Drupal detected
@@ -87,12 +86,12 @@ async def test_version_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["module"] == "drupal_enum"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web application framework")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["module"] == "drupal_enum"
-        assert persister.add_payload.call_args_list[1][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[1][1]["info"] == (
             '{"name": "Drupal", "versions": ["7.67"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
         )

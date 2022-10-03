@@ -8,7 +8,6 @@ import pytest
 import respx
 
 from wapitiCore.attack.mod_htp import ModuleHtp
-from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -221,7 +220,7 @@ async def test_finish_one_range():
 
             mock_add_vuln_info.assert_called_once_with(
                 module_htp,
-                category=_("Fingerprint web server"),
+                category="Fingerprint web server",
                 request=Request("http://perdu.com/"),
                 info='{"name": "techno", "versions": ["1.2", "1.2.1", "1.3"]}'
             )
@@ -269,7 +268,7 @@ async def test_finish_two_ranges():
 
             mock_add_vuln_info.assert_called_once_with(
                 module_htp,
-                category=_("Fingerprint web server"),
+                category="Fingerprint web server",
                 request=Request("http://perdu.com/"),
                 info='{"name": "techno", "versions": ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"]}'
             )

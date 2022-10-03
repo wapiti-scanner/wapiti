@@ -17,22 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Htaccess Bypass")
+NAME = "Htaccess Bypass"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CONF-06"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Htaccess files are used to restrict access to some files or HTTP method."
-) + " " + _(
+) + " " + (
     "In some case it may be possible to bypass this restriction and access the files."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Make sure every HTTP method is forbidden if the credentials are bad."
 )
 

@@ -9,14 +9,13 @@ from httpx import RequestError
 
 from wapitiCore.net import Request
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue
 
-MSG_TECHNO_VERSIONED = _("{0} {1} detected")
-MSG_NO_DRUPAL = _("No Drupal Detected")
+MSG_TECHNO_VERSIONED = "{0} {1} detected"
+MSG_NO_DRUPAL = "No Drupal Detected"
 
 
 class ModuleDrupalEnum(Attack):

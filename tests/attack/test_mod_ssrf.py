@@ -8,7 +8,6 @@ import pytest
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_ssrf import ModuleSsrf
 
 
@@ -79,7 +78,7 @@ async def test_whole_stuff():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "ssrf"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Server Side Request Forgery")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Server Side Request Forgery"
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "file"
         assert persister.add_payload.call_args_list[0][1]["request"].file_params == [
             ['file', ('http://external.url/page', b'<xml>Hello there</xml', 'application/xml')]

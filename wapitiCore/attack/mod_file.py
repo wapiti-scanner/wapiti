@@ -26,7 +26,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, PayloadReader
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.file import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
@@ -134,7 +134,7 @@ class ModuleFile(Attack):
             flags = original_flags.with_section(section)
 
             rules = config_reader[section]["rules"].splitlines()
-            messages = [_(message) for message in config_reader[section]["messages"].splitlines()]
+            messages = config_reader[section]["messages"].splitlines()
             self.payload_to_rules[section] = rules
             self.rules_to_messages.update(dict(zip(rules, messages)))
 
@@ -244,22 +244,20 @@ class ModuleFile(Attack):
                             continue
 
                         # Mark as eventuality
-                        vulnerable_method = _("Possible {0} vulnerability").format(vulnerable_method)
+                        vulnerable_method = f"Possible {vulnerable_method} vulnerability"
                         warned = True
 
                     # An error message implies that a vulnerability may exists
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(vulnerable_method, page)
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(
-                            vulnerable_method, parameter
-                        )
+                        vuln_message = f"{vulnerable_method} via injection in the parameter {parameter}"
 
                     constraint_message = ""
                     if file_warning and file_warning.uri:
                         constraints = has_prefix_or_suffix(payload, file_warning.uri)
                         if constraints:
-                            constraint_message += _("Constraints: {}").format(", ".join(constraints))
+                            constraint_message += "Constraints: " + ", ".join(constraints)
                             vuln_message += " (" + constraint_message + ")"
 
                     await self.add_vuln_critical(

@@ -19,13 +19,12 @@ from typing import Optional
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.secure_cookie import NAME as COOKIE_SECURE_DISABLED, WSTG_CODE as COOKIE_SECURE_WSTG
 from wapitiCore.definitions.http_only import NAME as COOKIE_HTTPONLY_DISABLED, WSTG_CODE as COOKIE_HTTPONLY_WSTG
 from wapitiCore.main.log import log_red, log_blue
 
-INFO_COOKIE_HTTPONLY = _("HttpOnly flag is not set in the cookie : {0}")
-INFO_COOKIE_SECURE = _("Secure flag is not set in the cookie : {0}")
+INFO_COOKIE_HTTPONLY = "HttpOnly flag is not set in the cookie : {0}"
+INFO_COOKIE_SECURE = "Secure flag is not set in the cookie : {0}"
 
 
 class ModuleCookieflags(Attack):
@@ -53,7 +52,7 @@ class ModuleCookieflags(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         for cookie in self.crawler.cookie_jar:
-            log_blue(_("Checking cookie : {}").format(cookie.name))
+            log_blue(f"Checking cookie : {cookie.name}")
             if not self.check_httponly_flag(cookie):
                 log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
                 await self.add_vuln_low(

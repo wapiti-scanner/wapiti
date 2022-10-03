@@ -17,21 +17,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Content Security Policy Configuration")
-SHORT_NAME = _("CSP Configuration")
+NAME = "Content Security Policy Configuration"
+SHORT_NAME = "CSP Configuration"
 
 WSTG_CODE = ["WSTG-CONF-12", "OSHP-Content-Security-Policy"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types "
     "of attacks, including Cross Site Scripting (XSS) and data injection attacks."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Configuring Content Security Policy involves adding the Content-Security-Policy HTTP header to a web page and "
     "giving it values to control what resources the user agent is allowed to load for that page."
 )

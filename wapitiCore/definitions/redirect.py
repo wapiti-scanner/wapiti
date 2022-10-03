@@ -17,24 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Open Redirect")
+NAME = "Open Redirect"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CLNT-04"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Unvalidated redirects and forwards are possible when a web application accepts untrusted input that could cause "
     "the web application to redirect the request to a URL contained within untrusted input."
-) + " " + _(
+) + " " + (
     "By modifying untrusted URL input to a malicious site, "
     "an attacker may successfully launch a phishing scam and steal user credentials."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Force all redirects to first go through a page notifying users that they are going off of your site, "
     "and have them click a link to confirm."
 )

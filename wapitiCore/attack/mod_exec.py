@@ -22,7 +22,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack, PayloadType
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
@@ -49,37 +49,37 @@ class ModuleExec(Attack):
         vuln_info = ""
         executed = 0
         if "eval()'d code</b> on line <b>" in data and not warned:
-            vuln_info = _("Warning eval()")
+            vuln_info = "Warning eval()"
             warned = True
         if "PATH=" in data and "PWD=" in data:
-            vuln_info = _("Command execution")
+            vuln_info = "Command execution"
             executed = True
         if "COMPUTERNAME=" in data and "Program" in data:
-            vuln_info = _("Command execution")
+            vuln_info = "Command execution"
             executed = True
         if "w4p1t1_eval" in data or "1d97830e30da7214d3e121859cfa695f" in data:
-            vuln_info = _("PHP evaluation")
+            vuln_info = "PHP evaluation"
             executed = True
         if "Cannot execute a blank command in" in data and not warned:
-            vuln_info = _("Warning exec")
+            vuln_info = "Warning exec"
             warned = True
         if "sh: command substitution:" in data and not warned:
-            vuln_info = _("Warning exec")
+            vuln_info = "Warning exec"
             warned = True
         if "Fatal error</b>:  preg_replace" in data and not warned:
-            vuln_info = _("preg_replace injection")
+            vuln_info = "preg_replace injection"
             warned = True
         if "Warning: usort()" in data and not warned:
-            vuln_info = _("Warning usort()")
+            vuln_info = "Warning usort()"
             warned = True
         if "Warning: preg_replace():" in data and not warned:
-            vuln_info = _("preg_replace injection")
+            vuln_info = "preg_replace injection"
             warned = True
         if "Warning: assert():" in data and not warned:
-            vuln_info = _("Warning assert")
+            vuln_info = "Warning assert"
             warned = True
         if "Failure evaluating code:" in data and not warned:
-            vuln_info = _("Evaluation warning")
+            vuln_info = "Evaluation warning"
             warned = True
         return vuln_info, executed, warned
 
@@ -116,11 +116,11 @@ class ModuleExec(Attack):
                         self.false_positive_timeouts.add(request.path_id)
                         continue
 
-                    vuln_info = _("Blind command execution")
+                    vuln_info = "Blind command execution"
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
+                        vuln_message = f"{vuln_info} via injection in the parameter {parameter}"
 
                     await self.add_vuln_critical(
                         request_id=request.path_id,
@@ -181,7 +181,7 @@ class ModuleExec(Attack):
                         vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                         log_message = Messages.MSG_QS_INJECT
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
+                        vuln_message = f"{vuln_info} via injection in the parameter {parameter}"
                         log_message = Messages.MSG_PARAM_INJECT
 
                     await self.add_vuln_critical(

@@ -5,7 +5,6 @@ import httpx
 import json
 
 from wapitiCore.report import GENERATORS
-from wapitiCore.language.language import _
 from wapitiCore.net.sql_persister import Response
 from wapitiCore.net import Request
 from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
@@ -70,7 +69,7 @@ def test_reports():
         print("Using report type '{}'".format(report_format))
         request = Request("http://perdu.com/riri?foo=bar")
         report_gen.add_vulnerability(
-            category=_("Reflected Cross Site Scripting"),
+            category="Reflected Cross Site Scripting",
             level=1,
             request=request,
             parameter="foo",
@@ -80,7 +79,7 @@ def test_reports():
 
         request = Request("http://perdu.com/fifi?foo=bar")
         report_gen.add_anomaly(
-            category=_("Internal Server Error"),
+            category="Internal Server Error",
             level=2,
             request=request,
             parameter="foo",
@@ -90,7 +89,7 @@ def test_reports():
 
         request = Request("http://perdu.com/?foo=bar")
         report_gen.add_additional(
-            category=_("Fingerprint web technology"),
+            category="Fingerprint web technology",
             level=3,
             request=request,
             parameter="foo",

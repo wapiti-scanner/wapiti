@@ -32,15 +32,14 @@ from wapitiCore.main.log import logging, log_blue
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED, WSTG_CODE as WEB_SERVER_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_APP_WSTG_CODE
 from wapitiCore.net import Request
 
-MSG_TECHNO_VERSIONED = _("{0} {1} detected")
-MSG_CATEGORIES = _("  -> Categorie(s): {0}")
-MSG_GROUPS = _("  -> Group(s): {0}")
+MSG_TECHNO_VERSIONED = "{0} {1} detected"
+MSG_CATEGORIES = "  -> Categories: {0}"
+MSG_GROUPS = "  -> Group(s): {0}"
 
 BULK_SIZE = 50
 VERSION_REGEX = re.compile(r"\d[\d.]*")
@@ -112,7 +111,7 @@ class ModuleWapp(Attack):
                 self.WAPP_GROUPS_URL
             )
         except IOError:
-            logging.error(_("Error downloading wapp database."))
+            logging.error("Error downloading wapp database.")
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
@@ -136,7 +135,7 @@ class ModuleWapp(Attack):
             application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
         except FileNotFoundError as exception:
             logging.error(exception)
-            logging.error(_("Try using --store-session option, or update apps.json using --update option."))
+            logging.error("Try using --store-session option, or update apps.json using --update option.")
             return
         except ApplicationDataException as exception:
             logging.error(exception)
@@ -257,8 +256,8 @@ class ModuleWapp(Attack):
                 json.load(technologies_file)
                 json.load(groups_file)
         except IOError:
-            logging.warning(_("Problem with local wapp database."))
-            logging.info(_("Downloading from the web..."))
+            logging.warning("Problem with local wapp database.")
+            logging.info("Downloading from the web...")
             await self.update()
 
     async def _detect_applications_headless(self, url: str) -> dict:

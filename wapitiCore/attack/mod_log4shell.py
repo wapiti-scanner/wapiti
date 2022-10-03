@@ -9,7 +9,6 @@ import dns.resolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
-from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -177,18 +176,14 @@ class ModuleLog4Shell(Attack):
         await self.add_vuln_critical(
             category=NAME,
             request=request,
-            info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
-                .format(request.url, element_type, param_name),
+            info=f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}",
             parameter=f"{param_name}",
             wstg=WSTG_CODE,
             response=response
         )
 
         log_red("---")
-        log_red(
-            _("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"),
-            request.url, element_type, param_name
-        )
+        log_red(f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}")
         log_red(request.http_repr())
         log_red("---")
 
@@ -215,8 +210,7 @@ class ModuleLog4Shell(Attack):
             await self.add_vuln_critical(
                 category=NAME,
                 request=modified_request,
-                info=_("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}") \
-                    .format(modified_request.url, "header", header),
+                info=f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}",
                 parameter=f"{header}: {payload}",
                 wstg=WSTG_CODE,
                 response=response
@@ -224,8 +218,7 @@ class ModuleLog4Shell(Attack):
 
             log_red("---")
             log_red(
-                _("URL {0} seems vulnerable to Log4Shell attack by using the {1} {2}"),
-                modified_request.url, "header", header
+                f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}"
             )
             log_red(modified_request.http_repr())
             log_red("---")
@@ -237,18 +230,14 @@ class ModuleLog4Shell(Attack):
         await self.add_vuln_critical(
             category=NAME,
             request=request,
-            info=_("URL {0} seems vulnerable to Log4Shell attack") \
-                .format(request.url),
+            info=f"URL {request.url} seems vulnerable to Log4Shell attack",
             parameter="",
             wstg=WSTG_CODE,
             response=response
         )
 
         log_red("---")
-        log_red(
-            _("URL {0} seems vulnerable to Log4Shell attack"),
-            request.url
-        )
+        log_red(f"URL {request.url} seems vulnerable to Log4Shell attack")
         log_red(request.http_repr())
         log_red("---")
 
@@ -315,6 +304,6 @@ class ModuleLog4Shell(Attack):
         try:
             self._dns_host = socket.gethostbyname(dns_endpoint)
         except OSError:
-            logging.error(_("Error: {} is not a valid domain name").format(dns_endpoint))
+            logging.error(f"Error: {dns_endpoint} is not a valid domain name")
             return False
         return True

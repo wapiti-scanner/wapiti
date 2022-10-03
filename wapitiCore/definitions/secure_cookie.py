@@ -17,26 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Secure Flag cookie")
+NAME = "Secure Flag cookie"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-SESS-02"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "The secure flag is an option that can be set by the application server when sending a new cookie to the user "
     "within an HTTP Response."
-) + " " + _(
+) + " " + (
     "The purpose of the secure flag is to prevent cookies from being observed by unauthorized parties due "
     "to the transmission of a the cookie in clear text."
 )
 
-SOLUTION = _(
-    "When generating the cookie, make sure to set the Secure Flag to True."
-)
+SOLUTION = "When generating the cookie, make sure to set the Secure Flag to True."
 
 REFERENCES = [
     {

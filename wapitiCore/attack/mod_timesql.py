@@ -22,7 +22,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net import Request, Response
@@ -38,7 +38,7 @@ class ModuleTimesql(Attack):
     name = "timesql"
     PRIORITY = 6
 
-    MSG_VULN = _("Blind SQL vulnerability")
+    MSG_VULN = "Blind SQL vulnerability"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -77,7 +77,7 @@ class ModuleTimesql(Attack):
                     vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                     log_message = Messages.MSG_QS_INJECT
                 else:
-                    vuln_message = _("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter)
+                    vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter}"
                     log_message = Messages.MSG_PARAM_INJECT
 
                 await self.add_vuln_critical(

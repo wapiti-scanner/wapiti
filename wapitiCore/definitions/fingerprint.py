@@ -17,22 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "additional"
 
-NAME = _("Fingerprint web technology")
+NAME = "Fingerprint web technology"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-INFO-02", "WSTG-INFO-08"]
 
-DESCRIPTION = _(
-    "The use of a web technology can be deducted due to the presence of its specific fingerprints."
-)
+DESCRIPTION = "The use of a web technology can be deducted due to the presence of its specific fingerprints."
 
-SOLUTION = _(
-    "This is only for informational purposes."
-)
+SOLUTION = "This is only for informational purposes."
 
 REFERENCES = [
     {

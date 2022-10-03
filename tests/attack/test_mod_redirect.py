@@ -12,7 +12,6 @@ import respx
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_redirect import ModuleRedirect
 
 
@@ -39,7 +38,7 @@ async def test_redirect_detection():
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Open Redirect")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Open Redirect"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
             ['yolo', 'nawak'],
             ['url', 'https://openbugbounty.org/']
@@ -58,7 +57,7 @@ async def test_redirect_detection_no_url():
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Open Redirect")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Open Redirect"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
             ['url', '//openbugbounty.org/']
         ]

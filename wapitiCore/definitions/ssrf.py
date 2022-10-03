@@ -17,21 +17,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Server Side Request Forgery")
-SHORT_NAME = _("SSRF")
+NAME = "Server Side Request Forgery"
+SHORT_NAME = "SSRF"
 
 WSTG_CODE = ["WSTG-INPV-19"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "The target application may have functionality for importing data from a URL, "
     "publishing data to a URL or otherwise reading data from a URL that can be tampered with."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Every URI received by the web application should be checked, "
     "especially scheme and hostname. A whitelist should be used."
 )

@@ -21,14 +21,13 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
 from wapitiCore.definitions.csp import NAME, WSTG_CODE
 from wapitiCore.main.log import log_red
 
-MSG_NO_CSP = _("CSP is not set")
-MSG_CSP_MISSING = _("CSP attribute \"{0}\" is missing")
-MSG_CSP_UNSAFE = _("CSP \"{0}\" value is not safe")
+MSG_NO_CSP = "CSP is not set"
+MSG_CSP_MISSING = "CSP attribute \"{0}\" is missing"
+MSG_CSP_UNSAFE = "CSP \"{0}\" value is not safe"
 
 
 # This module check the basics recommendations of CSP

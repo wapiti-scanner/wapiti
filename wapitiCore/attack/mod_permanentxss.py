@@ -24,7 +24,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, PayloadType, Mutator, random_string
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.stored_xss import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
@@ -52,7 +52,7 @@ class ModulePermanentxss(Attack):
 
     PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
 
-    MSG_VULN = _("Stored XSS vulnerability")
+    MSG_VULN = "Stored XSS vulnerability"
 
     RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
 
@@ -146,21 +146,16 @@ class ModulePermanentxss(Attack):
                                 )
 
                                 if request.path == input_request.path:
-                                    description = _(
-                                        "Permanent XSS vulnerability found via injection in the parameter {0}"
-                                    ).format(parameter)
-                                else:
-                                    description = _(
-                                        "Permanent XSS vulnerability found in {0} by injecting"
-                                        " the parameter {1} of {2}"
-                                    ).format(
-                                        request.url,
-                                        parameter,
-                                        input_request.path
+                                    description = (
+                                        f"Permanent XSS vulnerability found via injection in the parameter {parameter}"
                                     )
-
+                                else:
+                                    description = (
+                                        f"Permanent XSS vulnerability found in {request.url} by injecting"
+                                        f" the parameter {parameter} of {input_request.path}"
+                                    )
                                 if has_strong_csp(response, html):
-                                    description += ".\n" + _("Warning: Content-Security-Policy is present!")
+                                    description += ".\nWarning: Content-Security-Policy is present!"
 
                                 await self.add_vuln_high(
                                     request_id=request.path_id,
@@ -185,7 +180,7 @@ class ModulePermanentxss(Attack):
                                 )
 
                                 if has_strong_csp(response, html):
-                                    log_red(_("Warning: Content-Security-Policy is present!"))
+                                    log_red("Warning: Content-Security-Policy is present!")
 
                                 log_red(Messages.MSG_EVIL_REQUEST)
                                 log_red(evil_request.http_repr())
@@ -286,21 +281,17 @@ class ModulePermanentxss(Attack):
                 ):
 
                     if page == output_request.path:
-                        description = _(
-                            "Permanent XSS vulnerability found via injection in the parameter {0}"
-                        ).format(xss_param)
+                        description = (
+                            f"Permanent XSS vulnerability found via injection in the parameter {xss_param}"
+                        )
                     else:
-                        description = _(
-                            "Permanent XSS vulnerability found in {0} by injecting"
-                            " the parameter {1} of {2}"
-                        ).format(
-                            output_request.url,
-                            parameter,
-                            page
+                        description = (
+                            f"Permanent XSS vulnerability found in {output_request.url} by injecting"
+                            f" the parameter {parameter} of {page}"
                         )
 
                     if has_strong_csp(response, html):
-                        description += ".\n" + _("Warning: Content-Security-Policy is present!")
+                        description += ".\nWarning: Content-Security-Policy is present!"
 
                     await self.add_vuln_high(
                         request_id=injection_request.path_id,
@@ -327,7 +318,7 @@ class ModulePermanentxss(Attack):
                     )
 
                     if has_strong_csp(response, html):
-                        log_red(_("Warning: Content-Security-Policy is present!"))
+                        log_red("Warning: Content-Security-Policy is present!")
 
                     log_red(Messages.MSG_EVIL_REQUEST)
                     log_red(evil_request.http_repr())

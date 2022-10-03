@@ -28,7 +28,6 @@ from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.dangerous_resource import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 
@@ -101,7 +100,7 @@ class ModuleNikto(Attack):
                 writer.writerows(self.nikto_db)
 
         except IOError:
-            logging.error(_("Error downloading nikto database."))
+            logging.error("Error downloading nikto database.")
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
@@ -137,8 +136,8 @@ class ModuleNikto(Attack):
                 self.nikto_db = [line for line in reader if line != [] and line[0].isdigit()]
 
         except IOError:
-            logging.warning(_("Problem with local nikto database."))
-            logging.info(_("Downloading from the web..."))
+            logging.warning("Problem with local nikto database.")
+            logging.info("Downloading from the web...")
             await self.update()
 
         self.finished = True
@@ -327,10 +326,10 @@ class ModuleNikto(Attack):
 
             info = vuln_desc
             if refs:
-                log_red(_("References:"))
+                log_red("References:")
                 log_red("  " + "\n  ".join(refs))
 
-                info += "\n" + _("References:") + "\n"
+                info += "\nReferences: \n"
                 info += "\n".join(refs)
 
             log_red("---")

@@ -17,24 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "anomaly"
 
-NAME = _("Internal Server Error")
+NAME = "Internal Server Error"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-ERRH-01"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "An error occurred on the server's side, preventing it to process the request."
-) + " " + _(
+) + " " + (
     "It may be the sign of a vulnerability."
 )
 
-SOLUTION = _(
-    "More information about the error should be found in the server logs."
-)
+SOLUTION = "More information about the error should be found in the server logs."
 
 REFERENCES = [
     {

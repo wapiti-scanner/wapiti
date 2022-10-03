@@ -26,7 +26,6 @@ from typing import Optional
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.htaccess import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import log_red, log_verbose
@@ -73,17 +72,14 @@ class ModuleHtaccess(Attack):
                 request_id=request.path_id,
                 category=NAME,
                 request=evil_req,
-                info=_("{0} bypassable weak restriction").format(evil_req.url),
+                info=f"{evil_req.url} bypassable weak restriction",
                 wstg=WSTG_CODE,
                 response=response
             )
-            log_red(_("Weak restriction bypass vulnerability: {0}"), evil_req.url)
-            log_red(_("HTTP status code changed from {0} to {1}").format(
-                original_status,
-                response.status
-            ))
+            log_red(f"Weak restriction bypass vulnerability: {evil_req.url}")
+            log_red(f"HTTP status code changed from {original_status} to {response.status}")
 
-            log_verbose(_("Source code:"))
+            log_verbose("Source code:")
             log_verbose(unblocked_content)
             log_red("---")
 

@@ -23,7 +23,7 @@ from httpx import RequestError
 
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Flags
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html import Html
@@ -34,7 +34,7 @@ class ModuleRedirect(Attack):
     # Won't work with PHP >= 4.4.2
 
     name = "redirect"
-    MSG_VULN = _("Open Redirect")
+    MSG_VULN = "Open Redirect"
     do_get = True
     do_post = False
     payloads = [("https://openbugbounty.org/", Flags()), ("//openbugbounty.org/", Flags())]
@@ -63,7 +63,7 @@ class ModuleRedirect(Attack):
                     category=NAME,
                     request=mutated_request,
                     parameter=parameter,
-                    info=_("{0} via injection in the parameter {1}").format(self.MSG_VULN, parameter),
+                    info=f"{self.MSG_VULN} via injection in the parameter {parameter}",
                     wstg=WSTG_CODE,
                     response=response
                 )

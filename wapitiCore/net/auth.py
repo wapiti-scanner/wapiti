@@ -11,7 +11,6 @@ from arsenic.errors import ArsenicError
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html import Html
 from wapitiCore.main.log import logging
-from wapitiCore.language.language import _
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
@@ -27,7 +26,7 @@ async def async_try_login(
     Returns if the authentication has been successful, the used form variables and the disconnect urls.
     """
     if len(crawler_configuration.auth_credentials) != 2:
-        logging.error(_("Login failed") + " : " + _("Invalid credentials format"))
+        logging.error("Login failed : Invalid credentials format")
         return False, {}, []
 
     if crawler_configuration.auth_method == "post" and auth_url:
@@ -115,7 +114,7 @@ async def _async_try_login_post(
                 page_source = await headless_client.get_page_source()
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
         except (ArsenicError, asyncio.TimeoutError) as exception:
-            logging.error(_("[!] {} with URL {}").format(exception.__class__.__name__, auth_url))
+            logging.error(f"[!] {exception.__class__.__name__} with URL {auth_url}")
             return False, {}, []
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -124,10 +123,10 @@ async def _async_try_login_post(
                 crawler_configuration.cookies = crawler.cookie_jar
                 page_source = response.content
             except ConnectionError:
-                logging.error(_("[!] Connection error with URL"), auth_url)
+                logging.error("[!] Connection error with URL", auth_url)
                 return False, {}, []
             except RequestError as exception:
-                logging.error(_("[!] {} with URL {}").format(exception.__class__.__name__, auth_url))
+                logging.error(f"[!] {exception.__class__.__name__} with URL {auth_url}")
                 return False, {}, []
 
     disconnect_urls = []
@@ -156,16 +155,16 @@ async def _async_try_login_post(
             # ensure logged in
             is_logged_in = html.is_logged_in()
             if is_logged_in:
-                logging.success(_("Login success"))
+                logging.success("Login success")
                 disconnect_urls = html.extract_disconnect_urls()
             else:
-                logging.warning(_("Login failed") + " : " + _("Credentials might be invalid"))
+                logging.warning("Login failed : Credentials might be invalid")
 
             # In every case keep the cookies
             crawler_configuration.cookies = crawler.cookie_jar
             return is_logged_in, form, disconnect_urls
 
-    logging.warning(_("Login failed") + " : " + _("No login form detected"))
+    logging.warning("Login failed : No login form detected")
     return False, {}, []
 
 

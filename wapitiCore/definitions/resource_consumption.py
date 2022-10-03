@@ -17,22 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "anomaly"
 
-NAME = _("Resource consumption")
+NAME = "Resource consumption"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-ERRH-01"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "It took an abnormal time to the server to respond to a query."
-) + " " + _(
+) + " " + (
     "An attacker might leverage this kind of weakness to overload the server."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "The involved script is maybe using the server resources (CPU, memory, network, file access...) "
     "in a non-efficient way."
 )

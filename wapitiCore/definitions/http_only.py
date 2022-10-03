@@ -17,25 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("HttpOnly Flag cookie")
+NAME = "HttpOnly Flag cookie"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CONF-07", "WSTG-SESS-02"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "HttpOnly is an additional flag included in a Set-Cookie HTTP response header."
-) + " " + _(
+) + " " + (
     "Using the HttpOnly flag when generating a cookie helps mitigate the risk of client side script accessing "
     "the protected cookie (if the browser supports it)."
 )
 
-SOLUTION = _(
-    "While creation of the cookie, make sure to set the HttpOnly Flag to True."
-)
+SOLUTION = "While creation of the cookie, make sure to set the HttpOnly Flag to True."
 
 REFERENCES = [
     {
