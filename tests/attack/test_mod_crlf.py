@@ -8,7 +8,6 @@ import httpx
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_crlf import ModuleCrlf
 
 
@@ -36,5 +35,5 @@ async def test_whole_stuff():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "crlf"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("CRLF Injection")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "CRLF Injection"
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"

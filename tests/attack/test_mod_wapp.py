@@ -7,7 +7,6 @@ import pytest
 import respx
 
 from wapitiCore.attack.mod_wapp import ModuleWapp
-from wapitiCore.language.language import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -91,7 +90,7 @@ async def test_url_detection():
                     '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web '
                     'frameworks"], "groups": ["Web development"]}'
                 ),
-                _("Fingerprint web technology"),
+                "Fingerprint web technology",
             ),
             (
                 'additional',
@@ -99,7 +98,7 @@ async def test_url_detection():
                     '{"name": "Outlook Web App", "versions": [], "categories": ["Webmail"], '
                     '"groups": ["Communication"]}'
                 ),
-                _("Fingerprint web technology"),
+                "Fingerprint web technology",
             )
         ]
 
@@ -413,12 +412,12 @@ async def test_vulnerabilities():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "Backdrop", "versions": ["4.5"], "categories": ["CMS"], "groups": ["Content"]}'
         )
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Fingerprint web technology")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
 
         assert persister.add_payload.call_args_list[3][1]["info"] == (
             '{"name": "Cherokee", "versions": ["1.3.4"], "categories": ["Web servers"], "groups": ["Servers"]}'
         )
-        assert persister.add_payload.call_args_list[3][1]["category"] == _('Fingerprint web server')
+        assert persister.add_payload.call_args_list[3][1]["category"] == "Fingerprint web server"
 
 
 @pytest.mark.asyncio
@@ -475,17 +474,17 @@ async def test_merge_with_and_without_redirection():
             (
                 'additional',
                 '{"name": "Microsoft ASP.NET", "versions": [], "categories": ["Web frameworks"], "groups": ["Web development"]}',
-                _("Fingerprint web technology")
+                "Fingerprint web technology"
             ),
             (
                 'additional',
                 '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "categories": ["Webmail"], "groups": ["Communication"]}',
-                _("Fingerprint web technology")
+                "Fingerprint web technology"
             ),
             (
                 'vulnerability',
                 '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "categories": ["Webmail"], "groups": ["Communication"]}',
-                _("Fingerprint web application framework")
+                "Fingerprint web application framework"
             ),
         ]
 

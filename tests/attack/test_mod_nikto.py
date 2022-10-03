@@ -10,7 +10,6 @@ import pytest
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_nikto import ModuleNikto
 
 
@@ -47,7 +46,7 @@ async def test_whole_stuff():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
         assert persister.add_payload.call_args_list[0][1]["request"].url == (
             "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
         )
@@ -101,7 +100,7 @@ async def test_false_positives():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Potentially dangerous file")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
         assert persister.add_payload.call_args_list[0][1]["request"].url == (
             "http://perdu.com/opendir.php?%2Fetc%2Fpasswd"
         )

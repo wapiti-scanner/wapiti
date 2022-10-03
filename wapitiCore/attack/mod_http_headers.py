@@ -21,14 +21,13 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.http_headers import (
     NAME, WSTG_CODE_CONTENT_TYPE_OPTIONS, WSTG_CODE_FRAME_OPTIONS,
     WSTG_CODE_STRICT_TRANSPORT_SECURITY)
-from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, log_green, log_red
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
-INFO_HSTS = _("Strict-Transport-Security is not set")
-INFO_XCONTENT_TYPE = _("X-Content-Type-Options is not set")
-INFO_XFRAME_OPTIONS = _("X-Frame-Options is not set")
+INFO_HSTS = "Strict-Transport-Security is not set"
+INFO_XCONTENT_TYPE = "X-Content-Type-Options is not set"
+INFO_XFRAME_OPTIONS = "X-Frame-Options is not set"
 
 
 class ModuleHttpHeaders(Attack):
@@ -42,19 +41,19 @@ class ModuleHttpHeaders(Attack):
         "X-Frame-Options": {
             "list": check_list_xframe,
             "info": INFO_XFRAME_OPTIONS,
-            "log": _("Checking X-Frame-Options :"),
+            "log": "Checking X-Frame-Options :",
             "wstg": WSTG_CODE_FRAME_OPTIONS
         },
         "X-Content-Type-Options": {
             "list": check_list_xcontent,
             "info": INFO_XCONTENT_TYPE,
-            "log": _("Checking X-Content-Type-Options :"),
+            "log": "Checking X-Content-Type-Options :",
             "wstg": WSTG_CODE_CONTENT_TYPE_OPTIONS
         },
         "Strict-Transport-Security": {
             "list": check_list_hsts,
             "info": INFO_HSTS,
-            "log": _("Checking Strict-Transport-Security :"),
+            "log": "Checking Strict-Transport-Security :",
             "wstg": WSTG_CODE_STRICT_TRANSPORT_SECURITY
         }
     }

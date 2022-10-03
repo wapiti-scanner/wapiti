@@ -17,24 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("CRLF Injection")
+NAME = "CRLF Injection"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-INPV-15"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, \\n)."
-) + " " + _(
+) + " " + (
     "A CRLF Injection attack occurs when a user manages to submit a CRLF into an application."
-) + " " + _(
+) + " " + (
     "This is most commonly done by modifying an HTTP parameter or URL."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Check the submitted parameters and do not allow CRLF to be injected when it is not expected."
 )
 

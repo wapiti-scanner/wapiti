@@ -17,20 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Path Traversal")
+NAME = "Path Traversal"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-ATHZ-01"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "This attack is known as Path or Directory Traversal."
-) + " " + _(
+) + " " + (
     "Its aim is the access to files and directories that are stored outside the web root folder."
-) + " " + _(
+) + " " + (
     "The attacker tries to explore the directories stored in the web server."
 ) + " " + (
     "The attacker uses some techniques, for instance, the manipulation of variables that reference files with "
@@ -38,17 +36,17 @@ DESCRIPTION = _(
     "the file system."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Prefer working without user input when using file system calls."
-) + " " + _(
+) + " " + (
     "Use indexes rather than actual portions of file names when templating or using language files "
     "(eg: value 5 from the user submission = Czechoslovakian, rather than expecting the user to return "
     "'Czechoslovakian')."
-) + " " + _(
+) + " " + (
     "Ensure the user cannot supply all parts of the path - surround it with your path code."
-) + " " + _(
+) + " " + (
     "Validate the user's input by only accepting known good - do not sanitize the data."
-) + " " + _(
+) + " " + (
     "Use chrooted jails and code access policies to restrict where the files can be obtained or saved to."
 )
 

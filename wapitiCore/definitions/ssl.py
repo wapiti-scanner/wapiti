@@ -17,26 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("TLS/SSL misconfigurations")
-SHORT_NAME = _("SSL misconfigurations")
+NAME = "TLS/SSL misconfigurations"
+SHORT_NAME = "SSL misconfigurations"
 
 WSTG_CODE = ["WSTG-CRYP-01"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "The TLS protocol aims primarily to provide privacy and data integrity between "
     "two or more communicating computer applications."
-) + " " + _(
+) + " " + (
     "Over the years numerous vulnerabilities have been discovered in some SSL/TLS version or specific ciphers making "
     "the integrity of the communications at risk (eavesdropping, alteration...)"
 )
 
-SOLUTION = _(
+SOLUTION = (
     "To protect against SSL/TLS vulnerabilities make sure that deprecated versions of the protocol are disabled."
-) + " " + _(
+) + " " + (
     "Refer to up-to-date recommendations to only allow modern versions of TLS with Perfect Forward Secrecy."
 )
 
@@ -76,9 +74,9 @@ REFERENCES = [
 
 LEVELS = [
     # For translation purpose only
-    _("Insecure"),
-    _("Weak"),
-    _("Secure"),
-    _("Recommended"),
-    _("Unknown")
+    "Insecure",
+    "Weak",
+    "Secure",
+    "Recommended",
+    "Unknown",
 ]

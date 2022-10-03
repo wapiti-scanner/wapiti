@@ -11,7 +11,6 @@ import httpx
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_exec import ModuleExec
 
@@ -90,7 +89,7 @@ async def test_detection():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
 
 

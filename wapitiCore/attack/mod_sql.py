@@ -24,7 +24,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Flags, Mutator
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net import Request, Response
@@ -293,20 +293,20 @@ class ModuleSql(Attack):
         for dbms, regex_list in DBMS_ERROR_PATTERNS.items():
             for regex in regex_list:
                 if regex.search(data):
-                    return f"{_('SQL Injection')} (DMBS: {dbms}"
+                    return f"SQL Injection (DBMS: {dbms})"
 
         # Can't guess the DBMS but may be useful
         if "Unclosed quotation mark after the character string" in data:
-            return _(".NET SQL Injection")
+            return ".NET SQL Injection"
         if "StatementCallback; bad SQL grammar" in data:
-            return _("Spring JDBC Injection")
+            return "Spring JDBC Injection"
 
         if "XPathException" in data:
-            return _("XPath Injection")
+            return "XPath Injection"
         if "Warning: SimpleXMLElement::xpath():" in data:
-            return _("XPath Injection")
+            return "XPath Injection"
         if "supplied argument is not a valid ldap" in data or "javax.naming.NameNotFoundException" in data:
-            return _("LDAP Injection")
+            return "LDAP Injection"
 
         return ""
 
@@ -352,12 +352,11 @@ class ModuleSql(Attack):
             else:
                 vuln_info = self._find_pattern_in_response(response.content)
                 if vuln_info and not await self.is_false_positive(request):
-                    # An error message implies that a vulnerability may exists
-
+                    # An error message implies that a vulnerability may exist
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, parameter)
+                        vuln_message = f"{vuln_info} via injection in the parameter {parameter}"
 
                     await self.add_vuln_critical(
                         request_id=request.path_id,
@@ -450,12 +449,12 @@ class ModuleSql(Attack):
                 if test_results and all(test_results):
                     # We got a winner
                     skip_till_next_parameter = True
-                    vuln_info = _("SQL Injection")
+                    vuln_info = "SQL Injection"
 
                     if current_parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(vuln_info, current_parameter)
+                        vuln_message = f"{vuln_info} via injection in the parameter {current_parameter}"
 
                     await self.add_vuln_critical(
                         request_id=request.path_id,

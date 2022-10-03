@@ -9,12 +9,11 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint_webserver import \
     NAME as WEB_SERVER_VERSIONED
-from wapitiCore.language.vulnerability import _
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
-MSG_TECHNO_VERSIONED = _("The range for {0} is from {1} to {2}")
+MSG_TECHNO_VERSIONED = "The range for {0} is from {1} to {2}"
 
 # types
 Technology = str
@@ -53,7 +52,7 @@ class ModuleHtp(Attack):
                 os.path.join(self.user_config_dir, self.HTP_DATABASE)
             )
         except IOError:
-            logging.error(_("Error downloading htp database."))
+            logging.error("Error downloading htp database.")
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if request.method == "POST":
@@ -174,8 +173,8 @@ class ModuleHtp(Attack):
 
     async def _verify_htp_database(self, htp_database_path: str):
         if os.path.exists(htp_database_path) is False:
-            logging.warning(_("Problem with local htp database."))
-            logging.info(_("Downloading from the web..."))
+            logging.warning("Problem with local htp database.")
+            logging.info("Downloading from the web...")
             await self.update()
 
 

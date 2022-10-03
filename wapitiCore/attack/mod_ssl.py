@@ -32,7 +32,7 @@ from sslyze.errors import ServerHostnameCouldNotBeResolved
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
-from wapitiCore.language.vulnerability import _, CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
 from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
 from wapitiCore.definitions.ssl import NAME, WSTG_CODE
 
@@ -66,25 +66,25 @@ def process_certificate_info(certinfo_result):
     for cert_deployment in certinfo_result.certificate_deployments:
 
         leaf_certificate = cert_deployment.received_certificate_chain[0]
-        message = _("Certificate subject: {0}").format(get_common_name(leaf_certificate.subject))
+        message = f"Certificate subject: {get_common_name(leaf_certificate.subject)}"
         log_blue(message)
         yield INFO_LEVEL, message
 
-        message = _("Alt. names: {0}").format(extract_dns_subject_alternative_names(leaf_certificate))
+        message = f"Alt. names: {extract_dns_subject_alternative_names(leaf_certificate)}"
         log_blue(message)
         yield INFO_LEVEL, message
 
-        message = _("Issuer: {0}").format(get_common_name(leaf_certificate.issuer))
+        message = f"Issuer: {get_common_name(leaf_certificate.issuer)}"
         log_blue(message)
         yield INFO_LEVEL, message
 
         if not cert_deployment.leaf_certificate_subject_matches_hostname:
-            message = _("Requested hostname doesn't match those in the certificate")
+            message = "Requested hostname doesn't match those in the certificate"
             log_red(message)
             yield CRITICAL_LEVEL, message
 
         if not cert_deployment.received_chain_has_valid_order:
-            message = _("Certificate chain is in invalid order")
+            message = "Certificate chain is in invalid order"
             log_orange(message)
             yield MEDIUM_LEVEL, message
 
@@ -102,11 +102,11 @@ def process_certificate_info(certinfo_result):
         else:
             algorithm = public_key.__class__.__name__
 
-        message = _("Key: {0} {1} bits").format(algorithm, key_size)
+        message = f"Key: {algorithm} {key_size} bits"
         log_blue(message)
         yield INFO_LEVEL, message
 
-        message = _("Signature Algorithm: {0}").format(leaf_certificate.signature_hash_algorithm.name)
+        message = f"Signature Algorithm: {leaf_certificate.signature_hash_algorithm.name}"
         log_blue(message)
         yield INFO_LEVEL, message
 
@@ -114,51 +114,53 @@ def process_certificate_info(certinfo_result):
         if leaf_certificate.not_valid_after > datetime.utcnow():
             # We should add a method for humanize inside our language package
             # _t = humanize.i18n.activate("fr_FR")
-            message = _("Certificate expires in ") + \
+            message = "Certificate expires in " + \
                       humanize.precisedelta(leaf_certificate.not_valid_after - datetime.utcnow())
             log_green(message)
             yield INFO_LEVEL, message
         else:
-            message = _("Certificate has expired at") + f" {leaf_certificate.not_valid_after}"
+            message = f"Certificate has expired at {leaf_certificate.not_valid_after}"
             log_red(message)
             yield CRITICAL_LEVEL, message
 
         if not cert_deployment.leaf_certificate_is_ev:
-            message = _("Certificate doesn't use Extended Validation")
+            message = "Certificate doesn't use Extended Validation"
             log_orange(message)
             yield MEDIUM_LEVEL, message
 
         # https://en.wikipedia.org/wiki/OCSP_stapling
         if not cert_deployment.leaf_certificate_has_must_staple_extension:
-            message = _("OCSP Must-Staple extension is missing")
+            message = "OCSP Must-Staple extension is missing"
             log_orange(message)
             yield MEDIUM_LEVEL, message
 
         if cert_deployment.leaf_certificate_signed_certificate_timestamps_count is None:
-            message = _("Certificate transparency:") + " " + _("Unknown (Your OpenSSL version is not recent enough)")
+            message = "Certificate transparency: Unknown (OpenSSL version is not recent enough)"
             log_orange(message)
             yield MEDIUM_LEVEL, message
         elif cert_deployment.leaf_certificate_signed_certificate_timestamps_count:
-            message = _("Certificate transparency:") + " " + _("Yes") + \
-                      f" ({cert_deployment.leaf_certificate_signed_certificate_timestamps_count} SCT)"
+            message = (
+                "Certificate transparency: Yes "
+                f"({cert_deployment.leaf_certificate_signed_certificate_timestamps_count} SCT)"
+            )
             log_green(message)
             yield INFO_LEVEL, message
         else:
-            message = _("Certificate transparency:") + " " + _("No")
+            message = "Certificate transparency: No"
             log_red(message)
             yield HIGH_LEVEL, message
 
         if cert_deployment.verified_chain_has_sha1_signature:
-            message = _("One of the certificate in the chain is signed using SHA-1")
+            message = "One of the certificate in the chain is signed using SHA-1"
             log_red(message)
             yield HIGH_LEVEL, message
 
         for validation_result in cert_deployment.path_validation_results:
             if not validation_result.was_validation_successful:
-                message = _("Certificate is invalid for {} trust store: {}").format(
-                        validation_result.trust_store.name,
-                        validation_result.openssl_error_string
-                    )
+                message = (
+                    f"Certificate is invalid for {validation_result.trust_store.name} "
+                    f"trust store: {validation_result.openssl_error_string}"
+                )
                 log_red(message)
                 yield CRITICAL_LEVEL, message
 
@@ -195,11 +197,7 @@ def process_cipher_suites(results, version: str):
         group_by_severity[security_level].append(accepted_cipher_suite.cipher_suite.openssl_name)
 
     for security_level, ciphers in group_by_severity.items():
-        message = _("The following ciphers are {0} for {1}: {2}").format(
-            _(security_level).lower(),
-            version,
-            ", ".join(sorted(ciphers))
-        )
+        message = f"The following ciphers are {security_level.lower()} for {version}: {', '.join(sorted(ciphers))}"
         yield cipher_level_to_wapiti_level(security_level), message
 
 
@@ -209,7 +207,7 @@ def analyze(hostname: str, port: int) -> List[Tuple[int, str]]:
     try:
         server_location = ServerNetworkLocation(hostname, port)
     except ServerHostnameCouldNotBeResolved:
-        log_red(_("Could not resolve {0}"), hostname)
+        log_red(f"Could not resolve {hostname}")
         return results
 
     # Then queue some scan commands for the server
@@ -258,7 +256,7 @@ def analyze(hostname: str, port: int) -> List[Tuple[int, str]]:
 
     # Then retrieve the results
     for result in scanner.get_results():
-        log_blue("\n" + _("Results for") + f" {result.server_location.hostname}:")
+        log_blue(f"\nResults for {result.server_location.hostname}:")
         deprecated_protocols = []
 
         if result.connectivity_error_trace:
@@ -286,47 +284,47 @@ def analyze(hostname: str, port: int) -> List[Tuple[int, str]]:
                 if scan_results.result.robot_result in (
                         RobotScanResultEnum.VULNERABLE_WEAK_ORACLE, RobotScanResultEnum.VULNERABLE_STRONG_ORACLE
                 ):
-                    message = _("Server is vulnerable to ROBOT attack")
+                    message = "Server is vulnerable to ROBOT attack"
                     log_red(message)
                     results.append((CRITICAL_LEVEL, message))
             elif scan_command == ScanCommand.HEARTBLEED:
                 if scan_results.result.is_vulnerable_to_heartbleed:
-                    message = _("Server is vulnerable to Heartbleed attack")
+                    message = "Server is vulnerable to Heartbleed attack"
                     log_red(message)
                     results.append((CRITICAL_LEVEL, message))
             elif scan_command == ScanCommand.TLS_COMPRESSION:
                 if scan_results.result.supports_compression:
-                    message = _("Server is vulnerable to CRIME attack (compression is supported)")
+                    message = "Server is vulnerable to CRIME attack (compression is supported)"
                     log_red(message)
                     results.append((CRITICAL_LEVEL, message))
             elif scan_command == ScanCommand.TLS_FALLBACK_SCSV:
                 if not scan_results.result.supports_fallback_scsv:
-                    message = _("Server is vulnerable to downgrade attacks (support for TLS_FALLBACK_SCSV is missing)")
+                    message = "Server is vulnerable to downgrade attacks (support for TLS_FALLBACK_SCSV is missing)"
                     log_red(message)
                     results.append((CRITICAL_LEVEL, message))
             elif scan_command == ScanCommand.TLS_1_3_EARLY_DATA:
                 # https://blog.trailofbits.com/2019/03/25/what-application-developers-need-to-know-about-tls-early-data-0rtt/
                 if scan_results.result.supports_early_data:
-                    message = _("TLS 1.3 Early Data (0RTT) is vulnerable to replay attacks")
+                    message = "TLS 1.3 Early Data (0RTT) is vulnerable to replay attacks"
                     log_orange(message)
                     results.append((MEDIUM_LEVEL, message))
             elif scan_command == ScanCommand.OPENSSL_CCS_INJECTION:
                 if scan_results.result.is_vulnerable_to_ccs_injection:
-                    message = _("Server is vulnerable to OpenSSL CCS (CVE-2014-0224)")
+                    message = "Server is vulnerable to OpenSSL CCS (CVE-2014-0224)"
                     log_red(message)
                     results.append((CRITICAL_LEVEL, message))
             elif scan_command == ScanCommand.SESSION_RENEGOTIATION:
                 if scan_results.result.is_vulnerable_to_client_renegotiation_dos:
-                    message = _("Server honors client-initiated renegotiations (vulnerable to DoS attacks)")
+                    message = "Server honors client-initiated renegotiations (vulnerable to DoS attacks)"
                     log_red(message)
                     results.append((HIGH_LEVEL, message))
                 if not scan_results.result.supports_secure_renegotiation:
-                    message = _("Server doesn't support secure renegotiations")
+                    message = "Server doesn't support secure renegotiations"
                     log_orange(message)
                     results.append((MEDIUM_LEVEL, message))
             elif scan_command == ScanCommand.HTTP_HEADERS:
                 if scan_results.result.strict_transport_security_header is None:
-                    message = _("Strict Transport Security (HSTS) is not set")
+                    message = "Strict Transport Security (HSTS) is not set"
                     log_red(message)
                     results.append((HIGH_LEVEL, message))
             elif scan_command in good_protocols:
@@ -334,8 +332,8 @@ def analyze(hostname: str, port: int) -> List[Tuple[int, str]]:
                     results.append((level, message))
 
         if deprecated_protocols:
-            message = _("The following protocols are deprecated and/or insecure and should be deactivated:") + \
-                      " " + ", ".join(deprecated_protocols)
+            message = "The following protocols are deprecated and/or insecure and should be deactivated: " + \
+                      ", ".join(deprecated_protocols)
             log_red(message)
             results.append((CRITICAL_LEVEL, message))
 

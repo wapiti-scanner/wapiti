@@ -10,7 +10,6 @@ import pytest
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_shellshock import ModuleShellshock
 
 
@@ -52,5 +51,5 @@ async def test_whole_stuff():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "shellshock"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Command execution")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
         assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/vuln/"

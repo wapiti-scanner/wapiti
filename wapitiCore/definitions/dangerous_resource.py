@@ -17,22 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Potentially dangerous file")
+NAME = "Potentially dangerous file"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CONF-04", "WSTG-CONF-01"]
 
-DESCRIPTION = _(
-    "A file with potential vulnerabilities has been found on the website."
-)
+DESCRIPTION = "A file with potential vulnerabilities has been found on the website."
 
-SOLUTION = _(
-    "Make sure the script is up-to-date and restrict access to it if possible."
-)
+SOLUTION = "Make sure the script is up-to-date and restrict access to it if possible."
 
 REFERENCES = [
     {

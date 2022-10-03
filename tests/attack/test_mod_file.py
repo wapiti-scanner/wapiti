@@ -9,7 +9,6 @@ import pytest
 
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_file import ModuleFile, has_prefix_or_suffix, find_warning_message, FileWarning
 
@@ -42,7 +41,7 @@ async def test_inclusion_detection():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "file"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Path Traversal")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Path Traversal"
         assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
 
 

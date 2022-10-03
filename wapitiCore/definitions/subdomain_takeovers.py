@@ -17,20 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Subdomain takeover")
+NAME = "Subdomain takeover"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CONF-10"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "A DNS CNAME record points to a non existing domain or to a content that an attacker can take control of."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Prevent dangling DNS entries by making sure you already have control over the pointed domain."
 )
 

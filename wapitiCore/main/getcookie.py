@@ -24,7 +24,6 @@ import sys
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
-from wapitiCore.language.language import _
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
@@ -37,7 +36,7 @@ class InvalidOptionValue(Exception):
         self.opt_value = opt_value
 
     def __str__(self):
-        return _("Invalid argument for option {0} : {1}").format(self.opt_name, self.opt_value)
+        return f"Invalid argument for option {self.opt_name} : {self.opt_value}"
 
 
 def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
@@ -101,21 +100,21 @@ async def getcookie_main(arguments):
     parser.add_argument(
         "--tor",
         action="store_true",
-        help=_("Use Tor listener (127.0.0.1:9050)")
+        help="Use Tor listener (127.0.0.1:9050)",
     )
 
     parser.add_argument(
         "-a", "--auth-cred",
         dest="credentials",
         default=argparse.SUPPRESS,
-        help=_("Set HTTP authentication credentials"),
-        metavar="CREDENTIALS"
+        help="Set HTTP authentication credentials",
+        metavar="CREDENTIALS",
     )
 
     parser.add_argument(
         "--auth-type",
         default=argparse.SUPPRESS,
-        help=_("Set the authentication type to use"),
+        help="Set the authentication type to use",
         choices=["basic", "digest", "ntlm"]
     )
 
@@ -127,7 +126,7 @@ async def getcookie_main(arguments):
     parser.add_argument(
         "-A", "--user-agent",
         default=argparse.SUPPRESS,
-        help=_("Set a custom user-agent to use for every requests"),
+        help="Set a custom user-agent to use for every requests",
         metavar="AGENT",
         dest="user_agent"
     )
@@ -136,7 +135,7 @@ async def getcookie_main(arguments):
         "-H", "--header",
         action="append",
         default=[],
-        help=_("Set a custom header to use for every requests"),
+        help="Set a custom header to use for every requests",
         metavar="HEADER",
         dest="headers"
     )
@@ -145,8 +144,8 @@ async def getcookie_main(arguments):
 
     parts = urlparse(args.url)
     if not parts.scheme or not parts.netloc or not parts.path:
-        print(_("Invalid base URL was specified, please give a complete URL with protocol scheme"
-                " and slash after the domain name."))
+        print("Invalid base URL was specified, please give a complete URL with protocol scheme"
+              " and slash after the domain name.")
         sys.exit()
 
     server = parts.netloc
@@ -170,7 +169,7 @@ async def getcookie_main(arguments):
             for i, form in enumerate(html.iter_forms(autofill=False)):
                 if i == 0:
                     print('')
-                    print(_("Choose the form you want to use or enter 'q' to leave :"))
+                    print("Choose the form you want to use or enter 'q' to leave :")
                 print(f"{i}) {form}")
                 forms.append(form)
 
@@ -179,7 +178,7 @@ async def getcookie_main(arguments):
                 nchoice = -1
                 print('')
                 while not valid_choice_done:
-                    choice = input(_("Enter a number : "))
+                    choice = input("Enter a number : ")
                     if choice.isdigit():
                         nchoice = int(choice)
                         if len(forms) > nchoice >= 0:
@@ -190,8 +189,8 @@ async def getcookie_main(arguments):
                 if valid_choice_done:
                     form = forms[nchoice]
                     print('')
-                    print(_("Please enter values for the following form: "))
-                    print(_("url = {0}").format(form.url))
+                    print("Please enter values for the following form: ")
+                    print(f"url = {form.url}")
 
                     post_params = form.post_params
                     for i, post_param_tuple in enumerate(post_params):

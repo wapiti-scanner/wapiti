@@ -27,7 +27,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.xxe import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -49,7 +49,7 @@ class ModuleXxe(Attack):
     do_post = True
 
     PAYLOADS_FILE = "xxePayloads.ini"
-    MSG_VULN = _("XXE vulnerability")
+    MSG_VULN = "XXE vulnerability"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -177,12 +177,11 @@ class ModuleXxe(Attack):
             else:
                 pattern = search_pattern(response.content, self.flag_to_patterns(flags))
                 if pattern and not await self.false_positive(request, pattern):
-                    # An error message implies that a vulnerability may exists
+                    # An error message implies that a vulnerability may exist
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                     else:
-                        vuln_message = _("{0} via injection in the parameter {1}").format(
-                            self.MSG_VULN, parameter)
+                        vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter}"
 
                     await self.add_vuln_high(
                         request_id=request.path_id,
@@ -318,7 +317,7 @@ class ModuleXxe(Attack):
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_xxe.php?session_id={self._session_id}"
-        logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
+        logging.info(f"[*] Asking endpoint URL {endpoint_url} for results, please wait...")
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
@@ -326,7 +325,7 @@ class ModuleXxe(Attack):
             response = await self.crawler.async_send(endpoint_request)
         except RequestError:
             self.network_errors += 1
-            logging.error(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
+            logging.error(f"[!] Unable to request endpoint URL '{self.internal_endpoint}'")
             return
 
         data = response.json
@@ -354,36 +353,22 @@ class ModuleXxe(Attack):
                     if parameter == "QUERY_STRING":
                         vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                     elif parameter == "raw body":
-                        vuln_message = _(
-                            "Out-Of-Band {0} by sending raw XML in request body"
-                        ).format(
-                            self.MSG_VULN
-                        )
+                        vuln_message = f"Out-Of-Band {self.MSG_VULN} by sending raw XML in request body"
                     else:
-                        vuln_message = _(
-                            "Out-Of-Band {0} via injection in the parameter {1}"
-                        ).format(
-                            self.MSG_VULN,
-                            parameter
-                        )
+                        vuln_message = f"Out-Of-Band {self.MSG_VULN} via injection in the parameter {1}"
 
                     if not request_size:
                         # Overwrite the message as the full exploit chain failed
-                        vuln_message = _(
+                        vuln_message = (
                             "The target reached the DTD file on the endpoint but the exploitation didn't succeed."
                         )
                     else:
                         # Exploitation succeed, we have some data
-                        more_infos = _(
-                            "The target sent {0} bytes of data to the endpoint at {1} with IP {2}.\n"
-                            "Received data can be seen at {3}."
-                        ).format(
-                            request_size,
-                            request_date,
-                            request_ip,
-                            request_url
+                        more_infos = (
+                            f"The target sent {request_size} bytes of data to the endpoint at {request_date} "
+                            f"with IP {request_ip}.\n"
+                            f"Received data can be seen at {request_url}."
                         )
-
                         vuln_message += "\n" + more_infos
 
                     # placeholder if shit happens

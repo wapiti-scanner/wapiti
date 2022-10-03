@@ -14,7 +14,6 @@ from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_xxe import ModuleXxe
-from wapitiCore.language.vulnerability import _
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -50,7 +49,7 @@ async def test_direct_body():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "xxe"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("XML External Entity")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "XML External Entity"
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "raw body"
         assert "/etc/passwd" in persister.add_payload.call_args_list[0][1]["request"].post_params
 

@@ -29,7 +29,6 @@ from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.backup import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 
@@ -118,13 +117,13 @@ class ModuleBackup(Attack):
                 # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
                 # uses the string as a token so we cannot use f string
                 # pylint: disable=consider-using-f-string
-                log_red(_("Found backup file {}".format(evil_req.url)))
+                log_red(f"Found backup file {evil_req.url}")
 
                 await self.add_vuln_low(
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_req,
-                    info=_("Backup file {0} found for {1}").format(url, page),
+                    info=f"Backup file {url} found for {page}",
                     wstg=WSTG_CODE,
                     response=response
                 )

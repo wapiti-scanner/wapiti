@@ -17,22 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Command execution")
+NAME = "Command execution"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-INPV-12"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "This attack consists in executing system commands on the server."
-) + " " + _(
+) + " " + (
     "The attacker tries to inject this commands in the request parameters."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Prefer working without user input when using file system calls."
 )
 

@@ -26,7 +26,7 @@ from typing import Optional
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
 from wapitiCore.parsers.html import Html
 from wapitiCore.net.response import Response
@@ -185,11 +185,7 @@ class ModuleBruteLoginForm(Attack):
                     if result:
                         found = True
                         username, password, response = result
-                        vuln_message = _("Credentials found for URL {} : {} / {}").format(
-                            request.referer,
-                            username,
-                            password
-                        )
+                        vuln_message = f"Credentials found for URL {request.referer} : {username} / {password}"
 
                         # Recreate the request that succeed in order to print and store it
                         post_params = login_form.post_params

@@ -20,7 +20,6 @@ import codecs
 
 from httpx import Response
 
-from wapitiCore.language.language import _
 from wapitiCore.net.response import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
@@ -64,19 +63,19 @@ class TXTReportGenerator(ReportGenerator):
             try:
                 txt_report_file.write(separator)
                 txt_report_file.write(center(f"{self._infos['version']} - wapiti-scanner.github.io\n"))
-                txt_report_file.write(center(_("Report for {0}\n").format(self._infos["target"])))
-                txt_report_file.write(center(_("Date of the scan : {0}\n").format(self._infos["date"])))
-                txt_report_file.write(center(_("Crawled pages : {0}\n").format(self._infos["crawled_pages_nbr"])))
+                txt_report_file.write(center(f"Report for {self._infos['target']}\n"))
+                txt_report_file.write(center(f"Date of the scan : {self._infos['date']}\n"))
+                txt_report_file.write(center(f"Crawled pages : {self._infos['crawled_pages_nbr']}\n"))
                 if "scope" in self._infos:
-                    txt_report_file.write(center(_("Scope of the scan : {0}\n").format(self._infos["scope"])))
+                    txt_report_file.write(center(f"Scope of the scan : {self._infos['scope']}\n"))
                 txt_report_file.write(separator)
                 txt_report_file.write("\n")
 
                 self._write_auth_info(txt_report_file)
 
-                txt_report_file.write(title(_("Summary of vulnerabilities :")))
+                txt_report_file.write(title("Summary of vulnerabilities :"))
                 for category, vulnerabilities in self._vulns.items():
-                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(vulnerabilities)).rjust(NB_COLUMNS))
+                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}\n".rjust(NB_COLUMNS))
                 txt_report_file.write(separator)
 
                 for category, vulnerabilities in self._vulns.items():
@@ -86,22 +85,22 @@ class TXTReportGenerator(ReportGenerator):
                         for vuln in vulnerabilities:
                             txt_report_file.write(vuln["info"])
                             txt_report_file.write("\n")
-                            txt_report_file.write(_("WSTG code: {0}").format(vuln['wstg']))
+                            txt_report_file.write(f"WSTG code: {vuln['wstg']}")
                             txt_report_file.write("\n")
                             # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
-                            txt_report_file.write(_("Evil request:\n"))
+                            txt_report_file.write("Evil request:\n")
                             txt_report_file.write(vuln["request"].http_repr())
                             txt_report_file.write("\n")
-                            txt_report_file.write(_("cURL command PoC : \"{0}\"").format(vuln["request"].curl_repr))
+                            txt_report_file.write(f"cURL command PoC : \"{vuln['request'].curl_repr}\"")
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
                         txt_report_file.write(separator)
 
                 txt_report_file.write("\n")
 
-                txt_report_file.write(title(_("Summary of anomalies :")))
+                txt_report_file.write(title("Summary of anomalies :"))
                 for category, vulnerabilities in self._anomalies.items():
-                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(vulnerabilities)).rjust(NB_COLUMNS))
+                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}\n".rjust(NB_COLUMNS))
                 txt_report_file.write(separator)
 
                 for category, anomalies in self._anomalies.items():
@@ -111,17 +110,17 @@ class TXTReportGenerator(ReportGenerator):
                         for anom in anomalies:
                             txt_report_file.write(anom["info"])
                             txt_report_file.write("\n")
-                            txt_report_file.write(_("WSTG code: {0}").format(anom['wstg']))
+                            txt_report_file.write(f"WSTG code: {anom['wstg']}")
                             txt_report_file.write("\n")
-                            txt_report_file.write(_("Evil request:\n"))
+                            txt_report_file.write("Evil request:\n")
                             txt_report_file.write(anom["request"].http_repr())
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
                         txt_report_file.write(separator)
 
-                txt_report_file.write(title(_("Summary of additionals :")))
+                txt_report_file.write(title("Summary of additionals :"))
                 for category, additionnals in self._additionals.items():
-                    txt_report_file.write(_("{0} : {1:>3}\n").format(category, len(additionnals)).rjust(NB_COLUMNS))
+                    txt_report_file.write(f"{category} : {len(additionnals):>3}\n".rjust(NB_COLUMNS))
                 txt_report_file.write(separator)
 
                 for category, additionnals in self._additionals.items():
@@ -299,7 +298,7 @@ class TXTReportGenerator(ReportGenerator):
         if self._infos.get("auth") is None:
             return
         auth_dict = self._infos["auth"]
-        txt_report_file.write(title(_("Authentication :")))
+        txt_report_file.write(title("Authentication :"))
         txt_report_file.write(f"Method: {auth_dict['method']}\n")
         txt_report_file.write(f"Url: {auth_dict['url']}\n")
         txt_report_file.write(f"Logged in: {auth_dict['logged_in']}\n")

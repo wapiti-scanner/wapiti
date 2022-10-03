@@ -12,7 +12,6 @@ from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.attack.mod_csrf import ModuleCsrf
-from wapitiCore.language.vulnerability import _
 
 
 @pytest.fixture(autouse=True)
@@ -82,7 +81,7 @@ async def test_csrf_cases():
             vulnerabilities.add((call[1]["request_id"], call[1]["info"]))
 
         assert vulnerabilities == {
-            (2, _("CSRF token '{}' is not properly checked in backend").format("xsrf_token")),
-            (3, _("CSRF token '{}' might be easy to predict").format("xsrf_token")),
-            (4, _("Lack of anti CSRF token"))
+            (2, "CSRF token 'xsrf_token' is not properly checked in backend"),
+            (3, "CSRF token 'xsrf_token' might be easy to predict"),
+            (4, "Lack of anti CSRF token")
         }

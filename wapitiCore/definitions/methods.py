@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-from wapitiCore.language.language import _
-
 TYPE = "additional"
 
-NAME = _("HTTP Methods")
+NAME = "HTTP Methods"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-CONF-06"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "While GET and POST are by far the most common methods that are used to access "
     "information provided by a web server, HTTP allows several other (and somewhat less known) methods."
-) + " " + _(
+) + " " + (
     "Some of these can be used for nefarious purposes if the web server is misconfigured."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "This is only for informational purposes."
 )
 

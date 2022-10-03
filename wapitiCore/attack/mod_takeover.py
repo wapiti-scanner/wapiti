@@ -38,7 +38,6 @@ import dns.resolver
 from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net import Request, Response
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.definitions.subdomain_takeovers import NAME, WSTG_CODE
 
 
@@ -274,7 +273,7 @@ class ModuleTakeover(Attack):
                     if cname in bad_responses:
                         continue
 
-                    log_verbose(_(f"Record {domain} points to {cname}"))
+                    log_verbose(f"Record {domain} points to {cname}")
 
                     try:
                         if get_root_domain(cname) == root_domain:
@@ -286,12 +285,12 @@ class ModuleTakeover(Attack):
 
                     if await self.takeover.check(domain, cname):
                         log_red("---")
-                        log_red(_(f"CNAME {domain} to {cname} seems vulnerable to takeover"))
+                        log_red(f"CNAME {domain} to {cname} seems vulnerable to takeover")
                         log_red("---")
 
                         await self.add_vuln_high(
                             category=NAME,
-                            info=_(f"CNAME {domain} to {cname} seems vulnerable to takeover"),
+                            info=f"CNAME {domain} to {cname} seems vulnerable to takeover",
                             request=Request(f"https://{domain}/"),
                             wstg=WSTG_CODE
                         )

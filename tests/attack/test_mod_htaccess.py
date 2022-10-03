@@ -8,7 +8,6 @@ import pytest
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_htaccess import ModuleHtaccess
 
 
@@ -57,5 +56,5 @@ async def test_whole_stuff():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "htaccess"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("Htaccess Bypass")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Htaccess Bypass"
         assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/admin/"

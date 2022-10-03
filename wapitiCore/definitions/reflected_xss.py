@@ -1,25 +1,24 @@
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Reflected Cross Site Scripting")
+NAME = "Reflected Cross Site Scripting"
 
-SHORT_NAME = _("XSS")
+SHORT_NAME = "XSS"
 
 WSTG_CODE = ["WSTG-INPV-01"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications "
-    "which allow code injection by malicious web users into the web pages viewed by other users."
-) + " " + _("Examples of such code include HTML code and client-side scripts.")
+    "which allow code injection by malicious web users into the web pages viewed by other users. "
+    "Examples of such code include HTML code and client-side scripts."
+)
 
-SOLUTION = _(
+SOLUTION = (
     "The best way to protect a web application from XSS attacks is ensure that the application performs validation of "
     "all headers, cookies, query strings, form fields, and hidden fields."
-) + " " + _(
+) + " " + (
     "Encoding user supplied output in the server side can also defeat XSS vulnerabilities by preventing inserted "
     "scripts from being transmitted to users in an executable form."
-) + " " + _(
+) + " " + (
     "Applications can gain significant protection from javascript based attacks by converting the following characters "
     "in all generated output to the appropriate HTML entity encoding:"
 ) + "<, >, &, ', (, ), #, %, ; , +, -"

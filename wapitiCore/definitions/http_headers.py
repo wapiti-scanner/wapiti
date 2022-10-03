@@ -17,11 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("HTTP Secure Headers")
+NAME = "HTTP Secure Headers"
 SHORT_NAME = NAME
 
 WSTG_CODE_FRAME_OPTIONS = ["OSHP-X-Frame-Options"]
@@ -34,13 +32,11 @@ WSTG_CODE = (
     WSTG_CODE_STRICT_TRANSPORT_SECURITY
 )
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "HTTP security headers tell the browser how to behave when handling the website's content."
 )
 
-SOLUTION = _(
-    "Use the recommendations for hardening your HTTP Security Headers."
-)
+SOLUTION = "Use the recommendations for hardening your HTTP Security Headers."
 
 REFERENCES = [
     {

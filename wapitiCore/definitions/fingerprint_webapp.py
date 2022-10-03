@@ -1,19 +1,15 @@
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Fingerprint web application framework")
+NAME = "Fingerprint web application framework"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-INFO-08"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "The version of a web application framework can be identified due to the presence of its specific fingerprints."
 )
 
-SOLUTION = _(
-    "This is only for informational purposes."
-)
+SOLUTION = "This is only for informational purposes."
 
 REFERENCES = [
     {

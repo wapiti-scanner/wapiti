@@ -25,7 +25,6 @@ from wapitiCore.main.log import log_verbose, log_orange
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.methods import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
-from wapitiCore.language.vulnerability import _
 
 
 class ModuleMethods(Attack):
@@ -69,19 +68,11 @@ class ModuleMethods(Attack):
 
             if interesting_methods:
                 log_orange("---")
-                log_orange(
-                    _("Interesting methods allowed on {}: {}").format(
-                        page,
-                        ", ".join(interesting_methods)
-                    )
-                )
+                log_orange(f"Interesting methods allowed on {page}: {', '.join(interesting_methods)}")
                 await self.add_addition(
                     category=NAME,
                     request=option_request,
-                    info=_("Interesting methods allowed on {}: {}").format(
-                        page,
-                        ", ".join(interesting_methods)
-                    ),
+                    info=f"Interesting methods allowed on {page}: {', '.join(interesting_methods)}",
                     wstg=WSTG_CODE,
                     response=response
                 )

@@ -25,7 +25,7 @@ from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 
@@ -153,7 +153,7 @@ class ModuleSsrf(Attack):
     """
 
     name = "ssrf"
-    MSG_VULN = _("SSRF vulnerability")
+    MSG_VULN = "SSRF vulnerability"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -187,7 +187,7 @@ class ModuleSsrf(Attack):
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
-        logging.info(_("[*] Asking endpoint URL {} for results, please wait...").format(endpoint_url))
+        logging.info(f"[*] Asking endpoint URL {endpoint_url} for results, please wait...")
         await sleep(2)
         # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
         endpoint_request = Request(endpoint_url)
@@ -195,7 +195,7 @@ class ModuleSsrf(Attack):
             response = await self.crawler.async_send(endpoint_request)
         except RequestError:
             self.network_errors += 1
-            logging.error(_("[!] Unable to request endpoint URL '{}'").format(self.internal_endpoint))
+            logging.error(f"[!] Unable to request endpoint URL '{self.internal_endpoint}'")
         else:
             data = response.json
             if isinstance(data, dict):
@@ -219,17 +219,11 @@ class ModuleSsrf(Attack):
                             if parameter == "QUERY_STRING":
                                 vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                             else:
-                                vuln_message = _(
-                                    "{0} via injection in the parameter {1}.\n"
-                                    "The target performed an outgoing HTTP {2} request at {3} with IP {4}.\n"
-                                    "Full request can be seen at {5}"
-                                ).format(
-                                    self.MSG_VULN,
-                                    parameter,
-                                    request_method,
-                                    request_date,
-                                    request_ip,
-                                    request_url
+                                vuln_message = (
+                                    f"{self.MSG_VULN} via injection in the parameter {parameter}.\n"
+                                    f"The target performed an outgoing HTTP {request_method} request at {request_date} "
+                                    f"with IP {request_ip}.\n"
+                                    f"Full request can be seen at {request_url}"
                                 )
 
                             mutator = Mutator(

@@ -17,23 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Cross Site Request Forgery")
-SHORT_NAME = _("CSRF")
+NAME = "Cross Site Request Forgery"
+SHORT_NAME = "CSRF"
 
 WSTG_CODE = ["WSTG-SESS-05"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web "
     "application in which they're currently authenticated."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "Check if your framework has built-in CSRF protection and use it."
-) + " " + _(
+) + " " + (
     "If framework does not have built-in CSRF protection add CSRF tokens to all state changing requests "
     "(requests that cause actions on the site) and validate them on backend."
 )

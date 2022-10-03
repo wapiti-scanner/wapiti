@@ -12,7 +12,6 @@ import httpx
 from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.language.vulnerability import _
 from wapitiCore.attack.mod_timesql import ModuleTimesql
 
 
@@ -44,7 +43,7 @@ async def test_timesql_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "timesql"
-        assert persister.add_payload.call_args_list[0][1]["category"] == _("SQL Injection")
+        assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
             ['foo', 'bar'],
             ['vuln1', 'sleep(2)#1']

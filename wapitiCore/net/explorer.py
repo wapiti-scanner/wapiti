@@ -29,7 +29,6 @@ from http.cookiejar import CookieJar
 import httpx
 
 # Internal libraries
-from wapitiCore.language.language import _
 from wapitiCore.net import web
 
 from wapitiCore.net.response import Response
@@ -329,7 +328,7 @@ class Explorer:
                 logging.debug(f"{exception} with url {resource_url}")  # debug
                 return False, [], None
             except (ConnectionError, httpx.RequestError) as error:
-                logging.error(_("[!] {} with URL {}").format(error.__class__.__name__, resource_url))
+                logging.error(f"[!] {error.__class__.__name__} with URL {resource_url}")
                 return False, [], None
 
             if self._max_files_per_dir:

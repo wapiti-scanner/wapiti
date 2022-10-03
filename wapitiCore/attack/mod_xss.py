@@ -23,7 +23,7 @@ from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
-from wapitiCore.language.vulnerability import Messages, _
+from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.reflected_xss import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -53,7 +53,7 @@ class ModuleXss(Attack):
 
     PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
 
-    MSG_VULN = _("XSS vulnerability")
+    MSG_VULN = "XSS vulnerability"
 
     RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
 
@@ -168,9 +168,9 @@ class ModuleXss(Attack):
                         )
                 ):
                     self.successful_xss[taint] = (xss_payload, xss_flags)
-                    message = _("XSS vulnerability found via injection in the parameter {0}").format(xss_param)
+                    message = f"XSS vulnerability found via injection in the parameter {xss_param}"
                     if has_strong_csp(response, html):
-                        message += ".\n" + _("Warning: Content-Security-Policy is present!")
+                        message += ".\nWarning: Content-Security-Policy is present!"
 
                     await self.add_vuln_medium(
                         request_id=original_request.path_id,
@@ -196,7 +196,7 @@ class ModuleXss(Attack):
                     )
 
                     if has_strong_csp(response, html):
-                        log_red(_("Warning: Content-Security-Policy is present!"))
+                        log_red("Warning: Content-Security-Policy is present!")
 
                     log_red(Messages.MSG_EVIL_REQUEST)
                     log_red(evil_request.http_repr())

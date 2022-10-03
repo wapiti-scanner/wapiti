@@ -1,20 +1,18 @@
-from wapitiCore.language.language import _
-
 TYPE = "vulnerability"
 
-NAME = _("Log4Shell")
+NAME = "Log4Shell"
 SHORT_NAME = NAME
 
 WSTG_CODE = ["WSTG-INPV-11"]
 
-DESCRIPTION = _(
+DESCRIPTION = (
     "Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against "
     "attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages "
     "or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution "
     "is enabled."
 )
 
-SOLUTION = _(
+SOLUTION = (
     "From log4j 2.15.0, this behavior has been disabled by default. "
     "In previous releases (>2.10) this behavior can be mitigated "
     "by setting system property \"log4j2.formatMsgNoLookups\" to \"true\" "

@@ -24,7 +24,6 @@ from typing import Optional
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.language.vulnerability import _
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
 from wapitiCore.main.log import log_red
@@ -78,13 +77,13 @@ class ModuleShellshock(Attack):
         if response:
             data = response.content
             if self.rand_string in data:
-                log_red(_("URL {0} seems vulnerable to Shellshock attack!").format(url))
+                log_red(f"URL {url} seems vulnerable to Shellshock attack!")
 
                 await self.add_vuln_high(
                     request_id=request.path_id,
                     category=NAME,
                     request=evil_req,
-                    info=_("URL {0} seems vulnerable to Shellshock attack").format(url),
+                    info=f"URL {url} seems vulnerable to Shellshock attack",
                     wstg=WSTG_CODE,
                     response=response
                 )
