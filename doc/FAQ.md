@@ -45,8 +45,7 @@ Please create an issue on https://github.com/wapiti-scanner/wapiti/issues
 
 ### Can I help the project ? ###
 
-Sure ! If you have Python3 skills I can give you some tasks to work on.  
-If you are not in development you can help translate Wapiti in your language (see https://www.transifex.com/none-538/wapiti/ )
+Sure ! If you have Python3 skills I can give you some tasks to work on.
 
 ### I love Wapiti, how to support the project ? ###
 

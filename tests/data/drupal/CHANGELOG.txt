@@ -176,11 +176,11 @@ Drupal 7.50, 2016-07-07
 - Fixed the locale safety check that is used to ensure that translations are
   safe to allow for tokens in the href/src attributes of translated strings.
 - Fixed that URL generation only works on port 80 when using domain based
-  language negotation.
+  language negotiation.
 - Made method="get" forms work inside the administrative overlay. The fix adds
   a new hidden field to these forms when they appear inside the overlay (minor
   data structure change).
-- Increased maxlength of menu link title input fields in the node form and
+- Increased max length of menu link title input fields in the node form and
   menu link form from 128 to 255 characters.
 - Removed meaningless post-check=0 and pre-check=0 cache control headers from
   Drupal HTTP responses.
