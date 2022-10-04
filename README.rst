@@ -185,12 +185,10 @@ You can :
 + Support the project by making a donation ( http://sf.net/donate/index.php?group_id=168625 )
 + Create or improve attack modules
 + Create or improve report generators
-+ Work on the JS interpreter (lamejs)
 + Send bugfixes, patches...
 + Write some GUIs
 + Create some tools to convert cookies from browsers to Wapiti JSON format
 + Create a tool to convert PCAP files to Wapiti sqlite3 session files
-+ Translate Wapiti in your language ( https://www.transifex.com/none-538/wapiti/ )
 + Talk about Wapiti around you
 
 
