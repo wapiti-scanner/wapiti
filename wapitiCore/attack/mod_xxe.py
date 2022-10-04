@@ -355,7 +355,7 @@ class ModuleXxe(Attack):
                     elif parameter == "raw body":
                         vuln_message = f"Out-Of-Band {self.MSG_VULN} by sending raw XML in request body"
                     else:
-                        vuln_message = f"Out-Of-Band {self.MSG_VULN} via injection in the parameter {1}"
+                        vuln_message = f"Out-Of-Band {self.MSG_VULN} via injection in the parameter {parameter}"
 
                     if not request_size:
                         # Overwrite the message as the full exploit chain failed
