@@ -27,10 +27,10 @@ from wapitiCore.report.reportgenerator import ReportGenerator
 
 
 class BytesDump(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, bytes):
-            return obj.decode("utf-8", errors="replace")
-        return json.JSONEncoder.default(self, obj)
+    def default(self, o):
+        if isinstance(o, bytes):
+            return o.decode("utf-8", errors="replace")
+        return json.JSONEncoder.default(self, o)
 
 
 class JSONReportGenerator(ReportGenerator):
