@@ -26,6 +26,13 @@ from wapitiCore.net.response import detail_response
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
+class BytesDump(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return obj.decode("utf-8", errors="replace")
+        return json.JSONEncoder.default(self, obj)
+
+
 class JSONReportGenerator(ReportGenerator):
     """This class allow generating reports in JSON format.
     The root dictionary contains 5 dictionaries :
@@ -33,7 +40,7 @@ class JSONReportGenerator(ReportGenerator):
     - vulnerabilities : each key is matching a vulnerability class. Value is a list of found vulnerabilities.
     - anomalies : same as vulnerabilities but used only for error messages and timeouts (items of less importance).
     - additionals : some additional information about the target.
-    - infos : several information about the scan.
+    - infos : information about the scan.
     """
 
     def __init__(self):
@@ -58,7 +65,7 @@ class JSONReportGenerator(ReportGenerator):
             "infos": self._infos
         }
         with open(output_path, "w", encoding="utf-8") as json_report_file:
-            json.dump(report_dict, json_report_file, indent=2)
+            json.dump(report_dict, json_report_file, indent=2, cls=BytesDump)
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
@@ -189,10 +196,12 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg
         }
+
         if self._infos["detailed_report"]:
             addition_dict["detail"] = {
                 "response": detail_response(response)
             }
+
         if category not in self._additionals:
             self._additionals[category] = []
         self._additionals[category].append(addition_dict)
