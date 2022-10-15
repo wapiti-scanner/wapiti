@@ -941,20 +941,20 @@ async def wapiti_main():
 
     url = fix_url_path(args.base_url)
     if args.data:
-        base_requests = Request(
+        base_request = Request(
             url,
             method="POST",
             post_params=args.data
         )
     else:
-        base_requests = Request(url)
+        base_request = Request(url)
 
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc:
         logging.error("Invalid base URL was specified, please give a complete URL with protocol scheme.")
         sys.exit()
 
-    wap = Wapiti(base_requests, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+    wap = Wapiti(base_request, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     if args.log:
         wap.set_logfile(args.log)

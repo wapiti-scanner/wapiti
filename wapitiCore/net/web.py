@@ -323,7 +323,7 @@ class Request:
             self._post_params = []
         else:
             if isinstance(post_params, list):
-                # Non empty list
+                # Non-empty list
                 self._post_params = deepcopy(post_params)
             elif isinstance(post_params, str):
                 if "urlencoded" in self.enctype or self.is_multipart:
