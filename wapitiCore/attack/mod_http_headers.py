@@ -89,25 +89,31 @@ class ModuleHttpHeaders(Attack):
             log_green("OK")
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
-        if self.finished:
-            return False
-
         if request.method == "POST":
             return False
 
-        return request.url == await self.persister.get_root_url()
+        if request.is_root and not request.parameters_count:
+            return True
+
+        if request.url == await self.persister.get_root_url():
+            return True
+
+        return False
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         request_to_root = Request(request.url, "GET")
         self.finished = True
 
         try:
-            response = await self.crawler.async_send(request_to_root, follow_redirects=True)
+            response = await self.crawler.async_send(request_to_root)
         except RequestError:
             self.network_errors += 1
             return
 
         for header, value in self.headers_to_check.items():
+            if header == "Strict-Transport-Security" and request_to_root.scheme != "https":
+                continue
+
             await self.check_header(
                 response,
                 request_to_root,
