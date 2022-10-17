@@ -49,9 +49,9 @@ from wapitiCore.main.log import logging
 from wapitiCore.moon import phase
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential, FormCredential
 from wapitiCore.net.intercepting_explorer import InterceptingExplorer
-from wapitiCore.net.auth import async_try_login, load_auth_script
+from wapitiCore.net.auth import async_try_form_login, load_form_script, check_http_auth
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request, Response
@@ -731,13 +731,12 @@ class Wapiti:
     def set_drop_cookies(self):
         self.crawler_configuration.drop_cookies = True
 
-    def set_auth_credentials(self, credentials: tuple):
+    def set_http_credentials(self, credentials: HttpCredential):
         """Set credentials to use if the website require an authentication."""
-        self.crawler_configuration.auth_credentials = credentials
+        self.crawler_configuration.http_credential = credentials
 
-    def set_auth_type(self, auth_method: str):
-        """Set the authentication method to use."""
-        self.crawler_configuration.auth_method = auth_method
+    def set_form_credential(self, credential: FormCredential):
+        self.crawler_configuration.form_credential = credential
 
     def add_bad_param(self, param_name: str):
         """Exclude a parameter from a url (urls with this parameter will be
@@ -829,9 +828,8 @@ class Wapiti:
     async def have_attacks_started(self) -> bool:
         return await self.persister.have_attacks_started()
 
-    def set_auth_state(self, is_logged_in: bool, form: dict, url: str, method: str):
+    def set_auth_state(self, is_logged_in: bool, form: dict, url: str):
         self._auth_state = {
-            "method": method,
             "url": url,
             "logged_in": is_logged_in,
             "form": form,
@@ -1013,26 +1011,41 @@ async def wapiti_main():
         if args.drop_set_cookie:
             wap.set_drop_cookies()
 
-        if "credentials" in args:
-            if "auth_type" not in args:
-                raise InvalidOptionValue("--auth-type", "This option is required when -a is used")
-            if "%" in args.credentials:
-                auth_credentials = args.credentials.split("%", 1)
-                wap.set_auth_credentials(auth_credentials)
+        if "http_credentials" in args:
+            if "auth_method" not in args:
+                raise InvalidOptionValue("--auth-method", "This option is required when -a is used")
+
+            if "%" in args.http_credential:
+                username, password = args.http_credential.split("%", 1)
+                wap.set_http_credentials(HttpCredential(username, password, args.auth_method))
             else:
-                raise InvalidOptionValue("-a", args.credentials)
+                raise InvalidOptionValue("-a", args.http_credential)
 
-        auth_url = ""
-        if "auth_type" in args:
-            if "credentials" not in args:
-                raise InvalidOptionValue("-a", "This option is required when --auth-type is used")
+        if "auth_method" in args:
+            if "http_credentials" not in args:
+                raise InvalidOptionValue("-a", "This option is required when --auth-method is used")
 
-            if args.auth_type == "post":
-                if not args.starting_urls:
-                    raise InvalidOptionValue("-s", "This option is required when --auth-type of type 'post' is used")
-                auth_url = args.starting_urls[0]
+        if "form_credentials" in args:
+            if "form_url" not in args:
+                raise InvalidOptionValue("--form-url", "This option is required when --form-cred is used")
 
-            wap.set_auth_type(args.auth_type)
+            if "%" in args.form_credentials:
+                username, password = args.form_credentials.split("%", 1)
+                wap.set_form_credential(
+                    FormCredential(
+                        username,
+                        password,
+                        args.form_url,
+                        args.form_enctype,
+                        args.form_data,
+                    )
+                )
+            else:
+                raise InvalidOptionValue("--form-cred", args.http_credential)
+
+        if "form_url" in args:
+            if "form_credentials" not in args:
+                raise InvalidOptionValue("--form-cred", "This option is required when --form-url is used")
 
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
@@ -1128,6 +1141,27 @@ async def wapiti_main():
 
     assert os.path.exists(wap.history_file)
 
+    if "auth_method" in args:
+        if not await check_http_auth(wap.crawler_configuration):
+            logging.warning("[!] HTTP authentication failed, a 4xx status code was received")
+            return
+
+    if "form_credentials" in args:
+        is_logged_in, form, excluded_urls = await async_try_form_login(
+            wap.crawler_configuration,
+            args.headless,
+        )
+        wap.set_auth_state(is_logged_in, form, wap.crawler_configuration.form_credential.url)
+        for url in excluded_urls:
+            wap.add_excluded_url(url)
+
+    if "form_script" in args:
+        await load_form_script(
+            args.form_script,
+            wap.crawler_configuration,
+            args.headless
+        )
+
     loop = asyncio.get_event_loop()
 
     try:
@@ -1137,19 +1171,6 @@ async def wapiti_main():
             else:
                 if await wap.has_scan_started():
                     logging.info("[*] Resuming scan from previous session, please wait")
-
-                if "auth_type" in args:
-                    is_logged_in, form, excluded_urls = await async_try_login(
-                        wap.crawler_configuration,
-                        auth_url,
-                        args.headless,
-                    )
-                    wap.set_auth_state(is_logged_in, form, auth_url, args.auth_type)
-                    for url in excluded_urls:
-                        wap.add_excluded_url(url)
-
-                if "auth_script" in args:
-                    await load_auth_script(args.auth_script, wap.crawler_configuration, auth_url, args.headless)
 
                 await wap.load_scan_state()
                 loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
