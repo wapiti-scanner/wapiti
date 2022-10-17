@@ -236,7 +236,7 @@ class Html:
     def text_only(self) -> str:
         """Returns the displayed text of a webpage (without HTML tags)"""
         # if "text" in self.type and self.size:
-        texts = self.soup.find_all(text=True)
+        texts = self.soup.find_all(string=True)
 
         def is_visible(element):
             if len(element.strip()) == 0:
@@ -599,7 +599,7 @@ class Html:
 
     def is_logged_in(self):
         if self._soup.find_all(
-            text=re.compile(DISCONNECT_REGEX)
+            string=re.compile(DISCONNECT_REGEX)
         ):
             return True
         return False

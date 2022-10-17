@@ -48,7 +48,7 @@ async def test_applicationdata():
             },
             "cpe": "cpe:/a:php:php",
             "description": "PHP is a general-purpose scripting language used for web development.",
-            \"headers\": {\"Server\": \"php\/?([\\\\d.]+)?\\\\;version:\\\\1\",\"X-Powered-By\": \"^php\/?([\\\\d.]+)?\\\\;version:\\\\1\"},
+            \"headers\": {\"Server\": \"php/?([\\\\d.]+)?\\\\;version:\\\\1\",\"X-Powered-By\": \"^php/?([\\\\d.]+)?\\\\;version:\\\\1\"},
             "icon": "PHP.svg",
             "url": \"\\\\.php(?:$|\\\\?)\",
             "website": "http://php.net"
@@ -63,7 +63,7 @@ async def test_applicationdata():
             "js": {
                 \"AFRAME.version\": \"^(.+)$\\\\;version:\\\\1\"
             },
-            \"scripts\": \"\/?([\\\\d.]+)?\/aframe(?:\\\\.min)?\\\\.js\\\\;version:\\\\1\",
+            \"scripts\": \"/?([\\\\d.]+)?/aframe(?:\\\\.min)?\\\\.js\\\\;version:\\\\1\",
             "website": "https://aframe.io"
         }
     }"""
@@ -81,8 +81,6 @@ async def test_applicationdata():
         f'{groups_file_path}': groups_text,
         f'{technologies_file_path}': technologies_text,
     }
-
-    application_data = None
 
     with mock.patch("builtins.open", get_mock_open(files)):
         application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)

@@ -21,7 +21,7 @@
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 import asyncio
 import ssl
 
@@ -30,7 +30,7 @@ import httpx
 
 # Internal libraries
 from wapitiCore.net import web
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential
 
 from wapitiCore.net.response import Response
 
@@ -95,7 +95,7 @@ class AsyncCrawler:
             base_request: web.Request,
             client: httpx.AsyncClient,
             timeout: float = 10.0,
-            form_credentials: Tuple[str, str] = None,
+            form_credentials: Optional[HttpCredential] = None,
     ):
         self._base_request = base_request
         self._client = client
@@ -134,20 +134,27 @@ class AsyncCrawler:
         ssl_context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
 
         auth = None
-        form_credentials = tuple()
-        if len(configuration.auth_credentials) == 2:
-            username, password = configuration.auth_credentials
-
-            if configuration.auth_method == "basic":
-                auth = httpx.BasicAuth(username, password)
-            elif configuration.auth_method == "digest":
-                auth = httpx.DigestAuth(username, password)
-            elif configuration.auth_method == "ntlm":
+        form_credentials = None
+        if configuration.http_credential:
+            if configuration.http_credential.method == "basic":
+                auth = httpx.BasicAuth(
+                    configuration.http_credential.username,
+                    configuration.http_credential.password
+                )
+            elif configuration.http_credential.method == "digest":
+                auth = httpx.DigestAuth(
+                    configuration.http_credential.username,
+                    configuration.http_credential.password
+                )
+            elif configuration.http_credential.method == "ntlm":
                 # https://github.com/ulodciv/httpx-ntlm
                 from httpx_ntlm import HttpNtlmAuth
-                auth = HttpNtlmAuth(username, password)  # username in the form domain\user
+                auth = HttpNtlmAuth(
+                    configuration.http_credential.username,  # username should be in the form "domain\user"
+                    configuration.http_credential.password
+                )
             elif configuration.auth_method == "post":
-                form_credentials = username, password
+                form_credentials = configuration.http_credential
 
         client = httpx.AsyncClient(
             auth=auth,

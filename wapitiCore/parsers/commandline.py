@@ -96,22 +96,54 @@ def parse_args():
 
     parser.add_argument(
         "-a", "--auth-cred",
-        dest="credentials",
+        dest="http_credentials",
         default=argparse.SUPPRESS,
         help="Set HTTP authentication credentials",
         metavar="CREDENTIALS"
     )
 
     parser.add_argument(
-        "--auth-type",
+        "--auth-method",
         default=argparse.SUPPRESS,
-        help="Set the authentication type to use",
-        choices=["basic", "digest", "ntlm", "post"]
+        help="Set the HTTP authentication method to use",
+        choices=["basic", "digest", "ntlm"]
     )
 
     parser.add_argument(
-        "--auth-script",
-        dest="auth_script",
+        "--form-cred",
+        dest="form_credentials",
+        default=argparse.SUPPRESS,
+        help="Set login form credentials",
+        metavar="CREDENTIALS"
+    )
+
+    parser.add_argument(
+        "--form-url",
+        dest="form_url",
+        default=argparse.SUPPRESS,
+        help="Set login form URL",
+        metavar="URL"
+    )
+
+    parser.add_argument(
+        "--form-data",
+        dest="form_data",
+        default=None,
+        help="Set login form POST data",
+        metavar="DATA"
+    )
+
+    parser.add_argument(
+        "--form-enctype",
+        dest="form_enctype",
+        default=None,
+        help="Set enctype to use to POST form data to form URL",
+        metavar="DATA"
+    )
+
+    parser.add_argument(
+        "--form-script",
+        dest="form_script",
         default=argparse.SUPPRESS,
         help="Use a custom Python authentication plugin",
         metavar="FILENAME"

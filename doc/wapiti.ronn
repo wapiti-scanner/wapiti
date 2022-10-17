@@ -38,7 +38,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--tor`
   * `--mitm-port` <PORT>
   * `-a`, `--auth-cred` <CREDENTIALS>
-  * `--auth-type` {basic,digest,ntlm,post}
+  * `--auth-method` {basic,digest,ntlm}
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `--drop-set-cookie`
 
@@ -153,10 +153,9 @@ OTHER OPTIONS:
     Set credentials to use for authentication on the target.  
     Given value should be in the form login%password (% is used as a separator)
     
-  * `--auth-type` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest, ntlm and post (web login form).  
+  * `--auth-method` <TYPE>
+    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
     NTLM authentication may require you to install an additional Python module.
-    "Post" authentication could be combined with `-s` to specify where to find the login form.
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  
@@ -199,8 +198,7 @@ Following options allows you to bypass this behavior/
     Those URLs will be given a depth of 0, just like the base URL.  
     This option can be called several times.  
     You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.
-    Combined with `--auth-type=post`, Wapiti will try to find a login form on the first URL provided and to authenticate with the given credentials.
-    
+
   * `-x`, `--exclude` <URL>  
     Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).  
     This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.

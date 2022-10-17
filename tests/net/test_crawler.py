@@ -5,10 +5,10 @@ import pytest
 import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential, FormCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
-from wapitiCore.net.auth import _async_try_login_post, _async_try_login_basic_digest_ntlm
+from wapitiCore.net.auth import async_try_form_login, check_http_auth
 
 
 def test_extract_disconnect_urls_one_url():
@@ -85,8 +85,8 @@ async def test_async_try_login_post_good_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.auth_credentials = ("username", "password")
-    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
+    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
 
     assert form == {'login_field': 'uname', 'password_field': 'pass'}
     assert len(disconnect_urls) == 2
@@ -129,9 +129,9 @@ async def test_async_try_login_post_wrong_credentials():
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
 
-    crawler_configuration.auth_credentials = ("username", "password")
+    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
 
-    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
 
     assert form == {'login_field': 'uname', 'password_field': 'pass'}
     assert len(disconnect_urls) == 0
@@ -154,9 +154,9 @@ async def test_async_try_login_post_form_not_detected():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.auth_credentials = ("username", "password")
+    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
 
-    is_logged_in, form, disconnect_urls = await _async_try_login_post(crawler_configuration, target_url)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
 
     assert form == {}
     assert len(disconnect_urls) == 0
@@ -187,13 +187,11 @@ async def test_async_try_login_basic_digest_ntlm_good_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.auth_credentials = ("username", "password")
+    crawler_configuration.http_credential = HttpCredential("username", "password")
 
-    is_logged_in, form, disconnect_urls = await _async_try_login_basic_digest_ntlm(crawler_configuration, auth_url)
+    auth_success = await check_http_auth(crawler_configuration)
 
-    assert is_logged_in is True
-    assert len(form) == 0
-    assert len(disconnect_urls) == 0
+    assert auth_success is True
 
 
 @respx.mock
@@ -230,37 +228,17 @@ async def test_async_try_login_basic_digest_ntlm_wrong_credentials():
     target_url = "http://perdu.com/"
     respx.get(target_url).mock(
         return_value=httpx.Response(
-            200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-            <a href='http://perdu.com/foobar/signout'></a> \
-            <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
+            401,
+            text="<html><head><title>Forbidden</title></head><body></body></html>"
         )
     )
 
-    auth_urls = [
-        ["http://perdu.com/login1", 401],
-        ["http://perdu.com/login2", 403],
-        ["http://perdu.com/login3", 404]
-    ]
-
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.auth_credentials = ("username", "password")
+    crawler_configuration.http_credential = HttpCredential("username", "password")
 
-    for auth_url, status_code in auth_urls:
-        respx.get(auth_url).mock(
-            return_value=httpx.Response(
-                status_code,
-                text="KO"
-            )
-        )
+    auth_success = await check_http_auth(crawler_configuration)
 
-        is_logged_in, form, disconnect_urls = await _async_try_login_basic_digest_ntlm(crawler_configuration, auth_url)
-
-        assert is_logged_in is False
-        assert len(form) == 0
-        assert len(disconnect_urls) == 0
+    assert auth_success is False
 
 
 def test_extract_disconnect_urls():

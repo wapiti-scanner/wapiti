@@ -23,7 +23,7 @@ import sys
 
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
@@ -58,12 +58,13 @@ def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
 
     if "credentials" in arguments:
         if "%" in arguments.credentials:
-            crawler_configuration.auth_credentials = arguments.credentials.split("%", 1)
+            username, password = arguments.credentials.split("%", 1)
+            crawler_configuration.http_credential = HttpCredential(username, password)
         else:
             raise InvalidOptionValue("-a", arguments.credentials)
 
-    if "auth_type" in arguments:
-        crawler_configuration.auth_method = arguments.auth_type
+    if "auth_method" in arguments:
+        crawler_configuration.auth_method = arguments.auth_method
 
     headers = {}
     for custom_header in arguments.headers:
@@ -112,7 +113,7 @@ async def getcookie_main(arguments):
     )
 
     parser.add_argument(
-        "--auth-type",
+        "--auth-method",
         default=argparse.SUPPRESS,
         help="Set the authentication type to use",
         choices=["basic", "digest", "ntlm"]
