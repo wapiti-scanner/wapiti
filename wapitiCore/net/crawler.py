@@ -21,7 +21,7 @@
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Tuple, Dict, Optional
+from typing import Dict, Optional
 import asyncio
 import ssl
 
