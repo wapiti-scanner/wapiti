@@ -21,7 +21,7 @@
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Dict, Optional
+from typing import Dict
 import asyncio
 import ssl
 
@@ -30,7 +30,7 @@ import httpx
 
 # Internal libraries
 from wapitiCore.net import web
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration
 
 from wapitiCore.net.response import Response
 
@@ -95,12 +95,10 @@ class AsyncCrawler:
             base_request: web.Request,
             client: httpx.AsyncClient,
             timeout: float = 10.0,
-            form_credentials: Optional[HttpCredential] = None,
     ):
         self._base_request = base_request
         self._client = client
         self._timeout = timeout
-        self._auth_credentials = form_credentials
 
         self.is_logged_in = False
         self.auth_url: str = self._base_request.url
@@ -134,7 +132,6 @@ class AsyncCrawler:
         ssl_context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
 
         auth = None
-        form_credentials = None
         if configuration.http_credential:
             if configuration.http_credential.method == "basic":
                 auth = httpx.BasicAuth(
@@ -153,8 +150,6 @@ class AsyncCrawler:
                     configuration.http_credential.username,  # username should be in the form "domain\user"
                     configuration.http_credential.password
                 )
-            elif configuration.auth_method == "post":
-                form_credentials = configuration.http_credential
 
         client = httpx.AsyncClient(
             auth=auth,
@@ -167,7 +162,7 @@ class AsyncCrawler:
         )
 
         client.max_redirects = 5
-        return cls(configuration.base_request, client, configuration.timeout, form_credentials)
+        return cls(configuration.base_request, client, configuration.timeout)
 
     @staticmethod
     def _proxy_url_to_dict(proxy: str) -> Dict[str, str]:

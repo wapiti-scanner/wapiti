@@ -1,5 +1,5 @@
 import sys
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 import asyncio
 from urllib.parse import urlparse
 import importlib.util
@@ -11,7 +11,7 @@ from arsenic.errors import ArsenicError
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html import Html
 from wapitiCore.main.log import logging
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
 
@@ -55,10 +55,11 @@ def _create_login_request(
     return login_request, form
 
 
-async def async_try_form_login(
+async def async_fetch_login_page(
         crawler_configuration: CrawlerConfiguration,
+        form_credential: FormCredential,
         headless_mode: str = "no",
-) -> Tuple[bool, dict, List[str]]:
+) -> Optional[str]:
     """
     Try to authenticate with the provided url and credentials.
     Returns if the authentication has been successful, the used form variables and the disconnect urls.
@@ -92,44 +93,52 @@ async def async_try_form_login(
         try:
             async with get_session(service, browser) as headless_client:
                 await headless_client.get(
-                    crawler_configuration.form_credential.url,
+                    form_credential.url,
                     timeout=crawler_configuration.timeout
                 )
                 await asyncio.sleep(.1)
                 page_source = await headless_client.get_page_source()
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
+                return page_source
         except (ArsenicError, asyncio.TimeoutError) as exception:
-            logging.error(f"[!] {exception.__class__.__name__} with URL {crawler_configuration.form_credential.url}")
-            return False, {}, []
+            logging.error(f"[!] {exception.__class__.__name__} with URL {form_credential.url}")
+            return
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             try:
                 response: Response = await crawler.async_get(
-                    Request(crawler_configuration.form_credential.url),
+                    Request(form_credential.url),
                     follow_redirects=True
                 )
                 crawler_configuration.cookies = crawler.cookie_jar
                 page_source = response.content
+                return page_source
             except ConnectionError:
-                logging.error("[!] Connection error with URL", crawler_configuration.form_credential.url)
-                return False, {}, []
+                logging.error("[!] Connection error with URL", form_credential.url)
+                return
             except RequestError as exception:
                 logging.error(
-                    f"[!] {exception.__class__.__name__} with URL {crawler_configuration.form_credential.url}"
+                    f"[!] {exception.__class__.__name__} with URL {form_credential.url}"
                 )
-                return False, {}, []
+                return
 
+
+async def async_submit_login_form(
+        page_source: str,
+        crawler_configuration: CrawlerConfiguration,
+        form_credential: FormCredential,
+) -> Tuple[bool, dict, List[str]]:
     disconnect_urls = []
-    page = Html(page_source, crawler_configuration.form_credential.url)
+    page = Html(page_source, form_credential.url)
 
     login_form, username_field_idx, password_field_idx = page.find_login_form()
     if login_form:
         # Step 2: submit the login form, keep new cookies
         login_request, form = _create_login_request(
             login_form,
-            crawler_configuration.form_credential.username,
+            form_credential.username,
             username_field_idx,
-            crawler_configuration.form_credential.password,
+            form_credential.password,
             password_field_idx,
         )
 
@@ -157,9 +166,40 @@ async def async_try_form_login(
     return False, {}, []
 
 
+async def async_try_form_login(
+        crawler_configuration: CrawlerConfiguration,
+        form_credential: FormCredential,
+        headless_mode: str = "no",
+) -> Tuple[bool, dict, List[str]]:
+    """
+    Try to authenticate with the provided url and credentials.
+    Returns if the authentication has been successful, the used form variables and the disconnect urls.
+    """
+    page_source = await async_fetch_login_page(crawler_configuration, form_credential, headless_mode)
+    if not page_source:
+        return False, {}, []
+    return await async_submit_login_form(page_source, crawler_configuration, form_credential)
+
+
+async def login_with_raw_data(crawler_configuration: CrawlerConfiguration, raw_credential: RawCredential):
+    """Performs authentication by directly sending POST request with raw data"""
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        login_request = Request(
+            raw_credential.url,
+            post_params=raw_credential.data,
+            enctype=raw_credential.enctype,
+        )
+        await crawler.async_send(
+            login_request,
+            follow_redirects=True
+        )
+        crawler_configuration.cookies = crawler.cookie_jar
+
+
 async def load_form_script(
         filepath: str,
         crawler_configuration: CrawlerConfiguration,
+        form_credential: Optional[FormCredential] = None,
         headless: str = "no"
 ):
     """Load the Python script at filepath and call the run function in it with several parameters"""
@@ -174,7 +214,7 @@ async def load_form_script(
     spec.loader.exec_module(module)
     # We expect the auth script to set cookies on the crawler_configuration object but everything can be done here
     try:
-        await module.run(crawler_configuration, crawler_configuration.form_credential.url, headless)
+        await module.run(crawler_configuration, form_credential, headless)
     except AttributeError:
         logging.error("run() method seems to be missing in your auth script")
         sys.exit(1)
