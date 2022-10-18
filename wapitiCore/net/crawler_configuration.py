@@ -19,8 +19,13 @@ class FormCredential:
     username: str
     password: str
     url: str
+
+
+@dataclass
+class RawCredential:
+    data: str
+    url: str
     enctype: Optional[str] = None
-    data: Optional[str] = None
 
 
 @dataclass
@@ -32,7 +37,6 @@ class CrawlerConfiguration:
     user_agent: str = DEFAULT_UA
     proxy: Optional[str] = None
     http_credential: Optional[HttpCredential] = None
-    form_credential: Optional[FormCredential] = None
     cookies: Optional[CookieJar] = None
     stream: bool = False
     headers: Optional[dict] = None

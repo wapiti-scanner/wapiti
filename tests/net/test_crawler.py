@@ -5,10 +5,10 @@ import pytest
 import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential, FormCredential
+from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential, FormCredential, RawCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
-from wapitiCore.net.auth import async_try_form_login, check_http_auth
+from wapitiCore.net.auth import async_try_form_login, check_http_auth, login_with_raw_data
 
 
 def test_extract_disconnect_urls_one_url():
@@ -73,7 +73,7 @@ async def test_async_try_login_post_good_credentials():
         )
     )
 
-    respx.post(target_url + 'userinfo.php').mock(
+    respx.post(target_url + 'userinfo.php', data={"uname": "username", "pass": "password"}).mock(
         return_value=httpx.Response(
             200,
             text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
@@ -85,8 +85,8 @@ async def test_async_try_login_post_good_credentials():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
-    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
+    form_credential = FormCredential("username", "password", target_url)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration, form_credential)
 
     assert form == {'login_field': 'uname', 'password_field': 'pass'}
     assert len(disconnect_urls) == 2
@@ -117,7 +117,7 @@ async def test_async_try_login_post_wrong_credentials():
         )
     )
 
-    respx.post(target_url + 'userinfo.php').mock(
+    respx.post(target_url + 'userinfo.php', data={"uname": "username", "pass": "password"}).mock(
         return_value=httpx.Response(
             401,
             text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
@@ -129,9 +129,9 @@ async def test_async_try_login_post_wrong_credentials():
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
 
-    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
+    form_credential = FormCredential("username", "password", target_url)
 
-    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration, form_credential)
 
     assert form == {'login_field': 'uname', 'password_field': 'pass'}
     assert len(disconnect_urls) == 0
@@ -154,13 +154,38 @@ async def test_async_try_login_post_form_not_detected():
     )
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
-    crawler_configuration.form_credential = FormCredential("username", "password", target_url)
+    form_credential = FormCredential("username", "password", target_url)
 
-    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration)
+    is_logged_in, form, disconnect_urls = await async_try_form_login(crawler_configuration, form_credential)
 
     assert form == {}
     assert len(disconnect_urls) == 0
     assert is_logged_in is False
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_async_try_login_raw_credentials():
+    target_url = "http://perdu.com/userinfo.php"
+    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
+    raw_credential = RawCredential(
+        "uname=besthacker&pass=letmein",
+        target_url
+    )
+    respx.post(target_url, data={"uname": "besthacker", "pass": "letmein"}).mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
+            <a href='http://perdu.com/foobar/signout'>disconnect</a> \
+                <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"Set-Cookie": "login=besthacker;"}
+        )
+    )
+
+    await login_with_raw_data(crawler_configuration, raw_credential)
+    assert [("login", "besthacker")] == [(cookie.name, cookie.value) for cookie in crawler_configuration.cookies]
 
 
 @respx.mock
