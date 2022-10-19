@@ -11,7 +11,7 @@ from arsenic.errors import ArsenicError
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html import Html
 from wapitiCore.main.log import logging
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration, FormCredential, RawCredential
+from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
 

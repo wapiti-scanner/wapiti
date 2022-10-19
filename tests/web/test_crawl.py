@@ -8,7 +8,7 @@ import httpx
 import pytest
 
 from wapitiCore.net import Request
-from wapitiCore.main.wapiti import Wapiti
+from wapitiCore.controller.wapiti import Wapiti
 
 
 @pytest.mark.asyncio

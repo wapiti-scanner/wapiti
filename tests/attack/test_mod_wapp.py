@@ -8,7 +8,7 @@ import respx
 
 from wapitiCore.attack.mod_wapp import ModuleWapp
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 
 

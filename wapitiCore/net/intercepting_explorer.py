@@ -43,7 +43,7 @@ from wapitiCore.net import Request
 from wapitiCore.net.cookies import mitm_jar_to_cookiejar
 from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
 from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS, wildcard_translate
 from wapitiCore.net.scope import Scope

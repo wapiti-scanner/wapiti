@@ -64,7 +64,7 @@ class JsParserAngular:
 
         data_found_with_params = \
             re.findall(r"router\.(?:navigate|createUrlTree)\(\[[\w\s]*[\"'](?P<path>.*?[\"'].*?)\](?:.*?)\)",data)
-        #data_found_with_params : ['login"', '"', 't", "123" + this.testId + "/","settings"']
+        # data_found_with_params : ['login"', '"', 't", "123" + this.testId + "/","settings"']
         for i, data_with_params in enumerate(data_found_with_params):
             data_with_params = re.sub(r'["+\s]','', data_with_params) # -> t,123this.testId/,settings'
             data_with_params = re.sub('/,', '/', data_with_params) # -> 't,123this.testId/settings'

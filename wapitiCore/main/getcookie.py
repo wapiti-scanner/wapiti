@@ -23,7 +23,7 @@ import sys
 
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential
+from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
