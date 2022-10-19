@@ -332,6 +332,8 @@ async def wapiti_main():
     if "form_script" in args:
         if "form_credentials" not in args:
             raise InvalidOptionValue("--form-cred", "This option is required when --form-script is used")
+        if "form_url" not in args:
+            raise InvalidOptionValue("--form-url", "This option is required when --form-script is used")
 
         if "%" in args.form_credentials:
             username, password = args.form_credentials.split("%", 1)
@@ -366,9 +368,6 @@ async def wapiti_main():
 
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)
-            # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
-            # uses the string as a token so we cannot use f string
-            # pylint: disable=consider-using-f-string
             logging.info(
                 f"[*] {count} URLs and forms having more than {args.max_parameters} parameters were removed."
             )
