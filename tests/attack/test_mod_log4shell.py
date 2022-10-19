@@ -16,7 +16,7 @@ from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.definitions.log4shell import NAME
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 

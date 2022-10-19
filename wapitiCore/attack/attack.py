@@ -33,7 +33,7 @@ from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister

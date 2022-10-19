@@ -9,7 +9,7 @@ import dns
 import dns.message
 import dns.resolver
 
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_takeover import ModuleTakeover, TakeoverChecker

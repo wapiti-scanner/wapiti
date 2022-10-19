@@ -5,7 +5,7 @@ import pytest
 import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration, HttpCredential, FormCredential, RawCredential
+from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential, FormCredential, RawCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
 from wapitiCore.net.auth import async_try_form_login, check_http_auth, login_with_raw_data

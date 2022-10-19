@@ -30,7 +30,7 @@ import httpx
 
 # Internal libraries
 from wapitiCore.net import web
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 
 from wapitiCore.net.response import Response
 

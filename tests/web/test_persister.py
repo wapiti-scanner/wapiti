@@ -5,7 +5,7 @@ import pytest
 import httpx
 import respx
 
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.parsers.html import Html
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request

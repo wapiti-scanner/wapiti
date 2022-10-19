@@ -7,7 +7,7 @@ import pytest
 
 from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.attack.mod_backup import ModuleBackup
 
 

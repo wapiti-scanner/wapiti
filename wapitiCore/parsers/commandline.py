@@ -128,7 +128,7 @@ def parse_args():
     parser.add_argument(
         "--form-data",
         dest="form_data",
-        default=None,
+        default=argparse.SUPPRESS,
         help="Set login form POST data",
         metavar="DATA"
     )

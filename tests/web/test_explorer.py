@@ -11,7 +11,7 @@ import respx
 import httpx
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.crawler_configuration import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net import Request
 from wapitiCore.net.scope import Scope
