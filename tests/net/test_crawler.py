@@ -165,7 +165,7 @@ async def test_async_try_login_post_form_not_detected():
 
 @respx.mock
 @pytest.mark.asyncio
-async def test_async_try_login_raw_credentials():
+async def test_async_login_raw_credentials():
     target_url = "http://perdu.com/userinfo.php"
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     raw_credential = RawCredential(
@@ -173,6 +173,36 @@ async def test_async_try_login_raw_credentials():
         target_url
     )
     respx.post(target_url, data={"uname": "besthacker", "pass": "letmein"}).mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
+            <a href='http://perdu.com/foobar/signout'>disconnect</a> \
+                <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"Set-Cookie": "login=besthacker;"}
+        )
+    )
+
+    await login_with_raw_data(crawler_configuration, raw_credential)
+    assert [("login", "besthacker")] == [(cookie.name, cookie.value) for cookie in crawler_configuration.cookies]
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_async_login_json_credentials():
+    target_url = "http://perdu.com/userinfo.php"
+    crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
+    raw_credential = RawCredential(
+        """{"uname": "besthacker", "pass": "letmein"}""",
+        target_url,
+        enctype="application/json"
+    )
+    respx.post(
+        target_url,
+        json={"uname": "besthacker", "pass": "letmein"},
+        headers={"Content-Type": "application/json"},
+    ).mock(
         return_value=httpx.Response(
             200,
             text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
