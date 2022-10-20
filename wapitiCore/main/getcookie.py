@@ -56,12 +56,12 @@ def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
     if "user_agent" in arguments:
         crawler_configuration.user_agent = arguments.user_agent
 
-    if "credentials" in arguments:
-        if "%" in arguments.credentials:
-            username, password = arguments.credentials.split("%", 1)
+    if "http_credentials" in arguments:
+        if "%" in arguments.http_credentials:
+            username, password = arguments.http_credentials.split("%", 1)
             crawler_configuration.http_credential = HttpCredential(username, password)
         else:
-            raise InvalidOptionValue("-a", arguments.credentials)
+            raise InvalidOptionValue("-a", arguments.http_credentials)
 
     if "auth_method" in arguments:
         crawler_configuration.auth_method = arguments.auth_method
@@ -106,7 +106,7 @@ async def getcookie_main(arguments):
 
     parser.add_argument(
         "-a", "--auth-cred",
-        dest="credentials",
+        dest="http_credentials",
         default=argparse.SUPPRESS,
         help="Set HTTP authentication credentials",
         metavar="CREDENTIALS",
