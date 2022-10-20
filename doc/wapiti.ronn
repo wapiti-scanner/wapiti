@@ -39,6 +39,9 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--mitm-port` <PORT>
   * `-a`, `--auth-cred` <CREDENTIALS>
   * `--auth-method` {basic,digest,ntlm}
+  * `--form-cred` <CREDENTIALS>
+  * `--form-url` <URL>
+  * `--form-enctype` <ENCTYPE>
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `--drop-set-cookie`
 
@@ -150,12 +153,23 @@ OTHER OPTIONS:
     Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    Set credentials to use for authentication on the target.  
+    Set credentials to use for HTTP authentication on the target (see available methods bellow).
     Given value should be in the form login%password (% is used as a separator)
     
   * `--auth-method` <TYPE>
     Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
     NTLM authentication may require you to install an additional Python module.
+
+  * `--form-cred` <CREDENTIALS>
+    Set credentials to use for web form authentication on the target.
+    Given value should be in the form login%password (% is used as a separator)
+
+  * `--form-url` <URL>
+    If `--form-data` is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
+    Otherwise raw credentials are sent directly to the given URL.
+
+  * `--form-enctype` <ENCTYPE>
+    Send data specified with `--form-data` using the given content-type (default is "application/x-www-form-urlencoded")
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  

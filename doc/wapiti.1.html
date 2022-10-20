@@ -130,7 +130,10 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--tor</code></li>
 <li><code>--mitm-port</code> <var>PORT</var></li>
 <li><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var></li>
-<li><code>--auth-type</code> {basic,digest,ntlm,post}</li>
+<li><code>--auth-method</code> {basic,digest,ntlm}</li>
+<li><code>--form-cred</code> <var>CREDENTIALS</var></li>
+<li><code>--form-url</code> <var>URL</var></li>
+<li><code>--form-enctype</code> <var>ENCTYPE</var></li>
 <li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
 <li><code>--drop-set-cookie</code></li>
 </ul>
@@ -269,12 +272,19 @@ Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li
 If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
 Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p></li>
 <li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
-Set credentials to use for authentication on the target.<br />
+Set credentials to use for HTTP authentication on the target (see available methods bellow).
 Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--auth-type</code> <var>TYPE</var><br />
-Set the authentication mechanism to use. Valid choices are basic, digest, ntlm and post (web login form).<br />
-NTLM authentication may require you to install an additional Python module.
-"Post" authentication could be combined with <code>-s</code> to specify where to find the login form.</p></li>
+<li><p><code>--auth-method</code> <var>TYPE</var>
+Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
+NTLM authentication may require you to install an additional Python module.</p></li>
+<li><p><code>--form-cred</code> <var>CREDENTIALS</var>
+Set credentials to use for web form authentication on the target.
+Given value should be in the form login%password (% is used as a separator)</p></li>
+<li><p><code>--form-url</code> <var>URL</var>
+If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
+Otherwise raw credentials are sent directly to the given URL.</p></li>
+<li><p><code>--form-enctype</code> <var>ENCTYPE</var>
+Send data specified with <code>--form-data</code> using the given content-type (default is "application/x-www-form-urlencoded")</p></li>
 <li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
 Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
@@ -315,8 +325,7 @@ Specify an alternative path for storing particular module (<code>apps.json</code
 If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with.<br />
 Those URLs will be given a depth of 0, just like the base URL.<br />
 This option can be called several times.<br />
-You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.
-Combined with <code>--auth-type=post</code>, Wapiti will try to find a login form on the first URL provided and to authenticate with the given credentials.</p></li>
+You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.</p></li>
 <li><p><code>-x</code>, <code>--exclude</code> <var>URL</var><br />
 Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).<br />
 This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.</p></li>
@@ -482,7 +491,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>July 2022</li>
+    <li class='tc'>October 2022</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 
