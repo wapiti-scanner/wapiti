@@ -42,6 +42,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--form-cred` <CREDENTIALS>
   * `--form-url` <URL>
   * `--form-enctype` <ENCTYPE>
+  * `--form-script` <FILENAME>
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `--drop-set-cookie`
 
@@ -170,6 +171,9 @@ OTHER OPTIONS:
 
   * `--form-enctype` <ENCTYPE>
     Send data specified with `--form-data` using the given content-type (default is "application/x-www-form-urlencoded")
+
+  * `--form-script` <FILENAME>
+    Use a custom Python authentication plugin
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  
