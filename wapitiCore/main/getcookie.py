@@ -23,10 +23,10 @@ import sys
 
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential
+from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential, RawCredential
 from wapitiCore.parsers.html import Html
 from wapitiCore.net import Request
-from wapitiCore.net.response import Response
+from wapitiCore.net.auth import login_with_raw_data, async_fetch_login_page
 
 
 class InvalidOptionValue(Exception):
@@ -120,8 +120,28 @@ async def getcookie_main(arguments):
     )
 
     parser.add_argument(
-        '-d', '--data',
-        help='Data to send to the form with POST'
+        "--form-data",
+        dest="form_data",
+        default=argparse.SUPPRESS,
+        help="Set login form POST data",
+        metavar="DATA"
+    )
+
+    parser.add_argument(
+        "--form-enctype",
+        dest="form_enctype",
+        default=None,
+        help="Set enctype to use to POST form data to form URL",
+        metavar="DATA"
+    )
+
+    parser.add_argument(
+        "--headless",
+        dest="headless",
+        default="no",
+        help="Use a Firefox headless crawler for browsing (slower)",
+        metavar="PORT",
+        choices=["no", "hidden", "visible"]
     )
 
     parser.add_argument(
@@ -157,64 +177,64 @@ async def getcookie_main(arguments):
     json_cookie.load(args.cookie)
     json_cookie.delete(server)
 
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        response: Response = await crawler.async_get(Request(args.url), follow_redirects=True)
+    page_source = await async_fetch_login_page(crawler_configuration, args.url, args.headless)
+    json_cookie.addcookies(crawler_configuration.cookies)
 
-        # A first crawl is sometimes necessary, so let's fetch the webpage
-        json_cookie.addcookies(crawler.cookie_jar)
-
-        if not args.data:
-            # Not data specified, try interactive mode by fetching forms
-            forms = []
-            html = Html(response.content, args.url)
-            for i, form in enumerate(html.iter_forms(autofill=False)):
-                if i == 0:
-                    print('')
-                    print("Choose the form you want to use or enter 'q' to leave :")
-                print(f"{i}) {form}")
-                forms.append(form)
-
-            valid_choice_done = False
-            if forms:
-                nchoice = -1
+    if "form_data" in args:
+        raw_credential = RawCredential(
+            args.form_data,
+            args.url,
+            args.form_enctype or ""
+        )
+        await login_with_raw_data(crawler_configuration, raw_credential)
+        json_cookie.addcookies(crawler_configuration.cookies)
+    else:
+        # Not data specified, try interactive mode by fetching forms
+        forms = []
+        html = Html(page_source, args.url)
+        for i, form in enumerate(html.iter_forms(autofill=False)):
+            if i == 0:
                 print('')
-                while not valid_choice_done:
-                    choice = input("Enter a number : ")
-                    if choice.isdigit():
-                        nchoice = int(choice)
-                        if len(forms) > nchoice >= 0:
-                            valid_choice_done = True
-                    elif choice == 'q':
-                        break
+                print("Choose the form you want to use or enter 'q' to leave :")
+            print(f"{i}) {form}")
+            forms.append(form)
 
-                if valid_choice_done:
-                    form = forms[nchoice]
-                    print('')
-                    print("Please enter values for the following form: ")
-                    print(f"url = {form.url}")
+        valid_choice_done = False
+        if forms:
+            nchoice = -1
+            print('')
+            while not valid_choice_done:
+                choice = input("Enter a number : ")
+                if choice.isdigit():
+                    nchoice = int(choice)
+                    if len(forms) > nchoice >= 0:
+                        valid_choice_done = True
+                elif choice == 'q':
+                    break
 
-                    post_params = form.post_params
-                    for i, post_param_tuple in enumerate(post_params):
-                        field, value = post_param_tuple
-                        if value:
-                            new_value = input(field + " (" + value + ") : ")
-                            if not new_value:
-                                new_value = value
-                        else:
-                            new_value = input(f"{field}: ")
-                        post_params[i] = [field, new_value]
+            if valid_choice_done:
+                form = forms[nchoice]
+                print('')
+                print("Please enter values for the following form: ")
+                print(f"url = {form.url}")
 
-                    request = Request(form.url, post_params=post_params)
+                post_params = form.post_params
+                for i, post_param_tuple in enumerate(post_params):
+                    field, value = post_param_tuple
+                    if value:
+                        new_value = input(field + " (" + value + ") : ")
+                        if not new_value:
+                            new_value = value
+                    else:
+                        new_value = input(f"{field}: ")
+                    post_params[i] = [field, new_value]
+
+                request = Request(form.url, post_params=post_params)
+                async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     await crawler.async_send(request, follow_redirects=True)
-
                     json_cookie.addcookies(crawler.cookie_jar)
-        else:
-            request = Request(args.url, post_params=args.data)
-            await crawler.async_send(request, follow_redirects=True)
 
-            json_cookie.addcookies(crawler.cookie_jar)
-
-        json_cookie.dump()
+    json_cookie.dump()
 
 
 def getcookie_asyncio_wrapper():
