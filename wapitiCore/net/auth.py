@@ -75,7 +75,7 @@ def _create_login_request(
 
 async def async_fetch_login_page(
         crawler_configuration: CrawlerConfiguration,
-        form_credential: FormCredential,
+        url: str,
         headless_mode: str = "no",
 ) -> Optional[str]:
     """
@@ -111,7 +111,7 @@ async def async_fetch_login_page(
         try:
             async with get_session(service, browser) as headless_client:
                 await headless_client.get(
-                    form_credential.url,
+                    url,
                     timeout=crawler_configuration.timeout
                 )
                 await asyncio.sleep(.1)
@@ -119,24 +119,24 @@ async def async_fetch_login_page(
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
                 return page_source
         except (ArsenicError, asyncio.TimeoutError) as exception:
-            logging.error(f"[!] {exception.__class__.__name__} with URL {form_credential.url}")
+            logging.error(f"[!] {exception.__class__.__name__} with URL {url}")
             return
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             try:
                 response: Response = await crawler.async_get(
-                    Request(form_credential.url),
+                    Request(url),
                     follow_redirects=True
                 )
                 crawler_configuration.cookies = crawler.cookie_jar
                 page_source = response.content
                 return page_source
             except ConnectionError:
-                logging.error("[!] Connection error with URL", form_credential.url)
+                logging.error("[!] Connection error with URL", url)
                 return
             except RequestError as exception:
                 logging.error(
-                    f"[!] {exception.__class__.__name__} with URL {form_credential.url}"
+                    f"[!] {exception.__class__.__name__} with URL {url}"
                 )
                 return
 
@@ -193,7 +193,7 @@ async def async_try_form_login(
     Try to authenticate with the provided url and credentials.
     Returns if the authentication has been successful, the used form variables and the disconnect urls.
     """
-    page_source = await async_fetch_login_page(crawler_configuration, form_credential, headless_mode)
+    page_source = await async_fetch_login_page(crawler_configuration, form_credential.url, headless_mode)
     if not page_source:
         return False, {}, []
     return await async_submit_login_form(page_source, crawler_configuration, form_credential)
