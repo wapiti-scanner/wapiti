@@ -69,7 +69,8 @@ async def test_async_try_login_post_good_credentials():
                     <tr><td colspan='2' align='right'><input type='submit' value='login'></td></tr> \
                 </tbody></table> \
             </form> \
-            <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
+            <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"Set-Cookie": "1st_stage=success;"}
         )
     )
 
@@ -80,7 +81,8 @@ async def test_async_try_login_post_good_credentials():
             <h2>Pas de panique, on va vous aider</h2> \
             <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
             <a href='http://perdu.com/foobar/signout'>disconnect</a> \
-                <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
+                <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"Set-Cookie": "2nd_stage=success;"}
         )
     )
 
@@ -93,6 +95,9 @@ async def test_async_try_login_post_good_credentials():
     assert "http://perdu.com/foobar/signout" in disconnect_urls
     assert "http://perdu.com/a/b/signout" in disconnect_urls
     assert is_logged_in is True
+    assert [
+               ("1st_stage", "success"), ("2nd_stage", "success")
+           ] == [(cookie.name, cookie.value) for cookie in crawler_configuration.cookies]
 
 
 @respx.mock
@@ -123,7 +128,8 @@ async def test_async_try_login_post_wrong_credentials():
             text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
             <h2>Pas de panique, on va vous aider</h2> \
             <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
-                <div></div></body></html>"
+                <div></div></body></html>",
+            headers={"Set-Cookie": "at_least=you_tried;"}
         )
     )
 
@@ -136,6 +142,7 @@ async def test_async_try_login_post_wrong_credentials():
     assert form == {'login_field': 'uname', 'password_field': 'pass'}
     assert len(disconnect_urls) == 0
     assert is_logged_in is False
+    assert [("at_least", "you_tried")] == [(cookie.name, cookie.value) for cookie in crawler_configuration.cookies]
 
 
 @respx.mock
@@ -149,7 +156,8 @@ async def test_async_try_login_post_form_not_detected():
             <h2>Pas de panique, on va vous aider</h2> \
             <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong><a href='http://perdu.com/foobar/'></a> \
             <a href='http://perdu.com/foobar/signout'></a> \
-            <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>"
+            <div><a href='http://perdu.com/a/b/signout'></a></div></body></html>",
+            headers={"Set-Cookie": "success=false;"}
         )
     )
 
@@ -161,6 +169,7 @@ async def test_async_try_login_post_form_not_detected():
     assert form == {}
     assert len(disconnect_urls) == 0
     assert is_logged_in is False
+    assert [("success", "false")] == [(cookie.name, cookie.value) for cookie in crawler_configuration.cookies]
 
 
 @respx.mock
@@ -243,7 +252,6 @@ async def test_async_try_login_basic_digest_ntlm_good_credentials():
 
     crawler_configuration = CrawlerConfiguration(Request(target_url), timeout=1)
     crawler_configuration.http_credential = HttpCredential("username", "password")
-
     auth_success = await check_http_auth(crawler_configuration)
 
     assert auth_success is True
