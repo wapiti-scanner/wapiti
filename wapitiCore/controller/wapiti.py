@@ -663,7 +663,7 @@ class Wapiti:
 
     def set_headless(self, headless_mode: str):
         """Set the headless mode used for browsing"""
-        if not shutil.which("geckodriver"):
+        if headless_mode != "no" and not shutil.which("geckodriver"):
             logging.error("Headless mode won't be activated because geckodriver is missing on the system")
         else:
             self._headless_mode = headless_mode
