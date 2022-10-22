@@ -252,9 +252,6 @@ class XMLReportGenerator(JSONReportGenerator):
             auth_dict = self._infos["auth"]
             is_logged_in = "true" if auth_dict["logged_in"] is True else "false"
 
-            auth_method_node = self._xml_doc.createElement("method")
-            auth_method_node.appendChild(self._xml_doc.createTextNode(auth_dict["method"]))
-            auth_node.appendChild(auth_method_node)
             auth_url_node = self._xml_doc.createElement("url")
             auth_url_node.appendChild(self._xml_doc.createTextNode(auth_dict["url"]))
             auth_node.appendChild(auth_url_node)

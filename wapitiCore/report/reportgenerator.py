@@ -43,7 +43,7 @@ class ReportGenerator:
         crawled_pages_nbr: int,
         detail_report: bool
     ):
-        """Set the informations about the scan"""
+        """Set the information about the scan"""
         self._infos["target"] = target
         self._infos["date"] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", date)
         self._infos["version"] = version
