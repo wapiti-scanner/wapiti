@@ -59,12 +59,9 @@ def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
     if "http_credentials" in arguments:
         if "%" in arguments.http_credentials:
             username, password = arguments.http_credentials.split("%", 1)
-            crawler_configuration.http_credential = HttpCredential(username, password)
+            crawler_configuration.http_credential = HttpCredential(username, password, arguments.auth_method)
         else:
             raise InvalidOptionValue("-a", arguments.http_credentials)
-
-    if "auth_method" in arguments:
-        crawler_configuration.http_credential.auth_method = arguments.auth_method
 
     headers = {}
     for custom_header in arguments.headers:
@@ -114,7 +111,7 @@ async def getcookie_main(arguments):
 
     parser.add_argument(
         "--auth-method",
-        default=argparse.SUPPRESS,
+        default="basic",
         help="Set the authentication type to use",
         choices=["basic", "digest", "ntlm"]
     )
@@ -130,7 +127,7 @@ async def getcookie_main(arguments):
     parser.add_argument(
         "--form-enctype",
         dest="form_enctype",
-        default=None,
+        default="application/x-www-form-urlencoded",
         help="Set enctype to use to POST form data to form URL",
         metavar="DATA"
     )
@@ -184,7 +181,7 @@ async def getcookie_main(arguments):
         raw_credential = RawCredential(
             args.form_data,
             args.url,
-            args.form_enctype or ""
+            args.form_enctype
         )
         await login_with_raw_data(crawler_configuration, raw_credential)
         json_cookie.addcookies(crawler_configuration.cookies)
