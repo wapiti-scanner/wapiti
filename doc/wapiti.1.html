@@ -134,6 +134,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--form-cred</code> <var>CREDENTIALS</var></li>
 <li><code>--form-url</code> <var>URL</var></li>
 <li><code>--form-enctype</code> <var>ENCTYPE</var></li>
+<li><code>--form-script</code> <var>FILENAME</var></li>
 <li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
 <li><code>--drop-set-cookie</code></li>
 </ul>
@@ -274,17 +275,19 @@ Configure your browser to use the intercepting proxy then explore the target man
 <li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
 Set credentials to use for HTTP authentication on the target (see available methods bellow).
 Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--auth-method</code> <var>TYPE</var>
+<li><p><code>--auth-method</code> <var>TYPE</var><br />
 Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
 NTLM authentication may require you to install an additional Python module.</p></li>
-<li><p><code>--form-cred</code> <var>CREDENTIALS</var>
+<li><p><code>--form-cred</code> <var>CREDENTIALS</var><br />
 Set credentials to use for web form authentication on the target.
 Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--form-url</code> <var>URL</var>
+<li><p><code>--form-url</code> <var>URL</var><br />
 If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
 Otherwise raw credentials are sent directly to the given URL.</p></li>
-<li><p><code>--form-enctype</code> <var>ENCTYPE</var>
+<li><p><code>--form-enctype</code> <var>ENCTYPE</var><br />
 Send data specified with <code>--form-data</code> using the given content-type (default is "application/x-www-form-urlencoded")</p></li>
+<li><p><code>--form-script</code> <var>FILENAME</var><br />
+Use a custom Python authentication plugin</p></li>
 <li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
 Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
@@ -384,16 +387,16 @@ Default HTTP endpoint is http://wapiti3.ovh/. Keep in mind that the target and y
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint.</p>
 
 <ul>
-<li><p><code>--internal-endpoint</code> <var>URL</var>
+<li><p><code>--internal-endpoint</code> <var>URL</var><br />
 You may want to specify an internal endpoint different from the external one.<br />
 The internal endpoint is used by Wapiti to fetch results of attacks.<br />
 If you are behind a NAT it may be a URL for a local server (for example http://192.168.0.1/)</p></li>
-<li><p><code>--external-endpoint</code> <var>URL</var>
+<li><p><code>--external-endpoint</code> <var>URL</var><br />
 Set the endpoint URL (the one that the target will fetch in case of vulnerability).<br />
 Using your own endpoint may reduce risk of being caught by NIDS or WAF.</p></li>
-<li><p><code>--endpoint</code> <var>URL</var>
+<li><p><code>--endpoint</code> <var>URL</var><br />
 This option will set both internal and external endpoint URL to the same value.</p></li>
-<li><p><code>--dns-endpoint</code> <var>DNS</var>
+<li><p><code>--dns-endpoint</code> <var>DNS</var><br />
 This options specify the DNS endpoint to use for the log4shell attack module.<br />
 The default value is dns.wapiti3.ovh</p></li>
 </ul>
@@ -402,7 +405,7 @@ The default value is dns.wapiti3.ovh</p></li>
 <h2 id="HTTP-AND-NETWORK-OPTIONS">HTTP AND NETWORK OPTIONS</h2>
 
 <ul>
-<li><p><code>-t</code>, <code>--timeout</code> <var>SECONDS</var>
+<li><p><code>-t</code>, <code>--timeout</code> <var>SECONDS</var><br />
 Time to wait (in seconds) for a HTTP response before considering failure.</p></li>
 <li><p><code>-H</code>, <code>--header</code> <var>HEADER</var><br />
 Set a custom HTTM header to inject in every request sent by Wapiti.
@@ -426,7 +429,7 @@ Output will be colorized based on the severity of the information (red is critic
 <li><p><code>-v</code>, <code>--verbose</code> <var>LEVEL</var><br />
 Set the level of verbosity for the output.
 Possible values are quiet (O), normal (1, default behavior) and verbose (2).</p></li>
-<li><p><code>--log</code> <var>OUTPUT_PATH</var>
+<li><p><code>--log</code> <var>OUTPUT_PATH</var><br />
 In addition to getting information from the console you can also log the output to a local file.<br />
 Debug information will also be stored in that file so this option should be mainly used to debug Wapiti.</p></li>
 </ul>
@@ -442,7 +445,7 @@ Set the format of the report. Valid choices are json, html, txt and xml.<br />
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p></li>
 <li><p><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var><br />
 Set the path were the report will be generated.</p></li>
-<li><p><code>-dr</code>, <code>--detailed-report</code>
+<li><p><code>-dr</code>, <code>--detailed-report</code><br />
 HTTP responses (headers and bodies) will appear in the report.</p></li>
 </ul>
 
@@ -455,7 +458,7 @@ Print Wapiti version then exit.</p></li>
 <li><p><code>--no-bugreport</code><br />
 If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.<br />
 You can still prevent reports from being sent using that option.</p></li>
-<li><p><code>--update</code>
+<li><p><code>--update</code><br />
 Update particular Wapiti modules (download a fresh version of the <code>apps.json</code> and <code>nikto_db</code> files) then exit.
 You can combine it with <code>--store-config</code> to specify where to store downloaded files.</p></li>
 <li><p><code>-h</code>, <code>--help</code><br />

@@ -157,22 +157,22 @@ OTHER OPTIONS:
     Set credentials to use for HTTP authentication on the target (see available methods bellow).
     Given value should be in the form login%password (% is used as a separator)
     
-  * `--auth-method` <TYPE>
+  * `--auth-method` <TYPE>  
     Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
     NTLM authentication may require you to install an additional Python module.
 
-  * `--form-cred` <CREDENTIALS>
+  * `--form-cred` <CREDENTIALS>  
     Set credentials to use for web form authentication on the target.
     Given value should be in the form login%password (% is used as a separator)
 
-  * `--form-url` <URL>
+  * `--form-url` <URL>  
     If `--form-data` is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
     Otherwise raw credentials are sent directly to the given URL.
 
-  * `--form-enctype` <ENCTYPE>
+  * `--form-enctype` <ENCTYPE>  
     Send data specified with `--form-data` using the given content-type (default is "application/x-www-form-urlencoded")
 
-  * `--form-script` <FILENAME>
+  * `--form-script` <FILENAME>  
     Use a custom Python authentication plugin
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
@@ -282,25 +282,25 @@ For example the SSRF module inject the endpoint URL into webpage arguments to ch
 Default HTTP endpoint is http://wapiti3.ovh/. Keep in mind that the target and your computer must be able to join that endpoint for the module to work.  
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint.  
 
-  * `--internal-endpoint` <URL>
+  * `--internal-endpoint` <URL>  
     You may want to specify an internal endpoint different from the external one.  
     The internal endpoint is used by Wapiti to fetch results of attacks.  
     If you are behind a NAT it may be a URL for a local server (for example http://192.168.0.1/)
     
-  * `--external-endpoint` <URL>
+  * `--external-endpoint` <URL>  
     Set the endpoint URL (the one that the target will fetch in case of vulnerability).  
     Using your own endpoint may reduce risk of being caught by NIDS or WAF.
 
-  * `--endpoint` <URL>
+  * `--endpoint` <URL>  
     This option will set both internal and external endpoint URL to the same value.
 
-  * `--dns-endpoint` <DNS>
+  * `--dns-endpoint` <DNS>  
     This options specify the DNS endpoint to use for the log4shell attack module.  
     The default value is dns.wapiti3.ovh
     
 ## HTTP AND NETWORK OPTIONS
 
-  * `-t`, `--timeout` <SECONDS>
+  * `-t`, `--timeout` <SECONDS>  
     Time to wait (in seconds) for a HTTP response before considering failure.
     
   * `-H`, `--header` <HEADER>  
@@ -327,7 +327,7 @@ Wapiti prints its status to standard output. The two following options allow to 
     Set the level of verbosity for the output.
     Possible values are quiet (O), normal (1, default behavior) and verbose (2).
 
-  * `--log` <OUTPUT_PATH>
+  * `--log` <OUTPUT_PATH>  
     In addition to getting information from the console you can also log the output to a local file.  
     Debug information will also be stored in that file so this option should be mainly used to debug Wapiti.
 
@@ -342,7 +342,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
   * `-o`, `--output` <OUTPUT_PATH>  
     Set the path were the report will be generated.
 
-  * `-dr`, `--detailed-report`
+  * `-dr`, `--detailed-report`  
     HTTP responses (headers and bodies) will appear in the report.
 
 ## OTHER OPTIONS
@@ -354,7 +354,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
     If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.  
     You can still prevent reports from being sent using that option.
 
-  * `--update`
+  * `--update`  
     Update particular Wapiti modules (download a fresh version of the `apps.json` and `nikto_db` files) then exit. 
     You can combine it with `--store-config` to specify where to store downloaded files.
 

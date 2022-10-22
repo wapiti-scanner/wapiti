@@ -80,6 +80,9 @@ PROXY AND AUTHENTICATION OPTIONS:
 \fB\-\-form\-enctype\fR \fIENCTYPE\fR
 .
 .IP "\(bu" 4
+\fB\-\-form\-script\fR \fIFILENAME\fR
+.
+.IP "\(bu" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
 .
 .IP "\(bu" 4
@@ -349,16 +352,34 @@ Make Wapiti use a Tor listener (same as \-\-proxy socks://127\.0\.0\.1:9050/)
 Set credentials to use for HTTP authentication on the target (see available methods bellow)\. Given value should be in the form login%password (% is used as a separator)
 .
 .IP "\(bu" 4
-\fB\-\-auth\-method\fR \fITYPE\fR Set the authentication mechanism to use\. Valid choices are basic, digest and ntlm\. NTLM authentication may require you to install an additional Python module\.
+\fB\-\-auth\-method\fR \fITYPE\fR
+.
+.br
+Set the authentication mechanism to use\. Valid choices are basic, digest and ntlm\. NTLM authentication may require you to install an additional Python module\.
 .
 .IP "\(bu" 4
-\fB\-\-form\-cred\fR \fICREDENTIALS\fR Set credentials to use for web form authentication on the target\. Given value should be in the form login%password (% is used as a separator)
+\fB\-\-form\-cred\fR \fICREDENTIALS\fR
+.
+.br
+Set credentials to use for web form authentication on the target\. Given value should be in the form login%password (% is used as a separator)
 .
 .IP "\(bu" 4
-\fB\-\-form\-url\fR \fIURL\fR If \fB\-\-form\-data\fR is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials\. Otherwise raw credentials are sent directly to the given URL\.
+\fB\-\-form\-url\fR \fIURL\fR
+.
+.br
+If \fB\-\-form\-data\fR is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials\. Otherwise raw credentials are sent directly to the given URL\.
 .
 .IP "\(bu" 4
-\fB\-\-form\-enctype\fR \fIENCTYPE\fR Send data specified with \fB\-\-form\-data\fR using the given content\-type (default is "application/x\-www\-form\-urlencoded")
+\fB\-\-form\-enctype\fR \fIENCTYPE\fR
+.
+.br
+Send data specified with \fB\-\-form\-data\fR using the given content\-type (default is "application/x\-www\-form\-urlencoded")
+.
+.IP "\(bu" 4
+\fB\-\-form\-script\fR \fIFILENAME\fR
+.
+.br
+Use a custom Python authentication plugin
 .
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
@@ -591,7 +612,10 @@ Default HTTP endpoint is http://wapiti3\.ovh/\. Keep in mind that the target and
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint\.
 .
 .IP "\(bu" 4
-\fB\-\-internal\-endpoint\fR \fIURL\fR You may want to specify an internal endpoint different from the external one\.
+\fB\-\-internal\-endpoint\fR \fIURL\fR
+.
+.br
+You may want to specify an internal endpoint different from the external one\.
 .
 .br
 The internal endpoint is used by Wapiti to fetch results of attacks\.
@@ -600,16 +624,25 @@ The internal endpoint is used by Wapiti to fetch results of attacks\.
 If you are behind a NAT it may be a URL for a local server (for example http://192\.168\.0\.1/)
 .
 .IP "\(bu" 4
-\fB\-\-external\-endpoint\fR \fIURL\fR Set the endpoint URL (the one that the target will fetch in case of vulnerability)\.
+\fB\-\-external\-endpoint\fR \fIURL\fR
+.
+.br
+Set the endpoint URL (the one that the target will fetch in case of vulnerability)\.
 .
 .br
 Using your own endpoint may reduce risk of being caught by NIDS or WAF\.
 .
 .IP "\(bu" 4
-\fB\-\-endpoint\fR \fIURL\fR This option will set both internal and external endpoint URL to the same value\.
+\fB\-\-endpoint\fR \fIURL\fR
+.
+.br
+This option will set both internal and external endpoint URL to the same value\.
 .
 .IP "\(bu" 4
-\fB\-\-dns\-endpoint\fR \fIDNS\fR This options specify the DNS endpoint to use for the log4shell attack module\.
+\fB\-\-dns\-endpoint\fR \fIDNS\fR
+.
+.br
+This options specify the DNS endpoint to use for the log4shell attack module\.
 .
 .br
 The default value is dns\.wapiti3\.ovh
@@ -619,7 +652,10 @@ The default value is dns\.wapiti3\.ovh
 .SH "HTTP AND NETWORK OPTIONS"
 .
 .IP "\(bu" 4
-\fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR Time to wait (in seconds) for a HTTP response before considering failure\.
+\fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR
+.
+.br
+Time to wait (in seconds) for a HTTP response before considering failure\.
 .
 .IP "\(bu" 4
 \fB\-H\fR, \fB\-\-header\fR \fIHEADER\fR
@@ -663,7 +699,10 @@ Output will be colorized based on the severity of the information (red is critic
 Set the level of verbosity for the output\. Possible values are quiet (O), normal (1, default behavior) and verbose (2)\.
 .
 .IP "\(bu" 4
-\fB\-\-log\fR \fIOUTPUT_PATH\fR In addition to getting information from the console you can also log the output to a local file\.
+\fB\-\-log\fR \fIOUTPUT_PATH\fR
+.
+.br
+In addition to getting information from the console you can also log the output to a local file\.
 .
 .br
 Debug information will also be stored in that file so this option should be mainly used to debug Wapiti\.
@@ -689,7 +728,10 @@ Although the HTML reports were rewritten to be more responsive, they still are i
 Set the path were the report will be generated\.
 .
 .IP "\(bu" 4
-\fB\-dr\fR, \fB\-\-detailed\-report\fR HTTP responses (headers and bodies) will appear in the report\.
+\fB\-dr\fR, \fB\-\-detailed\-report\fR
+.
+.br
+HTTP responses (headers and bodies) will appear in the report\.
 .
 .IP "" 0
 .
@@ -711,7 +753,10 @@ If a Wapiti attack module crashes of a non\-caught exception a bug report is gen
 You can still prevent reports from being sent using that option\.
 .
 .IP "\(bu" 4
-\fB\-\-update\fR Update particular Wapiti modules (download a fresh version of the \fBapps\.json\fR and \fBnikto_db\fR files) then exit\. You can combine it with \fB\-\-store\-config\fR to specify where to store downloaded files\.
+\fB\-\-update\fR
+.
+.br
+Update particular Wapiti modules (download a fresh version of the \fBapps\.json\fR and \fBnikto_db\fR files) then exit\. You can combine it with \fB\-\-store\-config\fR to specify where to store downloaded files\.
 .
 .IP "\(bu" 4
 \fB\-h\fR, \fB\-\-help\fR
