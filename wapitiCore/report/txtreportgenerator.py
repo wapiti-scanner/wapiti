@@ -299,7 +299,6 @@ class TXTReportGenerator(ReportGenerator):
             return
         auth_dict = self._infos["auth"]
         txt_report_file.write(title("Authentication :"))
-        txt_report_file.write(f"Method: {auth_dict['method']}\n")
         txt_report_file.write(f"Url: {auth_dict['url']}\n")
         txt_report_file.write(f"Logged in: {auth_dict['logged_in']}\n")
 

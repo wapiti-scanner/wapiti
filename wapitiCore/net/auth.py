@@ -171,16 +171,16 @@ async def async_submit_login_form(
             # ensure logged in
             is_logged_in = html.is_logged_in()
             if is_logged_in:
-                logging.success("Login success")
+                logging.success("[*] Login success")
                 disconnect_urls = html.extract_disconnect_urls()
             else:
-                logging.warning("Login failed : Credentials might be invalid")
+                logging.warning("[!] Login failed : Credentials might be invalid")
 
             # In every case keep the cookies
             crawler_configuration.cookies = crawler.cookie_jar
             return is_logged_in, form, disconnect_urls
 
-    logging.warning("Login failed : No login form detected")
+    logging.warning("[!] Login failed : No login form detected")
     return False, {}, []
 
 
