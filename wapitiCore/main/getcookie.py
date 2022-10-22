@@ -64,7 +64,7 @@ def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
             raise InvalidOptionValue("-a", arguments.http_credentials)
 
     if "auth_method" in arguments:
-        crawler_configuration.auth_method = arguments.auth_method
+        crawler_configuration.http_credential.auth_method = arguments.auth_method
 
     headers = {}
     for custom_header in arguments.headers:
