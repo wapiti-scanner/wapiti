@@ -187,9 +187,6 @@ async def wapiti_main():
             else:
                 raise InvalidOptionValue("-a", args.http_credential)
 
-        if "form_url" in args and not ("form_credentials" in args or "form_data" in args):
-            raise InvalidOptionValue("--form-url", "This option must be used with --form-cred or --form-data")
-
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
 
@@ -289,29 +286,30 @@ async def wapiti_main():
             logging.warning("[!] HTTP authentication failed, a 4xx status code was received")
             return
 
+    form_credential = None
     if "form_credentials" in args:
+        # If the option is set it MUST have valid requirements
+        if "%" not in args.form_credentials:
+            raise InvalidOptionValue("--form-cred", args.http_credential)
+
         if "form_url" not in args:
             raise InvalidOptionValue("--form-url", "This option is required when --form-cred is used")
 
-        if "%" in args.form_credentials:
-            username, password = args.form_credentials.split("%", 1)
-            form_credential = FormCredential(
-                username,
-                password,
-                args.form_url,
-            )
-            is_logged_in, form, excluded_urls = await async_try_form_login(
-                wap.crawler_configuration,
-                form_credential,
-                args.headless,
-            )
-            wap.set_auth_state(is_logged_in, form, form_credential.url)
-            for url in excluded_urls:
-                wap.add_excluded_url(url)
-        else:
-            raise InvalidOptionValue("--form-cred", args.http_credential)
+        username, password = args.form_credentials.split("%", 1)
+        form_credential = FormCredential(
+            username,
+            password,
+            args.form_url,
+        )
 
-    if "form_data" in args:
+    if "form_script" in args:
+        await load_form_script(
+            args.form_script,
+            wap.crawler_configuration,
+            form_credential,  # Either None or filled
+            args.headless
+        )
+    elif "form_data" in args:
         if "form_url" not in args:
             raise InvalidOptionValue("--form-url", "This option is required when --form-data is used")
 
@@ -321,27 +319,15 @@ async def wapiti_main():
             args.form_enctype
         )
         await login_with_raw_data(wap.crawler_configuration, raw_credential)
-
-    if "form_script" in args:
-        if "form_credentials" not in args:
-            raise InvalidOptionValue("--form-cred", "This option is required when --form-script is used")
-        if "form_url" not in args:
-            raise InvalidOptionValue("--form-url", "This option is required when --form-script is used")
-
-        if "%" in args.form_credentials:
-            username, password = args.form_credentials.split("%", 1)
-            form_credential = FormCredential(
-                username,
-                password,
-                args.form_url,
-            )
-
-            await load_form_script(
-                args.form_script,
-                wap.crawler_configuration,
-                form_credential,
-                args.headless
-            )
+    elif form_credential:
+        is_logged_in, form, excluded_urls = await async_try_form_login(
+            wap.crawler_configuration,
+            form_credential,
+            args.headless,
+        )
+        wap.set_auth_state(is_logged_in, form, form_credential.url)
+        for url in excluded_urls:
+            wap.add_excluded_url(url)
 
     loop = asyncio.get_event_loop()
 
