@@ -181,18 +181,11 @@ async def wapiti_main():
             wap.set_drop_cookies()
 
         if "http_credentials" in args:
-            if "auth_method" not in args:
-                raise InvalidOptionValue("--auth-method", "This option is required when -a is used")
-
             if "%" in args.http_credential:
                 username, password = args.http_credential.split("%", 1)
                 wap.set_http_credentials(HttpCredential(username, password, args.auth_method))
             else:
                 raise InvalidOptionValue("-a", args.http_credential)
-
-        if "auth_method" in args:
-            if "http_credentials" not in args:
-                raise InvalidOptionValue("-a", "This option is required when --auth-method is used")
 
         if "form_url" in args and not ("form_credentials" in args or "form_data" in args):
             raise InvalidOptionValue("--form-url", "This option must be used with --form-cred or --form-data")
@@ -291,7 +284,7 @@ async def wapiti_main():
 
     assert os.path.exists(wap.history_file)
 
-    if "auth_method" in args:
+    if "http_credentials" in args:
         if not await check_http_auth(wap.crawler_configuration):
             logging.warning("[!] HTTP authentication failed, a 4xx status code was received")
             return

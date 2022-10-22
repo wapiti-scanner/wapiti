@@ -122,7 +122,7 @@ def parse_args():
 
     parser.add_argument(
         "--auth-method",
-        default=argparse.SUPPRESS,
+        default="basic",
         help="Set the HTTP authentication method to use",
         choices=["basic", "digest", "ntlm"]
     )
@@ -154,7 +154,7 @@ def parse_args():
     parser.add_argument(
         "--form-enctype",
         dest="form_enctype",
-        default=None,
+        default="application/x-www-form-urlencoded",
         help="Set enctype to use to POST form data to form URL",
         metavar="DATA"
     )
