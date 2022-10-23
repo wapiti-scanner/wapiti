@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = ">=6.2.2"
-respx = "==0.19.2"
+respx = "==0.20.0"
 pytest-asyncio = "==0.14.0"
 pytest-cov = ">=2.11.1"
 
