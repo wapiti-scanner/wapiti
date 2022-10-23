@@ -668,6 +668,10 @@ class Wapiti:
         else:
             self._headless_mode = headless_mode
 
+    @property
+    def headless_mode(self) -> str:
+        return self._headless_mode
+
     def set_wait_time(self, wait_time: float):
         """Set the time to wait before processing a webpage content (headless mode only)"""
         self._wait_time = wait_time

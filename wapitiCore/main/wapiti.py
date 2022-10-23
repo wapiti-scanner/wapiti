@@ -231,7 +231,7 @@ async def wapiti_main():
             "level": args.level,
             "timeout": args.timeout,
             "tasks": args.tasks,
-            "headless": args.headless,
+            "headless": wap.headless_mode,
         }
 
         if "dns_endpoint" in args:
@@ -307,7 +307,7 @@ async def wapiti_main():
             args.form_script,
             wap.crawler_configuration,
             form_credential,  # Either None or filled
-            args.headless
+            wap.headless_mode
         )
     elif "form_data" in args:
         if "form_url" not in args:
@@ -323,7 +323,7 @@ async def wapiti_main():
         is_logged_in, form, excluded_urls = await async_try_form_login(
             wap.crawler_configuration,
             form_credential,
-            args.headless,
+            wap.headless_mode,
         )
         wap.set_auth_state(is_logged_in, form, form_credential.url)
         for url in excluded_urls:
