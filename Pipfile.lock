@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "184571b088d22a4cf1347dae62045ac1866692239be92aad0b98b545231c9d23"
+            "sha256": "ab1de6d26eec0c53e0f49768b81b668a36c38db088dbb5fe0f4e8377f3824453"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -241,10 +241,11 @@
         },
         "browser-cookie3": {
             "hashes": [
-                "sha256:3d140c6b651dbd8b8555aca6472557fcfda4dd93afc26ea3a200be922a843e2c"
+                "sha256:201d0cb3e9821e1ee57c6dd761fbc4da1ff695e7394eaf40023a80373ef1d211",
+                "sha256:298326fd9df16bef4b9fb510e35ccf72075ebc150aea47f2bbae0a721655cce7"
             ],
             "index": "pypi",
-            "version": "==0.11.4"
+            "version": "==0.16.2"
         },
         "certifi": {
             "hashes": [
@@ -1179,7 +1180,7 @@
                 "sha256:2403533ef369eca6d2ba81718576c5e0f564d5cca1b58f73a8b23e7d4eeebd77",
                 "sha256:f356e6628222568e3af06f2eba8df495efa13b3b63081dafd4f7d9a7b7bc9f99"
             ],
-            "markers": "sys_platform == 'linux'",
+            "markers": "python_version >= '3.6'",
             "version": "==3.3.3"
         },
         "setuptools": {
