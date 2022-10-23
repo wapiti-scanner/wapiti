@@ -130,8 +130,8 @@ if a script is vulnerable.""",
     extras_require={
         "NTLM": ["httpx-ntlm"],
         "sslyze": [
-            "sslyze==5.0.1",
-            "humanize==3.13.1"
+            "sslyze==5.0.6",
+            "humanize==4.4.0"
         ]
     },
     entry_points={
