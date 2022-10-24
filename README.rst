@@ -57,13 +57,14 @@ Browsing features
 =================
 
 + Support HTTP, HTTPS and SOCKS5 proxies.
-+ Authentication on the target via several methods : Basic, Digest, NTLM or GET/POST on login forms.
++ HTTP authentication on the target (Basic, Digest, NTLM)
++ Authentication by filling login forms.
 + Ability to restrain the scope of the scan (domain, folder, page, url).
 + Automatic removal of one or more parameters in URLs.
 + Multiple safeguards against scan endless-loops (for example, limit of values for a parameter).
 + Possibility to set the first URLs to explore (even if not in scope).
 + Can exclude some URLs of the scan and attacks (eg: logout URL).
-+ Import cookies from your Chrome or Firefox browser or using the wapiti-getcookie tool.
++ Import cookies from your Chrome or Firefox browser or using the `wapiti-getcookie` tool.
 + Can activate / deactivate SSL certificates verification.
 + Extract URLs from Flash SWF files.
 + Try to extract URLs from javascript (very basic JS interpreter).
@@ -72,6 +73,8 @@ Browsing features
 + Skipping some parameter names during attack.
 + Setting a maximum time for the scan process.
 + Adding some custom HTTP headers or setting a custom User-Agent.
++ Using a Firefox headless browser for crawling
++ Loading your own python code for complicated authentication cases (see `--form-script` option)
 
 
 Supported attacks
@@ -125,7 +128,7 @@ The aforementioned attacks are tied to the following module names :
 + htaccess (Misconfigured htaccess restrictions)
 + http_header (Check HTTP security headers)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
-+ methods (Look for uncommon availables HTTP methods like PUT)
++ methods (Look for uncommon available HTTP methods like PUT)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
 + redirect (Open Redirects)
@@ -181,22 +184,11 @@ You can :
 
 + Support the project by making a donation ( http://sf.net/donate/index.php?group_id=168625 )
 + Create or improve attack modules
-+ Create or improve report generators
++ Create or improve report generators and templates
 + Send bugfixes, patches...
 + Write some GUIs
-+ Create some tools to convert cookies from browsers to Wapiti JSON format
 + Create a tool to convert PCAP files to Wapiti sqlite3 session files
 + Talk about Wapiti around you
-
-
-What is included with Wapiti
-============================
-
-Wapiti comes with :
-
-+ a modified version of PyNarcissus (MPL 1.1 License),
-  see https://github.com/jtolds/pynarcissus
-+ Kube CSS framework ( see http://kube7.imperavi.com/ ) for HTML report generation.
 
 Licensing
 =========
