@@ -23,14 +23,9 @@ http://wapiti-scanner.github.io/
 
 Requirements
 ============
-In order to work correctly, Wapiti needs :
+In order to work correctly, Wapiti needs Python 3.x where x is >= 8 (3.8, 3.9, 3.10...)
 
-+ Python 3.x where x is >= 8 (3.8, 3.9, 3.10...)
-+ httpx ( https://www.python-httpx.org/ )
-+ BeautifulSoup ( http://www.crummy.com/software/BeautifulSoup/ )
-+ yaswfp ( https://github.com/facundobatista/yaswfp )
-+ tld ( https://github.com/barseghyanartur/tld )
-+ Mako ( https://www.makotemplates.org/ )
+All Python module dependencies will be installed automatically if you use the setup.py script or `pip install wapiti3`
 
 See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md>`__ for more details on installation.
 
