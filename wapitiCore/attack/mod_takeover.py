@@ -143,7 +143,7 @@ class TakeoverChecker:
 
                         return True
 
-                    # Otherwise if the pointed domain doesn't exists if may be enough
+                    # Otherwise if the pointed domain doesn't exist it may be enough
                     if service_entry["nxdomain"]:
                         try:
                             await dns.asyncresolver.resolve(domain)
