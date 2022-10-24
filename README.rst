@@ -33,6 +33,7 @@ In order to work correctly, Wapiti needs :
 + Mako ( https://www.makotemplates.org/ )
 
 See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md>`__ for more details on installation.
+
 Running Wapiti on Windows can be accomplished through the use of `WSL <https://learn.microsoft.com/en-us/training/modules/get-started-with-windows-subsystem-for-linux/>`__.
 
 How it works
