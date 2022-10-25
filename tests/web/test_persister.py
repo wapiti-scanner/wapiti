@@ -6,7 +6,7 @@ import httpx
 import respx
 
 from wapitiCore.net.classes import CrawlerConfiguration
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler, Response

@@ -5,7 +5,7 @@ import warnings
 from typing import Set
 
 from wapitiCore.net.crawler import Response
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 
 
 class ApplicationDataException(Exception):

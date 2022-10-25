@@ -31,7 +31,7 @@ from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CO
 from wapitiCore.net import Request, Response
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 
 
 class ModulePermanentxss(Attack):

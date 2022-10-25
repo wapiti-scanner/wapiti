@@ -48,7 +48,7 @@ from wapitiCore.net.async_stickycookie import AsyncStickyCookie
 from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS, wildcard_translate
 from wapitiCore.net.scope import Scope
 from wapitiCore.main.log import log_verbose, log_blue, logging
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 
 # Mime types that a browser will commonly display instead of downloading
 KNOWN_INTERPRETED_TYPES = (
