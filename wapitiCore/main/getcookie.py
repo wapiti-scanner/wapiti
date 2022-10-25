@@ -24,7 +24,7 @@ import sys
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential, RawCredential
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 from wapitiCore.net.auth import login_with_raw_data, async_fetch_login_page
 

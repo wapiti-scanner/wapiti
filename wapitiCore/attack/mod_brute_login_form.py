@@ -28,7 +28,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.credentials import NAME, WSTG_CODE
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 from wapitiCore.main.log import log_red

@@ -1,4 +1,4 @@
-from wapitiCore.parsers.html import Html, extract_js_redirections
+from wapitiCore.parsers.html_parser import Html, extract_js_redirections
 
 
 def test_js_parser():

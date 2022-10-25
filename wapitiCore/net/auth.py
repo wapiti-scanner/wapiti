@@ -27,7 +27,7 @@ from arsenic import get_session, browsers, services
 from arsenic.errors import ArsenicError
 
 from wapitiCore.net import Request, Response
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.main.log import logging
 from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler

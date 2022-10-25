@@ -33,12 +33,12 @@ from wapitiCore.net import web
 
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request, make_absolute
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.parsers.javascript import extract_js_redirections
 from wapitiCore.main.log import logging, log_verbose
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net import swf
+from wapitiCore.parsers import swf
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.scope import Scope
 

@@ -30,7 +30,7 @@ from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WS
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net import Request, Response
-from wapitiCore.parsers.html import Html
+from wapitiCore.parsers.html_parser import Html
 
 
 class ModuleXss(Attack):
