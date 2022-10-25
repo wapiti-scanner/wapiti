@@ -23,34 +23,43 @@ from bs4 import BeautifulSoup
 from wapitiCore import parser_name
 
 
-def looks_like_an_url(string):
-    string = string.strip()
+def is_invalid_string(string) -> bool:
+    """Check if the string match common uninteresting values"""
     if len(string) < 3:
-        return False
+        return True
     if " " in string or "\t" in string or "\n" in string or "\\" in string:
-        return False
+        return True
     if string.startswith(("http://adobe.com/", "http://www.adobe.com/", ":", "com.", "org.")):
-        return False
+        return True
     if string in {"../", "./"}:
-        return False
+        return True
+    return False
+
+
+def looks_like_an_url(string):
     if string.startswith(("../", "./")):
         return True
     if string.startswith(("http://", "https://")):
         if len(string) > 12:
             return True
         return False
+
     if ":" in string:
         return False
+
     if string.startswith("/") or string.endswith("/"):
         return True
+
     for ext in [
             ".php", ".asp", ".php4", ".php5", ".html", ".xhtml", ".htm", ".swf", ".xml", ".pl", ".cgi", ".rb", ".py",
             ".js", ".pdf", ".gif", ".png", ".jpg", ".svg", ".jpeg", ".mp3", ".wav", ".aspx"
     ]:
         if ext in string and not string.startswith(ext) and "(" not in string:
             return True
+
     if "?" in string and "=" in string:
         return True
+
     return False
 
 
@@ -189,6 +198,7 @@ def extract_links_from_swf(file):
     urls = set()
     for tag in swf.tags:
         for text in analyze_tag(tag):
-            if looks_like_an_url(text):
+            text = text.strip()
+            if not is_invalid_string(text) and looks_like_an_url(text):
                 urls.add(text)
     return list(urls)
