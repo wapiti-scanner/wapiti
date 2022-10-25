@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Tuple, List
+
 from yaswfp import swfparser
 from bs4 import BeautifulSoup
 
@@ -27,27 +29,34 @@ def is_invalid_string(string) -> bool:
     """Check if the string match common uninteresting values"""
     if len(string) < 3:
         return True
+
     if " " in string or "\t" in string or "\n" in string or "\\" in string:
         return True
+
     if string.startswith(("http://adobe.com/", "http://www.adobe.com/", ":", "com.", "org.")):
         return True
+
     if string in {"../", "./"}:
         return True
+
     return False
 
 
-def looks_like_an_url(string):
+def looks_like_an_url(string) -> bool:
     if string.startswith(("../", "./")):
+        # relative URLs are interesting
         return True
+
     if string.startswith(("http://", "https://")):
-        if len(string) > 12:
-            return True
-        return False
+        # we expect a valid domain with suffix and path
+        return len(string) > 12
 
     if ":" in string:
+        # common bad flash strings discarded here
         return False
 
     if string.startswith("/") or string.endswith("/"):
+        # Looks like absolute or relative path
         return True
 
     for ext in [
@@ -57,13 +66,11 @@ def looks_like_an_url(string):
         if ext in string and not string.startswith(ext) and "(" not in string:
             return True
 
-    if "?" in string and "=" in string:
-        return True
-
-    return False
+    # looks like a query string
+    return "?" in string and "=" in string
 
 
-def read_u30(data):
+def read_u30(data) -> Tuple[int, int]:
     i = 0
     result = 0
     byte_pos = 0
@@ -78,7 +85,7 @@ def read_u30(data):
     return result, i
 
 
-def new_read_u30(stream):
+def new_read_u30(stream) -> int:
     result = 0
     byte_pos = 0
     while True:
@@ -193,7 +200,7 @@ def analyze_tag(tag):
                         yield url
 
 
-def extract_links_from_swf(file):
+def extract_links_from_swf(file) -> List[str]:
     swf = swfparser.SWFParser(file)
     urls = set()
     for tag in swf.tags:
