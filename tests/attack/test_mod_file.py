@@ -46,6 +46,27 @@ async def test_inclusion_detection():
 
 
 @pytest.mark.asyncio
+async def test_loknop_lfi_to_rce():
+    # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65085/lfi_with_suffix.php?f=test")
+    request.path_id = 42
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].startswith(
+            "php://filter/convert.iconv.UTF8.CSISO2022KR|convert.base64-encode|convert.iconv.UTF8.UTF7|"
+        )
+
+
+@pytest.mark.asyncio
 async def test_warning_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
