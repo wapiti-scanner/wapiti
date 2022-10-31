@@ -1,9 +1,11 @@
+import asyncio
 import hashlib
 import json
 import os
 import re
 import sqlite3
 from typing import Dict, List, Tuple, Optional
+from itertools import chain
 
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
@@ -17,7 +19,16 @@ MSG_TECHNO_VERSIONED = "The range for {0} is from {1} to {2}"
 
 # types
 Technology = str
-Version = str
+Versions = List[str]
+
+
+def get_matching_versions(known_versions: Versions, possible_versions_list: List[Versions]) -> Versions:
+    # Flatten the lists of list of version strings, make versions unique
+    flat_versions = set(chain(*possible_versions_list))
+    low_index = min([known_versions.index(version) for version in flat_versions])
+    high_index = max([known_versions.index(version) for version in flat_versions])
+    # Returns the range of versions that start at the lowest found version to the highest found version
+    return known_versions[low_index:high_index+1]
 
 
 class ModuleHtp(Attack):
@@ -38,7 +49,7 @@ class ModuleHtp(Attack):
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
-        self.tech_versions: Dict[Technology, List[Version]] = {}
+        self.tech_versions: Dict[Technology, List[Versions]] = {}
         self.user_config_dir = self.persister.CONFIG_DIR
 
         if not os.path.isdir(self.user_config_dir):
@@ -64,30 +75,9 @@ class ModuleHtp(Attack):
         root_url = await self.persister.get_root_url()
 
         if request.url == root_url:
-            files = self._get_static_files()
+            await self.search_static_files(root_url)
 
-            for file_path in files:
-                await self._analyze_file(Request(root_url + file_path, method="GET"))
-        await self._analyze_file(request)
-
-    async def _init_db(self):
-        if self._db is None:
-            await self._verify_htp_database(os.path.join(self.user_config_dir, self.HTP_DATABASE))
-            self._db = sqlite3.connect(os.path.join(self.user_config_dir, self.HTP_DATABASE))
-            self._db.create_function("REGEXP", 2, regexp)
-
-    async def _analyze_file(self, request: Request):
-        """
-        Retrieves the url's content and then analyze it to get the technology and the version
-        """
-        try:
-            response = await self.crawler.async_send(request, follow_redirects=True)
-        except RequestError:
-            self.network_errors += 1
-            return
-        if response.content is None or len(response.content) == 0:
-            return
-        found_technology = self._find_technology(response.bytes)
+        found_technology = await self._analyze_file(request)
         if found_technology is not None:
             technology_name = found_technology[0]
             technology_info = json.loads(found_technology[1])
@@ -96,6 +86,96 @@ class ModuleHtp(Attack):
                 self.tech_versions[technology_name] = []
 
             self.tech_versions[technology_name].append(json.loads(technology_info)["versions"])
+
+    async def search_static_files(self, root_url: str):
+        files = self._get_static_files()
+        tasks = set()
+
+        for file_path in files:
+            task = asyncio.create_task(self._analyze_file(Request(root_url + file_path, method="GET")))
+            tasks.add(task)
+
+            while tasks:
+                done_tasks, pending_tasks = await asyncio.wait(
+                    tasks,
+                    timeout=0.01,
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+
+                for task in done_tasks:
+                    found_technology = await task
+                    if found_technology is not None:
+                        technology_name = found_technology[0]
+                        technology_info = json.loads(found_technology[1])
+
+                        if self.tech_versions.get(technology_name) is None:
+                            self.tech_versions[technology_name] = []
+
+                        self.tech_versions[technology_name].append(json.loads(technology_info)["versions"])
+
+                    tasks.remove(task)
+
+                if self._stop_event.is_set():
+                    for task in pending_tasks:
+                        task.cancel()
+                        tasks.remove(task)
+
+                if len(pending_tasks) > self.options["tasks"]:
+                    continue
+
+                break
+
+            if self._stop_event.is_set():
+                break
+
+        # We reached the end of your list, but we may still have some running tasks
+        while tasks:
+            done_tasks, pending_tasks = await asyncio.wait(
+                tasks,
+                timeout=0.01,
+                return_when=asyncio.FIRST_COMPLETED
+            )
+
+            for task in done_tasks:
+                found_technology = await task
+                if found_technology is not None:
+                    technology_name = found_technology[0]
+                    technology_info = json.loads(found_technology[1])
+
+                    if self.tech_versions.get(technology_name) is None:
+                        self.tech_versions[technology_name] = []
+
+                    self.tech_versions[technology_name].append(json.loads(technology_info)["versions"])
+
+                tasks.remove(task)
+
+            if self._stop_event.is_set():
+                for task in pending_tasks:
+                    task.cancel()
+                    tasks.remove(task)
+
+                break
+
+    async def _init_db(self):
+        if self._db is None:
+            await self._verify_htp_database(os.path.join(self.user_config_dir, self.HTP_DATABASE))
+            self._db = sqlite3.connect(os.path.join(self.user_config_dir, self.HTP_DATABASE))
+            self._db.create_function("REGEXP", 2, regexp)
+
+    async def _analyze_file(self, request: Request) -> Optional[Tuple[str, str]]:
+        """
+        Retrieves the URL's content and then analyze it to get the technology and the version
+        """
+        try:
+            response = await self.crawler.async_send(request, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+            return
+
+        if response.content is None or len(response.content) == 0:
+            return
+
+        return self._find_technology(response.bytes)
 
     async def finish(self):
         if self._db is None:
@@ -106,27 +186,11 @@ class ModuleHtp(Attack):
         for technology, versions_list in self.tech_versions.items():
             # First we retrieve all the stored versions in the same order as they have been added to the database
             truth_table = self._get_versions(technology)
-            ranges_tables = []
-
-            # We create ranges of versions by using the index of the version in the truth table
-            for versions in versions_list:
-                ranges_tables.append([truth_table.index(versions[0]), truth_table.index(versions[len(versions) - 1])])
-
-            # We obtain the list of min range values by only keeping the first value
-            min_range = [arr[0] for arr in ranges_tables]
-
-            # We obtain the list of max range values by only keeping the last value
-            max_range = [arr[len(arr) - 1] for arr in ranges_tables]
-
-            # We get the min range by sorting the ranges by ascending order and retrieving the first value
-            min_index = sorted(min_range)[0]
-
-            # We get the max range by sorting the ranges by descending order and retrieving the first value
-            max_index = sorted(max_range, reverse=True)[0]
+            matching_versions = get_matching_versions(truth_table, versions_list)
 
             tech_info = {
                 "name": technology,
-                "versions": truth_table[min_index:max_index + 1]
+                "versions": matching_versions
             }
 
             await self.add_vuln_info(
@@ -134,11 +198,12 @@ class ModuleHtp(Attack):
                 request=Request(root_url),
                 info=json.dumps(tech_info)
             )
-            log_blue(MSG_TECHNO_VERSIONED, technology, truth_table[min_index], truth_table[max_index])
+            log_blue(MSG_TECHNO_VERSIONED, technology, matching_versions[0], matching_versions[-1])
+
         self._db.close()
         self.finished = True
 
-    def _find_technology(self, page_content: bytes) -> Tuple[str, str]:
+    def _find_technology(self, page_content: bytes) -> Optional[Tuple[str, str]]:
         cursor = self._db.cursor()
         page_hash = hashlib.sha256(page_content).hexdigest()
         stmt = "SELECT `technology`, `versions` FROM `Hash` WHERE `hash`=:hash"
@@ -164,8 +229,8 @@ class ModuleHtp(Attack):
         cursor.close()
         return [path for path, in result]
 
-    async def _download_htp_database(self, htp_dabatabse_url: str, htp_database_path: str):
-        request = Request(htp_dabatabse_url)
+    async def _download_htp_database(self, htp_database_url: str, htp_database_path: str):
+        request = Request(htp_database_url)
         response: Response = await self.crawler.async_send(request, follow_redirects=True)
 
         with open(htp_database_path, 'wb') as file:
