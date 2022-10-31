@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from asyncio import Event
 from unittest.mock import patch, MagicMock, PropertyMock, AsyncMock
@@ -7,7 +8,7 @@ import httpx
 import pytest
 import respx
 
-from wapitiCore.attack.mod_htp import ModuleHtp
+from wapitiCore.attack.mod_htp import ModuleHtp, get_matching_versions
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -52,19 +53,18 @@ async def test_analyze_file_detection():
     request.path_id = 1
 
     techno = "techno"
-    techno_versions = '"{\\"versions\\": [\\"1.2\\", \\"1.2.1\\"]}"'  # '{"versions": ["1.2", "1.2.1"]}'
+    techno_versions = {"versions": ["1.2", "1.2.1"]}
 
-    with patch.object(ModuleHtp, "_find_technology", return_value=(techno, techno_versions)):
+    with patch.object(ModuleHtp, "_find_technology", return_value=(techno, json.dumps(techno_versions))):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
             module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
 
-            await module_htp._analyze_file(Request("http://perdu.com/"))
+            found_technology = await module_htp._analyze_file(Request("http://perdu.com/"))
 
-            assert len(module_htp.tech_versions) == 1
-            assert module_htp.tech_versions.get(techno) is not None
-            assert module_htp.tech_versions.get(techno) == [["1.2", "1.2.1"]]
+            assert found_technology
+            assert techno_versions == json.loads(found_technology[1])
 
 
 @pytest.mark.asyncio
@@ -91,9 +91,7 @@ async def test_analyze_file_no_detection():
             options = {"timeout": 10, "level": 2}
             module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
 
-            await module_htp._analyze_file(Request("http://perdu.com"))
-
-            assert len(module_htp.tech_versions) == 0
+            assert await module_htp._analyze_file(Request("http://perdu.com")) is None
 
 
 @pytest.mark.asyncio
@@ -116,9 +114,7 @@ async def test_analyze_file_none_content():
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
 
-        await module_htp._analyze_file(Request("http://perdu.com"))
-
-        assert len(module_htp.tech_versions) == 0
+        assert await module_htp._analyze_file(Request("http://perdu.com")) is None
 
 
 @pytest.mark.asyncio
@@ -141,9 +137,9 @@ async def test_analyze_file_request_error():
         options = {"timeout": 10, "level": 2}
         module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
 
-        await module_htp._analyze_file(Request("http://perdu.com"))
+        found_technology = await module_htp._analyze_file(Request("http://perdu.com"))
 
-        assert len(module_htp.tech_versions) == 0
+        assert found_technology is None
         assert module_htp.network_errors == 1
 
 
@@ -311,10 +307,11 @@ async def test_root_attack_root_url():
             ) as mock_init_db:
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-            options = {"timeout": 10, "level": 2}
+            options = {"timeout": 10, "level": 2, "tasks": 20}
             module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
             module_htp._root_url = target_url
             target_request = Request(target_url)
+            mock_analyze_file.return_value = None
 
             await module_htp.attack(target_request)
 
@@ -361,12 +358,33 @@ async def test_attack():
             patch.object(ModuleHtp, "_init_db", return_value=future_init_db):
         crawler_configuration = CrawlerConfiguration(Request(target_url))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-            options = {"timeout": 10, "level": 2}
+            options = {"timeout": 10, "level": 2, "tasks": 20}
             module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
             module_htp._root_url = target_url
             target_request = Request(target_url + "index.html")
+            options = {"timeout": 10, "level": 2, "tasks": 20}
+            mock_analyze_file.return_value = None
 
             await module_htp.attack(target_request)
 
             mock_get_static_files.assert_not_called()
             assert mock_analyze_file.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "known_versions, detected_versions, matching_versions",
+    [
+        [
+            ["1.0", "1.1", "1.2", "1.3", "1.3.1"],
+            [["1.1", "1.3"], ["1.2", "1.3.1"]],
+            ["1.1", "1.2", "1.3", "1.3.1"],
+        ],
+        [
+            ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5", "1.6"],
+            [["1.2", "1.2.1", "1.3"], ["1.3", "1.4"], ["1.5", "1.5"], ["1.0", "1.2"]],
+            ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"],
+        ]
+    ],
+)
+def test_get_matching_technology_versions(known_versions, detected_versions, matching_versions):
+    assert matching_versions == get_matching_versions(known_versions, detected_versions)

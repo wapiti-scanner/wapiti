@@ -47,7 +47,7 @@ class ModuleDrupalEnum(Attack):
             task = asyncio.create_task(self.get_url_hash(root_url, path))
             tasks.add(task)
 
-            while True:
+            while tasks:
                 done_tasks, pending_tasks = await asyncio.wait(
                     tasks,
                     timeout=0.01,
