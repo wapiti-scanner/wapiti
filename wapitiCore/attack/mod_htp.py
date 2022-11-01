@@ -15,7 +15,8 @@ from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
-MSG_TECHNO_VERSIONED = "The range for {0} is from {1} to {2}"
+MSG_TECHNO_VERSIONS_RANGE = "Detected {0} technology seems to match versions from {1} to {2}"
+MSG_TECHNO_SINGLE_VERSION = "Detected {0} technology seems to match version {1}"
 
 # types
 Technology = str
@@ -25,10 +26,12 @@ Versions = List[str]
 def get_matching_versions(known_versions: Versions, possible_versions_list: List[Versions]) -> Versions:
     # Flatten the lists of list of version strings, make versions unique
     flat_versions = set(chain(*possible_versions_list))
-    low_index = min([known_versions.index(version) for version in flat_versions])
-    high_index = max([known_versions.index(version) for version in flat_versions])
+    indexes = [known_versions.index(version) for version in flat_versions if version in known_versions]
+    if not indexes:
+        return []
+
     # Returns the range of versions that start at the lowest found version to the highest found version
-    return known_versions[low_index:high_index+1]
+    return known_versions[min(indexes):max(indexes)+1]
 
 
 class ModuleHtp(Attack):
@@ -159,7 +162,10 @@ class ModuleHtp(Attack):
     async def _init_db(self):
         if self._db is None:
             await self._verify_htp_database(os.path.join(self.user_config_dir, self.HTP_DATABASE))
-            self._db = sqlite3.connect(os.path.join(self.user_config_dir, self.HTP_DATABASE))
+            self._db = sqlite3.connect(
+                f"file:{os.path.join(self.user_config_dir, self.HTP_DATABASE)}?mode=ro",
+                uri=True,
+            )
             self._db.create_function("REGEXP", 2, regexp)
 
     async def _analyze_file(self, request: Request) -> Optional[Tuple[str, str]]:
@@ -187,6 +193,8 @@ class ModuleHtp(Attack):
             # First we retrieve all the stored versions in the same order as they have been added to the database
             truth_table = self._get_versions(technology)
             matching_versions = get_matching_versions(truth_table, versions_list)
+            if not matching_versions:
+                continue
 
             tech_info = {
                 "name": technology,
@@ -198,7 +206,10 @@ class ModuleHtp(Attack):
                 request=Request(root_url),
                 info=json.dumps(tech_info)
             )
-            log_blue(MSG_TECHNO_VERSIONED, technology, matching_versions[0], matching_versions[-1])
+            if len(matching_versions) > 1:
+                log_blue(MSG_TECHNO_VERSIONS_RANGE, technology, matching_versions[0], matching_versions[-1])
+            else:
+                log_blue(MSG_TECHNO_SINGLE_VERSION, technology, matching_versions[0])
 
         self._db.close()
         self.finished = True

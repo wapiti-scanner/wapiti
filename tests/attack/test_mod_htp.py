@@ -383,8 +383,30 @@ async def test_attack():
             ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5", "1.6"],
             [["1.2", "1.2.1", "1.3"], ["1.3", "1.4"], ["1.5", "1.5"], ["1.0", "1.2"]],
             ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"],
-        ]
+        ],
+        [
+            ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.3.1"],
+            [["0.7", "1.3"], ["1.2", "1.4"]],
+            ["1.2", "1.2.1", "1.3"],
+        ],
+        [
+            ["0.8", "1.1", "1.2", "1.2.1", "1.3", "1.3.1"],
+            [["0.7", "1.3"], ["1.3.2", "1.4"]],
+            ["1.3"],
+        ],
+        [
+            ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.3.1"],
+            [["0.7", "0.8"], ["1.3.2", "1.4"]],
+            [],
+        ],
     ],
+    ids=[
+        "regular test #1",
+        "regular test #2",
+        "missing start end end of range",
+        "only one matching version",
+        "no matching version",
+    ]
 )
 def test_get_matching_technology_versions(known_versions, detected_versions, matching_versions):
     assert matching_versions == get_matching_versions(known_versions, detected_versions)
