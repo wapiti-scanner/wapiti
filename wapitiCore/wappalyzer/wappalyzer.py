@@ -3,6 +3,7 @@ import os
 import re
 import warnings
 from typing import Set
+from soupsieve.util import SelectorSyntaxError
 
 from wapitiCore.net.crawler import Response
 from wapitiCore.parsers.html_parser import Html
@@ -64,10 +65,21 @@ class ApplicationData:
                     # Ensure to not iterate on a string value
                     self.applications[application_name][list_field] = [self.applications[application_name][list_field]]
 
-            for dict_field in ["meta", "cookies", "headers"]:
+            for dict_field in ["meta", "cookies", "headers", "dom"]:
                 if dict_field not in self.applications[application_name]:
                     # Complete with empty elements if not already present
                     self.applications[application_name][dict_field] = {}
+                # To deal with dom
+                elif dict_field == "dom" and not isinstance(self.applications[application_name][dict_field], dict):
+                    temp_dict = {}
+                    dom = self.applications[application_name][dict_field]
+                    if isinstance(dom, str):
+                        temp_dict.update({dom: ""})
+                    elif isinstance(dom, list):
+                        for selector in dom:
+                            temp_dict.update({selector: ""})
+                    self.applications[application_name][dict_field] = temp_dict
+
                 elif not isinstance(self.applications[application_name][dict_field], dict):
                     # Raise an exception if the provided field is not a dict
                     raise ApplicationDataException(
@@ -129,6 +141,34 @@ class ApplicationData:
 
                     for i, pattern in enumerate(self.applications[application_name][dict_field][key]):
                         self.applications[application_name][dict_field][key][i] = self.normalize_regex(pattern)
+
+            # Format each dom of applications
+            tmp_dom = []
+            for (key, patterns) in self.applications[application_name]["dom"].items():
+                tmp_dom.append(self.normalize_application_regex_dom({key:patterns}))
+            self.applications[application_name]["dom"] = tmp_dom
+
+    @staticmethod
+    def normalize_application_regex_dom(dom : dict) -> dict:
+        """
+        Convert the result of wappalyzer to a generic format used by Wapiti.
+        The goal is to match with the css selector if we don't have a regex.
+        In that case we set an empty value else we put the regex.
+
+        The list contains only one item same as the idct contains only one key to fit with the wapiti format.
+        ex input of the function :
+            {"link[href*='/wp-content/plugins/wp-statistics/']": ''}
+            {'[data-block-key]': {'attributes': {'data-block-key': '[a-z0-9]{5}'}}}
+
+        ex output :
+            {"link[href*='/wp-content/plugins/wp-statistics/']": {'exists': ''}}
+            {'[data-block-key]': {'attributes': {'data-block-key': '[a-z0-9]{5}'}}}
+        """
+        css_selector = list(dom.keys())[0]
+        value = dom[css_selector]
+        if value == "":
+            return {css_selector : {"exists": ""}}
+        return dom
 
     @staticmethod
     def normalize_regex(pattern: str):
@@ -290,11 +330,11 @@ class Wappalyzer:
         self._url = web_content.url
         self._html_code = web_content.content
         # Copy some values to make sure they aren't processed more than once
-        html = Html(self._html_code, self._url)
-        self._scripts = html.scripts[:]
+        self.html = Html(self._html_code, self._url)
+        self._scripts = self.html.scripts[:]
         self._cookies = dict(web_content.cookies)
         self._headers = web_content.headers
-        self._metas = dict(html.metas)
+        self._metas = dict(self.html.metas)
         self._js = js
 
     def detect_application_versions(self, application: dict) -> Set[str]:
@@ -307,6 +347,7 @@ class Wappalyzer:
             "html": self._html_code,
             "scriptSrc": self._scripts,
         }
+
         for element_name,  data in elements_to_check.items():
             versions.update(detect_versions_normalize_list(application[element_name], data))
 
@@ -318,7 +359,76 @@ class Wappalyzer:
         for element, data in elements_to_check.items():
             versions.update(detect_versions_normalize_dict(application[element], data))
 
+        # Detect version of dom element
+        versions.update(self.detect_versions_normalize_dom(application))
+
         return versions
+
+    def detect_versions_normalize_dom(self, application: dict) -> Set[str]:
+        versions = set()
+        soup = self.html.soup
+        for dom_raw in application["dom"]:
+            for css_selector, value in dom_raw.items():
+                self.check_dom_attribute(soup, versions, css_selector, value)
+        return versions
+
+    def check_dom_attribute(self, soup, versions : set, css_selector, value):
+        try:
+            match = soup.select(css_selector)
+        except SelectorSyntaxError as err:
+            warnings.warn(
+                        f"Caught {err} while selecting css selector: {css_selector}")
+            return
+        for attribute, data in value.items():
+            if attribute == "exists":
+                self.check_dom_attribute_exists(match, versions)
+            elif attribute == "text":
+                self.check_dom_attribute_text(match, versions, data)
+
+            elif attribute == "attributes":
+                self.check_dom_attribute_others(match, versions, data)
+
+    @staticmethod
+    def check_dom_attribute_exists(match, versions : set):
+        # if attribute is "exists" we just want to match with the css selector
+        if match:
+            versions.add("__detected__")
+
+    @staticmethod
+    def check_dom_attribute_text(match, versions: set, data):
+        # if data is empty you just want to match with the css selector and check if the attribute exist
+        if data == "":
+            for match_html in match:
+                if match_html.getText():
+                    versions.add("__detected__")
+        # Else we have to get value inside the attribute and it must match with the regex
+        else:
+            regex = ApplicationData.normalize_regex(data)
+            for match_html in match:
+                match_html_text = match_html.getText()
+                if match_html_text and re.search(regex["regex"], str(match_html_text)):
+                    versions.add("__detected__")
+                    versions.update(extract_version(regex, str(match)))
+
+    @staticmethod
+    def check_dom_attribute_others(match, versions: set, data):
+        for attribute, value  in data.items():
+            # if data is empty you just want to match with the css selector and check if the attribute exist
+            if value == "":
+                for match_html in match:
+                    if match_html.get(attribute):
+                        versions.add("__detected__")
+            # Else we have to get value inside the attribute and it must match with the regex
+            else:
+                regex = ApplicationData.normalize_regex(value)
+                for match_html in match:
+                    if attribute == "text":
+                        match_html_text = match_html.getText()
+                    else:
+                        match_html_text = match_html.get(attribute)
+                    if match_html_text and re.search(regex["regex"], str(match_html_text)):
+                        versions.add("__detected__")
+                        versions.update(extract_version(regex, str(match)))
 
     def get_rec_implied_applications(self, detected_applications: Set[str]) -> set:
         """

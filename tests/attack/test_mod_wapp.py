@@ -141,6 +141,58 @@ async def test_html_detection():
             '["Development"], "groups": ["Web development"]}'
         )
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_dom_detection():
+    # Test if application is detected using its dom regex
+    respx.get("http://perdu.com").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title> \
+            <link href=\"/wp-content/plugins/astra-widgets/test.css?ver=1.5.4\" rel=\"stylesheet\" >\
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            <input type=\"hidden\" name=\"_glpi_csrf_token\" value=\"b6db36a8c9fd4f3f5d244faa76247688\">\
+            <p id=\"mod-sellacious-cart\">test text</p> \
+            <p id=\"sm-page-footer-copyright\">SmugMug</p> \
+            <img src=\"www.afi-b.com\" /> \
+            <a href=\"/cart\">test</a> \
+            </body></html>"
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        expected_result = [
+            '{"name": "Astra Widgets", "versions": ["1.5.4"], "categories": ["WordPress plugins", "Widgets"], "groups": ["Add-ons", "Other"]}',
+            '{"name": "GLPI", "versions": [], "categories": ["Web frameworks", "CRM"], "groups": ["Web development", "Marketing", "Business tools"]}',
+            '{"name": "Sellacious", "versions": [], "categories": ["Ecommerce"], "groups": ["Sales"]}',
+            '{"name": "SmugMug", "versions": [], "categories": ["Photo galleries"], "groups": ["Content", "Media"]}',
+            '{"name": "Affiliate B", "versions": [], "categories": ["Affiliate programs", "Advertising"], "groups": ["Marketing"]}',
+            '{"name": "Cart Functionality", "versions": [], "categories": ["Ecommerce"], "groups": ["Sales"]}',
+            '{"name": "PHP", "versions": [], "categories": ["Programming languages"], "groups": ["Web development"]}'
+
+        ]
+        for arg in persister.add_payload.call_args_list:
+            assert arg[1]["info"] in expected_result
+
+
 
 @pytest.mark.asyncio
 @respx.mock
