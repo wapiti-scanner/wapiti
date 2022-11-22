@@ -1,5 +1,5 @@
 install: clean
-	python setup.py install
+	pip3 install .
 
 test:
 	docker build -f Dockerfile.test --tag=wapiti_test .

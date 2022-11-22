@@ -14,7 +14,7 @@ RUN apt update \
 
 COPY . .
 
-RUN python3 setup.py install
+RUN pip3 install .
 
 FROM debian:bullseye-slim
 
