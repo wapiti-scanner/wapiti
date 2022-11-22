@@ -18,5 +18,5 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN pip3 install .[sslyze]
-CMD ["python3", "setup.py", "test", "-vv"]
+RUN pip3 install .[test]
+CMD ["pytest"]
