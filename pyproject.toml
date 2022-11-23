@@ -39,7 +39,7 @@ dependencies = [
         "browser-cookie3==0.16.2",
         "dnspython==2.1.0",
         "h11==0.12",
-        "httpcore>=0.15.0",
+        "httpcore==0.15.0",
         "httpx[brotli, socks]==0.23.0",
         "loguru>=0.5.3",
         "mako>=1.1.4",
@@ -67,6 +67,11 @@ test = [
         "pytest-cov>=2.11.1",
         "pytest-asyncio==0.20.1",
         "respx==0.20.0", 
+        "sslyze==5.0.6"
+]
+
+ssl = [
+        "humanize==4.4.0",
         "sslyze==5.0.6"
 ]
 
