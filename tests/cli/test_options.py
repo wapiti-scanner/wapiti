@@ -1,6 +1,7 @@
 import sys
 from asyncio import Event
 from unittest import mock
+from httpcore import URL
 
 import pytest
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
@@ -108,3 +109,20 @@ async def test_update_without_modules(mock_update, _):
         with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
             await wapiti_main()
             mock_update.assert_called_once_with(None)
+
+@pytest.mark.asyncio
+async def test_update_with_proxy():
+    """Let's ensure that the proxy is used when updating modules resources."""
+    testargs = ["wapiti", "--update", "--proxy", "http://127.0.0.42:1234", "-m", "nikto"]
+
+    with mock.patch.object(sys, 'argv', testargs):
+        with mock.patch("wapitiCore.attack.mod_nikto.ModuleNikto") as mock_nikto:
+            with pytest.raises(SystemExit):
+                await wapiti_main()
+
+            # Check that Nikto is initialized with a Crawler that is configured with a proxy
+            async_crawler = mock_nikto.call_args[0][0]
+            httpx_client = async_crawler._client
+            for httpx_transport in httpx_client._mounts.values():
+                proxy_url = httpx_transport._pool._proxy_url
+                assert proxy_url == URL(scheme="http", host="127.0.0.42", port=1234, target="/")
