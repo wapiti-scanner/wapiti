@@ -126,6 +126,12 @@ async def wapiti_main():
     if args.log:
         wap.set_logfile(args.log)
 
+    if "proxy" in args:
+        wap.set_proxy(args.proxy)
+
+    if args.tor:
+        wap.set_proxy("socks5://127.0.0.1:9050/")
+
     if args.update:
         await wap.init_persister()
         logging.log("GREEN", "[*] Updating modules")
@@ -156,12 +162,6 @@ async def wapiti_main():
                 wap.add_excluded_url(exclude_url)
             else:
                 raise InvalidOptionValue("-x", exclude_url)
-
-        if "proxy" in args:
-            wap.set_proxy(args.proxy)
-
-        if args.tor:
-            wap.set_proxy("socks5://127.0.0.1:9050/")
 
         if "mitm_port" in args:
             wap.set_intercepting_proxy_port(args.mitm_port)
