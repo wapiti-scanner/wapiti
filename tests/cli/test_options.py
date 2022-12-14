@@ -101,10 +101,10 @@ async def test_update_with_modules(mock_update, _):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")
-@mock.patch("sys.exit")
-async def test_update_without_modules(mock_update, _):
+async def test_update_without_modules(mock_update):
+    """Ensure that no module should be updated when no module is requested."""
     testargs = ["wapiti", "--update"]
     with mock.patch.object(sys, 'argv', testargs):
-        with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
+        with pytest.raises(SystemExit):
             await wapiti_main()
             mock_update.assert_called_once_with(None)
