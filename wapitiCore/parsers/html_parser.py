@@ -598,8 +598,4 @@ class Html:
         return disconnect_urls
 
     def is_logged_in(self):
-        if self._soup.find_all(
-            string=re.compile(DISCONNECT_REGEX)
-        ):
-            return True
-        return False
+        return self._soup.find(string=re.compile(DISCONNECT_REGEX)) is not None
