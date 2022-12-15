@@ -41,12 +41,12 @@ from wapitiCore.report import GENERATORS
 global_stop_event = asyncio.Event()
 
 
-def inner_ctrl_c_signal_handler():  # pylint: disable=unused-argument
+def inner_ctrl_c_signal_handler():
     logging.info("Waiting for running crawler tasks to finish, please wait.")
     global_stop_event.set()
 
 
-def stop_attack_process():  # pylint: disable=unused-argument
+def stop_attack_process():
     logging.info("Waiting for all payload tasks to finish for current resource, please wait.")
     global_stop_event.set()
 
