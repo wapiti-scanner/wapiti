@@ -91,11 +91,10 @@ async def test_options():
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")
-@mock.patch("sys.exit")
-async def test_update_with_modules(mock_update, _):
+async def test_update_with_modules(mock_update):
     testargs = ["wapiti", "--update", "-m", "wapp,nikto"]
     with mock.patch.object(sys, 'argv', testargs):
-        with mock.patch("wapitiCore.main.wapiti.Wapiti.update") as mock_update:
+        with pytest.raises(SystemExit):
             await wapiti_main()
             mock_update.assert_called_once_with("wapp,nikto")
 
@@ -109,6 +108,7 @@ async def test_update_without_modules(mock_update):
         with pytest.raises(SystemExit):
             await wapiti_main()
             mock_update.assert_called_once_with(None)
+
 
 @pytest.mark.asyncio
 async def test_update_with_proxy():
