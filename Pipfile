@@ -10,7 +10,7 @@ pytest-asyncio = "==0.20.1"
 pytest-cov = ">=2.11.1"
 
 [packages]
-"httpx[brotli, socks]" = "==0.23.1"
+"httpx[brotli, socks]" = "==0.23.3"
 beautifulsoup4 = ">=4.10.0"
 mako = ">=1.1.4"
 markupsafe = "==2.1.1"
