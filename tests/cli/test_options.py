@@ -1,9 +1,10 @@
 import sys
 from asyncio import Event
 from unittest import mock
-from httpcore import URL
 
+from httpcore import URL
 import pytest
+
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
 from wapitiCore.net import Request
 from wapitiCore.main.wapiti import wapiti_main
@@ -126,3 +127,36 @@ async def test_update_with_proxy():
             for httpx_transport in httpx_client._mounts.values():
                 proxy_url = httpx_transport._pool._proxy_url
                 assert proxy_url == URL(scheme="http", host="127.0.0.42", port=1234, target="/")
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.check_http_auth", return_value=True)
+async def test_use_http_creds(mock_check_http_auth, _, __):
+    """Let's ensure that the proxy is used when updating modules resources."""
+    testargs = ["wapiti", "-a", "test%test", "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_check_http_auth.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.async_try_form_login", return_value=(False, {}, []))
+async def test_use_web_creds(mock_async_try_form_login, _, __):
+    """Let's ensure that the proxy is used when updating modules resources."""
+    testargs = [
+        "wapiti",
+        "--form-cred", "test%test",
+        "--form-url", "http://testphp.vulnweb.com/login.php",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "",
+        "--scope", "url"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_async_try_form_login.assert_called_once()
