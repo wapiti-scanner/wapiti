@@ -181,11 +181,11 @@ async def wapiti_main():
             wap.set_drop_cookies()
 
         if "http_credentials" in args:
-            if "%" in args.http_credential:
-                username, password = args.http_credential.split("%", 1)
+            if "%" in args.http_credentials:
+                username, password = args.http_credentials.split("%", 1)
                 wap.set_http_credentials(HttpCredential(username, password, args.auth_method))
             else:
-                raise InvalidOptionValue("-a", args.http_credential)
+                raise InvalidOptionValue("-a", args.http_credentials)
 
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
@@ -290,7 +290,7 @@ async def wapiti_main():
     if "form_credentials" in args:
         # If the option is set it MUST have valid requirements
         if "%" not in args.form_credentials:
-            raise InvalidOptionValue("--form-cred", args.http_credential)
+            raise InvalidOptionValue("--form-cred", args.form_credentials)
 
         if "form_url" not in args:
             raise InvalidOptionValue("--form-url", "This option is required when --form-cred is used")
