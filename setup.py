@@ -118,12 +118,13 @@ if a script is vulnerable.""",
         "aiohttp==3.8.1",
         "loguru>=0.5.3",
         "dnspython==2.1.0",
-        "httpcore==0.16.0",
+        "httpcore==0.16.3",
         "mitmproxy==9.0.0",
         "h11==0.14",
         "pyasn1==0.4.8",
         "arsenic==21.8",
         "pyasn1==0.4.8",
+        "pydantic==1.10.2",  # This is to avoid a conflict with sslyze
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
@@ -139,7 +140,7 @@ if a script is vulnerable.""",
         ],
     },
     # https://buildmedia.readthedocs.org/media/pdf/pytest/3.6.0/pytest.pdf
-    tests_require=["pytest>=6.2.2", "respx==0.20.1", "pytest-cov>=2.11.1", "pytest-asyncio==0.20.1"],
+    tests_require=["pytest>=7.1.3", "respx==0.20.1", "pytest-cov>=4.0.0", "pytest-asyncio>=0.20.1"],
     setup_requires=["pytest-runner"],
     cmdclass={"test": PyTest}
 )
