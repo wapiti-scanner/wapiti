@@ -1,3 +1,11 @@
+16/01/2023
+    Wapiti 3.1.5
+    LFI: adds a payload for loknop technique (chaining PHP filters)
+    mod_cookie: Fix bad WSTG code for bad cookie attribute
+    Core: use proxy settings for updating
+    Core: fix creds options
+    Core: update most dependencies
+
 24/10/2022
     Wapiti 3.1.4
     Crawler: Adds support for Firefox headless
