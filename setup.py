@@ -124,13 +124,13 @@ if a script is vulnerable.""",
         "pyasn1==0.4.8",
         "arsenic==21.8",
         "pyasn1==0.4.8",
-        "pydantic==1.10.2",  # This is to avoid a conflict with sslyze
     ],
     extras_require={
         "NTLM": ["httpx-ntlm"],
         "sslyze": [
             "sslyze==5.0.6",
-            "humanize==4.4.0"
+            "humanize==4.4.0",
+            "pydantic==1.10.2",  # This is to avoid a conflict with sslyze
         ]
     },
     entry_points={
