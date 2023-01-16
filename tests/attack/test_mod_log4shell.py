@@ -48,7 +48,7 @@ async def test_read_headers():
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2}
+        options = {"timeout": 10, "level": 2, "dns_endpoint": "8.8.8.8"}
 
         module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
         module.DATA_DIR = ""
@@ -117,48 +117,15 @@ async def test_verify_dns():
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2}
+        options = {"timeout": 10, "level": 2, "dns_endpoint": "dns.google"}
 
         module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
-        module._dns_host = ""
 
         with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(True),)):
             assert await module._verify_dns("foobar") is True
 
         with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(False),)):
             assert await module._verify_dns("foobar") is False
-
-
-@pytest.mark.asyncio
-@respx.mock
-async def test_is_valid_dns():
-    persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
-    base_dir = os.path.join(home_dir, ".wapiti")
-    persister.CONFIG_DIR = os.path.join(base_dir, "config")
-
-    request = Request("http://perdu.com/")
-    request.path_id = 1
-
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2}
-
-        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
-
-        good_dns = "foobar"
-        bad_dns = "wrongdns"
-
-        # Good DNS
-        with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
-            status = module._is_valid_dns(good_dns)
-            assert status
-            mock_gethostbyname.assert_called_once_with(good_dns)
-
-        # Bad DNS
-        with patch("socket.gethostbyname", side_effect=OSError("error")) as mock_gethostbyname:
-            status = module._is_valid_dns(bad_dns)
-            assert not status
 
 
 @pytest.mark.asyncio
@@ -322,27 +289,26 @@ def test_init():
 
     crawler = AsyncMock()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
-    options = {"timeout": 10, "level": 2, "dns_endpoint": None}
 
     # When the dns_endpoint is valid
-    with patch.object(ModuleLog4Shell, "_is_valid_dns", return_value=True), \
-        patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
+    options = {"timeout": 10, "level": 2, "dns_endpoint": "whatever.use.mock"}
+    with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
         module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         assert mock_gethostbyname.assert_called_once
         assert not module.finished
 
     # When the dns_endpoint is not valid
-    with patch.object(ModuleLog4Shell, "_is_valid_dns", return_value=False):
-        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
+    options = {"timeout": 10, "level": 2, "dns_endpoint": "256.512.1024.2048"}
+    module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
-        assert module.finished
+    assert module.finished
 
     # When the dns_endpoint is None
-    with patch("socket.gethostbyname", autospec=True) as mock_gethostbyname:
-        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
+    options = {"timeout": 10, "level": 2, "dns_endpoint": None}
+    module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
-        assert module.finished
+    assert module.finished
 
 
 @pytest.mark.asyncio
@@ -405,6 +371,7 @@ async def test_attack_apache_druid():
 
         assert crawler.async_send.assert_called_once
         assert mock_verify_url.assert_called_once
+
 
 @pytest.mark.asyncio
 @respx.mock
