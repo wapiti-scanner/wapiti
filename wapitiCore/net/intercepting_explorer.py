@@ -200,7 +200,7 @@ async def launch_proxy(
         log_blue(f"Using upstream proxy {proxy}")
         opt.update(mode=f"upstream:{proxy}")
 
-    opt.update(listen_port=port,  http2=False)
+    opt.update(listen_port=port,  http2=False, ssl_insecure=True)
     master = Master(opt)
     master.addons.add(addons.core.Core())
     master.addons.add(addons.proxyserver.Proxyserver())
