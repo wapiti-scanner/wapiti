@@ -647,11 +647,14 @@ class Wapiti:
         """Set a proxy to use for HTTP requests."""
         self._proxy = proxy
         self.crawler_configuration.proxy = proxy
-        # Chech mitm proxy settings
+        # Update mitm proxy settings
         self.set_intercepting_proxy_port(self._mitm_proxy_port)
 
     def set_intercepting_proxy_port(self, port: int):
         """Set the listening port for the mitmproxy instance."""
+        if not port:
+            return
+
         self._mitm_proxy_port = port
         # self.crawler_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port}/"
         if self._proxy:
