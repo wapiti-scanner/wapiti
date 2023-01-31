@@ -1,3 +1,8 @@
+31/01/2023
+    Wapiti 3.1.6
+    Wappalyze: improve detection with DOM rules
+    Core: fix proxy option
+
 16/01/2023
     Wapiti 3.1.5
     LFI: adds a payload for loknop technique (chaining PHP filters)
