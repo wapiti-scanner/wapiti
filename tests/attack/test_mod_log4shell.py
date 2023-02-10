@@ -306,9 +306,9 @@ async def test_attack():
 
         mock_open_headers.assert_called_once()
 
-        # vsphere case (2) + each header batch (10) + url case (1) + druid case (1) + solr case (1)
-        assert crawler.async_send.call_count == 15
-        assert mock_verify_dns.call_count == 105
+        # vsphere case (2) + each header batch (10) + url case (1) + druid case (1) + solr case (1) + unifi case (2)
+        assert crawler.async_send.call_count == 17
+        assert mock_verify_dns.call_count == 107
 
 
 def test_init():
@@ -402,6 +402,36 @@ async def test_attack_apache_druid():
         module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
 
         await module._attack_apache_druid_url("http://perdu.com/")
+
+        assert crawler.async_send.assert_called_once
+        assert mock_verify_url.assert_called_once
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_attack_unifi():
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    options = {"timeout": 10, "level": 2, "dns_endpoint": "dns.wapiti3.ovh"}
+
+    future_url_vulnerability = asyncio.Future()
+    future_url_vulnerability.set_result(None)
+
+    with patch.object(
+            ModuleLog4Shell,
+            "_verify_url_vulnerability",
+            return_value=future_url_vulnerability
+    ) as mock_verify_url:
+        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
+
+        await module._attack_unifi_url("http://perdu.com/")
 
         assert crawler.async_send.assert_called_once
         assert mock_verify_url.assert_called_once

