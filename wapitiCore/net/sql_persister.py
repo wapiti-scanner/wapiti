@@ -24,8 +24,10 @@ from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple
 from aiocache import cached
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
-                        PickleType, String, Table, Text, LargeBinary, and_, func,
+                        PickleType, String, Table, Text, LargeBinary, and_,
                         literal_column, or_, select)
+from sqlalchemy.sql.functions import max as sql_max
+from sqlalchemy.sql.functions import count as sql_count
 from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import Request, Response
 
@@ -221,7 +223,7 @@ class SqlPersister:
                 if bigest_id == 0:
                     # This is a trick to be able to insert all paths and params in bulk
                     # instead of inserting path and get the new returned ID to then insert params
-                    result = await conn.execute(select(func.max(self.paths.c.path_id)))
+                    result = await conn.execute(select(sql_max(self.paths.c.path_id)))
                     result = result.scalar()
                     if result is not None:
                         bigest_id = result
@@ -553,7 +555,7 @@ class SqlPersister:
             } for row in result.fetchall()]
 
     async def count_paths(self) -> int:
-        statement = select(func.count(self.paths.c.path_id)).where(~self.paths.c.evil)
+        statement = select(sql_count(self.paths.c.path_id)).where(~self.paths.c.evil)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone()[0]
@@ -569,7 +571,7 @@ class SqlPersister:
             await conn.execute(self.attack_logs.insert(), all_values)
 
     async def count_attacked(self, module_name) -> int:
-        statement = select(func.count(self.attack_logs.c.path_id)).where(self.attack_logs.c.module == module_name)
+        statement = select(sql_count(self.attack_logs.c.path_id)).where(self.attack_logs.c.module == module_name)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             return result.fetchone()[0]
@@ -861,7 +863,7 @@ class SqlPersister:
 
     async def get_big_requests_ids(self, params_count: int) -> list:
         statement = select(
-            self.params.c.path_id, func.count(self.params.c.param_id).label("params_count")
+            self.params.c.path_id, sql_count(self.params.c.param_id).label("params_count")
         ).group_by("path_id").having(literal_column("params_count") > params_count)
 
         async with self._engine.begin() as conn:
