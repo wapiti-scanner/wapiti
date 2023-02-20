@@ -382,6 +382,8 @@ class Request:
         self._start_time = None
         self._size = 0
         self._path_id = None
+        # Remove port from ressource_path
+        self._resource_path = urlunparse((parsed.scheme, parsed.hostname, parsed.path, '', '', ''))
 
     # TODO: hashable objects should be read-only. Currently the Mutator get a deepcopy of params to play with but
     # having read-only params in Request class would be more Pythonic. More work on the Mutator in a future version ?
