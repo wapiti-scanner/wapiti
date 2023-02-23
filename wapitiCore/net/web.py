@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2008-2022 Nicolas Surribas
+# Copyright (C) 2008-2023 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -181,6 +181,20 @@ def make_absolute(base: str, url: str, allow_fragments=True) -> str:
         # malformed URL, for example "Invalid IPv6 URL" errors due to square brackets
         return ""
 
+    try:
+        # urlparse tries to convert port in base10. an error is raised if port is not digits
+        port = parts.port
+    except ValueError:
+        port = None
+
+    if (
+            (parts.scheme == "http" and port == 80) or
+            (parts.scheme == "https" and port == 443)
+    ):
+        # Remove the port number if it is not necessary, be careful with IPv6 addresses:
+        # don't use parts.hostname as it removes square brackets
+        parts = parts._replace(netloc=parts.netloc.rsplit(":", 1)[0])
+
     query_string = parts.query
     url_path = parts.path or '/'
     url_path = posixpath.normpath(url_path.replace("\\", "/"))
@@ -204,29 +218,10 @@ def make_absolute(base: str, url: str, allow_fragments=True) -> str:
     if parts.scheme:
         if parts.scheme in ('http', 'https'):
             if parts.netloc and parts.netloc != "http:":  # malformed url
-                netloc = parts.netloc
-                try:
-                    # urlparse tries to convert port in base10. an error is raised if port is not digits
-                    port = parts.port
-                except ValueError:
-                    port = None
-
-                if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
-                    # Beware of IPv6 addresses
-                    netloc = parts.netloc.rsplit(":", 1)[0]
-                absolute_url = urlunparse((parts.scheme, netloc, url_path, parts.params, query_string, ''))
+                absolute_url = urlunparse((parts.scheme, parts.netloc, url_path, parts.params, query_string, ''))
     elif url.startswith("//"):
         if parts.netloc:
-            netloc = parts.netloc
-            try:
-                port = parts.port
-            except ValueError:
-                port = None
-
-            if (parts.scheme == "https" and port == 443) or (parts.scheme == "http" and port == 80):
-                # Beware of IPv6 addresses
-                netloc = parts.netloc.rsplit(":", 1)[0]
-            absolute_url = urlunparse((scheme, netloc, url_path or '/', parts.params, query_string, ''))
+            absolute_url = urlunparse((scheme, parts.netloc, url_path or '/', parts.params, query_string, ''))
     elif url.startswith("/"):
         absolute_url = urlunparse((scheme, domain, url_path, parts.params, query_string, ''))
     elif url.startswith("?"):
@@ -276,11 +271,22 @@ class Request:
                                   Don't mistake it with the encoding of the webpage pointed out by the Request.
             referer : The URL from which the current Request was found.
         """
-        self._resource_path = path.split("#")[0]
-        if "#" in path:
-            self._fragment = path.split("#", 1)[1]
-        else:
-            self._fragment = ""
+        url_parts = urlparse(path)
+        try:
+            # urlparse tries to convert port in base10. an error is raised if port is not digits
+            port = url_parts.port
+        except ValueError:
+            port = None
+
+        if (
+                (url_parts.scheme == "http" and port == 80) or
+                (url_parts.scheme == "https" and port == 443)
+        ):
+            # Remove the port number if it is not necessary
+            url_parts = url_parts._replace(netloc=url_parts.netloc.rsplit(":", 1)[0])
+
+        self._resource_path = urlunparse((url_parts.scheme, url_parts.netloc, url_parts.path, url_parts.params, '', ''))
+        self._fragment = url_parts.fragment or ""
 
         # Most of the members of a Request object are immutable so we compute
         # the data only one time (when asked for) and we keep it in memory for less
@@ -352,13 +358,10 @@ class Request:
         # eg: get = [['id', '25'], ['color', 'green']]
         if not get_params:
             self._get_params = []
-            if "?" in self._resource_path:
-                query_string = urlparse(self._resource_path).query
-                self._get_params = [[k, v] for k, v in parse_qsl(query_string)]
-                self._resource_path = self._resource_path.split("?")[0]
+            if url_parts.query:
+                self._get_params = [[k, v] for k, v in parse_qsl(url_parts.query)]
         else:
             if isinstance(get_params, list):
-                self._resource_path = self._resource_path.split("?")[0]
                 self._get_params = deepcopy(get_params)
             else:
                 self._get_params = get_params
@@ -366,16 +369,16 @@ class Request:
         self._encoding = encoding
         self._referer = referer
         self._link_depth = link_depth
-        parsed = urlparse(self._resource_path)
-        self._file_path = parsed.path
-        self._hostname = parsed.hostname
-        self._scheme = parsed.scheme or ""
-        self._netloc = parsed.netloc
+        # parsed = urlparse(self._resource_path)
+        self._file_path = url_parts.path
+        self._hostname = url_parts.hostname
+        self._scheme = url_parts.scheme or ""
+        self._netloc = url_parts.netloc
 
         self._port = 80
-        if parsed.port is not None:
-            self._port = parsed.port
-        elif parsed.scheme == "https":
+        if port is not None:
+            self._port = port
+        elif url_parts.scheme == "https":
             self._port = 443
         self._headers = None
         self._response_content = None
