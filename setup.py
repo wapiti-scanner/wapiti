@@ -130,7 +130,7 @@ if a script is vulnerable.""",
     extras_require={
         "NTLM": ["httpx-ntlm"],
         "sslyze": [
-            "sslyze==5.0.6",
+            "sslyze==5.1.1",
             "humanize==4.4.0",
             "pydantic==1.10.2",  # This is to avoid a conflict with sslyze
         ]
