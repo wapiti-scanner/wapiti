@@ -92,7 +92,7 @@ async def test_ssl_scanner():
             request=request,
             parameter='',
             wstg=["WSTG-CRYP-01"],
-            info="Certificate is invalid for Mozilla trust store: self signed certificate",
+            info="Certificate is invalid for Mozilla trust store: self-signed certificate",
             response=None
         )
 
