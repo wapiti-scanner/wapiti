@@ -20,11 +20,13 @@ import asyncio
 from os.path import join as path_join
 from typing import List, Tuple, Optional
 from collections import defaultdict
+from itertools import chain
 
 import humanize
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography import x509
-from sslyze.plugins.certificate_info._certificate_utils import get_common_names, extract_dns_subject_alternative_names
+from sslyze.plugins.certificate_info._certificate_utils import get_common_names, \
+    parse_subject_alternative_name_extension
 from sslyze.plugins.robot.implementation import RobotScanResultEnum
 from sslyze import ServerNetworkLocation, ServerNetworkConfiguration, ScanCommand, Scanner, ServerScanRequest, \
     ScanCommandAttemptStatusEnum
@@ -70,7 +72,9 @@ def process_certificate_info(certinfo_result):
         log_blue(message)
         yield INFO_LEVEL, message
 
-        message = f"Alt. names: {extract_dns_subject_alternative_names(leaf_certificate)}"
+        alt_names = parse_subject_alternative_name_extension(leaf_certificate)
+        alt_names = ", ".join(chain(alt_names.dns_names, alt_names.ip_addresses))
+        message = f"Alt. names: {alt_names}"
         log_blue(message)
         yield INFO_LEVEL, message
 
