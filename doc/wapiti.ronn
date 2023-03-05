@@ -368,7 +368,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2022 Nicolas Surribas.
+Copyright (c) 2006-2023 Nicolas Surribas.
 
 ## AUTHORS
 

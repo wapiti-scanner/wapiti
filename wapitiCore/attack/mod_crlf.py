@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2008-2022 Nicolas Surribas
+# Copyright (C) 2008-2023 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class ModuleCrlf(Attack):
     MSG_VULN = "CRLF Injection"
     do_get = True
     do_post = True
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.1.6 version"), Flags())
+    payloads = (quote("http://www.google.fr\r\nwapiti: 3.1.7 version"), Flags())
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)

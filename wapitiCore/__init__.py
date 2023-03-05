@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2017-2022 Nicolas Surribas
+# Copyright (C) 2017-2023 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,4 +18,4 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 parser_name = "html.parser"
-WAPITI_VERSION = "3.1.6"
+WAPITI_VERSION = "3.1.7"

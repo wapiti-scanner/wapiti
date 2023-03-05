@@ -3,7 +3,7 @@
 # JSON Report Generator Module for Wapiti Project
 # Wapiti Project (https://wapiti-scanner.github.io)
 #
-# Copyright (C) 2014-2022 Nicolas SURRIBAS
+# Copyright (C) 2014-2023 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

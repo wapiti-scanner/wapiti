@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2008-2022 Nicolas Surribas
+# Copyright (C) 2008-2023 Nicolas Surribas
 #
 # Original authors :
 # Alberto Pastor
