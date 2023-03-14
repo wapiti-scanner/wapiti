@@ -31,6 +31,8 @@ See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md
 
 Running Wapiti on Windows can be accomplished through the use of `WSL <https://learn.microsoft.com/en-us/training/modules/get-started-with-windows-subsystem-for-linux/>`__.
 
+ARM platforms (such as macOS on M1 chips) are currently not supported.
+
 How it works
 ============
 
