@@ -51,7 +51,7 @@ def cipher_level_to_color(security_level: str) -> str:
         return "RED"
     if security_level == "Weak":
         return "ORANGE"
-    # Secure / Recommanded / Unknown
+    # Secure / Recommended / Unknown
     return "GREEN"
 
 
@@ -114,10 +114,7 @@ def process_certificate_info(certinfo_result):
         log_blue(message)
         yield INFO_LEVEL, message
 
-        # print(f"Valid from {leaf_certificate.not_valid_before} to {leaf_certificate.not_valid_after}")
         if leaf_certificate.not_valid_after > datetime.utcnow():
-            # We should add a method for humanize inside our language package
-            # _t = humanize.i18n.activate("fr_FR")
             message = "Certificate expires in " + \
                       humanize.precisedelta(leaf_certificate.not_valid_after - datetime.utcnow())
             log_green(message)
@@ -365,7 +362,7 @@ class ModuleSsl(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         loop = asyncio.get_running_loop()
-        # sslyze use threads to launch scanners concurrently so we put those inside an asyncio executor
+        # sslyze use threads to launch scanners concurrently, so we put those inside an asyncio executor
         scan_results = await loop.run_in_executor(None, analyze, request.hostname, request.port)
 
         for level, message in scan_results:

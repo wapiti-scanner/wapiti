@@ -62,6 +62,10 @@ wapiti = "wapitiCore.main.wapiti:wapiti_asyncio_wrapper"
 wapiti-getcookie = "wapitiCore.main.getcookie:getcookie_asyncio_wrapper"
 
 [project.optional-dependencies]
+ssl = [
+        "humanize==4.4.0",
+        "sslyze==5.1.1"
+]
 test = [
         "humanize==4.4.0",
         "pytest>=7.1.3", 
