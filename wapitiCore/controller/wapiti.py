@@ -70,10 +70,7 @@ class InvalidOptionValue(Exception):
 
 
 def module_to_class_name(module_name: str) -> str:
-    # We should use str.removeprefix when 3.7/3.8 support is removed
-    if module_name.startswith("mod_"):
-        module_name = module_name[4:]
-    return "Module" + module_name.title().replace("_", "")
+    return "Module" + module_name.removeprefix("mod_").title().replace("_", "")
 
 
 def activate_method_module(module: Attack, method: str, status: bool):
@@ -297,8 +294,8 @@ class Wapiti:
             try:
                 try:
                     mod = import_module("wapitiCore.attack.mod_" + mod_name)
-                except ImportError:
-                    logging.error(f"[!] Unable to import module {mod_name}")
+                except ImportError as error:
+                    logging.error(f"[!] Unable to import module {mod_name}: {error}")
                     continue
 
                 class_name = module_to_class_name(mod_name)
@@ -517,7 +514,7 @@ class Wapiti:
                             )
                             break
                     except RequestError:
-                        # Hmmm it should be caught inside the module
+                        # Hmm, it should be caught inside the module
                         await asyncio.sleep(1)
                         continue
                     except Exception as exception:  # pylint: disable=broad-except
