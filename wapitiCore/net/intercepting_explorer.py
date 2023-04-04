@@ -77,7 +77,6 @@ def set_arsenic_log_level(level: int = WARNING):
     structlog.configure(logger_factory=logger_factory)
     logger.setLevel(level)
 
-
 set_arsenic_log_level(CRITICAL)
 
 
@@ -243,7 +242,7 @@ def extract_requests(html: Html, request: Request):
         yield form
 
 
-async def click_in_webpage(headless_client, request: Request, wait_time: float):
+async def click_in_webpage(headless_client, request: Request, wait_time: float, timeout: float):
     # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
     for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
         button_index = 1
@@ -265,7 +264,7 @@ async def click_in_webpage(headless_client, request: Request, wait_time: float):
                 await asyncio.sleep(wait_time)
                 current_url = await headless_client.get_url()
                 if current_url != request.url_with_fragment:
-                    await headless_client.get(request.url_with_fragment, timeout=5)
+                    await headless_client.get(request.url_with_fragment, timeout=timeout)
 
 
 async def launch_headless_explorer(
@@ -278,6 +277,7 @@ async def launch_headless_explorer(
         exclusion_regexes: List[re.Pattern],
         visibility: str = "hidden",
         wait_time: float = 2.,
+        timeout: float = 6.,
         max_depth: int = 20,
 ):
     # The headless browser will be configured to use the MITM proxy
@@ -319,14 +319,14 @@ async def launch_headless_explorer(
 
                 if request.method == "GET":
                     try:
-                        await headless_client.get(request.url_with_fragment, timeout=5)
+                        await headless_client.get(request.url_with_fragment, timeout=timeout)
                         await asyncio.sleep(wait_time)
                         # We may be redirected outside our target so let's check the URL first
                         if not scope.check(await headless_client.get_url()):
                             continue
 
                         page_source = await headless_client.get_page_source()
-                        await click_in_webpage(headless_client, request, wait_time)
+                        await click_in_webpage(headless_client, request, wait_time, timeout=timeout)
                     except (ArsenicError, asyncio.TimeoutError) as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
@@ -379,7 +379,8 @@ class InterceptingExplorer(Explorer):
             drop_cookies: bool = False,
             headless: str = "no",
             cookies: Optional[CookieJar] = None,
-            wait_time: float = 2.
+            wait_time: float = 2.,
+            timeout: float = 6.,
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -389,6 +390,7 @@ class InterceptingExplorer(Explorer):
         self._final_cookies = None
         self._cookies = cookies or CookieJar()
         self._wait_time = wait_time
+        self._timeout = crawler_configuration.timeout
 
     async def async_explore(
             self,
@@ -441,6 +443,7 @@ class InterceptingExplorer(Explorer):
                     exclusion_regexes=exclusion_regexes,
                     visibility=self._headless,
                     wait_time=self._wait_time,
+                    timeout=self._timeout,
                     max_depth=self._max_depth,
                 )
             )

@@ -156,7 +156,6 @@ class Wapiti:
 
         self.crawler_configuration = CrawlerConfiguration(self.base_request)
         # self.crawler = None
-
         self.target_scope = Scope(self.base_request, scope)
 
         self.report_gen = None
@@ -187,6 +186,7 @@ class Wapiti:
         self.detailed_report = False
         self._headless_mode = "no"
         self._wait_time = 2.
+        self._timeout = 6.
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
