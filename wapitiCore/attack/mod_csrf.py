@@ -76,12 +76,19 @@ class ModuleCsrf(Attack):
                 self.csrf_string = param[0]
                 return param[1]
 
-        # Look for anti-csrf token in HTTP headers
+        # Look for anti-csrf token in HTTP response headers
         if response.headers:
             for header in response.headers:
                 if header.lower() in self.TOKEN_HEADER_STRINGS:
                     self.csrf_string = header
                     return response.headers[header]
+
+        # Look for anti-csrf token in HTTP request headers
+        if request.headers:
+            for header in request.headers:
+                if header.lower() in self.TOKEN_HEADER_STRINGS:
+                    self.csrf_string = header
+                    return request.headers[header]
 
         return None
 
@@ -124,6 +131,10 @@ class ModuleCsrf(Attack):
         if response.headers and self.csrf_string in response.headers:
             special_headers[self.csrf_string] = "wapiti"
 
+        # Replace anti-csrf token value from request headers with "wapiti"
+        if request.headers and self.csrf_string in request.headers:
+            special_headers[self.csrf_string] = "wapiti"
+
         mutated_request = Request(
             path=request.path,
             method=request.method,
@@ -135,7 +146,7 @@ class ModuleCsrf(Attack):
         )
 
         try:
-            response: Response = await self.crawler.async_send(request, follow_redirects=True)
+            response: Response = await self.crawler.async_send(request, follow_redirects=True, headers=request.headers)
         except RequestError:
             # We can't compare so act like it is secure
             self.network_errors += 1
