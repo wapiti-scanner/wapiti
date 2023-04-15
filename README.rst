@@ -31,6 +31,8 @@ See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md
 
 Running Wapiti on Windows can be accomplished through the use of `WSL <https://learn.microsoft.com/en-us/training/modules/get-started-with-windows-subsystem-for-linux/>`__.
 
+The `ssl` module used to scan TLS/SSL misconfiguration won't work on ARM processors (see `SSLyze documentation <https://nabla-c0d3.github.io/sslyze/documentation/installation.html>`__).
+
 How it works
 ============
 
@@ -126,6 +128,7 @@ The aforementioned attacks are tied to the following module names :
 + exec (Code execution or command injection)
 + file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)
++ htp (Identify web technologies used the HashThePlanet database)
 + http_header (Check HTTP security headers)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
 + methods (Look for uncommon available HTTP methods like PUT)
@@ -134,6 +137,7 @@ The aforementioned attacks are tied to the following module names :
 + redirect (Open Redirects)
 + shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
 + sql (Error-based and boolean-based SQL injection detection)
++ ssl (Evaluate the security of SSL/TLS certificate configuration, requires `SSLyze <https://github.com/nabla-c0d3/sslyze>`__)
 + ssrf (Server Side Request Forgery)
 + takeover (Subdomain takeover)
 + timesql (SQL injection vulnerabilities detected with time-based methodology)
@@ -171,7 +175,9 @@ In the prompt, just type the following command to get the basic usage :
 
 You can also take a look at the manpage (wapiti.1 or wapiti.1.html) for more details on each option.
 
-If you find a bug, fill a issue : https://github.com/wapiti-scanner/wapiti/issues  
+If you have another question, first check the `FAQ <https://github.com/wapiti-scanner/wapiti/blob/master/doc/FAQ.md>`__
+
+If you find a bug, fill an issue : https://github.com/wapiti-scanner/wapiti/issues
 
 The official wiki can be helpful too :  
 https://sourceforge.net/p/wapiti/wiki/browse_pages/

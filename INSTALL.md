@@ -20,7 +20,7 @@ You may want to install Wapiti to the system just to make access easier.
 If you haven't sufficient privileges are you are afraid of breaking some dependencies in your python packages then
 using a virtual environment is the way to go. Just refer to the related section.
 
-Otherwise you will have to launch setup.py as a privileged user.
+Otherwise, you will have to launch setup.py as a privileged user.
 
 Enjoy Wapiti.
 

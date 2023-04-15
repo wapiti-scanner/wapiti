@@ -3,7 +3,7 @@
 ### What is Wapiti ? ###
 
 Wapiti is a web-application / website vulnerability scanner written in Python3.  
-It allow to automate the processing of finding web-based vulnerabilities.  
+It allows to automate the processing of finding web-based vulnerabilities.  
 This is not an exploitation framework like Metasploit, it only does detection.
 
 ### How do I install Wapiti on my computer ? ###
@@ -25,14 +25,19 @@ Sure as long as you respect the GPLv2 license.
 
 ### How do I execute Wapiti ? ###
 
-Wapiti is a console tool so it must be launched from a terminal (Konsole or GnomeTerminal on Linux, etc)  
-If you installed Wapiti then the binary should be in your path. Otherwise you will have to launch it from the bin folder once the archive is uncompressed.  
+Wapiti is a console tool, so it must be launched from a terminal (Konsole or GnomeTerminal on Linux, etc)  
+If you installed Wapiti then the binary should be in your path. Otherwise, you will have to launch it from the bin folder once the archive is uncompressed.  
 On Linux and OSX, just typing `wapiti` should work.
 
 ### Where can I get some help about options ? ###
 
 The manpage (Linux or HTML version) is the best way to have detailed information about the options.  
 If you are really lost, feel free to contact me.
+
+### I have a warning about the ssl module not working ! ###
+
+The `ssl` module requires the Python libraries [SSLyze](https://github.com/nabla-c0d3/sslyze) and [humanize](https://github.com/python-humanize/humanize).  
+The module is optional therefore you need to install those dependencies to use the `ssl` module.
 
 ### I have some UnicodeDecodeError as soon as I launch Wapiti ! ###
 
@@ -79,7 +84,7 @@ Yes, most of the payloads are stored in plain text or .ini files. You just have 
 
 ### Launched a Wapiti scan, it takes sooooooo muuuuuuuuch time ####
 
-Yes it can happens if there is lot of webpages and/or forms or urls with lot of inputs.  
+Yes it can happen if there is a lot of webpages and/or forms or urls with a lot of inputs.  
 There is a lot of available options to reduce the amount of scanned pages. See the manpages.
 
 ### I launched Wireshark/tshark/tcpdump/whatever and I don't see any network activity ###
