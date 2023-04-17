@@ -264,7 +264,7 @@ class AsyncCrawler:
         if not form.is_multipart:
             form_headers = {"Content-Type": form.enctype}
 
-        if isinstance(headers, dict) and headers:
+        if isinstance(headers, (dict, httpx.Headers)) and headers:
             form_headers.update(headers)
 
         if form.referer:
