@@ -33,7 +33,7 @@ INFO_XFRAME_OPTIONS = "X-Frame-Options is not set"
 class ModuleHttpHeaders(Attack):
     """Evaluate the security of HTTP headers."""
     name = "http_headers"
-    check_list_xframe = ['deny', 'sameorigin', 'allow-from']
+    check_list_xframe = ['deny', 'sameorigin']
     check_list_xcontent = ['nosniff']
     check_list_hsts = ['max-age=']
 
