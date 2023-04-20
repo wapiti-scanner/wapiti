@@ -21,14 +21,9 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.http_headers import (
     NAME, WSTG_CODE_CONTENT_TYPE_OPTIONS, WSTG_CODE_FRAME_OPTIONS,
     WSTG_CODE_STRICT_TRANSPORT_SECURITY)
-from wapitiCore.main.log import log_blue, log_green, log_red
+from wapitiCore.main.log import log_blue, log_green, log_orange, log_red
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
-
-INFO_HSTS = "Strict-Transport-Security is not set"
-INFO_XCONTENT_TYPE = "X-Content-Type-Options is not set"
-INFO_XFRAME_OPTIONS = "X-Frame-Options is not set"
-
 
 class ModuleHttpHeaders(Attack):
     """Evaluate the security of HTTP headers."""
@@ -40,29 +35,26 @@ class ModuleHttpHeaders(Attack):
     headers_to_check = {
         "X-Frame-Options": {
             "list": check_list_xframe,
-            "info": INFO_XFRAME_OPTIONS,
-            "log": "Checking X-Frame-Options :",
             "wstg": WSTG_CODE_FRAME_OPTIONS
         },
         "X-Content-Type-Options": {
             "list": check_list_xcontent,
-            "info": INFO_XCONTENT_TYPE,
-            "log": "Checking X-Content-Type-Options :",
             "wstg": WSTG_CODE_CONTENT_TYPE_OPTIONS
         },
         "Strict-Transport-Security": {
             "list": check_list_hsts,
-            "info": INFO_HSTS,
-            "log": "Checking Strict-Transport-Security :",
             "wstg": WSTG_CODE_STRICT_TRANSPORT_SECURITY
         }
     }
 
     @staticmethod
-    def is_set(response: Response, header_name, check_list):
+    def is_set(response: Response, header_name):
         if header_name not in response.headers:
             return False
-
+        return True
+            
+    @staticmethod
+    def contains(response: Response, header_name, check_list):
         return any(element in response.headers[header_name].lower() for element in check_list)
 
     async def check_header(
@@ -71,17 +63,27 @@ class ModuleHttpHeaders(Attack):
         request: Request,
         header: str,
         check_list: List[str],
-        info: str,
+        error: str,
+        warning: str,
         log: str,
         wstg: str
     ):
         log_blue(log)
-        if not self.is_set(response, header, check_list):
-            log_red(info)
+        if not self.is_set(response, header):
+            log_red(error)
             await self.add_vuln_low(
                 category=NAME,
                 request=request,
-                info=info,
+                info=error,
+                wstg=wstg,
+                response=response
+            )
+        elif not self.contains(response, header, check_list):
+            log_orange(warning)
+            await self.add_vuln_low(
+                category=NAME,
+                request=request,
+                info=warning,
                 wstg=wstg,
                 response=response
             )
@@ -119,7 +121,8 @@ class ModuleHttpHeaders(Attack):
                 request_to_root,
                 header,
                 value["list"],
-                value["info"],
-                value["log"],
+                header + " is not set",
+                header + " has invalid value",
+                "Checking " +  header + ":",
                 value["wstg"]
             )
