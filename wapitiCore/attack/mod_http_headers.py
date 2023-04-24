@@ -65,7 +65,7 @@ class ModuleHttpHeaders(Attack):
         if header_name not in response.headers:
             return False
         return True
-            
+
     @staticmethod
     def contains(response: Response, header_name, check_list):
         return any(element in response.headers[header_name].lower() for element in check_list)
