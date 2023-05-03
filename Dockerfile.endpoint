@@ -1,0 +1,8 @@
+FROM php:7.1-apache
+COPY ./endpoint/ /var/www/html/
+COPY ./endpoint/.htaccess /var/www/html/.htaccess
+RUN sed -i '/LoadModule rewrite_module/s/^#//g' /etc/apache2/apache2.conf && \
+    sed -i 's#AllowOverride [Nn]one#AllowOverride All#' /etc/apache2/apache2.conf
+RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+RUN chmod 777 /var/www/html/ssrf_data
+RUN chmod 777 /var/www/html/xxe_data
