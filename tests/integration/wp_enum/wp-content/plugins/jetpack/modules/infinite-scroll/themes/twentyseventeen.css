@@ -1,0 +1,168 @@
+.infinite-scroll .pagination {
+	display: none;
+}
+
+.infinite-wrap > article:before,
+.infinite-wrap > article:after {
+	content: "";
+	display: table;
+}
+
+.infinite-wrap > article:after {
+	clear: both;
+}
+
+.infinite-wrap > article {
+	padding-bottom: 2em;
+}
+
+/* Spinner */
+.site-main .infinite-loader {
+	clear: both;
+	color: currentColor;
+	height: 42px;
+	margin-bottom: 3.5em;
+}
+
+.blog:not(.has-sidebar) .infinite-loader {
+	width: 100%;
+}
+
+.site-main .infinite-loader .spinner {
+	left: 50%!important;
+}
+
+/* Click-to-load */
+#infinite-handle {
+	clear: both;
+	margin: 0 7.6923% 2em;
+	text-align: center;
+}
+
+/* Style "Load More" button */
+.site-main #infinite-handle span {
+	background: #1a1a1a;
+	border-radius: 2px;
+	color: #fff;
+	font-family: "Libre Franklin", "Helvetica Neue", helvetica, arial, sans-serif;
+	font-size: inherit;
+	font-weight: 700;
+	letter-spacing: 0.046875em;
+	line-height: 1;
+	padding: 0.84375em 0.875em 0.78125em;
+	text-transform: uppercase;
+}
+
+#infinite-handle span:hover,
+#infinite-handle span:focus {
+	background: #767676;
+}
+
+/* Style "Load More" button when dark color scheme is used */
+.colors-dark .site-main #infinite-handle span {
+	background: #f8f8f8;
+	border-radius: 2px;
+	color: #222;
+	font-family: "Libre Franklin", "Helvetica Neue", helvetica, arial, sans-serif;
+	font-size: inherit;
+	font-weight: 700;
+	letter-spacing: 0.046875em;
+	line-height: 1;
+	padding: 0.84375em 0.875em 0.78125em;
+	text-transform: uppercase;
+}
+
+.colors-dark #infinite-handle span:hover,
+.colors-dark #infinite-handle span:focus {
+	background: #bbb;
+	columns: #222;
+}
+
+/* Style Infinite Footer */
+#infinite-footer {
+	position: fixed !important;
+}
+
+#infinite-footer .container {
+	background-color: #fff;
+	border-color: #d1d1d1;
+	padding: 0 7.6923%;
+}
+
+#infinite-footer .blog-info,
+#infinite-footer .blog-credits {
+	font-family: "Libre Franklin", "Helvetica Neue", helvetica, arial, sans-serif;
+	text-align: center;
+	width: auto;
+}
+
+#infinite-footer .blog-info a,
+#infinite-footer .blog-credits,
+#infinite-footer .blog-credits a {
+	color: #222222;
+}
+
+#infinite-footer .blog-info a:hover,
+#infinite-footer .blog-info a:focus,
+#infinite-footer .blog-credits a:hover,
+#infinite-footer .blog-credits a:focus {
+	color: #767676;
+	text-decoration: none;
+}
+
+.infinite-scroll #navigation,
+.infinite-scroll.neverending .jetpack-mobile-link,
+.infinite-scroll.neverending .site-footer {
+	display: none;
+}
+
+/* Shows the footer & mobile link again in case all posts have been loaded */
+.infinity-end.neverending .jetpack-mobile-link,
+.infinity-end.neverending .site-footer {
+	display: block;
+}
+
+@media screen and (min-width: 44.375em) {
+	#infinite-handle {
+		margin: 0 0 1em 0;
+		text-align: center;
+	}
+
+	.has-sidebar #infinite-handle {
+		text-align: left;
+	}
+
+	.site-main #infinite-handle span {
+		display: inline-block;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.infinite-wrap > article {
+		padding-bottom: 4em;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	#infinite-footer .blog-info,
+	#infinite-footer .blog-credits {
+		line-height: 35px;
+	}
+
+	#infinite-footer .blog-info {
+		font-size: 1.1rem;
+	}
+
+	#infinite-footer .blog-credits {
+		font-size: 0.9rem;
+	}
+
+	.blog:not(.has-sidebar) .infinite-loader {
+		float: right;
+		width: 58%;
+	}
+
+	.site-main .infinite-loader .spinner {
+		margin-left: -17px;
+	}
+}

@@ -1,0 +1,89 @@
+div.jetpack-quiz {
+	border: 1px solid #deede3;
+	background-color: #f3f3f3;
+	padding: 1em;
+	line-height: 1.3em;
+	margin-bottom: 2em;
+	border-radius: .2em;
+}
+
+div.jetpack-quiz div.jetpack-quiz-question {
+	margin-bottom: .5em;
+	font-weight: bold;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer {
+	cursor: pointer;
+	margin-bottom: .5em;
+	padding: 1em 0 1em 1em;
+	border-bottom: 1px dotted #999;
+}
+div.jetpack-quiz div.jetpack-quiz-answer.last {
+	padding-bottom: 0;
+	margin-bottom: 0;
+	border-bottom: 0;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer.correct {
+	color: green;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer.wrong {
+	color: red;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer div.jetpack-quiz-explanation {
+	display: none;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer.correct div.jetpack-quiz-explanation, div.jetpack-quiz div.jetpack-quiz-answer.wrong div.jetpack-quiz-explanation {
+	display: block;
+	color: black;
+	font-size: 90%;
+	margin-top: 1em;
+}
+
+div.jetpack-quiz div.jetpack-quiz-answer.correct div.jetpack-quiz-explanation tt, div.jetpack-quiz div.jetpack-quiz-answer.wrong div.jetpack-quiz-explanation tt {
+	font-size: 85%;
+}
+
+div.jetpack-quiz pre {
+	font: 15px Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+	background: transparent;
+	margin: 0;
+	padding: 0;
+}
+
+.jetpack-quiz-options {
+	margin-top: 12px;
+	text-align: right;
+}
+
+.jetpack-quiz-count {
+	color: #646970;
+	float: left;
+	font-size: 12px;
+}
+
+.jetpack-quiz-option-button {
+	cursor: pointer;
+	margin-left: 12px;
+}
+
+.jetpack-quiz-option-button:hover svg {
+	background: #3c434a;
+}
+
+.jetpack-quiz-option-button svg {
+	background: #000;
+	border-radius: 50%;
+	display: inline-block;
+	fill: #fff;
+	height: 24px;
+	width: 24px;
+}
+
+.jetpack-quiz-wrapper .jetpack-quiz:first-of-type .jetpack-quiz-option-button:first-of-type,
+.jetpack-quiz-wrapper .jetpack-quiz:last-of-type .jetpack-quiz-option-button:last-of-type {
+	display: none;
+}

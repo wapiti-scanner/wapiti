@@ -1,0 +1,71 @@
+.milestone-widget fieldset {
+	margin-bottom: 1em;
+}
+
+.milestone-widget fieldset * {
+	vertical-align: middle;
+}
+
+.jp-ms-data-time input[type="text"] {
+	text-align: right;
+	width: 2.1em;
+}
+
+.jp-ms-data-time .month {
+	width: 5.4em;
+
+}
+
+.jp-ms-data-time .year[type="text"] {
+	text-align: right;
+	width: 3.2em;
+}
+
+.jp-ms-data-time input[type="text"] {
+	text-align: right;
+	width: 3.2em;
+}
+
+.jp-ms-data-time .year[type="text"] {
+	width: 4.5em;
+}
+
+.jp-ms-data-time .assistive-text,
+.jp-ms-data-unit .assistive-text {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+}
+
+@media screen and (max-width: 782px) {
+	.jp-ms-data-time input[type="text"],
+	.jp-ms-data-time .year[type="text"] {
+		width: 2.8em;
+
+	}
+
+	.jp-ms-data-time .year[type="text"] {
+		width: 4em;
+	}
+}
+
+/* Fix styles of the Milestone block when it is dispayed as a part of the Legacy Widget block */
+.wp-block-legacy-widget__edit-form .widget-inside .widget-content .jp-ms-data-time .month {
+	display: inline-block;
+	width: 6.5em;
+	min-height: 34px;
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside .widget-content .jp-ms-data-time input[type="text"] {
+	display: inline-block;
+	width: 3.2em;
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside .widget-content .jp-ms-data-time .year[type="text"] {
+	width: 4.5em;
+}
+
+.editor-styles-wrapper ul.milestone-type {
+	list-style-type: none;
+	padding-left: 0;
+}

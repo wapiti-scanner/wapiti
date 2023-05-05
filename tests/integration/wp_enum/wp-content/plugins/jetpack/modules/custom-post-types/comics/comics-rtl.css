@@ -1,0 +1,53 @@
+#jetpack-comic-drop-zone .dragging, #jetpack-comic-drop-zone .uploading {
+  margin-top: 200px;
+  display: none;
+}
+
+/* Display the appropriate loading message for each upload state. */
+body.dragging #jetpack-comic-drop-zone .dragging, body.uploading #jetpack-comic-drop-zone .uploading {
+  display: block;
+}
+
+body.uploading #jetpack-comic-drop-zone .uploading .spinner,
+body.uploading #jetpack-comic-drop-zone .uploading .spinner:after {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+}
+
+body.uploading #jetpack-comic-drop-zone .uploading .spinner {
+  display: block;
+  margin: 15px auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-left: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-right: 1.1em solid #ffffff;
+  transform: translateZ(0);
+  animation: load8 1.1s infinite linear;
+}
+@keyframes load8 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+/* Add the drop zone overlay. */
+body.dragging #jetpack-comic-drop-zone, body.uploading #jetpack-comic-drop-zone {
+  background: rgba(0, 86, 132, 0.9);
+  border: 1px dashed #fff;
+  color: #fff;
+  display: block;
+  font-size: 30px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  bottom: 10px;
+  text-align: center;
+  z-index: 99999;
+}

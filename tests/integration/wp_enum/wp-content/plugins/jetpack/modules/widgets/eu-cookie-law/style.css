@@ -1,0 +1,134 @@
+.widget_eu_cookie_law_widget {
+	animation: fadeIn 800ms;
+	border: none;
+	bottom: 1em;
+	left: 1em;
+	margin: 0;
+	padding: 0;
+	position: fixed;
+	right: 1em;
+	width: auto;
+	z-index: 50001;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; visibility: hidden; }
+	to { opacity: 1; visibility: visible; }
+}
+
+.widget_eu_cookie_law_widget.widget.top {
+	bottom: auto;
+	top: 1em;
+}
+
+.admin-bar .widget_eu_cookie_law_widget.widget.top {
+	top: 3em;
+}
+
+amp-consent.widget_eu_cookie_law_widget.widget.top {
+	top: 1em;
+	margin: 0;
+}
+
+.admin-bar amp-consent.widget_eu_cookie_law_widget.widget.top {
+	top: 0;
+	margin-top: 3em;
+}
+
+#eu-cookie-law {
+	background-color: #fff;
+	border: 1px solid #dedede;
+	color: #2e4467;
+	font-size: 12px;
+	line-height: 1.5;
+	overflow: hidden;
+	padding: 6px 6px 6px 15px;
+	position: relative;
+}
+
+#eu-cookie-law a,
+#eu-cookie-law a:active,
+#eu-cookie-law a:visited {
+	color: inherit;
+	cursor: inherit;
+	text-decoration: underline;
+}
+
+#eu-cookie-law a:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+#eu-cookie-law.negative {
+	background-color: #000;
+	border: none;
+	color: #fff;
+}
+
+#eu-cookie-law.hide {
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 400ms, visibility 400ms;
+}
+
+/**
+ * Using a highly-specific rule to make sure that certain form styles
+ * will be reset
+ */
+#eu-cookie-law form {
+	margin-bottom: 0;
+	position: static;
+}
+
+/**
+ * Using a highly-specific rule to make sure that all button styles
+ * will be reset
+ */
+#eu-cookie-law input,
+#eu-cookie-law input:hover,
+#eu-cookie-law input:focus {
+	background: #f3f3f3;
+	border: 1px solid #dedede;
+	border-radius: 4px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	color: #2e4453;
+	cursor: pointer;
+	display: inline;
+	float: right;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: inherit;
+	line-height: inherit;
+	margin: 0 0 0 5%;
+	padding: 8px 12px;
+	position: static;
+	text-transform: none;
+}
+
+#eu-cookie-law.negative input,
+#eu-cookie-law.negative input:hover,
+#eu-cookie-law.negative input:focus {
+	background: #282828;
+	border-color: #535353;
+	color: #fff;
+}
+
+@media ( max-width: 600px ) {
+	#eu-cookie-law {
+		padding-bottom: 55px;
+	}
+	#eu-cookie-law input.accept {
+		bottom: 8px;
+		position: absolute;
+		right: 8px;
+	}
+}
+
+/**
+ * Tweak position of the Customizer edit button to make it more obvious this
+ * is an editable widget rather than a normal accept cookies banner.
+ */
+.widget_eu_cookie_law_widget .customize-partial-edit-shortcut > button {
+	left: 0;
+}

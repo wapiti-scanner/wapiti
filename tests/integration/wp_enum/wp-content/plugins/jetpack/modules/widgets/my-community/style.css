@@ -1,0 +1,35 @@
+/* Multi-Column Grid Layout */
+.widgets-multi-column-grid ul {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+}
+
+.widgets-multi-column-grid ul li {
+	background: none;
+	clear: none;
+	float: left;
+	margin: 0 -5px -3px 0;
+	padding: 0 8px 6px 0;
+	border: none;
+	list-style-type: none !important;
+}
+
+.widgets-multi-column-grid ul li a {
+	background: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.widgets-multi-column-grid .avatar {
+	vertical-align: middle;
+}
+
+/* Ensure My Community images fit the 48 pixel grid. */
+.widget_jetpack_my_community .avatar-48,
+.widget_jetpack_my_community .avatar-240 {
+	max-width: 48px;
+	max-height: 48px;
+}

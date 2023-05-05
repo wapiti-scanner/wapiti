@@ -1,0 +1,38 @@
+services:
+  wp_db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "somewordpress"
+      MYSQL_DATABASE: "wordpress"
+      MYSQL_USER: "wordpress"
+      MYSQL_PASSWORD: "wordpress"
+    networks:
+      - test-network
+
+  wordpress:
+    build:
+      context: ./wp_enum/
+      dockerfile: Dockerfile
+      no_cache: true
+    depends_on:
+      - wp_db
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: "wp_db"
+      WORDPRESS_DB_USER: "wordpress"
+      WORDPRESS_DB_PASSWORD: "wordpress"
+      WORDPRESS_DB_NAME: "wordpress"
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+    networks:
+      - test-network
+
+networks:
+  test-network:
+
+volumes:
+  db_data:
+

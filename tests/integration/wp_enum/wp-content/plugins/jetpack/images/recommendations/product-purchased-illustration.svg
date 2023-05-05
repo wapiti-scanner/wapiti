@@ -1,0 +1,29 @@
+<svg fill="none" viewBox="0 0 393 260" xmlns="http://www.w3.org/2000/svg">
+<rect x="64" y="44" width="138" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="62" width="105" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="18" width="69.361" height="10" rx="5" fill="#DCDCDE"/>
+<mask id="c" x="4" y="32" width="38" height="28" mask-type="alpha" maskUnits="userSpaceOnUse">
+<path d="m17.25 59.21-12.855-12.855 2.7102-2.7102 10.145 10.145 21.645-21.645 2.7102 2.7102-24.355 24.355z" fill="#fff"/>
+</mask>
+<g mask="url(#c)">
+<rect y="22" width="46" height="46" fill="#DCDCDE"/>
+</g>
+<rect x="64" y="130" width="138" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="148" width="105" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="104" width="69.361" height="10" rx="5" fill="#DCDCDE"/>
+<mask id="b" x="4" y="118" width="38" height="28" mask-type="alpha" maskUnits="userSpaceOnUse">
+<path d="m17.25 145.21-12.855-12.855 2.7102-2.71 10.145 10.145 21.645-21.645 2.7102 2.71-24.355 24.355z" fill="#fff"/>
+</mask>
+<g mask="url(#b)">
+<rect y="108" width="46" height="46" fill="#DCDCDE"/>
+</g>
+<rect x="64" y="216" width="138" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="234" width="105" height="10" rx="5" fill="#DCDCDE" opacity=".5"/>
+<rect x="64" y="190" width="69.361" height="10" rx="5" fill="#DCDCDE"/>
+<mask id="a" x="4" y="204" width="38" height="28" mask-type="alpha" maskUnits="userSpaceOnUse">
+<path d="m17.25 231.21-12.855-12.855 2.7102-2.71 10.145 10.145 21.645-21.645 2.7102 2.71-24.355 24.355z" fill="#fff"/>
+</mask>
+<g mask="url(#a)">
+<rect y="194" width="46" height="46" fill="#DCDCDE"/>
+</g>
+</svg>

@@ -1,0 +1,1 @@
+!function(t){var i=wp.customize,o=site_logo_header_classes;i("site_logo_header_text",function(i){i.bind(function(i){t(o).css(!0===i?{position:"static",clip:"auto"}:{position:"absolute",clip:"rect(1px 1px 1px 1px)"})})})}(jQuery);

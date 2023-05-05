@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="wpforms" horiz-adv-x="1000" >
+<font-face font-family="wpforms" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="wpforms" unicode="&#xf298;" d="M287 342v-72h-140v72h140z m0 142v-71h-140v71h140z m423-285v-72h-190v72h190z m0 143v-72h-375v72h375z m0 142v-71h-375v71h375z m76-480v692q0 4-4 8t-7 3h-18l-211-143-117 96-118-96-211 143h-17q-5 0-8-3t-4-8v-692q0-4 4-8t8-3h692q4 0 7 3t4 8z m-477 619l103 84h-227z m240 0l123 84h-227z m308 73v-692q0-35-24-59t-58-24h-692q-35 0-59 24t-24 59v692q0 35 24 59t59 24h692q34 0 58-24t24-59z" horiz-adv-x="857.1" />
+</font>
+</defs>
+</svg>

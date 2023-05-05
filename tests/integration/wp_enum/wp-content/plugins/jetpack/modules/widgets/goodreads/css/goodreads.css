@@ -1,0 +1,48 @@
+div[class^="gr_custom_container"] {
+	/* customize your Goodreads widget container here*/
+	border: 1px solid gray;
+	border-radius:10px;
+	padding: 10px 5px 10px 5px;
+	background-color: #FFF;
+	color: #000;
+}
+
+div[class^="gr_custom_container"] a {
+	color: #000;
+}
+
+h2[class^="gr_custom_header"] {
+	/* customize your Goodreads header here*/
+	display: none;
+}
+div[class^="gr_custom_each_container"] {
+	/* customize each individual book container here */
+	width: 100%;
+	clear: both;
+	margin-bottom: 10px;
+	overflow: auto;
+	padding-bottom: 4px;
+	border-bottom: 1px solid #a7aaad;
+}
+div[class^="gr_custom_book_container"] {
+	/* customize your book covers here */
+	float: right;
+	overflow: hidden;
+	height: 60px;
+	margin-left: 4px;
+	width: 39px;
+}
+div[class^="gr_custom_author"] {
+	/* customize your author names here */
+	font-size: 10px;
+}
+div[class^="gr_custom_tags"] {
+	/* customize your tags here */
+	font-size: 10px;
+	color: gray;
+}
+div[class^="gr_custom_review"] {
+}
+div[class^="gr_custom_rating"] {
+	display: none;
+}

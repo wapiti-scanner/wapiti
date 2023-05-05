@@ -1,0 +1,177 @@
+/* Main container */
+#w3tc-wizard-container {
+	background: #fff;
+   	padding: 10px;
+   	border-radius: 8px;
+   	max-width: 900px;
+}
+
+/* Header */
+#w3tc_wizard_header {
+	background: #0e1920;
+	border-bottom: 6px solid #cdeae7;
+	height: 6em;
+	position: relative;
+}
+
+/* Main title */
+#w3tc_wizard_title {
+	color: #fff;
+	position: absolute;
+	bottom: 0;
+}
+
+/* Title text: "TOTAL CACHE:" */
+#w3tc_wizard_title > span:nth-of-type(1),
+#w3tc_wizard_title > span:nth-of-type(2),
+#w3tc_wizard_title > span:nth-of-type(3) {
+	font-size: 2.5em;
+}
+
+/* Title text: "CACHE" */
+#w3tc_wizard_title > span:nth-of-type(2) {
+	color: #30bec4;
+}
+
+/* Title text: "$this->config['title']" */
+#w3tc_wizard_title > span:nth-of-type(4) {
+	font-size: 2.1em;
+	font-style: italic;
+}
+
+/* Wizard icon (w3 cube with shadow) */
+#w3tc_wizard_icon {
+	position: absolute;
+	top: 10px;
+	left: -2px;
+}
+
+/**
+ * Left nav / steps.
+ */
+
+ul#w3tc-options-menu {
+	position: absolute;
+	left: 0;
+	top: 30px;
+	margin: 0;
+}
+
+#w3tc-options-menu li {
+	display: block;
+	padding: 5px;
+	margin: 0;
+	border: 1px solid #ddd;
+	border-bottom: 0;
+}
+
+#w3tc-options-menu li:last-of-type {
+	border-bottom: 1px solid #ddd;
+}
+
+/* Active step */
+#w3tc-options-menu li.is-active {
+	background-color: #0073aa;
+	color: #fff;
+}
+
+/* Wizard content */
+#w3tc_wizard_content {
+	background-image:
+		url(../img/moon-bottom-left.png),
+		url(../img/moon-bottom-right.png);
+	background-size: 15% !Important;
+	background-repeat:
+		no-repeat,
+		no-repeat;
+	background-position:
+		bottom left,
+		bottom right;
+	background-size:
+		auto,
+		auto 60%;
+	min-height: 545px;
+	padding-bottom: 70px;
+	padding-right: 160px;
+	position: relative;
+}
+
+/* Footer */
+#w3tc_wizard_footer {
+	width: 100%;
+}
+
+/* Buttons */
+#w3tc-wizard-buttons {
+	display: flex;
+}
+
+#w3tc-wizard-buttons > span {
+	flex: 1;
+}
+
+/* All buttons. */
+#w3tc-wizard-buttons > span > button {
+	width: 100%;
+	border: 0;
+	padding: 10px 0;
+	cursor: pointer;
+}
+
+/* Next and Dashboard buttons. */
+#w3tc-wizard-next:enabled,
+#w3tc-wizard-dashboard {
+	background-color: #825772;
+	color: #fff;
+}
+
+/* Miscellaneous */
+#w3tc_wizard_title,
+#w3tc_wizard_content {
+	padding-left: 160px;
+}
+
+.w3tc-overlay {
+	display: none;
+}
+
+#wpfooter {
+	position: relative;
+}
+
+/* Spinner */
+.spinner.inline {
+	float: none;
+	visibility: visible;
+	vertical-align: top;
+	margin-left: 0px;
+}
+
+.spinner.spinner-left {
+	margin-left: 5px;
+}
+
+/* Notices */
+.w3tc_note,
+#setting-error-tgmpa {
+	display: none;
+	visibility: hidden;
+}
+
+.w3tc-notice-recommended {
+	padding-top: 5px;
+}
+
+.w3tc-notice-recommended .dashicons-lightbulb {
+	color: #00a0d2;
+}
+
+#w3tc-dbcache-recommended {
+	margin: 10px 0px;
+}
+
+/* Tables */
+.widefat thead th,
+.widefat td {
+	line-height: 1em;
+}

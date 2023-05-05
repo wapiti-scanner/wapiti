@@ -1,0 +1,351 @@
+@use "sass:math";
+
+$full-width:	960px;
+$one-col:		660px;
+$mobile:		480px;
+
+$sidebar-width:	269px;
+
+@mixin responsive($width) {
+	@if $width == full-width {
+		@media only screen and (max-width: $full-width) { @content; }
+	}
+	@else if $width == one-col {
+		@media only screen and (max-width: $one-col) { @content; }
+	}
+	@else if $width == mobile {
+		@media only screen and (max-width: $mobile) { @content; }
+	}
+}
+
+@mixin mobile-first-responsive($width) {
+	@if $width == full-width {
+		@media only screen and (min-width: $one-col) { @content; }
+	}
+	@else if $width == full-width-really {
+		@media only screen and (min-width: $full-width) { @content; }
+	}
+	@else if $width == one-col {
+		@media only screen and (min-width: $mobile) { @content; }
+	}
+}
+
+// ==========================================================================
+// Breakpoint Mixin
+// See https://wpcalypso.wordpress.com/devdocs/docs/coding-guidelines/css.md#media-queries
+// ==========================================================================
+
+$breakpoints: 480px, 660px, 960px, 1040px; // Think very carefully before adding a new breakpoint
+
+@mixin breakpoint( $size ){
+	@if type-of($size) == string {
+	  $approved-value: 0;
+		@each $breakpoint in $breakpoints {
+			$and-larger: ">" + $breakpoint;
+			$and-smaller: "<" + $breakpoint;
+
+			@if $size == $and-smaller {
+				$approved-value: 1;
+				@media ( max-width: $breakpoint ) {
+					@content;
+				}
+			}
+			@else {
+				@if $size == $and-larger {
+					$approved-value: 2;
+					@media ( min-width: $breakpoint + 1 ) {
+						@content;
+					}
+				}
+				@else {
+					@each $breakpoint-end in $breakpoints {
+						$range: $breakpoint + "-" + $breakpoint-end;
+						@if $size == $range {
+							$approved-value: 3;
+							@media ( min-width: $breakpoint + 1 ) and ( max-width: $breakpoint-end ) {
+								@content;
+							}
+						}
+					}
+				}
+			}
+		}
+		@if $approved-value == 0 {
+			$sizes: "";
+			@each $breakpoint in $breakpoints {
+				$sizes: $sizes + " " + $breakpoint;
+			}
+			// TODO - change this to use @error, when it is supported by node-sass
+			@warn "ERROR in breakpoint( #{ $size } ): You can only use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]";
+		}
+	}
+	@else {
+		$sizes: "";
+		@each $breakpoint in $breakpoints {
+			$sizes: $sizes + " " + $breakpoint;
+		}
+		// TODO - change this to use @error, when it is supported by node-sass
+		@warn "ERROR in breakpoint( #{ $size } ): Please wrap the breakpoint $size in parenthesis. You can use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]";
+	}
+}
+
+
+@mixin calc($property, $expression) {
+	#{$property}: -moz-calc(#{$expression});
+	#{$property}: -o-calc(#{$expression});
+	#{$property}: -webkit-calc(#{$expression});
+	#{$property}: calc(#{$expression});
+}
+
+@mixin clear-fix {
+	&:after {
+		content: ".";
+		display: block;
+		height: 0;
+		clear: both;
+		visibility: hidden;
+	}
+}
+
+@mixin noticon($char, $size: null) {
+	// This isn't very clean, but... we'll see ;)
+	@if $size != 0 {
+		font-size: $size;
+	}
+	content: $char;
+
+	// Copied verbatim
+	vertical-align: top;
+	text-align: center;
+	display: inline-block;
+	font-family: "Noticons";
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	line-height: 1;
+	text-decoration: inherit;
+	text-transform: none;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	speak: none;
+}
+
+@mixin border-box {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+// Turn a list into a dropdown menu
+@mixin dropdown-menu {
+	display: none;
+	background: $white;
+	float: none;
+	line-height: 46px;
+	min-width: 220px;
+	overflow: visible;
+	padding: 0;
+	position: absolute;
+	width: auto;
+	z-index: 1;
+	box-sizing: border-box;
+	box-shadow: 0 0 2px rgba(0,0,0,0.15), 0 3px 8px rgba(0,0,0,0.1);
+
+	&:after {
+		border: 6px solid transparent;
+		border-bottom-color: $white;
+		content: ' ';
+		height: 0;
+		position: absolute;
+			top: -12px;
+			left: 73px;
+		width: 0;
+	}
+
+	li {
+		display: block;
+		float: none;
+
+		a,
+		a.selected {
+			border-bottom: 1px solid rgba(0,0,0,0.1);
+			color: $blue-wordpress;
+			display: block;
+			float: none;
+			height: auto;
+			margin: 0;
+			padding: 0 14px;
+			text-align: left;
+
+			&:hover {
+				border-bottom: 1px solid rgba(0,0,0,0.1);
+				background: none; // Remove inherited background color
+				color: $link-highlight;
+				box-shadow: none; // Remove inherited box shadow
+			}
+		}
+
+		a.selected {
+			color: $gray-dark;
+		}
+
+		&:last-child a {
+			border-bottom: none; // Last child in the dropdown doesn't need a bottom border
+		}
+	}
+}
+
+// Can't use the @extend in a media query, use this instead
+@mixin clear-text {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+// courtesy: http://codeboxers.com/sass-mixin-for-transitions/
+@mixin transition($transition-property, $transition-time, $method) {
+	-webkit-transition: $transition-property $transition-time $method;
+	-moz-transition: $transition-property $transition-time $method;
+	-ms-transition: $transition-property $transition-time $method;
+	-o-transition: $transition-property $transition-time $method;
+	transition: $transition-property $transition-time $method;
+}
+
+@mixin box-shadow($shadows...) {
+	-webkit-box-shadow: $shadows;
+	-moz-box-shadow: $shadows;
+	-ms-box-shadow: $shadows;
+	-o-box-shadow: $shadows;
+	box-shadow: $shadows;
+}
+
+@mixin site-icon($size, $icon-size) {
+	position: relative;
+	display: inline-block;
+	width: $size;
+	height: $size;
+	overflow: hidden;
+	background: lighten( $gray, 20% );
+
+	&::before {
+		content: '\f475';
+		display: inline-block;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font: normal math.div($icon-size, 1) 'Noticons';
+		color: $white;
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: $size;
+		width: $size;
+		line-height: $size;
+		text-align: center;
+		z-index: 0;
+	}
+
+	img {
+		background: $white;
+		position: relative;
+	}
+}
+
+@mixin debug(){
+	box-shadow: 0px 0px 10px $alert-red inset;
+}
+
+@mixin stats-fade-text($toColor) {
+	background-image: linear-gradient(to right, $transparent 0%, $toColor 90%);
+	position: absolute;
+	z-index: 1;
+	left: -48px;
+	top: 0;
+	bottom: 0;
+	content: "";
+	display: block;
+	width: 48px;
+}
+
+@mixin hide-content-accessibly {
+	clip: rect( 1px, 1px, 1px, 1px );
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	width: 1px;
+}
+
+// Creates a fading overlay to signify that the content is longer
+// than the space allows.
+@mixin long-content-fade( $direction: right, $size: 20%, $color: #fff, $edge: 0px, $z-index: false) {
+	content: '';
+	display: block;
+	position: absolute;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+
+	@if $z-index {
+		z-index: $z-index;
+	}
+
+	@if $direction == 'bottom' {
+		background: linear-gradient( to top, rgba( $color, 0 ), $color 90% );
+		left: $edge;
+		right: $edge;
+		top: $edge;
+		bottom: calc(100% - $size);
+		width: auto;
+	}
+
+	@if $direction == 'top' {
+		background: linear-gradient( to bottom, rgba( $color, 0 ), $color 90% );
+		top: calc(100% - $size);
+		left: $edge;
+		right: $edge;
+		bottom: $edge;
+		width: auto;
+	}
+
+	@if $direction == 'left'{
+		background: linear-gradient( to left, rgba( $color, 0 ), $color 90% );
+		top: $edge;
+		left: $edge;
+		bottom: $edge;
+		right: auto;
+		width: $size;
+		height: auto;
+	}
+
+	@if $direction == 'right' {
+		background: linear-gradient( to right, rgba( $color, 0 ), $color 90% );
+		top: $edge;
+		bottom: $edge;
+		right: $edge;
+		left: auto;
+		width: $size;
+		height: auto;
+	}
+}
+
+@mixin placeholder( $lighten-percentage: 30% ) {
+	animation: loading-fade 1.6s ease-in-out infinite;
+	background-color: lighten( $gray, $lighten-percentage );
+	color: transparent;
+
+	&:after {
+		content: '\00a0';
+	}
+}
+
+// Simple animation to make elements appear
+@keyframes appear {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}

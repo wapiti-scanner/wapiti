@@ -1,0 +1,103 @@
+.ustats_ad {
+	max-width: 600px;
+	margin: auto;
+	padding-top: 50px;
+}
+.ustats_ad_metabox .inside {
+	background: url('./pub/img/stats-bg.png');
+	background-repeat: no-repeat;
+	background-size: cover;
+	min-height: 400px;
+	font-weight: bold;
+}
+
+.ustats_content {
+	text-align: right;
+}
+.ustats_p {
+    text-align: center;
+}
+.ustats_block {
+	width: 100%;
+	display: none;
+	margin-bottom: 10px;
+
+}
+.ustats_block_data {
+	width: 30%;
+	padding-bottom: 10px;
+}
+.ustats_block_data div {
+	display: none;
+}
+.ustats_block_data .ustats_header {
+    font-weight: bold;
+	display: block;
+}
+.ustats_block_chart {
+	width: 70%;
+	height: 200px;
+}
+.ustats_block_chart canvas {
+	display: block;
+	height: 200px;
+	width: 800px;
+}
+
+.ustats_table {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+td.ustats_td {
+    padding: 0;
+    padding-right: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+td.ustats_td_header_name {
+    padding: 0;
+    padding-right: 5px;
+    padding-top: 5px;
+    text-align: left;
+    font-weight: bold;
+    color: #333;
+}
+
+td.ustats_td_header {
+    padding: 0;
+    padding-right: 5px;
+    padding-top: 5px;
+    text-align: right;
+    font-weight: bold;
+    color: #333;
+}
+
+td.ustats_td_value {
+    padding: 0;
+    padding-right: 8px;
+    text-align: right;
+    color: #333;
+}
+
+/* specific cache areas */
+.ustats_php_php_requests_pagecache_hit,
+.ustats_php_php_requests_pagecache_miss {
+	padding-left: 20px;
+}
+.ustats_block_data div.ustats_php_php_requests_pagecache_miss_level2_wrap {
+	display: flex;
+	padding-left: 40px;
+	flex-wrap: wrap;
+}
+.ustats_php_php_requests_pagecache_miss_level2 {
+	width: 50%;
+}
+
+@media (max-width: 1500px) {
+	.ustats_php_php_requests_pagecache_miss_level2 {
+		width: 100%
+	}
+}

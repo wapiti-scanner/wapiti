@@ -1,0 +1,78 @@
+.w3tc-widget-stackpath2-logo {
+    width: 150px;
+    height: 35px;
+    background: url("pub/img/w3tc_stackpath_logo.svg") 0 8px no-repeat;
+    float: left;
+}
+
+.w3tcstackpath2_h4 {
+    text-align: center;
+}
+.w3tcstackpath2_summary_h4 {
+	text-align: center;
+    color: #8F8F8F;
+    text-align: left;
+    margin: 0;
+}
+.w3tcstackpath2_summary {
+    border-bottom: 1px solid #d2d2d2;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.w3tcstackpath2_wrapper {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+.w3tcstackpath2_ul li {
+    margin-bottom: 3px;
+    padding: 0;
+}
+.w3tcstackpath2_summary_col1 {
+    display: block;
+    font-weight: bold;
+    width: 90px;
+    float:left;
+}
+.w3tcstackpath2_summary_col2 {
+    display: block;
+    font-weight: bold;
+    width: 80px;
+    float:left;
+}
+.w3tcstackpath2_tools {
+    margin-top:15px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.w3tcstackpath2_tools li {
+    display:inline-block;
+    margin-right:10px;
+}
+.w3tcstackpath2_chart {
+	clear: both;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.w3tcstackpath2_chart p {
+    color:#8F8F8F;
+    margin:0;
+}
+
+.w3tcstackpath2_wrapper .button-secondary{
+	margin-bottom: 3px;
+}
+
+.w3tcstackpath2_signup_h4 {
+    text-align: left;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.w3tcstackpath2_signup p{
+    margin-top: 4px;
+    padding-top: 0;
+
+}
+.w3tcstackpath2_signup p span.desc {
+    color:#8F8F8F;
+}

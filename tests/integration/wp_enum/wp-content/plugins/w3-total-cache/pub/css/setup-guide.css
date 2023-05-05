@@ -1,0 +1,31 @@
+.w3tc-setupguide-table th,
+.w3tc-setupguide-table td {
+	text-align: left;
+}
+
+#w3tc-dbc-table th,
+#w3tc-objcache-table th,
+#w3tc-browsercache-table td {
+	white-space: nowrap;
+}
+
+.w3tc-option-disabled {
+	color: darkgray;
+}
+
+#w3tc-browsercache-table tr {
+	vertical-align: top;
+}
+
+.w3tc-option-recommended {
+	font-size: 0.9em;
+}
+
+#w3tc-options-menu {
+	max-width: 155px;
+}
+
+#w3tc-options-menu li {
+	hyphens: auto;
+	overflow-wrap: break-word;
+}

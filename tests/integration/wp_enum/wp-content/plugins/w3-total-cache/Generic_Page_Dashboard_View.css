@@ -1,0 +1,185 @@
+#w3tc-dashboard-widgets.metabox-holder {
+    background-color: #FFF;
+    margin:0;padding:0;
+    display: flex;
+}
+#w3tc-dashboard-widgets .hndle {
+    height: 36px;
+    line-height: 36px;
+}
+#w3tc-dashboard-widgets .hndle, #w3tc-dashboard-widgets .hndle span {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    text-shadow: none;
+    -webkit-box-shadow:  none;
+    box-shadow:  none;
+}
+#w3tc-dashboard-widgets #postbox-container-left {
+    padding: 10px;
+    margin-right: 200px;
+    border: none;
+    background-color: #fff;
+    flex-grow: 1;
+}
+#w3tc-dashboard-widgets #postbox-container-right {
+	float: none;
+}
+
+#w3tc-dashboard-widgets .handlediv {
+    display: none;
+}
+#w3tc-dashboard-widgets #postbox-container-3 .postbox .inside,
+#w3tc-dashboard-widgets #postbox-container-3 .postbox {
+    min-width: 165px;
+}
+#w3tc-dashboard-widgets div.postbox,
+#w3tc-dashboard-widgets #postbox-container-3 .hndle,
+#w3tc-dashboard-widgets #postbox-container-3 .inside,
+#w3tc-dashboard-widgets #postbox-container-3 .meta-box-sortables,
+#w3tc-dashboard-widgets #postbox-container-3 .widefat {
+    background: none;
+}
+#w3tc-dashboard-widgets #postbox-container-3 .postbox,
+#w3tc-dashboard-widgets #postbox-container-3 .hndle,
+#w3tc-dashboard-widgets #postbox-container-3 .inside,
+#w3tc-dashboard-widgets #postbox-container-3 .meta-box-sortables,
+#w3tc-dashboard-widgets #postbox-container-3 .widefat {
+    border:none;
+}
+#w3tc-dashboard-widgets {
+    border-color: #c7c9c8;
+    background: url(pub/img/sidebar-background.png) repeat-y right;
+    min-width: 600px;
+}
+
+#w3tc-dashboard-widgets #postbox-container-right h3.hndle {
+    border-bottom:1px solid #d5d2d2;
+    margin: 5px 10px 0 10px;
+    padding: 0;
+    height: 34px;
+    text-shadow: white 0 1px 0;
+    -webkit-box-shadow: 0 1px 0 white;
+    box-shadow: 0 1px 0 white;
+}
+
+.w3tc-widget-newrelic-logo {
+    float: left;
+    width: 150px;
+    height: 35px;
+    background: url("pub/img/w3tc_newrelic-logo.png") 0 3px no-repeat;
+}
+.w3tc-widget-configure {
+    float: left;
+}
+.w3tc-widget-text {
+    float: left;
+    padding-right: 10px;
+}
+
+.w3tc-widget-w3tc-logo {
+    float: left;
+    width: 50px;
+    height: 35px;
+    background: url("pub/img/w3tc_w3tc-logo.png") 0 0 no-repeat;
+}
+
+.w3tc-widget-services-logo {
+    float: left;
+    width: 50px;
+    height: 35px;
+    background: url("pub/img/w3tc_w3edge-logo.png") 0 0 no-repeat;
+}
+
+.w3tc-widget-pagespeed-logo {
+    float: left;
+    width: 110px;
+    height: 35px;
+    background: url("pub/img/w3tc_google-logo.png") 0 3px no-repeat;
+}
+
+.w3tc-widget-boldgrid-logo {
+	width: 70%;
+    height: 100%;
+    background: url("Generic_WidgetBoldGrid_Logo.svg") 0 0px no-repeat;
+    float: left;
+	margin-right: 10px;
+}
+
+#normal-sortables .postbox {
+    float:left;
+    margin-right:10px;
+}
+
+@media only screen and (max-device-width: 480px) {
+	#w3tc-dashboard-widgets #postbox-container-left {
+		margin-right: 0px;
+	}
+	#w3tc-dashboard-widgets {
+        min-width: auto;
+        flex-wrap: wrap;
+    }
+    #postbox-container-right {
+        width: 100%;
+        white-space: nowrap;
+        float: left;
+        margin-left: 0px;
+    }
+    #w3tc-dashboard-widgets {
+        background: none;
+    }
+    #w3tc-dashboard-widgets #normal-sortables .postbox {
+        width: 100%;
+    }
+    #w3tc-dashboard-widgets #side-sortables .postbox .postbox-header .w3tc-widget-text {
+        float: none;
+    }
+    #w3tc-dashboard-widgets #side-sortables .postbox .postbox-header,
+    #w3tc-dashboard-widgets #side-sortables .postbox .inside {
+        text-align: center;
+    }
+    .w3tc_generic_widgetservice_label {
+        display: inline;
+    }
+}
+
+/**
+ * HiDPI Displays
+ */
+/* doesnt work
+@media print,
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1),
+only screen and (        min-device-pixel-ratio: 2),
+only screen and (                min-resolution: 192dpi),
+only screen and (                min-resolution: 2dppx)  {
+    #w3tc h2.logo {
+        background-image: url("pub/img/W3TC_dashboard_logo_title-retina.png");
+        background-size: 224px 44px;
+    }
+
+    .w3tc-widget-w3tc-logo {
+        float: left;
+        width: 50px;
+        height: 90px;
+        background-image: url("pub/img/w3tc_w3tc-logo-retina.png");
+        background-size: 41px 34px;
+    }
+
+    .w3tc-widget-services-logo {
+        float: left;
+        width: 50px;
+        height: 90px;
+        background-image: url("pub/img/w3tc_w3edge-logo-retina.png");
+        background-size: 37px 35px;
+    }
+
+    .w3tc-widget-pagespeed-logo {
+        float: left;
+        width: 110px;
+        height: 90px;
+        background-image: url("pub/img/w3tc_google-logo-retina.png");
+        background-size: 97px 33px;
+    }
+}
+*/

@@ -1,0 +1,33 @@
+.posts-page .info {
+	position: relative;
+	display: inline-block;
+	margin-left:8px;
+}
+
+.posts-page .info .message {
+	visibility: hidden;
+	width:220px;
+	font-size: .875rem;
+	background-color: #fff;
+	color: #646970;
+	text-align: left;
+	border:1px solid #c3c4c7;
+	position: absolute;
+	z-index: 1;
+	margin-left:5px;
+	padding: 16px;
+	border-radius: 2px;
+	box-shadow: 0 2px 5px rgba(0,0,0,.1),0 0 56px rgba(0,0,0,.075)
+}
+
+.posts-page .info:hover .message {
+	visibility: visible;
+}
+
+@media screen and (max-width: 782px) {
+	.posts-page .info .icon {
+		font-size: 28px;
+		width:28px;
+		height:28px;
+	}
+}

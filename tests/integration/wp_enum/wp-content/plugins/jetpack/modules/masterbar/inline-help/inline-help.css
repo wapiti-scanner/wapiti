@@ -1,0 +1,74 @@
+.a8c-faux-inline-help {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 9999;
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button {
+	position: absolute;
+	right: 0;
+	bottom: 10px; /* push away from WordPress Core footer */
+	line-height: 0;
+	padding: 1px;
+	border-radius: 100%;
+	background-color: #1d2327; /* IE11 fallback - Classic Dark */
+	background-color: var( --color-primary );
+	border: 1px solid #3c434a; /* IE11 fallback - Classic Dark */
+	border: 1px solid var( --color-primary-dark );
+	transition: all 0.2s ease-in-out;
+	overflow: visible;
+	width: 40px;
+	height: 40px;
+	box-sizing: border-box; /* .button component */
+
+	/* elevation() mixin styles */
+	box-shadow: 0 4px 5px 0 rgba( 16, 21, 23, 0.14 ),
+										0 1px 10px 0 rgba( 16, 21, 23, 0.12 ),
+										0 2px 4px -1px rgba( 16, 21, 23, 0.2 ); /* IE11 fallback - Classic Dark */
+	box-shadow: 0 4px 5px 0 rgba( var( --color-neutral-100-rgb ), 0.14 ),
+										0 1px 10px 0 rgba( var( --color-neutral-100-rgb ), 0.12 ),
+										0 2px 4px -1px rgba( var( --color-neutral-100-rgb ), 0.2 );
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button::before {
+	width: 28px;
+	height: 28px;
+	display: block;
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	content: '';
+	background: #ffffff; /* IE11 fallback - Classic Dark */
+	background: var( --color-surface );
+	border-radius: 100%;
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button:focus {
+	background-color: #1d2327; /* IE11 fallback - Classic Dark */
+	background-color: var( --color-primary );
+	box-shadow: 0 0 0 2px #8c8f94; /* IE11 fallback - Classic Dark */
+	box-shadow: 0 0 0 2px var( --color-primary-light );
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button .gridicon {
+	pointer-events: none; /* ensure SVG does not capture click on anchor */
+	position: relative;
+	fill: #1d2327; /* IE11 fallback - Classic Dark */
+	fill: var( --color-primary );
+	margin: -3px 0 0 -3px;
+	top: 0;
+	height: 42px;
+	width: 42px;
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button .gridicon>use:first-child,
+.a8c-faux-inline-help .a8c-faux-inline-help__button .gridicon>g:first-child {
+	transform: none;
+}
+
+.a8c-faux-inline-help .a8c-faux-inline-help__button:hover:not(.is-active) {
+	background: #1d2327; /* IE11 fallback - Classic Dark */
+	background: var( --color-primary );
+	transform: scale( 1.15 );
+}

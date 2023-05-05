@@ -1,0 +1,57 @@
+.rr {
+	border: 2px solid var(--jp-green-40);
+	border-radius: var(--jp-border-radius);
+	padding: calc( var(--spacing-base) * 2 ) calc( var(--spacing-base) * 3 );
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: calc( var(--spacing-base) * 3 );
+	cursor: pointer;
+	text-align: left;
+	background: none;
+	margin: 0;
+	text-decoration:none;
+
+	svg{
+		display:none;
+	}
+
+	&:focus, &:active {
+		outline-color: var(--jp-black);
+	}
+
+	&:hover {
+		& .icon {
+			transform: translateX( calc( var(--spacing-base) * 2 ) );
+		}
+
+		& .cta {
+			text-decoration: underline;
+			text-decoration-thickness: 2px;
+		}
+	}
+}
+
+.cta {
+	font-weight: 600;
+}
+
+.dismiss {
+	font-size: 0.75em;
+	padding: calc( var(--spacing-base) * 2 ) calc( var(--spacing-base) * 3 );
+}
+
+.emojisPseudo {
+
+	&:after {
+		font-size:xx-large;
+		content: "\01F600"; // 😀
+	}
+
+	&:hover,
+	&:focus {
+		&:after {
+		content: "\01F60D"; // 😍
+		}
+	}
+}

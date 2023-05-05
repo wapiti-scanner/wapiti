@@ -1,0 +1,22 @@
+.jetpack-action-bar {
+	position: fixed;
+	right: var(--wp--preset--spacing--20);
+	bottom: var(--wp--preset--spacing--20);
+}
+
+.jetpack-action-bar__action-list {
+	background-color: var(--wp--preset--color--white);
+	box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.12);
+	border-radius: 4px;
+	list-style: none;
+	margin: 0;
+	padding: 4px 0;
+}
+
+.jetpack-action-bar__action-button {
+	background: none;
+	border: none;
+	line-height: 0;
+	margin: 8px;
+	padding: 0;
+}

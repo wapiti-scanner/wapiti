@@ -1,0 +1,212 @@
+.wp-customizer  .expanded .widget-conditional .widget-conditional-inner {
+	width: 98%;
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;
+}
+
+.wp-customizer  .expanded .widget-conditional .form{
+	overflow: scroll;
+	margin-bottom: 20px;
+}
+.widget-liquid-right .widget.expanded {
+	overflow: visible;
+}
+.widget-conditional-hide {
+	display: none;
+}
+.widget-conditional .widget-conditional-inner {
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	padding: 12px 10px 0;
+
+}
+.widget-conditional {
+	margin-bottom: 12px;
+	margin-top: 10px;
+}
+.widget-conditional .conditions{
+	margin-bottom: 12px;
+}
+.widget-conditional .condition,
+.widget-conditional .condition-top {
+	clear:both;
+}
+.widget-conditional .condition {
+	padding-top: 12px;
+	position: relative;
+}
+.widget-conditional .condition select {
+	width: 120px;
+	position: relative;
+	z-index: 2;
+}
+.widget-conditional .condition-top select {
+	width: auto;
+}
+.widget-conditional .condition-control {
+	padding-top: 4px;
+	clear: both;
+	margin-top: -20px;
+}
+.widget-conditional .selection {
+	margin-right: 50px;
+	margin-left: 20px;
+}
+.widget-conditional .conditions-rule-has-children {
+	display: block;
+}
+.widget-conditional .condition .actions {
+	margin-top: -28px;
+}.widget-conditional .condition .actions {
+	margin-top: -28px;
+}
+
+.widget-conditional .condition-control a {
+	text-decoration: none;
+	position: absolute;
+	top: 17px;
+	text-indent: -9999px;
+	z-index: 1;
+}
+
+.wp-block-legacy-widget__edit-form .widget-conditional .condition-control a {
+	top: 20px;
+}
+
+.widget-conditional .condition-control a:before {
+	position: absolute;
+	text-indent: 0;
+	top: 0;
+	left: 0;
+}
+.wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional .condition-control .delete-condition,
+.widget-conditional .condition-control .delete-condition {
+	left: 0;
+	color: #f11;
+}
+.widget-conditional .condition-control .add-condition {
+	right: 0;
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional .widget-conditional-inner a.dashicons {
+	font-family: dashicons;
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional-inner select {
+	display:initial;
+	width:auto;
+	background-color: #fff;
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional .widget-conditional-inner select:disabled {
+	color: #a7aaad;
+	border-color: #dcdcde;
+	background-color: #f6f7f7;
+}
+
+.editor-styles-wrapper .wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional  .alignleft {
+	margin-left:20px
+}
+
+.widget-conditional .condition:last-child .condition-conjunction,
+.widget-conditional .condition:last-child .condition-intersection {
+	display: none;
+}
+
+.widget-conditional.conjunction .condition-intersection {
+	display: none;
+}
+
+.widget-conditional.intersection .condition-conjunction {
+	display: none;
+}
+
+.wp-core-ui .button.display-options {
+	margin-right: 5px;
+}
+.wp-core-ui .button.display-options:hover {
+	text-decoration: none;
+}
+
+.wp-customizer .widget-conditional select {
+	min-width: 0;
+	max-width: none;
+	height: auto;
+}
+.wp-customizer .widget-conditional .condition-control a {
+	top: 15px;
+}
+@media screen and ( max-width: 782px ) {
+	.widget-conditional .condition-control a {
+		top: 20px;
+	}
+}
+
+.wp-block-legacy-widget__edit-form .widget-inside.widget-inside .widget-conditional-inner {
+	/*
+	 * fonts of labels are reset to 13px in gutenberg editor for legacy widgets, ensure a consistent look on non-labels
+	 */
+	font-size: 13px;
+}
+
+/*
+ * Rules for gutenberg advanced panel
+ */
+
+ .widget-vis__wrapper .components-base-control,
+ .widget-vis__rule .components-base-control {
+	 margin-bottom: 12px;
+ }
+
+.widget-vis__rule {
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 12px;
+}
+
+.widget-vis__rule-major,
+.widget-vis__rule-minor {
+	display: flex;
+	justify-content: stretch;
+	align-items: center;
+}
+
+.widget-vis__if,
+.widget-vis__is {
+	margin-right: 8px;
+	width: 10px;
+}
+
+.widget-vis__show-hide {
+	margin-bottom: 0;
+}
+
+.components-button.widget-vis__add-new-rule {
+	display: block;
+}
+
+.widget-vis__delete-rule {
+	margin-top: 6px;
+	text-align: right;
+}
+
+.widget-vis__match-all {
+	margin-top: 12px;
+}
+
+.widget-vis__select {
+	width: 100%;
+}
+
+.widget-vis__select .components-input-control__container {
+	position: relative;
+	top: 4px;
+}
+
+.widget-vis__select-multi-level select option:disabled {
+    font-size: 18px;
+    font-weight: 600;
+}

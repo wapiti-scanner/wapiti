@@ -1,0 +1,89 @@
+@import './calypso-mixins';
+@import './calypso-colors';
+
+.jp-masthead {
+	padding: 40px 0;
+	background-color: $white;
+	text-align: center;
+	@media (max-width: rem( 782px ) ) {
+		padding: 0 rem( 24px );
+
+		.jetpack-masterbar & {
+			padding-left: rem( 64px );
+		}
+	}
+}
+
+.jp-masthead__inside-container {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 auto;
+	width: 100%;
+	max-width: rem( 1040px );
+	padding-bottom: rem( 6px );
+
+	@media (max-width: 1250px) {
+		max-width: 95%;
+	}
+}
+
+.jp-masthead__logo-container {
+	flex-grow: 0;
+	flex-shrink: 0;
+	padding: rem( 11px ) 0 0;
+
+	@include breakpoint( "<480px" ) {
+		margin-right: rem( 16px );
+	}
+}
+
+.jp-masthead__logo-link {
+	display: inline-block;
+	outline: none;
+	vertical-align: middle;
+
+	&:focus {
+		line-height: 0; // fixes rectangle gap
+		box-shadow: 0 0 0 2px $blue-light;
+	}
+
+	& + code {
+		margin: 0 10px;
+		padding: 5px 9px;
+		border-radius: 2px;
+		background: #e6ecf1;
+		color: #647a88;
+	}
+}
+
+.jp-masthead__nav {
+	display: flex;
+	flex-wrap: nowrap;
+	flex-grow: 1;
+	flex-shrink: 0;
+	text-align: right;
+	margin-top: rem( 6px );
+	padding: rem( 4px ) 0;
+
+	.dops-button-group {
+		flex-grow: 1;
+		align-self: center;
+		/* This fixes an unwanted space between the buttons in the network settings caused by a line break. */
+		/* Fixed here to keep PHP code readable. It's safe: .dops-button and .dops-button.is-compact specify a font size. */
+		font-size: 0;
+	}
+	@include breakpoint( "<480px" ) {
+		text-align: left;
+	}
+}
+
+#sandbox-domain-badge {
+	background: #d63638;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	text-shadow: none;
+	font-size: 9px;
+	font-weight: bold;
+	cursor: pointer;
+	color: #ffffff;
+}

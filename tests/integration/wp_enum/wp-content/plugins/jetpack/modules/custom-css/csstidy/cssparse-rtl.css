@@ -1,0 +1,146 @@
+code#copytext {
+  white-space: pre;
+  font-family: Verdana;
+}
+
+.at {
+  color: darkblue;
+}
+
+.format {
+  color: gray;
+}
+
+.property {
+  color: green;
+}
+
+.selector {
+  color: blue;
+}
+
+.value {
+  color: red;
+  right: 500px;
+}
+
+.comment {
+  color: orange;
+}
+html, body {
+  font: 0.8em Verdana, Helvetica, sans-serif;
+  background: #F8F8F6;
+}
+
+code {
+  font-size: 1.2em;
+}
+
+div#rightcol {
+  padding-right: 32em;
+}
+
+fieldset {
+  display: block;
+  margin: 0.5em 0;
+  padding: 1em;
+  border: solid #7284AB 2px;
+}
+
+fieldset.code_output {
+  display: inline;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+small {
+  font-size: 0.7em;
+}
+
+fieldset#field_input {
+  float: right;
+  margin: 0 0 1em 0.5em;
+}
+
+fieldset#options, fieldset#code_layout {
+  width: 31em;
+}
+
+input#submit {
+  clear: both;
+  display: block;
+  margin: 1em;
+}
+
+select {
+  margin: 2px 0 0;
+}
+
+label.block {
+  display: block;
+}
+
+legend {
+  background: #c4E1C3;
+  padding: 2px 4px;
+  border: dashed 1px;
+}
+
+textarea#css_text {
+  width: 27em;
+  height: 370px;
+  display: block;
+  margin-left: 1em;
+}
+
+.help {
+  cursor: help;
+}
+
+p.important {
+  border: solid 1px red;
+  font-weight: bold;
+  padding: 1em;
+  background: white;
+}
+
+p {
+  margin: 1em 0;
+}
+
+dl {
+  padding-right: 0.5em;
+}
+
+dt {
+  font-weight: bold;
+  margin: 0;
+  float: right;
+  clear: both;
+  height: 1.5em;
+}
+
+dd {
+  margin: 0 4em 0 0;
+  height: 1.5em;
+}
+
+fieldset#messages {
+  background: white;
+  padding: 0 1em 0 0;
+}
+
+fieldset#messages div {
+  height: 10em;
+  overflow: auto;
+}
+
+dd.Warning {
+  color: orange;
+}
+
+dd.Information {
+  color: green;
+}

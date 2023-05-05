@@ -1,0 +1,45 @@
+.fixed .column-comment_likes {
+    width: 5.5em;
+    padding: 8px 0;
+    text-align: center;
+}
+
+.fixed .column-stats {
+    width: 5em;
+}
+
+.fixed .column-comment_likes .comment-like-count {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0 8px;
+    height: 2em;
+    margin-top: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background-color: #787c82;
+    color: #fff;
+    font-size: 11px;
+    line-height: 21px;
+}
+
+.fixed .column-comment_likes .comment-like-count:after {
+    border: none;
+}
+
+.fixed .column-comment_likes .comment-like-count:hover {
+    background-color: #2271b1;
+}
+
+.fixed .column-comment_likes .vers:before {
+    font: normal 20px/1 dashicons;
+    content: '\f155';
+    speak: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@media screen and (max-width: 782px) {
+    .fixed .column-comment_likes {
+        display: none;
+    }
+}

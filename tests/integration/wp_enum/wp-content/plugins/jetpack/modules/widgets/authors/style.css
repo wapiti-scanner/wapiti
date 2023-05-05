@@ -1,0 +1,25 @@
+/* Authors Widget */
+.widget_authors > ul, .widget.widget_authors li > ul {
+	margin-left: inherit;
+	padding-left: 0;
+}
+.widget_authors ul li li {
+	padding-left: 0;
+}
+
+.widget_authors > ul > li {
+	margin-bottom: 1em;
+	list-style: none;
+}
+
+.widget_authors > ul > li + li {
+	border-top: 0;
+}
+
+.widget.widget_authors img {
+	margin-right: 5px;
+	margin-bottom: 5px;
+	vertical-align: middle;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}

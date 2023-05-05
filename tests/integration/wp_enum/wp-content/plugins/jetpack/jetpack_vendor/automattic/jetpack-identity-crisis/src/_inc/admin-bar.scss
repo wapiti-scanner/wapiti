@@ -1,0 +1,30 @@
+#wpadminbar #wp-admin-bar-jetpack-idc {
+	margin-right: 5px;
+
+	.jp-idc-admin-bar {
+		border-radius: 2px;
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 20px;
+		color: #EFEFF0;
+		padding: 6px 8px;
+	}
+
+	&.hide {
+		display: none;
+	}
+
+	.dashicons {
+		font-family: 'dashicons';
+		margin-top: -6px;
+
+		&:before {
+			font-size: 18px;
+		}
+	}
+
+	.ab-item {
+		padding: 0;
+		background: #E68B28;
+	}
+}

@@ -1,0 +1,9 @@
+services:
+  wapiti:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    networks:
+      - test-network
+networks:
+  test-network:

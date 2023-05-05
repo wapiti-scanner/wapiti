@@ -1,0 +1,130 @@
+@import 'scss/calypso-colors';
+// ==========================================================================
+// FormToggle
+// ==========================================================================
+
+.form-toggle[type="checkbox"] {
+	display: none;
+}
+
+.form-toggle__switch {
+	flex: none;
+	position: relative;
+	display: inline-block;
+	border-radius: 12px;
+	box-sizing: border-box;
+	padding: 2px;
+	width: 40px;
+	height: 24px;
+	vertical-align: middle;
+	outline: 0;
+	cursor: pointer;
+	transition: all .4s ease, box-shadow 0s;
+
+	&:before,
+	&:after {
+		position: relative;
+		display: block;
+		content: "";
+		width: 20px;
+		height: 20px;
+	}
+	&:after {
+		left: 0;
+		border-radius: 50%;
+		background: $white;
+		transition: all .2s ease;
+	}
+	&:before {
+		display: none;
+	}
+	.dops-accessible-focus &:focus{
+		box-shadow: 0 0 0 2px $blue-medium;
+	}
+}
+
+.form-toggle__label {
+	display: flex;
+	cursor: pointer;
+
+	.is-disabled & {
+		cursor: default;
+	}
+}
+
+.form-toggle {
+	.dops-accessible-focus &:focus {
+		+ .form-toggle__label .form-toggle__switch {
+			box-shadow: 0 0 0 2px $blue-medium;
+		}
+		&:checked + .form-toggle__label .form-toggle__switch {
+			box-shadow: 0 0 0 2px $blue-light;
+		}
+	}
+
+	& + .form-toggle__label .form-toggle__switch {
+		background: lighten( $gray, 10% );
+	}
+
+	&:not( :disabled ) {
+		+ .form-toggle__switch:hover {
+			background: lighten( $gray, 20% );
+		}
+	}
+
+	&:checked{
+		+ .form-toggle__label .form-toggle__switch {
+			background: $blue-medium;
+
+			&:after {
+				left: 16px;
+			}
+		}
+	}
+
+	&:checked:not( :disabled ) {
+		+ .form-toggle__switch:hover {
+			background: $blue-light;
+		}
+	}
+
+	&:disabled {
+		+ span.form-toggle__switch {
+			opacity: 0.25;
+			cursor: default;
+		}
+	}
+}
+
+// Classes for toggle state before action is complete (updating plugin or something)
+.form-toggle.is-toggling {
+	+ .form-toggle__switch {
+		background: $blue-medium;
+	}
+	&:checked {
+		+ .form-toggle__switch {
+			background: lighten( $gray, 20% );
+		}
+	}
+}
+
+.form-toggle.is-compact {
+	+ .form-toggle__switch {
+		border-radius: 8px;
+		width: 24px;
+		height: 16px;
+
+		&:before,
+		&:after {
+			width: 12px;
+			height: 12px;
+		}
+	}
+	&:checked {
+		+ .form-toggle__switch {
+			&:after {
+				left: 8px;
+			}
+		}
+	}
+}

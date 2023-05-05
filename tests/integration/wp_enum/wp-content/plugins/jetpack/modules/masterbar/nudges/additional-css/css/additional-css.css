@@ -1,0 +1,13 @@
+.customize-control-cssNudge .nudge-container {
+	width: 100%;
+	padding: 50px 0;
+}
+
+.customize-control-cssNudge .nudge-container p {
+	text-align: center;
+}
+
+.customize-control-cssNudge .nudge-container .button-container {
+	margin-top: 20px;
+	text-align: center;
+}

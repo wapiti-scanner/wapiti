@@ -1,0 +1,206 @@
+@import "scss/calypso-colors";
+@import "scss/color-functions";
+@import "scss/functions/rem";
+@import "scss/typography";
+
+// ==========================================================================
+// Buttons
+// ==========================================================================
+
+.dops-button {
+	background: $blue-grey-light;
+	border-color: $blue-medium-dark;
+	border-style: solid;
+	border-width: 1px;
+	color: $blue-medium-dark;
+	cursor: pointer;
+	display: inline-block;
+	margin: 0;
+	outline: 0;
+	overflow: hidden;
+	font-size: $font-body-small;
+	text-overflow: ellipsis;
+	text-decoration: none;
+	vertical-align: top;
+	box-sizing: border-box;
+	border-radius: 3px;
+	padding: 7px 14px 9px;
+	-webkit-appearance: none;
+	appearance: none;
+
+	&:hover {
+		background: #f0f0f1;
+		border-color: $blue-grey-dark;
+		color: $blue-grey-dark;
+	}
+	&[disabled],
+	&:disabled {
+		color: lighten( $gray, 30% );
+		background: $white;
+		border-color: lighten( $gray, 30% );
+		cursor: default;
+	}
+	&:focus {
+		background: $white;
+		border-color: $blue-medium-dark;
+		box-shadow: 0 0 0 1px $blue-medium-dark;
+	}
+	&.is-compact {
+		padding: 0 10px;
+		line-height: 2;
+
+		&:disabled {
+			color: lighten( $gray, 30% );
+		}
+		.gridicon {
+			top: 4px;
+			margin-top: -8px;
+		}
+		// Make the left margin of the small plus icon visually less huge
+		.gridicons-plus-small {
+			margin-left: -4px;
+		}
+		// Reset the left margin if the button contains only the plus icon
+		.gridicons-plus-small:last-of-type {
+			margin-left: 0;
+		}
+		// Make plus icon nudged closer to adjacent icons for add-people and add-plugin type buttons
+		.gridicons-plus-small + .gridicon {
+			margin-left: -4px;
+		}
+	}
+	&.hidden {
+		display: none;
+	}
+	.gridicon {
+		position: relative;
+			top: 4px;
+		margin-top: -2px;
+		width: 18px;
+		height: 18px;
+	}
+}
+
+// Primary buttons
+.dops-button.is-primary {
+	background: $blue-medium;
+	border-color: $blue-medium;
+	color: $white;
+
+	&:hover,
+	&:focus {
+		border-color: $blue-medium-dark;
+		background: $blue-medium-dark;
+		color: $white;
+	}
+	&:focus {
+		box-shadow:
+			0 0 0 1px $white,
+			0 0 0 3px $blue-medium-dark;
+	}
+	&[disabled],
+	&:disabled {
+		color: #66c6e4 !important;
+		background-color: #008ec2 !important;
+		border-color: #008ec2 !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+		cursor: default;
+	}
+	&.is-compact {
+		color: $white;
+		white-space: nowrap;
+	}
+}
+
+// Scary buttons
+.dops-button.is-scary {
+	color: $alert-red;
+
+	&:hover,
+	&:focus {
+		border-color: $alert-red;
+	}
+	&:focus {
+		box-shadow: 0 0 0 2px lighten( $alert-red, 20% );
+	}
+	&[disabled],
+	&:disabled {
+		color: lighten( $alert-red, 30% );
+		border-color: lighten( $gray, 30% );
+	}
+}
+
+.dops-button.is-primary.is-scary {
+	background: $alert-red;
+	border-color: darken( $alert-red, 20% );
+	color: $white;
+
+	&:hover,
+	&:focus {
+		border-color: darken( $alert-red, 40% );
+	}
+	&[disabled],
+	&:disabled {
+		background: lighten( $alert-red, 20% );
+		border-color: tint( $alert-red, 30% );
+	}
+}
+
+.dops-button.is-borderless {
+	border: none;
+	color: darken( $gray, 10% );
+	padding-left: 0;
+	padding-right: 0;
+
+	&:hover {
+		color: $gray-dark;
+	}
+
+	&:focus {
+		box-shadow: none;
+	}
+
+	.dops-accessible-focus &:focus {
+		outline: thin dotted;
+	}
+
+	.gridicon {
+		width: 24px;
+		height: 24px;
+		top: 6px;
+	}
+
+	&[disabled],
+	&:disabled {
+		color: lighten( $gray, 30% );
+		background: $white;
+		cursor: default;
+
+		&:active {
+			border-width: 0;
+		}
+	}
+	&.is-scary {
+		color: $alert-red;
+
+		&:hover,
+		&:focus {
+			color: darken( $alert-red, 20% );
+		}
+
+		&[disabled] {
+			color: lighten( $alert-red, 30% );
+		}
+	}
+
+	&.is-compact {
+		background: transparent;
+		border-radius: 0;
+		.gridicon {
+			width: 18px;
+			height: 18px;
+			top: 5px;
+		}
+	}
+}

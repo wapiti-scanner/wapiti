@@ -1,0 +1,22 @@
+@import 'scss/_variables';
+
+#jp-wordads-dashboard {
+	color: $black;
+	font-size: 16px;
+
+  	* {
+	  box-sizing: border-box;
+	}
+
+	.jp-wordads-dashboard-page-loading-spinner {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate( -50%, -50% );
+	}
+
+	@include for-phone-down {
+		font-size: 14px;
+	}
+
+}

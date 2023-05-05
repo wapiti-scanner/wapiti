@@ -1,0 +1,55 @@
+//
+// Variables
+//
+@import 'node_modules/@automattic/color-studio/dist/color-variables.scss';
+
+/********* RNA styles *********/
+// Copied from plugins/backup/src/js/components
+
+$font-title-large: 36px;
+$font-title-small: 24px;
+$font-body: 16px;
+$font-label: 12px;
+
+$jp-black: #000000;
+$jp-black-80: #2c3338;
+$jp-white: #ffffff;
+$jp-white-off: #f9f9f6;
+$jp-gray: #dcdcde;
+$jp-gray-off: #e2e2df;
+
+$jp-green-primary: #069e08;
+$jp-green-secondary: #2fb41f;
+
+$jp-border-radius: 4px;
+$jp-menu-border-height: 1px;
+$jp-underline-thickness: 2px;
+/********* Generic styles *********/
+$wp-gray-dark: #23282d;
+$black: #000;
+$white: #fff;
+$blue-medium: #3582c4;
+$color-plan: #069e08; // $studio-jetpack-green-40
+
+/********* Mixins *********/
+@mixin for-phone-up {
+	@media ( min-width: 600px ) {
+		@content;
+	}
+}
+@mixin for-tablet-up {
+	@media ( min-width: 960px ) {
+		@content;
+	}
+}
+
+@mixin for-phone-down {
+	@media ( max-width: 600px ) {
+		@content;
+	}
+}
+@mixin for-tablet-down {
+	@media ( max-width: 960px ) {
+		@content;
+	}
+}

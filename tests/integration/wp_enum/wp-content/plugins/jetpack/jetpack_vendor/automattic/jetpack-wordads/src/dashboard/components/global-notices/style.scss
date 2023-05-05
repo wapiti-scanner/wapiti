@@ -1,0 +1,81 @@
+@import "scss/calypso-colors";
+@import "scss/calypso-mixins";
+@import 'scss/z-index';
+
+.global-notices {
+	text-align: right;
+	pointer-events: none;
+
+	z-index: z-index( 'root', '.global-notices' );
+	position: fixed;
+	top: auto;
+	right: 0;
+	bottom: 0;
+	left: 0;
+
+	@include breakpoint( ">660px" ) {
+		top: 47px + 16px;
+		right: 16px;
+		bottom: auto;
+		left: auto;
+
+		/* `36px` being the width of the collapsed WP-admin sidebar */
+		max-width: calc( 100% - 32px - 36px );
+	}
+
+	@include breakpoint( ">960px" ) {
+		top: 47px + 24px;
+		right: 24px;
+
+		/* `160px` being the width of the WP-admin sidebar */
+		max-width: calc( 100% - 48px - 160px );
+	}
+
+	@include breakpoint( ">1040px" ) {
+		right: 32px;
+
+		/* `160px` being the width of the WP-admin sidebar */
+		max-width: calc( 100% - 64px - 160px );
+	}
+}
+
+.global-notices .dops-notice {
+	flex-wrap: nowrap;
+	margin-bottom: 0;
+	text-align: left;
+	pointer-events: auto;
+	border-radius: 0;
+	box-shadow: 0 2px 5px rgba( 0, 0, 0, 0.2 ),
+	0 0 56px rgba( 0, 0, 0, 0.15 );
+
+	.dops-notice__icon-wrapper {
+		border-radius: 0;
+	}
+
+	@include breakpoint( ">660px" ) {
+		display: flex;
+		overflow: hidden;
+		margin-bottom: 24px;
+		border-radius: 3px;
+
+		.dops-notice__icon-wrapper {
+			border-radius: 3px 0 0 3px;
+		}
+	}
+}
+
+.global-notices .dops-notice a.dops-notice__action {
+
+	@include breakpoint( ">660px" ) {
+		font-size: 14px;
+		padding: 13px 16px;
+	}
+}
+
+.global-notices .dops-notice__dismiss {
+	flex-shrink: 0;
+
+	@include breakpoint( ">660px" ) {
+		padding: 13px 16px 0;
+	}
+}

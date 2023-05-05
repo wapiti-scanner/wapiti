@@ -1,0 +1,6 @@
+/**
+ * Utilities to stylize widget in Customizer controls.
+ */
+
+/* My Community */
+#available-widgets [class*="community"] .widget-title:before { content: "\f307"; }

@@ -1,0 +1,709 @@
+#w3tc h2.logo {
+	width: 224px;
+	height: 44px;
+	background: url("../img/W3TC_dashboard_logo_title.png") top right no-repeat;
+	text-indent: -9999px;
+	margin:5px 0 10px 0;
+	padding:0;
+}
+
+#icon-w3tc_general {
+	display: none;
+}
+
+.w3tc-enabled {
+	color: #090;
+	font-weight: 700
+}
+
+.w3tc-disabled {
+	color: #f00;
+	font-weight: 700
+}
+
+.w3tc-empty {
+	font-weight: 700;
+	font-style: italic
+}
+
+.w3tc-success {
+	background: #bfb
+}
+
+.w3tc-error {
+	background: #f99
+}
+div.w3tc-error.inline {
+	display:inline-block;
+}
+input.w3tc-error, textarea.w3tc-error {
+	background: none;
+	border: 1px solid #f99
+}
+
+
+.w3tc-status {
+	padding: 5px
+}
+
+#w3tc-help ul {
+	columns: 2;
+	list-style-type: disc;
+	margin: 1em 2% 1em 2%;
+}
+
+#w3tc-help a {
+	text-decoration: none;
+}
+
+#w3tc-help a:hover {
+	text-decoration: underline;
+}
+
+#w3tc acronym {
+	border-bottom: 1px dotted #666
+}
+
+#w3tc ul {
+	list-style: disc outside;
+	margin-left: 15px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+#w3tc ul.w3tc-incomp-plugins {
+	list-style: disc outside;
+	margin-left: 17px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+#w3tc ul.w3tc-incomp-plugins li div{
+	width: 150px;
+	display: inline-block;
+}
+
+#w3tc blockquote {
+	font-style: italic;
+}
+
+#w3tc blockquote cite {
+	font-weight: 400;
+}
+
+#w3tc optgroup {
+	font-style: normal;
+}
+
+#w3tc optgroup option {
+	text-indent: 20px;
+}
+
+#w3tc h5 {
+	margin: 0
+}
+
+#w3tc hr {
+	clear: both;
+	margin-top: 10px
+}
+
+#w3tc #toc a, #qa a {
+	text-decoration: none
+}
+
+#w3tc #toc a:hover, #qa a:hover {
+	text-decoration: underline
+}
+
+#w3tc #toc ul {
+	margin: 0;
+	padding: 0
+}
+
+#w3tc #toc li {
+	margin: 0;
+	padding: 0
+}
+
+#w3tc #qa {
+	clear: both;
+	padding: 10px;
+}
+
+#w3tc #qa, #w3tc #about, #w3tc #install {
+	width: 760px;
+}
+
+#w3tc fieldset {
+	margin: 1em 0;
+	background: #fdfdfd;
+	padding: 0 1em;
+	border: 1px solid #bbb;
+	border-radius: 11px;
+	-webkit-border-radius: 11px;
+	-moz-border-radius: 11px;
+}
+
+#w3tc fieldset .submit,
+#cachegroups_form .submit {
+	margin: 1em 0 0 0;
+	padding: 0;
+}
+
+#w3tc fieldset legend {
+	color: #999;
+	padding: 0 5px;
+	font-weight: bold;
+}
+
+#w3tc fieldset legend a:hover {
+	text-decoration: none;
+}
+
+#w3tc pre.code {
+	color: #000;
+	margin: 1em 0;
+	overflow: auto;
+	background: #eee;
+	padding: 12px 15px;
+	border: 1px solid #ccc;
+}
+
+#w3tc pre.console {
+	color: #ccc;
+	margin: 1em 0;
+	overflow: auto;
+	background: #000;
+	padding: 12px 15px;
+	border: 1px solid #ccc;
+}
+
+#w3tc-cdn-general th {
+	width: 400px;
+}
+
+#cdn_cnames li {
+	padding: 5px;
+	cursor: ns-resize;
+}
+
+#cdn_cnames li:hover {
+	background: #e9e9e9;
+}
+
+#cdn_cnames li span, .w3tc_cdn_cname_comment {
+	padding-left: 10px;
+	color: #999;
+}
+
+#mobile_groups th,
+#referrer_groups th,
+.w3tc_cachegroups th,
+#mobile_groups td,
+#referrer_groups td,
+.w3tc_cachegroups td,
+#cachegroups_form .form-table th {
+	padding: 10px 10px 10px 15px;
+}
+
+#mobile_groups li,
+#referrer_groups li,
+.w3tc_cachegroups li {
+	cursor: ns-resize;
+	list-style: none;
+	background: #f0f0f0;
+	margin-bottom: 1em;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+#mobile_groups li:hover,
+#referrer_groups li:hover,
+.w3tc_cachegroups li:hover {
+	background: #e9e9e9;
+}
+
+#mobile_groups li table,
+#referrer_groups li table,
+.w3tc_cachegroups li table {
+	margin: 0;
+}
+
+.mobile_group,
+.referrer_group,
+.cookiegroup_name {
+	font-weight: bold;
+}
+
+.w3tc-rules {
+	display: none;
+	margin: 1em 0;
+	padding: 0;
+	background: none;
+}
+
+.minify-files {
+	margin-bottom: 1em;
+}
+
+.minify-files li {
+	padding: 2px;
+	list-style: none;
+	background: #f0f0f0;
+	cursor: ns-resize;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	line-height: 100%;
+}
+
+.minify-files li:hover {
+	background: #e9e9e9;
+}
+
+.minify-files th,
+.minify-files td {
+	width: auto;
+	line-height: 100%;
+	padding: 3px 3px;
+	font-weight: normal;
+	text-align: left;
+}
+
+#support_loading, .w3tc-checking {
+	height: 32px;
+	background: url(../img/wpspin_light.gif) left center no-repeat;
+	padding-left: 38px;
+	line-height: 32px;
+	margin: 1em 0;
+	font-weight: bold;
+}
+#w3tc .postbox .inside {
+	padding: 0 10px;
+}
+
+#w3tc .postbox .hndle {
+	cursor: auto;
+	border-bottom: 1px solid #ccd0d4; /* WP 5.5 */
+}
+
+#w3tc .postbox-header {
+	border-bottom: 0; /* WP 5.5 */
+}
+
+#w3tc .postbox .handlediv {
+	float: right; /* WP 5.5 */
+}
+
+#pgcache_reject_roles label, #newrelic_accept_roles label, #cdn_reject_roles label  {
+	margin-right: 15px;
+}
+
+#minify_form fieldset{
+	padding-bottom: 10px;
+}
+
+#minify_form .html-tag{
+	font-weight: bold;
+	color: #107e0e;
+	float: right;
+}
+
+#minify_form fieldset label{
+	margin-bottom: 5px;
+	margin-right:10px;
+}
+
+#minify_table td {
+	padding: 0;
+}
+
+#minify_table table td {
+	white-space: nowrap;
+	padding: 0;
+}
+
+#minify_table .placement {
+	width: 110px;
+}
+
+#minify_table .options {
+	padding-left: 10px;
+}
+
+.recom_js_type {
+	width:160px;
+}
+.w3tc-missing-files ul {
+	margin-left:5px;
+}
+
+#w3tc .updated p, #w3tc_dashboard p, #w3tc_general p, #w3tc_cdn p { line-height: 30px}
+
+#w3tc .updated p, #w3tc_general p, #w3tc_cdn p { line-height: 30px}
+
+#w3tc #application ul {
+	margin-top:0;
+}
+
+#monitoring td label{
+	display: block;
+}
+
+#monitoring td label input {
+	margin-right: 5px;
+}
+
+.w3tc-required-changes strong {
+	font-weight: bold;
+	font-family: courier, sans-serif;
+}
+
+.minify_auto_test, .w3tc-loading {
+	height: 16px;
+	background: url(../img/wpspin_light.gif) right top no-repeat;
+	width: 16px;
+}
+.create-error p {
+	margin:0;
+}
+.create-error {
+	padding: 3px;
+	display:none;
+}
+
+#w3tc_extensions table.extensions .column-name {
+	width:180px;
+}
+#wpbody-content .metabox-holder.extension-settings {
+	padding-top: 0;
+}
+
+#w3tc .subsubsub {
+	margin-left: 0;
+}
+
+#edge-mode.updated p {
+	line-height: 20px;
+}
+
+td.w3tc-td-with-button {
+	line-height: 28px;
+}
+
+.w3tc_loading {
+	position:absolute;
+	width: 100%;
+	text-align: center;
+}
+
+.w3tc_hidden {
+	visibility: hidden;
+}
+
+.w3tc_none {
+	display: none;
+}
+
+th.w3tc_config_checkbox {
+	padding-top: 15px;
+}
+td.w3tc_config_value_text {
+	padding-top: 20px;
+}
+
+.w3tc_cdn_cnames_readonly {
+	margin-top: .5em;
+	margin-right: 20px;
+	margin-bottom: .5em;
+}
+
+.w3tchelp_loading_outer {
+	width: 100%;
+	margin-top: 50px;
+}
+
+.w3tchelp_loading_inner {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.w3tc_menu_item_pro {
+	color: #0FA9B5;
+}
+
+.w3tc_menu_item_pro:hover {
+	color: #ddd;
+}
+
+#toplevel_page_w3tc_dashboard li a[href="admin.php?page=w3tc_support"] {
+	color: red;
+}
+
+.w3tc_popup_form {
+	padding: 20px;
+}
+
+.w3tc_reject_roles label {
+	font-weight: normal;
+}
+
+/*---*/
+/* js bound to id */
+
+th.w3tc_extensions_manage_column_check {
+	padding: 0 0 0 5px;
+	vertical-align: middle;
+	width: 2.2em;
+}
+
+#browsercache_security_xfo_allow {
+	padding-top:0;
+	padding-bottom:4px;
+}
+
+.lightbox-content-padded {
+	padding: 15px;
+}
+
+.w3tcbc_qrf {
+	width: 100%;
+}
+
+.w3tcbc_qrf th {
+	text-align: left;
+}
+
+.w3tcbc_qrf td code {
+	white-space: nowrap;
+}
+
+
+/**
+ * Go pro features.
+ */
+
+.w3tc-gopro-more .dashicons {
+	font-size: 1em;
+	margin-left: -3px;
+	vertical-align: baseline;
+}
+
+.w3tc-gopro-description {
+	display: block;
+	max-height: 0px;
+	transition: max-height 0.5s ease-out;
+	overflow: hidden;
+}
+
+.w3tc-gopro-action {
+	margin-top: 15px;
+}
+
+.button.w3tc-gopro-button {
+	border-color: darkgreen;
+	box-shadow: 0 1px 0 darkgreen;
+	background: green;
+	color: #fff;
+}
+.button.w3tc-gopro-button:hover,
+.button.w3tc-gopro-button:focus {
+	border-color: green;
+	box-shadow: 0 1px 0 green;
+	background: #009900;
+	color: #fff;
+}
+
+table:not(.w3tc-pro-feature) .w3tc-gopro {
+	border-left: 3px solid green;
+	margin: 5px -20px 5px -13px;
+	box-shadow: 0 5px 5px -3px #888;
+	background: #efefef;
+	padding: 10px;
+	background-image: linear-gradient( to right, #f1f1f1, #f1f1f1, #f1f1f1, #f1f1f1, #e7f3f3, #56bec1, #16252c );
+	position: relative;
+	padding-right: 280px;
+}
+
+/* Pro features on the Extensions page. */
+#the-list .w3tc-gopro {
+	margin-right: -10px;
+	padding-right: 196px;
+}
+
+
+/**
+ * A Table for a pro feature.
+ */
+
+table.w3tc-pro-feature {
+	box-shadow: 0 5px 5px -3px #888;
+	margin-left: -10px;
+	margin-bottom: 45px;
+	width: calc(100% + 20px);
+	background: #fff;
+	position: relative;
+}
+
+table.w3tc-pro-feature:after,
+table:not(.w3tc-pro-feature) .w3tc-gopro:after {
+	background-image: url("../img/transparent-comet.png");
+	background-repeat: no-repeat;
+	background-position: top right;
+	background-size: 100% 100%;
+	content:"";
+	width: 321px;
+	height: 174px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+table.w3tc-pro-feature th,
+table.w3tc-pro-feature td {
+	display: block;
+	box-sizing: border-box;
+	clear: both;
+	padding: 12px;
+	margin: 0;
+}
+
+table.w3tc-pro-feature th {
+	background: #294149;
+	color: #fff;
+	border-bottom: 5px solid #65bbbd;
+	width: 100%;
+}
+
+table.w3tc-pro-feature td {
+	background-image: linear-gradient( to right, #f1f1f1, #f1f1f1, #f1f1f1, #e7f3f3, #56bec1, #16252c );
+	padding-right: 401.25px;
+}
+
+/* Size of comet background for pro features not in a pro table. */
+table:not(.w3tc-pro-feature) .w3tc-gopro:after {
+	width: 280px;
+	height: 152px;
+}
+
+/* Size of comet background for pro features on Extensions page. */
+#the-list .plugin-description .w3tc-gopro:after {
+	width: 196px;
+	height: 106px;
+}
+
+@media ( max-width: 782px ) {
+	table.w3tc-pro-feature:after {
+		background-image: none;
+	}
+
+	table.w3tc-pro-feature td {
+		background-image: none;
+	}
+
+	table.w3tc-pro-feature td {
+		padding: 12px;
+	}
+
+	/* Pro features that aren't a <table>. A <tr> for example - User Experience > Lazy Load Google Maps. */
+	table:not(.w3tc-pro-feature) .w3tc-gopro {
+		padding-right: initial;
+		background: #efefef;
+	}
+
+	table:not(.w3tc-pro-feature) .w3tc-gopro:after {
+		background: none;
+	}
+}
+
+/**
+ * Banner ad on dashboard.
+ */
+
+#w3tc_dashboard_banner {
+	margin-right: 200px;
+}
+
+#w3tc #w3tc_dashboard_banner .inside {
+	background-image: url("../img/transparent-comet-moon.png"), linear-gradient( to right, #fff 60%, #56bec1 100% );
+	background-repeat: no-repeat;
+	background-position: top right;
+	background-size: contain;
+	margin: 0;
+	padding: 0 250px 12px 12px;
+}
+
+#w3tc_dashboard_banner .inside > p:first-of-type {
+	margin-top: 0;
+	padding-top: 1em;
+}
+
+#w3tc_dashboard_banner .postbox .hndle {
+	background: #eee;
+	border-bottom: 3px solid #65bbbd;
+}
+
+#w3tc_dashboard_banner .w3tc-postbox-ad {
+	position: absolute;
+	top: 13px;
+	right: 10px;
+	font-size: 12px;
+	max-width: calc( 100% - 200px );
+}
+
+@media screen and (max-width: 960px) {
+	#w3tc #w3tc_dashboard_banner {
+		margin: 45px auto auto auto;
+	}
+
+	#w3tc #w3tc_dashboard_banner .inside {
+		background: none;
+		padding: 12px;
+	}
+
+	#w3tc #w3tc_dashboard_banner .inside > p:first-of-type {
+		padding-top: initial;
+	}
+}
+
+
+/**
+ * Labels.
+ */
+
+.w3tc-label {
+	color: #fff;
+	padding: 0px 4px;
+	border-radius: 5px;
+	display: inline-block;
+	font-size: 11px;
+}
+
+.w3tc-label-success {
+	background: green;
+}
+
+.w3tc-label-danger {
+	/* Same color as "update plugin count" in WP Dashboard left nav. */
+	background: #ca4a1f;;
+}
+
+/* Learn more links */
+a > span.dashicons-external {
+	text-decoration: none;
+}
+
+.w3tc-control-after {
+	vertical-align: middle;
+}
+
+td .w3tc-control-after span {
+	vertical-align: text-top;
+}
+
+.w3tc-ftp-form input[type="text"],
+.w3tc-ftp-form input[type="password"] {
+	width: 100%;
+}

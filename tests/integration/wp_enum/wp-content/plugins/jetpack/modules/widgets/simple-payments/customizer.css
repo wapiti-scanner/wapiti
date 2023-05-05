@@ -1,0 +1,80 @@
+.widget-content .jetpack-simple-payments,
+.widget-content .jetpack-simple-payments-form {
+	clear: both;
+}
+
+.widget-content .jetpack-simple-payments-disabled-error {
+	background: #fff;
+	border-left: 4px solid #dc3232;
+	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+	margin: 5px 0 15px;
+	padding: 1px 12px;
+}
+
+.widget-content .jetpack-simple-payments-form .invalid {
+	border: 1px solid #d63638;
+}
+
+.widget-content .jetpack-simple-payments-form .cost label {
+	display: block;
+}
+
+.widget-content .jetpack-simple-payments-image-fieldset {
+	position: relative;
+	width: 100%;
+}
+
+.widget-content .jetpack-simple-payments-image-fieldset .placeholder {
+	border: 1px dashed #c3c4c7;
+	box-sizing: border-box;
+	cursor: pointer;
+	line-height: 20px;
+	padding: 9px 0;
+	position: relative;
+	text-align: center;
+	width: 100%;
+	margin: 4px 0 1em;
+}
+
+.widget-content .jetpack-simple-payments-image {
+	max-width: 100%;
+	margin-top: 4px;
+	position: relative;
+	text-align: center;
+}
+
+.widget-content .jetpack-simple-payments-image img {
+	max-width: 100%;
+	box-sizing: border-box;
+	border: 1px dashed #c3c4c7;
+	padding: 4px;
+	height: auto;
+	cursor: pointer;
+}
+
+.widget-content .jetpack-simple-payments-image img:hover {
+	border-style: solid;
+}
+
+.widget-content .jetpack-simple-payments-form .field-currency {
+	display: inline-block;
+	vertical-align: top;
+	width: 40%;
+}
+
+.widget-content .jetpack-simple-payments-form .field-price {
+	display: inline-block;
+	line-height: 20px;
+	width: 58%;
+}
+
+.widget-content .jetpack-simple-payments-form .alignleft button,
+.widget-content .jetpack-simple-payments-form .alignright span {
+	display: inline-block;
+	margin-top: 5px;
+}
+
+.widget-content .button-link:disabled,
+.widget-content .button-link:hover[disabled] {
+	color: #a7aaad;
+}

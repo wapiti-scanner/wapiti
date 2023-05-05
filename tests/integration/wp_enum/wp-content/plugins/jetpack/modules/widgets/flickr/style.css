@@ -1,0 +1,16 @@
+.flickr-images {
+	text-align: center;
+}
+
+.flickr-size-thumbnail .flickr-images {
+	align-content: space-between;
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+}
+
+.flickr-images img {
+	max-width: 100%;
+	margin: 5px;
+}

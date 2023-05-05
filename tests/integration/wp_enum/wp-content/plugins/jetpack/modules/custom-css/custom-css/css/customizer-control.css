@@ -1,0 +1,145 @@
+/* NOAUTORTL */
+.for-codemirror, .CodeMirror {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 12px;
+	line-height: 16px;
+	margin: 0;
+	direction: ltr;
+	text-align: left;
+	border-top: 1px solid #dcdcde;
+	border-bottom: 1px solid #dcdcde;
+}
+#customize-control-custom_css#customize-control-custom_css {
+	margin-right: -12px;
+	margin-left: -12px;
+	width: calc( 100% + 24px );
+}
+.customize-control-code_editor .CodeMirror {
+	height: 300px;
+	height: calc( 100vh - 268px );
+}
+.for-codemirror {
+	width: 98%;
+	height: 300px;
+}
+#customize-control-wpcom_custom_css_content_width_control {
+	position: relative;
+}
+#customize-control-wpcom_custom_css_content_width_control > label {
+	position: relative;
+	width: 100px;
+}
+#customize-control-wpcom_custom_css_content_width_control .customize-control-title {
+	padding-bottom: 6px;
+}
+#customize-controls #customize-control-wpcom_custom_css_content_width_control input[type="text"], /* stronger selector to override new-customizer.css */
+#customize-control-wpcom_custom_css_content_width_control input[type="text"] {
+	width: 64px;
+	padding-right: 22px;
+	text-align: right;
+}
+#customize-control-wpcom_custom_css_content_width_control input[type="text"] + span {
+	position: absolute;
+	left: 43px;
+	padding-top: 3px;
+	opacity: .8;
+}
+
+#customize-control-wpcom_custom_css_content_width_control input[type="text"]:focus + span {
+	opacity: 1;
+}
+
+#customize-control-wpcom_custom_css_content_width_control .description {
+	display: block;
+	margin: 28px 0 0 0;
+	color: #a7aaad;
+}
+
+#customize-control-wpcom_custom_css_content_width_control .description strong {
+	font-style: normal;
+}
+
+#customize-control-jetpack_custom_css_control {
+	position: relative;
+}
+
+.css-help {
+	border-bottom: 1px solid #dcdcde;
+	background: #ffffff;
+	position: relative;
+	right: 0;
+	left: 0;
+	width: 100%;
+	padding: 0;
+	overflow: hidden;
+}
+
+.css-help a {
+	float: none;
+	display: inline-block;
+	text-decoration: none;
+	border-bottom: 4px solid transparent;
+	color: #50575e;
+	padding: 7px 10px 5px;
+	transition: .15s color ease-in-out,.15s background-color ease-in-out,.15s border-color ease-in-out;
+}
+
+.css-help a:hover {
+	color: #2271b1;
+	background-color: #f3f3f5;
+}
+
+.css-help a:before {
+	display: inline-block;
+	position: relative;
+	font-family: dashicons;
+	font-size: 20px;
+	padding-right: 3px;
+	top: 5px;
+	line-height: 1px;
+}
+
+.css-help a:focus {
+	color: #2271b1;
+	background-color: #f3f3f5;
+	border-bottom-color: #2271b1;
+	box-shadow: none;
+}
+
+.css-help a#revisions-link:before {
+	content: "\f321";
+}
+
+.css-help a#help-link:before {
+	content: "\f223";
+}
+
+#sub-accordion-section-custom_css .customize-control {
+	margin: 12px 0;
+}
+
+#sub-accordion-section-custom_css .customize-control-jetpackCss {
+	margin: 0 -12px;
+	width: calc( 100% + 24px );
+}
+
+#customize-theme-controls #sub-accordion-section-custom_css .customize-control-title {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#sub-accordion-section-custom_css #customize-control-jetpack_css_preprocessors_control select {
+	max-width: 75%;
+}
+
+body.editing-css .wp-full-overlay-sidebar {
+	width: 500px;
+}
+
+body.editing-css .wp-full-overlay.expanded {
+	margin-left: 500px;
+}
+
+input[type=jetpackCss] {
+	display: none;
+}
