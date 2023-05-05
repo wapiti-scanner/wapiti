@@ -1,0 +1,49 @@
+version: '3.9'
+
+# Following the DRY philosophy
+x-default_php_setup:
+  &default_php_setup
+  image: php${PHP_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_web:
+  &healthcheck_web
+  healthcheck:
+    test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+x-default_mysql_setup:
+  &default_mysql_setup
+  image: mysql${MYSQL_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_mysql:
+  &healthcheck_mysql
+  healthcheck:
+    test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+services:
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+networks:
+  test-network:

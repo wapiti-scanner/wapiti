@@ -64,3 +64,19 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  integrate:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Docker Compose
+        run: bash ${GITHUB_WORKSPACE}/tests/integration/run.sh
+      
+      - name: Archive production artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: diff-reports-file
+          path: tests/integration/.dump_diff_file.txt
