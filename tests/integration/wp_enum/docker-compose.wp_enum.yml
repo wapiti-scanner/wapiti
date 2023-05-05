@@ -1,6 +1,6 @@
 services:
   wp_db:
-    image: mysql:latest
+    image: mysql:8
     volumes:
       - db_data:/var/lib/mysql
     restart: always

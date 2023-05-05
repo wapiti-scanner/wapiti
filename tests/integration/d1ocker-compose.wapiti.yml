@@ -3,6 +3,7 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile
+    container_name: wapiti
     networks:
       - test-network
 networks:
