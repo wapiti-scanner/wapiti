@@ -1,8 +1,0 @@
-@media screen and (min-width: 400px) {
-	.widget.jetpack-simple-payments .jetpack-simple-payments-product {
-		flex-direction: column;
-	}
-	.widget.jetpack-simple-payments .jetpack-simple-payments-details {
-		padding-left: 0;
-	}
-}

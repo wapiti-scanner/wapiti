@@ -25,8 +25,6 @@ services:
       WORDPRESS_DB_USER: "wordpress"
       WORDPRESS_DB_PASSWORD: "wordpress"
       WORDPRESS_DB_NAME: "wordpress"
-    volumes:
-      - ./wp-content:/var/www/html/wp-content
     networks:
       - test-network
 

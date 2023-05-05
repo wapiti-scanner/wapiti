@@ -1,4 +1,0 @@
-lazyload version 12.2.0
-author
-https://www.andreaverlicchi.eu/lazyload/
-https://github.com/verlok/lazyload

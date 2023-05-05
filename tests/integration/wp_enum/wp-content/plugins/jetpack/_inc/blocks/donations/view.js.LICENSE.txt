@@ -1,7 +1,0 @@
-/*
- * Exposes number format capability
- *
- * @copyright Copyright (c) 2013 Kevin van Zonneveld (http://kvz.io) and Contributors (http://phpjs.org/authors).
- * @license See CREDITS.md
- * @see https://github.com/kvz/phpjs/blob/ffe1356af23a6f2512c84c954dd4e828e92579fa/functions/strings/number_format.js
- */

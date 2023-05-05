@@ -1,9 +1,0 @@
-/* Pull "Title" header name over in "Thumbnail"s place. */
-th.column-thumbnail + th a {
-	margin-right:-60px;
-}
-
-/* If thumbnail column has .hidden class. The entire column is toggled off. Don't pull "Title" header name over. */
-th.column-thumbnail.hidden + th a {
-	margin-right:0;
-}
