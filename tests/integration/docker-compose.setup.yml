@@ -58,7 +58,7 @@ services:
   cookieflags:
     image: php:8.1-apache
     volumes:
-      - ./php/src:/var/www/html/
+      - ./cookieflags/php/src:/var/www/html/
     networks:
       - test-network
 
@@ -285,7 +285,15 @@ services:
   xss:
     image: php:8.1-apache
     volumes:
-      - ./php/src:/var/www/html/
+      - ./xss/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the csrf module
+  csrf:
+    image: php:8.1-apache
+    volumes:
+      - ./csrf/php/src:/var/www/html/
     networks:
       - test-network
 
