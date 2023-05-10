@@ -47,19 +47,14 @@ tested_modules=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 while ! all $tested_modules; do 
     for i in "${!modules[@]}"; do
         if [[ "${tested_modules[$i]}" -eq 0 ]]; then
-            curl http://"${modules[$i]}" 
+            curl http://"${modules[$i]}" > /dev/null
             if [[ $? -eq 0 ]]; then
               tested_modules[$i]="1"
-              echo "testing module"
+              echo "testing module ${modules[$i]}"
               wapiti -u http://"${modules[$i]}" -m "${modules[$i]}" -f json -o /home/"${modules[$i]}".out --flush-session
             else
-              echo "module not available, passing..."
+              echo "container for module ${modules[$i]} not available yet"
             fi
         fi 
     done
 done
-
-
-wapiti -u http://wp_enum/ -m wp_enum -f json -o /home/wp_enum.out --flush-session
-wapiti -u http://backup/index.html -m backup -f json -o /home/backup.out --flush-session
-# wapiti -u http://backup -m backup -f json -o /home/backup.out
