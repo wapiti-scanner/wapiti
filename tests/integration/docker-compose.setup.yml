@@ -47,6 +47,20 @@ services:
       start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
       retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
 
+  # Apache container for the http_headers module
+  http_headers:
+    build:
+      context: ./test_mod_http_headers/
+      dockerfile: "Dockerfile"
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_web
+    volumes:
+      - ./test_mod_http_headers/php/src:/var/www/html/
+    networks:
+      - test-network
+
+
   # Apache container for the crlf module
   crlf:
     <<: [ *default_php_setup, *healthcheck_web ]
@@ -403,6 +417,8 @@ services:
       xss:
         condition: service_healthy
       file:
+        condition: service_healthy
+      http_headers:
         condition: service_healthy
 
 volumes:
