@@ -96,7 +96,10 @@ services:
 
   # Apache container for the htaccess module
   htaccess:
-    image: php:8.1-apache
+    htaccess:
+    build:
+      context: ./htaccess/
+      dockerfile: Dockerfile
     volumes:
       - ./htaccess/php/src:/var/www/html/
     networks:

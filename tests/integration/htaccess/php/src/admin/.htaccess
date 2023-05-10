@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(GET|TRACE|TRACK|OPTIONS|HEAD) 
+RewriteRule .* - [F]
