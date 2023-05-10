@@ -76,6 +76,11 @@ services:
       - ./test_mod_htaccess/php/src:/var/www/html/
     networks:
       - test-network
+  # Apache container for the exec module
+  exec:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_exec/php/src:/var/www/html/
 
   # Apache container for the sql module
   sql:
@@ -329,6 +334,8 @@ services:
       drupal9:
         condition: service_healthy
       drupal10:
+        condition: service_healthy
+      exec:
         condition: service_healthy
       buster:
         condition: service_healthy
