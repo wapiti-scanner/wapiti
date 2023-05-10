@@ -7,6 +7,7 @@ test_mod_buster \
 test_mod_crlf \
 test_mod_drupal_enum \
 test_mod_htaccess \
+test_mod_exec \
 test_mod_log4shell \
 test_mod_methods \
 test_mod_permanentxss \
