@@ -46,6 +46,13 @@ services:
       timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
       start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
       retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+  # Apache container for the crlf module
+  crlf:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_crlf/php/src:/var/www/html/
+
   
   # Apache container for the shellshock module
   shellshock:
@@ -332,6 +339,8 @@ services:
       xxe:
         condition: service_healthy
       sql:
+        condition: service_healthy
+      crlf:
         condition: service_healthy
 
 volumes:
