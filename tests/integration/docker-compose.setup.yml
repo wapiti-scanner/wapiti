@@ -184,7 +184,6 @@ services:
       dockerfile: "Dockerfile"
     volumes:
       - ./http_headers/php/src:/var/www/html/
-      - ./http_headers/apache_conf/000-default.conf:/etc/apache2/sites-available/000-default.conf
     networks:
       - test-network
 

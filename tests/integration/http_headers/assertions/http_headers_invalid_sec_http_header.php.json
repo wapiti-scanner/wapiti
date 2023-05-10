@@ -1,0 +1,317 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [
+            {
+                "method": "GET",
+                "path": "/invalid_sec_http_header.php",
+                "info": "X-Frame-Options has an invalid value",
+                "level": 1,
+                "parameter": "",
+                "referer": "",
+                "module": "http_headers",
+                "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"https://http_headers/invalid_sec_http_header.php\"",
+                "wstg": [
+                    "OSHP-X-Frame-Options"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "x-frame-options",
+                                "ALLOW"
+                            ],
+                            [
+                                "x-content-type-options",
+                                "fullsniff"
+                            ],
+                            [
+                                "strict-transport-security",
+                                "min-age=0"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "103"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            },
+            {
+                "method": "GET",
+                "path": "/invalid_sec_http_header.php",
+                "info": "X-Content-Type-Options has an invalid value",
+                "level": 1,
+                "parameter": "",
+                "referer": "",
+                "module": "http_headers",
+                "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"https://http_headers/invalid_sec_http_header.php\"",
+                "wstg": [
+                    "OSHP-X-Content-Type-Options"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "x-frame-options",
+                                "ALLOW"
+                            ],
+                            [
+                                "x-content-type-options",
+                                "fullsniff"
+                            ],
+                            [
+                                "strict-transport-security",
+                                "min-age=0"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "103"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            },
+            {
+                "method": "GET",
+                "path": "/invalid_sec_http_header.php",
+                "info": "Strict-Transport-Security has an invalid value",
+                "level": 1,
+                "parameter": "",
+                "referer": "",
+                "module": "http_headers",
+                "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"https://http_headers/invalid_sec_http_header.php\"",
+                "wstg": [
+                    "WSTG-CONF-07",
+                    "OSHP-HTTP-Strict-Transport-Security"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "x-frame-options",
+                                "ALLOW"
+                            ],
+                            [
+                                "x-content-type-options",
+                                "fullsniff"
+                            ],
+                            [
+                                "strict-transport-security",
+                                "min-age=0"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "103"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionnals": {},
+    "infos": {
+        "target": "https://http_headers/invalid_sec_http_header.php",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 1,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "https://http_headers/invalid_sec_http_header.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "http_headers"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-frame-options",
+                            "ALLOW"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "fullsniff"
+                        ],
+                        [
+                            "strict-transport-security",
+                            "min-age=0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "103"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
+    }
+}

@@ -84,7 +84,9 @@
     {
         "module": "http_headers",
         "targets": [
-            "http_headers"
+            "http_headers/valid_sec_http_header.php",
+            "http_headers/invalid_sec_http_header.php",
+            "http_headers/no_sec_http_header.php"
         ]
     },
     {
