@@ -96,6 +96,12 @@ services:
       drupal10-db:
         condition: service_healthy
 
+
+  buster:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_buster/php/src:/var/www/html
+      
   # Wapiti container 
   # requires all the targets containers to work perfectly
   wapiti:
@@ -115,6 +121,8 @@ services:
       drupal9:
         condition: service_healthy
       drupal10:
+        condition: service_healthy
+      buster:
         condition: service_healthy
 
 volumes:
