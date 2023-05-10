@@ -53,7 +53,6 @@ services:
     volumes:
       - ./test_mod_crlf/php/src:/var/www/html/
 
-  
   # Apache container for the shellshock module
   shellshock:
     build:
@@ -64,6 +63,19 @@ services:
     networks:
       - test-network
     <<: *healthcheck_web
+
+  # Apache container for the htaccess module
+  htaccess:
+    build:
+      context: ./test_mod_htaccess/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_web
+    volumes:
+      - ./test_mod_htaccess/php/src:/var/www/html/
+    networks:
+      - test-network
 
   # Apache container for the sql module
   sql:
@@ -77,7 +89,6 @@ services:
       - ./test_mod_sql/php/src/:/var/www/html/
     networks:
       - test-network
-
 
   timesql-db:
     build:
@@ -95,6 +106,7 @@ services:
       - timesql_db_data:/var/lib/mysql
     networks:
       - test-network
+
   # Apache container for the timesql module
   timesql:
     build:
@@ -319,6 +331,8 @@ services:
       drupal10:
         condition: service_healthy
       buster:
+        condition: service_healthy
+      htaccess:
         condition: service_healthy
       ssrf:
         condition: service_healthy
