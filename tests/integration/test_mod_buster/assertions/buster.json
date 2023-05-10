@@ -1,0 +1,58 @@
+{
+    "additionals": {
+        "Review Webserver Metafiles for Information Leakage": [
+            {
+                "method": "GET",
+                "path": "/honeypot",
+                "info": "Found webpage http://buster/honeypot/ on http://buster/honeypot",
+                "http_request": "GET /honeypot HTTP/1.1\nhost: buster\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-03"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/index.php",
+                "info": "Found webpage http://buster/index.php on http://buster/index.php",
+                "http_request": "GET /index.php HTTP/1.1\nhost: buster\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-03"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/inside",
+                "info": "Found webpage http://buster/inside/ on http://buster/inside",
+                "http_request": "GET /inside HTTP/1.1\nhost: buster\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-03"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/inside/index.html",
+                "info": "Found webpage http://buster/inside/index.html on http://buster/inside/index.html",
+                "http_request": "GET /inside/index.html HTTP/1.1\nhost: buster\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-03"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://buster/",
+        "crawled_pages_nbr": 1,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://buster/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <title>Document</title>\n</head>\n<body>\n    \n</body>\n</html>\n"
+                }
+            }
+        ]
+    }
+}
