@@ -1,0 +1,312 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [
+            {
+                "method": "GET",
+                "path": "/index.php",
+                "info": "CRLF Injection via injection in the parameter user-agent",
+                "level": 1,
+                "parameter": "user-agent",
+                "referer": "",
+                "module": "crlf",
+                "http_request": "GET /index.php?user-agent=http%3A%2F%2Fwww.google.fr%0D%0Awapiti%3A%203.1.7%20version HTTP/1.1\nhost: crlf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://crlf/index.php?user-agent=http%3A%2F%2Fwww.google.fr%0D%0Awapiti%3A%203.1.7%20version\"",
+                "wstg": [
+                    "WSTG-INPV-15"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "user-agent",
+                                "http://www.google.fr"
+                            ],
+                            [
+                                "wapiti",
+                                "3.1.7 version"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "161"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionnals": {},
+    "infos": {
+        "target": "http://crlf/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 3,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://crlf/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "crlf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.19"
+                        ],
+                        [
+                            "location",
+                            "index.php?user-agent=blabla"
+                        ],
+                        [
+                            "content-length",
+                            "191"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crlf/index.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "crlf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "user-agent",
+                            "blabla"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "161"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crlf/index.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "crlf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.19"
+                        ],
+                        [
+                            "location",
+                            "index.php?user-agent=blabla"
+                        ],
+                        [
+                            "content-length",
+                            "191"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
+    }
+}
