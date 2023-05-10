@@ -15,6 +15,7 @@ test_mod_ssrf \
 test_mod_sql \
 test_mod_timesql \
 test_mod_wapp \
+test_mod_xss \
 test_mod_xxe "
 
 # Normalize spaces for shell substitution
