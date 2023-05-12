@@ -1,5 +1,5 @@
 <?php
-// Generate a random token
+// Generate a "random" token
 $token = "AAAAAAAAAAAAAAAA";
 // Store the token in the user's session
 session_start();
