@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Optional
-from urllib.parse import quote
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
 
@@ -37,7 +36,7 @@ class ModuleCrlf(Attack):
     MSG_VULN = "CRLF Injection"
     do_get = True
     do_post = True
-    payloads = (quote("http://www.google.fr\r\nwapiti: 3.1.7 version"), Flags())
+    payloads = ("http://www.google.fr\r\nwapiti: 3.1.7 version", Flags())
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
