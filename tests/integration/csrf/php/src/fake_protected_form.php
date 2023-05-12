@@ -1,5 +1,11 @@
 <?php
+<<<<<<< HEAD
 session_id("1335df1b1b4a214");
+=======
+// Generate a "random" token
+$token = "AAAAAAAAAAAAAAAA";
+// Store the token in the user's session
+>>>>>>> 59965998 (fixed the integration tests for the CSRF module)
 session_start();
 if (!isset($_SESSION['csrf_token'])) {
     // Generate a random token
