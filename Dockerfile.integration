@@ -15,7 +15,7 @@ RUN apt update \
 COPY . .
 
 
-RUN pip3 install .
+RUN pip3 install . requests 
 
 FROM debian:bullseye-slim
 
@@ -33,9 +33,7 @@ RUN apt update \
 COPY --from=build /usr/local/lib/python3.9/dist-packages/ /usr/local/lib/python3.9/dist-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
 
-ARG CACHEBUST=1
+COPY ./tests/integration/test.py /usr/local/bin/test.py
+COPY ./tests/integration/modules.json /usr/local/bin/modules.json
 
-COPY ./tests/integration/test.sh /usr/local/bin/test.sh
-RUN chmod +x /usr/local/bin/test.sh
-
-ENTRYPOINT [ "test.sh" ]
+ENTRYPOINT [ "python3","-u","/usr/local/bin/test.py"]
