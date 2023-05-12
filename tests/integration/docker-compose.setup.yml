@@ -22,7 +22,7 @@ services:
     networks:
       - test-network
 
-  wp_enum:
+  wordpress:
     build:
       context: ./wp_enum/
       dockerfile: Dockerfile
@@ -303,7 +303,7 @@ services:
     depends_on:
       - backup
       - wp_db
-      - wp_enum
+      - wordpress
       - brute_login_form
       - buster
       - cookieflags
