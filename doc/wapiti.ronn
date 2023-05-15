@@ -38,8 +38,12 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--tor`
   * `--mitm-port` <PORT>
   * `-a`, `--auth-cred` <CREDENTIALS>
+  * `--auth-user` <USERNAME>
+  * `--auth-password` <PASSWORD>
   * `--auth-method` {basic,digest,ntlm}
   * `--form-cred` <CREDENTIALS>
+  * `--form-user` <USERNAME>
+  * `--form-password` <PASSWORD>
   * `--form-url` <URL>
   * `--form-enctype` <ENCTYPE>
   * `--form-script` <FILENAME>
@@ -154,16 +158,28 @@ OTHER OPTIONS:
     Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    Set credentials to use for HTTP authentication on the target (see available methods bellow).
+    (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).
     Given value should be in the form login%password (% is used as a separator)
-    
+
+  * `--auth-user` <USERNAME>  
+    Set username to use for HTTP authentication on the target (see available methods bellow).
+
+    * `--auth-password` <PASSWORD>  
+    Set password to use for HTTP authentication on the target (see available methods bellow).
+
   * `--auth-method` <TYPE>  
     Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
     NTLM authentication may require you to install an additional Python module.
 
   * `--form-cred` <CREDENTIALS>  
-    Set credentials to use for web form authentication on the target.
+    (DEPRECATED) Set credentials to use for web form authentication on the target.
     Given value should be in the form login%password (% is used as a separator)
+
+  * `--form-user` <USERNAME>  
+    Set username to use for web form authentication on the target.
+
+    * `--form-password` <PASSWORD>  
+    Set password to use for web form authentication on the target.
 
   * `--form-url` <URL>  
     If `--form-data` is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.

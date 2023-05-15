@@ -181,11 +181,20 @@ async def wapiti_main():
             wap.set_drop_cookies()
 
         if "http_credentials" in args:
+            # This option is deprecated, but we still support it
+            # Should be removed in the future
             if "%" in args.http_credentials:
                 username, password = args.http_credentials.split("%", 1)
                 wap.set_http_credentials(HttpCredential(username, password, args.auth_method))
             else:
                 raise InvalidOptionValue("-a", args.http_credentials)
+        elif "http_user" in args and "http_password" in args:
+            wap.set_http_credentials(HttpCredential(args.http_user, args.http_password, args.auth_method))
+
+        if ("http_user" in args and "http_password" not in args) or \
+           ("http_user" not in args and "http_password" in args):
+            raise InvalidOptionValue("--auth-user and --auth-password",
+                                     "Both options are required when one is used")
 
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
@@ -281,26 +290,43 @@ async def wapiti_main():
 
     assert os.path.exists(wap.history_file)
 
-    if "http_credentials" in args:
+    if "http_credentials" in args or ("http_user" in args and "http_password" in args):
         if not await check_http_auth(wap.crawler_configuration):
             logging.warning("[!] HTTP authentication failed, a 4xx status code was received")
             return
 
     form_credential = None
     if "form_credentials" in args:
-        # If the option is set it MUST have valid requirements
-        if "%" not in args.form_credentials:
-            raise InvalidOptionValue("--form-cred", args.form_credentials)
-
         if "form_url" not in args:
-            raise InvalidOptionValue("--form-url", "This option is required when --form-cred is used")
-
-        username, password = args.form_credentials.split("%", 1)
-        form_credential = FormCredential(
+            raise InvalidOptionValue(
+                "--form-url",
+                "This option is required when --form-user and --form-password or form-cred is used")
+        # This option is deprecated, but we still support it
+        # Should be removed in the future
+        username, password = None, None
+        if "%" in args.form_credentials:
+            username, password = args.form_credentials.split("%", 1)
+            form_credential = FormCredential(
             username,
             password,
             args.form_url,
         )
+        else:
+            raise InvalidOptionValue("--form-cred", args.form_credentials)
+    elif "form_user" in args and "form_password" in args:
+        if "form_url" not in args:
+            raise InvalidOptionValue(
+                "--form-url",
+                "This option is required when --form-user and --form-password or form-cred is used")
+        form_credential = FormCredential(
+            args.form_user,
+            args.form_password,
+            args.form_url,
+        )
+
+    if ("form_user" in args and "form_password" not in args) or ("form_user" not in args and "form_password" in args):
+        raise InvalidOptionValue("--form-user and --form-password", "Both options are required when one is used")
+
 
     if "form_script" in args:
         await load_form_script(

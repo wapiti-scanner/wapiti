@@ -57,11 +57,21 @@ def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:
         crawler_configuration.user_agent = arguments.user_agent
 
     if "http_credentials" in arguments:
+            # This option is deprecated, but we still support it
+            # Should be removed in the future
         if "%" in arguments.http_credentials:
             username, password = arguments.http_credentials.split("%", 1)
             crawler_configuration.http_credential = HttpCredential(username, password, arguments.auth_method)
         else:
             raise InvalidOptionValue("-a", arguments.http_credentials)
+    elif "http_user" in arguments and "http_password" in arguments:
+        crawler_configuration.http_credential = HttpCredential(arguments.http_user, arguments.http_password,
+                                                               arguments.auth_method)
+
+    if ("http_user" in arguments and "http_password" not in arguments) or \
+       ("http_user" not in arguments and "http_password" in arguments):
+        raise InvalidOptionValue("--auth-user and --auth-password", arguments.http_credentials)
+
 
     headers = {}
     for custom_header in arguments.headers:
@@ -101,12 +111,33 @@ async def getcookie_main(arguments):
         help="Use Tor listener (127.0.0.1:9050)",
     )
 
+    # This option is deprecated
+    # Should be removed in a future version
     parser.add_argument(
         "-a", "--auth-cred",
         dest="http_credentials",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="(DEPRECATED) Set HTTP authentication credentials",
+        metavar="CREDENTIALS",
+    )
+
+    parser.add_argument(
+        "--auth-user",
+        dest="http_user",
+        action="store",
         default=argparse.SUPPRESS,
         help="Set HTTP authentication credentials",
-        metavar="CREDENTIALS",
+        metavar="USERNAME",
+    )
+
+    parser.add_argument(
+        "--auth-password",
+        dest="http_password",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="Set HTTP authentication credentials",
+        metavar="PASSWORD",
     )
 
     parser.add_argument(
