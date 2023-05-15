@@ -1,0 +1,168 @@
+[
+    {
+        "module": "backup",
+        "targets": [
+            "backup"
+        ]
+    },
+    {
+        "module": "wp_enum",
+        "targets": [
+            "wordpress"
+        ]
+    },
+    {
+        "module": "brute_login_form",
+        "targets": [
+            "brute_login_form"
+        ]
+    },
+    {
+        "module": "buster",
+        "targets": [
+            "buster"
+        ]
+    },
+    {
+        "module": "cookieflags",
+        "targets": [
+            "cookieflags"
+        ]
+    },
+    {
+        "module": "crlf",
+        "targets": [
+            "crlf"
+        ]
+    },
+    {
+        "module": "csp",
+        "targets": [
+            "csp/csp_insecured.php",
+            "csp/index.php",
+            "csp/csp_secured.php"
+        ]
+    },
+    {
+        "module": "csrf",
+        "targets": [
+            "csrf"
+        ]
+    },
+    {
+        "module": "exec",
+        "targets": [
+            "exec"
+        ]
+    },
+    {
+        "module": "file",
+        "targets": [
+            "file"
+        ]
+    },
+    {
+        "module": "htaccess",
+        "targets": [
+            "htaccess"
+        ]
+    },
+    {
+        "module": "htp",
+        "targets": [
+            "htp"
+        ]
+    },
+    {
+        "module": "drupal_enum",
+        "targets": [
+            "drupal8",
+            "drupal9",
+            "drupal10"
+        ]
+    },
+    {
+        "module": "http_headers",
+        "targets": [
+            "http_headers"
+        ]
+    },
+    {
+        "module": "log4shell",
+        "targets": [
+            "log4shell"
+        ]
+    },
+    {
+        "module": "methods",
+        "targets": [
+            "methods"
+        ]
+    },
+    {
+        "module": "nikto",
+        "targets": [
+            "nikto"
+        ]
+    },
+    {
+        "module": "permanentxxs",
+        "targets": [
+            "permanentxxs"
+        ]
+    },
+    {
+        "module": "xxe",
+        "targets": [
+            "xxe"
+        ]
+    },
+    {
+        "module": "shellshock",
+        "targets": [
+            "shellshock"
+        ]
+    },
+    {
+        "module": "sql",
+        "targets": [
+            "sql"
+        ]
+    },
+    {
+        "module": "ssl",
+        "targets": [
+            "ssl"
+        ]
+    },
+    {
+        "module": "ssrf",
+        "targets": [
+            "ssrf"
+        ]
+    },
+    {
+        "module": "takeover",
+        "targets": [
+            "takeover"
+        ]
+    },
+    {
+        "module": "timesql",
+        "targets": [
+            "timesql"
+        ]
+    },
+    {
+        "module": "wapp",
+        "targets": [
+            "wapp"
+        ]
+    },
+    {
+        "module": "xxs",
+        "targets": [
+            "xxs"
+        ]
+    }
+]
