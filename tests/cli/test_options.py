@@ -135,7 +135,7 @@ async def test_update_with_proxy():
 @mock.patch("wapitiCore.main.wapiti.check_http_auth", return_value=True)
 async def test_use_http_creds(mock_check_http_auth, _, __):
     """Let's ensure that the proxy is used when updating modules resources."""
-    testargs = ["wapiti", "-a", "test%test", "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"]
+    testargs = ["wapiti", "--auth-user", "test", "--auth-password", "test", "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"]
 
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()
@@ -150,7 +150,8 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
     """Let's ensure that the proxy is used when updating modules resources."""
     testargs = [
         "wapiti",
-        "--form-cred", "test%test",
+        "--form-user", "test",
+        "--form-password", "test",
         "--form-url", "http://testphp.vulnweb.com/login.php",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "",

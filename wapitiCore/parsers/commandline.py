@@ -112,12 +112,33 @@ def parse_args():
         type=float
     )
 
+    # This option is deprecated
+    # Should be removed in a future version
     parser.add_argument(
         "-a", "--auth-cred",
         dest="http_credentials",
+        action="store",
         default=argparse.SUPPRESS,
-        help="Set HTTP authentication credentials",
+        help="(DEPRECATED) Set HTTP authentication credentials",
         metavar="CREDENTIALS"
+    )
+
+    parser.add_argument(
+        "--auth-user",
+        dest="http_user",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="Set HTTP authentication username credentials",
+        metavar="USERNAME",
+    )
+
+    parser.add_argument(
+        "--auth-password",
+        dest="http_password",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="Set HTTP authentication password credentials",
+        metavar="PASSWORD",
     )
 
     parser.add_argument(
@@ -127,12 +148,33 @@ def parse_args():
         choices=["basic", "digest", "ntlm"]
     )
 
+    # This option is deprecated
+    # Should be removed in a future version
     parser.add_argument(
         "--form-cred",
         dest="form_credentials",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="(DEPRECATED) Set login form credentials",
+        metavar="CREDENTIALS"
+    )
+
+    parser.add_argument(
+        "--form-user",
+        dest="form_user",
+        action="store",
         default=argparse.SUPPRESS,
         help="Set login form credentials",
-        metavar="CREDENTIALS"
+        metavar="USERNAME"
+    )
+
+    parser.add_argument(
+        "--form-password",
+        dest="form_password",
+        action="store",
+        default=argparse.SUPPRESS,
+        help="Set password form credentials",
+        metavar="PASSWORD"
     )
 
     parser.add_argument(

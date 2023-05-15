@@ -164,7 +164,7 @@ async def test_getcookie_basic_auth():
         url = "https://lundberg.github.io/respx/guide/"
         respx.get(url).mock(return_value=httpx.Response(200))
 
-        await getcookie_main(["-u", url, "-c", json_fd.name, "--auth-cred", "john%doe"])
+        await getcookie_main(["-u", url, "-c", json_fd.name, "--auth-user", "john", "--auth-password", "doe"])
 
         assert "Authorization" in respx.calls.last.request.headers
         assert respx.calls.last.request.headers["Authorization"] == "Basic am9objpkb2U="

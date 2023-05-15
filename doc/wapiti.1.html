@@ -130,8 +130,12 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--tor</code></li>
 <li><code>--mitm-port</code> <var>PORT</var></li>
 <li><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var></li>
+<li><code>--auth-user</code> <var>USERNAME</var></li>
+<li><code>--auth-password</code> <var>PASSWORD</var></li>
 <li><code>--auth-method</code> {basic,digest,ntlm}</li>
 <li><code>--form-cred</code> <var>CREDENTIALS</var></li>
+<li><code>--form-user</code> <var>USERNAME</var></li>
+<li><code>--form-password</code> <var>PASSWORD</var></li>
 <li><code>--form-url</code> <var>URL</var></li>
 <li><code>--form-enctype</code> <var>ENCTYPE</var></li>
 <li><code>--form-script</code> <var>FILENAME</var></li>
@@ -272,15 +276,17 @@ Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li
 <li><p><code>--mitm-port</code> <var>PORT</var>
 If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
 Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p></li>
-<li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
-Set credentials to use for HTTP authentication on the target (see available methods bellow).
-Given value should be in the form login%password (% is used as a separator)</p></li>
+<li><p><code>-a</code>, <code>--auth-user</code> <var>USERNAME</var><br />
+Set username to use for HTTP authentication on the target (see available methods bellow).</p></li>
+<li><p><code>-a</code>, <code>--auth-password</code> <var>PASSWORD</var><br />
+Set password to use for HTTP authentication on the target (see available methods bellow).</p></li>
 <li><p><code>--auth-method</code> <var>TYPE</var><br />
 Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
 NTLM authentication may require you to install an additional Python module.</p></li>
-<li><p><code>--form-cred</code> <var>CREDENTIALS</var><br />
-Set credentials to use for web form authentication on the target.
-Given value should be in the form login%password (% is used as a separator)</p></li>
+<li><p><code>--form-user</code> <var>USERNAME</var><br />
+Set username to use for web form authentication on the target.</p></li>
+<li><p><code>--form-password</code> <var>PASSWORD</var><br />
+Set password to use for web form authentication on the target.</p></li>
 <li><p><code>--form-url</code> <var>URL</var><br />
 If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
 Otherwise raw credentials are sent directly to the given URL.</p></li>
