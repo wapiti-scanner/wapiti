@@ -16,6 +16,7 @@ die(){
     exit 1
 }
 
+MODULE_NAME=$(pwd | cut -d'/' -f8)
 
 # Ensure we are on the good execution directory
 cd "$(dirname "$0")"
