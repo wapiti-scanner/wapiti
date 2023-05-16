@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker compose -f docker-compose.solo_test.yml up --abort-on-container-exit
+docker compose -f docker-compose.setup.yml up --abort-on-container-exit
 
 asserters=$(find . -name check.sh)
 
