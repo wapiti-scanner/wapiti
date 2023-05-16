@@ -1,11 +1,12 @@
 #!/bin/bash
 
-docker compose -f docker-compose.setup.yml up --abort-on-container-exit
+docker compose -f docker-compose.setup.yml up --abort-on-container-exit 
 
-asserters=$(find . -name check.sh)
+# will do some checks only where assertions files exist
+asserters=$(find . -mindepth 2 -type d -name assertions)
 
-for script in ${asserters}; do
-    cd $(dirname "${script}")
-    bash $(basename "${script}")
+for path in ${asserters}; do
+    cd  "${path}"
+    bash "check.sh"
     cd - > /dev/null
 done
