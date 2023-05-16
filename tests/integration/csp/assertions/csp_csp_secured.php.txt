@@ -1,0 +1,45 @@
+  },
+  "vulnerabilities": {
+    "Backup file": [],
+    "Weak credentials": [],
+    "CRLF Injection": [],
+    "Content Security Policy Configuration": [],
+    "Cross Site Request Forgery": [],
+    "Potentially dangerous file": [],
+    "Command execution": [],
+    "Path Traversal": [],
+    "Fingerprint web application framework": [],
+    "Fingerprint web server": [],
+    "Htaccess Bypass": [],
+    "HTTP Secure Headers": [],
+    "HttpOnly Flag cookie": [],
+    "Log4Shell": [],
+    "Open Redirect": [],
+    "Reflected Cross Site Scripting": [],
+    "Secure Flag cookie": [],
+    "SQL Injection": [],
+    "TLS/SSL misconfigurations": [],
+    "Server Side Request Forgery": [],
+    "Stored Cross Site Scripting": [],
+    "Subdomain takeover": [],
+    "Blind SQL Injection": [],
+    "XML External Entity": []
+  },
+  "anomalies": {
+    "Internal Server Error": [],
+    "Resource consumption": []
+  },
+  "additionals": {
+    "Fingerprint web technology": [],
+    "HTTP Methods": []
+  },
+  "infos": {
+    "target": "http://csp/csp_secured.php",
+    "date": "Tue, 16 May 2023 15:01:27 +0000",
+    "version": "Wapiti 3.1.7",
+    "scope": "folder",
+    "auth": null,
+    "crawled_pages_nbr": 1,
+    "detailed_report": false
+  }
+}

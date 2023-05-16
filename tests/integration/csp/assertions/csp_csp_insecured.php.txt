@@ -1,0 +1,90 @@
+  "vulnerabilities": {
+    "Backup file": [],
+    "Weak credentials": [],
+    "CRLF Injection": [],
+    "Content Security Policy Configuration": [
+      {
+        "method": "GET",
+        "path": "/csp_insecured.php",
+        "info": "CSP \"default-src\" value is not safe",
+        "level": 1,
+        "parameter": "",
+        "referer": "",
+        "module": "csp",
+        "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "curl_command": "curl \"http://csp/csp_insecured.php\"",
+        "wstg": [
+          "WSTG-CONF-12",
+          "OSHP-Content-Security-Policy"
+        ]
+      },
+      {
+        "method": "GET",
+        "path": "/csp_insecured.php",
+        "info": "CSP \"script-src\" value is not safe",
+        "level": 1,
+        "parameter": "",
+        "referer": "",
+        "module": "csp",
+        "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "curl_command": "curl \"http://csp/csp_insecured.php\"",
+        "wstg": [
+          "WSTG-CONF-12",
+          "OSHP-Content-Security-Policy"
+        ]
+      },
+      {
+        "method": "GET",
+        "path": "/csp_insecured.php",
+        "info": "CSP \"object-src\" value is not safe",
+        "level": 1,
+        "parameter": "",
+        "referer": "",
+        "module": "csp",
+        "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "curl_command": "curl \"http://csp/csp_insecured.php\"",
+        "wstg": [
+          "WSTG-CONF-12",
+          "OSHP-Content-Security-Policy"
+        ]
+      }
+    ],
+    "Cross Site Request Forgery": [],
+    "Potentially dangerous file": [],
+    "Command execution": [],
+    "Path Traversal": [],
+    "Fingerprint web application framework": [],
+    "Fingerprint web server": [],
+    "Htaccess Bypass": [],
+    "HTTP Secure Headers": [],
+    "HttpOnly Flag cookie": [],
+    "Log4Shell": [],
+    "Open Redirect": [],
+    "Reflected Cross Site Scripting": [],
+    "Secure Flag cookie": [],
+    "SQL Injection": [],
+    "TLS/SSL misconfigurations": [],
+    "Server Side Request Forgery": [],
+    "Stored Cross Site Scripting": [],
+    "Subdomain takeover": [],
+    "Blind SQL Injection": [],
+    "XML External Entity": []
+  },
+  "anomalies": {
+    "Internal Server Error": [],
+    "Resource consumption": []
+  },
+  "additionals": {
+    "Fingerprint web technology": [],
+    "HTTP Methods": []
+  },
+  "infos": {
+    "target": "http://csp/csp_insecured.php",
+    "date": "Tue, 16 May 2023 15:01:30 +0000",
+    "version": "Wapiti 3.1.7",
+    "scope": "folder",
+    "auth": null,
+    "crawled_pages_nbr": 1,
+    "detailed_report": false
+  }
+}
