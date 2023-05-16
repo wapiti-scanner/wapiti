@@ -22,6 +22,7 @@ for mod in modules_data:
     if not os.path.exists(f"/home/{mod['module']}"):
         os.mkdir(f"/home/{mod['module']}")
 
+
 # data structures to count target and cycle through modules
 tested_targets = set()
 iter_modules = cycle(modules_data)
@@ -41,7 +42,7 @@ for mod in iter_modules:
         break
     for target in mod["targets"]:
         if target not in tested_targets:
-            sys.stdout.write(f"Querying target {target}...\n")
+            sys.stdout.write(f"Querying target {target} from {mod['module']}...\n")
             requests_counter[target] += 1
             try:
                 requests.get(f"http://{target}")
