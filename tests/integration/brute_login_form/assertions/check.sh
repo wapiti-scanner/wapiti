@@ -29,7 +29,8 @@ fi
 # somewhat useful
 declare -a targets_name
 for i in "${assertions[@]}"; do
-    targets_name+=("$(basename "$i" | cut -d'.' -f 1)")
+    filename="$(basename "$i")"
+    targets_name+=("${filename%.*}")
 done
 
 
