@@ -53,10 +53,10 @@ if [[ ${#assertions[@]} -ne ${#targets_name[@]} || ${#targets_name[@]} -ne ${#ou
     die "Error: different number of reports/assertion files, found ${#outputs[@]} outputs for ${#assertions[@]} assertions"
 fi
 
-# Finally, we give grep (in quiet mode) the 2 paths to know weither an assertion's content is 
+# Finally, we give grep the 2 paths to know weither an assertion's content is 
 # a substring of the report or not 
 for i in "${!outputs[@]}"; do
-    if [[ $( grep -qFf <(cat "${assertions[$i]}") <(cat "${outputs[$i]}")) -ne 0 ]]; then
+    if [[ $( grep -Ff <(cat "${assertions[$i]}") <(cat "${outputs[$i]}") >/dev/null ) -ne 0 ]]; then
         die "Assertion ${targets_name[$i]} not respected"
     else
         echo "Assertion ${targets_name[$i]} of module $MODULE_NAME respected"
