@@ -13,8 +13,8 @@ die(){
 
 MODULE_NAME=$(pwd | cut -d'/' -f8)
 
-# get all the assertions (paths to texts files that we want to find in the report)
-# 1 assertion per target, one or some target per modules
+# Get all the assertions (paths to text files that we want to find in the report)
+# 1 assertion per target, one or more targets per module
 # assertions can be found in the same directory than this file
 declare -a assertions=()
 mapfile -t assertions < <(find . -name "*.txt")
@@ -23,7 +23,7 @@ if [[ ${#assertions[@]} -eq 0 ]]; then
 fi
 
 # Since the assertions and the target reports must have the same name 
-# (except their extention name, .out and .txt) we extract the targets names
+# (except their extention name, .txt and .out) we extract the target names
 # from the assertion array
 # We also use their names to log some informations so keeping an array is
 # somewhat useful
