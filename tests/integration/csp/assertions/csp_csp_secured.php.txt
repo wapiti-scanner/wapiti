@@ -1,4 +1,3 @@
-  },
   "vulnerabilities": {
     "Backup file": [],
     "Weak credentials": [],
@@ -35,7 +34,6 @@
   },
   "infos": {
     "target": "http://csp/csp_secured.php",
-    "date": "Tue, 16 May 2023 15:01:27 +0000",
     "version": "Wapiti 3.1.7",
     "scope": "folder",
     "auth": null,
