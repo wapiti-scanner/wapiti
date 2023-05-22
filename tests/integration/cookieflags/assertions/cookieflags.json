@@ -1,0 +1,71 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [
+            {
+                "method": "GET",
+                "path": "/",
+                "info": "HttpOnly flag is not set in the cookie : not_httponly_cookie",
+                "level": 1,
+                "parameter": "",
+                "referer": "",
+                "module": "cookieflags",
+                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://cookieflags/\"",
+                "wstg": [
+                    "WSTG-SESS-02"
+                ]
+            }
+        ],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [
+            {
+                "method": "GET",
+                "path": "/",
+                "info": "Secure flag is not set in the cookie : insecure_cookie",
+                "level": 1,
+                "parameter": "",
+                "referer": "",
+                "module": "cookieflags",
+                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://cookieflags/\"",
+                "wstg": [
+                    "WSTG-SESS-02"
+                ]
+            }
+        ],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionnals": {},
+    "infos": {
+        "target": "http://cookieflags/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 4,
+        "detailed_report": false
+    }
+}

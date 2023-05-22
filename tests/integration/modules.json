@@ -160,9 +160,9 @@
         ]
     },
     {
-        "module": "xxs",
+        "module": "xss",
         "targets": [
-            "xxs"
+            "xss"
         ]
     }
 ]

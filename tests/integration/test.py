@@ -22,7 +22,6 @@ for mod in modules_data:
     if not os.path.exists(f"/home/{mod['module']}"):
         os.mkdir(f"/home/{mod['module']}")
 
-
 # data structures to count target and cycle through modules
 tested_targets = set()
 iter_modules = cycle(modules_data)
@@ -42,18 +41,31 @@ for mod in iter_modules:
         break
     for target in mod["targets"]:
         if target not in tested_targets:
-            sys.stdout.write(f"Querying target {target} from {mod['module']}...\n")
+            sys.stdout.write(f"Querying target {target}...\n")
             requests_counter[target] += 1
             try:
                 requests.get(f"http://{target}")
                 os.system(f"wapiti -u http://{target} -m {mod['module']} "
                           f"-f json -o /home/{mod['module']}/{re.sub('/','_',target)}.out"
-                          f" --flush-session")
+                          f"--detailed-report --flush-session ")
+                # Now we reparse the JSON to get only useful tests informations:
+                with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "r") as bloated_output_file:
+                    bloated_output_data = json.load(bloated_output_file)
+                with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "w") as output_file:
+                    # The date is useless and creates false positive, removing it
+                    dateless_info_data = bloated_output_data.get("infos", {}).copy()
+                    dateless_info_data.pop("date", None)
+                    json.dump({
+                        "vulnerabilities": bloated_output_data.get("vulnerabilities", {}),
+                        "anomalies": bloated_output_data.get("anomalies", {}),
+                        "additionnals": bloated_output_data.get("additionnals", {}),
+                        "infos": dateless_info_data
+                    }, output_file, indent=4)
                 tested_targets.add(target)
             except requests.exceptions.ConnectionError:
-                sys.stdout.write(f"Target {target} from module {mod['module']} is not ready yet...\n")
-                # print(f"Target {target} is not ready yet...")
+                sys.stdout.write(f"Target {target} is not ready yet...\n")
                 pass
-        if requests_counter[target] > MAX_REQ:
-            sys.stdout.write(f"Target {target} from module {mod['module']} takes too long to respond\nSkipping...\n")
-            tested_targets.add(target)
+            if requests_counter[target] > MAX_REQ:
+                sys.stdout.write(
+                    f"Target {target} from module {mod['module']} takes too long to respond\nSkipping...\n")
+                tested_targets.add(target)

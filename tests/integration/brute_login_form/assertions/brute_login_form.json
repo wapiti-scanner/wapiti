@@ -1,0 +1,56 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [
+            {
+                "method": "POST",
+                "path": "/index.php",
+                "info": "Credentials found for URL http://brute_login_form/ : admin / admin",
+                "level": 1,
+                "parameter": "",
+                "referer": "http://brute_login_form/",
+                "module": "brute_login_form",
+                "http_request": "POST /index.php HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\n\nusername=admin&password=admin",
+                "curl_command": "curl \"http://brute_login_form/index.php\" -e \"http://brute_login_form/\" -d \"username=admin&password=admin\"",
+                "wstg": [
+                    "WSTG-ATHN-07"
+                ]
+            }
+        ],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionnals": {},
+    "infos": {
+        "target": "http://brute_login_form/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 3,
+        "detailed_report": false
+    }
+}
