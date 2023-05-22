@@ -1,3 +1,10 @@
+<?php
+session_start();
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    http_response_code(200);
+    echo "form submitted !";
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
