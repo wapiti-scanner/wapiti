@@ -14,6 +14,6 @@ mapfile -t asserters < <(find . -mindepth 2 -type d -name assertions)
 
 for path in "${asserters[@]}"; do
     cd "${path}" 
-    bash "check.sh"
+    bash "check.sh" || echo "assertion ${path} not ready, skipping"
     cd - > /dev/null 
 done

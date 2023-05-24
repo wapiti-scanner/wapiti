@@ -31,7 +31,7 @@ total_targets = sum([len(mod["targets"]) for mod in modules_data])
 # started well, this is another way to fill the set to break
 # the loop
 requests_counter = defaultdict(int)
-MAX_REQ = 500
+MAX_REQ = 50
 
 # Running wapiti for each module for each target
 # If a target isn't set up, passing to another and so on
@@ -44,10 +44,13 @@ for mod in iter_modules:
             sys.stdout.write(f"Querying target {target}...\n")
             requests_counter[target] += 1
             try:
-                requests.get(f"http://{target}")
-                os.system(f"wapiti -u http://{target} -m {mod['module']} "
+                secure_conn = ("https"
+                               if requests.get(f"http://{target}", allow_redirects=True, verify=False).url.startswith("https://")
+                               else "http")
+                # We then call wapiti on each target of each module, generating a detailed JSON report
+                os.system(f"wapiti -u {secure_conn}://{target} -m {mod['module']} "
                           f"-f json -o /home/{mod['module']}/{re.sub('/','_',target)}.out"
-                          f"--detailed-report --flush-session ")
+                          f" --detailed-report --flush-session --verbose 2 ")
                 # Now we reparse the JSON to get only useful tests informations:
                 with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "r") as bloated_output_file:
                     bloated_output_data = json.load(bloated_output_file)
