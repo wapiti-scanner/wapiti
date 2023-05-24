@@ -12,41 +12,11 @@
         "Fingerprint web server": [],
         "Htaccess Bypass": [],
         "HTTP Secure Headers": [],
-        "HttpOnly Flag cookie": [
-            {
-                "method": "GET",
-                "path": "/",
-                "info": "HttpOnly flag is not set in the cookie : not_httponly_cookie",
-                "level": 1,
-                "parameter": "",
-                "referer": "",
-                "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "curl_command": "curl \"http://cookieflags/\"",
-                "wstg": [
-                    "WSTG-SESS-02"
-                ]
-            }
-        ],
+        "HttpOnly Flag cookie": [],
         "Log4Shell": [],
         "Open Redirect": [],
         "Reflected Cross Site Scripting": [],
-        "Secure Flag cookie": [
-            {
-                "method": "GET",
-                "path": "/",
-                "info": "Secure flag is not set in the cookie : insecure_cookie",
-                "level": 1,
-                "parameter": "",
-                "referer": "",
-                "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "curl_command": "curl \"http://cookieflags/\"",
-                "wstg": [
-                    "WSTG-SESS-02"
-                ]
-            }
-        ],
+        "Secure Flag cookie": [],
         "SQL Injection": [],
         "TLS/SSL misconfigurations": [],
         "Server Side Request Forgery": [],
@@ -61,11 +31,99 @@
     },
     "additionnals": {},
     "infos": {
-        "target": "http://cookieflags/",
+        "target": "http://backup/",
         "version": "Wapiti 3.1.7",
         "scope": "folder",
         "auth": null,
-        "crawled_pages_nbr": 4,
-        "detailed_report": false
+        "crawled_pages_nbr": 1,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://backup/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "backup"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n\n<html>\n\n<head>\n\n\t<meta charset=\"UTF-8\">\n\n\t<title>Backup</title>\n\n</head>\n\n<body>\n\n\n\n\t<p>Here you can find a backup file supposed to be in the same directory</p>\n\n\n\n</body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "date",
+                            "Wed, 24 May 2023 12:10:13 GMT"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "last-modified",
+                            "Tue, 23 May 2023 07:53:21 GMT"
+                        ],
+                        [
+                            "etag",
+                            "\"c6-5fc57ae687447-gzip\""
+                        ],
+                        [
+                            "accept-ranges",
+                            "bytes"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "165"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
     }
 }
