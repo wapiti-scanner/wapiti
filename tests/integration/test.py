@@ -6,6 +6,25 @@ import re
 from itertools import cycle
 from collections import defaultdict
 
+
+def purge_date(data):
+    """
+    Look recursively for any pattern matching ["date", XXXXXX] in a dictionnary 
+    containing lists, dictionnaries, and other non-collections structures
+    """
+    if isinstance(data, dict):
+        for key in data.keys():
+            purge_date(data[key])
+    elif isinstance(data, list) and len(data) != 0:
+        for i, item in enumerate(data):
+            if isinstance(item, list) and len(item) == 2 and item[0] == "date":
+                data.pop(i)
+            elif isinstance(item, dict) or isinstance(item, list):
+                purge_date(item)
+    else:
+        return
+
+
 # parsing the json file containing the modules
 with open('/usr/local/bin/modules.json', 'r') as modules_file:
     modules_data = json.load(modules_file)
@@ -58,6 +77,11 @@ for mod in iter_modules:
                     # The date is useless and creates false positive, removing it
                     dateless_info_data = bloated_output_data.get("infos", {}).copy()
                     dateless_info_data.pop("date", None)
+
+                    # Some dates still exists in the "crawled pages" section of the detailed report
+                    purge_date(bloated_output_data)
+
+                    # Rewriting the file
                     json.dump({
                         "vulnerabilities": bloated_output_data.get("vulnerabilities", {}),
                         "anomalies": bloated_output_data.get("anomalies", {}),
