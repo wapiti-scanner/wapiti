@@ -105,6 +105,9 @@ VULN = "vulnerability"
 ANOM = "anomaly"
 ADDITION = "additional"
 
+# File extensions to attempt to upload for XXE
+XXE_FILE_EXTENSIONS = ("svg", "xml")
+
 
 class PayloadType(Enum):
     pattern = 1
@@ -539,7 +542,7 @@ class Mutator:
                     yield evil_req, "QUERY_STRING", payload, original_flags.with_method(PayloadType.get)
 
 
-class FileMutator:
+class XXEUploadMutator:
     def __init__(self, payloads=None, parameters=None, skip=None):
         self._payloads = payloads
         self._attack_hashes = set()
@@ -591,21 +594,22 @@ class FileMutator:
                     hexlify(param_name.encode("utf-8", errors="replace")).decode()
                 )
 
-                # httpx needs bytes as content value
-                new_params[i][1] = ("content.xml", payload.encode(errors="replace"), "text/xml")
+                for file_extension in XXE_FILE_EXTENSIONS:
+                    # httpx needs bytes as content value
+                    new_params[i][1] = (f"content.{file_extension}", payload.encode(errors="replace"), "text/xml")
 
-                evil_req = Request(
-                    request.path,
-                    method=request.method,
-                    get_params=get_params,
-                    post_params=post_params,
-                    file_params=new_params,
-                    referer=referer,
-                    link_depth=request.link_depth
-                )
-                # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
-                # so let's copy them just to be sure we don't mess with them.
-                yield evil_req, param_name, payload, original_flags.with_method(PayloadType.file)
+                    evil_req = Request(
+                        request.path,
+                        method=request.method,
+                        get_params=get_params,
+                        post_params=post_params,
+                        file_params=new_params,
+                        referer=referer,
+                        link_depth=request.link_depth
+                    )
+                    # Flags from iter_payloads should be considered as mutable (even if it's ot the case)
+                    # so let's copy them just to be sure we don't mess with them.
+                    yield evil_req, param_name, payload, original_flags.with_method(PayloadType.file)
 
 
 class PayloadReader:

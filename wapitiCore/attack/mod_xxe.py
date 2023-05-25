@@ -26,7 +26,7 @@ from os.path import join as path_join
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
-from wapitiCore.attack.attack import Attack, FileMutator, Mutator, PayloadReader, Flags
+from wapitiCore.attack.attack import Attack, XXEUploadMutator, Mutator, PayloadReader, Flags
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.xxe import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
@@ -270,7 +270,7 @@ class ModuleXxe(Attack):
                     break
 
     async def attack_upload(self, original_request):
-        mutator = FileMutator(payloads=self.payloads)
+        mutator = XXEUploadMutator(payloads=self.payloads)
         current_parameter = None
         vulnerable_parameter = False
 
@@ -407,7 +407,7 @@ class ModuleXxe(Attack):
 
                         mutated_request, __, __, __ = next(mutator.mutate(original_request))
                     else:
-                        mutator = FileMutator(
+                        mutator = XXEUploadMutator(
                             payloads=[(payload, Flags())],
                             parameters=[parameter],
                             skip=self.options.get("skipped_parameters")
