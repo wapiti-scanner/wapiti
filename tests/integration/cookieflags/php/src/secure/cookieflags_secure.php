@@ -1,6 +1,6 @@
 <?php
 	// Set a cookie named "my_cookie" with the value "example_value"
-	setcookie("secure_cookie", "example_value", time()+3600, "/secure", "", true, true );
+	setcookie("secure_cookie", "example_value", 0, "/secure", "", true, true );
 ?>
 <!DOCTYPE html>
 <html>

@@ -149,6 +149,84 @@
             },
             {
                 "request": {
+                    "url": "http://cookieflags/insecure/cookieflags_insecure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "cookieflags"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title>Set Cookie Example</title>\n\t</head>\n\t<body>\n\t\t<p>Cookie set successfully.</p>\n\t</body>\n</html>",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "set-cookie",
+                            "insecure_cookie=example_value; path=/insecure; HttpOnly"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "119"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
                     "url": "http://cookieflags/secure/cookieflags_secure.php",
                     "method": "GET",
                     "headers": [
@@ -196,7 +274,7 @@
                         ],
                         [
                             "set-cookie",
-                            "secure_cookie=example_value; expires=Thu, 25-May-2023 08:28:16 GMT; Max-Age=3600; path=/secure; secure; HttpOnly"
+                            "secure_cookie=example_value; path=/secure; secure; HttpOnly"
                         ],
                         [
                             "vary",
@@ -212,7 +290,7 @@
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=99"
+                            "timeout=5, max=100"
                         ],
                         [
                             "connection",
@@ -274,85 +352,7 @@
                         ],
                         [
                             "set-cookie",
-                            "not_httponly_cookie=example_value; expires=Thu, 25-May-2023 08:28:16 GMT; Max-Age=3600; path=/insecure; secure"
-                        ],
-                        [
-                            "vary",
-                            "Accept-Encoding"
-                        ],
-                        [
-                            "content-encoding",
-                            "gzip"
-                        ],
-                        [
-                            "content-length",
-                            "119"
-                        ],
-                        [
-                            "keep-alive",
-                            "timeout=5, max=100"
-                        ],
-                        [
-                            "connection",
-                            "Keep-Alive"
-                        ],
-                        [
-                            "content-type",
-                            "text/html; charset=UTF-8"
-                        ]
-                    ]
-                }
-            },
-            {
-                "request": {
-                    "url": "http://cookieflags/insecure/cookieflags_insecure.php",
-                    "method": "GET",
-                    "headers": [
-                        [
-                            "host",
-                            "cookieflags"
-                        ],
-                        [
-                            "connection",
-                            "keep-alive"
-                        ],
-                        [
-                            "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
-                        ],
-                        [
-                            "accept-language",
-                            "en-US"
-                        ],
-                        [
-                            "accept-encoding",
-                            "gzip, deflate, br"
-                        ],
-                        [
-                            "accept",
-                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-                        ]
-                    ],
-                    "referer": "",
-                    "enctype": "",
-                    "encoding": "UTF-8",
-                    "depth": 1
-                },
-                "response": {
-                    "status_code": 200,
-                    "body": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title>Set Cookie Example</title>\n\t</head>\n\t<body>\n\t\t<p>Cookie set successfully.</p>\n\t</body>\n</html>",
-                    "headers": [
-                        [
-                            "server",
-                            "Apache/2.4.56 (Debian)"
-                        ],
-                        [
-                            "x-powered-by",
-                            "PHP/8.1.18"
-                        ],
-                        [
-                            "set-cookie",
-                            "insecure_cookie=example_value; expires=Thu, 25-May-2023 08:28:16 GMT; Max-Age=3600; path=/insecure; HttpOnly"
+                            "not_httponly_cookie=example_value; path=/insecure; secure"
                         ],
                         [
                             "vary",

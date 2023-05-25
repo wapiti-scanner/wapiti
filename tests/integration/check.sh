@@ -69,7 +69,7 @@ for i in "${!outputs[@]}"; do
         echo -e "Assertion $(basename "${assertions[$i]}" .json) of module $MODULE_NAME is ${RED}not respected:${NC}"
         echo "< : assertion"
         echo "> : output"
-        diff <(jq --sort-keys . "${outputs[$i]}") <(jq --sort-keys . "${assertions[$i]}")
+        diff <(jq --sort-keys . "${outputs[$i]}") <(jq --sort-keys . "${assertions[$i]}") || echo "---End of diff of assertion $(basename "${assertions[$i]}" .json) module ${MODULE_NAME}---"
     else 
         echo -e "Assertion $(basename "${assertions[$i]}" .json) of module $MODULE_NAME is ${GREEN}respected${NC}"
     fi 

@@ -7,20 +7,25 @@ from itertools import cycle
 from collections import defaultdict
 
 
-def purge_date(data):
+def purge_irrelevant_data(data):
     """
-    Look recursively for any pattern matching ["date", XXXXXX] in a dictionnary 
-    containing lists, dictionnaries, and other non-collections structures
+    Look recursively for any pattern matching a 2 lenght sized list with 
+    "date", "last-modified" or "etag" in a dictionnary containing lists, 
+    dictionnaries, and other non-collections structures. Removing them because those 
+    datas can change from one test to another and aren't really relevant 
     """
     if isinstance(data, dict):
         for key in data.keys():
-            purge_date(data[key])
+            purge_irrelevant_data(data[key])
     elif isinstance(data, list) and len(data) != 0:
+        indexes_to_remove = []
         for i, item in enumerate(data):
-            if isinstance(item, list) and len(item) == 2 and item[0] == "date":
-                data.pop(i)
-            elif isinstance(item, dict) or isinstance(item, list):
-                purge_date(item)
+            if isinstance(item, list) and len(item) == 2 and item[0] in ("date", "last-modified", "etag"):
+                indexes_to_remove.append(i)
+            elif isinstance(item, dict) or (isinstance(item, list) and len(item) > 2):
+                purge_irrelevant_data(item)
+        for i in indexes_to_remove[::-1]:
+            data.pop(i)
     else:
         return
 
@@ -75,18 +80,18 @@ for mod in iter_modules:
                     bloated_output_data = json.load(bloated_output_file)
                 with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "w") as output_file:
                     # The date is useless and creates false positive, removing it
-                    dateless_info_data = bloated_output_data.get("infos", {}).copy()
-                    dateless_info_data.pop("date", None)
+                    bloated_output_data.get("infos", {}).pop("date", None)
 
-                    # Some dates still exists in the "crawled pages" section of the detailed report
-                    purge_date(bloated_output_data)
+                    # Some dates and other non determinist data
+                    # still exists somewhere in the detailed report
+                    purge_irrelevant_data(bloated_output_data)
 
                     # Rewriting the file
                     json.dump({
                         "vulnerabilities": bloated_output_data.get("vulnerabilities", {}),
                         "anomalies": bloated_output_data.get("anomalies", {}),
                         "additionnals": bloated_output_data.get("additionnals", {}),
-                        "infos": dateless_info_data
+                        "infos": bloated_output_data.get("infos", {})
                     }, output_file, indent=4)
                 tested_targets.add(target)
             except requests.exceptions.ConnectionError:

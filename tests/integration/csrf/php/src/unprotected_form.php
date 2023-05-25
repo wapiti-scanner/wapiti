@@ -1,4 +1,5 @@
 <?php
+session_id("1335df1b1b4a2149e8690c7ce5");
 session_start();
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     http_response_code(200);

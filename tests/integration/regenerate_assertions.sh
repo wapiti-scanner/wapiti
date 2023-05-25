@@ -19,7 +19,7 @@ for module in "${modules_dirs[@]}";do
         done
         echo "assertions of module $(basename "${module}") copied"
     else 
-        echo "directory ./$(basename "${module}")/ does not exist, skipping..."
+        echo "directory ./$(basename "${module}")/assertions/ does not exist, skipping..."
     fi 
 done
 
