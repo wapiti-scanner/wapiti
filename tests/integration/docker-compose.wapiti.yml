@@ -1,10 +1,11 @@
 services:
   wapiti:
     build:
-      context: ../../
-      dockerfile: Dockerfile
+      context: "../../"
+      dockerfile: "Dockerfile.integration"
     container_name: wapiti
     networks:
       - test-network
 networks:
   test-network:
+    external: true

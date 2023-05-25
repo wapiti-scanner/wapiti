@@ -1,9 +1,0 @@
-services:
-  web:
-    image: php:8.1-apache
-    volumes:
-      - ./php/src:/var/www/html/
-    networks:
-      - test-network
-networks:
-  test-network:

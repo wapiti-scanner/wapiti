@@ -1,0 +1,340 @@
+services:
+  # Apache server for the backup module
+  backup:
+    image: php:8.1-apache
+    volumes:
+      - ./backup/html/:/var/www/html/
+    networks:
+      - test-network
+
+  # Wordpress database and wordpress container 
+  # for the wp_enum
+  wp_db:
+    image: mysql:8
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "somewordpress"
+      MYSQL_DATABASE: "wordpress"
+      MYSQL_USER: "wordpress"
+      MYSQL_PASSWORD: "wordpress"
+    networks:
+      - test-network
+
+  wp_enum:
+    build:
+      context: ./wp_enum/
+      dockerfile: Dockerfile
+      no_cache: true
+    depends_on:
+      - wp_db
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: "wp_db"
+      WORDPRESS_DB_USER: "wordpress"
+      WORDPRESS_DB_PASSWORD: "wordpress"
+      WORDPRESS_DB_NAME: "wordpress"
+    networks:
+      - test-network
+
+  # Apache container for the brute_login_form module
+  brute_login_form:
+    image: php:8.1-apache
+    volumes:
+      - ./brute_login_form/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the buster module
+  buster:
+    image: php:8.1-apache
+    volumes:
+      - ./buster/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the cookieflags module
+  cookieflags:
+    image: php:8.1-apache
+    volumes:
+      - ./php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the crlf module
+  crlf:
+    image: php:8.1-apache
+    volumes:
+      - ./crlf/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the csp module
+  csp:
+    image: php:8.1-apache
+    volumes:
+      - ./csp/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the exec module
+  exec:
+    image: php:8.1-apache
+    volumes:
+      - ./exec/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the file module
+  file:
+    image: php:8.1-apache
+    volumes:
+      - ./file/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the htaccess module
+  htaccess:
+    image: php:8.1-apache
+    volumes:
+      - ./htaccess/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the htp module
+  htp:
+    image: php:8.1-apache
+    volumes:
+      - ./htp/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Drupal containers and their databases for the drupal_enum module
+  drupal8:
+    image: drupal:8-apache
+    networks:
+      - test-network
+    environment:
+      MYSQL_HOST: drupal8-db
+      MYSQL_DATABASE: drupal8
+      MYSQL_USER: drupal8
+      MYSQL_PASSWORD: drupal8pwd
+    depends_on:
+      - drupal8-db
+
+  drupal8-db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: drupal8
+      MYSQL_USER: drupal8
+      MYSQL_PASSWORD: drupal8pwd
+      MYSQL_ROOT_PASSWORD: rootpwd
+    networks:
+      - test-network
+
+  drupal9:
+    image: drupal:9-apache
+    networks:
+      - test-network
+    environment:
+      MYSQL_HOST: drupal9-db
+      MYSQL_DATABASE: drupal9
+      MYSQL_USER: drupal9
+      MYSQL_PASSWORD: drupal9pwd
+    depends_on:
+      - drupal9-db
+
+  drupal9-db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: drupal9
+      MYSQL_USER: drupal9
+      MYSQL_PASSWORD: drupal9pwd
+      MYSQL_ROOT_PASSWORD: rootpwd
+    networks:
+      - test-network
+
+  drupal10:
+    image: drupal:10-apache
+    networks:
+      - test-network
+    environment:
+      MYSQL_HOST: drupal10-db
+      MYSQL_DATABASE: drupal10
+      MYSQL_USER: drupal10
+      MYSQL_PASSWORD: drupal10pwd
+    depends_on:
+      - drupal10-db
+
+  drupal10-db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: drupal10
+      MYSQL_USER: drupal10
+      MYSQL_PASSWORD: drupal10pwd
+      MYSQL_ROOT_PASSWORD: rootpwd
+    networks:
+      - test-network
+
+  # Apache container for the http_headers module
+  http_headers:
+    image: php:8.1-apache
+    volumes:
+      - ./http_headers/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the log4shell module
+  log4shell:
+    image: php:8.1-apache
+    volumes:
+      - ./log4shell/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the methods module
+  methods:
+    image: php:8.1-apache
+    volumes:
+      - ./methods/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the nikto module
+  nikto:
+    image: php:8.1-apache
+    volumes:
+      - ./nikto/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the permanentxss module
+  permanentxss:
+    image: php:8.1-apache
+    volumes:
+      - ./permanentxss/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the xxe module
+  xxe:
+    image: php:8.1-apache
+    volumes:
+      - ./xxe/php/src/:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the shellshock module
+  shellshock:
+    image: php:8.1-apache
+    volumes:
+      - ./shellshock/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the sql module
+  sql:
+    image: php:8.1-apache
+    volumes:
+      - ./sql/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the ssl module
+  ssl:
+    image: php:8.1-apache
+    volumes:
+      - ./ssl/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the ssrf module
+  ssrf:
+    image: php:8.1-apache
+    volumes:
+      - ./ssrf/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the takeover module
+  takeover:
+    image: php:8.1-apache
+    volumes:
+      - ./takeover/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the timesql module
+  timesql:
+    image: php:8.1-apache
+    volumes:
+      - ./timesql/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the wapp module
+  wapp:
+    image: php:8.1-apache
+    volumes:
+      - ./wapp/php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Apache container for the xss module
+  xss:
+    image: php:8.1-apache
+    volumes:
+      - ./php/src:/var/www/html/
+    networks:
+      - test-network
+
+  # Wapiti container
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    depends_on:
+      - backup
+      - wp_db
+      - wp_enum
+      - brute_login_form
+      - buster
+      - cookieflags
+      - crlf
+      - csp
+      - exec
+      - file
+      - htaccess
+      - htp
+      - drupal8
+      - drupal8-db
+      - drupal9
+      - drupal9-db
+      - drupal10
+      - drupal10-db
+      - http_headers
+      - log4shell
+      - methods
+      - nikto
+      - permanentxss
+      - xxe
+      - shellshock
+      - sql
+      - ssl
+      - ssrf
+      - takeover
+      - timesql
+      - wapp
+      - xss
+
+volumes:
+  db_data:
+networks:
+  test-network:
