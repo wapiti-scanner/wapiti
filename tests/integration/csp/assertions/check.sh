@@ -1,1 +1,1 @@
-check.sh
+../../check.sh

@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 mapfile -t modules_dirs < <(find .test -maxdepth 1 -mindepth 1 -type d)
 
 for module in "${modules_dirs[@]}";do
-    if [[ -d "./$(basename "${module}")/" ]]; then
+    if [[ -d "./$(basename "${module}")/assertions" ]]; then
         cp "${module}/"* "./$(basename "${module}")/"
         mapfile -t assertion_files < <(find "./$(basename "${module}")/" -name "*.out")
         for assertion_file in "${assertion_files[@]}";do
