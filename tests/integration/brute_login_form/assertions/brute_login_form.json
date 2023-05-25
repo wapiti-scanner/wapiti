@@ -21,10 +21,6 @@
                         "body": "Your form has been submitted successfully.",
                         "headers": [
                             [
-                                "date",
-                                "Wed, 24 May 2023 12:10:59 GMT"
-                            ],
-                            [
                                 "server",
                                 "Apache/2.4.56 (Debian)"
                             ],
@@ -132,10 +128,6 @@
                     "body": "\n<!DOCTYPE html>\n\n<html>\n\n<head>\n\n\t<meta charset=\"UTF-8\">\n\n\t<title>Bruteforce Login form</title>\n\n</head>\n\n<body>\n\n\n\n\t<form method=\"post\" action=\"/index.php\">\n\n    <div>\n\n        <label for=\"username\">Username:</label>\n\n        <input type=\"text\" id=\"username\" name=\"username\">\n\n    </div>\n\n    <div>\n\n        <label for=\"password\">Password:</label>\n\n        <input type=\"password\" id=\"password\" name=\"password\">\n\n    </div>\n\n    <div>\n\n        <button type=\"submit\">Log in</button>\n\n    </div>\n\n</form>\n\n\n\n\n\n</body>\n\n</html>",
                     "headers": [
                         [
-                            "date",
-                            "Wed, 24 May 2023 12:10:59 GMT"
-                        ],
-                        [
                             "server",
                             "Apache/2.4.56 (Debian)"
                         ],
@@ -222,10 +214,6 @@
                     "body": "Invalid username or password.",
                     "headers": [
                         [
-                            "date",
-                            "Wed, 24 May 2023 12:10:59 GMT"
-                        ],
-                        [
                             "server",
                             "Apache/2.4.56 (Debian)"
                         ],
@@ -295,10 +283,6 @@
                     "status_code": 200,
                     "body": "\n<!DOCTYPE html>\n\n<html>\n\n<head>\n\n\t<meta charset=\"UTF-8\">\n\n\t<title>Bruteforce Login form</title>\n\n</head>\n\n<body>\n\n\n\n\t<form method=\"post\" action=\"/index.php\">\n\n    <div>\n\n        <label for=\"username\">Username:</label>\n\n        <input type=\"text\" id=\"username\" name=\"username\">\n\n    </div>\n\n    <div>\n\n        <label for=\"password\">Password:</label>\n\n        <input type=\"password\" id=\"password\" name=\"password\">\n\n    </div>\n\n    <div>\n\n        <button type=\"submit\">Log in</button>\n\n    </div>\n\n</form>\n\n\n\n\n\n</body>\n\n</html>",
                     "headers": [
-                        [
-                            "date",
-                            "Wed, 24 May 2023 12:10:59 GMT"
-                        ],
                         [
                             "server",
                             "Apache/2.4.56 (Debian)"

@@ -77,20 +77,16 @@
                     "body": "<!DOCTYPE html>\n\n<html>\n\n<head>\n\n\t<meta charset=\"UTF-8\">\n\n\t<title>Backup</title>\n\n</head>\n\n<body>\n\n\n\n\t<p>Here you can find a backup file supposed to be in the same directory</p>\n\n\n\n</body>\n\n</html>\n",
                     "headers": [
                         [
-                            "date",
-                            "Wed, 24 May 2023 12:10:13 GMT"
-                        ],
-                        [
                             "server",
                             "Apache/2.4.56 (Debian)"
                         ],
                         [
                             "last-modified",
-                            "Tue, 23 May 2023 07:53:21 GMT"
+                            "Wed, 24 May 2023 21:00:22 GMT"
                         ],
                         [
                             "etag",
-                            "\"c6-5fc57ae687447-gzip\""
+                            "\"c6-5fc76cac9379b-gzip\""
                         ],
                         [
                             "accept-ranges",
