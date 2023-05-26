@@ -1,7 +1,7 @@
 services:
   # Apache server for the backup module
   backup:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./backup/html/:/var/www/html/
     networks:
@@ -10,7 +10,7 @@ services:
   # Wordpress database and wordpress container 
   # for the wp_enum
   wp_db:
-    image: mysql:8
+    image: ${MYSQL_HASH}
     volumes:
       - db_data:/var/lib/mysql
     restart: always
@@ -40,7 +40,7 @@ services:
 
   # Apache container for the brute_login_form module
   brute_login_form:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./brute_login_form/php/src:/var/www/html/
     networks:
@@ -48,7 +48,7 @@ services:
 
   # Apache container for the buster module
   buster:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./buster/php/src:/var/www/html/
     networks:
@@ -56,7 +56,7 @@ services:
 
   # Apache container for the cookieflags module
   cookieflags:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./cookieflags/php/src:/var/www/html/
     networks:
@@ -64,7 +64,7 @@ services:
 
   # Apache container for the crlf module
   crlf:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./crlf/php/src:/var/www/html/
     networks:
@@ -72,7 +72,7 @@ services:
 
   # Apache container for the csp module
   csp:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./csp/php/src:/var/www/html/
     networks:
@@ -80,7 +80,7 @@ services:
 
   # Apache container for the exec module
   exec:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./exec/php/src:/var/www/html/
     networks:
@@ -88,7 +88,7 @@ services:
 
   # Apache container for the file module
   file:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./file/php/src:/var/www/html/
     networks:
@@ -96,7 +96,6 @@ services:
 
   # Apache container for the htaccess module
   htaccess:
-    htaccess:
     build:
       context: ./htaccess/
       dockerfile: Dockerfile
@@ -107,76 +106,54 @@ services:
 
   # Apache container for the htp module
   htp:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./htp/php/src:/var/www/html/
     networks:
       - test-network
 
   # Drupal containers and their databases for the drupal_enum module
-  drupal8:
-    image: drupal:8-apache
-    networks:
-      - test-network
-    environment:
-      MYSQL_HOST: drupal8-db
-      MYSQL_DATABASE: drupal8
-      MYSQL_USER: drupal8
-      MYSQL_PASSWORD: drupal8pwd
-    depends_on:
-      - drupal8-db
-
-  drupal8-db:
-    image: mysql:8
-    environment:
-      MYSQL_DATABASE: drupal8
-      MYSQL_USER: drupal8
-      MYSQL_PASSWORD: drupal8pwd
-      MYSQL_ROOT_PASSWORD: rootpwd
-    networks:
-      - test-network
-
   drupal9:
-    image: drupal:9-apache
+    image: ${DRUPAL9_HASH}
     networks:
       - test-network
     environment:
       MYSQL_HOST: drupal9-db
-      MYSQL_DATABASE: drupal9
-      MYSQL_USER: drupal9
-      MYSQL_PASSWORD: drupal9pwd
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
     depends_on:
       - drupal9-db
 
   drupal9-db:
-    image: mysql:8
+    image: ${MYSQL_HASH}
     environment:
-      MYSQL_DATABASE: drupal9
-      MYSQL_USER: drupal9
-      MYSQL_PASSWORD: drupal9pwd
-      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
     networks:
       - test-network
 
   drupal10:
-    image: drupal:10-apache
+    image: ${DRUPAL10_HASH}
     networks:
       - test-network
     environment:
       MYSQL_HOST: drupal10-db
-      MYSQL_DATABASE: drupal10
-      MYSQL_USER: drupal10
-      MYSQL_PASSWORD: drupal10pwd
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
     depends_on:
       - drupal10-db
 
   drupal10-db:
-    image: mysql:8
+    image: ${MYSQL_HASH}
     environment:
-      MYSQL_DATABASE: drupal10
-      MYSQL_USER: drupal10
-      MYSQL_PASSWORD: drupal10pwd
-      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
     networks:
       - test-network
 
@@ -192,7 +169,7 @@ services:
 
   # Apache container for the log4shell module
   log4shell:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./log4shell/php/src:/var/www/html/
     networks:
@@ -200,7 +177,7 @@ services:
 
   # Apache container for the methods module
   methods:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./methods/php/src:/var/www/html/
     networks:
@@ -208,7 +185,7 @@ services:
 
   # Apache container for the nikto module
   nikto:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./nikto/php/src:/var/www/html/
     networks:
@@ -216,7 +193,7 @@ services:
 
   # Apache container for the permanentxss module
   permanentxss:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./permanentxss/php/src:/var/www/html/
     networks:
@@ -224,7 +201,7 @@ services:
 
   # Apache container for the xxe module
   xxe:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./xxe/php/src/:/var/www/html/
     networks:
@@ -232,7 +209,7 @@ services:
 
   # Apache container for the shellshock module
   shellshock:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./shellshock/php/src:/var/www/html/
     networks:
@@ -240,7 +217,7 @@ services:
 
   # Apache container for the sql module
   sql:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./sql/php/src:/var/www/html/
     networks:
@@ -248,7 +225,7 @@ services:
 
   # Apache container for the ssl module
   ssl:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./ssl/php/src:/var/www/html/
     networks:
@@ -256,7 +233,7 @@ services:
 
   # Apache container for the ssrf module
   ssrf:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./ssrf/php/src:/var/www/html/
     networks:
@@ -264,7 +241,7 @@ services:
 
   # Apache container for the takeover module
   takeover:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./takeover/php/src:/var/www/html/
     networks:
@@ -272,7 +249,7 @@ services:
 
   # Apache container for the timesql module
   timesql:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./timesql/php/src:/var/www/html/
     networks:
@@ -280,7 +257,7 @@ services:
 
   # Apache container for the wapp module
   wapp:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./wapp/php/src:/var/www/html/
     networks:
@@ -288,7 +265,7 @@ services:
 
   # Apache container for the xss module
   xss:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./xss/php/src:/var/www/html/
     networks:
@@ -296,7 +273,7 @@ services:
 
   # Apache container for the csrf module
   csrf:
-    image: php:8.1-apache
+    image: ${PHP_HASH}
     volumes:
       - ./csrf/php/src:/var/www/html/
     networks:
@@ -326,8 +303,6 @@ services:
       - file
       - htaccess
       - htp
-      - drupal8
-      - drupal8-db
       - drupal9
       - drupal9-db
       - drupal10

@@ -13,7 +13,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 	<title>CSRF unprotected test</title>
 </head>
 <body>
-    <form action="csrf_verify_unprotected.php" method="post">
+    <form method="post">
     <label for="name">Name:</label>
     <input type="text" id="name" name="name"><br><br>
     <input type="submit" value="Update">

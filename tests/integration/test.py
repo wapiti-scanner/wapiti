@@ -5,6 +5,7 @@ import requests
 import re
 from itertools import cycle
 from collections import defaultdict
+from time import sleep
 
 
 def purge_irrelevant_data(data):
@@ -55,7 +56,7 @@ total_targets = sum([len(mod["targets"]) for mod in modules_data])
 # started well, this is another way to fill the set to break
 # the loop
 requests_counter = defaultdict(int)
-MAX_REQ = 50
+MAX_REQ = 500
 
 # Running wapiti for each module for each target
 # If a target isn't set up, passing to another and so on
@@ -90,13 +91,15 @@ for mod in iter_modules:
                     json.dump({
                         "vulnerabilities": bloated_output_data.get("vulnerabilities", {}),
                         "anomalies": bloated_output_data.get("anomalies", {}),
-                        "additionnals": bloated_output_data.get("additionnals", {}),
+                        "additionals": bloated_output_data.get("additionals", {}),
                         "infos": bloated_output_data.get("infos", {})
                     }, output_file, indent=4)
                 tested_targets.add(target)
             except requests.exceptions.ConnectionError:
                 sys.stdout.write(f"Target {target} is not ready yet...\n")
-                pass
+                # 0.5 seconds penalty in case of no response to avoid requests spamming and being
+                # too fast at blacklisting targets
+                sleep(0.5)
             if requests_counter[target] > MAX_REQ:
                 sys.stdout.write(
                     f"Target {target} from module {mod['module']} takes too long to respond\nSkipping...\n")
