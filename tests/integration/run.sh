@@ -12,7 +12,8 @@ test_mod_redirect \
 test_mod_shellshock \
 test_mod_ssrf \
 test_mod_timesql \
-test_mod_wapp "
+test_mod_wapp \
+test_mod_xxe "
 
 # Normalize spaces for shell substitution
 if [[ -n "${TESTS}" ]]; then

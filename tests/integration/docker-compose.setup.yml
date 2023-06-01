@@ -220,6 +220,15 @@ services:
       endpoint:
         condition: service_healthy
 
+  # Apache container for the xxe module and its endpoint
+  xxe:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    depends_on:
+      endpoint:
+        condition: service_healthy
+    volumes:
+      - ./test_mod_xxe/php/src/:/var/www/html/
+
   # Custom endpoint for requests
   endpoint:
     build:
@@ -305,6 +314,8 @@ services:
       methods:
         condition: service_healthy
       shellshock:
+        condition: service_healthy
+      xxe:
         condition: service_healthy
 
 volumes:
