@@ -101,6 +101,18 @@ services:
     <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
       - ./test_mod_buster/php/src:/var/www/html
+
+  # Custom endpoint for requests
+  endpoint:
+    build:
+      context: ../../
+      dockerfile: "tests/integration/endpoint/Dockerfile"
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_web
+    networks:
+      - test-network
+
       
   # Wapiti container 
   # requires all the targets containers to work perfectly
