@@ -75,7 +75,7 @@ for mod in iter_modules:
                 # We then call wapiti on each target of each module, generating a detailed JSON report
                 os.system(f"wapiti -u {secure_conn}://{target} -m {mod['module']} "
                           f"-f json -o /home/{mod['module']}/{re.sub('/','_',target)}.out"
-                          f" --detailed-report --flush-session --verbose 2 ")
+                          f" --detailed-report --flush-session --verbose 2 --endpoint http://endpoint/")
                 # Now we reparse the JSON to get only useful tests informations:
                 with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "r") as bloated_output_file:
                     bloated_output_data = json.load(bloated_output_file)
