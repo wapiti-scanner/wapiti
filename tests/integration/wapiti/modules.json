@@ -465,5 +465,46 @@
                 "name": "http://shellshock"
             }
         ]
+    },
+    "test_mod_xxe": {
+        "modules": "xxe",
+        "supplementary_argument": "--endpoint http://endpoint/",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "XML External Entity": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://xxe"
+            }
+        ]
     }
 }

