@@ -58,6 +58,20 @@ services:
       - test-network
     <<: *healthcheck_web
 
+  # Apache container for the sql module
+  sql:
+    build:
+      context: ./test_mod_sql/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_web
+    volumes:
+      - ./test_mod_sql/php/src/:/var/www/html/
+    networks:
+      - test-network
+
+
   timesql-db:
     build:
       context: ./test_mod_timesql/
@@ -316,6 +330,8 @@ services:
       shellshock:
         condition: service_healthy
       xxe:
+        condition: service_healthy
+      sql:
         condition: service_healthy
 
 volumes:

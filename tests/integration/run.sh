@@ -11,6 +11,7 @@ test_mod_permanentxss \
 test_mod_redirect \
 test_mod_shellshock \
 test_mod_ssrf \
+test_mod_sql \
 test_mod_timesql \
 test_mod_wapp \
 test_mod_xxe "
