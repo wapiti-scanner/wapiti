@@ -1,0 +1,703 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [
+            {
+                "method": "GET",
+                "path": "/sql_easy.php",
+                "info": "SQL Injection (DBMS: SQLite) via injection in the parameter query",
+                "level": 4,
+                "parameter": "query",
+                "referer": "",
+                "module": "sql",
+                "http_request": "GET /sql_easy.php?query=Linda%C2%BF%27%22%28 HTTP/1.1\nhost: sql\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://sql/sql_easy.php?query=Linda%C2%BF%27%22%28\"",
+                "wstg": [
+                    "WSTG-INPV-05"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<br />\n<b>Warning</b>:  SQLite3::querySingle(): Unable to prepare statement: 1, unrecognized token: &quot;&quot;;&quot; in <b>/var/www/html/sql_easy.php</b> on line <b>5</b><br />\n\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "262"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=99"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            },
+            {
+                "method": "GET",
+                "path": "/sql_hard.php",
+                "info": "SQL Injection via injection in the parameter query",
+                "level": 4,
+                "parameter": "query",
+                "referer": "",
+                "module": "sql",
+                "http_request": "GET /sql_hard.php?query=Linda%22%20AND%2044%3D44%20AND%20%2282%22%3D%2282 HTTP/1.1\nhost: sql\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://sql/sql_hard.php?query=Linda%22%20AND%2044%3D44%20AND%20%2282%22%3D%2282\"",
+                "wstg": [
+                    "WSTG-INPV-05"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "adnil@internet.tech\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "161"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=84"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            },
+            {
+                "method": "GET",
+                "path": "/sql_medium.php",
+                "info": "SQL Injection via injection in the parameter query",
+                "level": 4,
+                "parameter": "query",
+                "referer": "",
+                "module": "sql",
+                "http_request": "GET /sql_medium.php?query=Linda%22%20AND%2027%3D27%20AND%20%2257%22%3D%2257 HTTP/1.1\nhost: sql\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://sql/sql_medium.php?query=Linda%22%20AND%2027%3D27%20AND%20%2257%22%3D%2257\"",
+                "wstg": [
+                    "WSTG-INPV-05"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "1adnil@internet.tech\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "162"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=71"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
+    "infos": {
+        "target": "http://sql/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 7,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://sql/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <h1>SQL vuln website</h1>\n</head>\n<body>\n    <ul>\n        <li>here is a simple webpage with 0 sanitizing <a href=\"./sql_easy.php?query=Linda\">link 1</a></li>\n        <li>here is a simple webpage with very few sanitizing <a href=\"./sql_medium.php?query=Linda\">link 2</a></li>\n        <li>here is a simple webpage with some more sanitizing <a href=\"./sql_hard.php?query=Linda\">link 2</a></li>\n    </ul>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "227"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_easy.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "adnil@internet.tech\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "161"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_medium.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "1adnil@internet.tech\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "162"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=98"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_easy.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "location",
+                            "./sql_easy.php?query=Linda"
+                        ],
+                        [
+                            "content-length",
+                            "169"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_hard.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "adnil@internet.tech\n<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "161"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_medium.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "location",
+                            "./sql_medium.php?query=Linda"
+                        ],
+                        [
+                            "content-length",
+                            "169"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://sql/sql_hard.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "sql"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <h1>SQL vulns</h1>\n</head>\n<body>\n    <p>You can query the DB with the name of the person, it will return its mail</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "location",
+                            "./sql_hard.php?query=Linda"
+                        ],
+                        [
+                            "content-length",
+                            "169"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
+    }
+}

@@ -1,13 +1,13 @@
-version: '3.8'
+version: '3.9'
 
 # Following the DRY philosophy
-default_php_setup:
+x-default_php_setup:
   &default_php_setup
   image: php${PHP_HASH}
   networks:
     - test-network
 
-healthcheck_php:
+x-healthcheck_php:
   &healthcheck_php
   healthcheck:
     test: ${DEFAULT_PHP_APACHE_HEALTHCHECK_COMMAND}
@@ -16,13 +16,13 @@ healthcheck_php:
     start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
     retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
 
-default_mysql_setup:
+x-default_mysql_setup:
   &default_mysql_setup
   image: mysql${MYSQL_HASH}
   networks:
     - test-network
 
-healthcheck_mysql:
+x-healthcheck_mysql:
   &healthcheck_mysql
   healthcheck:
     test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
@@ -34,8 +34,7 @@ healthcheck_mysql:
 services:
   # First, all the different databases required to run the containers
   wp_db:
-    <<: *default_mysql_setup
-    <<: *healthcheck_mysql
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
     volumes:
       - wp_db_data:/var/lib/mysql
     restart: always
@@ -46,8 +45,7 @@ services:
       MYSQL_PASSWORD: ${WP_MYSQL_PASSWORD}
 
   drupal9-db:
-    <<: *default_mysql_setup
-    <<: *healthcheck_mysql
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
     environment:
       MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
       MYSQL_USER: ${DRUPAL_MYSQL_USER}
@@ -57,8 +55,7 @@ services:
       - drupal9_db_data:/var/lib/mysql
 
   drupal10-db:
-    <<: *default_mysql_setup
-    <<: *healthcheck_mysql
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
     environment:
       MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
       MYSQL_USER: ${DRUPAL_MYSQL_USER}
@@ -70,21 +67,19 @@ services:
   # Then, all the containers required for the integration tests
   # Apache server for the backup module
   backup:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./backup/html/:/var/www/html/
 
   # Apache container for the brute_login_form module
   brute_login_form:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./brute_login_form/php/src:/var/www/html/
 
   # Apache container for the buster module
   # buster:
-  #    <<: *default_php_setup
+  #    <<: [*default_php_setup,  *healthcheck_php]
   #    <<: *healthcheck_php
   #   volumes:
   #     - ./buster/php/src:/var/www/html/
@@ -92,29 +87,25 @@ services:
 
   # Apache container for the cookieflags module
   cookieflags:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./cookieflags/php/src:/var/www/html/
 
   # Apache container for the crlf module
   crlf:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./crlf/php/src:/var/www/html/
 
   # Apache container for the csp module
   csp:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./csp/php/src:/var/www/html/
 
   # Apache container for the csrf module
   csrf:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./csrf/php/src:/var/www/html/
 
@@ -149,15 +140,13 @@ services:
 
   # Apache container for the exec module
   exec:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./exec/php/src:/var/www/html/
 
   # Apache container for the file module
   file:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./file/php/src:/var/www/html/
 
@@ -176,8 +165,7 @@ services:
 
   # Apache container for the htp module
   # htp:
-  #    <<: *default_php_setup
-  #    <<: *healthcheck_php
+  #    <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./htp/php/src:/var/www/html/
 
@@ -196,78 +184,74 @@ services:
 
   # Apache container for the log4shell module
   # log4shell:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./log4shell/php/src:/var/www/html/
 
   # Apache container for the methods module
   # methods:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./methods/php/src:/var/www/html/
 
   # Apache container for the nikto module
   # nikto:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./nikto/php/src:/var/www/html/
 
   # Apache container for the permanentxss module
   # permanentxss:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./permanentxss/php/src:/var/www/html/
 
   # Apache container for the shellshock module
   # shellshock:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./shellshock/php/src:/var/www/html/
 
   # Apache container for the sql module
-  # sql:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
-  #   volumes:
-  #     - ./sql/php/src:/var/www/html/
+  sql:
+    build:
+      context: ./sql/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_php
+    volumes:
+      - ./sql/php/src/:/var/www/html/
+    networks:
+      - test-network
 
   # Apache container for the ssl module
   # ssl:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./ssl/php/src:/var/www/html/
 
   # Apache container for the ssrf module
   # ssrf:
-  #    <<: *default_php_setup
-  #    <<: *healthcheck_php
+  #    <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./ssrf/php/src:/var/www/html/
 
   # Apache container for the takeover module
   # takeover:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./takeover/php/src:/var/www/html/
 
   # Apache container for the timesql module
   # timesql:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./timesql/php/src:/var/www/html/
 
   # Apache container for the wapp module
   # wapp:
-  #   <<: *default_php_setup
-  #   <<: *healthcheck_php
+  #   <<: [*default_php_setup,  *healthcheck_php]
   #   volumes:
   #     - ./wapp/php/src:/var/www/html/
 
@@ -294,15 +278,13 @@ services:
 
   # Apache container for the xss module
   xss:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     volumes:
       - ./xss/php/src:/var/www/html/
 
   # Apache container for the xxe module and its endpoint
   xxe:
-    <<: *default_php_setup
-    <<: *healthcheck_php
+    <<: [ *default_php_setup, *healthcheck_php ]
     depends_on:
       endpoint:
         condition: service_healthy
@@ -332,7 +314,7 @@ services:
       - ./.test:/home/
     networks:
       - test-network
-    command: "backup wp_enum brute_login_form cookieflags crlf csp exec file htaccess drupal_enum http_headers xxe xss"
+    command: "backup wp_enum brute_login_form cookieflags crlf csp exec file htaccess drupal_enum http_headers xxe xss sql"
     depends_on:
       backup:
         condition: service_healthy
@@ -361,6 +343,8 @@ services:
       xxe:
         condition: service_healthy
       xss:
+        condition: service_healthy
+      sql:
         condition: service_healthy
 
 volumes:
