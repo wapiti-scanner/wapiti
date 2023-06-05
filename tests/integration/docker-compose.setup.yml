@@ -64,6 +64,23 @@ services:
     volumes:
       - drupal10_db_data:/var/lib/mysql
 
+  timesql-db:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.mysql
+      args:
+        - MYSQL_HASH_TAG=${MYSQL_HASH}
+    environment:
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_mysql
+    volumes:
+      - timesql_db_data:/var/lib/mysql
+    networks:
+      - test-network
+
   # Then, all the containers required for the integration tests
   # Apache server for the backup module
   backup:
@@ -262,10 +279,26 @@ services:
   #     - ./test_mod_takeover/php/src:/var/www/html/
 
   # Apache container for the timesql module
-  # timesql:
-  #   <<: [*default_php_setup,  *healthcheck_web]
-  #   volumes:
-  #     - ./test_mod_timesql/php/src:/var/www/html/
+  timesql:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.php
+      args:
+        - PHP_HASH_TAG=${PHP_HASH}
+    environment:
+      MYSQL_HOST: timesql-db
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_web
+    depends_on:
+      timesql-db:
+        condition: service_healthy
+    volumes:
+      - ./test_mod_timesql/php/src/:/var/www/html/
+    networks:
+      - test-network
 
   # Apache container for the wapp module
   # wapp:
@@ -332,7 +365,7 @@ services:
       - ./.test:/home/
     networks:
       - test-network
-    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock test_mod_methods"
+    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock test_mod_methods test_mod_timesql"
     depends_on:
       backup:
         condition: service_healthy
@@ -368,10 +401,13 @@ services:
         condition: service_healthy
       methods:
         condition: service_healthy
+      timesql:
+        condition: service_healthy
 
 volumes:
   drupal9_db_data:
   drupal10_db_data:
   wp_db_data:
+  timesql_db_data:
 networks:
   test-network:
