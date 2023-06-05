@@ -9,6 +9,7 @@ test_mod_log4shell \
 test_mod_permanentxss \
 test_mod_redirect \
 test_mod_ssrf \
+test_mod_timesql \
 test_mod_wapp "
 
 # Normalize spaces for shell substitution

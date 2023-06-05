@@ -1,0 +1,21 @@
+ARG MYSQL_HASH_TAG=":8"
+FROM mysql${MYSQL_HASH_TAG}
+
+ARG MYSQL_HOST="localhost"
+ARG MYSQL_DATABASE="timesql-db"
+ARG MYSQL_USER="timesql-usr"
+ARG MYSQL_PASSWORD="timesqlpwd"
+ARG MYSQL_ROOT_PASSWORD="timesqlpwd"
+
+# ENV MYSQL_HOST=$MYSQL_HOST
+ENV MYSQL_DATABASE=$MYSQL_DATABASE
+ENV MYSQL_USER=$MYSQL_USER
+ENV MYSQL_PASSWORD=$MYSQL_PASSWORD
+ENV MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+
+EXPOSE 3306
+
+COPY /populate.sql /docker-entrypoint-initdb.d/
+RUN chown mysql:mysql /docker-entrypoint-initdb.d/populate.sql
+
+RUN sh -c /entrypoint.sh
