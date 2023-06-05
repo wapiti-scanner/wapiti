@@ -54,6 +54,7 @@ all_modules = {
     "htaccess",
     "htp",
     "http_headers",
+    "https_redirect",
     "log4shell",
     "methods",
     "nikto",
