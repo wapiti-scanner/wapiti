@@ -46,6 +46,44 @@ services:
       timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
       start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
       retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+  timesql-db:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.mysql
+      args:
+        - MYSQL_HASH_TAG=${MYSQL_HASH}
+    environment:
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_mysql
+    volumes:
+      - timesql_db_data:/var/lib/mysql
+    networks:
+      - test-network
+  # Apache container for the timesql module
+  timesql:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.php
+      args:
+        - PHP_HASH_TAG=${PHP_HASH}
+    environment:
+      MYSQL_HOST: timesql-db
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_web
+    depends_on:
+      timesql-db:
+        condition: service_healthy
+    volumes:
+      - ./test_mod_timesql/php/src/:/var/www/html/
+    networks:
+      - test-network
       
   # First, all the different databases required to run the containers
   drupal9-db:
@@ -232,10 +270,12 @@ services:
         condition: service_healthy
       permanentxss:
         condition: service_healthy
+      timesql:
+        condition: service_healthy
 
 volumes:
   drupal9_db_data:
   drupal10_db_data:
-
+  timesql_db_data:
 networks:
   test-network:
