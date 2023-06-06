@@ -1,4 +1,5 @@
-FROM php@sha256:5d5f0dbea68afab7e6fa7649fb818e078680e338a3265ec5cf237a6a791dd471 
+ARG PHP_HASH_TAG=':8.1-apache'
+FROM php${PHP_HASH_TAG}
 
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini &&\
     sed -i \

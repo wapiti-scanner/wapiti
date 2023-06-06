@@ -1,120 +1,127 @@
+version: '3.8'
+
+# Following the DRY philosophy
+default_php_setup:
+  &default_php_setup
+  image: php${PHP_HASH}
+  networks:
+    - test-network
+
+healthcheck_php:
+  &healthcheck_php
+  healthcheck:
+    test: ${DEFAULT_PHP_APACHE_HEALTHCHECK_COMMAND}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+default_mysql_setup:
+  &default_mysql_setup
+  image: mysql${MYSQL_HASH}
+  networks:
+    - test-network
+
+healthcheck_mysql:
+  &healthcheck_mysql
+  healthcheck:
+    test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
 services:
+  # First, all the different databases required to run the containers
+  wp_db:
+    <<: *default_mysql_setup
+    <<: *healthcheck_mysql
+    volumes:
+      - wp_db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WP_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WP_MYSQL_DATABASE}
+      MYSQL_USER: ${WP_MYSQL_USER}
+      MYSQL_PASSWORD: ${WP_MYSQL_PASSWORD}
+
+  drupal9-db:
+    <<: *default_mysql_setup
+    <<: *healthcheck_mysql
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - drupal9_db_data:/var/lib/mysql
+
+  drupal10-db:
+    <<: *default_mysql_setup
+    <<: *healthcheck_mysql
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - drupal10_db_data:/var/lib/mysql
+
+  # Then, all the containers required for the integration tests
   # Apache server for the backup module
   backup:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./backup/html/:/var/www/html/
-    networks:
-      - test-network
-
-  # Wordpress database and wordpress container 
-  # for the wp_enum
-  wp_db:
-    image: ${MYSQL_HASH}
-    volumes:
-      - db_data:/var/lib/mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: "somewordpress"
-      MYSQL_DATABASE: "wordpress"
-      MYSQL_USER: "wordpress"
-      MYSQL_PASSWORD: "wordpress"
-    networks:
-      - test-network
-
-  wordpress:
-    build:
-      context: ./wp_enum/
-      dockerfile: Dockerfile
-      no_cache: true
-    depends_on:
-      - wp_db
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: "wp_db"
-      WORDPRESS_DB_USER: "wordpress"
-      WORDPRESS_DB_PASSWORD: "wordpress"
-      WORDPRESS_DB_NAME: "wordpress"
-    networks:
-      - test-network
 
   # Apache container for the brute_login_form module
   brute_login_form:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./brute_login_form/php/src:/var/www/html/
-    networks:
-      - test-network
 
   # Apache container for the buster module
-  buster:
-    image: ${PHP_HASH}
-    volumes:
-      - ./buster/php/src:/var/www/html/
-    networks:
-      - test-network
+  # buster:
+  #    <<: *default_php_setup
+  #    <<: *healthcheck_php
+  #   volumes:
+  #     - ./buster/php/src:/var/www/html/
+
 
   # Apache container for the cookieflags module
   cookieflags:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./cookieflags/php/src:/var/www/html/
-    networks:
-      - test-network
 
   # Apache container for the crlf module
   crlf:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./crlf/php/src:/var/www/html/
-    networks:
-      - test-network
 
   # Apache container for the csp module
   csp:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./csp/php/src:/var/www/html/
-    networks:
-      - test-network
 
-  # Apache container for the exec module
-  exec:
-    image: ${PHP_HASH}
+  # Apache container for the csrf module
+  csrf:
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
-      - ./exec/php/src:/var/www/html/
-    networks:
-      - test-network
-
-  # Apache container for the file module
-  file:
-    image: ${PHP_HASH}
-    volumes:
-      - ./file/php/src:/var/www/html/
-    networks:
-      - test-network
-
-  # Apache container for the htaccess module
-  htaccess:
-    build:
-      context: ./htaccess/
-      dockerfile: Dockerfile
-    volumes:
-      - ./htaccess/php/src:/var/www/html/
-    networks:
-      - test-network
-
-  # Apache container for the htp module
-  htp:
-    image: ${PHP_HASH}
-    volumes:
-      - ./htp/php/src:/var/www/html/
-    networks:
-      - test-network
+      - ./csrf/php/src:/var/www/html/
 
   # Drupal containers and their databases for the drupal_enum module
   drupal9:
-    image: ${DRUPAL9_HASH}
+    image: drupal${DRUPAL9_HASH}
+    <<: *healthcheck_php
     networks:
       - test-network
     environment:
@@ -123,20 +130,12 @@ services:
       MYSQL_USER: ${DRUPAL_MYSQL_USER}
       MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
     depends_on:
-      - drupal9-db
-
-  drupal9-db:
-    image: ${MYSQL_HASH}
-    environment:
-      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
-      MYSQL_USER: ${DRUPAL_MYSQL_USER}
-      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
-    networks:
-      - test-network
+      drupal9-db:
+        condition: service_healthy
 
   drupal10:
-    image: ${DRUPAL10_HASH}
+    image: drupal${DRUPAL10_HASH}
+    <<: *healthcheck_php
     networks:
       - test-network
     environment:
@@ -145,149 +144,184 @@ services:
       MYSQL_USER: ${DRUPAL_MYSQL_USER}
       MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
     depends_on:
-      - drupal10-db
+      drupal10-db:
+        condition: service_healthy
 
-  drupal10-db:
-    image: ${MYSQL_HASH}
-    environment:
-      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
-      MYSQL_USER: ${DRUPAL_MYSQL_USER}
-      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
+  # Apache container for the exec module
+  exec:
+    <<: *default_php_setup
+    <<: *healthcheck_php
+    volumes:
+      - ./exec/php/src:/var/www/html/
+
+  # Apache container for the file module
+  file:
+    <<: *default_php_setup
+    <<: *healthcheck_php
+    volumes:
+      - ./file/php/src:/var/www/html/
+
+  # Apache container for the htaccess module
+  htaccess:
+    build:
+      context: ./htaccess/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_php
+    volumes:
+      - ./htaccess/php/src:/var/www/html/
     networks:
       - test-network
+
+  # Apache container for the htp module
+  # htp:
+  #    <<: *default_php_setup
+  #    <<: *healthcheck_php
+  #   volumes:
+  #     - ./htp/php/src:/var/www/html/
 
   # Apache container for the http_headers module
   http_headers:
     build:
       context: ./http_headers/
       dockerfile: "Dockerfile"
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_php
     volumes:
       - ./http_headers/php/src:/var/www/html/
     networks:
       - test-network
 
   # Apache container for the log4shell module
-  log4shell:
-    image: ${PHP_HASH}
-    volumes:
-      - ./log4shell/php/src:/var/www/html/
-    networks:
-      - test-network
+  # log4shell:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./log4shell/php/src:/var/www/html/
 
   # Apache container for the methods module
-  methods:
-    image: ${PHP_HASH}
-    volumes:
-      - ./methods/php/src:/var/www/html/
-    networks:
-      - test-network
+  # methods:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./methods/php/src:/var/www/html/
 
   # Apache container for the nikto module
-  nikto:
-    image: ${PHP_HASH}
-    volumes:
-      - ./nikto/php/src:/var/www/html/
-    networks:
-      - test-network
+  # nikto:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./nikto/php/src:/var/www/html/
 
   # Apache container for the permanentxss module
-  permanentxss:
-    image: ${PHP_HASH}
-    volumes:
-      - ./permanentxss/php/src:/var/www/html/
-    networks:
-      - test-network
-
-  # Apache container for the xxe module
-  xxe:
-    image: ${PHP_HASH}
-    volumes:
-      - ./xxe/php/src/:/var/www/html/
-    networks:
-      - test-network
+  # permanentxss:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./permanentxss/php/src:/var/www/html/
 
   # Apache container for the shellshock module
-  shellshock:
-    image: ${PHP_HASH}
-    volumes:
-      - ./shellshock/php/src:/var/www/html/
-    networks:
-      - test-network
+  # shellshock:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./shellshock/php/src:/var/www/html/
 
   # Apache container for the sql module
-  sql:
-    image: ${PHP_HASH}
-    volumes:
-      - ./sql/php/src:/var/www/html/
-    networks:
-      - test-network
+  # sql:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./sql/php/src:/var/www/html/
 
   # Apache container for the ssl module
-  ssl:
-    image: ${PHP_HASH}
-    volumes:
-      - ./ssl/php/src:/var/www/html/
-    networks:
-      - test-network
+  # ssl:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./ssl/php/src:/var/www/html/
 
   # Apache container for the ssrf module
-  ssrf:
-    image: ${PHP_HASH}
-    volumes:
-      - ./ssrf/php/src:/var/www/html/
-    networks:
-      - test-network
+  # ssrf:
+  #    <<: *default_php_setup
+  #    <<: *healthcheck_php
+  #   volumes:
+  #     - ./ssrf/php/src:/var/www/html/
 
   # Apache container for the takeover module
-  takeover:
-    image: ${PHP_HASH}
-    volumes:
-      - ./takeover/php/src:/var/www/html/
-    networks:
-      - test-network
+  # takeover:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./takeover/php/src:/var/www/html/
 
   # Apache container for the timesql module
-  timesql:
-    image: ${PHP_HASH}
-    volumes:
-      - ./timesql/php/src:/var/www/html/
-    networks:
-      - test-network
+  # timesql:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./timesql/php/src:/var/www/html/
 
   # Apache container for the wapp module
-  wapp:
-    image: ${PHP_HASH}
-    volumes:
-      - ./wapp/php/src:/var/www/html/
+  # wapp:
+  #   <<: *default_php_setup
+  #   <<: *healthcheck_php
+  #   volumes:
+  #     - ./wapp/php/src:/var/www/html/
+
+  # Wordpress container 
+  wordpress:
+    build:
+      context: ./wp_enum/
+      dockerfile: Dockerfile
+      args:
+        WP_HASH_TAG: ${WP_HASH}
+    <<: *healthcheck_php
+    depends_on:
+      wp_db:
+        condition: service_healthy
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: "wp_db"
+      WORDPRESS_DB_USER: ${WP_MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${WP_MYSQL_DATABASE}
+      WP_HASH_TAG: ${WP_HASH}
     networks:
       - test-network
 
   # Apache container for the xss module
   xss:
-    image: ${PHP_HASH}
+    <<: *default_php_setup
+    <<: *healthcheck_php
     volumes:
       - ./xss/php/src:/var/www/html/
-    networks:
-      - test-network
 
-  # Apache container for the csrf module
-  csrf:
-    image: ${PHP_HASH}
+  # Apache container for the xxe module and its endpoint
+  xxe:
+    <<: *default_php_setup
+    <<: *healthcheck_php
+    depends_on:
+      endpoint:
+        condition: service_healthy
     volumes:
-      - ./csrf/php/src:/var/www/html/
-    networks:
-      - test-network
+      - ./xxe/php/src/:/var/www/html/
 
   # custom endpoint for requests
   endpoint:
     build:
       context: ../../
       dockerfile: "tests/integration/endpoint/Dockerfile"
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_php
     networks:
       - test-network
 
-  # Wapiti container
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
   wapiti:
     build:
       context: "../../"
@@ -298,39 +332,40 @@ services:
       - ./.test:/home/
     networks:
       - test-network
+    command: "backup wp_enum brute_login_form cookieflags crlf csp exec file htaccess drupal_enum http_headers xxe xss"
     depends_on:
-      - backup
-      - wp_db
-      - wordpress
-      - brute_login_form
-      - buster
-      - cookieflags
-      - crlf
-      - csp
-      - exec
-      - file
-      - htaccess
-      - htp
-      - drupal9
-      - drupal9-db
-      - drupal10
-      - drupal10-db
-      - http_headers
-      - log4shell
-      - methods
-      - nikto
-      - permanentxss
-      - xxe
-      - shellshock
-      - sql
-      - ssl
-      - ssrf
-      - takeover
-      - timesql
-      - wapp
-      - xss
+      backup:
+        condition: service_healthy
+      wordpress:
+        condition: service_healthy
+      brute_login_form:
+        condition: service_healthy
+      cookieflags:
+        condition: service_healthy
+      crlf:
+        condition: service_healthy
+      csp:
+        condition: service_healthy
+      exec:
+        condition: service_healthy
+      file:
+        condition: service_healthy
+      htaccess:
+        condition: service_healthy
+      drupal9:
+        condition: service_healthy
+      drupal10:
+        condition: service_healthy
+      http_headers:
+        condition: service_healthy
+      xxe:
+        condition: service_healthy
+      xss:
+        condition: service_healthy
 
 volumes:
-  db_data:
+  drupal9_db_data:
+  drupal10_db_data:
+  wp_db_data:
 networks:
   test-network:

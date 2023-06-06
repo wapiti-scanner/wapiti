@@ -1,7 +1,5 @@
-# This wordpress image refers to the 6.2.0 tag, it can be found here:
-# https://hub.docker.com/layers/library/wordpress/6.2.0/images/sha256-c3d6df13e49ed4039fbbe5bd1ec172b166a7a4df603716fd06f5bd66b7e60f90?context=explore
-
-FROM wordpress@sha256:c3d6df13e49ed4039fbbe5bd1ec172b166a7a4df603716fd06f5bd66b7e60f90
+ARG WP_HASH_TAG=":6.2.0"
+FROM wordpress${WP_HASH_TAG}
 
 ENV DEPENDENCIES "curl unzip"
 
