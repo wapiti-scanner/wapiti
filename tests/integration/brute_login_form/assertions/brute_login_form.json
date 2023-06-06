@@ -80,7 +80,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://brute_login_form/",
         "version": "Wapiti 3.1.7",

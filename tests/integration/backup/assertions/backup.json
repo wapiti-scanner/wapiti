@@ -29,7 +29,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://backup/",
         "version": "Wapiti 3.1.7",

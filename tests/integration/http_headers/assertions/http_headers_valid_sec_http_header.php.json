@@ -29,7 +29,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "https://http_headers/valid_sec_http_header.php",
         "version": "Wapiti 3.1.7",

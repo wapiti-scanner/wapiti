@@ -23,7 +23,43 @@
                 "curl_command": "curl \"http://htaccess/admin/private.php\"",
                 "wstg": [
                     "WSTG-CONF-06"
-                ]
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>Htaccess test</title>\n    </head>\n    <body>\n        <p>what ?</p>\n    </body>\n</html>\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "126"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
             }
         ],
         "HTTP Secure Headers": [],
@@ -44,14 +80,154 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://htaccess/",
-        "date": "Mon, 22 May 2023 09:45:19 +0000",
         "version": "Wapiti 3.1.7",
         "scope": "folder",
         "auth": null,
         "crawled_pages_nbr": 2,
-        "detailed_report": false
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://htaccess/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "htaccess"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>Htaccess test</title>\n    </head>\n    <body>\n        <p>Hey, that's a cool page you can GET</p>\n        <p>I bet you can't access <a href=\"./admin/private.php\">this page.</a></p>        \n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "197"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://htaccess/admin/private.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "htaccess"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 403,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\n<p>You don't have permission to access this resource.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at htaccess Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "content-length",
+                            "273"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
     }
 }

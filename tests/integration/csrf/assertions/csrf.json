@@ -13,7 +13,7 @@
                 "parameter": "",
                 "referer": "http://csrf/fake_protected_form.php",
                 "module": "csrf",
-                "http_request": "POST /fake_protected_form.php HTTP/1.1\ncontent-type: application/x-www-form-urlencoded, application/x-www-form-urlencoded\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\nreferer: http://csrf/fake_protected_form.php\ncookie: PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932\ncontent-length: 39\nContent-Type: application/x-www-form-urlencoded\n\ncsrf_token=AAAAAAAAAAAAAAA&name=default",
+                "http_request": "POST /fake_protected_form.php HTTP/1.1\ncontent-type: application/x-www-form-urlencoded, application/x-www-form-urlencoded\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\nreferer: http://csrf/fake_protected_form.php\ncookie: PHPSESSID=1335df1b1b4a214\ncontent-length: 39\nContent-Type: application/x-www-form-urlencoded\n\ncsrf_token=AAAAAAAAAAAAAAA&name=default",
                 "curl_command": "curl \"http://csrf/fake_protected_form.php\" -e \"http://csrf/fake_protected_form.php\" -d \"csrf_token=AAAAAAAAAAAAAAA&name=default\"",
                 "wstg": [
                     "WSTG-SESS-05"
@@ -30,7 +30,7 @@
                 "parameter": "",
                 "referer": "http://csrf/unprotected_form.php",
                 "module": "csrf",
-                "http_request": "POST /unprotected_form.php HTTP/1.1\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://csrf/unprotected_form.php\ncookie: PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932\ncontent-length: 12\nContent-Type: application/x-www-form-urlencoded\n\nname=default",
+                "http_request": "POST /unprotected_form.php HTTP/1.1\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://csrf/unprotected_form.php\ncookie: PHPSESSID=1335df1b1b4a214\ncontent-length: 12\nContent-Type: application/x-www-form-urlencoded\n\nname=default",
                 "curl_command": "curl \"http://csrf/unprotected_form.php\" -e \"http://csrf/unprotected_form.php\" -d \"name=default\"",
                 "wstg": [
                     "WSTG-SESS-05"
@@ -64,7 +64,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://csrf/",
         "version": "Wapiti 3.1.7",
@@ -183,7 +186,7 @@
                 },
                 "response": {
                     "status_code": 200,
-                    "body": "<!DOCTYPE html><html><head>\t<meta charset=\"UTF-8\">\t<title>CSRF protected test</title></head><body>    <form method=\"POST\">    <label for=\"name\">Name:</label>    <input type=\"hidden\" name=\"csrf_token\" value=\"6ff3e3f37433c2bd7577186a974603840303aaa67258abaefce298943b223581\">    <input type=\"text\" id=\"name\" name=\"name\"><br><br>    <input type=\"submit\" value=\"Update\">    </form></body></html>",
+                    "body": "<!DOCTYPE html><html><head>\t<meta charset=\"UTF-8\">\t<title>CSRF protected test</title></head><body>    <form method=\"POST\">    <label for=\"name\">Name:</label>    <input type=\"hidden\" name=\"csrf_token\" value=\"6b7e0e4812b64635ab58e2e2e90a0c47ac3d6062e3aee4b2a82ac7a2597d4274\">    <input type=\"text\" id=\"name\" name=\"name\"><br><br>    <input type=\"submit\" value=\"Update\">    </form></body></html>",
                     "headers": [
                         [
                             "server",
@@ -219,11 +222,11 @@
                         ],
                         [
                             "content-length",
-                            "276"
+                            "274"
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=99"
+                            "timeout=5, max=100"
                         ],
                         [
                             "connection",
@@ -403,7 +406,7 @@
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=100"
+                            "timeout=5, max=99"
                         ],
                         [
                             "connection",
@@ -455,7 +458,7 @@
                         ],
                         [
                             "cookie",
-                            "PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932"
+                            "PHPSESSID=1335df1b1b4a214"
                         ],
                         [
                             "content-length",
@@ -469,7 +472,7 @@
                 },
                 "response": {
                     "status_code": 200,
-                    "body": "<!DOCTYPE html><html><head>\t<meta charset=\"UTF-8\">\t<title>CSRF protected test</title></head><body>    <form method=\"POST\">    <label for=\"name\">Name:</label>    <input type=\"hidden\" name=\"csrf_token\" value=\"6ff3e3f37433c2bd7577186a974603840303aaa67258abaefce298943b223581\">    <input type=\"text\" id=\"name\" name=\"name\"><br><br>    <input type=\"submit\" value=\"Update\">    </form></body></html>form submitted !",
+                    "body": "<!DOCTYPE html><html><head>\t<meta charset=\"UTF-8\">\t<title>CSRF protected test</title></head><body>    <form method=\"POST\">    <label for=\"name\">Name:</label>    <input type=\"hidden\" name=\"csrf_token\" value=\"6b7e0e4812b64635ab58e2e2e90a0c47ac3d6062e3aee4b2a82ac7a2597d4274\">    <input type=\"text\" id=\"name\" name=\"name\"><br><br>    <input type=\"submit\" value=\"Update\">    </form></body></html>form submitted !",
                     "headers": [
                         [
                             "server",
@@ -505,11 +508,11 @@
                         ],
                         [
                             "content-length",
-                            "282"
+                            "279"
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=98"
+                            "timeout=5, max=99"
                         ],
                         [
                             "connection",
@@ -561,7 +564,7 @@
                         ],
                         [
                             "cookie",
-                            "PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932"
+                            "PHPSESSID=1335df1b1b4a214"
                         ],
                         [
                             "content-length",
@@ -615,7 +618,7 @@
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=97"
+                            "timeout=5, max=98"
                         ],
                         [
                             "connection",
@@ -667,7 +670,7 @@
                         ],
                         [
                             "cookie",
-                            "PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932"
+                            "PHPSESSID=1335df1b1b4a214"
                         ],
                         [
                             "content-length",

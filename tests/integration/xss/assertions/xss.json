@@ -40,7 +40,7 @@
                             ],
                             [
                                 "x-powered-by",
-                                "PHP/8.1.19"
+                                "PHP/8.1.18"
                             ],
                             [
                                 "vary",
@@ -74,15 +74,15 @@
                 "parameter": "group",
                 "referer": "",
                 "module": "xss",
-                "http_request": "GET /intermediate_xss.php?group=%3Cdetails%20open%20ontoggle%3Dconfirm%28%2Fwwfkuf85na%2F%29%3E HTTP/1.1\nhost: xss\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "curl_command": "curl \"http://xss/intermediate_xss.php?group=%3Cdetails%20open%20ontoggle%3Dconfirm%28%2Fwwfkuf85na%2F%29%3E\"",
+                "http_request": "GET /intermediate_xss.php?group=%3Cdetails%20open%20ontoggle%3Dconfirm%28%2Fwuwtq24eo7%2F%29%3E HTTP/1.1\nhost: xss\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://xss/intermediate_xss.php?group=%3Cdetails%20open%20ontoggle%3Dconfirm%28%2Fwuwtq24eo7%2F%29%3E\"",
                 "wstg": [
                     "WSTG-INPV-01"
                 ],
                 "detail": {
                     "response": {
                         "status_code": 200,
-                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page <details open ontoggle=confirm(/wwfkuf85na/)> </p>\n\t</ul>\n</body>\n</html>\n\n",
+                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page <details open ontoggle=confirm(/wuwtq24eo7/)> </p>\n\t</ul>\n</body>\n</html>\n\n",
                         "headers": [
                             [
                                 "server",
@@ -90,7 +90,7 @@
                             ],
                             [
                                 "x-powered-by",
-                                "PHP/8.1.19"
+                                "PHP/8.1.18"
                             ],
                             [
                                 "vary",
@@ -124,15 +124,15 @@
                 "parameter": "group",
                 "referer": "",
                 "module": "xss",
-                "http_request": "GET /simple_xss.php?group=%3CScRiPt%3Ealert%28%27w17gpc5zxw%27%29%3C%2FsCrIpT%3E HTTP/1.1\nhost: xss\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "curl_command": "curl \"http://xss/simple_xss.php?group=%3CScRiPt%3Ealert%28%27w17gpc5zxw%27%29%3C%2FsCrIpT%3E\"",
+                "http_request": "GET /simple_xss.php?group=%3CScRiPt%3Ealert%28%27wc2dbxsljo%27%29%3C%2FsCrIpT%3E HTTP/1.1\nhost: xss\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "curl_command": "curl \"http://xss/simple_xss.php?group=%3CScRiPt%3Ealert%28%27wc2dbxsljo%27%29%3C%2FsCrIpT%3E\"",
                 "wstg": [
                     "WSTG-INPV-01"
                 ],
                 "detail": {
                     "response": {
                         "status_code": 200,
-                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page <ScRiPt>alert('w17gpc5zxw')</sCrIpT> </p>\n\t</ul>\n</body>\n</html>\n\n",
+                        "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page <ScRiPt>alert('wc2dbxsljo')</sCrIpT> </p>\n\t</ul>\n</body>\n</html>\n\n",
                         "headers": [
                             [
                                 "server",
@@ -140,7 +140,7 @@
                             ],
                             [
                                 "x-powered-by",
-                                "PHP/8.1.19"
+                                "PHP/8.1.18"
                             ],
                             [
                                 "vary",
@@ -148,7 +148,7 @@
                             ],
                             [
                                 "content-length",
-                                "199"
+                                "196"
                             ],
                             [
                                 "keep-alive",
@@ -180,7 +180,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://xss/",
         "version": "Wapiti 3.1.7",
@@ -233,7 +236,7 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "vary",
@@ -264,7 +267,7 @@
             },
             {
                 "request": {
-                    "url": "http://xss/simple_xss.php",
+                    "url": "http://xss/advanced_xss.php",
                     "method": "GET",
                     "headers": [
                         [
@@ -307,11 +310,11 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "location",
-                            "simple_xss.php?group=I_guess"
+                            "advanced_xss.php?group=I_guess"
                         ],
                         [
                             "content-length",
@@ -334,7 +337,7 @@
             },
             {
                 "request": {
-                    "url": "http://xss/simple_xss.php",
+                    "url": "http://xss/advanced_xss.php",
                     "method": "GET",
                     "headers": [
                         [
@@ -377,7 +380,7 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "vary",
@@ -408,7 +411,7 @@
             },
             {
                 "request": {
-                    "url": "http://xss/intermediate_xss.php",
+                    "url": "http://xss/simple_xss.php",
                     "method": "GET",
                     "headers": [
                         [
@@ -451,11 +454,11 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "location",
-                            "intermediate_xss.php?group=I_guess"
+                            "simple_xss.php?group=I_guess"
                         ],
                         [
                             "content-length",
@@ -509,6 +512,76 @@
                     "referer": "",
                     "enctype": "",
                     "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page wrong param ! </p>\n\t</ul>\n</body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "location",
+                            "intermediate_xss.php?group=I_guess"
+                        ],
+                        [
+                            "content-length",
+                            "220"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://xss/simple_xss.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "xss"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
                     "depth": 2
                 },
                 "response": {
@@ -521,7 +594,7 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "vary",
@@ -552,77 +625,7 @@
             },
             {
                 "request": {
-                    "url": "http://xss/advanced_xss.php",
-                    "method": "GET",
-                    "headers": [
-                        [
-                            "host",
-                            "xss"
-                        ],
-                        [
-                            "connection",
-                            "keep-alive"
-                        ],
-                        [
-                            "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
-                        ],
-                        [
-                            "accept-language",
-                            "en-US"
-                        ],
-                        [
-                            "accept-encoding",
-                            "gzip, deflate, br"
-                        ],
-                        [
-                            "accept",
-                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-                        ]
-                    ],
-                    "referer": "",
-                    "enctype": "",
-                    "encoding": "UTF-8",
-                    "depth": 1
-                },
-                "response": {
-                    "status_code": 302,
-                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <p>Hello user, there is something wrong with this page wrong param ! </p>\n\t</ul>\n</body>\n</html>\n\n",
-                    "headers": [
-                        [
-                            "server",
-                            "Apache/2.4.56 (Debian)"
-                        ],
-                        [
-                            "x-powered-by",
-                            "PHP/8.1.19"
-                        ],
-                        [
-                            "location",
-                            "advanced_xss.php?group=I_guess"
-                        ],
-                        [
-                            "content-length",
-                            "220"
-                        ],
-                        [
-                            "keep-alive",
-                            "timeout=5, max=100"
-                        ],
-                        [
-                            "connection",
-                            "Keep-Alive"
-                        ],
-                        [
-                            "content-type",
-                            "text/html; charset=UTF-8"
-                        ]
-                    ]
-                }
-            },
-            {
-                "request": {
-                    "url": "http://xss/advanced_xss.php",
+                    "url": "http://xss/intermediate_xss.php",
                     "method": "GET",
                     "headers": [
                         [
@@ -665,7 +668,7 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "vary",
@@ -681,7 +684,7 @@
                         ],
                         [
                             "keep-alive",
-                            "timeout=5, max=96"
+                            "timeout=5, max=99"
                         ],
                         [
                             "connection",

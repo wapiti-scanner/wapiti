@@ -84,7 +84,10 @@
         "Internal Server Error": [],
         "Resource consumption": []
     },
-    "additionnals": {},
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
     "infos": {
         "target": "http://crlf/",
         "version": "Wapiti 3.1.7",
@@ -137,7 +140,7 @@
                         ],
                         [
                             "x-powered-by",
-                            "PHP/8.1.19"
+                            "PHP/8.1.18"
                         ],
                         [
                             "location",
@@ -150,6 +153,76 @@
                         [
                             "keep-alive",
                             "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crlf/index.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "crlf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "location",
+                            "index.php?user-agent=blabla"
+                        ],
+                        [
+                            "content-length",
+                            "191"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
                         ],
                         [
                             "connection",
@@ -220,76 +293,6 @@
                         [
                             "content-length",
                             "161"
-                        ],
-                        [
-                            "keep-alive",
-                            "timeout=5, max=99"
-                        ],
-                        [
-                            "connection",
-                            "Keep-Alive"
-                        ],
-                        [
-                            "content-type",
-                            "text/html; charset=UTF-8"
-                        ]
-                    ]
-                }
-            },
-            {
-                "request": {
-                    "url": "http://crlf/index.php",
-                    "method": "GET",
-                    "headers": [
-                        [
-                            "host",
-                            "crlf"
-                        ],
-                        [
-                            "connection",
-                            "keep-alive"
-                        ],
-                        [
-                            "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
-                        ],
-                        [
-                            "accept-language",
-                            "en-US"
-                        ],
-                        [
-                            "accept-encoding",
-                            "gzip, deflate, br"
-                        ],
-                        [
-                            "accept",
-                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-                        ]
-                    ],
-                    "referer": "",
-                    "enctype": "",
-                    "encoding": "UTF-8",
-                    "depth": 1
-                },
-                "response": {
-                    "status_code": 302,
-                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>CRLF Example</title>\n</head>\n    <body>\n        <p>Page where you can do some injections into the user_agent param and header.</p>\n    </body>\n</html>\n\n",
-                    "headers": [
-                        [
-                            "server",
-                            "Apache/2.4.56 (Debian)"
-                        ],
-                        [
-                            "x-powered-by",
-                            "PHP/8.1.19"
-                        ],
-                        [
-                            "location",
-                            "index.php?user-agent=blabla"
-                        ],
-                        [
-                            "content-length",
-                            "191"
                         ],
                         [
                             "keep-alive",
