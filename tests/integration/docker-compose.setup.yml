@@ -188,11 +188,24 @@ services:
   #   volumes:
   #     - ./test_mod_log4shell/php/src:/var/www/html/
 
-  # Apache container for the methods module
-  # methods:
-  #   <<: [*default_php_setup,  *healthcheck_web]
-  #   volumes:
-  #     - ./test_mod_methods/php/src:/var/www/html/
+  # Apache and Nginx container for the methods module
+  # Apache hardly handle the CONNECT method so we need Nginx
+  # as a proxy to filter methods and avoid complex Apache conf
+  methods:
+    image: nginx${NGINX_HASH}
+    volumes:
+      - ./test_mod_methods/nginx.template:/etc/nginx/templates/default.conf.template
+    networks:
+      - test-network
+    <<: *healthcheck_web
+    depends_on:
+      apache-methods:
+        condition: service_healthy
+
+  apache-methods:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_methods/php/src:/var/www/html/
 
   # Apache container for the nikto module
   # nikto:
@@ -319,7 +332,7 @@ services:
       - ./.test:/home/
     networks:
       - test-network
-    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock"
+    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock test_mod_methods"
     depends_on:
       backup:
         condition: service_healthy
@@ -352,6 +365,8 @@ services:
       sql:
         condition: service_healthy
       shellshock:
+        condition: service_healthy
+      methods:
         condition: service_healthy
 
 volumes:
