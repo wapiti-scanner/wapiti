@@ -85,6 +85,25 @@ services:
     networks:
       - test-network
       
+  # Apache and Nginx container for the methods module
+  # Apache hardly handle the CONNECT method so we need Nginx
+  # as a proxy to filter methods and avoid complex Apache conf
+  methods:
+    image: nginx${NGINX_HASH}
+    volumes:
+      - ./test_mod_methods/nginx.template:/etc/nginx/templates/default.conf.template
+    networks:
+      - test-network
+    <<: *healthcheck_web
+    depends_on:
+      apache-methods:
+        condition: service_healthy
+
+  apache-methods:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_methods/php/src:/var/www/html/
+
   # First, all the different databases required to run the containers
   drupal9-db:
     <<: [ *default_mysql_setup, *healthcheck_mysql ]
@@ -271,6 +290,8 @@ services:
       permanentxss:
         condition: service_healthy
       timesql:
+        condition: service_healthy
+      methods:
         condition: service_healthy
 
 volumes:
