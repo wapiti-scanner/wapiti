@@ -1,0 +1,272 @@
+{
+    "vulnerabilities": {},
+    "infos": {
+        "target": "http://methods/",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://methods/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "methods"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html>\n<head>\n    <title>Methods</title>\n</head>\n<body>\n    <ul>\n        <li>first page with different return with DELETE <a href=\"different_delete_return.php\"></a>link 1</li>\n        <li>second page with different return and empty OPTIONS <a href=\"empty_options.php\"></a>link 2</li>\n        <li>third page with same return <a href=\"same_return.php\"></a>link 3</li>\n    </ul>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "231"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "nginx/1.24.0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://methods/different_delete_return.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "methods"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Different Delete</title>\n</head>\n<body>\n    <p>This page has a different return response for the DELETE method</p>\n    <p>A normal body</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "156"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "nginx/1.24.0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://methods/empty_options.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "methods"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <title>empty options</title>\n</head>\n<body>\n    <p>This is a page with an empty allow headers, thus, OPTIONS is supposed to find nothing</p><p>PUT and GET are still accessible</p></body>\n</html>\n",
+                    "headers": [
+                        [
+                            "allow",
+                            ""
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "183"
+                        ],
+                        [
+                            "content-type",
+                            "text/html;charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "nginx/1.24.0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://methods/same_return.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "methods"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Normal HTML page</title>\n</head>\n<body>\n    <p>This page has a normal behavior</p>\n    <p>The goal is to see if the HEAD method is not triggered and create false positive because of an empty body</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "194"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "nginx/1.24.0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
