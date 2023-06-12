@@ -1,0 +1,60 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [
+            {
+                "method": "GET",
+                "path": "/jquery/index.html",
+                "info": "{\"name\": \"jQuery\", \"versions\": [\"3.6.0\"], \"cpe\": \"cpe:2.3:a:jquery:jquery:*:*:*:*:*:*:*:*\", \"categories\": [\"JavaScript libraries\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /jquery/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-08"
+                ]
+            }
+        ],
+        "Fingerprint web server": [
+            {
+                "method": "GET",
+                "path": "/jquery/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /jquery/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/jquery/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /jquery/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/jquery/index.html",
+                "info": "{\"name\": \"jQuery CDN\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /jquery/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/jquery/index.html",
+                "info": "{\"name\": \"jQuery\", \"versions\": [\"3.6.0\"], \"cpe\": \"cpe:2.3:a:jquery:jquery:*:*:*:*:*:*:*:*\", \"categories\": [\"JavaScript libraries\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /jquery/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            }
+        ]
+    }
+}

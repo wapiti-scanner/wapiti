@@ -32,6 +32,21 @@ x-healthcheck_mysql:
     retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
 
 services:
+  # Nginx container for the wapp module
+  wapp:
+    image: nginx${NGINX_HASH}
+    volumes:
+      - ./test_mod_wapp/websites/:/usr/share/nginx/html/
+      - ./test_mod_wapp/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - test-network
+    healthcheck:
+      test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}other_mock/index.wiki.jsp.html
+      interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+      timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+      start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+      retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
   # Wapiti container 
   # requires all the targets containers to work perfectly
   wapiti:
@@ -45,5 +60,9 @@ services:
     networks:
       - test-network
     command: "${TESTS}"
+    depends_on:
+      wapp:
+        condition: service_healthy
+
 networks:
   test-network:

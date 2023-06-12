@@ -1,0 +1,10 @@
+h1 {
+    color: blue;
+}
+
+#content {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: lightgray;
+}
