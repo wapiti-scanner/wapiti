@@ -154,8 +154,8 @@ async def test_dom_detection():
             <h2>Pas de panique, on va vous aider</h2> \
             <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
             <input type=\"hidden\" name=\"_glpi_csrf_token\" value=\"b6db36a8c9fd4f3f5d244faa76247688\">\
-            <p id=\"mod-sellacious-cart\">test text</p> \
-            <p id=\"sm-page-footer-copyright\">SmugMug</p> \
+            <p class=\"mod-sellacious-cart\">test text</p> \
+            <p class=\"sm-page-footer-copyright\">SmugMug</p> \
             <img src=\"www.afi-b.com\" /> \
             <a href=\"/cart\">test</a> \
             </body></html>"
@@ -179,19 +179,18 @@ async def test_dom_detection():
         await module.attack(request)
 
         assert persister.add_payload.call_count
-        expected_result = [
+        expected_result = {
             '{"name": "Astra Widgets", "versions": ["1.5.4"], "categories": ["WordPress plugins", "Widgets"], "groups": ["Add-ons", "Other"]}',
             '{"name": "GLPI", "versions": [], "categories": ["Web frameworks", "CRM"], "groups": ["Web development", "Marketing", "Business tools"]}',
             '{"name": "Sellacious", "versions": [], "categories": ["Ecommerce"], "groups": ["Sales"]}',
             '{"name": "SmugMug", "versions": [], "categories": ["Photo galleries"], "groups": ["Content", "Media"]}',
             '{"name": "Affiliate B", "versions": [], "categories": ["Affiliate programs", "Advertising"], "groups": ["Marketing"]}',
             '{"name": "Cart Functionality", "versions": [], "categories": ["Ecommerce"], "groups": ["Sales"]}',
-            '{"name": "PHP", "versions": [], "categories": ["Programming languages"], "groups": ["Web development"]}'
+            '{"name": "PHP", "versions": [], "categories": ["Programming languages"], "groups": ["Web development"]}',
+            '{"name": "Joomla", "versions": [], "categories": ["CMS"], "groups": ["Content"]}'
+        }
 
-        ]
-        for arg in persister.add_payload.call_args_list:
-            assert arg[1]["info"] in expected_result
-
+        assert set([arg[1]['info'] for arg in persister.add_payload.call_args_list]) == expected_result
 
 
 @pytest.mark.asyncio
@@ -272,6 +271,122 @@ async def test_cookies_detection():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_cookies_empty_value_detection():
+    # Test if application is detected using its cookies attribute regardless of their values
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"Set-Cookie": "rakuten-source=blabla"}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Rakuten", "versions": [], "categories": ["Affiliate programs"], "groups": ["Marketing"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_multiple_cookies_detection():
+    # Test if multiple applications are detected using their cookies
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers=[("Set-Cookie", "dtCookie1=blabla"),
+                     ("Set-Cookie", "rakuten-source=blabla")]
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        expected_output = {
+            '{"name": "Rakuten", "versions": [], "categories": ["Affiliate programs"], "groups": ["Marketing"]}',
+            '{"name": "Dynatrace", "versions": [], "categories": ["Analytics"], "groups": ["Analytics"]}'
+        }
+
+        assert persister.add_payload.call_count
+        assert set([arg[1]['info'] for arg in persister.add_payload.call_args_list]) == expected_output
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_conflicting_versions_cookies_detection():
+    # Test if multiple applications are detected using their cookies
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"Set-Cookie": "ci_csrf_token=1.1, ci_csrf_token=6.2"}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "CodeIgniter", "versions": ["2+"], "categories": ["Web '
+            'frameworks"], "groups": ["Web development"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_headers_detection():
     # Test if application is detected using its headers regex
     respx.get("http://perdu.com/").mock(
@@ -304,6 +419,84 @@ async def test_headers_detection():
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "Cherokee", "versions": ["1.3.4"], "categories": ["Web servers"], "groups": ["Servers"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_headers_multiple_values_detection():
+    # Test if application is detected using its headers regex with multiple values
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                    <h2>Pas de panique, on va vous aider</h2> \
+                    <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+                    </body></html>",
+            headers={("Server", "Cherokee/1.3.4"), ("Server", "cloudflare")}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        expected_output = {
+            '{"name": "Cherokee", "versions": ["1.3.4"], "categories": ["Web servers"], "groups": ["Servers"]}',
+            '{"name": "Cloudflare", "versions": [], "categories": ["CDN"], "groups": ["Servers"]}'
+        }
+
+        assert persister.add_payload.call_count
+        assert set([arg[1]['info'] for arg in persister.add_payload.call_args_list]) == expected_output
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_headers_empty_values_detection():
+    # Test if application is detected using its headers regex with multiple values
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                    <h2>Pas de panique, on va vous aider</h2> \
+                    <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+                    </body></html>",
+            headers={"X-CF1": "",
+                     "X-CF2": ""}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "CacheFly", "versions": [], "categories": ["CDN"], "groups": ["Servers"]}'
         )
 
 
@@ -343,6 +536,87 @@ async def test_meta_detection():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "Planet", "versions": ["1.6.2"], "categories": ["Feed readers"], "groups": ["Content"]}'
         )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_meta_empty_value_detection():
+    # Test if application is detected using its empty meta regex
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title> \
+            <meta name=\"naver-site-verification\" content=\"blabla\">    \
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>"
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Naver Analytics", "versions": [], "categories": ["Analytics"], "groups": ["Analytics"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_meta_multiple_values_detection():
+    # Test if application is detected using its multiple meta values with same attribute
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title> \
+            <meta name=\"generator\" content=\"Abicart\">    \
+            <meta name=\"generator\" content=\"RBS change\">    \
+            </head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>"
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        expected_output = {
+            '{"name": "Abicart", "versions": [], "categories": ["Ecommerce"], "groups": ["Sales"]}',
+            '{"name": "RBS Change", "versions": [], "categories": ["CMS", "Ecommerce"], "groups": ["Content", "Sales"]}',
+            '{"name": "PHP", "versions": [], "categories": ["Programming languages"], "groups": ["Web development"]}'
+        }
+
+        assert persister.add_payload.call_count
+        assert set([arg[1]['info'] for arg in persister.add_payload.call_args_list]) == expected_output
 
 
 @pytest.mark.asyncio
