@@ -1,0 +1,133 @@
+{
+    "vulnerabilities": {
+        "Command execution": [
+            {
+                "method": "GET",
+                "path": "/cgi-bin/vuln.cgi",
+                "info": "URL http://shellshock/cgi-bin/vuln.cgi seems vulnerable to Shellshock attack",
+                "parameter": "",
+                "module": "shellshock",
+                "wstg": [
+                    "WSTG-INPV-12"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://shellshock/",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://shellshock/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "shellshock"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<html>\n\n<head>\n    <title>Vulnerables | ShellShock</title>\n</head>\n\n<body>\n    <h1>This website is vulnerable to ShellShock, please exploit it</h1>\n    <pre>The script is <a href=\"/cgi-bin/vuln.cgi\"></a>here</pre>\n</body>\n\n</html>",
+                    "headers": [
+                        [
+                            "accept-ranges",
+                            "bytes"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "230"
+                        ],
+                        [
+                            "content-type",
+                            "text/html"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.57 (Unix)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://shellshock/cgi-bin/vuln.cgi",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "shellshock"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.57 (Unix)"
+                        ],
+                        [
+                            "transfer-encoding",
+                            "chunked"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}

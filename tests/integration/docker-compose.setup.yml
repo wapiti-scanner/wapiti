@@ -46,6 +46,17 @@ services:
       timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
       start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
       retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+  
+  # Apache container for the shellshock module
+  shellshock:
+    build:
+      context: ./test_mod_shellshock
+      dockerfile: Dockerfile
+      args:
+        HTTPD_HASH_TAG: ${HTTPD_HASH}
+    networks:
+      - test-network
+    <<: *healthcheck_web
 
   timesql-db:
     build:
@@ -292,6 +303,8 @@ services:
       timesql:
         condition: service_healthy
       methods:
+        condition: service_healthy
+      shellshock:
         condition: service_healthy
 
 volumes:
