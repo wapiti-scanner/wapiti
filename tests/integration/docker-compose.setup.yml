@@ -207,10 +207,15 @@ services:
   #     - ./test_mod_permanentxss/php/src:/var/www/html/
 
   # Apache container for the shellshock module
-  # shellshock:
-  #   <<: [*default_php_setup,  *healthcheck_web]
-  #   volumes:
-  #     - ./test_mod_shellshock/php/src:/var/www/html/
+  shellshock:
+    build:
+      context: ./test_mod_shellshock
+      dockerfile: Dockerfile
+      args:
+        HTTPD_HASH_TAG: ${HTTPD_HASH}
+    networks:
+      - test-network
+    <<: *healthcheck_web
 
   # Apache container for the sql module
   sql:
@@ -314,7 +319,7 @@ services:
       - ./.test:/home/
     networks:
       - test-network
-    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql"
+    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock"
     depends_on:
       backup:
         condition: service_healthy
@@ -345,6 +350,8 @@ services:
       xss:
         condition: service_healthy
       sql:
+        condition: service_healthy
+      shellshock:
         condition: service_healthy
 
 volumes:

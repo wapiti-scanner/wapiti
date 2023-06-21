@@ -68,7 +68,7 @@ for key_test, content_test in iter_tests:
                 with open(json_output_path, "w") as output_file:
 
                     # is a filter_tree supplied for this test ?
-                    if "report_filter_tree" in content_test:
+                    if "report_filter_tree" in content_test and content_test["report_filter_tree"]:
                         filter_tree = content_test["report_filter_tree"]
                         # We look for key that CANNOT exist at all,
                         # not even with a full report
