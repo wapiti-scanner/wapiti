@@ -4,6 +4,7 @@
 TESTS="test_mod_buster \
 test_mod_drupal_enum \
 test_mod_ssrf \
+test_mod_log4shell \
 test_mod_wapp "
 
 # Normalize spaces for shell substitution
