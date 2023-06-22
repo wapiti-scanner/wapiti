@@ -1,0 +1,25 @@
+FROM ruby:3
+
+RUN groupadd --gid 5000 appuser \
+    && useradd --home-dir /home/appuser --create-home --uid 5000 \
+    --gid 5000 --shell /bin/sh --skel /dev/null appuser \
+    && mkdir -p /app \
+    && chown appuser:5000 /app
+
+WORKDIR /app
+
+ADD log4j_listener.rb .
+ADD Gemfile .
+
+COPY healthcheck.rb /usr/local/bin/healthcheck.rb
+
+RUN gem install bundler && \
+    apt update && apt install sqlite3 && \
+    bundle install
+
+USER appuser
+
+EXPOSE 53/tcp
+EXPOSE 53/udp
+
+CMD ["ruby", "log4j_listener.rb"]

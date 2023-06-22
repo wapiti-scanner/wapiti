@@ -1,0 +1,27 @@
+ARG TOMCAT_HASH_TAG=':8.0.36-jre8'
+FROM tomcat${TOMCAT_HASH_TAG}
+
+# Need to add nc for healthcheck, 
+# This is Debian Jessie so we need to access to the archive packages
+# and clean the outdated repos  
+RUN printf "deb http://archive.debian.org/debian jessie main non-free contrib\n\
+    deb-src http://archive.debian.org/debian/ jessie main non-free contrib\n\n\
+    deb http://archive.debian.org/debian-security/ jessie/updates main non-free contrib\n\
+    deb-src http://archive.debian.org/debian-security/ etch/updates main non-free contrib\n"\
+    > /etc/apt/sources.list &&\
+    rm /etc/apt/sources.list.d/* &&\
+    apt install debian-archive-keyring -y &&\
+    apt-get clean &&\
+    apt update &&\
+    yes | apt install netcat --force-yes &&\
+    apt-get clean -yq &&\
+    apt-get autoremove -yq &&\
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
+    truncate -s 0 /var/log/*log
+
+# Some config tuning for Apache 
+RUN rm -rf /usr/local/tomcat/webapps/* &&\
+    sed -i 's/port="8080"/port="80"/' /usr/local/tomcat/conf/server.xml
+ADD log4shell-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war 
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
