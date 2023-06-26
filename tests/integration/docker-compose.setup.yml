@@ -7,10 +7,10 @@ x-default_php_setup:
   networks:
     - test-network
 
-x-healthcheck_php:
-  &healthcheck_php
+x-healthcheck_web:
+  &healthcheck_web
   healthcheck:
-    test: ${DEFAULT_PHP_APACHE_HEALTHCHECK_COMMAND}
+    test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
     interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
     timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
     start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
@@ -67,52 +67,52 @@ services:
   # Then, all the containers required for the integration tests
   # Apache server for the backup module
   backup:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./backup/html/:/var/www/html/
+      - ./test_mod_backup/html/:/var/www/html/
 
   # Apache container for the brute_login_form module
   brute_login_form:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./brute_login_form/php/src:/var/www/html/
+      - ./test_mod_brute_login_form/php/src:/var/www/html/
 
   # Apache container for the buster module
   # buster:
-  #    <<: [*default_php_setup,  *healthcheck_php]
-  #    <<: *healthcheck_php
+  #    <<: [*default_php_setup,  *healthcheck_web]
+  #    <<: *healthcheck_web
   #   volumes:
   #     - ./buster/php/src:/var/www/html/
 
 
   # Apache container for the cookieflags module
   cookieflags:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./cookieflags/php/src:/var/www/html/
+      - ./test_mod_cookieflags/php/src:/var/www/html/
 
   # Apache container for the crlf module
   crlf:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./crlf/php/src:/var/www/html/
+      - ./test_mod_crlf/php/src:/var/www/html/
 
   # Apache container for the csp module
   csp:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./csp/php/src:/var/www/html/
+      - ./test_mod_csp/php/src:/var/www/html/
 
   # Apache container for the csrf module
   csrf:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./csrf/php/src:/var/www/html/
+      - ./test_mod_csrf/php/src:/var/www/html/
 
   # Drupal containers and their databases for the drupal_enum module
   drupal9:
     image: drupal${DRUPAL9_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     networks:
       - test-network
     environment:
@@ -126,7 +126,7 @@ services:
 
   drupal10:
     image: drupal${DRUPAL10_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     networks:
       - test-network
     environment:
@@ -140,129 +140,129 @@ services:
 
   # Apache container for the exec module
   exec:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./exec/php/src:/var/www/html/
+      - ./test_mod_exec/php/src:/var/www/html/
 
   # Apache container for the file module
   file:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./file/php/src:/var/www/html/
+      - ./test_mod_file/php/src:/var/www/html/
 
   # Apache container for the htaccess module
   htaccess:
     build:
-      context: ./htaccess/
+      context: ./test_mod_htaccess/
       dockerfile: Dockerfile
       args:
         PHP_HASH_TAG: ${PHP_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     volumes:
-      - ./htaccess/php/src:/var/www/html/
+      - ./test_mod_htaccess/php/src:/var/www/html/
     networks:
       - test-network
 
   # Apache container for the htp module
   # htp:
-  #    <<: [*default_php_setup,  *healthcheck_php]
+  #    <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./htp/php/src:/var/www/html/
+  #     - ./test_mod_htp/php/src:/var/www/html/
 
   # Apache container for the http_headers module
   http_headers:
     build:
-      context: ./http_headers/
+      context: ./test_mod_http_headers/
       dockerfile: "Dockerfile"
       args:
         PHP_HASH_TAG: ${PHP_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     volumes:
-      - ./http_headers/php/src:/var/www/html/
+      - ./test_mod_http_headers/php/src:/var/www/html/
     networks:
       - test-network
 
   # Apache container for the log4shell module
   # log4shell:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./log4shell/php/src:/var/www/html/
+  #     - ./test_mod_log4shell/php/src:/var/www/html/
 
   # Apache container for the methods module
   # methods:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./methods/php/src:/var/www/html/
+  #     - ./test_mod_methods/php/src:/var/www/html/
 
   # Apache container for the nikto module
   # nikto:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./nikto/php/src:/var/www/html/
+  #     - ./test_mod_nikto/php/src:/var/www/html/
 
   # Apache container for the permanentxss module
   # permanentxss:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./permanentxss/php/src:/var/www/html/
+  #     - ./test_mod_permanentxss/php/src:/var/www/html/
 
   # Apache container for the shellshock module
   # shellshock:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./shellshock/php/src:/var/www/html/
+  #     - ./test_mod_shellshock/php/src:/var/www/html/
 
   # Apache container for the sql module
   sql:
     build:
-      context: ./sql/
+      context: ./test_mod_sql/
       dockerfile: Dockerfile
       args:
         PHP_HASH_TAG: ${PHP_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     volumes:
-      - ./sql/php/src/:/var/www/html/
+      - ./test_mod_sql/php/src/:/var/www/html/
     networks:
       - test-network
 
   # Apache container for the ssl module
   # ssl:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./ssl/php/src:/var/www/html/
+  #     - ./test_mod_ssl/php/src:/var/www/html/
 
   # Apache container for the ssrf module
   # ssrf:
-  #    <<: [*default_php_setup,  *healthcheck_php]
+  #    <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./ssrf/php/src:/var/www/html/
+  #     - ./test_mod_ssrf/php/src:/var/www/html/
 
   # Apache container for the takeover module
   # takeover:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./takeover/php/src:/var/www/html/
+  #     - ./test_mod_takeover/php/src:/var/www/html/
 
   # Apache container for the timesql module
   # timesql:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./timesql/php/src:/var/www/html/
+  #     - ./test_mod_timesql/php/src:/var/www/html/
 
   # Apache container for the wapp module
   # wapp:
-  #   <<: [*default_php_setup,  *healthcheck_php]
+  #   <<: [*default_php_setup,  *healthcheck_web]
   #   volumes:
-  #     - ./wapp/php/src:/var/www/html/
+  #     - ./test_mod_wapp/php/src:/var/www/html/
 
   # Wordpress container 
   wordpress:
     build:
-      context: ./wp_enum/
+      context: ./test_mod_wp_enum/
       dockerfile: Dockerfile
       args:
         WP_HASH_TAG: ${WP_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     depends_on:
       wp_db:
         condition: service_healthy
@@ -278,18 +278,18 @@ services:
 
   # Apache container for the xss module
   xss:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
-      - ./xss/php/src:/var/www/html/
+      - ./test_mod_xss/php/src:/var/www/html/
 
   # Apache container for the xxe module and its endpoint
   xxe:
-    <<: [ *default_php_setup, *healthcheck_php ]
+    <<: [ *default_php_setup, *healthcheck_web ]
     depends_on:
       endpoint:
         condition: service_healthy
     volumes:
-      - ./xxe/php/src/:/var/www/html/
+      - ./test_mod_xxe/php/src/:/var/www/html/
 
   # custom endpoint for requests
   endpoint:
@@ -298,7 +298,7 @@ services:
       dockerfile: "tests/integration/endpoint/Dockerfile"
       args:
         PHP_HASH_TAG: ${PHP_HASH}
-    <<: *healthcheck_php
+    <<: *healthcheck_web
     networks:
       - test-network
 
@@ -307,14 +307,14 @@ services:
   wapiti:
     build:
       context: "../../"
-      dockerfile: "Dockerfile.integration"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
       no_cache: true
     container_name: wapiti
     volumes:
       - ./.test:/home/
     networks:
       - test-network
-    command: "backup wp_enum brute_login_form cookieflags crlf csp exec file htaccess drupal_enum http_headers xxe xss sql"
+    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql"
     depends_on:
       backup:
         condition: service_healthy
