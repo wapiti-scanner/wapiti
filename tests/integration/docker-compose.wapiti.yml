@@ -2,10 +2,13 @@ services:
   wapiti:
     build:
       context: "../../"
-      dockerfile: "Dockerfile.integration"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
     container_name: wapiti
+    volumes:
+      - ./.test:/home/
     networks:
       - test-network
+
 networks:
   test-network:
-    external: true

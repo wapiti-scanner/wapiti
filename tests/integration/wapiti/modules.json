@@ -1,169 +1,606 @@
-[
-    {
-        "module": "backup",
+{
+    "test_mod_backup": {
+        "modules": "backup",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "backup"
+            "http://backup"
         ]
     },
-    {
-        "module": "wp_enum",
+    "test_mod_wp_enum": {
+        "modules": "wp_enum",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "wordpress"
+            "http://wordpress"
         ]
     },
-    {
-        "module": "brute_login_form",
+    "test_mod_brute_login_form": {
+        "modules": "brute_login_form",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Weak credentials": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "brute_login_form"
+            "http://brute_login_form"
         ]
     },
-    {
-        "module": "buster",
+    "test_mod_buster": {
+        "modules": "buster",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "buster"
+            "http://buster"
         ]
     },
-    {
-        "module": "cookieflags",
+    "test_mod_cookieflags": {
+        "modules": "cookieflags",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "HttpOnly Flag cookie": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ],
+                "Secure Flag cookie": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "cookieflags"
+            "http://cookieflags"
         ]
     },
-    {
-        "module": "crlf",
+    "test_mod_crlf": {
+        "modules": "crlf",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "CRLF Injection": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "crlf"
+            "http://crlf"
         ]
     },
-    {
-        "module": "csp",
+    "test_mod_csp": {
+        "modules": "csp",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Content Security Policy Configuration": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "csp/csp_insecured.php",
-            "csp/index.php",
-            "csp/csp_secured.php"
+            "http://csp/csp_insecured.php",
+            "http://csp/index.php",
+            "http://csp/csp_secured.php"
         ]
     },
-    {
-        "module": "csrf",
+    "test_mod_csrf": {
+        "modules": "csrf",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Cross Site Request Forgery": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "csrf"
+            "http://csrf"
         ]
     },
-    {
-        "module": "exec",
+    "test_mod_exec": {
+        "modules": "exec",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Command execution": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "exec"
+            "http://exec"
         ]
     },
-    {
-        "module": "file",
+    "test_mod_file": {
+        "modules": "file",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Path Traversal": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "file"
+            "http://file"
         ]
     },
-    {
-        "module": "htaccess",
+    "test_mod_htaccess": {
+        "modules": "htaccess",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Htaccess Bypass": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "htaccess"
+            "http://htaccess"
         ]
     },
-    {
-        "module": "htp",
+    "test_mod_htp": {
+        "modules": "htp",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "htp"
+            "http://htp"
         ]
     },
-    {
-        "module": "drupal_enum",
+    "test_mod_drupal_enum": {
+        "modules": "drupal_enum",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "drupal9",
-            "drupal10"
+            "http://drupal9",
+            "http://drupal10"
         ]
     },
-    {
-        "module": "http_headers",
+    "test_mod_http_headers": {
+        "modules": "http_headers",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "HTTP Secure Headers": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "http_headers/valid_sec_http_header.php",
-            "http_headers/invalid_sec_http_header.php",
-            "http_headers/no_sec_http_header.php"
+            "https://http_headers/valid_sec_http_header.php",
+            "https://http_headers/invalid_sec_http_header.php",
+            "https://http_headers/no_sec_http_header.php"
         ]
     },
-    {
-        "module": "log4shell",
+    "test_mod_log4shell": {
+        "modules": "log4shell",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "log4shell"
+            "http://log4shell"
         ]
     },
-    {
-        "module": "methods",
+    "test_mod_methods": {
+        "modules": "methods",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "methods"
+            "http://methods"
         ]
     },
-    {
-        "module": "nikto",
+    "test_mod_nikto": {
+        "modules": "nikto",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "nikto"
+            "http://nikto"
         ]
     },
-    {
-        "module": "permanentxss",
+    "test_mod_permanentxss": {
+        "modules": "permanentxss",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "permanentxss"
+            "http://permanentxss"
         ]
     },
-    {
-        "module": "xxe",
+    "test_mod_xxe": {
+        "modules": "xxe",
+        "supplementary_argument": "--endpoint http://endpoint/",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "XML External Entity": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "xxe"
+            "http://xxe"
         ]
     },
-    {
-        "module": "shellshock",
+    "test_mod_shellshock": {
+        "modules": "shellshock",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "shellshock"
+            "http://shellshock"
         ]
     },
-    {
-        "module": "sql",
+    "test_mod_sql": {
+        "modules": "sql",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "SQL Injection": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "sql"
+            "http://sql"
         ]
     },
-    {
-        "module": "ssl",
+    "test_mod_ssl": {
+        "modules": "ssl",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "ssl"
+            "http://ssl"
         ]
     },
-    {
-        "module": "ssrf",
+    "test_mod_ssrf": {
+        "modules": "ssrf",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "ssrf"
+            "http://ssrf"
         ]
     },
-    {
-        "module": "takeover",
+    "test_mod_takeover": {
+        "modules": "takeover",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "takeover"
+            "http://takeover"
         ]
     },
-    {
-        "module": "timesql",
+    "test_mod_timesql": {
+        "modules": "timesql",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "timesql"
+            "http://timesql"
         ]
     },
-    {
-        "module": "wapp",
+    "test_mod_wapp": {
+        "modules": "wapp",
+        "supplementary_argument": "",
+        "report_filter_tree": {},
         "targets": [
-            "wapp"
+            "http://wapp"
         ]
     },
-    {
-        "module": "xss",
+    "test_mod_xss": {
+        "modules": "xss",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Reflected Cross Site Scripting": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
         "targets": [
-            "xss"
+            "http://xss"
         ]
     }
-]
+}

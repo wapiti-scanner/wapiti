@@ -5,96 +5,89 @@ import requests
 import re
 from itertools import cycle
 from collections import defaultdict
+from itertools import chain
 from time import sleep
 
+from misc_functions import purge_irrelevant_data, filter_data, all_keys_dicts
+from templates_and_data import DEFAULT_FILTER_TREE, EXISTING_MODULES, TREE_CHECKER
 
-def purge_irrelevant_data(data):
-    """
-    Look recursively for any pattern matching a 2 lenght sized list with 
-    "date", "last-modified" or "etag" in a dictionnary containing lists, 
-    dictionnaries, and other non-collections structures. Removing them because those 
-    datas can change from one test to another and aren't really relevant 
-    """
-    if isinstance(data, dict):
-        for key in data.keys():
-            purge_irrelevant_data(data[key])
-    elif isinstance(data, list) and len(data) != 0:
-        indexes_to_remove = []
-        for i, item in enumerate(data):
-            if isinstance(item, list) and len(item) == 2 and item[0] in ("date", "last-modified", "etag"):
-                indexes_to_remove.append(i)
-            elif isinstance(item, dict) or (isinstance(item, list) and len(item) > 2):
-                purge_irrelevant_data(item)
-        for i in indexes_to_remove[::-1]:
-            data.pop(i)
-    else:
-        return
-
-
-# parsing the json file containing the modules
-with open('/usr/local/bin/modules.json', 'r') as modules_file:
-    modules_data = json.load(modules_file)
+# parsing and checking the json file containing the modules
+with open('/usr/local/bin/modules.json', 'r') as integration_file:
+    integration_data = json.load(integration_file)
+    assert set(chain.from_iterable([test["modules"].split(",")
+               for _, test in integration_data.items()])).issubset(EXISTING_MODULES)
 
 # Eventually filter arguments if any
 if len(sys.argv) > 1:
-    # first checking unknown modules/typo errors
-    assert set(sys.argv[1:]).issubset(set([mod["module"] for mod in modules_data]))
+    # first checking unknown tests/typo errors
+    assert set(sys.argv[1:]).issubset(set(key for key, _ in integration_data.items()))
     # then filtering the wanted modules
-    modules_data = [mod for mod in modules_data if mod["module"] in sys.argv[1:]]
+    integration_data = {key: test for key, test in integration_data.items() if key in sys.argv[1:]}
 
 # creating folders for the logs
-for mod in modules_data:
-    if not os.path.exists(f"/home/{mod['module']}"):
-        os.mkdir(f"/home/{mod['module']}")
+for test_key, _ in integration_data.items():
+    if not os.path.exists(f"/home/{test_key}"):
+        os.mkdir(f"/home/{test_key}")
 
-# data structures to count target and cycle through modules
-tested_targets = set()
-iter_modules = cycle(modules_data)
-total_targets = sum([len(mod["targets"]) for mod in modules_data])
+# All keys available in a general default report
+# to check syntax of filters on the fly
+KEYS_AVAILABLE = all_keys_dicts(TREE_CHECKER)
+
+# data structures to count and cycle through targets
+targets_done = set()
+iter_tests = cycle(integration_data.items())
+total_targets = sum([len(test["targets"]) for _, test in integration_data.items()])
 
 # If any target recieve too many requests, it might not have
 # started well, this is another way to fill the set to break
 # the loop
 requests_counter = defaultdict(int)
-MAX_REQ = 500
+MAX_REQ = 100
 
 # Running wapiti for each module for each target
 # If a target isn't set up, passing to another and so on
 # That way we don't have a strict order and spare testing time
-for mod in iter_modules:
-    if len(tested_targets) == total_targets:
+for key_test, content_test in iter_tests:
+    if len(targets_done) == total_targets:
         break
-    for target in mod["targets"]:
-        if target not in tested_targets:
+    for target in content_test["targets"]:
+        if target not in targets_done:
             sys.stdout.write(f"Querying target {target}...\n")
             requests_counter[target] += 1
             try:
-                secure_conn = ("https"
-                               if requests.get(f"http://{target}", allow_redirects=True, verify=False).url.startswith("https://")
-                               else "http")
+                requests.get(f"{target}", verify=False)
                 # We then call wapiti on each target of each module, generating a detailed JSON report
-                os.system(f"wapiti -u {secure_conn}://{target} -m {mod['module']} "
-                          f"-f json -o /home/{mod['module']}/{re.sub('/','_',target)}.out"
-                          f" --detailed-report --flush-session --verbose 2 --endpoint http://endpoint/")
+                json_output_path = f"/home/{key_test}/{re.sub('/','_',re.sub(r'^https?://', '', target))}.out"
+                os.system(f"wapiti -u {target} -m {content_test['modules']} "
+                          f"-f json -o {json_output_path} "
+                          f"{content_test.get('supplementary_argument', '')} "
+                          f"--detailed-report --flush-session --verbose 2 ")
                 # Now we reparse the JSON to get only useful tests informations:
-                with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "r") as bloated_output_file:
+                with open(json_output_path, "r") as bloated_output_file:
                     bloated_output_data = json.load(bloated_output_file)
-                with open(f"/home/{mod['module']}/{re.sub('/','_',target)}.out", "w") as output_file:
-                    # The date is useless and creates false positive, removing it
-                    bloated_output_data.get("infos", {}).pop("date", None)
+                with open(json_output_path, "w") as output_file:
+
+                    # is a filter_tree supplied for this test ?
+                    if "report_filter_tree" in content_test:
+                        filter_tree = content_test["report_filter_tree"]
+                        # We look for key that CANNOT exist at all,
+                        # not even with a full report
+                        filter_keys = all_keys_dicts(filter_tree)
+                        assert filter_keys.issubset(KEYS_AVAILABLE), \
+                            f"Keys not existing at all: {(filter_keys|KEYS_AVAILABLE)-(filter_keys&KEYS_AVAILABLE)}"
+                    else:
+                        filter_tree = DEFAULT_FILTER_TREE
+
+                    filtered_data = filter_data(bloated_output_data, filter_tree)
 
                     # Some dates and other non determinist data
                     # still exists somewhere in the detailed report
-                    purge_irrelevant_data(bloated_output_data)
+                    bloated_output_data.get("infos", {}).pop("date", None)
+                    purge_irrelevant_data(filtered_data)
 
                     # Rewriting the file
-                    json.dump({
-                        "vulnerabilities": bloated_output_data.get("vulnerabilities", {}),
-                        "anomalies": bloated_output_data.get("anomalies", {}),
-                        "additionals": bloated_output_data.get("additionals", {}),
-                        "infos": bloated_output_data.get("infos", {})
-                    }, output_file, indent=4)
-                tested_targets.add(target)
+                    json.dump(filtered_data, output_file, indent=4)
+                targets_done.add(target)
             except requests.exceptions.ConnectionError:
                 sys.stdout.write(f"Target {target} is not ready yet...\n")
                 # 0.5 seconds penalty in case of no response to avoid requests spamming and being
@@ -102,5 +95,5 @@ for mod in iter_modules:
                 sleep(0.5)
             if requests_counter[target] > MAX_REQ:
                 sys.stdout.write(
-                    f"Target {target} from module {mod['module']} takes too long to respond\nSkipping...\n")
-                tested_targets.add(target)
+                    f"Target {target} from test {key_test} takes too long to respond\nSkipping...\n")
+                targets_done.add(target)
