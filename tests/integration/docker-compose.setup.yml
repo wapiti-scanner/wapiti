@@ -101,6 +101,14 @@ services:
     <<: [ *default_php_setup, *healthcheck_web ]
     volumes:
       - ./test_mod_buster/php/src:/var/www/html
+  # Apache container for the ssrf module
+  ssrf:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_ssrf/php/src:/var/www/html/
+    depends_on:
+      endpoint:
+        condition: service_healthy
 
   # Custom endpoint for requests
   endpoint:
@@ -135,6 +143,8 @@ services:
       drupal10:
         condition: service_healthy
       buster:
+        condition: service_healthy
+      ssrf:
         condition: service_healthy
 
 volumes:
