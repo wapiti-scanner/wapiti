@@ -1,0 +1,319 @@
+{
+    "vulnerabilities": {
+        "Backup file": [],
+        "Weak credentials": [],
+        "CRLF Injection": [],
+        "Content Security Policy Configuration": [],
+        "Cross Site Request Forgery": [],
+        "Potentially dangerous file": [],
+        "Command execution": [],
+        "Path Traversal": [],
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [],
+        "Htaccess Bypass": [],
+        "HTTP Secure Headers": [],
+        "HttpOnly Flag cookie": [],
+        "Log4Shell": [],
+        "Open Redirect": [],
+        "Reflected Cross Site Scripting": [],
+        "Secure Flag cookie": [],
+        "SQL Injection": [],
+        "TLS/SSL misconfigurations": [],
+        "Server Side Request Forgery": [
+            {
+                "method": "GET",
+                "path": "/ssrf.php",
+                "info": "SSRF vulnerability via injection in the parameter url.\nThe target performed an outgoing HTTP GET request at 2023-06-30T14:08:15+00:00 with IP 172.20.0.3.\nFull request can be seen at http://endpoint/ssrf_data/zdw8r2/3/75726c/1688134095-172.20.0.3.txt",
+                "level": 4,
+                "parameter": "url",
+                "referer": "",
+                "module": "ssrf",
+                "http_request": "GET /ssrf.php?url=http%3A%2F%2Fexternal.url%2Fpage HTTP/1.1",
+                "curl_command": "curl \"http://ssrf/ssrf.php?url=http%3A%2F%2Fexternal.url%2Fpage\"",
+                "wstg": [
+                    "WSTG-INPV-19"
+                ],
+                "detail": {
+                    "response": {
+                        "status_code": 200,
+                        "body": "{\n    \"3\": {\n        \"75726c\": [\n            {\n                \"date\": \"2023-06-30T14:08:15+00:00\",\n                \"url\": \"http:\\/\\/endpoint\\/ssrf_data\\/zdw8r2\\/3\\/75726c\\/1688134095-172.20.0.3.txt\",\n                \"ip\": \"172.20.0.3\",\n                \"size\": 70,\n                \"method\": \"GET\"\n            }\n        ]\n    }\n}",
+                        "headers": [
+                            [
+                                "server",
+                                "Apache/2.4.56 (Debian)"
+                            ],
+                            [
+                                "x-powered-by",
+                                "PHP/8.1.18"
+                            ],
+                            [
+                                "vary",
+                                "Accept-Encoding"
+                            ],
+                            [
+                                "content-length",
+                                "195"
+                            ],
+                            [
+                                "keep-alive",
+                                "timeout=5, max=100"
+                            ],
+                            [
+                                "connection",
+                                "Keep-Alive"
+                            ],
+                            [
+                                "content-type",
+                                "text/html; charset=UTF-8"
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        "Stored Cross Site Scripting": [],
+        "Subdomain takeover": [],
+        "Blind SQL Injection": [],
+        "XML External Entity": []
+    },
+    "anomalies": {
+        "Internal Server Error": [],
+        "Resource consumption": []
+    },
+    "additionals": {
+        "Fingerprint web technology": [],
+        "HTTP Methods": []
+    },
+    "infos": {
+        "target": "http://ssrf/",
+        "version": "Wapiti 3.1.7",
+        "scope": "folder",
+        "auth": null,
+        "crawled_pages_nbr": 3,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://ssrf/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "ssrf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 0
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Welcome VulnWebsite</title>\n</head>\n<body>\n\t<p>This is a simple page.</p>\n\t<ul>\n    <li>this is a <a href=\"ssrf.php?url=45\">first link</a> to a simple ssrf vuln</li>\n\t</ul>\n</body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "182"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://ssrf/ssrf.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "ssrf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<br />\n<b>Warning</b>:  Undefined array key \"url\" in <b>/var/www/html/ssrf.php</b> on line <b>2</b><br />\n<br />\n<b>Deprecated</b>:  file_get_contents(): Passing null to parameter #1 ($filename) of type string is deprecated in <b>/var/www/html/ssrf.php</b> on line <b>3</b><br />\n<br />\n<b>Fatal error</b>:  Uncaught ValueError: Path cannot be empty in /var/www/html/ssrf.php:3\nStack trace:\n#0 /var/www/html/ssrf.php(3): file_get_contents('')\n#1 {main}\n  thrown in <b>/var/www/html/ssrf.php</b> on line <b>3</b><br />\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "270"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=99"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://ssrf/ssrf.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "host",
+                            "ssrf"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ]
+                    ],
+                    "referer": "",
+                    "enctype": "",
+                    "encoding": "UTF-8",
+                    "depth": 1
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<br />\n<b>Warning</b>:  file_get_contents(45): Failed to open stream: No such file or directory in <b>/var/www/html/ssrf.php</b> on line <b>3</b><br />\n",
+                    "headers": [
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "144"
+                        ],
+                        [
+                            "keep-alive",
+                            "timeout=5, max=100"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ]
+                    ]
+                }
+            }
+        ],
+        "detailed_report": true
+    }
+}

@@ -267,10 +267,13 @@ services:
   #     - ./test_mod_ssl/php/src:/var/www/html/
 
   # Apache container for the ssrf module
-  # ssrf:
-  #    <<: [*default_php_setup,  *healthcheck_web]
-  #   volumes:
-  #     - ./test_mod_ssrf/php/src:/var/www/html/
+  ssrf:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_ssrf/php/src:/var/www/html/
+    depends_on:
+      endpoint:
+        condition: service_healthy
 
   # Apache container for the takeover module
   # takeover:
@@ -365,7 +368,7 @@ services:
       - ./.test:/home/
     networks:
       - test-network
-    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock test_mod_methods test_mod_timesql"
+    command: "test_mod_backup test_mod_wp_enum test_mod_brute_login_form test_mod_cookieflags test_mod_crlf test_mod_csrf test_mod_csp test_mod_exec test_mod_file test_mod_htaccess test_mod_drupal_enum test_mod_http_headers test_mod_xxe test_mod_xss test_mod_sql test_mod_shellshock test_mod_methods test_mod_timesql test_mod_ssrf"
     depends_on:
       backup:
         condition: service_healthy
@@ -402,6 +405,8 @@ services:
       methods:
         condition: service_healthy
       timesql:
+        condition: service_healthy
+      ssrf:
         condition: service_healthy
 
 volumes:
