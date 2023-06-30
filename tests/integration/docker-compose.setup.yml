@@ -180,6 +180,20 @@ services:
     volumes:
       - ./test_crawler_redirect/php/src:/var/www/html/
 
+  # Apache container for the permanentxss module
+  permanentxss:
+    build:
+      context: ./test_mod_permanentxss/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    <<: *healthcheck_web
+    volumes:
+      - ./test_mod_permanentxss/php/src/index.php:/var/www/html/index.php
+      - ./test_mod_permanentxss/php/src/form.php:/var/www/html/form.php
+    networks:
+      - test-network
+
   # Wapiti container 
   # requires all the targets containers to work perfectly
   wapiti:
@@ -215,6 +229,8 @@ services:
       crawler_redirect:
         condition: service_healthy
       crawler_auth:
+        condition: service_healthy
+      permanentxss:
         condition: service_healthy
 
 volumes:
