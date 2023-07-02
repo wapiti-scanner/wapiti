@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from typing import Optional
+from os.path import join as path_join
 
 from httpx import RequestError
 
@@ -87,40 +88,40 @@ class ModuleBuster(Attack):
 
         tasks = set()
         pending_count = 0
-        payload_iterator = iter(self.payloads)
 
-        while True:
-            if pending_count < self.options["tasks"] and not self._stop_event.is_set():
-                try:
-                    candidate, __ = next(payload_iterator)
-                except StopIteration:
-                    pass
-                else:
-                    url = path + candidate
-                    if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
-                        task = asyncio.create_task(self.check_path(url))
-                        tasks.add(task)
+        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), encoding="utf-8", errors="ignore") as wordlist:
+            while True:
+                if pending_count < self.options["tasks"] and not self._stop_event.is_set():
+                    try:
+                        candidate = next(wordlist).strip()
+                    except StopIteration:
+                        pass
+                    else:
+                        url = path + candidate
+                        if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
+                            task = asyncio.create_task(self.check_path(url))
+                            tasks.add(task)
 
-            if not tasks:
-                break
+                if not tasks:
+                    break
 
-            done_tasks, pending_tasks = await asyncio.wait(
-                tasks,
-                timeout=0.01,
-                return_when=asyncio.FIRST_COMPLETED
-            )
-            pending_count = len(pending_tasks)
-            for task in done_tasks:
-                try:
-                    await task
-                except RequestError:
-                    self.network_errors += 1
-                tasks.remove(task)
-
-            if self._stop_event.is_set():
-                for task in pending_tasks:
-                    task.cancel()
+                done_tasks, pending_tasks = await asyncio.wait(
+                    tasks,
+                    timeout=0.01,
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+                pending_count = len(pending_tasks)
+                for task in done_tasks:
+                    try:
+                        await task
+                    except RequestError:
+                        self.network_errors += 1
                     tasks.remove(task)
+
+                if self._stop_event.is_set():
+                    for task in pending_tasks:
+                        task.cancel()
+                        tasks.remove(task)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True

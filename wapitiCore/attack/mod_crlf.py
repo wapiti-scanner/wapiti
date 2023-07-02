@@ -20,10 +20,11 @@ from typing import Optional
 
 from httpx import ReadTimeout, HTTPStatusError, RequestError
 
-from wapitiCore.attack.attack import Attack, Flags
+from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.crlf import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.model import PayloadInfo, payloads_to_payload_callback
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
@@ -36,7 +37,7 @@ class ModuleCrlf(Attack):
     MSG_VULN = "CRLF Injection"
     do_get = True
     do_post = True
-    payloads = ("http://www.google.fr\r\nwapiti: 3.1.7 version", Flags())
+    payloads = [PayloadInfo(payload="http://www.google.fr\r\nwapiti: 3.1.7 version")]
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -45,7 +46,10 @@ class ModuleCrlf(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
-        for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
+        for mutated_request, parameter, _payload in self.mutator.mutate(
+                request,
+                payloads_to_payload_callback(["http://www.google.fr\r\nwapiti: 3.1.7 version"]),
+        ):
             log_verbose(f"[¨] {mutated_request.url}")
 
             try:
@@ -56,8 +60,8 @@ class ModuleCrlf(Attack):
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
-                    parameter=parameter,
-                    info="Timeout (" + parameter + ")",
+                    parameter=parameter.display_name,
+                    info="Timeout (" + parameter.display_name + ")",
                     wstg=RESOURCE_CONSUMPTION_WSTG_CODE,
                 )
 
@@ -77,13 +81,13 @@ class ModuleCrlf(Attack):
                         request_id=request.path_id,
                         category=NAME,
                         request=mutated_request,
-                        parameter=parameter,
-                        info=f"{self.MSG_VULN} via injection in the parameter {parameter}",
+                        parameter=parameter.display_name,
+                        info=f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}",
                         wstg=WSTG_CODE,
                         response=response
                     )
 
-                    if parameter == "QUERY_STRING":
+                    if parameter.is_qs_injection:
                         injection_msg = Messages.MSG_QS_INJECT
                     else:
                         injection_msg = Messages.MSG_PARAM_INJECT
@@ -93,7 +97,7 @@ class ModuleCrlf(Attack):
                         injection_msg,
                         self.MSG_VULN,
                         page,
-                        parameter
+                        parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
                     log_red(mutated_request.http_repr())

@@ -71,7 +71,7 @@ class ModuleLog4Shell(Attack):
             return
         await self._verify_header_vulnerability(malicious_request, header_target, payload, payload_unique_id, response)
 
-    async def _attack_unifi_url(self, request_url: Request):
+    async def _attack_unifi_url(self, request_url: str):
 
         payload_unique_id = uuid.uuid4()
         payload = self._generate_payload(payload_unique_id)

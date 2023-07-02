@@ -306,9 +306,6 @@ class Wapiti:
                     stop_event,
                     self.crawler_configuration,
                 )
-                if hasattr(class_instance, "set_timeout"):
-                    class_instance.set_timeout(crawler.timeout)
-
             except Exception as exception:  # pylint: disable=broad-except
                 # Catch every possible exceptions and print it
                 logging.error(f"[!] Module {mod_name} seems broken and will be skipped")

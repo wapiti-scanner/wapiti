@@ -1,9 +1,10 @@
-from typing import Dict
 from http.cookiejar import CookieJar, Cookie
 from unittest import mock
-from unittest.mock import MagicMock, mock_open
+from unittest.mock import MagicMock
 import pytest
 import respx
+
+from tests import get_mock_open
 from wapitiCore.net.jsoncookie import JsonCookie
 
 json_cookie_path = "./cookie.txt"
@@ -42,15 +43,6 @@ cookie_content_result = """
 
 cookie_domain_1 = ".testphp.vulnweb.com"
 cookie_domain_2 = "127.0.0.1"
-
-
-def get_mock_open(files: Dict[str, str]):
-    def open_mock(filename, *args, **kwargs):
-        for expected_filename, content in files.items():
-            if filename == expected_filename:
-                return mock_open(read_data=content).return_value
-        raise FileNotFoundError('(mock) Unable to open {filename}')
-    return MagicMock(side_effect=open_mock)
 
 
 @pytest.mark.asyncio

@@ -95,7 +95,8 @@ def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote) -> st
 
 
 def parse_qsl(
-        query_string, strict_parsing=False, encoding='utf-8', errors='replace', max_num_fields=None
+        query_string: str, strict_parsing: bool = False,
+        encoding: str = 'utf-8', errors: str = 'replace', max_num_fields: Optional[int] = None
 ) -> List[Tuple[str, str]]:
     """Parse a query given as a string argument.
         Arguments:

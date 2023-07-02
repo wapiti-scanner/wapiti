@@ -14,20 +14,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import dataclasses
 from configparser import ConfigParser
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from html.parser import attrfind_tolerant
 from urllib.parse import urlparse
 from os.path import join as path_join
 
 from bs4 import BeautifulSoup, element
 
-from wapitiCore.attack.attack import PayloadType, Flags, random_string
+from wapitiCore.attack.attack import PayloadType, random_string
 from wapitiCore.net import Response
 
 
 # Everything under those tags will be treated as text
 from wapitiCore.parsers.html_parser import Html
+
+@dataclasses.dataclass
+class PayloadInfo:
+    payload: str
+    type: PayloadType
+    name: str
+
 
 NONEXEC_PARENTS = {
     "iframe",
@@ -129,7 +137,7 @@ def find_separator(html_code, tainted_attr_value, tag_name):
 
 
 # type/name/tag ex: attrval/img/src
-def get_context_list(html_code, original_keyword):
+def get_context_list(html_code: str, original_keyword: str) -> List[Dict[str, str]]:
     tainted_code, taints = replace_with_unique_values(html_code, original_keyword)
     root_node = BeautifulSoup(tainted_code, "html.parser")
     context_list = []
@@ -227,7 +235,7 @@ def get_context_list(html_code, original_keyword):
     return context_list
 
 
-def load_payloads_from_ini(filename, external_endpoint):
+def load_payloads_from_ini(filename, external_endpoint) -> List[Dict[str, str]]:
     config_reader = ConfigParser(interpolation=None)
     payloads = []
 
@@ -291,7 +299,7 @@ def meet_requirements(payload_requirements, special_attributes):
     return payload_prefix
 
 
-def apply_attrval_context(context, payloads, code):
+def apply_attrval_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     # Our string is in the value of a tag attribute
     # ex: <a href="our_string"></a>
     result = []
@@ -327,7 +335,7 @@ def apply_attrval_context(context, payloads, code):
                         continue
 
                 result.append(
-                    (js_code, Flags(payload_type=PayloadType.xss_non_closing_tag, section=payload_infos["name"]))
+                    PayloadInfo(payload=js_code, type=PayloadType.xss_non_closing_tag, name=payload_infos["name"])
                 )
 
         else:
@@ -337,7 +345,7 @@ def apply_attrval_context(context, payloads, code):
             if context["tag"].lower() in [
                     "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
                     "source", "track", "wbr",
-                    "frame"  # Not in Mozilla list but I guess it is because it is deprecated
+                    "frame"  # Not in Mozilla list, but I guess it is because it is deprecated
             ]:
                 # We don't even need a slash to mark the end of the tag
                 js_code += ">"
@@ -351,12 +359,12 @@ def apply_attrval_context(context, payloads, code):
                 js_code += "</" + context["non_exec_parent"] + ">"
 
             js_code += payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append(PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"]))
 
     return result
 
 
-def apply_attrname_context(context, payloads, code):
+def apply_attrname_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     # we control an attribute name
     # ex: <a our_string="/index.html">
     result = []
@@ -372,12 +380,14 @@ def apply_attrname_context(context, payloads, code):
                     js_code += "</" + context["non_exec_parent"] + ">"
                 js_code += payload_infos["payload"].replace("__XSS__", code)
 
-                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append(
+                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                )
 
     return result
 
 
-def apply_tagname_context(context, payloads, code):
+def apply_tagname_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     # we control the tag name
     # ex: <our_string name="column" />
     result = []
@@ -394,7 +404,9 @@ def apply_tagname_context(context, payloads, code):
                 js_code += payload_infos["payload"].replace("__XSS__", code)
 
                 js_code = js_code[1:]  # use independent payloads, just remove the first character (<)
-                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append(
+                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                )
     else:
         for payload_infos in payloads:
             if not payload_infos["close_tag"]:
@@ -405,12 +417,14 @@ def apply_tagname_context(context, payloads, code):
                 if context["non_exec_parent"]:
                     js_code += "</" + context["non_exec_parent"] + ">"
                 js_code += payload_infos["payload"].replace("__XSS__", code)
-                result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+                result.append(
+                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                )
 
     return result
 
 
-def apply_text_context(context, payloads, code):
+def apply_text_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     # we control the text of the tag
     # ex: <textarea>our_string</textarea>
     result = []
@@ -430,12 +444,14 @@ def apply_text_context(context, payloads, code):
             pass
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append(
+                PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+            )
 
     return result
 
 
-def apply_comment_context(context, payloads, code):
+def apply_comment_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     # Injection occurred in a comment tag
     # ex: <!-- <div> whatever our_string blablah </div> -->
     result = []
@@ -455,12 +471,14 @@ def apply_comment_context(context, payloads, code):
             pass
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
-            result.append((js_code, Flags(payload_type=PayloadType.xss_closing_tag, section=payload_infos["name"])))
+            result.append(
+                PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+            )
 
     return result
 
 
-def apply_context(context, payloads, code):
+def apply_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
     func = {
         "attrval": apply_attrval_context,
         "attrname": apply_attrname_context,
@@ -473,23 +491,25 @@ def apply_context(context, payloads, code):
 
 
 # generate a list of payloads based on where in the webpage the js-code will be injected
-def generate_payloads(html_code, code, payload_file, external_endpoint="http://wapiti3.ovh/"):
+def generate_payloads(
+        html_code: str, code: str, payload_file: str, external_endpoint: str = "http://wapiti3.ovh/"
+) -> List[PayloadInfo]:
     # We must keep the original source code because bs gives us something that may differ...
     context_list = get_context_list(html_code, code)
     payload_list = load_payloads_from_ini(payload_file, external_endpoint)
 
-    payloads_and_flags = []
+    payloads = []
 
     for context in context_list:
 
         for context_payload in apply_context(context, payload_list, code):
-            if context_payload not in payloads_and_flags:
-                payloads_and_flags.append(context_payload)
+            if context_payload not in payloads:
+                payloads.append(context_payload)
 
-    return payloads_and_flags
+    return payloads
 
 
-def valid_xss_content_type(response: Response):
+def valid_xss_content_type(response: Response) -> bool:
     """Check whether the returned content-type header allow javascript evaluation."""
     # When no content-type is returned, browsers try to display the HTML
     if "content-type" not in response.headers:
@@ -501,7 +521,7 @@ def valid_xss_content_type(response: Response):
     return False
 
 
-def compare(left_value: str, right_value: str, method: str, case_sensitive: bool = True):
+def compare(left_value: str, right_value: str, method: str, case_sensitive: bool = True) -> bool:
     """Compare two strings given a comparison method and case sensitivity"""
     if not case_sensitive:
         left_value = left_value.lower()
@@ -521,15 +541,15 @@ def check_payload(
         external_endpoint: str,
         proto_endpoint: str,
         page: Html,
-        flags,
+        payload: PayloadInfo,
         taint: str
-):
+) -> bool:
     config_reader = ConfigParser(interpolation=None)
     with open(path_join(data_dir, payloads_file), encoding='utf-8') as payload_file:
         config_reader.read_file(payload_file)
 
     for section in config_reader.sections():
-        if section == flags.section:
+        if section == payload.name:
             expected_value = config_reader[section]["value"].replace('[EXTERNAL_ENDPOINT]', external_endpoint)
             expected_value = expected_value.replace("[PROTO_ENDPOINT]", proto_endpoint)
             expected_value = expected_value.replace("__XSS__", taint)

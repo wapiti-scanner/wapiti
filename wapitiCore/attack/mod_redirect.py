@@ -22,9 +22,10 @@ from urllib.parse import urlparse
 from httpx import RequestError
 
 from wapitiCore.main.log import log_red, log_verbose
-from wapitiCore.attack.attack import Attack, Flags
+from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
+from wapitiCore.model import payloads_to_payload_callback
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
@@ -37,7 +38,6 @@ class ModuleRedirect(Attack):
     MSG_VULN = "Open Redirect"
     do_get = True
     do_post = False
-    payloads = [("https://openbugbounty.org/", Flags()), ("//openbugbounty.org/", Flags())]
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -46,7 +46,10 @@ class ModuleRedirect(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
-        for mutated_request, parameter, __, __ in self.mutator.mutate(request):
+        for mutated_request, parameter, __ in self.mutator.mutate(
+                request,
+                payloads_to_payload_callback(["https://openbugbounty.org/", "//openbugbounty.org/"]),
+        ):
             log_verbose(f"[¨] {mutated_request.url}")
 
             try:
@@ -62,13 +65,13 @@ class ModuleRedirect(Attack):
                     request_id=request.path_id,
                     category=NAME,
                     request=mutated_request,
-                    parameter=parameter,
-                    info=f"{self.MSG_VULN} via injection in the parameter {parameter}",
+                    parameter=parameter.display_name,
+                    info=f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}",
                     wstg=WSTG_CODE,
                     response=response
                 )
 
-                if parameter == "QUERY_STRING":
+                if not parameter.is_qs_injection:
                     injection_msg = Messages.MSG_QS_INJECT
                 else:
                     injection_msg = Messages.MSG_PARAM_INJECT
@@ -78,7 +81,7 @@ class ModuleRedirect(Attack):
                     injection_msg,
                     self.MSG_VULN,
                     page,
-                    parameter
+                    parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
                 log_red(mutated_request.http_repr())

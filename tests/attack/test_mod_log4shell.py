@@ -11,6 +11,7 @@ import pytest
 import respx
 from dns.resolver import Resolver
 
+from tests import get_mock_open
 from wapitiCore.attack.attack import VULN
 from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.definitions.log4shell import NAME
@@ -19,15 +20,6 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
-
-
-def get_mock_open(files: Dict[str, str]):
-    def open_mock(filename, *_args, **_kwargs):
-        for expected_filename, content in files.items():
-            if filename == expected_filename:
-                return mock_open(read_data=content).return_value
-        raise FileNotFoundError('(mock) Unable to open {filename}')
-    return MagicMock(side_effect=open_mock)
 
 
 @pytest.mark.asyncio

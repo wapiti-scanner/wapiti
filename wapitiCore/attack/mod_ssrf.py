@@ -17,16 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from asyncio import sleep
-from typing import Optional
+from typing import Optional, Iterator, Tuple
 from urllib.parse import quote
 from binascii import hexlify, unhexlify
 
 from httpx import RequestError
 
 from wapitiCore.main.log import logging, log_red, log_verbose
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType, Flags
+from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
+from wapitiCore.model import PayloadInfo, payloads_to_payload_callback, PayloadSource
 from wapitiCore.net import Request, Response
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
@@ -34,30 +35,25 @@ SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
 
 class SsrfMutator(Mutator):
     def __init__(
-            self, session_id: str, methods="FGP", payloads=None, qs_inject=False, max_queries_per_pattern: int = 1000,
+            self, session_id: str, methods="FGP", qs_inject=False, max_queries_per_pattern: int = 1000,
             parameters=None,  # Restrict attack to a whitelist of parameters
             skip=None,  # Must not attack those parameters (blacklist)
             endpoint: str = "http://wapiti3.ovh/"
     ):
         Mutator.__init__(
-            self, methods=methods, payloads=payloads, qs_inject=qs_inject,
+            self, methods=methods, qs_inject=qs_inject,
             max_queries_per_pattern=max_queries_per_pattern, parameters=parameters, skip=skip)
         self._session_id = session_id
         self._endpoint = endpoint
 
-    def mutate(self, request: Request):
+    def mutate(
+            self,
+            request: Request,
+            payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
         post_params = request.post_params
         file_params = request.file_params
         referer = request.referer
-
-        # estimation = self.estimate_requests_count(request)
-        #
-        # if self._attacks_per_url_pattern[request.hash_params] + estimation > self._max_queries_per_pattern:
-        #     # Otherwise (pattern already attacked), make sure we don't exceed maximum allowed
-        #     return
-        #
-        # self._attacks_per_url_pattern[request.hash_params] += estimation
 
         for params_list in [get_params, post_params, file_params]:
             for i, __ in enumerate(params_list):
@@ -98,13 +94,13 @@ class SsrfMutator(Mutator):
 
                     if params_list is file_params:
                         params_list[i][1] = (payload, saved_value[1], saved_value[2])
-                        method = PayloadType.file
+                        parameter_situation = ParameterSituation.MULTIPART
                     else:
                         params_list[i][1] = payload
                         if params_list is get_params:
-                            method = PayloadType.get
+                            parameter_situation = ParameterSituation.QUERY_STRING
                         else:
-                            method = PayloadType.post
+                            parameter_situation = ParameterSituation.POST_BODY
 
                     evil_req = Request(
                         request.path,
@@ -115,7 +111,7 @@ class SsrfMutator(Mutator):
                         referer=referer,
                         link_depth=request.link_depth
                     )
-                    yield evil_req, param_name, payload, Flags(method=method)
+                    yield evil_req, Parameter(name=param_name, situation=parameter_situation), payload
 
                 params_list[i][1] = saved_value
 
@@ -144,7 +140,7 @@ class SsrfMutator(Mutator):
                     link_depth=request.link_depth
                 )
 
-                yield evil_req, "QUERY_STRING", payload, Flags(method=PayloadType.get)
+                yield evil_req, Parameter(name="", situation=ParameterSituation.QUERY_STRING), payload
 
 
 class ModuleSsrf(Attack):
@@ -167,7 +163,6 @@ class ModuleSsrf(Attack):
         self.mutator = SsrfMutator(
             session_id=self._session_id,
             methods=methods,
-            payloads=self.payloads,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters"),
             endpoint=self.external_endpoint
@@ -176,7 +171,7 @@ class ModuleSsrf(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
-        for mutated_request, _parameter, _payload, _flags in self.mutator.mutate(request):
+        for mutated_request, _parameter, _payload in self.mutator.mutate(request, []):
             log_verbose(f"[¨] {mutated_request}")
 
             try:
@@ -189,7 +184,7 @@ class ModuleSsrf(Attack):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
         logging.info(f"[*] Asking endpoint URL {endpoint_url} for results, please wait...")
         await sleep(2)
-        # A la fin des attaques on questionne le endpoint pour savoir s'il a été contacté
+        # When attacks are down we ask the endpoint for receive requests
         endpoint_request = Request(endpoint_url)
         try:
             response = await self.crawler.async_send(endpoint_request)
@@ -228,13 +223,15 @@ class ModuleSsrf(Attack):
 
                             mutator = Mutator(
                                 methods="G" if original_request.method == "GET" else "PF",
-                                payloads=[("http://external.url/page", Flags())],
                                 qs_inject=self.must_attack_query_string,
                                 parameters=[parameter],
                                 skip=self.options.get("skipped_parameters")
                             )
 
-                            mutated_request, __, __, __ = next(mutator.mutate(original_request))
+                            mutated_request, __, __ = next(mutator.mutate(
+                                original_request,
+                                payloads_to_payload_callback(["http://external.url/page"])
+                            ))
 
                             await self.add_vuln_critical(
                                 request_id=original_request.path_id,

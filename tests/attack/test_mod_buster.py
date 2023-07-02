@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import Mock, patch
 from asyncio import Event
 
@@ -5,12 +6,12 @@ import httpx
 import respx
 import pytest
 
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.attack.mod_buster import ModuleBuster
-from wapitiCore.attack.attack import Flags
-from tests import AsyncIterator
+from tests import AsyncIterator, get_mock_open
 
 
 @pytest.mark.asyncio
@@ -37,11 +38,13 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        with patch(
-                "wapitiCore.attack.mod_buster.ModuleBuster.payloads",
-                [("nawak", Flags()), ("admin", Flags()), ("config.inc", Flags()), ("authconfig.php", Flags())]
-        ):
+        files = {
+            "wordlist.txt": "nawak\nadmin\nconfig.inc\nauthconfig.php",
+        }
+        with mock.patch("builtins.open", get_mock_open(files)):
             module = ModuleBuster(crawler, persister, options, Event(), crawler_configuration)
+            module.DATA_DIR = ""
+            module.PAYLOADS_FILE = "wordlist.txt"
             module.do_get = True
             await module.attack(request, None)
 

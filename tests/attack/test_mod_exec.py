@@ -117,8 +117,8 @@ async def test_blind_detection():
         module.do_post = False
 
         payloads_until_sleep = 0
-        for payload, __ in module.payloads:
-            if "sleep" in payload:
+        for payload_info in module.get_payloads():
+            if "sleep" in payload_info.payload:
                 break
             payloads_until_sleep += 1
 

@@ -85,22 +85,23 @@ class ModuleBackup(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
-        for payload, __ in self.payloads:
+        for payload_info in self.get_payloads():
+            raw_payload = payload_info.payload
             if self._stop_event.is_set():
                 break
 
             if request.file_name:
-                if "[FILE_" not in payload:
+                if "[FILE_" not in raw_payload:
                     continue
 
-                payload = payload.replace("[FILE_NAME]", request.file_name)
-                payload = payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
-                url = page.replace(request.file_name, payload)
+                raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
+                raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                url = page.replace(request.file_name, raw_payload)
             else:
-                if "[FILE_" in payload:
+                if "[FILE_" in raw_payload:
                     continue
 
-                url = urljoin(request.path, payload)
+                url = urljoin(request.path, raw_payload)
 
             log_verbose(f"[¨] {url}")
 
