@@ -8,8 +8,6 @@ def process_line(line: str):
     clean_line = clean_line.replace("[TAB]", "\t")
     clean_line = clean_line.replace("[LF]", "\n")
     clean_line = clean_line.replace("[FF]", "\f")  # Form feed
-    # clean_line = clean_line.replace("[TIME]", str(int(ceil(self._timeout)) + 1))
-    # clean_line = clean_line.replace("[EXTERNAL_ENDPOINT]", self._endpoint_url)
     clean_line = clean_line.replace("\\0", "\0")
 
     return clean_line
