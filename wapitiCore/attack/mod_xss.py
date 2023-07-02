@@ -17,20 +17,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import join as path_join
-from typing import Optional
+from typing import Optional, Iterator, List, Tuple, Dict
 
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_orange, log_red, log_verbose
-from wapitiCore.attack.attack import Attack, Mutator, PayloadType, random_string_with_flags, random_string
+from wapitiCore.attack.attack import Attack, Mutator, ParameterSituation, random_string, Parameter
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.reflected_xss import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
+
+
+def get_random_string_payload() -> Iterator[PayloadInfo]:
+    yield PayloadInfo(payload=random_string())
 
 
 class ModuleXss(Attack):
@@ -45,11 +50,11 @@ class ModuleXss(Attack):
     # POST XSS structure :
     # {uniq_code: [target_url, {param1: val1, param2: uniq_code, param3:...}, referer_ul], next_uniq_code : [...]...}
     # POST_XSS = {}
-    tried_xss = {}
+    tried_xss: Dict[str, Tuple[Request, Parameter]] = {}
     PHP_SELF = []
 
     # key = taint code, value = (payload, flags)
-    successful_xss = {}
+    successful_xss: Dict[str, PayloadInfo] = {}
 
     PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
 
@@ -67,7 +72,6 @@ class ModuleXss(Attack):
 
         self.mutator = Mutator(
             methods=methods,
-            payloads=random_string_with_flags,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters")
         )
@@ -77,7 +81,10 @@ class ModuleXss(Attack):
         return self.RANDOM_WEBSITE
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        for mutated_request, parameter, taint, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, payload_info in self.mutator.mutate(
+                request,
+                get_random_string_payload
+        ):
             # We don't display the mutated request here as the payload is not interesting
             try:
                 response = await self.crawler.async_send(mutated_request)
@@ -88,39 +95,47 @@ class ModuleXss(Attack):
             else:
                 # We keep a history of taint values we sent because in case of stored value, the taint code
                 # may be found in another webpage by the permanentxss module.
-                self.tried_xss[taint] = (mutated_request, parameter, flags)
+                self.tried_xss[payload_info.payload] = (request, parameter)
 
                 # Reminder: valid_xss_content_type is not called before before content is not necessary
                 # reflected here, may be found in another webpage so we have to inject tainted values
                 # even if the Content-Type seems uninteresting.
-                if taint.lower() in response.content.lower() and valid_xss_content_type(response):
+                if payload_info.payload.lower() in response.content.lower() and valid_xss_content_type(response):
                     # Simple text injection worked in HTML response, let's try with JS code
-                    payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
+                    payloads = generate_payloads(
+                        response.content,
+                        payload_info.payload,
+                        self.PAYLOADS_FILE,
+                        self.external_endpoint
+                    )
 
-                    # TODO: check that and make it better
-                    if flags.method == PayloadType.get:
+                    if parameter.situation == ParameterSituation.QUERY_STRING:
                         method = "G"
-                    elif flags.method == PayloadType.file:
+                    elif parameter.situation == ParameterSituation.MULTIPART:
                         method = "F"
                     else:
                         method = "P"
 
-                    await self.attempt_exploit(method, payloads, request, parameter, taint)
+                    await self.attempt_exploit(method, payloads, request, parameter.name, payload_info.payload)
 
-    async def attempt_exploit(self, method, payloads, original_request, parameter, taint):
+    async def attempt_exploit(
+            self, method: str, payloads: List[PayloadInfo], original_request: Request, parameter: str, taint: str
+    ):
         timeouted = False
         page = original_request.path
         saw_internal_error = False
 
         attack_mutator = Mutator(
             methods=method,
-            payloads=payloads,
             qs_inject=self.must_attack_query_string,
             parameters=[parameter],
             skip=self.options.get("skipped_parameters")
         )
 
-        for evil_request, xss_param, xss_payload, xss_flags in attack_mutator.mutate(original_request):
+        for evil_request, xss_param, xss_payload in attack_mutator.mutate(
+                original_request,
+                payloads,
+        ):
             log_verbose(f"[¨] {evil_request}")
 
             try:
@@ -136,17 +151,17 @@ class ModuleXss(Attack):
                 log_orange(evil_request.http_repr())
                 log_orange("---")
 
-                if xss_param == "QUERY_STRING":
+                if xss_param.is_qs_injection:
                     anom_msg = Messages.MSG_QS_TIMEOUT
                 else:
-                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param)
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param.name)
 
                 await self.add_anom_medium(
                     request_id=original_request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=evil_request,
                     info=anom_msg,
-                    parameter=xss_param,
+                    parameter=xss_param.name,
                     wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
@@ -163,12 +178,12 @@ class ModuleXss(Attack):
                             self.external_endpoint,
                             self.proto_endpoint,
                             html,
-                            xss_flags,
+                            xss_payload,
                             taint
                         )
                 ):
-                    self.successful_xss[taint] = (xss_payload, xss_flags)
-                    message = f"XSS vulnerability found via injection in the parameter {xss_param}"
+                    self.successful_xss[taint] = xss_payload
+                    message = f"XSS vulnerability found via injection in the parameter {xss_param.name}"
                     if has_strong_csp(response, html):
                         message += ".\nWarning: Content-Security-Policy is present!"
 
@@ -176,13 +191,13 @@ class ModuleXss(Attack):
                         request_id=original_request.path_id,
                         category=NAME,
                         request=evil_request,
-                        parameter=xss_param,
+                        parameter=xss_param.name,
                         info=message,
                         wstg=WSTG_CODE,
                         response=response
                     )
 
-                    if xss_param == "QUERY_STRING":
+                    if xss_param.is_qs_injection:
                         injection_msg = Messages.MSG_QS_INJECT
                     else:
                         injection_msg = Messages.MSG_PARAM_INJECT
@@ -192,7 +207,7 @@ class ModuleXss(Attack):
                         injection_msg,
                         self.MSG_VULN,
                         page,
-                        xss_param
+                        xss_param.name
                     )
 
                     if has_strong_csp(response, html):
@@ -206,17 +221,17 @@ class ModuleXss(Attack):
                     break
 
                 if response.is_server_error and not saw_internal_error:
-                    if xss_param == "QUERY_STRING":
+                    if xss_param.is_qs_injection:
                         anom_msg = Messages.MSG_QS_500
                     else:
-                        anom_msg = Messages.MSG_PARAM_500.format(xss_param)
+                        anom_msg = Messages.MSG_PARAM_500.format(xss_param.name)
 
                     await self.add_anom_high(
                         request_id=original_request.path_id,
                         category=Messages.ERROR_500,
                         request=evil_request,
                         info=anom_msg,
-                        parameter=xss_param,
+                        parameter=xss_param.name,
                         wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )

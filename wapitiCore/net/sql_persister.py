@@ -611,12 +611,12 @@ class SqlPersister:
             request_id: int,
             payload_type: str,
             module: str,
-            category=None,
-            level=0,
+            category: Optional[str] = None,
+            level: int = 0,
             request: Request = None,
-            parameter="",
-            info="",
-            wstg=None,
+            parameter: str = "",
+            info: str = "",
+            wstg: Optional[List[str]] = None,
             response: Response = None
     ):
 

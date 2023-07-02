@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from configparser import ConfigParser
 from os.path import join as path_join
 from collections import defaultdict, namedtuple
 import re
@@ -25,7 +24,8 @@ from typing import Optional
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
-from wapitiCore.attack.attack import Attack, PayloadReader
+from wapitiCore.attack.attack import Attack
+from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.file import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -109,38 +109,21 @@ class ModuleFile(Attack):
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
-        self.rules_to_messages = {}
-        self.payload_to_rules = {}
         self.known_false_positives = defaultdict(set)
         self.mutator = self.get_mutator()
 
-    @property
-    def payloads(self):
+    def get_payloads(self):
         """Load the payloads from the specified file"""
         if not self.PAYLOADS_FILE:
             return []
 
-        payloads = []
+        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser.add_key_handler("payload", replace_tags)
+        parser.add_key_handler("payload", lambda x: x.replace("[EXTERNAL_ENDPOINT]", self.external_endpoint))
+        parser.add_key_handler("messages", lambda x: x.splitlines())
+        parser.add_key_handler("rules", lambda x: x.splitlines())
 
-        config_reader = ConfigParser(interpolation=None)
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), encoding='utf-8') as payload_file:
-            config_reader.read_file(payload_file)
-
-        # No time based payloads here so we don't care yet
-        reader = PayloadReader(self.options)
-
-        for section in config_reader.sections():
-            clean_payload, original_flags = reader.process_line(config_reader[section]["payload"])
-            flags = original_flags.with_section(section)
-
-            rules = config_reader[section]["rules"].splitlines()
-            messages = config_reader[section]["messages"].splitlines()
-            self.payload_to_rules[section] = rules
-            self.rules_to_messages.update(dict(zip(rules, messages)))
-
-            payloads.append((clean_payload, flags))
-
-        return payloads
+        return parser
 
     async def is_false_positive(self, request, pattern):
         """Check if the response for a given request contains an expected pattern."""
@@ -173,7 +156,7 @@ class ModuleFile(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
-        for mutated_request, parameter, payload, flags in self.mutator.mutate(request):
+        for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
@@ -197,17 +180,17 @@ class ModuleFile(Attack):
                 log_orange(mutated_request.http_repr())
                 log_orange("---")
 
-                if parameter == "QUERY_STRING":
+                if parameter.is_qs_injection:
                     anom_msg = Messages.MSG_QS_TIMEOUT
                 else:
-                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter)
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
                 await self.add_anom_medium(
                     request_id=request.path_id,
                     category=Messages.RES_CONSUMPTION,
                     request=mutated_request,
                     info=anom_msg,
-                    parameter=parameter,
+                    parameter=parameter.display_name,
                     wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
@@ -216,17 +199,16 @@ class ModuleFile(Attack):
                 continue
             else:
                 file_warning = None
-                # original_payload = self.payload_to_rules[flags.section]
-                for rule in self.payload_to_rules[flags.section]:
+                for i, rule in enumerate(payload_info.rules):
                     if rule in response.content:
                         found_pattern = rule
-                        vulnerable_method = self.rules_to_messages[rule]
+                        vulnerable_method = payload_info.messages[i]
                         inclusion_succeed = True
                         break
                 else:
-                    # No successful inclusion or directory traversal but perhaps we can control something
+                    # No successful inclusion or directory traversal, but perhaps we can control something
                     inclusion_succeed = False
-                    file_warning = find_warning_message(response.content, payload)
+                    file_warning = find_warning_message(response.content, payload_info.payload)
                     if file_warning:
                         found_pattern = file_warning.pattern
                         vulnerable_method = file_warning.function
@@ -247,15 +229,15 @@ class ModuleFile(Attack):
                         vulnerable_method = f"Possible {vulnerable_method} vulnerability"
                         warned = True
 
-                    # An error message implies that a vulnerability may exists
-                    if parameter == "QUERY_STRING":
+                    # An error message implies that a vulnerability may exist
+                    if parameter.is_qs_injection:
                         vuln_message = Messages.MSG_QS_INJECT.format(vulnerable_method, page)
                     else:
-                        vuln_message = f"{vulnerable_method} via injection in the parameter {parameter}"
+                        vuln_message = f"{vulnerable_method} via injection in the parameter {parameter.display_name}"
 
                     constraint_message = ""
                     if file_warning and file_warning.uri:
-                        constraints = has_prefix_or_suffix(payload, file_warning.uri)
+                        constraints = has_prefix_or_suffix(payload_info.payload, file_warning.uri)
                         if constraints:
                             constraint_message += "Constraints: " + ", ".join(constraints)
                             vuln_message += " (" + constraint_message + ")"
@@ -265,17 +247,17 @@ class ModuleFile(Attack):
                         category=NAME,
                         request=mutated_request,
                         info=vuln_message,
-                        parameter=parameter,
+                        parameter=parameter.display_name,
                         wstg=WSTG_CODE,
                         response=response
                     )
 
                     log_red("---")
                     log_red(
-                        Messages.MSG_QS_INJECT if parameter == "QUERY_STRING" else Messages.MSG_PARAM_INJECT,
+                        Messages.MSG_QS_INJECT if parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
                         vulnerable_method,
                         page,
-                        parameter
+                        parameter.display_name
                     )
 
                     if constraint_message:
@@ -292,17 +274,17 @@ class ModuleFile(Attack):
 
                 elif response.is_server_error and not saw_internal_error:
                     saw_internal_error = True
-                    if parameter == "QUERY_STRING":
+                    if parameter.is_qs_injection:
                         anom_msg = Messages.MSG_QS_500
                     else:
-                        anom_msg = Messages.MSG_PARAM_500.format(parameter)
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter,
+                        parameter=parameter.display_name,
                         wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )

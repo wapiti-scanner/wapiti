@@ -16,7 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from math import ceil
 from typing import Optional
+from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
 
@@ -26,6 +28,7 @@ from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.net import Request, Response
+from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
 class ModuleTimesql(Attack):
@@ -33,7 +36,7 @@ class ModuleTimesql(Attack):
     Detect SQL injection vulnerabilities using blind time-based technique.
     """
 
-    PAYLOADS_FILE = "blindSQLPayloads.txt"
+    PAYLOADS_FILE = "blindSQLPayloads.ini"
     time_to_sleep = 6
     name = "timesql"
     PRIORITY = 6
@@ -43,9 +46,18 @@ class ModuleTimesql(Attack):
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.mutator = self.get_mutator()
+        self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
 
-    def set_timeout(self, timeout):
-        self.time_to_sleep = str(1 + int(timeout))
+    def get_payloads(self):
+        """Load the payloads from the specified file"""
+        if not self.PAYLOADS_FILE:
+            return []
+
+        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser.add_key_handler("payload", replace_tags)
+        parser.add_key_handler("payload", lambda x: x.replace("[TIME]", str(self.time_to_sleep)))
+
+        return parser
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
@@ -53,7 +65,7 @@ class ModuleTimesql(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
-        for mutated_request, parameter, _payload, _flags in self.mutator.mutate(request):
+        for mutated_request, parameter, _payload in self.mutator.mutate(request, self.get_payloads):
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
@@ -73,11 +85,11 @@ class ModuleTimesql(Attack):
                     logging.error("[!] Too much lag from website, can't reliably test time-based blind SQL")
                     break
 
-                if parameter == "QUERY_STRING":
+                if parameter.is_qs_injection:
                     vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
                     log_message = Messages.MSG_QS_INJECT
                 else:
-                    vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter}"
+                    vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
                     log_message = Messages.MSG_PARAM_INJECT
 
                 await self.add_vuln_critical(
@@ -85,7 +97,7 @@ class ModuleTimesql(Attack):
                     category=NAME,
                     request=mutated_request,
                     info=vuln_message,
-                    parameter=parameter,
+                    parameter=parameter.display_name,
                     wstg=WSTG_CODE
                 )
 
@@ -94,7 +106,7 @@ class ModuleTimesql(Attack):
                     log_message,
                     self.MSG_VULN,
                     page,
-                    parameter
+                    parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
                 log_red(mutated_request.http_repr())
@@ -109,17 +121,17 @@ class ModuleTimesql(Attack):
             else:
                 if response.is_server_error and not saw_internal_error:
                     saw_internal_error = True
-                    if parameter == "QUERY_STRING":
+                    if parameter.is_qs_injection:
                         anom_msg = Messages.MSG_QS_500
                     else:
-                        anom_msg = Messages.MSG_PARAM_500.format(parameter)
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_anom_high(
                         request_id=request.path_id,
                         category=Messages.ERROR_500,
                         request=mutated_request,
                         info=anom_msg,
-                        parameter=parameter,
+                        parameter=parameter.display_name,
                         wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )

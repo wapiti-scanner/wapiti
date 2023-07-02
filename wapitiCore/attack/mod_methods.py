@@ -147,7 +147,7 @@ class ModuleMethods(Attack):
                 wstg=WSTG_CODE,
                 response=option_response
             )
-        # if a method has a relevant information, it will be listed
+        # if a method has relevant information, it will be listed
         for method, data in interesting_methods.items():
             if not (data['status_different'] or data['content_different']):
                 continue
