@@ -44,7 +44,7 @@ async def test_whole_stuff():
         with mock.patch("builtins.open", get_mock_open(files)):
             module = ModuleBuster(crawler, persister, options, Event(), crawler_configuration)
             module.DATA_DIR = ""
-            module.PAYLOADS_FILE = "wordlist.txt"
+            module.PATHS_FILE = "wordlist.txt"
             module.do_get = True
             await module.attack(request, None)
 

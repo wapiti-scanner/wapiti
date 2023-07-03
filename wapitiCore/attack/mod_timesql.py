@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from math import ceil
-from typing import Optional
+from typing import Optional, Iterator
 from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
@@ -27,6 +27,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
@@ -35,8 +36,6 @@ class ModuleTimesql(Attack):
     """
     Detect SQL injection vulnerabilities using blind time-based technique.
     """
-
-    PAYLOADS_FILE = "blindSQLPayloads.ini"
     time_to_sleep = 6
     name = "timesql"
     PRIORITY = 6
@@ -48,16 +47,13 @@ class ModuleTimesql(Attack):
         self.mutator = self.get_mutator()
         self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
 
-    def get_payloads(self):
+    def get_payloads(self) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser = IniPayloadReader(path_join(self.DATA_DIR, "blindSQLPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)
         parser.add_key_handler("payload", lambda x: x.replace("[TIME]", str(self.time_to_sleep)))
 
-        return parser
+        yield from parser
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path

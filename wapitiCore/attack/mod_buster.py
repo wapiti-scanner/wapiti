@@ -33,7 +33,7 @@ class ModuleBuster(Attack):
     Brute force paths on the web-server to discover hidden files and directories.
     """
 
-    PAYLOADS_FILE = "busterPayloads.txt"
+    PATHS_FILE = "busterPayloads.txt"
 
     name = "buster"
 
@@ -89,7 +89,7 @@ class ModuleBuster(Attack):
         tasks = set()
         pending_count = 0
 
-        with open(path_join(self.DATA_DIR, self.PAYLOADS_FILE), encoding="utf-8", errors="ignore") as wordlist:
+        with open(path_join(self.DATA_DIR, self.PATHS_FILE), encoding="utf-8", errors="ignore") as wordlist:
             while True:
                 if pending_count < self.options["tasks"] and not self._stop_event.is_set():
                     try:

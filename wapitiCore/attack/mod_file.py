@@ -19,12 +19,13 @@
 from os.path import join as path_join
 from collections import defaultdict, namedtuple
 import re
-from typing import Optional
+from typing import Optional, Iterator
 
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack
+from wapitiCore.model import PayloadInfo
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.file import NAME, WSTG_CODE
@@ -102,9 +103,6 @@ def find_warning_message(data, payload):
 
 class ModuleFile(Attack):
     """Detect file-related vulnerabilities such as directory traversal and include() vulnerabilities."""
-
-    PAYLOADS_FILE = "fileHandlingPayloads.ini"
-
     name = "file"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
@@ -112,18 +110,15 @@ class ModuleFile(Attack):
         self.known_false_positives = defaultdict(set)
         self.mutator = self.get_mutator()
 
-    def get_payloads(self):
+    def get_payloads(self) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser = IniPayloadReader(path_join(self.DATA_DIR, "fileHandlingPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)
         parser.add_key_handler("payload", lambda x: x.replace("[EXTERNAL_ENDPOINT]", self.external_endpoint))
         parser.add_key_handler("messages", lambda x: x.splitlines())
         parser.add_key_handler("rules", lambda x: x.splitlines())
 
-        return parser
+        yield from parser
 
     async def is_false_positive(self, request, pattern):
         """Check if the response for a given request contains an expected pattern."""

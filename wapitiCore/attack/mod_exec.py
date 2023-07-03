@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import Optional
+from typing import Optional, Iterator
 from os.path import join as path_join
 
 from httpx import ReadTimeout, RequestError
@@ -25,6 +25,7 @@ from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -36,9 +37,6 @@ class ModuleExec(Attack):
     """
     Detect scripts vulnerable to command and/or code execution.
     """
-
-    PAYLOADS_FILE = "execPayloads.ini"
-
     name = "exec"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
@@ -46,16 +44,13 @@ class ModuleExec(Attack):
         self.false_positive_timeouts = set()
         self.mutator = self.get_mutator()
 
-    def get_payloads(self):
+    def get_payloads(self) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser = IniPayloadReader(path_join(self.DATA_DIR, "execPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)
         parser.add_key_handler("rules", lambda x: x.splitlines() if x else [])
 
-        return parser
+        yield from parser
 
     @staticmethod
     def _find_warning_in_response(data) -> str:
