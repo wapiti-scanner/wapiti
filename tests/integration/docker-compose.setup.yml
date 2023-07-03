@@ -164,6 +164,12 @@ services:
       - test-network
 
       
+  # Apache container for the redirect module
+  redirect:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_redirect/php/src:/var/www/html/
+
   # Wapiti container 
   # requires all the targets containers to work perfectly
   wapiti:
@@ -194,9 +200,12 @@ services:
         condition: service_healthy
       dns-endpoint:
         condition: service_healthy
-        
+      redirect:
+        condition: service_healthy
+
 volumes:
   drupal9_db_data:
   drupal10_db_data:
+
 networks:
   test-network:
