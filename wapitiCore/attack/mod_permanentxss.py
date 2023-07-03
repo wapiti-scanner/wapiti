@@ -226,7 +226,7 @@ class ModulePermanentxss(Attack):
             log_verbose(f"[¨] {evil_request}")
 
             try:
-                evil_response = await self.crawler.async_send(evil_request)
+                await self.crawler.async_send(evil_request)
             except ReadTimeout:
                 self.network_errors += 1
                 if timeouted:
@@ -266,7 +266,7 @@ class ModulePermanentxss(Attack):
 
                 if (
                         not response.is_redirect and
-                        valid_xss_content_type(evil_response) and  # TODO: check this twice
+                        valid_xss_content_type(response) and
                         check_payload(
                             self.DATA_DIR,
                             self.PAYLOADS_FILE,
