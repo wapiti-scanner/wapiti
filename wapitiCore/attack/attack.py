@@ -184,8 +184,6 @@ class Attack:
     DATA_DIR = resource_filename("wapitiCore", os.path.join("data", "attacks"))
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE") or "home"
 
-    PAYLOADS_FILE = None
-
     # Color codes
     STD = "\033[0;0m"
     RED = "\033[0;31m"
@@ -223,8 +221,6 @@ class Attack:
         self.crawler = crawler
         self.persister = persister
         self._stop_event = stop_event
-        if self.PAYLOADS_FILE:
-            self.payload_reader = TxtPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
         self.options = attack_options
         self.crawler_configuration = crawler_configuration
 
@@ -267,10 +263,6 @@ class Attack:
     add_anom_medium = partialmethod(add_payload, payload_type=ANOM, level=MEDIUM_LEVEL)
 
     add_addition = partialmethod(add_payload, payload_type=ADDITION, level=INFO_LEVEL)
-
-    def get_payloads(self) -> Iterator[PayloadInfo]:
-        """Load the payloads from the specified file"""
-        yield from self.payload_reader
 
     def load_require(self, dependencies: list = None):
         self.deps = dependencies

@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from binascii import unhexlify
 from asyncio import sleep
-from typing import Optional
+from typing import Optional, Iterator
 from urllib.parse import quote
 from os.path import join as path_join
 
@@ -30,6 +30,7 @@ from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.xxe import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
@@ -48,7 +49,6 @@ class ModuleXxe(Attack):
     do_get = True
     do_post = True
 
-    PAYLOADS_FILE = "xxePayloads.ini"
     MSG_VULN = "XXE vulnerability"
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
@@ -58,18 +58,15 @@ class ModuleXxe(Attack):
         self.payload_to_rules = {}
         self.mutator = self.get_mutator()
 
-    def get_payloads(self):
+    def get_payloads(self) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
-        if not self.PAYLOADS_FILE:
-            return []
-
-        parser = IniPayloadReader(path_join(self.DATA_DIR, self.PAYLOADS_FILE))
+        parser = IniPayloadReader(path_join(self.DATA_DIR, "xxePayloads.ini"))
         parser.add_key_handler("payload", replace_tags)
         parser.add_key_handler("payload", lambda x: x.replace("[EXTERNAL_ENDPOINT]", self.external_endpoint))
         parser.add_key_handler("payload", lambda x: x.replace("[SESSION_ID]", self._session_id))
         parser.add_key_handler("rules", lambda x: x.splitlines())
 
-        return parser
+        yield from parser
 
     def get_mutator(self):
         methods = ""

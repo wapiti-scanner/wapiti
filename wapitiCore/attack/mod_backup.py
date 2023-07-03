@@ -21,25 +21,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from os.path import splitext
+from os.path import splitext, join as path_join
 from urllib.parse import urljoin
-from typing import Optional
+from typing import Optional, Iterator
 
 from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.definitions.backup import NAME, WSTG_CODE
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
+from wapitiCore.parsers.txt_payload_parser import TxtPayloadReader
 
 
 class ModuleBackup(Attack):
     """
     Uncover backup files on the web server.
     """
-
-    PAYLOADS_FILE = "backupPayloads.txt"
-
     name = "backup"
 
     do_get = True
@@ -48,6 +47,11 @@ class ModuleBackup(Attack):
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.false_positive_directories = {}
+
+    def get_payloads(self) -> Iterator[PayloadInfo]:
+        """Load the payloads from the specified file"""
+        payload_reader = TxtPayloadReader(path_join(self.DATA_DIR, "backupPayloads.txt"))
+        yield from payload_reader
 
     async def is_false_positive(self, request: Request):
         # Check for false positives by asking an improbable file inside the same folder
@@ -115,9 +119,6 @@ class ModuleBackup(Attack):
                 continue
 
             if response and response.is_success:
-                # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
-                # uses the string as a token so we cannot use f string
-                # pylint: disable=consider-using-f-string
                 log_red(f"Found backup file {evil_req.url}")
 
                 await self.add_vuln_low(

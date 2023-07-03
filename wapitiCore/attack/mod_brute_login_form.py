@@ -37,17 +37,17 @@ from wapitiCore.main.log import log_red
 class ModuleBruteLoginForm(Attack):
     """Attempt to login on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
-    PAYLOADS_FILE = "passwords.txt"
-    PAYLOADS_FILE_USER = "users.txt"
-    PAYLOADS_SUCCESS = "successMessage.txt"
-    PAYLOADS_FAIL = "incorrectMessage.txt"
+    PASSWORDS_FILE = "passwords.txt"
+    USERS_FILE = "users.txt"
+    SUCCESS_FILE = "successMessage.txt"
+    FAILURE_FILE = "incorrectMessage.txt"
 
     do_get = True
     do_post = True
 
     def check_success_auth(self, content_response: str):
         with open(
-            path_join(self.DATA_DIR, self.PAYLOADS_SUCCESS),
+            path_join(self.DATA_DIR, self.SUCCESS_FILE),
             errors="ignore",
             encoding='utf-8'
         ) as success_pattern_file:
@@ -59,7 +59,7 @@ class ModuleBruteLoginForm(Attack):
 
     def get_usernames(self):
         with open(
-            path_join(self.DATA_DIR, self.PAYLOADS_FILE_USER),
+            path_join(self.DATA_DIR, self.USERS_FILE),
             errors="ignore",
             encoding='utf-8'
         ) as username_file:
@@ -70,7 +70,7 @@ class ModuleBruteLoginForm(Attack):
 
     def get_passwords(self):
         with open(
-            path_join(self.DATA_DIR, self.PAYLOADS_FILE),
+            path_join(self.DATA_DIR, self.PASSWORDS_FILE),
             errors="ignore",
             encoding='utf-8'
         ) as password_file:
