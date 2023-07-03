@@ -38,7 +38,6 @@ from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request
-from wapitiCore.parsers.txt_payload_parser import TxtPayloadReader
 
 
 all_modules = {
