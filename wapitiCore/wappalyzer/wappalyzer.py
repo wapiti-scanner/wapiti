@@ -306,7 +306,10 @@ def detect_versions_normalize_dict(rules: dict, contents) -> Set[str]:
         if key in contents:
             # regex_params is a list : [{"application_pattern": "..", "regex": "re.compile(..)"}, ...]
             for i, _ in enumerate(regex_params):
-                if re.search(regex_params[i]['regex'], contents[key]):
+                # If the regex fails, it can be due to the fact that we are looking for the key instead
+                # The value can be set to the key so we compare
+                if re.search(regex_params[i]['regex'], contents[key]) or\
+                        regex_params[i]['application_pattern'] == key:
                     # Use that special string to show we detected the app once but not necessarily a version
                     versions.add("__detected__")
                     versions.update(extract_version(regex_params[i], contents[key]))
