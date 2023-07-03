@@ -18,6 +18,9 @@ async def test_applicationdata():
     groups_text = """{
         "9": {
             "name": "Web development"
+        },
+        "7": {
+            "name": "Servers"
         }
     }"""
 
@@ -35,6 +38,13 @@ async def test_applicationdata():
             ],
             "name": "JavaScript graphics",
             "priority": 6
+        },
+        "31": {
+            "groups": [
+            7
+        ],
+        "name": "CDN",
+        "priority": 9
         }
     }"""
 
@@ -52,6 +62,23 @@ async def test_applicationdata():
             "icon": "PHP.svg",
             "url": \"\\\\.php(?:$|\\\\?)\",
             "website": "http://php.net"
+        },
+        "Akamai": {
+            "cats": [
+                31
+            ],
+            "description": "Akamai is global content delivery network (CDN) services provider for media and software delivery, and cloud security solutions.",
+            "headers": {
+                "X-Akamai-Transformed": "",
+                "X-EdgeConnect-MidMile-RTT": "",
+                "X-EdgeConnect-Origin-MEX-Latency": ""
+            },
+            "icon": "Akamai.svg",
+            "pricing": [
+                "poa"
+            ],
+            "saas": true,
+            "website": "http://akamai.com"
         },
          "A-Frame": {
             "cats": [
@@ -86,9 +113,9 @@ async def test_applicationdata():
         application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
 
     assert application_data is not None
-    assert len(application_data.get_applications()) == 2
-    assert len(application_data.get_categories()) == 2
-    assert len(application_data.get_groups()) == 1
+    assert len(application_data.get_applications()) == 3
+    assert len(application_data.get_categories()) == 3
+    assert len(application_data.get_groups()) == 2
 
     target_url = "http://perdu.com/"
 
@@ -101,7 +128,8 @@ async def test_applicationdata():
             headers=[
                 ('server', 'nginx/1.19.0'),
                 ('content-type', 'text/html; charset=UTF-8'),
-                ('x-powered-by', 'PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1')
+                ('x-powered-by', 'PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1'),
+                ('x-akamai-transformed', 'another text value')
             ]
         )
     )
@@ -112,10 +140,19 @@ async def test_applicationdata():
     wappalyzer = Wappalyzer(application_data, page, {})
     result = wappalyzer.detect()
 
-    assert len(result) == 1
+    # Value based detection result
+    assert len(result) == 2
     assert result.get("PHP") is not None
     assert len(result.get("PHP").get("categories")) == 1
     assert result.get("PHP").get("categories")[0] == "Programming languages"
     assert len(result.get("PHP").get("groups")) == 1
     assert result.get("PHP").get("groups")[0] == "Web development"
+
+    # Key based detection result
+    assert result.get("Akamai") is not None
+    assert len(result.get("Akamai").get("categories")) == 1
+    assert result.get("Akamai").get("categories")[0] == "CDN"
+    assert len(result.get("Akamai").get("groups")) == 1
+    assert result.get("Akamai").get("groups")[0] == "Servers"
+
     assert result.get("A-Frame") is None
