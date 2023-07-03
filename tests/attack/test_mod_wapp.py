@@ -141,6 +141,7 @@ async def test_html_detection():
             '["Development"], "groups": ["Web development"]}'
         )
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_dom_detection():
@@ -191,7 +192,6 @@ async def test_dom_detection():
         ]
         for arg in persister.add_payload.call_args_list:
             assert arg[1]["info"] in expected_result
-
 
 
 @pytest.mark.asyncio
