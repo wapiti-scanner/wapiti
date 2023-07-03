@@ -1,8 +1,6 @@
-from typing import List, Callable, Iterable
-
 from wapitiCore.attack.attack import Mutator
 from wapitiCore.net import Request
-from wapitiCore.model import PayloadInfo, PayloadCallback, payloads_to_payload_callback
+from wapitiCore.model import str_to_payloadinfo
 
 
 def test_mutations():
@@ -16,43 +14,43 @@ def test_mutations():
     mutator = Mutator()
 
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["INJECT"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["INJECT"])):
         count += 1
     assert count == 4
 
     mutator = Mutator()
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 12
 
     mutator = Mutator(methods="G")
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 3
 
     mutator = Mutator(methods="P")
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 6
 
     mutator = Mutator(methods="PF")
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 9
 
     mutator = Mutator(parameters=["user", "file"])
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 6
 
     mutator = Mutator(skip={"p"})
     count = 0
-    for __ in mutator.mutate(req, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
+    for __ in mutator.mutate(req, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2", "PAYLOAD_3"])):
         count += 1
     assert count == 9
 
@@ -66,7 +64,7 @@ def test_mutations():
     )
     mutator = Mutator()
     count = 0
-    for __ in mutator.mutate(req2, payloads_to_payload_callback(["INJECT"])):
+    for __ in mutator.mutate(req2, str_to_payloadinfo(["INJECT"])):
         count += 1
     assert count == 3
 
@@ -74,7 +72,7 @@ def test_mutations():
     req3 = Request("http://perdu.com/page.php")
     mutator = Mutator(qs_inject=True)
     count = 0
-    for __ in mutator.mutate(req3, payloads_to_payload_callback(["PAYLOAD_1", "PAYLOAD_2"])):
+    for __ in mutator.mutate(req3, str_to_payloadinfo(["PAYLOAD_1", "PAYLOAD_2"])):
         count += 1
     assert count == 2
 
@@ -86,6 +84,6 @@ def test_missing_value():
     # Filename of the target URL should be injected, but it is missing here, we should not raise a mutation
     mutator = Mutator()
     count = 0
-    for __ in mutator.mutate(req2, payloads_to_payload_callback(["[FILE_NAME]::$DATA"])):
+    for __ in mutator.mutate(req2, str_to_payloadinfo(["[FILE_NAME]::$DATA"])):
         count += 1
     assert count == 0
