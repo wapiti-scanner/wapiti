@@ -39,4 +39,9 @@ COPY ./tests/integration/wapiti/templates_and_data.py /usr/local/bin/templates_a
 COPY ./tests/integration/wapiti/misc_functions.py /usr/local/bin/misc_functions.py
 COPY ./tests/integration/wapiti/modules.json /usr/local/bin/modules.json
 
+# Required to test external script for crawler auth, 
+# comment the 2 following lines if you removed test_crawler_auth integration tests for any reason
+COPY ./tests/integration/test_crawler_auth/external_script_crawler_auth_test.py /usr/local/bin/external_script_crawler_auth_test.py
+COPY ./tests/integration/test_crawler_auth/stored_cookie.json  /usr/local/bin/stored_cookie.json
+
 ENTRYPOINT [ "python3","-u","/usr/local/bin/test.py"]

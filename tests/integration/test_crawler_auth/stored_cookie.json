@@ -1,0 +1,13 @@
+{
+    ".crawler_auth.local": {
+        "/": {
+            "token": {
+                "value": "0123456789abcdefghijklmnopqrstuvwxyz",
+                "version": 0,
+                "secure": false,
+                "expires": null,
+                "port": null
+            }
+        }
+    }
+}
