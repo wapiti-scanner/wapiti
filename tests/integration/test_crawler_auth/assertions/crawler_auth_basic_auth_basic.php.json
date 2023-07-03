@@ -1,0 +1,40 @@
+{
+    "infos": {
+        "target": "http://crawler_auth/basic/auth_basic.php",
+        "auth": null,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://crawler_auth/basic/auth_basic.php",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "Welcome, admin! You are authenticated.",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "38"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}

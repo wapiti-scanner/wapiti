@@ -21,6 +21,8 @@ EXISTING_MODULES = {
     "wapp", "wp_enum",
     "xss", "xxe", ""
 }
+# Empty string in EXISTING_MODULES is because Wapiti can be
+# launched without any module, only to crawl a website for example
 
 TREE_CHECKER = {
     "vulnerabilities": {'Backup file': [{'curl_command': '',

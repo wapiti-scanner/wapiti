@@ -163,6 +163,12 @@ services:
     networks:
       - test-network
 
+  # Apache container to test the auths methods for the crawler
+  crawler_auth:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_crawler_auth/php/src:/var/www/html/
+
   # Apache container for the redirect module
   redirect:
     <<: [ *default_php_setup, *healthcheck_web ]
@@ -207,6 +213,8 @@ services:
       redirect:
         condition: service_healthy
       crawler_redirect:
+        condition: service_healthy
+      crawler_auth:
         condition: service_healthy
 
 volumes:

@@ -1,0 +1,64 @@
+{
+    "infos": {
+        "target": "http://crawler_auth/data/",
+        "auth": null,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://crawler_auth/data/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html><html lang=\"en\"><head>    <title>Logged in !</title></head><body><button>disconnect</button></body></html>",
+                    "headers": [
+                        [
+                            "cache-control",
+                            "no-store, no-cache, must-revalidate"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "115"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "expires",
+                            "Thu, 19 Nov 1981 08:52:00 GMT"
+                        ],
+                        [
+                            "pragma",
+                            "no-cache"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "set-cookie",
+                            "PHPSESSID=1335df1b1b4a214; path=/"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}

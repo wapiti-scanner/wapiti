@@ -1,0 +1,63 @@
+{
+    "infos": {
+        "target": "http://crawler_auth/url/",
+        "auth": {
+            "url": "http://crawler_auth/url/auth_url.php",
+            "logged_in": true,
+            "form": {
+                "login_field": "username",
+                "password_field": "password"
+            }
+        },
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://crawler_auth/url/",
+                    "method": "GET"
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<button>disconnect</button>",
+                    "headers": [
+                        [
+                            "cache-control",
+                            "no-store, no-cache, must-revalidate"
+                        ],
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "27"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "expires",
+                            "Thu, 19 Nov 1981 08:52:00 GMT"
+                        ],
+                        [
+                            "pragma",
+                            "no-cache"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "set-cookie",
+                            "PHPSESSID=1335df1b1b4a213; path=/"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
