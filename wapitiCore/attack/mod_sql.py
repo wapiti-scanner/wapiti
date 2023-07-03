@@ -29,7 +29,7 @@ from wapitiCore.attack.attack import Attack, Mutator
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.model import payloads_to_payload_callback
+from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
@@ -355,7 +355,7 @@ class ModuleSql(Attack):
 
         for mutated_request, parameter, __ in self.mutator.mutate(
                 request,
-                payloads_to_payload_callback(self.payloads),
+                str_to_payloadinfo(self.payloads),
         ):
             if current_parameter != parameter:
                 # Forget what we know about current parameter

@@ -24,7 +24,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.crlf import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.model import PayloadInfo, payloads_to_payload_callback
+from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
 
@@ -48,7 +48,7 @@ class ModuleCrlf(Attack):
 
         for mutated_request, parameter, _payload in self.mutator.mutate(
                 request,
-                payloads_to_payload_callback(["http://www.google.fr\r\nwapiti: 3.1.7 version"]),
+                str_to_payloadinfo(["http://www.google.fr\r\nwapiti: 3.1.7 version"]),
         ):
             log_verbose(f"[¨] {mutated_request.url}")
 

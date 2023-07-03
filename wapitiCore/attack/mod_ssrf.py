@@ -27,7 +27,7 @@ from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
-from wapitiCore.model import PayloadInfo, payloads_to_payload_callback, PayloadSource
+from wapitiCore.model import PayloadInfo, str_to_payloadinfo, PayloadSource
 from wapitiCore.net import Request, Response
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
@@ -230,7 +230,7 @@ class ModuleSsrf(Attack):
 
                             mutated_request, __, __ = next(mutator.mutate(
                                 original_request,
-                                payloads_to_payload_callback(["http://external.url/page"])
+                                str_to_payloadinfo(["http://external.url/page"])
                             ))
 
                             await self.add_vuln_critical(

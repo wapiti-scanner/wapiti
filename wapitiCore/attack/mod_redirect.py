@@ -25,7 +25,7 @@ from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.redirect import NAME, WSTG_CODE
-from wapitiCore.model import payloads_to_payload_callback
+from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
@@ -48,7 +48,7 @@ class ModuleRedirect(Attack):
 
         for mutated_request, parameter, __ in self.mutator.mutate(
                 request,
-                payloads_to_payload_callback(["https://openbugbounty.org/", "//openbugbounty.org/"]),
+                str_to_payloadinfo(["https://openbugbounty.org/", "//openbugbounty.org/"]),
         ):
             log_verbose(f"[¨] {mutated_request.url}")
 
