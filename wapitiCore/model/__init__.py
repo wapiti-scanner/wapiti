@@ -6,6 +6,7 @@ from typing import List, Callable, Iterable, Union
 class PayloadInfo:
     payload: str
     rules: List[str]
+    injection_type: str
 
     def __init__(self, payload: str, **kwargs):  # pylint: disable=unused-argument
         self.payload = payload

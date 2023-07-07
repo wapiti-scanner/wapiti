@@ -30,11 +30,13 @@ from wapitiCore.net import Response
 # Everything under those tags will be treated as text
 from wapitiCore.parsers.html_parser import Html
 
+
 @dataclasses.dataclass
 class PayloadInfo:
     payload: str
     type: PayloadType
     name: str
+    injection_type: str
 
 
 NONEXEC_PARENTS = {
@@ -265,7 +267,8 @@ def load_payloads_from_ini(filename, external_endpoint) -> List[Dict[str, str]]:
             "attribute": config_reader[section]["attribute"],
             "value": clean_value,
             "case_sensitive": config_reader.getboolean(section, "case_sensitive", fallback=True),
-            "close_tag": config_reader.getboolean(section, "close_tag", fallback=True)
+            "close_tag": config_reader.getboolean(section, "close_tag", fallback=True),
+            "injection_type": config_reader[section]["injection_type"],
         }
 
         if "requirements" in config_reader[section]:
@@ -335,7 +338,12 @@ def apply_attrval_context(context: Dict[str, str], payloads: List[Dict[str, str]
                         continue
 
                 result.append(
-                    PayloadInfo(payload=js_code, type=PayloadType.xss_non_closing_tag, name=payload_infos["name"])
+                    PayloadInfo(
+                        payload=js_code,
+                        type=PayloadType.xss_non_closing_tag,
+                        name=payload_infos["name"],
+                        injection_type=payload_infos["injection_type"],
+                    )
                 )
 
         else:
@@ -359,7 +367,14 @@ def apply_attrval_context(context: Dict[str, str], payloads: List[Dict[str, str]
                 js_code += "</" + context["non_exec_parent"] + ">"
 
             js_code += payload_infos["payload"].replace("__XSS__", code)
-            result.append(PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"]))
+            result.append(
+                PayloadInfo(
+                    payload=js_code,
+                    type=PayloadType.xss_closing_tag,
+                    name=payload_infos["name"],
+                    injection_type=payload_infos["injection_type"],
+                )
+            )
 
     return result
 
@@ -381,7 +396,12 @@ def apply_attrname_context(context: Dict[str, str], payloads: List[Dict[str, str
                 js_code += payload_infos["payload"].replace("__XSS__", code)
 
                 result.append(
-                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                    PayloadInfo(
+                        payload=js_code,
+                        type=PayloadType.xss_closing_tag,
+                        name=payload_infos["name"],
+                        injection_type=payload_infos["injection_type"],
+                    )
                 )
 
     return result
@@ -405,7 +425,12 @@ def apply_tagname_context(context: Dict[str, str], payloads: List[Dict[str, str]
 
                 js_code = js_code[1:]  # use independent payloads, just remove the first character (<)
                 result.append(
-                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                    PayloadInfo(
+                        payload=js_code,
+                        type=PayloadType.xss_closing_tag,
+                        name=payload_infos["name"],
+                        injection_type=payload_infos["injection_type"],
+                    )
                 )
     else:
         for payload_infos in payloads:
@@ -418,7 +443,12 @@ def apply_tagname_context(context: Dict[str, str], payloads: List[Dict[str, str]
                     js_code += "</" + context["non_exec_parent"] + ">"
                 js_code += payload_infos["payload"].replace("__XSS__", code)
                 result.append(
-                    PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                    PayloadInfo(
+                        payload=js_code,
+                        type=PayloadType.xss_closing_tag,
+                        name=payload_infos["name"],
+                        injection_type=payload_infos["injection_type"],
+                    )
                 )
 
     return result
@@ -445,7 +475,12 @@ def apply_text_context(context: Dict[str, str], payloads: List[Dict[str, str]], 
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
             result.append(
-                PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                PayloadInfo(
+                    payload=js_code,
+                    type=PayloadType.xss_closing_tag,
+                    name=payload_infos["name"],
+                    injection_type=payload_infos["injection_type"],
+                )
             )
 
     return result
@@ -472,7 +507,12 @@ def apply_comment_context(context: Dict[str, str], payloads: List[Dict[str, str]
         else:
             js_code = prefix + payload_infos["payload"].replace("__XSS__", code)
             result.append(
-                PayloadInfo(payload=js_code, type=PayloadType.xss_closing_tag, name=payload_infos["name"])
+                PayloadInfo(
+                    payload=js_code,
+                    type=PayloadType.xss_closing_tag,
+                    name=payload_infos["name"],
+                    injection_type=payload_infos["injection_type"],
+                )
             )
 
     return result
