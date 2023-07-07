@@ -24,7 +24,8 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, ParameterSituation, random_string, Parameter
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.reflected_xss import NAME, WSTG_CODE
+from wapitiCore.definitions.reflected_xss import NAME as XSS_NAME, WSTG_CODE as XSS_WSTG_CODE
+from wapitiCore.definitions.html_injection import NAME as HTMLI_NAME, WSTG_CODE as HTMLI_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.model import PayloadInfo
@@ -53,12 +54,10 @@ class ModuleXss(Attack):
     tried_xss: Dict[str, Tuple[Request, Parameter]] = {}
     PHP_SELF = []
 
-    # key = taint code, value = (payload, flags)
-    successful_xss: Dict[str, PayloadInfo] = {}
+    # key = taint code, value = (evil request, payload info)
+    successful_xss: Dict[str, Tuple[Request, PayloadInfo]] = {}
 
     PAYLOADS_FILE = path_join(Attack.DATA_DIR, "xssPayloads.ini")
-
-    MSG_VULN = "XSS vulnerability"
 
     RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
 
@@ -182,18 +181,18 @@ class ModuleXss(Attack):
                             taint
                         )
                 ):
-                    self.successful_xss[taint] = xss_payload
+                    self.successful_xss[taint] = (evil_request, xss_payload)
                     message = f"XSS vulnerability found via injection in the parameter {xss_param.name}"
                     if has_strong_csp(response, html):
                         message += ".\nWarning: Content-Security-Policy is present!"
 
                     await self.add_vuln_medium(
                         request_id=original_request.path_id,
-                        category=NAME,
+                        category=XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME,
                         request=evil_request,
                         parameter=xss_param.name,
                         info=message,
-                        wstg=WSTG_CODE,
+                        wstg=XSS_WSTG_CODE if xss_payload.injection_type == "javascript" else HTMLI_WSTG_CODE,
                         response=response
                     )
 
@@ -205,7 +204,7 @@ class ModuleXss(Attack):
                     log_red("---")
                     log_red(
                         injection_msg,
-                        self.MSG_VULN,
+                        XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME,
                         page,
                         xss_param.name
                     )
