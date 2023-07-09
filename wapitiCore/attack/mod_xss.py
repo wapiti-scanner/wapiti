@@ -182,7 +182,8 @@ class ModuleXss(Attack):
                         )
                 ):
                     self.successful_xss[taint] = (evil_request, xss_payload)
-                    message = f"XSS vulnerability found via injection in the parameter {xss_param.name}"
+                    message = XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME
+                    message += f" vulnerability found via injection in the parameter {xss_param.name}"
                     if has_strong_csp(response, html):
                         message += ".\nWarning: Content-Security-Policy is present!"
 
