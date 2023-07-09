@@ -1,3 +1,4 @@
+import re
 from subprocess import Popen
 import os
 import sys
@@ -417,3 +418,27 @@ async def test_xss_with_weak_csp():
 
         assert persister.add_payload.call_count
         assert "Warning: Content-Security-Policy is present!" not in persister.add_payload.call_args_list[0][1]["info"]
+
+
+@pytest.mark.asyncio
+async def test_fallback_to_html_injection():
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65081/no_js_possible.php?name=test")
+    request.path_id = 42
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65081/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "name"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "HTML Injection"
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            "HTML Injection vulnerability found via injection in the parameter name"
+        )
+        used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
+        assert re.match(r'<div id="\w+">yolo</div>', used_payload)
+

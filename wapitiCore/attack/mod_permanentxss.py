@@ -83,10 +83,7 @@ class ModulePermanentxss(Attack):
 
         html = Html(response.content, request.url)
 
-        # Should we look for taint codes sent with GET in the webpages?
-        # Exploiting those may imply sending more GET requests
-
-        # Search in the page source for every taint code used by mod_xss
+        # Search in the page source for every taint code that was used previously by mod_xss
         for taint in self.tried_xss:
             input_request, parameter = self.tried_xss[taint]
 
@@ -103,8 +100,10 @@ class ModulePermanentxss(Attack):
                 # Did mod_xss saw this as a reflected XSS ?
                 if taint in self.successful_xss:
                     # Yes, it means XSS payloads were injected, not just tainted code.
+                    # Either we are on the same vulnerability that mod_xss found or our injections appears at different
+                    # places (which would be awkward)
                     evil_request, payload_info = self.successful_xss[taint]
-                    # Using rules declared in the INI, perform the injection verification
+                    # Using rules declared in the INI, check it we find the payload in the webpage
                     if check_payload(
                         self.DATA_DIR,
                         self.PAYLOADS_FILE,
@@ -114,8 +113,8 @@ class ModulePermanentxss(Attack):
                         payload_info,
                         taint
                     ):
+                        # Success, this is a stored XSS / HTML injection vulnerability
                         vuln_type = XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME
-                        # If we can find the payload again, this is in fact a stored XSS
                         if request.path == evil_request.path:
                             description = (
                                 f"{vuln_type} vulnerability found via injection "
@@ -157,9 +156,9 @@ class ModulePermanentxss(Attack):
                         log_red(Messages.MSG_EVIL_REQUEST)
                         log_red(evil_request.http_repr())
                         log_red("---")
-                        # FIX: search for the next code in the webpage
 
-                # Ok the content is stored, but will we be able to inject javascript?
+                # Here mod_xss did inject the tainted value but as it was not reflected in the same webpage it didn't
+                # go further. It is now our job to send the payloads to webpage A and check the output in webpage B
                 else:
                     payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
 
@@ -278,7 +277,7 @@ class ModulePermanentxss(Attack):
                         injection_msg = Messages.MSG_PARAM_INJECT
 
                     log_red("---")
-                    # TODO: a last parameter should give URL used to pass the vulnerable parameter
+                    # TODO: use a more detailed description like the one used for the report
                     log_red(
                         injection_msg,
                         XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME,
