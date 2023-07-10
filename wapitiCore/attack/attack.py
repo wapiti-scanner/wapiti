@@ -310,9 +310,9 @@ class Attack:
             skip=self.options.get("skipped_parameters")
         )
 
-    async def does_timeout(self, request):
+    async def does_timeout(self, request, timeout: float = None):
         try:
-            await self.crawler.async_send(request)
+            await self.crawler.async_send(request, timeout=timeout)
         except ReadTimeout:
             return True
         except RequestError:
