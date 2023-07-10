@@ -73,10 +73,10 @@ class ModuleTimesql(Attack):
             log_verbose(f"[¨] {mutated_request}")
 
             try:
-                response = await self.crawler.async_send(mutated_request)
+                response = await self.crawler.async_send(mutated_request, timeout=self.time_to_sleep)
             except ReadTimeout:
                 # The request with time based payload did timeout, what about a regular request?
-                if await self.does_timeout(request):
+                if await self.does_timeout(request, timeout=self.time_to_sleep):
                     self.network_errors += 1
                     logging.error("[!] Too much lag from website, can't reliably test time-based blind SQL")
                     break

@@ -98,7 +98,7 @@ class AsyncCrawler:
     ):
         self._base_request = base_request
         self._client = client
-        self._timeout = timeout
+        self._timeout = httpx.Timeout(timeout, read=None)
 
         self.is_logged_in = False
         self.auth_url: str = self._base_request.url
@@ -217,7 +217,8 @@ class AsyncCrawler:
             resource: web.Request,
             follow_redirects: bool = False,
             headers: dict = None,
-            stream: bool = False
+            stream: bool = False,
+            timeout: float = None,
     ) -> Response:
         """Fetch the given url, returns a Response object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
@@ -231,7 +232,8 @@ class AsyncCrawler:
         @type stream: bool
         @rtype: Response
         """
-        request = self._client.build_request("GET", resource.url, headers=headers, timeout=self.timeout)
+        timeout = self.timeout if timeout is None else httpx.Timeout(timeout)
+        request = self._client.build_request("GET", resource.url, headers=headers, timeout=timeout)
         try:
             response = await self._client.send(
                 request, stream=stream, follow_redirects=follow_redirects
@@ -250,7 +252,8 @@ class AsyncCrawler:
             form: web.Request,
             follow_redirects: bool = False,
             headers: dict = None,
-            stream: bool = False
+            stream: bool = False,
+            timeout: float = None,
     ) -> Response:
         """Submit the given form, returns a Response on success, None otherwise.
 
@@ -297,7 +300,7 @@ class AsyncCrawler:
             content=content,
             files=file_params or None,
             headers=form_headers,
-            timeout=self.timeout
+            timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
         )
         try:
             response = await self._client.send(
@@ -318,7 +321,8 @@ class AsyncCrawler:
             form: web.Request,
             follow_redirects: bool = False,
             headers: dict = None,
-            stream: bool = False
+            stream: bool = False,
+            timeout: float = None,
     ) -> Response:
         """Submit the given form, returns a Response on success, None otherwise.
 
@@ -356,7 +360,7 @@ class AsyncCrawler:
             content=content,
             files=form.file_params or None,
             headers=form_headers,
-            timeout=self.timeout
+            timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
         )
         try:
             response = await self._client.send(
@@ -375,20 +379,26 @@ class AsyncCrawler:
             request: web.Request,
             headers: dict = None,
             follow_redirects: bool = False,
-            stream: bool = False
+            stream: bool = False,
+            timeout: float = None
     ) -> Response:
         if request.method == "GET":
-            response = await self.async_get(request, headers=headers, follow_redirects=follow_redirects, stream=stream)
+            response = await self.async_get(request, headers=headers,
+                                            follow_redirects=follow_redirects, stream=stream,
+                                            timeout=timeout
+            )
         elif request.method == "POST":
             response = await self.async_post(
                 request,
                 headers=headers,
                 follow_redirects=follow_redirects,
-                stream=stream
+                stream=stream,
+                timeout=timeout
             )
         else:
-            response = await self.async_request(
-                request.method, request, headers=headers, follow_redirects=follow_redirects, stream=stream
+            response = await self.async_request(request.method, request,
+                                                headers=headers, follow_redirects=follow_redirects,
+                                                stream=stream, timeout=timeout
             )
 
         request.set_cookies(self._client.cookies)

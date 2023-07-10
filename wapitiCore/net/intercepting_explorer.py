@@ -243,7 +243,7 @@ def extract_requests(html: Html, request: Request):
         yield form
 
 
-async def click_in_webpage(headless_client, request: Request, wait_time: float):
+async def click_in_webpage(headless_client, request: Request, wait_time: float, timeout: float):
     # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
     for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
         button_index = 1
@@ -265,7 +265,7 @@ async def click_in_webpage(headless_client, request: Request, wait_time: float):
                 await asyncio.sleep(wait_time)
                 current_url = await headless_client.get_url()
                 if current_url != request.url_with_fragment:
-                    await headless_client.get(request.url_with_fragment, timeout=5)
+                    await headless_client.get(request.url_with_fragment, timeout=timeout)
 
 
 async def launch_headless_explorer(
@@ -319,14 +319,14 @@ async def launch_headless_explorer(
 
                 if request.method == "GET":
                     try:
-                        await headless_client.get(request.url_with_fragment, timeout=5)
+                        await headless_client.get(request.url_with_fragment, timeout=crawler.timeout.connect)
                         await asyncio.sleep(wait_time)
                         # We may be redirected outside our target so let's check the URL first
                         if not scope.check(await headless_client.get_url()):
                             continue
 
                         page_source = await headless_client.get_page_source()
-                        await click_in_webpage(headless_client, request, wait_time)
+                        await click_in_webpage(headless_client, request, wait_time, timeout=crawler.timeout.connect)
                     except (ArsenicError, asyncio.TimeoutError) as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
