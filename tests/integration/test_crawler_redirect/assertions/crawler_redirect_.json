@@ -1,0 +1,4618 @@
+{
+    "infos": {
+        "target": "http://crawler_redirect/",
+        "crawled_pages_nbr": 65,
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://crawler_redirect/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Redirect</title>\n</head>\n<body>\n    \n<div class=\"panel-header\">\n        <h3>Redirects</h3>\n      </div>\n      \n    <a href=\"/redirects/disallowed_redirect.php\">Disallowed Redirect</a>\n    <a href=\"/redirects/redirect_chain_allowed.php\">Redirect Chain Allowed</a>\n    <a href=\"/redirects/disallowed_redirect_target_redirect.php\">Disallowed Redirect Target</a>\n    <a href=\"/redirects/infinite_redirect.php\">Infinite Redirect</a>\n    <a href=\"/redirects/two_step_redirect_loop_1.php\">Infinite Redirect (2 steps)</a>\n    <a href=\"/redirects/external_redirect.php\">External Redirect</a>\n    <a href=\"/redirects/invalid_redirect.php\">Redirect 303 To 404</a>\n    <a href=\"/redirects/meta_redirect_1.php\">Meta Redirect</a>\n    <a href=\"/redirects/meta_redirect_2.php\">Meta Redirect - Example 2</a>\n    <a href=\"/redirects/meta_redirect_3.php\">Meta Redirect - Example 3</a>\n    <a href=\"/redirects/infinite_meta_redirect.php\">Infinite Meta Redirect Loop</a>\n    <a href=\"/redirects/external_meta_redirect.php\">External Meta Redirect</a>\n    <a href=\"/redirects/invalid_meta_redirect.php\">Invalid Meta Redirect</a>\n    <a href=\"/redirects/header_refresh_redirect.php\">Header Refresh Redirect</a>\n    <a href=\"/redirects/redirect_to_404.php\">Redirect To 404 Http Status</a>\n    <a href=\"/redirects/url_redirect_chains.php\">URL Redirect Chains</a>\n    <a href=\"/redirects/redirect_content.php\">Redirect Content</a>\n    <a href=\"/redirects/external_redirect_chain1.php\">External Redirect Chain 1</a>\n    <a href=\"/redirects/redirect_300.php\">Redirect 300</a>\n    <a href=\"/redirects/redirect_301.php\">Redirect 301</a>\n    <a href=\"/redirects/redirect_301_2.php\">Redirect Double 301</a>\n    <a href=\"/redirects/redirect_3_302.php\">Redirect 302</a>\n    <a href=\"/redirects/redirect_303.php\">Redirect 303</a>\n    <a href=\"/redirects/redirect_304.php\">Redirect 304</a>\n    <a href=\"/redirects/redirect_305.php\">Redirect 305</a>\n    <a href=\"/redirects/redirect_4_307.php\">Redirect 307</a>\n    <a href=\"/redirects/redirect_308.php\">Redirect 308</a>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "495"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/disallow_redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "\n<!DOCTYPE html>\n<html>\n  <head>\n    <title>Disallowed Redirect Target</title>\n    \n</head>\n<body>\n \n    \n</body>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "103"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=utf-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect/meta_redirect_1.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 404,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at crawler_redirect Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "278"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect/meta_redirect_2.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 404,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at crawler_redirect Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "278"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page not supplied</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "125"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasdisallowed_redirect</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "136"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasmeta_redirect_1</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "133"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_300</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_301</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_303</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_304</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_305</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_308</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "131"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_3_302</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "133"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_4_307</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "133"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_chain_disallowed</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "139"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirect_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Target</title>\n</head>\n\n<body>\n    <p>Target reached</p>\n    <p>Origin page wasredirect_chain_link</p></body>\n\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "136"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/disallowed_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 301,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=disallowed_redirect"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/disallowed_redirect_target_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 301,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/disallow_redirect_target.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/external_meta_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n    <title>External redirect Meta</title>\n    <meta http-equiv=\"refresh\" content=\"0;url=http://www.perdu.com\"/>\n</head>\n<body>    \n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "154"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/external_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "http://www.perdu.com"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/external_redirect_chain1.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/external_redirect_chain2.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/external_redirect_chain2.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "https://www.perdu.com"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/header_refresh_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "refresh",
+                            "0; url=/redirect_target.php?origin=header_refresh_redirect"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/infinite_meta_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": " \n<!DOCTYPE html>\n<html>\n  <head>    \n    <meta http-equiv=\"refresh\" content=\"0;url=/redirects/infinite_meta_redirect.php\"/>\n  </head>\n  <body>\n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "143"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/infinite_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/infinite_redirect.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/invalid_meta_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta http-equiv=\"refresh\" content=\"0;url=../images/foo.jpg\"/>\n  </head>\n  <body>\n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "126"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/invalid_redirect.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "../images/foo.jpg"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/meta_redirect_1.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta http-equiv=\"refresh\" content=\"0;url=/redirect_target.php?origin=meta_redirect_1\"/>\n  </head>\n  <body>    \n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "146"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/meta_redirect_2.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta http-equiv=\"refresh\" content=\"0;url=/redirect/meta_redirect_1.php\"/>\n  </head>\n  <body>\n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "129"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/meta_redirect_3.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta http-equiv=\"refresh\" content=\"0;url=/redirect/meta_redirect_2.php\"/>\n  </head>\n  <body>\n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "129"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_300.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 300,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_300"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_301.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 301,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_301"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_301_2.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 301,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_301.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_303.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 303,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_303"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_304.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 304,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_304"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_305.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 305,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_305"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_308.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 308,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_308"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_3_302.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_3_302"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_4_307.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 307,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_4_307"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_allowed.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_disallowed.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_disallowed.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_chain_disallowed"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_chain_link"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirect_target.php?origin=redirect_chain_link"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=0"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=10"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=11"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=12"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=13"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=2"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=3"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=4"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=5"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=6"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=7"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_chain_link.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_chain_link.php?redirect_left=9"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_content.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "<a href=\"/redirects/redirect_content_link\">Redirect content link</a>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "69"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_content_link",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 404,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at crawler_redirect Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "278"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_to_404.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/redirect_to_404_target.php"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/redirect_to_404_target.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 404,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at crawler_redirect Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "278"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/two_step_redirect_loop_1.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 302,
+                    "body": "",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "0"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "location",
+                            "/redirects/two_step_redirect_loop_2"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/two_step_redirect_loop_2",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 404,
+                    "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apache/2.4.56 (Debian) Server at crawler_redirect Port 80</address>\n</body></html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-length",
+                            "278"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=iso-8859-1"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://crawler_redirect/redirects/url_redirect_chains.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "crawler_redirect"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n    <a href=\"/redirects/redirect_chain_link.php?redirect_left=4\">4 Redirects Chain Link</a>\n    <a href=\"/redirects/redirect_chain_link.php?redirect_left=9\">9 Redirects Chain Link</a>\n    <a href=\"/redirects/redirect_chain_link.php?redirect_left=14\">14 Redirects Chain Link</a>\n  </body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "144"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "nosniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "SAMEORIGIN"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ],
+                        [
+                            "x-xss-protection",
+                            "1; mode=block"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
