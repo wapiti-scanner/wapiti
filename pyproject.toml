@@ -42,6 +42,7 @@ dependencies = [
         "h11>=0.11",
         "httpcore>=0.17.2",
         "httpx[brotli, socks]==0.24.1",
+        "httpx-ntlm>=1.1.0",
         "loguru>=0.5.3",
         "mako>=1.1.4",
         "markupsafe==2.1.1",
