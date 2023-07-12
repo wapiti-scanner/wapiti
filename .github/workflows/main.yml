@@ -22,7 +22,7 @@ jobs:
           pip install "pylint-ignore==2021.1020"
       - name: Pylint
         run: |
-          pylint-ignore --rcfile=.pylintrc *.py wapitiCore
+          pylint-ignore --rcfile=.pylintrc wapitiCore
 
   docker:
     runs-on: ubuntu-22.04
