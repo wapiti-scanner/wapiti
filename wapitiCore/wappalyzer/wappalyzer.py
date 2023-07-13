@@ -502,22 +502,32 @@ class Wappalyzer:
             versions = self.detect_application_versions(applications[application_name])
             if versions:
                 versions.remove("__detected__")
-                detected_versions[application_name] = {"name": application_name, "versions": list(versions)}
+                detected_versions[application_name] = {
+                    "name": application_name, "versions": list(versions),
+                    "cpe": applications.get(application_name).get("cpe", "")
+                }
                 detected_applications_names.add(application_name)
 
         for application_name, versions in self._js.items():
             detected_applications_names.add(application_name)
             if application_name not in detected_versions:
-                detected_versions[application_name] = {"name": application_name, "versions": []}
+                detected_versions[application_name] = {
+                    "name": application_name, "versions": [],
+                    "cpe": applications.get(application_name).get("cpe", "")
+                }
 
             uniq_versions = set(detected_versions[application_name]["versions"])
             uniq_versions.update(versions)
-            detected_versions[application_name] = {"name": application_name, "versions": list(uniq_versions)}
-
+            detected_versions[application_name] = {
+                "name": application_name, "versions": list(uniq_versions),
+                "cpe": applications.get(application_name).get("cpe", "")
+            }
         # Add implied applications
         for application_name in self.get_rec_implied_applications(detected_applications_names):
             # If we found it in another way, don't overwrite!
             if application_name not in detected_versions:
-                detected_versions[application_name] = {"name": application_name, "versions": []}
-
+                detected_versions[application_name] = {
+                    "name": application_name, "versions": [],
+                    "cpe": applications.get(application_name).get("cpe", "")
+                }
         return detected_versions

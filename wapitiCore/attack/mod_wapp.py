@@ -40,6 +40,7 @@ from wapitiCore.net import Request
 MSG_TECHNO_VERSIONED = "{0} {1} detected"
 MSG_CATEGORIES = "  -> Categories: {0}"
 MSG_GROUPS = "  -> Group(s): {0}"
+MSG_CPE = "  -> CPE: {0}"
 
 BULK_SIZE = 50
 VERSION_REGEX = re.compile(r"\d[\d.]*")
@@ -151,10 +152,13 @@ class ModuleWapp(Attack):
             versions = detected_applications[application_name]["versions"]
             categories = detected_applications[application_name]["categories"]
             groups = detected_applications[application_name]["groups"]
+            cpe = detected_applications[application_name]["cpe"]
 
             log_blue(MSG_TECHNO_VERSIONED, application_name, versions)
             log_blue(MSG_CATEGORIES, categories)
             log_blue(MSG_GROUPS, groups)
+            if cpe:
+                log_blue(MSG_CPE, cpe)
             log_blue("")
             await self.add_addition(
                 category=TECHNO_DETECTED,
