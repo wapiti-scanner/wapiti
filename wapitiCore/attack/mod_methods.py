@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import Optional
+from typing import Optional, Set, Dict
 
 from httpx import RequestError
 
@@ -27,6 +27,39 @@ from wapitiCore.definitions.methods import NAME, WSTG_CODE
 from wapitiCore.net import Request, Response
 
 
+def get_allowed_methods(response: Response) -> Set[str]:
+    methods = response.headers.get("allow", "").upper().split(",")
+    return {method.strip() for method in methods if method.strip()}
+
+
+def format_statuses(statuses: Dict[str, int]) -> str:
+    return " ".join([f"{method} ({statuses[method]})" for method in sorted(statuses)])
+
+
+def is_interesting(method: str, response: Response) -> bool:
+    # This is basic config like default Nginx or CloudFlare protected websites
+    if response.status in (403, 405):
+        return False
+
+    # If the method is HEAD and its body is empty, this behavior is not abnormal
+    if method == "HEAD" and not response.content:
+        return False
+
+    if method == "CONNECT" and response.status == 400:
+        # Common as CONNECT should be used with a resource
+        return False
+
+    if response.status == 403 and (
+        "This distribution is not configured to allow the HTTP request method that was used for this request"
+    ) in response.content:
+        return False
+
+    if method == "TRACE" and "TRACE /" not in response.content:
+        return False
+
+    return True
+
+
 class ModuleMethods(Attack):
     """
     Detect uncommon HTTP methods (like PUT) that may be allowed by a script.
@@ -34,137 +67,106 @@ class ModuleMethods(Attack):
 
     name = "methods"
     PRIORITY = 6
-    KNOWN_METHODS = {"GET", "POST", "OPTIONS", "HEAD", "TRACE", }
+    KNOWN_METHODS = {"GET", "POST", "OPTIONS", "HEAD", "TRACE"}
     UNCOMMON_METHODS = {"CONNECT", "DELETE", "PUT", "PATCH"}
     do_get = True
     do_post = True
     excluded_path = set()
+    hosts_with_trace = set()
 
-    async def discover_methods(self, request: Request, response: Response, methods: set):
-        """
-        A function to try the various methods returned by an OPTIONS method and comparing them
-        with the method used by the crawler to see the differences.
-        If OPTIONS returned nothing (empty methods) or a 404 status code,
-        it will blindly try all the known methods. A fully empty OPTIONS
-        methods seems suspicious so it's better to ultimately check everything.
-
-        Parameter List
-        -------------
-        request : Request
-            Request made previously, useful for its informations in order to make new requests
-        response : Response
-            Response from the request argument, used to compare to responses from requests made with methods
-        methods: set
-            set of all methods returned by an OPTIONS method request
-
-        Return object
-        -------------
-        methods_dict : dict
-            dictionnary referencing relevant methods (not 405 status code, differences with the response in argument)
-            and their informations
-
-        """
-        methods_dict = {}
-        # Testing and comparing the uncommon methods,
-        # not_allowed_methods record all the methods
-        # returning a 405 error which will be removed
-        all_but_options_method = set.union(self.KNOWN_METHODS, self.UNCOMMON_METHODS)-{'OPTIONS'}
-        for method in (methods-self.KNOWN_METHODS if methods else all_but_options_method):
-            uncommon_request = Request(
-                request.path,
-                method,
-                referer=request.referer,
-                link_depth=request.link_depth
-            )
-            try:
-                log_verbose(f"[+] {uncommon_request}")
-                uncommon_response = await self.crawler.async_send(uncommon_request)
-            except RequestError:
-                self.network_errors += 1
-                return
-            if uncommon_response.status != 405:
-                # If the method is HEAD and its body is empty, this behavior is not abnormal
-                methods_dict.update({method: {"code": uncommon_response.status,
-                                              "status_different": response.status != uncommon_response.status,
-                                              "content_different": False
-                                              if (method == 'HEAD' and uncommon_response.content == "")
-                                              else response.content != uncommon_response.content,
-                                              "response": uncommon_response,
-                                              "request": uncommon_request
-                                              }})
-
-        return methods_dict
+    async def query_method(self, path: str, method: str) -> Response:
+        request = Request(
+            path,
+            method,
+        )
+        log_verbose(f"[¨] {request}")
+        return await self.crawler.async_send(request)
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         return request.path not in self.excluded_path
 
     async def attack(self, request: Request, response: Optional[Response] = None):
+        # We first try to obtain the list of allowed methods using OPTIONS
+        # then we test each of those and we compare the status code and content to the response
+        # given to a GET request (that will be sent in every case).
+        # If OPTIONS isn't implemented we send a request for each HTTP method from a hardcoded list
+        # To filter most common cases we call the function called `is_interesting` above.
+        # The behavior of this module is a bit different from https://svn.nmap.org/nmap/scripts/http-methods.nse
         page = request.path
         self.excluded_path.add(page)
-
-        option_request = Request(
-            page,
-            "OPTIONS",
-            referer=request.referer,
-            link_depth=request.link_depth
-        )
-
-        log_verbose(f"[+] {option_request}")
+        methods_to_test = self.KNOWN_METHODS | self.UNCOMMON_METHODS
+        options_succeed = False
+        statuses = {}
 
         try:
-            option_response = await self.crawler.async_send(option_request)
+            options_response = await self.query_method(page, "OPTIONS")
         except RequestError:
             self.network_errors += 1
-            return
-
-        # If options response status code is 2** or 301/2/3/5/7
-        option_exist = (option_response.is_success or option_response.is_redirect)
-        if option_exist:
-            methods = option_response.headers.get("allow", '').upper().split(',')
-            methods = {method.strip() for method in methods if method.strip()}
-            log_orange(f"Methods found in the header: {','.join(methods)}")
         else:
-            # Giving an empty method set to the discover method will
-            # make it try all the methods blindly
-            log_orange("No methods found in the header, blindly try all the methods")
-            methods = {}
-        interesting_methods = await self.discover_methods(request, response, methods)
+            allowed_methods = get_allowed_methods(options_response)
+            if allowed_methods:
+                methods_to_test = allowed_methods
+                log_orange(f"Methods found in the header: {','.join(methods_to_test)}")
+                options_succeed = True
+                statuses["OPTIONS"] = options_response.status
 
-        if not interesting_methods:
-            log_orange("No interesting method found")
+        try:
+            get_response = await self.query_method(page, "GET")
+        except RequestError:
+            self.network_errors += 1
+            # We leave because GET serves as reference
             return
 
-        log_orange(interesting_methods)
-        log_orange("---")
-        # methods returned by the OPTIONS method request
-        option_log = f"Interesting methods allowed on {page}: {', '.join(list(interesting_methods.keys()))}"
-        if option_exist:
-            log_orange(option_log)
-            await self.add_addition(
-                category=NAME,
-                request=option_request,
-                info=option_log,
-                wstg=WSTG_CODE,
-                response=option_response
-            )
-        # if a method has relevant information, it will be listed
-        for method, data in interesting_methods.items():
-            if not (data['status_different'] or data['content_different']):
+        methods_to_test -= {"GET", "OPTIONS"}
+
+        for method in methods_to_test:
+            if method == "GET":
                 continue
+
+            try:
+                method_response = await self.query_method(page, method)
+            except RequestError:
+                self.network_errors += 1
+                continue
+
+            if not is_interesting(method, method_response):
+                continue
+
+            if method == "TRACE" and request.netloc not in self.hosts_with_trace:
+                # Log this only once per netloc
+                self.hosts_with_trace.add(request.netloc)
+                log_orange("[!] TRACE method is allowed on the server")
+                await self.add_addition(
+                    category=NAME,
+                    request=request,
+                    info="HTTP TRACE method is allowed on the webserver",
+                    wstg=WSTG_CODE,
+                )
+
+            status_different = method_response.status != get_response.status
+            content_different = method_response.content != get_response.content
+            if not status_different and not content_different:
+                continue
+
+            statuses[method] = method_response.status
             logging_string = f"Method {method} returned "
             differences_str = []
-            if data['status_different']:
-                differences_str.append(f"{data['code']} server code")
-            if data['content_different']:
+            if status_different:
+                differences_str.append(f"{method_response.status} server code")
+            if content_different:
                 differences_str.append("a body content")
+
             logging_string += f"{' and '.join(differences_str)} different from GET method on {page}"
             log_orange(logging_string)
-            await self.add_addition(
-                category=NAME,
-                request=data['request'],
-                info=logging_string,
-                wstg=WSTG_CODE,
-                response=data['response']
-            )
-        if option_exist or interesting_methods:
-            log_orange("---")
+
+        message = (
+            f"Possible interesting methods (using {'OPTIONS' if options_succeed else 'heuristics'}) "
+            f"on {page}: {format_statuses(statuses)}"
+        )
+
+        await self.add_addition(
+            category=NAME,
+            request=request,
+            info=message,
+            wstg=WSTG_CODE,
+        )
