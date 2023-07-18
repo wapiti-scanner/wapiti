@@ -9,7 +9,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
 from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
-from wapitiCore.main.log import log_blue, logging
+from wapitiCore.main.log import log_blue, log_orange, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 
@@ -54,7 +54,10 @@ class ModuleWpEnum(Attack):
             request = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}", "GET")
             response: Response = await self.crawler.async_send(request, follow_redirects=True)
 
-            if not response.content or response.is_error:
+            if not response.content or response.is_error or "content-type" not in response.headers:
+                continue
+            if "xml" not in response.headers["content-type"]:
+                log_orange(f"Response content-type for {rss_url} is not XML")
                 continue
             root = ET.fromstring(response.content)
 

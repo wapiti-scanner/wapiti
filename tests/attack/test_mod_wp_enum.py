@@ -219,7 +219,34 @@ async def test_wp_version():
         )
     )
 
+    # test with no content-type, should be skipped
     respx.get("http://perdu.com/feed/").mock(
+        return_value=httpx.Response(
+            200,
+            text='<?xml version="1.0" encoding="UTF-8"?>\
+                <rss version="2.0">\
+                    <channel>\
+                        <generator>https://wordpress.org/?v=4.3.2</generator>\
+                    </channel>\
+                </rss>'
+        )
+    )
+
+    # test with content-type different from XML, should be skipped
+    respx.get("http://perdu.com/comments/feed/").mock(
+        return_value=httpx.Response(
+            200,
+            text='<?xml version="1.0" encoding="UTF-8"?>\
+                <rss version="2.0">\
+                    <channel>\
+                        <generator>https://wordpress.org/?v=5.4.3</generator>\
+                    </channel>\
+                </rss>',
+            headers={"content-type":"text/html, charset=UTF-8"}
+        )
+    )
+
+    respx.get("http://perdu.com/feed/rss/").mock(
         return_value=httpx.Response(
             200,
             text='<?xml version="1.0" encoding="UTF-8"?>\
@@ -227,7 +254,8 @@ async def test_wp_version():
                     <channel>\
                         <generator>https://wordpress.org/?v=5.8.2</generator>\
                     </channel>\
-                </rss>'
+                </rss>',
+            headers={"content-type":"application/rss+xml, charset=UTF-8"}
         )
     )
 
