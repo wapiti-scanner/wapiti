@@ -424,7 +424,7 @@ async def test_implies_detection():
 
         assert persister.add_payload.call_count == 3
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "", "categories": ["CMS"], "groups": '
+            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", "categories": ["CMS"], "groups": '
             '["Content"]}'
         )
         assert persister.add_payload.call_args_list[-1][1]["info"] == (
@@ -467,7 +467,7 @@ async def test_vulnerabilities():
         assert persister.add_payload.call_count == 5
         # FIrst one is an additional
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "", "categories": ["CMS"], "groups": ["Content"]}'
+            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", "categories": ["CMS"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
 
