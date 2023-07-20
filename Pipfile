@@ -32,7 +32,7 @@ typing-extensions = "==4.4.0"
 h11 = "==0.14"
 arsenic = "==21.8"
 pyasn1 = "==0.4.8"
-aiohttp = "==3.8.4"
+aiohttp = "==3.8.5"
 pydantic = "==1.10.2"
 
 [requires]
