@@ -9,6 +9,9 @@ class AsyncIterator:
     def __aiter__(self):
         return self
 
+    def __call__(self, *args, **kwds):
+        return self
+
     async def __anext__(self):
         try:
             return next(self.iter)
