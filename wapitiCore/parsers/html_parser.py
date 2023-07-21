@@ -209,6 +209,21 @@ class Html:
         return metas
 
     @property
+    def multi_meta(self) -> List[Tuple[str, str]]:
+        """Returns a list of tuples of all metas tags with name attribute as the first element of the tuple and content
+           attribute as last element of the tuple. Useful when multiple meta tags have the same name but different
+           content.
+        """
+        metas = []
+        if self.soup.head is not None:
+            for meta_tag in self.soup.head.find_all("meta", attrs={"name": True, "content": True}):
+                tag_name = meta_tag["name"].lower().strip()
+                if tag_name:
+                    metas.append((tag_name, meta_tag["content"]))
+
+        return metas
+
+    @property
     def description(self) -> str:
         """Returns the content of the meta description tag in the HTML header.
 

@@ -3,6 +3,7 @@ import os
 import re
 import warnings
 from typing import Set
+from collections import defaultdict
 from soupsieve.util import SelectorSyntaxError
 
 from wapitiCore.net.crawler import Response
@@ -306,14 +307,14 @@ def detect_versions_normalize_dict(rules: dict, contents) -> Set[str]:
         if key in contents:
             # regex_params is a list : [{"application_pattern": "..", "regex": "re.compile(..)"}, ...]
             for i, _ in enumerate(regex_params):
-                # If the regex fails, it can be due to the fact that we are looking for the key instead
-                # The value can be set to the key so we compare
-                if re.search(regex_params[i]['regex'], contents[key]) or\
-                        regex_params[i]['application_pattern'] == key:
-                    # Use that special string to show we detected the app once but not necessarily a version
-                    versions.add("__detected__")
-                    versions.update(extract_version(regex_params[i], contents[key]))
-
+                for content_value in contents[key]:
+                    # If the regex fails, it can be due to the fact that we are looking for the key instead
+                    # The value can be set to the key so we compare
+                    if re.search(regex_params[i]['regex'], content_value) or\
+                       regex_params[i]['application_pattern'] == key:
+                        # Use that special string to show we detected the app once but not necessarily a version
+                        versions.add("__detected__")
+                        versions.update(extract_version(regex_params[i], content_value))
     return versions
 
 
@@ -335,10 +336,19 @@ class Wappalyzer:
         # Copy some values to make sure they aren't processed more than once
         self.html = Html(self._html_code, self._url)
         self._scripts = self.html.scripts[:]
-        self._cookies = dict(web_content.cookies)
-        self._headers = web_content.headers
-        self._metas = dict(self.html.metas)
         self._js = js
+        # dict(web_content.headers)->{"Server":"Nginx, Apache, Redis" ...}
+        # With the workaround below ->{"Server":["Nginx", "Apache", "Redis"] ...}
+        # Way better for processing instead of splitting on " ,"
+        self._headers = defaultdict(list)
+        for attribute, value in web_content.headers.multi_items():
+            self._headers[attribute].append(value)
+        # Same with meta tags
+        self._metas = defaultdict(list)
+        for attribute, value in self.html.multi_meta:
+            self._metas[attribute].append(value)
+        # Cookies can't have multiple values but we must keep a dict->list format
+        self._cookies = {key: [value] for key, value in web_content.cookies.items()}
 
     def detect_application_versions(self, application: dict) -> Set[str]:
         """
