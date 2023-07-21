@@ -26,6 +26,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
+from wapitiCore.definitions.buster import NAME, WSTG_CODE
 
 
 class ModuleBuster(Attack):
@@ -55,19 +56,26 @@ class ModuleBuster(Attack):
             self.network_errors += 1
             return False
 
-        if response.redirection_url:
+        if response.redirection_url and response.is_directory_redirection:
             loc = response.redirection_url
-            if response.is_directory_redirection:
-                log_red(f"Found webpage {loc}")
-                self.new_resources.append(loc)
-            else:
-                log_red(f"Found webpage {page.path}")
-                self.new_resources.append(page.path)
-            return True
-
-        if response.status not in [403, 404, 429]:
+            log_red(f"Found webpage {loc}")
+            self.new_resources.append(loc)
+            await self.add_addition(
+                category=NAME,
+                request=page,
+                info=f"Found webpage {loc} on {url}",
+                wstg=WSTG_CODE
+            )
+        elif (response.redirection_url and not response.is_directory_redirection) \
+                or response.status not in [403, 404, 429]:
             log_red(f"Found webpage {page.path}")
             self.new_resources.append(page.path)
+            await self.add_addition(
+                category=NAME,
+                request=page,
+                info=f"Found webpage {page.path} on {url}",
+                wstg=WSTG_CODE
+            )
             return True
 
         return False
