@@ -354,6 +354,44 @@ services:
     volumes:
       - ./test_mod_xss/php/src:/var/www/html/
 
+  # First, all the different databases required to run the containers
+  wp_db:
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
+    volumes:
+      - wp_db_data:/var/lib/mysql
+      - ./test_mod_wp_enum/mock_wp_db.sql:/docker-entrypoint-initdb.d/mock_wp_db.sql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WP_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WP_MYSQL_DATABASE}
+      MYSQL_USER: ${WP_MYSQL_USER}
+      MYSQL_PASSWORD: ${WP_MYSQL_PASSWORD}
+
+  # Wordpress container 
+  wordpress:
+    build:
+      context: ./test_mod_wp_enum/
+      dockerfile: Dockerfile
+      args:
+        WP_HASH_TAG: ${WP_HASH}
+    healthcheck:
+      test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+      interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+      timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+      start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+      retries: 30
+    depends_on:
+      wp_db:
+        condition: service_healthy
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: wp_db:3306
+      WORDPRESS_DB_USER: ${WP_MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${WP_MYSQL_DATABASE}
+    networks:
+      - test-network
+
   # Wapiti container 
   # requires all the targets containers to work perfectly
   wapiti:
@@ -420,10 +458,13 @@ services:
         condition: service_healthy
       http_headers:
         condition: service_healthy
+      wordpress:
+        condition: service_healthy
 
 volumes:
   drupal9_db_data:
   drupal10_db_data:
   timesql_db_data:
+  wp_db_data:
 networks:
   test-network:
