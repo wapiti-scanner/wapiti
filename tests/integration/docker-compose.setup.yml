@@ -130,6 +130,12 @@ services:
       - timesql_db_data:/var/lib/mysql
     networks:
       - test-network
+      
+  # Apache container for the file module
+  file:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_file/php/src:/var/www/html/
 
   # Apache container for the timesql module
   timesql:
@@ -395,6 +401,8 @@ services:
       crlf:
         condition: service_healthy
       xss:
+        condition: service_healthy
+      file:
         condition: service_healthy
 
 volumes:

