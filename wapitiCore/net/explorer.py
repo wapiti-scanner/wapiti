@@ -40,8 +40,7 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.parsers import swf
 from wapitiCore.net import jsparser_angular
-from wapitiCore.net.scope import Scope
-
+from wapitiCore.net.scope import Scope, wildcard_translate
 
 MIME_TEXT_TYPES = ('text/', 'application/xml')
 # Limit page size to 2MB
@@ -62,24 +61,6 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 
 
 BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
-
-
-def wildcard_translate(pattern: str) -> re.Pattern:
-    """Translate a wildcard PATTERN to a regular expression object.
-
-    This is largely inspired by fnmatch.translate.
-    """
-
-    i, length = 0, len(pattern)
-    res = ''
-    while i < length:
-        char = pattern[i]
-        i += 1
-        if char == '*':
-            res += r'.*'
-        else:
-            res += re.escape(char)
-    return re.compile(res + r'\Z(?ms)')
 
 
 class Explorer:
@@ -377,16 +358,11 @@ class Explorer:
         @rtype: generator
         """
         if isinstance(excluded_urls, list):
-            while True:
-                try:
-                    bad_request = excluded_urls.pop()
-                except IndexError:
-                    break
-                else:
-                    if isinstance(bad_request, str):
-                        self._regexes.append(wildcard_translate(bad_request))
-                    elif isinstance(bad_request, web.Request):
-                        self._processed_requests.append(bad_request)
+            for bad_request in excluded_urls:
+                if isinstance(bad_request, str):
+                    self._regexes.append(wildcard_translate(bad_request))
+                elif isinstance(bad_request, web.Request):
+                    self._processed_requests.append(bad_request)
 
         if self._max_depth < 0:
             return

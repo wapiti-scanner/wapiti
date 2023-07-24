@@ -65,6 +65,7 @@ all_modules = {
     "ssrf",
     "takeover",
     "timesql",
+    "upload",
     "wapp",
     "wp_enum",
     "xss",
@@ -83,6 +84,7 @@ common_modules = {
     "sql",
     "ssl",
     "ssrf",
+    "upload",
     "xss"
 }
 
