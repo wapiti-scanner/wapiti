@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import re
 from typing import Iterable, Union, Set
 from urllib.parse import urlparse
 
@@ -71,3 +72,15 @@ class Scope:
 
     def filter(self, resources: Iterable[Union[Request, str]]) -> Set[Union[Request, str]]:
         return {resource for resource in resources if self.check(resource)}
+
+
+def wildcard_translate(pattern: str) -> re.Pattern:
+    """Translate a wildcard PATTERN to a regular expression object that must be used with the 'match' function.
+
+    This is largely inspired by fnmatch.translate.
+    """
+
+    res = ''
+    for char in pattern:
+        res += r'.*' if char == '*' else re.escape(char)
+    return re.compile(r'(?ms)' + res + r'\Z')

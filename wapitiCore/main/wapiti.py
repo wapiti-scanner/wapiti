@@ -241,6 +241,7 @@ async def wapiti_main():
             "timeout": args.timeout,
             "tasks": args.tasks,
             "headless": wap.headless_mode,
+            "excluded_urls": wap.excluded_urls,
         }
 
         if "dns_endpoint" in args:
@@ -326,7 +327,6 @@ async def wapiti_main():
 
     if ("form_user" in args and "form_password" not in args) or ("form_user" not in args and "form_password" in args):
         raise InvalidOptionValue("--form-user and --form-password", "Both options are required when one is used")
-
 
     if "form_script" in args:
         await load_form_script(

@@ -681,6 +681,10 @@ class Wapiti:
         """Specify a URL to exclude from the scan. Can be called several times."""
         self._excluded_urls.append(url_or_pattern)
 
+    @property
+    def excluded_urls(self) -> List[str]:
+        return self._excluded_urls
+
     def set_cookie_file(self, cookie: str):
         """Load session cookies from a cookie file"""
         if os.path.isfile(cookie):

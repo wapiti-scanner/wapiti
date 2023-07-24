@@ -45,8 +45,8 @@ from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
-from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS, wildcard_translate
-from wapitiCore.net.scope import Scope
+from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS
+from wapitiCore.net.scope import Scope, wildcard_translate
 from wapitiCore.main.log import log_verbose, log_blue, logging
 from wapitiCore.parsers.html_parser import Html
 
@@ -401,16 +401,11 @@ class InterceptingExplorer(Explorer):
         excluded_requests = []
 
         if isinstance(excluded_urls, list):
-            while True:
-                try:
-                    bad_request = excluded_urls.pop()
-                except IndexError:
-                    break
-                else:
-                    if isinstance(bad_request, str):
-                        exclusion_regexes.append(wildcard_translate(bad_request))
-                    elif isinstance(bad_request, Request):
-                        excluded_requests.append(bad_request)
+            for bad_request in excluded_urls:
+                if isinstance(bad_request, str):
+                    exclusion_regexes.append(wildcard_translate(bad_request))
+                elif isinstance(bad_request, Request):
+                    excluded_requests.append(bad_request)
 
         # Launch proxy as asyncio task
         mitm_task = asyncio.create_task(
