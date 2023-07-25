@@ -3,6 +3,7 @@
 # List of modules to be tested
 TESTS="test_crawler_auth \
 test_crawler_redirect \
+test_mod_brute_login_form \
 test_mod_buster \
 test_mod_crlf \
 test_mod_drupal_enum \

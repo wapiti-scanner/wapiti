@@ -64,6 +64,13 @@ services:
       - test-network
     <<: *healthcheck_web
 
+  # Apache container for the brute_login_form module
+  brute_login_form:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_brute_login_form/php/src:/var/www/html/
+
+
   # Apache container for the htaccess module
   htaccess:
     build:
@@ -332,6 +339,8 @@ services:
       wapp:
         condition: service_healthy
       drupal9:
+        condition: service_healthy
+      brute_login_form:
         condition: service_healthy
       drupal10:
         condition: service_healthy
