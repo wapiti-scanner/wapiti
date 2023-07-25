@@ -108,6 +108,12 @@ services:
     volumes:
       - ./test_mod_cookieflags/php/src:/var/www/html/
 
+  # Apache container for the csp module
+  csp:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_csp/php/src:/var/www/html/
+
   timesql-db:
     build:
       context: ./test_mod_timesql/
@@ -351,6 +357,8 @@ services:
       drupal10:
         condition: service_healthy
       cookieflags:
+        condition: service_healthy
+      csp:
         condition: service_healthy
       exec:
         condition: service_healthy

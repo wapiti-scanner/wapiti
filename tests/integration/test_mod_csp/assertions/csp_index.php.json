@@ -1,0 +1,85 @@
+{
+    "vulnerabilities": {
+        "Content Security Policy Configuration": [
+            {
+                "method": "GET",
+                "path": "/index.php",
+                "info": "CSP is not set",
+                "parameter": "",
+                "module": "csp",
+                "http_request": "GET /index.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://csp/index.php",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://csp/index.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "csp"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "\n<!DOCTYPE html>\n<html>\n<head>\n\t<title>Index</title>\n</head>\n<body>\n\t<h1>Index</h1>\n\t<p>This is a simple PHP web page.</p>\n    <ul>\n        <li><a href=\"csp_secured.php\">link 1</a></li>\n        <li><a href=\"csp_insecured.php\">link 2</a></li> \n    </ul>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "182"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}

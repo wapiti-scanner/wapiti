@@ -1,0 +1,76 @@
+{
+    "vulnerabilities": {
+        "Content Security Policy Configuration": []
+    },
+    "infos": {
+        "target": "http://csp/csp_secured.php",
+        "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://csp/csp_secured.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "csp"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <title>CSP Example</title>\n    </head>\n    <body>\n        <p>Page with an CSP highly secured.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "127"
+                        ],
+                        [
+                            "content-security-policy",
+                            "default-src 'none'  ; frame-ancestors 'self' ; base-uri 'self' ; block-all-mixed-content ;require-trusted-types-for 'script'"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}
