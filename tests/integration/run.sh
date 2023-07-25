@@ -9,6 +9,7 @@ test_mod_buster \
 test_mod_cookieflags \
 test_mod_crlf \
 test_mod_csp \
+test_mod_csrf \
 test_mod_drupal_enum \
 test_mod_htaccess \
 test_mod_http_headers \

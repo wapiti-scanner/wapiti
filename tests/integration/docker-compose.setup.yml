@@ -371,6 +371,11 @@ services:
       MYSQL_DATABASE: ${WP_MYSQL_DATABASE}
       MYSQL_USER: ${WP_MYSQL_USER}
       MYSQL_PASSWORD: ${WP_MYSQL_PASSWORD}
+  # Apache container for the csrf module
+  csrf:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_csrf/php/src:/var/www/html/
 
   # Wordpress container 
   wordpress:
@@ -462,6 +467,8 @@ services:
       file:
         condition: service_healthy
       http_headers:
+        condition: service_healthy
+      csrf:
         condition: service_healthy
       wordpress:
         condition: service_healthy
