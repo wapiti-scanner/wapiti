@@ -60,6 +60,11 @@ services:
     networks:
       - test-network
 
+  # Apache server for the backup module
+  backup:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_backup/html/:/var/www/html/
 
   # Apache container for the crlf module
   crlf:
@@ -459,6 +464,8 @@ services:
       http_headers:
         condition: service_healthy
       wordpress:
+        condition: service_healthy
+      backup:
         condition: service_healthy
 
 volumes:

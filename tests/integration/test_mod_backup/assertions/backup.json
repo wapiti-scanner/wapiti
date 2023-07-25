@@ -1,0 +1,15 @@
+{
+    "vulnerabilities": {
+        "Backup file": [
+            {
+                "method": "GET",
+                "path": "/backup.zip",
+                "info": "Backup file http://backup/backup.zip found for http://backup/",
+                "http_request": "GET /backup.zip HTTP/1.1\nhost: backup\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-CONF-04"
+                ]
+            }
+        ]
+    }
+}
