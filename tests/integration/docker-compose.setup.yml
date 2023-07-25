@@ -102,6 +102,12 @@ services:
     networks:
       - test-network
 
+  # Apache container for the cookieflags module
+  cookieflags:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    volumes:
+      - ./test_mod_cookieflags/php/src:/var/www/html/
+
   timesql-db:
     build:
       context: ./test_mod_timesql/
@@ -343,6 +349,8 @@ services:
       brute_login_form:
         condition: service_healthy
       drupal10:
+        condition: service_healthy
+      cookieflags:
         condition: service_healthy
       exec:
         condition: service_healthy
