@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # List of modules to be tested
-TESTS="test_mod_wapp "
+TESTS="test_mod_drupal_enum \
+test_mod_wapp "
 
 # Normalize spaces for shell substitution
 if [[ ! -z "$TESTS" ]]; then
