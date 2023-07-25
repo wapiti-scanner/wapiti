@@ -1,0 +1,44 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [
+            {
+                "method": "GET",
+                "path": "/",
+                "info": "{\"name\": \"Drupal\", \"versions\": [\"9.5.9\"], \"categories\": [\"CMS Drupal\"], \"groups\": [\"Content\"]}",
+                "level": 0,
+                "parameter": "",
+                "referer": "",
+                "module": "drupal_enum",
+                "http_request": "GET / HTTP/1.1",
+                "curl_command": "curl \"http://drupal9/\"",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ],
+                "detail": {
+                    "response": null
+                }
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/",
+                "info": "{\"name\": \"Drupal\", \"versions\": [\"9.5.9\"], \"categories\": [\"CMS Drupal\"], \"groups\": [\"Content\"]}",
+                "level": 0,
+                "parameter": "",
+                "module": "drupal_enum",
+                "http_request": "GET / HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ],
+                "detail": {
+                    "response": null
+                }
+            }
+        ]
+    }
+}
