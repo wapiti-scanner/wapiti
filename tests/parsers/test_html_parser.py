@@ -228,7 +228,17 @@ def test_base_other_links():
 
         assert page.html_redirections == ["http://perdu.com/blog/adblock.html"]
 
-def test_logged_in():
+def test_logged_in_success():
     with open("tests/data/logged_in.html") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert page.is_logged_in()
+
+def test_logged_in_failed_implicit():
+    with open("tests/data/logged_in_failed_implicit.html") as data_body:
+        page = Html(data_body.read(), "http://perdu.com/index.php")
+        assert not page.is_logged_in()
+
+def test_logged_in_failed_explicit():
+    with open("tests/data/logged_in_failed_explicit.html") as data_body:
+        page = Html(data_body.read(), "http://perdu.com/index.php")
+        assert not page.is_logged_in()
