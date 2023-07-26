@@ -147,6 +147,16 @@
             {
                 "method": "GET",
                 "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Open Journal Systems\", \"versions\": [], \"cpe\": \"cpe:2.3:a:public_knowledge_project:open_journal_systems:*:*:*:*:*:*:*:*\", \"categories\": [\"DMS\"], \"groups\": [\"Content\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
                 "info": "{\"name\": \"PHP\", \"versions\": [], \"cpe\": \"cpe:2.3:a:php:php:*:*:*:*:*:*:*:*\", \"categories\": [\"Programming languages\"], \"groups\": [\"Web development\"]}",
                 "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1",
                 "wstg": [

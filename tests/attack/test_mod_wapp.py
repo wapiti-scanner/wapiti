@@ -276,6 +276,44 @@ async def test_cookies_detection():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_cookies_whatever_value_detection():
+    # Test if application is detected using its cookies with empty values
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"Set-Cookie": "OJSSID=5646"}
+        )
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Open Journal Systems", "versions": [], "cpe": "cpe:2.3:a:public_knowledge_project:open_journal_systems:*:*:*:*:*:*:*:*", '
+            '"categories": ["DMS"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_headers_detection():
     # Test if application is detected using its headers regex
     respx.get("http://perdu.com/").mock(
