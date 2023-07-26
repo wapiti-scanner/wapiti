@@ -17,6 +17,18 @@ from wapitiCore.net import Request, make_absolute
 from wapitiCore.parsers.javascript import extract_js_redirections
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
+CONNECT_ERROR_REGEX = r'(invalid|'\
+                      r'authentication failed|'\
+                      r'denied|'\
+                      r'incorrect|'\
+                      r'failed|'\
+                      r'not found|'\
+                      r'expired|'\
+                      r'try again|'\
+                      r'captcha|'\
+                      r'two-factors|'\
+                      r'verify your email|'\
+                      r'erreur)'
 
 
 def not_empty(original_function):
@@ -649,5 +661,9 @@ class Html:
                 disconnect_urls.append(link)
         return disconnect_urls
 
-    def is_logged_in(self):
+    def is_logged_in(self) -> bool:
+        # If we find logging errors on the page
+        if self._soup.find(string=re.compile(CONNECT_ERROR_REGEX)) is not None:
+            return False
+        # If we find a disconnect button on the page
         return self._soup.find(string=re.compile(DISCONNECT_REGEX)) is not None
