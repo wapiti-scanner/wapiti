@@ -1,0 +1,100 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Tailwind CSS\", \"versions\": [\"2.2.16\"], \"cpe\": \"\", \"categories\": [\"UI frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-08"
+                ]
+            }
+        ],
+        "Fingerprint web server": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Backbone.js\", \"versions\": [], \"cpe\": \"cpe:2.3:a:backbone_project:backbone:*:*:*:*:*:*:*:*\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Cloudflare\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Tailwind CSS\", \"versions\": [\"2.2.16\"], \"cpe\": \"\", \"categories\": [\"UI frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Underscore.js\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"JavaScript libraries\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"cdnjs\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"jsDelivr\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            }
+        ]
+    }
+}

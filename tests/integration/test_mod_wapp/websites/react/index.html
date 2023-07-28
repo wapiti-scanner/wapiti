@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Boilerplate</title>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <!-- React CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.14.0/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.14.0/umd/react-dom.development.js"></script>
+
+    <!-- Babel CDN (for JSX support) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+    <!-- Your React component -->
+    <script type="text/babel">
+        // Define your React component here
+        class App extends React.Component {
+            render() {
+                return (
+                    <div>
+                        <h1>Welcome to React!</h1>
+                        <p>This is a basic React boilerplate.</p>
+                    </div>
+                );
+            }
+        }
+
+        // Render the component to the DOM
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>

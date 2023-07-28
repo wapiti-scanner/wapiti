@@ -1,0 +1,50 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [
+            {
+                "method": "GET",
+                "path": "/react/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /react/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/react/index.html",
+                "info": "{\"name\": \"Cloudflare\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /react/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/react/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /react/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/react/index.html",
+                "info": "{\"name\": \"cdnjs\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /react/index.html HTTP/1.1",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            }
+        ]
+    }
+}
