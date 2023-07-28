@@ -43,3 +43,7 @@ pip-delete-this-directory.txt
 
 ### Pycharm ###
 .idea/
+
+### integration test system ###
+tests/integrations/.dump_diff_file.txt
+tests/integrations/.test/
