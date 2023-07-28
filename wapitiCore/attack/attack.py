@@ -60,6 +60,7 @@ all_modules = {
     "permanentxss",
     "redirect",
     "shellshock",
+    "spring4shell",
     "sql",
     "ssl",
     "ssrf",
