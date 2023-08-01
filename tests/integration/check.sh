@@ -30,7 +30,7 @@ MODULE_NAME=$(basename "$(realpath ..)")
 declare -a assertions
 mapfile -t assertions < <(find . -name "*.json")
 if [[ ${#assertions[@]} -eq 0 ]]; then 
-    die "Error: No assertions found in module $MODULE_NAME"
+    die "Error: No assertions found in module ${MODULE_NAME}"
 fi
 
 # Since the assertions and the target reports must have the same name 
@@ -47,10 +47,10 @@ done
 # we can safely use indexes to compare
 declare -a outputs
 for target in "${targets_name[@]}"; do
-    outputs+=("$(realpath "../../.test/$MODULE_NAME/$target.out")")
+    outputs+=("$(realpath "../../.test/${MODULE_NAME}/${target}.out")")
 done
 if [[ ${#outputs[@]} -eq 0 ]]; then 
-    die "Error: No targets found in module $MODULE_NAME"
+    die "Error: No targets found in module ${MODULE_NAME}"
 fi
 
 # A special case is if we don't get the same number of reports as they are targets.
@@ -64,13 +64,13 @@ EXIT_CODE=0
 # Comparing outputs and assertions :
 for i in "${!outputs[@]}"; do
     if [[ "$(cat "${outputs[$i]}")" != "$(cat "${assertions[$i]}")" ]]; then
-        echo -e "Assertion $(basename "${assertions[$i]}" .json) of module $MODULE_NAME is ${RED}not respected:${NC}"
+        echo -e "Assertion $(basename "${assertions[$i]}" .json) of module ${MODULE_NAME} is ${RED}not respected:${NC}"
         echo "< : assertion"
         echo "> : output"
         diff <(jq --sort-keys . "${outputs[$i]}") <(jq --sort-keys . "${assertions[$i]}") || echo "---End of diff of assertion $(basename "${assertions[$i]}" .json) module ${MODULE_NAME}---"
         EXIT_CODE=1
     else 
-        echo -e "Assertion $(basename "${assertions[$i]}" .json) of module $MODULE_NAME is ${GREEN}respected${NC}"
+        echo -e "Assertion $(basename "${assertions[$i]}" .json) of module ${MODULE_NAME} is ${GREEN}respected${NC}"
     fi 
 done
 
