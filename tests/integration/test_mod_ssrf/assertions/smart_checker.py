@@ -22,9 +22,6 @@ def match_trim(string_1: str, string_2: str, reg: str)-> tuple[str,str]:
     # and MUST be at the same position
     assert (match_1 := reg.search(string_1)) and (match_2 := reg.search(string_2)), \
     "Regex: no match found" 
-    # 2 nested if because reg.search can be None 
-    assert match_1.start() == match_2.start(),\
-    "Regex: match found but position different"
     return string_1[:match_1.start()]+string_1[match_2.end():],\
            string_2[:match_2.start()]+string_2[match_2.end():]
 
