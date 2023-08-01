@@ -13,8 +13,9 @@ test_mod_timesql \
 test_mod_wapp "
 
 # Normalize spaces for shell substitution
-if [[ ! -z "$TESTS" ]]; then
-    export TESTS="$(echo "$TESTS" | xargs) "
+if [[ -n "${TESTS}" ]]; then
+    TESTS="$(echo "$TESTS" | xargs) " 
+    export TESTS
 fi
 
 # exit upon any error
@@ -69,7 +70,7 @@ docker compose  --progress quiet -f docker-compose.setup.yml up --abort-on-conta
 
 declare -a asserters=()
 # If the TESTS env variable is supplied, we will only check the specified tests
-if [[ ! -z "$TESTS" ]]; then
+if [[ -n "${TESTS}" ]]; then
     # Assuming all the tests in the TESTS variable are well written and exist
     mapfile -t asserters < <(echo -e "${TESTS// /\/assertions\/check.sh\\n}" |  head -n -1)
 else
