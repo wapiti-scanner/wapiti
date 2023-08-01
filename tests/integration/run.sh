@@ -39,9 +39,10 @@ if [[ -v args["--help"] ]]; then
            "Entrypoint to run integration tests" \
            "Usage: ./run.sh [options]" \
            "Options:" \
-           "    --help           Display this message and exit"\
-           "    --docker-clean   Kill containers, remove and prune all docker images, volumes, and system, be carefull when using this option"\
-           "    --verbose-build  Print the build messages before running the tests";
+           "    --help              Display this message and exit"\
+           "    --docker-clean      Kill containers, remove and prune all docker images, volumes, and system, be carefull when using this option"\
+           "    --verbose-build     Print the build messages before running the tests"\
+           "    --debug-containers  Attach all containers to the STDOUT";
            exit 0;
 fi
 
@@ -66,8 +67,14 @@ docker compose -f docker-compose.setup.yml build --quiet
 fi
 
 # Start the tests
-docker compose  --progress quiet -f docker-compose.setup.yml up --abort-on-container-exit
-
+if [[ -v args["--debug-containers"] ]]; then
+    docker compose  --progress quiet -f docker-compose.setup.yml up --abort-on-container-exit
+else
+    echo "waiting for healthchecks to start Wapiti"
+    docker compose  --progress quiet -f docker-compose.setup.yml up -d
+    echo "Wapiti container ready, attaching"
+    docker attach "$(docker ps -aq --filter name=wapiti)"
+fi 
 declare -a asserters=()
 # If the TESTS env variable is supplied, we will only check the specified tests
 if [[ -n "${TESTS}" ]]; then
