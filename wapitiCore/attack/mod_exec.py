@@ -165,6 +165,9 @@ class ModuleExec(Attack):
             except RequestError:
                 self.network_errors += 1
             else:
+                if payload_info.type == "time":
+                    continue
+
                 vuln_info = None
 
                 # No timeout raised, check for patterns in response
