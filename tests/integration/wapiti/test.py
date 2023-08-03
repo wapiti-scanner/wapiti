@@ -66,7 +66,7 @@ for key_test, content_test in iter_tests:
             requests_counter[target['name']] += 1
             try:
                 requests.get(f"{target['name']}", verify=False)
-                json_output_path = f"/home/{key_test}/{re.sub('/','_',re.sub(r'^https?://', '', target['name']))}.out"
+                json_output_path = f"/home/{key_test}/{re.sub(r'[/:]','_',re.sub(r'^https?://', '', target['name']))}.out"
 
                 # We define supplementary arguments globally and for each target:
                 more_args = target.get('supplementary_argument', '') + \
