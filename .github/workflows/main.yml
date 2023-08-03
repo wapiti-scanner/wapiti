@@ -80,3 +80,10 @@ jobs:
         with:
           name: diff-reports-file
           path: tests/integration/.dump_diff_file.txt
+
+      - name: Archive production artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: produced-reports
+          path: tests/integration/.test/*
