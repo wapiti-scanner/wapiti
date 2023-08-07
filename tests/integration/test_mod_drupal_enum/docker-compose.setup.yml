@@ -1,0 +1,108 @@
+version: '3.9'
+
+# Following the DRY philosophy
+x-default_php_setup:
+  &default_php_setup
+  image: php${PHP_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_web:
+  &healthcheck_web
+  healthcheck:
+    test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+x-default_mysql_setup:
+  &default_mysql_setup
+  image: mysql${MYSQL_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_mysql:
+  &healthcheck_mysql
+  healthcheck:
+    test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+services:
+  # First, all the different databases required to run the containers
+  drupal9-db:
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - drupal9_db_data:/var/lib/mysql
+
+  drupal10-db:
+    <<: [ *default_mysql_setup, *healthcheck_mysql ]
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - drupal10_db_data:/var/lib/mysql
+
+  # Drupal containers and their databases for the drupal_enum module
+  drupal9:
+    image: drupal${DRUPAL9_HASH}
+    <<: *healthcheck_web
+    networks:
+      - test-network
+    environment:
+      MYSQL_HOST: drupal9-db
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+    depends_on:
+      drupal9-db:
+        condition: service_healthy
+
+  drupal10:
+    image: drupal${DRUPAL10_HASH}
+    <<: *healthcheck_web
+    networks:
+      - test-network
+    environment:
+      MYSQL_HOST: drupal10-db
+      MYSQL_DATABASE: ${DRUPAL_MYSQL_DB}
+      MYSQL_USER: ${DRUPAL_MYSQL_USER}
+      MYSQL_PASSWORD: ${DRUPAL_MYSQL_PASSWORD}
+    depends_on:
+      drupal10-db:
+        condition: service_healthy
+
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+    depends_on:
+      drupal9:
+        condition: service_healthy
+      drupal10:
+        condition: service_healthy
+
+volumes:
+  drupal9_db_data:
+  drupal10_db_data:
+networks:
+  test-network:

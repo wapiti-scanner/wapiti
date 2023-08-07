@@ -27,13 +27,7 @@ test_mod_timesql \
 test_mod_wapp \
 test_mod_wp_enum \
 test_mod_xss \
-test_mod_xxe "
-
-# Normalize spaces for shell substitution
-if [[ -n "${TESTS}" ]]; then
-    TESTS="$(echo "$TESTS" | xargs) " 
-    export TESTS
-fi
+test_mod_xxe"
 
 # exit upon any error
 set -o errexit
@@ -50,7 +44,7 @@ for arg in "$@"; do
     args[$arg]=1;
 done; 
 
-if [[ -v args["--help"] ]]; then
+if [[ -v args[--help] ]]; then
     # Printing some help
     printf "%s\n" \
            "Entrypoint to run integration tests" \
@@ -63,7 +57,31 @@ if [[ -v args["--help"] ]]; then
            exit 0;
 fi
 
-if [[ -v args["--docker-clean"] ]]; then
+
+
+# Check if TESTS variable is well set, look for all tests otherwise
+if [[ ! -v TESTS ]]; then
+    TESTS=$(find . -maxdepth 1 -type d -name "test_*" -printf "%P " | xargs)
+fi
+readarray -d ' ' -t TESTS_ARRAY <<< "${TESTS}"
+export TESTS
+
+# Building the parameters for docker
+declare -a DOCKER_COMPOSE_CONFIG_ARGUMENT
+declare -a DOCKER_COMPOSE_UP_ARGUMENT
+for test in "${TESTS_ARRAY[@]}"; do
+    # removing unwanted newlines because last item has one (why ??)
+    DOCKER_COMPOSE_CONFIG_ARGUMENT+=("-f ./${test//$'\n'/}/docker-compose.setup.yml")
+done
+if [[ -v args[--debug-containers] ]]; then
+    DOCKER_COMPOSE_UP_ARGUMENT+=("up --abort-on-container-exit")
+else 
+    DOCKER_COMPOSE_UP_ARGUMENT+=("up -d")
+fi
+
+docker compose --env-file .env --project-directory ./ ${DOCKER_COMPOSE_CONFIG_ARGUMENT[*]} config -o .docker-compose.final.yml
+
+if [[ -v args[--docker-clean] ]]; then
     # Cleaning docker
     echo "Cleaning docker..."
     docker kill $(docker ps -q) 2> /dev/null || echo "No containers to kill"
@@ -75,35 +93,33 @@ if [[ -v args["--docker-clean"] ]]; then
 fi
 
 # Fallback to create the test-network in case it doesn't exist
-docker network inspect test-network > /dev/null || docker network create test-network > /dev/null
+docker network inspect test-network &> /dev/null || docker network create test-network &> /dev/null
 
-echo "Building images..."
-if [[ ! -v args["--verbose-build"] ]];then
-# Quietly build all Dockerfiles
-docker compose -f docker-compose.setup.yml build --quiet
+# Shellcheck says to quote the ${DOCKER_COMPOSE_UP_ARGUMENT}
+# ignore that or the stat command invoked by docker will break
+
+# Building containers
+if [[ ! -v args[--verbose-build] ]]; then
+    docker compose -f .docker-compose.final.yml build --quiet
+    DOCKER_COMPOSE_UP_ARGUMENT+=("--quiet-pull")
+else
+    docker compose -f .docker-compose.final.yml build
 fi
 
 # Start the tests
-if [[ -v args["--debug-containers"] ]]; then
-    docker compose  --progress quiet -f docker-compose.setup.yml up --abort-on-container-exit
-else
-    echo "waiting for healthchecks to start Wapiti"
-    docker compose  --progress quiet -f docker-compose.setup.yml up -d
+echo "waiting for healthchecks to start Wapiti"
+docker compose --progress quiet --project-directory ./ -f .docker-compose.final.yml ${DOCKER_COMPOSE_UP_ARGUMENT[*]} 
+
+if [[ ! -v args[--debug-containers] ]]; then
     echo "Wapiti container ready, attaching"
     docker attach "$(docker ps -aq --filter name=wapiti)"
-fi 
-declare -a asserters=()
-# If the TESTS env variable is supplied, we will only check the specified tests
-if [[ -n "${TESTS}" ]]; then
-    # Assuming all the tests in the TESTS variable are well written and exist
-    mapfile -t asserters < <(echo -e "${TESTS// /\/assertions\/check.sh\\n}" |  head -n -1)
-else
-    # Otherwise, we take all the tests
-    mapfile -t asserters < <(find . -mindepth 2 -type l,f -name check.sh)
 fi
+
+rm .docker-compose.final.yml
+
 EXIT_CODE=0
-for path in "${asserters[@]}"; do
-    cd "$(dirname "${path}")" 
+for test in "${TESTS_ARRAY[@]}"; do
+    cd "${test//$'\n'/}/assertions/" 
     bash "check.sh" | tee -a ../../.dump_diff_file.txt
     # Workaround to check if check.sh succeed, may not work on zsh 
     if [[ "${PIPESTATUS[0]}" -eq 1 ]]; then
