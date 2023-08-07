@@ -1,0 +1,94 @@
+version: '3.9'
+
+# Following the DRY philosophy
+x-default_php_setup:
+  &default_php_setup
+  image: php${PHP_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_web:
+  &healthcheck_web
+  healthcheck:
+    test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+x-default_mysql_setup:
+  &default_mysql_setup
+  image: mysql${MYSQL_HASH}
+  networks:
+    - test-network
+
+x-healthcheck_mysql:
+  &healthcheck_mysql
+  healthcheck:
+    test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+services:
+  timesql-db:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.mysql
+      args:
+        - MYSQL_HASH_TAG=${MYSQL_HASH}
+    environment:
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_mysql
+    volumes:
+      - timesql_db_data:/var/lib/mysql
+    networks:
+      - test-network
+
+  # Apache container for the timesql module
+  timesql:
+    build:
+      context: ./test_mod_timesql/
+      dockerfile: Dockerfile.php
+      args:
+        - PHP_HASH_TAG=${PHP_HASH}
+    environment:
+      MYSQL_HOST: timesql-db
+      MYSQL_DATABASE: ${TIMESQL_MYSQL_DATABASE}
+      MYSQL_USER: ${TIMESQL_MYSQL_USER}
+      MYSQL_PASSWORD: ${TIMESQL_MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${TIMESQL_MYSQL_ROOT_PASSWORD}
+    <<: *healthcheck_web
+    depends_on:
+      timesql-db:
+        condition: service_healthy
+    volumes:
+      - ./test_mod_timesql/php/src/:/var/www/html/
+    networks:
+      - test-network
+
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+    depends_on:
+      timesql:
+        condition: service_healthy
+
+volumes:
+  timesql_db_data:
+networks:
+  test-network:
