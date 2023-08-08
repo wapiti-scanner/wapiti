@@ -11,3 +11,6 @@ wapiti-endpoint:
 
 clean:
 	rm -rf dist/ build/ wapiti3.egg-info/
+
+release: clean
+	python -m build --sdist --wheel

@@ -1,3 +1,17 @@
+08/08/2023
+    Wapiti 3.1.8
+    mod_log4shell: add Ubiquiti UniFi to targets
+    mod_crlf: Fix double-encoding errors
+    mod_methods: In-depth check of methods allowed by a web server
+    mod_permanentxss: Fix several bugs
+    mod_xss: Detect if HTML injection is allowed when XSS injection failed
+    mod_wapp: several improvements like CPE versions added to output
+    mod_upload: New module to detect unrestricted file uploads (attempt to upload PHP code)
+    mod_buster: Discovered assets are added to the generated report
+    Core: make module errors more verbose
+    Core: add a Dockerfile to quickly set up your own PHP endpoint
+    CLI: renamed some authentication options
+
 05/03/2023
     Wapiti 3.1.7
     Support for Python 3.11

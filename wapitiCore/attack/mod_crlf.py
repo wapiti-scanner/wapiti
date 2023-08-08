@@ -37,7 +37,7 @@ class ModuleCrlf(Attack):
     MSG_VULN = "CRLF Injection"
     do_get = True
     do_post = True
-    payloads = [PayloadInfo(payload="http://www.google.fr\r\nwapiti: 3.1.7 version")]
+    payloads = [PayloadInfo(payload="http://www.google.fr\r\nwapiti: 3.1.8 version")]
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -48,7 +48,7 @@ class ModuleCrlf(Attack):
 
         for mutated_request, parameter, _payload in self.mutator.mutate(
                 request,
-                str_to_payloadinfo(["http://www.google.fr\r\nwapiti: 3.1.7 version"]),
+                str_to_payloadinfo(["http://www.google.fr\r\nwapiti: 3.1.8 version"]),
         ):
             log_verbose(f"[¨] {mutated_request.url}")
 
