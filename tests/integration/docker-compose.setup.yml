@@ -208,6 +208,19 @@ services:
     volumes:
       - drupal9_db_data:/var/lib/mysql
 
+  # Apache container for the https_redirect module
+  https_redirect:
+    build:
+      context: ./test_mod_https_redirect/
+      dockerfile: Dockerfile
+      args:
+        PHP_HASH_TAG: ${PHP_HASH}
+    volumes:
+      - ./test_mod_https_redirect/php/src:/var/www/html
+    <<: *healthcheck_web
+    networks:
+     - test-network
+
   # Apache container for the log4shell module
   log4shell:
     build:
@@ -467,6 +480,8 @@ services:
       file:
         condition: service_healthy
       http_headers:
+        condition: service_healthy
+      https_redirect:
         condition: service_healthy
       csrf:
         condition: service_healthy
