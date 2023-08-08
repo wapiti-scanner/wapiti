@@ -1,0 +1,75 @@
+version: '3.9'
+# Following the DRY philosophy
+x-default_php_setup:
+  &default_php_setup
+  image: php${PHP_HASH}
+  networks:
+      - test-network
+
+x-healthcheck_web:
+  &healthcheck_web
+  healthcheck:
+      test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+      interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+      timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+      start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+      retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+x-default_mysql_setup:
+  &default_mysql_setup
+  image: mysql${MYSQL_HASH}
+  networks:
+      - test-network
+
+x-healthcheck_mysql:
+  &healthcheck_mysql
+  healthcheck:
+      test: ${DEFAULT_MYSQL_HEALTHCHECK_COMMAND}
+      start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+      interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+      timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+      retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+services:
+  dummy_target:
+    <<: [ *default_php_setup, *healthcheck_web ]
+    depends_on:
+    endpoint:
+        condition: service_healthy
+    volumes:
+        - ./test_dummy_name/target_1/php/src/:/var/www/html/
+
+  built_dummy_target:
+    build:
+        context: ./test_dummy_name/target_2/
+        dockerfile: "./test_dummy_name/target_2/Dockerfile"
+        args:
+            PHP_HASH_TAG: ${PHP_HASH}
+    volumes:
+        - ./test_dummy_name/target_2/php/src/:/var/www/html/
+    <<: *healthcheck_web
+    networks:
+        - test-network
+
+
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+    depends_on:
+      dummy_target: 
+        condition: service_healthy
+      built_dummy_target: 
+        condition: service_healthy
+
+networks:
+  test-network:
