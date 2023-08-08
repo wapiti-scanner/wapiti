@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wapiti3"
-version = "3.1.7"
+version = "3.1.8"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
 requires-python = ">=3.9" 
@@ -78,7 +78,7 @@ test = [
 ]
 
 [tool.setuptools.packages]
-find = {exclude=["tests"]}
+find = {exclude=["tests*"]}
 
 [tool.pytest.ini_options]
 testpaths = [
