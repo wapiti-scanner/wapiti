@@ -1,0 +1,26 @@
+{
+    "test_mod_ssrf": {
+        "modules": "ssrf",
+        "supplementary_argument": "--endpoint http://endpoint/",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Server Side Request Forgery": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "level": "",
+                        "parameter": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://ssrf"
+            }
+        ]
+    }
+}

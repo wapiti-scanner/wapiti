@@ -1,0 +1,26 @@
+{
+    "test_crawler_redirect": {
+        "modules": "",
+        "report_filter_tree": {
+            "infos": {
+                "target": "",
+                "crawled_pages_nbr": 0,
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {}
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://crawler_redirect/"
+            }
+        ]
+    }
+}

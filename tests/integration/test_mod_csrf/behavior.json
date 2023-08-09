@@ -1,0 +1,49 @@
+{
+    "test_mod_csrf": {
+        "modules": "csrf",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Cross Site Request Forgery": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://csrf/protected_form.php"
+            },
+            {
+                "name": "http://csrf/fake_protected_form.php"
+            },
+            {
+                "name": "http://csrf/unprotected_form.php"
+            }
+        ]
+    }
+}

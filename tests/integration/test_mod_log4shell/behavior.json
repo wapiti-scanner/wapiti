@@ -1,0 +1,49 @@
+{
+    "test_mod_log4shell": {
+        "modules": "log4shell",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Log4Shell": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "level": 4,
+                        "http_request": "",
+                        "wstg": [],
+                        "detail": {
+                            "response": {
+                                "status_code": 0,
+                                "body": ""
+                            }
+                        }
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages_nbr": 0,
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": ""
+                        },
+                        "response": {
+                            "status_code": 0
+                        }
+                    }
+                ]
+            }
+        },
+        "supplementary_argument": "--dns-endpoint dns-endpoint",
+        "targets": [
+            {
+                "name": "http://log4shell"
+            },
+            {
+                "name": "https://unifi:8443"
+            }
+        ]
+    }
+}

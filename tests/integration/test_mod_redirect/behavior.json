@@ -1,0 +1,44 @@
+{
+    "test_mod_redirect": {
+        "modules": "redirect",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Open Redirect": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "http_request": "",
+                        "wstg": [],
+                        "detail": {
+                            "response": {
+                                "status_code": 0,
+                                "headers": []
+                            }
+                        }
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages_nbr": 0,
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": ""
+                        },
+                        "response": {}
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://redirect"
+            }
+        ]
+    }
+}

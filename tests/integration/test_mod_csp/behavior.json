@@ -1,0 +1,49 @@
+{
+    "test_mod_csp": {
+        "modules": "csp",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Content Security Policy Configuration": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://csp/csp_insecured.php"
+            },
+            {
+                "name": "http://csp/index.php"
+            },
+            {
+                "name": "http://csp/csp_secured.php"
+            }
+        ]
+    }
+}

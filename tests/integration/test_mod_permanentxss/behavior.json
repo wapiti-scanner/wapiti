@@ -1,0 +1,32 @@
+{
+    "test_mod_permanentxss": {
+        "modules": "xss,permanentxss",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Stored Cross Site Scripting": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "level": 0,
+                        "parameter": "level",
+                        "http_request": "",
+                        "wstg": [],
+                        "detail": {
+                            "response": {
+                                "status_code": 0,
+                                "body": ""
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://permanentxss"
+            }
+        ]
+    }
+}
