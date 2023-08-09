@@ -13,7 +13,7 @@ from misc_functions import purge_irrelevant_data, filter_data, all_keys_dicts, s
 from templates_and_data import DEFAULT_FILTER_TREE, EXISTING_MODULES, TREE_CHECKER
 
 # parsing and checking the json file containing the modules
-with open('/usr/local/bin/modules.json', 'r') as integration_file:
+with open('/usr/local/bin/behavior.json', 'r') as integration_file:
     integration_data = json.load(integration_file)
     wanted_modules = set(chain.from_iterable([test["modules"].split(",")
                                               for _, test in integration_data.items()]))

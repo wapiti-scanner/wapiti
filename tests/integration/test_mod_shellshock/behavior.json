@@ -1,0 +1,42 @@
+{
+    "test_mod_shellshock": {
+        "modules": "shellshock",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Command execution": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://shellshock"
+            }
+        ]
+    }
+}

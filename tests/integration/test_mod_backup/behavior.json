@@ -1,0 +1,26 @@
+{
+    "test_mod_backup": {
+        "modules": "backup",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Backup file": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://backup",
+                "supplementary_argument": "",
+                "erase_global_supplementary": false
+            }
+        ]
+    }
+}

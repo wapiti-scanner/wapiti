@@ -1,0 +1,53 @@
+{
+    "test_mod_https_redirect": {
+        "modules": "https_redirect",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Unencrypted Channels": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "http_request": "",
+                        "wstg": [],
+                        "detail": {
+                            "response": {
+                                "status_code": 0,
+                                "headers": []
+                            }
+                        }
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages_nbr": 0,
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": ""
+                        },
+                        "response": {}
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://https_redirect:80/"
+            },
+            {
+                "name": "http://https_redirect:8080/"
+            },
+            {
+                "name": "https://https_redirect:443/"
+            },
+            {
+                "name": "https://https_redirect:8443/"
+            }
+        ]
+    }
+}

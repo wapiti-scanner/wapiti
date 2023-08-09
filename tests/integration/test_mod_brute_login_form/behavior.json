@@ -1,0 +1,43 @@
+{
+    "test_mod_brute_login_form": {
+        "modules": "brute_login_form",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Weak credentials": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://brute_login_form"
+            }
+        ]
+    }
+}

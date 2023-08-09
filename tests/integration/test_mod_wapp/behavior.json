@@ -1,0 +1,59 @@
+{
+    "test_mod_wapp": {
+        "modules": "wapp",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Fingerprint web application framework": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ],
+                "Fingerprint web server": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            },
+            "additionals": {
+                "Fingerprint web technology": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://wapp/backbonejs/index.html"
+            },
+            {
+                "name": "http://wapp/bootstrap/index.html"
+            },
+            {
+                "name": "http://wapp/jquery/index.html"
+            },
+            {
+                "name": "http://wapp/other_mock/index.wiki.jsp.html"
+            },
+            {
+                "name": "http://wapp/react/index.html"
+            },
+            {
+                "name": "http://wapp/vuejs/index.html"
+            }
+        ]
+    }
+}

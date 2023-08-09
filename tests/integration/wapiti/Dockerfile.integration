@@ -37,7 +37,7 @@ COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/loc
 COPY ./tests/integration/wapiti/test.py /usr/local/bin/test.py
 COPY ./tests/integration/wapiti/templates_and_data.py /usr/local/bin/templates_and_data.py
 COPY ./tests/integration/wapiti/misc_functions.py /usr/local/bin/misc_functions.py
-COPY ./tests/integration/wapiti/modules.json /usr/local/bin/modules.json
+COPY ./tests/integration/wapiti/behavior.json /usr/local/bin/behavior.json
 
 # Required to test external script for crawler auth, 
 # comment the 2 following lines if you removed test_crawler_auth integration tests for any reason

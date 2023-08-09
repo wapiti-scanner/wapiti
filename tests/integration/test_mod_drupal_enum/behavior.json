@@ -1,0 +1,39 @@
+{
+    "test_mod_drupal_enum": {
+        "modules": "drupal_enum",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Fingerprint web application framework": []
+            },
+            "additionals": {
+                "Fingerprint web technology": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "level": 0,
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": [],
+                        "detail": {
+                            "response": {
+                                "status_code": 0,
+                                "headers": []
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://drupal9"
+            },
+            {
+                "name": "http://drupal10"
+            }
+        ]
+    }
+}

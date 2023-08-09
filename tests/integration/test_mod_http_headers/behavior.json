@@ -1,0 +1,49 @@
+{
+    "test_mod_http_headers": {
+        "modules": "http_headers",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "HTTP Secure Headers": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "https://http_headers/valid_sec_http_header.php"
+            },
+            {
+                "name": "https://http_headers/invalid_sec_http_header.php"
+            },
+            {
+                "name": "https://http_headers/no_sec_http_header.php"
+            }
+        ]
+    }
+}

@@ -1,0 +1,39 @@
+{
+    "test_mod_buster": {
+        "modules": "buster",
+        "report_filter_tree": {
+            "additionals": {
+                "Review Webserver Metafiles for Information Leakage": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages_nbr": 0,
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": ""
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": ""
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://buster"
+            }
+        ]
+    }
+}

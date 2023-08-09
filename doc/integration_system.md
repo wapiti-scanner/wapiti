@@ -149,7 +149,7 @@ To create your own scenario:
     ```
 <br/>
 
-5. Modify the [module.json](../tests/integration/wapiti/modules.json) to define the behavior of Wapiti toward the target(s). You can supply:
+5. Add a ``behavior.json`` file at the root of you directory to define the behavior of Wapiti toward the target(s). You can supply:
     - A filter per scenario to avoid bloating the reports and the assertions. If you don't a default one will be supplied (see [this section](#creating-and-understanding-filters) for more informations).
     - Supplementary arguments per scenario or per target (supplementary arguments will sum up unless you specify you want target supplementary argument to override scenario supplementary argument)
     - Modules 
@@ -159,29 +159,31 @@ To create your own scenario:
 
     Here is an example:
     ```JSON
-    "test_dummy_name": {
-        "modules": "dummy",
-        "supplementary_argument": "--auth-method digest",
-        "report_filter_tree": {},
-        "targets": [
-            {
-                "name": "http://dummy_target/endpoint1/index.php"
-            },
-            {
-                "name": "http://dummy_target/endpoint2/index.php",
-                "supplementary_argument": "--endpoint http://endpoint/"
-            },
-            {
-                "name": "http://built_dummy_target",
-                "supplementary_argument": "--auth-method basic",
-                "erase_global_supplementary": true
-            }
-        ]
-    },
+    {
+        "test_dummy_name": {
+            "modules": "dummy",
+            "supplementary_argument": "--auth-method digest",
+            "report_filter_tree": {},
+            "targets": [
+                {
+                    "name": "http://dummy_target/endpoint1/index.php"
+                },
+                {
+                    "name": "http://dummy_target/endpoint2/index.php",
+                    "supplementary_argument": "--endpoint http://endpoint/"
+                },
+                {
+                    "name": "http://built_dummy_target",
+                    "supplementary_argument": "--auth-method basic",
+                    "erase_global_supplementary": true
+                }
+            ]
+        }
+    }
     ```
     <br/>
 
-    As shown, you can also define multiples targets on a single container, which allow you to host mutliple websites on a single server. Wapiti will be launched on each target and thus, will produce as many reports as there is target for a given scenario. 
+    As shown, you can also define multiples targets on a single container, which allow you to host mutliple websites on a single server. Wapiti will be launched on each target and thus, will produce as many reports as there is target for a given scenario. (Changing the scope in the supplementary argument is also doable).
     <br/>
 
     ``supplementary_argument`` and ``report_filter_tree`` can be omitted. All the other keys are mandatory (``modules`` should be left as an empty string when testing without any module)
@@ -190,7 +192,7 @@ To create your own scenario:
     __supplementary_argument__
     As you can see above, the first target will inherit from the scenario supplementary argument, the second one will have both argument and the third one runs with it own supplementary argument
 
-    Some arguments are already supplied by default and can't be changed. Wapiti will always be run with ``--detailed-report --flush-session --verbose 2 -f json``. The outpout path of the reports will also be supplied, supplying it here may break you scenario. 
+    Some arguments are already supplied by default and can't be changed. Wapiti will always be ran with ``--detailed-report --flush-session --verbose 2 -f json``. The outpout path of the reports will also be supplied, supplying it here may break you scenario. 
     <br/>
 
     __report_filter_tree__
@@ -221,6 +223,7 @@ To create your own scenario:
     ```txt
         - test_dummy_name/
             - docker-compose.setup.yml
+            - behavior.json
             - Dockerfile.dummy (if you need one or more)
             - assertions/
                 - check.sh 

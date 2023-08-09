@@ -1,0 +1,42 @@
+{
+    "test_mod_timesql": {
+        "modules": "timesql",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "SQL Injection": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": "",
+                            "headers": []
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://timesql"
+            }
+        ]
+    }
+}

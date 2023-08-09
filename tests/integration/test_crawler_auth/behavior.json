@@ -1,0 +1,50 @@
+{
+    "test_crawler_auth": {
+        "modules": "",
+        "report_filter_tree": {
+            "infos": {
+                "auth": null,
+                "target": "",
+                "crawled_pages": [
+                    {
+                        "request": {
+                            "url": "",
+                            "method": ""
+                        },
+                        "response": {
+                            "status_code": 0,
+                            "body": "",
+                            "headers": []
+                        }
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://crawler_auth/basic/auth_basic.php",
+                "supplementary_argument": "--auth-user admin --auth-password password --auth-method basic"
+            },
+            {
+                "name": "http://crawler_auth/digest/auth_digest.php",
+                "supplementary_argument": "--auth-user admin --auth-password password --auth-method digest"
+            },
+            {
+                "name": "http://crawler_auth/cookie/auth_cookie.php",
+                "supplementary_argument": " --cookie /usr/local/bin/stored_cookie.json"
+            },
+            {
+                "name": "http://crawler_auth/script/auth_script.php",
+                "supplementary_argument": " --form-script /usr/local/bin/external_script_crawler_auth_test.py"
+            },
+            {
+                "name": "http://crawler_auth/data/",
+                "supplementary_argument": "--form-url http://crawler_auth/data/auth_data.php --form-data 'us3rn4mexyz=admin&p455w0rd=password'"
+            },
+            {
+                "name": "http://crawler_auth/url/",
+                "supplementary_argument": " --form-user admin --form-password password  --form-url http://crawler_auth/url/auth_url.php"
+            }
+        ]
+    }
+}

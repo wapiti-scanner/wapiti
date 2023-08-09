@@ -38,6 +38,14 @@ set -o nounset
 # Placing ourselves in the right directory
 cd "$(dirname "$0")"
 
+function cleanup(){
+    rm -f "$(dirname "$0")"/.docker-compose.final.yml
+    rm -f "$(dirname "$0")"/wapiti/behavior.json
+}
+
+# Cleaning temporary files on any signal
+trap cleanup INT EXIT
+
 # Parsing script arguments 
 declare -A args
 for arg in "$@"; do
@@ -79,7 +87,10 @@ else
     DOCKER_COMPOSE_UP_ARGUMENT+=("up -d")
 fi
 
+# Generating global docker compose file 
 docker compose --env-file .env --project-directory ./ ${DOCKER_COMPOSE_CONFIG_ARGUMENT[*]} config -o .docker-compose.final.yml
+# Generating global json file (doesn't matter if all the tests are inside, the $TESTS variable handle what to attack)
+jq -s 'add' ./*/behavior.json > ./wapiti/behavior.json
 
 if [[ -v args[--docker-clean] ]]; then
     # Cleaning docker
@@ -114,8 +125,6 @@ if [[ ! -v args[--debug-containers] ]]; then
     echo "Wapiti container ready, attaching"
     docker attach "$(docker ps -aq --filter name=wapiti)"
 fi
-
-rm .docker-compose.final.yml
 
 EXIT_CODE=0
 for test in "${TESTS_ARRAY[@]}"; do
