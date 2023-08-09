@@ -13,6 +13,7 @@ from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.main.log import log_red, log_orange
 
+
 @lru_cache
 def test_port(address: str, dest_port: int, timeout: float = None) -> bool:
     """Check if dest_port is open on address"""
@@ -24,6 +25,7 @@ def test_port(address: str, dest_port: int, timeout: float = None) -> bool:
             return False
     except (OSError, ValueError):
         return False
+
 
 # This module check whether HTTP requests are redirected to HTTPS or not
 class ModuleHttpsRedirect(Attack):
@@ -79,12 +81,12 @@ class ModuleHttpsRedirect(Attack):
         if http_response.is_success:
             log_red(f"URL {http_response.url} does not redirect to https")
             await self.add_vuln_low(
-                    category=NAME,
-                    request=http_request,
-                    info=self.MSG_VULN_NO_REDIRECT,
-                    wstg=WSTG_CODE,
-                    response=http_response
-                )
+                category=NAME,
+                request=http_request,
+                info=self.MSG_VULN_NO_REDIRECT,
+                wstg=WSTG_CODE,
+                response=http_response
+            )
 
         elif http_response.is_redirect:
             # add vuln if redirected to url without https
