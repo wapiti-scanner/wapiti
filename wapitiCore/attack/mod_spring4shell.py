@@ -12,7 +12,7 @@ class ModuleSpring4Shell(Attack):
     """
     Detect the Spring4Shell vulnerability
     """
-
+    name = "spring4shell"
 
     async def _default_request(self, request_url: str, method: str) -> int:
         request = Request(
@@ -21,7 +21,6 @@ class ModuleSpring4Shell(Attack):
         )
         response = await self.crawler.async_send(request, follow_redirects=False)
         return response.status
-
 
     async def _attack_spring4shell_url(self, request: Request):
         payload_unique_id = uuid.uuid4()
@@ -35,10 +34,8 @@ class ModuleSpring4Shell(Attack):
             self.network_errors += 1
             return
 
-
     async def attack(self, request: Request, response: Optional[Response] = None):
         await self._attack_spring4shell_url(request)
-
 
     async def _check_spring4shell(self, method: str, request: Request, payload: str) -> bool:
         key_payload, value_payload = payload.split("=")
@@ -67,7 +64,6 @@ class ModuleSpring4Shell(Attack):
             return True
         return False
 
-
     async def _vulnerable(self, request: Request):
         await self.add_vuln_critical(
             category=NAME,
@@ -78,13 +74,9 @@ class ModuleSpring4Shell(Attack):
         )
 
         log_red("---")
-        log_red(
-            ("URL {0} seems vulnerable to Spring4Shell attack"),
-            request.url
-        )
+        log_red("URL {0} seems vulnerable to Spring4Shell attack", request.url)
         log_red(request.http_repr())
         log_red("---")
-
 
     @staticmethod
     def _generate_payload(unique_id: uuid.UUID) -> str:

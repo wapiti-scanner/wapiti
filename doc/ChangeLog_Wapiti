@@ -1,6 +1,7 @@
-08/08/2023
+09/08/2023
     Wapiti 3.1.8
-    mod_log4shell: add Ubiquiti UniFi to targets
+    mod_log4shell: Add Ubiquiti UniFi to targets
+    mod_spring4shell: New Module to detect the Spring4Shell vulnerability
     mod_crlf: Fix double-encoding errors
     mod_methods: In-depth check of methods allowed by a web server
     mod_permanentxss: Fix several bugs
