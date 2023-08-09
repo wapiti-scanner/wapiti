@@ -1,13 +1,14 @@
 09/08/2023
     Wapiti 3.1.8
-    mod_log4shell: Add Ubiquiti UniFi to targets
     mod_spring4shell: New Module to detect the Spring4Shell vulnerability
+    mod_upload: New module to detect unrestricted file uploads (attempt to upload PHP code)
+    mod_https_redirect: New module to detect lack of redirect-to-https behavior
     mod_crlf: Fix double-encoding errors
     mod_methods: In-depth check of methods allowed by a web server
     mod_permanentxss: Fix several bugs
     mod_xss: Detect if HTML injection is allowed when XSS injection failed
     mod_wapp: several improvements like CPE versions added to output
-    mod_upload: New module to detect unrestricted file uploads (attempt to upload PHP code)
+    mod_log4shell: Add Ubiquiti UniFi to targets
     mod_buster: Discovered assets are added to the generated report
     Core: make module errors more verbose
     Core: add a Dockerfile to quickly set up your own PHP endpoint
