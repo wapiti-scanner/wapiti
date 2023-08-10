@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urlunparse
 from typing import Iterator, List, Optional, Dict, Set, Tuple
 
 from bs4 import BeautifulSoup
-from bs4.element import Comment, Doctype
+from bs4.element import Comment, Doctype, Tag
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
 
@@ -26,6 +26,78 @@ def not_empty(original_function):
             if value:
                 yield value
     return wrapped
+
+
+AUTOFILL_VALUES = {
+    "checkbox": "default",
+    "color": "#bada55",
+    "date": "2023-03-03",
+    "datetime": "2023-03-03T20:35:34.32",
+    "datetime-local": "2023-03-03T22:41",
+    "email": "wapiti2021@mailinator.com",
+    "file": ("pix.gif", b"GIF89a", "image/gif"),
+    "hidden": "default",
+    "month": "2023-03",
+    "number": "1337",
+    "password": "Letm3in_",  # 8 characters with uppercase, digit and special char for common rules
+    "radio": "on",
+    "range": "37",
+    "search": "default",
+    "submit": "submit",
+    "tel": "0606060606",
+    "text": "default",
+    "time": "13:37",
+    "url": "https://wapiti-scanner.github.io/",
+    "username": "alice",
+    "week": "2019-W24"
+}
+
+# Field types that we should always fill
+NON_EMPTY_FIELD_TYPES = (
+    "color",  # browsers send them with default value #000000 no matter what
+    "range",  # browsers send a value in the middle of the range
+    # bellow we consider that if they are present they are meant to be filled
+    "date", "datetime", "datetime-local", "month", "time", "week",
+)
+
+
+def is_required(input_field: Tag) -> bool:
+    """Returns True if the given input field should be filled"""
+    if "required" in input_field.attrs or "checked" in input_field.attrs:
+        return True
+
+    if input_field.attrs.get("type", "text").lower() in NON_EMPTY_FIELD_TYPES:
+        return True
+
+    return False
+
+
+def get_input_field_value(input_field: Tag, autofill: bool = False) -> str:
+    """Returns the value that we should the field with"""
+    # When attribute "type" is missing, it is considered as text type
+    input_type = input_field.attrs.get("type", "text").lower()
+    # Function should always be used with a field that has a name
+    input_name = input_field["name"].lower()
+    autofill |= is_required(input_field)
+    fallback = input_field.get("value", "")
+
+    # If there is a non-empty default value, use it
+    # If it is empty, it is OK if autofill is not set
+    if fallback or not autofill:
+        return fallback
+
+    # Otherwise use our hardcoded values
+    if input_type == "text":
+        if "mail" in input_name:
+            # If an input text match name "mail" then put a valid email address in it
+            return AUTOFILL_VALUES["email"]
+        if "pass" in input_name or "pwd" in input_name:
+            # Looks like a text field but waiting for a password
+            return AUTOFILL_VALUES["password"]
+        if "user" in input_name or "login" in input_name:
+            return AUTOFILL_VALUES["username"]
+
+    return AUTOFILL_VALUES[input_type]
 
 
 class Html:
@@ -385,30 +457,6 @@ class Html:
             file_params = []
             form_actions = set()
 
-            defaults = {
-                "checkbox": "default",
-                "color": "#bada55",
-                "date": "2019-03-03",
-                "datetime": "2019-03-03T20:35:34.32",
-                "datetime-local": "2019-03-03T22:41",
-                "email": "wapiti2021@mailinator.com",
-                "file": ("pix.gif", b"GIF89a", "image/gif"),
-                "hidden": "default",
-                "month": "2019-03",
-                "number": "1337",
-                "password": "Letm3in_",  # 8 characters with uppercase, digit and special char for common rules
-                "radio": "beton",  # priv8 j0k3
-                "range": "37",
-                "search": "default",
-                "submit": "submit",
-                "tel": "0606060606",
-                "text": "default",
-                "time": "13:37",
-                "url": "https://wapiti-scanner.github.io/",
-                "username": "alice",
-                "week": "2019-W24"
-            }
-
             radio_inputs = {}
             for input_field in form.find_all("input", attrs={"name": True}):
                 input_type = input_field.attrs.get("type", "text").lower()
@@ -424,20 +472,7 @@ class Html:
                     else:
                         post_params.append([input_field["name"] + ".x", "1"])
                         post_params.append([input_field["name"] + ".y", "1"])
-                elif input_type in defaults:
-                    if input_type == "text" and "mail" in input_field["name"] and autofill:
-                        # If an input text match name "mail" then put a valid email address in it
-                        input_value = defaults["email"]
-                    elif input_type == "text" and "pass" in input_field["name"] or \
-                            "pwd" in input_field["name"] and autofill:
-                        # Looks like a text field but waiting for a password
-                        input_value = defaults["password"]
-                    elif input_type == "text" and "user" in input_field["name"] or \
-                            "login" in input_field["name"] and autofill:
-                        input_value = defaults["username"]
-                    else:
-                        input_value = input_field.get("value", defaults[input_type] if autofill else "")
-
+                elif input_type in AUTOFILL_VALUES:
                     if input_type == "file":
                         # With file inputs the content is only sent if the method is POST and enctype multipart
                         # otherwise only the file name is sent.
@@ -446,17 +481,19 @@ class Html:
                             get_params.append([input_field["name"], "pix.gif"])
                         else:
                             if "multipart" in enctype:
-                                file_params.append([input_field["name"], defaults["file"]])
+                                file_params.append([input_field["name"], AUTOFILL_VALUES["file"]])
                             else:
                                 post_params.append([input_field["name"], "pix.gif"])
-                    elif input_type == "radio":
-                        # Do not put in forms now, do it at the end
-                        radio_inputs[input_field["name"]] = input_value
                     else:
-                        if method == "GET":
-                            get_params.append([input_field["name"], input_value])
+                        input_value = get_input_field_value(input_field, autofill)
+                        if input_type == "radio":
+                            # Do not put in forms now, do it at the end
+                            radio_inputs[input_field["name"]] = input_value
                         else:
-                            post_params.append([input_field["name"], input_value])
+                            if method == "GET":
+                                get_params.append([input_field["name"], input_value])
+                            else:
+                                post_params.append([input_field["name"], input_value])
 
             # A formaction doesn't need a name
             for input_field in form.find_all("input", attrs={"formaction": True}):
