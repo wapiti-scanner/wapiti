@@ -7,6 +7,7 @@ Table of content
     - [Integration test creation guide](#integration-test-creation-guide)
     - [Creating and understanding filters](#creating-and-understanding-filters)
     - [Miscellaneous and notes](#miscellaneous-and-notes)
+- [The automated way](#the-automated-way)
 ----
 
 ## Working principle
@@ -339,3 +340,21 @@ The produced output will be:
 - If you want to mutualize a service between some integration tests, make sure to create a specific folder next to the ``test_*`` ones (like ``endpoint``, ``dns-endpoint``, etc.) to store its config files and make it agnostic from any tests 
 - Sometimes, when running the CI locally on limited hardware, some containers may appears as unhealthy and stop [run.sh](../tests/integration/run.sh). This is mostly due to the databases not ready for some services. Don't hesitate to increase ``DEFAULT_HEALTHCHECKS_RETRIES`` in the [.env](../tests/integration/.env) file. 
 - When creating a ``docker-compose.setup.yml`` file, write paths as if you were in the parent directory since the project path is in [the integration folder](../tests/integration/)
+- If for any reason you want to completely delete a test (not disabling it), you can simply remove its associated folder.  
+
+## The automated way
+
+To avoid repetitive task, the script [init_test.sh](../tests/integration/init_test.sh) has been created. It setups default integration tests by:
+
+- Creating a folder with the supplied name
+- Creating the assertion folder
+- making a symlink to the default [check.sh](../tests/integration/check.sh)
+- Creating a default ``behavior.json`` with the supplied name
+- Creating a default [docker-compose.setup.yml](docker-compose.dummy.yml)
+
+So you can focus on things that will vary among all those files. You may need to remove some generated content inside those files (even remove the symlink) to adjust the test to your needs.
+This script is able to create as many integration tests as you supply them by argument:
+```Bash
+./init_test.sh test_dummy_1 test_dummy_2 test_dummy_3
+```
+It will also check if your tests start by the prefix ``test_`` and if you are using the name of a test that already exists
