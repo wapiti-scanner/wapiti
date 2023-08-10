@@ -1,18 +1,10 @@
-import respx
-import httpx
-
-from wapitiCore.net.crawler import Response
 from wapitiCore.parsers.html_parser import Html
 
 
-@respx.mock
 def test_forms():
     with open("tests/data/forms.html") as data_body:
         url = "http://perdu.com/"
-        respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
-
-        resp = httpx.get(url, follow_redirects=False)
-        page = Html(Response(resp).content, url)
+        page = Html(data_body.read(), url)
         count = 0
         form_action = False
 
@@ -42,19 +34,19 @@ def test_forms():
                     "vehicle1": "car",
                     "vehicle2": "boat",
                     "color": "#bada55",
-                    "date": "2019-03-03",
-                    "datetime": "2019-03-03T20:35:34.32",
-                    "datetime-local": "2019-03-03T22:41",
+                    "date": "2023-03-03",
+                    "datetime": "2023-03-03T20:35:34.32",
+                    "datetime-local": "2023-03-03T22:41",
                     "email": "wapiti2021@mailinator.com",
                     "file": "pix.gif",
                     "gender": "other",  # taking the last one
                     "hidden": "default",
                     "image.x": "1",
                     "image.y": "1",
-                    "month": "2019-03",
+                    "month": "2023-03",
                     "number": "1337",
                     "password": "Letm3in_",
-                    "radio": "beton",
+                    "radio": "on",
                     "range": "37",
                     "search": "default",
                     "submit": "submit",
@@ -84,7 +76,6 @@ def test_forms():
         assert form_action
 
 
-@respx.mock
 def test_email_input():
     url = "http://perdu.com/"
     body = """<html>
@@ -95,17 +86,12 @@ def test_email_input():
     </body>
     </html>
     """
-
-    respx.get(url).mock(return_value=httpx.Response(200, text=body))
-
-    resp = httpx.get(url, follow_redirects=False)
-    page = Html(Response(resp).content, url)
+    page = Html(body, url)
 
     form = next(page.iter_forms())
     assert "@" in form.post_params[0][1]
 
 
-@respx.mock
 def test_button_without_value():
     url = "https://crazyandthebrains.net/"
     body = """<html>
@@ -116,10 +102,65 @@ def test_button_without_value():
         </form>
     """
 
-    respx.get(url).mock(return_value=httpx.Response(200, text=body))
-
-    resp = httpx.get(url, follow_redirects=False)
-    page = Html(Response(resp).content, url)
+    page = Html(body, url)
 
     form = next(page.iter_forms())
     assert form.post_params == [["text", "default"], ["btn", ""]]
+
+
+def test_wordpress_comment_form():
+    # Given a form with either non-editable (hidden) fields but default values
+    # or fields we autofill
+    # or fields with a required attribute
+    url = "http://wordpress.com/"
+    body = """
+    <form action="http://wordpress.com/wp-comments-post.php" method="post" id="commentform" novalidate>
+      <textarea id="comment" name="comment" required></textarea>
+      <input id="author" name="author" type="text" value="" autocomplete="name" required />
+      <input id="email" name="email" type="email" value="" autocomplete="email" required />
+      <input id="url" name="url" type="url" value="" autocomplete="url" />
+      <input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes" />
+      <input name="submit" type="submit" id="submit"  value="Post Comment" />
+      <input type='hidden' name='comment_post_ID' value='4' id='comment_post_ID' />
+      <input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+    </form>
+    """
+
+    # When we extract forms
+    page = Html(body, url)
+    form = next(page.iter_forms())
+    # We expect all fields to have values (no empty string)
+    assert all(value for _, value in form.post_params)
+
+
+def test_missing_required():
+    # Given a form with fields having default values
+    # and some with empty string as default without the "required" attribute
+    url = "http://wordpress.com/"
+    body = """
+    <form action="http://wordpress.com/wp-comments-post.php" method="post" id="commentform" novalidate>
+      <textarea id="comment" name="comment"></textarea>
+      <input id="author" name="author" type="text" value="" autocomplete="name" />
+      <input id="email" name="email" type="email" value="" autocomplete="email" />
+      <input id="url" name="url" type="url" value="" autocomplete="url" />
+      <input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes" />
+      <input name="submit" type="submit" id="submit"  value="Post Comment" />
+      <input type='hidden' name='comment_post_ID' value='4' id='comment_post_ID' />
+      <input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+    </form>
+    """
+
+    # When we extract forms with autofill to False
+    page = Html(body, url)
+    form = next(page.iter_forms(autofill=False))
+    # We expect the fields to not be filled
+    assert [
+        ['author', ''],
+        ['email', ''],
+        ['url', ''],
+        ['wp-comment-cookies-consent', 'yes'],
+        ['submit', 'Post Comment'],
+        ['comment_post_ID', '4'],
+        ['comment_parent', '0'],
+        ['comment', '']
+    ] == form.post_params
