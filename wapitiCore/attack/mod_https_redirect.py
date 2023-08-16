@@ -27,6 +27,19 @@ def test_port(address: str, dest_port: int, timeout: float = None) -> bool:
         return False
 
 
+async def check_http_redirection(self, request: Request):
+    try:
+        response: Response = await self.crawler.async_send(request, follow_redirects=False)
+    except RequestError:
+        self.network_errors += 1
+        return
+    if response.status in (301, 302):
+        if response.headers.get('Location', '').startswith('https://'):
+            return True
+
+    return False
+
+
 # This module check whether HTTP requests are redirected to HTTPS or not
 class ModuleHttpsRedirect(Attack):
     """Check for HTTPS redirections."""
@@ -50,12 +63,20 @@ class ModuleHttpsRedirect(Attack):
         url = urlparse(request.url)
 
         is_http = False
+        http_request = Request(
+            request.url, request.method, request.get_params,
+            request.post_params, request.file_params, request.encoding,
+            request.enctype, request.referer, request.link_depth
+        )
         if url.scheme == "http":
-            log_red(f"HTTP URL provided : {request.url}")
-            is_http = True
-            # if http url is provided we will stop the module after the first request
-            # this will allow to add only one vuln for http target
-            self.finished = True
+            if not await check_http_redirection(self, http_request):
+                log_red(f"The HTTP URL provided : {request.url} does not redirect to HTTPS")
+                is_http = True
+                # if http url is provided we will stop the module after the first request
+                # this will allow to add only one vuln for http target
+                self.finished = True
+
+
 
         if url.port:
             log_orange(f"Specific port provided : {url.port}")
