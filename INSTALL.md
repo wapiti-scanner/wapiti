@@ -42,7 +42,13 @@ Now let's activate it (make it our current working environment) :
 Now you are in the virtual environment you can install Wapiti and its dependencies :
 
 ```sh
-python3 setup.py install
+make install
+```
+
+or
+
+```sh
+pip install .
 ```
 
 To leave the virtual environment just call the following command :
@@ -56,7 +62,13 @@ Remember that you will need to reactivate the environment each time you want to 
 You can install wapiti the regular way :
 
 ```sh
-python setup.py install
+make install
+```
+
+or
+
+```sh
+pip install .
 ```
 
 # Installing Wapiti using pip
@@ -75,7 +87,7 @@ You can pull latest dev version from Git :
 git clone git@github.com:wapiti-scanner/wapiti.git
 ```
 
-Then use setup.py for installation. Remember that dev version may contain unknown bugs.
+Then use [make or pip](#installing-wapiti-without-virtual-environment) for installation. Remember that dev version may contain unknown bugs.
 
 # Installation tutorials
 
