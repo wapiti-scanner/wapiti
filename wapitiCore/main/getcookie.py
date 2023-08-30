@@ -168,7 +168,6 @@ async def getcookie_main(arguments):
         dest="headless",
         default="no",
         help="Use a Firefox headless crawler for browsing (slower)",
-        metavar="PORT",
         choices=["no", "hidden", "visible"]
     )
 
