@@ -388,7 +388,7 @@ def parse_args():
 
     parser.add_argument(
         "-t", "--timeout",
-        type=float, default=6.0,
+        type=float, default=10.0,
         help="Set timeout for requests",
         metavar="SECONDS"
     )
