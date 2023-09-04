@@ -35,7 +35,9 @@ async def test_timesql_detection():
     request.path_id = 42
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 1, "level": 1}
+        # Time out is set to 0 because in blind_sql.php we have a sleep(2) call
+        # and in the module we have ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
+        options = {"timeout": 0, "level": 1}
 
         module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
@@ -46,7 +48,7 @@ async def test_timesql_detection():
         assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [
             ['foo', 'bar'],
-            ['vuln1', 'sleep(2)#1']
+            ['vuln1', 'sleep(1)#1']
         ]
 
 
@@ -57,7 +59,9 @@ async def test_timesql_false_positive():
     request.path_id = 42
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 1, "level": 1}
+        # Time out is set to 0 because in blind_sql.php we have a sleep(2) call
+        # and in the module we have ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
+        options = {"timeout": 0, "level": 1}
 
         module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
