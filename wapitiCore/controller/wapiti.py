@@ -629,7 +629,7 @@ class Wapiti:
                 logging.error("Error sending crash report")
             os.unlink(traceback_file)
 
-    def set_timeout(self, timeout: float = 6.0):
+    def set_timeout(self, timeout: float = 10.0):
         """Set the timeout for the time waiting for a HTTP response"""
         self.crawler_configuration.timeout = timeout
 
