@@ -106,6 +106,9 @@ Supported attacks
 + Enumeration of Wordpress and Drupal modules
 + Subdomain takeovers detection
 + Log4Shell (CVE-2021-44228) detection
++ Spring4Shell (CVE-2020-5398) detection
++ Check https redirections
++ Check for file upload vulnerabilities
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -130,17 +133,20 @@ The aforementioned attacks are tied to the following module names :
 + htaccess (Misconfigured htaccess restrictions)
 + htp (Identify web technologies used the HashThePlanet database)
 + http_header (Check HTTP security headers)
++ https_redirect (Check https redirections)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
 + methods (Look for uncommon available HTTP methods like PUT)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
 + redirect (Open Redirects)
 + shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
++ spring4shell (Detects websites vulnerable to CVE-2020-5398)
 + sql (Error-based and boolean-based SQL injection detection)
 + ssl (Evaluate the security of SSL/TLS certificate configuration, requires `SSLyze <https://github.com/nabla-c0d3/sslyze>`__)
 + ssrf (Server Side Request Forgery)
 + takeover (Subdomain takeover)
 + timesql (SQL injection vulnerabilities detected with time-based methodology)
++ upload (File upload vulnerabilities)
 + wapp (Not an attack module, retrieves web technologies with versions and categories in use on the target)
 + wp_enum (Enumerate plugins and themes on a Wordpress website)
 + xss (XSS injection module)
