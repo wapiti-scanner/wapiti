@@ -73,7 +73,7 @@ jobs:
 
       - name: Run Docker Compose
         run: bash ${GITHUB_WORKSPACE}/tests/integration/run.sh
-      
+
       - name: Archive production artifact
         if: always()
         uses: actions/upload-artifact@v3
