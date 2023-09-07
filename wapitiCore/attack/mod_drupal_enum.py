@@ -1,10 +1,9 @@
 import asyncio
-import json
 import hashlib
+import json
 import logging
 from os.path import join as path_join
 from typing import Tuple, Optional
-
 from httpx import RequestError
 
 from wapitiCore.net import Request
@@ -17,6 +16,19 @@ from wapitiCore.main.log import log_blue
 MSG_TECHNO_VERSIONED = "{0} {1} detected"
 MSG_NO_DRUPAL = "No Drupal Detected"
 
+
+def calculate_git_hash(file_content):
+
+    # Calculate the size of the file
+    file_size = len(file_content)
+
+    # Create the string to hash to match the git hash function
+    # This is a demo of how does git hash its blobs : https://alblue.bandlem.com/2011/08/git-tip-of-week-objects.html
+    to_hash = b"blob " + str(file_size).encode() + b"\0" + file_content
+
+    git_hash = hashlib.sha1(to_hash).hexdigest()
+
+    return git_hash
 
 class ModuleDrupalEnum(Attack):
     """Detect Drupal version."""
@@ -36,7 +48,10 @@ class ModuleDrupalEnum(Attack):
         if response.is_error:
             return "", ""
 
-        return hashlib.sha256(response.content.encode()).hexdigest(), path
+        file_content = response.bytes
+        git_hash = calculate_git_hash(file_content)
+
+        return git_hash, path
 
     async def detect_version(self, root_url):
         versions = {}
