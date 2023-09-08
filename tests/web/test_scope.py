@@ -38,7 +38,11 @@ async def test_scopes():
         "http://perdu.com/subdir/page.html?k=v",
         "http://perdu.com/subdir/page.html",
         "http://lost.com/lost.html",
-        "http://external.tld/external.html"
+        "http://external.tld/external.html",
+        "https://subdomain.perdu.com/",
+        "http://subdomain.perdu.com/",
+        "http://subdomain.perdu.com/page.html",
+        "http://subdomain.perdu.com/subdir/subdirpage.html",
     }
 
     scope = Scope(Request("http://perdu.com/subdir/"), "folder")
@@ -69,7 +73,19 @@ async def test_scopes():
         "http://sub.perdu.com/page.html",
         "https://perdu.com/secure.html",
         "http://perdu.com/subdir/page.html?k=v",
-        "http://perdu.com/subdir/page.html"
+        "http://perdu.com/subdir/page.html",
+        "http://subdomain.perdu.com/",
+        "http://subdomain.perdu.com/page.html",
+        "http://subdomain.perdu.com/subdir/subdirpage.html",
+        "https://subdomain.perdu.com/"
+    }
+
+    scope = Scope(Request("http://subdomain.perdu.com/subdir/page.html?k=v"), "subdomain")
+    assert scope.filter(links) == {
+        "http://subdomain.perdu.com/",
+        "http://subdomain.perdu.com/page.html",
+        "http://subdomain.perdu.com/subdir/subdirpage.html",
+        "https://subdomain.perdu.com/"
     }
 
     scope = Scope(Request("http://perdu.com/subdir/page.html?k=v"), "punk")
