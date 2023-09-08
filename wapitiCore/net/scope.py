@@ -46,29 +46,37 @@ class Scope:
         return self._scope
 
     def check(self, resource: Union[Request, str]) -> bool:
+
+        checked = None
+
         if not resource:
             return False
-
-        if self._scope == "punk":
-            # Life is short
-            return True
 
         if isinstance(resource, Request):
             url = resource.url
         else:
             url = resource
 
-        if self._scope == "domain":
-            return is_same_domain(url, self._base_request)
+        if self._scope == "punk":
+            # Life is short
+            checked = True
 
-        if self._scope == "folder":
-            return url.startswith(self._base_request.path)
+        elif self._scope == "domain":
+            checked = is_same_domain(url, self._base_request)
 
-        if self._scope == "page":
-            return url.split("?")[0] == self._base_request.path
+        elif self._scope == "subdomain":
+            checked = urlparse(url).hostname == self._base_request.hostname
+
+        elif self._scope == "folder":
+            checked = url.startswith(self._base_request.path)
+
+        elif self._scope == "page":
+            checked = url.split("?")[0] == self._base_request.path
 
         # URL
-        return url == self._base_request.url
+        if checked is None:
+            checked = url == self._base_request.url
+        return checked
 
     def filter(self, resources: Iterable[Union[Request, str]]) -> Set[Union[Request, str]]:
         return {resource for resource in resources if self.check(resource)}
