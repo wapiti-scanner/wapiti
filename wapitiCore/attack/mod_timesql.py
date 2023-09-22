@@ -17,8 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from math import ceil
-from typing import Optional, Iterator
 from os.path import join as path_join
+from time import monotonic
+from typing import Optional, Iterator
 
 from httpx import ReadTimeout, RequestError
 
@@ -56,12 +57,19 @@ class ModuleTimesql(Attack):
         yield from parser
 
     async def attack(self, request: Request, response: Optional[Response] = None):
+        self.start = monotonic()
         page = request.path
         saw_internal_error = False
         current_parameter = None
         vulnerable_parameter = False
 
         for mutated_request, parameter, _payload in self.mutator.mutate(request, self.get_payloads):
+            if monotonic() - self.start > self.max_attack_time >= 1:
+                logging.info(
+                    f"Skipping: attack time reached for module {self.name}."
+                )
+                break
+
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
