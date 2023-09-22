@@ -242,6 +242,7 @@ async def wapiti_main():
             "tasks": args.tasks,
             "headless": wap.headless_mode,
             "excluded_urls": wap.excluded_urls,
+            "max_attack_time" : args.max_attack_time
         }
 
         if "dns_endpoint" in args:

@@ -1,7 +1,6 @@
 import asyncio
 import hashlib
 import json
-import logging
 from os.path import join as path_join
 from typing import Tuple, Optional
 from httpx import RequestError
@@ -11,7 +10,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
-from wapitiCore.main.log import log_blue
+from wapitiCore.main.log import log_blue, logging
 
 MSG_TECHNO_VERSIONED = "{0} {1} detected"
 MSG_NO_DRUPAL = "No Drupal Detected"

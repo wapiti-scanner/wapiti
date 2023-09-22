@@ -226,6 +226,7 @@ class Attack:
         self._stop_event = stop_event
         self.options = attack_options
         self.crawler_configuration = crawler_configuration
+        self.start = 0
 
         # List of attack urls already launched in the current module
         self.attacked_get = []
@@ -285,6 +286,10 @@ class Attack:
     @property
     def external_endpoint(self):
         return self.options.get("external_endpoint", "http://wapiti3.ovh")
+
+    @property
+    def max_attack_time(self):
+        return self.options.get("max_attack_time", 0)
 
     @property
     def proto_endpoint(self):
