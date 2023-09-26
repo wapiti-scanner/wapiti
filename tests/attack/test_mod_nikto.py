@@ -57,6 +57,82 @@ async def test_whole_stuff():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_max_attack_time_5():
+    # Test attacking with max_attack_time limitation
+    respx.route(host="raw.githubusercontent.com").pass_through()
+
+    respx.get("http://perdu.com/README.md").mock(
+        return_value=httpx.Response(200, text="root:0:0:")
+    )
+
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(404, text="Not found")
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    persister.get_links.return_value = chain([request])
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 1, "max_attack_time": 5}
+
+        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
+        module.do_get = True
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_max_attack_time_10():
+    # Test attacking all kind of parameter without crashing
+    respx.route(host="raw.githubusercontent.com").pass_through()
+
+    respx.get("http://perdu.com/README.md").mock(
+        return_value=httpx.Response(200, text="root:0:0:")
+    )
+
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(404, text="Not found")
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    persister.get_links.return_value = chain([request])
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 1, "max_attack_time": 10}
+
+        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
+        module.do_get = True
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
+        assert persister.add_payload.call_args_list[0][1]["request"].url == (
+            "http://perdu.com/README.md"
+        )
+        assert (
+                   "Readme Found"
+               ) in persister.add_payload.call_args_list[0][1]["info"]
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_false_positives():
     respx.route(host="raw.githubusercontent.com").pass_through()
 
