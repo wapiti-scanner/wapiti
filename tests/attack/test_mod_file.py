@@ -67,6 +67,45 @@ async def test_loknop_lfi_to_rce():
 
 
 @pytest.mark.asyncio
+async def test_max_attack_time_5():
+    # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65085/inclusion.php?" + "yolo=nawak&" * 30 + "f=toto")
+    request.path_id = 42
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "max_attack_time": 5}
+
+        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
+
+
+@pytest.mark.asyncio
+async def test_max_attack_time_10():
+    # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65085/inclusion.php?" + "yolo=nawak&" * 30 + "f=toto")
+    request.path_id = 42
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "max_attack_time": 10}
+
+        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["module"] == "file"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Path Traversal"
+        assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
+
+
+@pytest.mark.asyncio
 async def test_warning_false_positive():
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65085/inclusion.php?yolo=warn&f=toto")
