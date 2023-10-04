@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension version="3.6" type="file" method="upgrade">
+	<name>files_joomla</name>
+	<author>Joomla! Project</author>
+	<authorEmail>admin@joomla.org</authorEmail>
+	<authorUrl>www.joomla.org</authorUrl>
+	<copyright>(C) 2019 Open Source Matters, Inc.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>3.10.12</version>
+	<creationDate>July 2023</creationDate>
+	<description>FILES_JOOMLA_XML_DESCRIPTION</description>
+
+	<scriptfile>administrator/components/com_admin/script.php</scriptfile>
+
+	<update>
+		<schemas>
+			<schemapath type="mysql">administrator/components/com_admin/sql/updates/mysql</schemapath>
+			<schemapath type="sqlsrv">administrator/components/com_admin/sql/updates/sqlazure</schemapath>
+			<schemapath type="sqlazure">administrator/components/com_admin/sql/updates/sqlazure</schemapath>
+			<schemapath type="postgresql">administrator/components/com_admin/sql/updates/postgresql</schemapath>
+		</schemas>
+	</update>
+
+	<fileset>
+		<files>
+			<folder>administrator</folder>
+			<folder>bin</folder>
+			<folder>cache</folder>
+			<folder>cli</folder>
+			<folder>components</folder>
+			<folder>images</folder>
+			<folder>includes</folder>
+			<folder>language</folder>
+			<folder>layouts</folder>
+			<folder>libraries</folder>
+			<folder>media</folder>
+			<folder>modules</folder>
+			<folder>plugins</folder>
+			<folder>templates</folder>
+			<folder>tmp</folder>
+			<file>htaccess.txt</file>
+			<file>web.config.txt</file>
+			<file>LICENSE.txt</file>
+			<file>README.txt</file>
+			<file>index.php</file>
+		</files>
+	</fileset>
+
+	<updateservers>
+		<server name="Joomla! Core" type="collection">https://update.joomla.org/core/list.xml</server>
+	</updateservers>
+</extension>
+Edited

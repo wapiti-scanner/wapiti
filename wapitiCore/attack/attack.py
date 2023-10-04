@@ -55,6 +55,7 @@ all_modules = {
     "htp",
     "http_headers",
     "https_redirect",
+    "joomla_enum",
     "log4shell",
     "methods",
     "nikto",
