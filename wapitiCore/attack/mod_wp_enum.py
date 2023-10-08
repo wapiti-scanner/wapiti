@@ -64,13 +64,19 @@ class ModuleWpEnum(Attack):
 
             if root is None:
                 continue
+
             try:
                 generator_text = root.findtext('./channel/generator')
             except xml.etree.ElementTree.ParseError:
                 continue
+
+            if not generator_text:
+                continue
+
             version: Match = re.search(r"\Ahttps?:\/\/wordpress\.(?:[a-z]+)\/\?v=(.*)\Z", generator_text)
             if version is None:
                 continue
+
             detected_version = version.group(1)
             break
 
@@ -171,6 +177,7 @@ class ModuleWpEnum(Attack):
 
             request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
             response = await self.crawler.async_send(request)
+
             if response.is_success:
                 version = re.search(r'tag:\s*([\d.]+)', response.content)
                 # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
