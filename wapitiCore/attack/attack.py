@@ -60,6 +60,7 @@ all_modules = {
     "methods",
     "nikto",
     "permanentxss",
+    "prestashop_enum",
     "redirect",
     "shellshock",
     "spring4shell",

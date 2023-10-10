@@ -27,7 +27,7 @@ class ModuleCms(Attack):
     versions = []
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        raise NotImplementedError()
+        raise NotImplementedError("Override me bro!")
 
 
     def get_hashes(self, payloads_hash):
