@@ -2,12 +2,13 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
+from asyncio import Event, sleep as Sleep
 from unittest.mock import AsyncMock
 
 import pytest
 import respx
 import httpx
+import asyncio
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -69,6 +70,9 @@ async def test_whole_stuff():
 async def test_detection():
     respx.get(url__regex=r"http://perdu\.com/\?vuln=.*env.*").mock(
         return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+    )
+    respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
     )
 
     respx.get(url__regex=r"http://perdu\.com/\?vuln=.*").mock(
@@ -132,51 +136,33 @@ async def test_blind_detection():
         assert respx.calls.call_count == payloads_until_sleep + 3 + 1
 
 
+async def delayed_response():
+    await Sleep(6)
+    return httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_max_attack_time_5():
-    respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*env.*").mock(
+    respx.get(url__regex=r"http://perdu\.com/\?vuln1=.*env.*&vuln2=there").mock(
+        side_effect=delayed_response()
+    )
+    respx.get(url__regex=r"http://perdu.com/\?vuln1=hello&vuln2=.*env.*").mock(
         return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
     )
 
-    respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*").mock(
+    respx.get(url__regex=r"http://perdu\.com/\?vuln1=.*&vuln=.*").mock(
         return_value=httpx.Response(200, text="Hello there")
     )
 
     persister = AsyncMock()
 
-    request = Request("http://perdu.com/?" + "test=test&" * 80 + "vuln=hello")
+    request = Request("http://perdu.com/?vuln1=hello&vuln2=there")
     request.path_id = 1
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 1, "max_attack_time": 5}
-
-        module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
-        await module.attack(request)
-
-        assert persister.add_payload.call_count == 0
-
-
-@pytest.mark.asyncio
-@respx.mock
-async def test_max_attack_time_10():
-    respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*env.*").mock(
-        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
-    )
-
-    respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*").mock(
-        return_value=httpx.Response(200, text="Hello there")
-    )
-
-    persister = AsyncMock()
-
-    request = Request("http://perdu.com/?" + "test=test&" * 80 + "vuln=hello")
-    request.path_id = 1
-
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 1, "max_attack_time": 10}
+        options = {"timeout": 20, "level": 1, "max_attack_time": 5}
 
         module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
@@ -184,5 +170,43 @@ async def test_max_attack_time_10():
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
+        assert persister.add_payload.call_args_list[0][1]["request_id"] == 1
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == \
-            [["test", "test"]] * 80 + [["vuln", ";env;"]]
+               [["vuln1", ";env;"]] + [["vuln2", "there"]]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_max_attack_time_10():
+    respx.get(url__regex=r"http://perdu\.com/\?vuln1=.*env.*&vuln2=there").mock(
+        side_effect=delayed_response()
+    )
+    respx.get(url__regex=r"http://perdu.com/\?vuln1=hello&vuln2=.*env.*").mock(
+        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+    )
+
+    respx.get(url__regex=r"http://perdu\.com/\?vuln1=.*&vuln=.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?vuln1=hello&vuln2=there")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 20, "level": 1, "max_attack_time": 10}
+
+        module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == \
+               [["vuln1", ";env;"]] + [["vuln2", "there"]]
+        assert persister.add_payload.call_args_list[1][1]["module"] == "exec"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Command execution"
+        assert persister.add_payload.call_args_list[1][1]["request"].get_params == \
+               [["vuln1", "hello"]] + [["vuln2", ";env;"]]
