@@ -1,5 +1,5 @@
 import os
-from asyncio import Event
+from asyncio import Event, sleep
 from itertools import chain
 from unittest.mock import AsyncMock
 
@@ -55,13 +55,20 @@ async def test_whole_stuff():
                ) in persister.add_payload.call_args_list[0][1]["info"]
 
 
+async def delayed_response():
+    await sleep(4)
+    return httpx.Response(200, text="uid=0")
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_max_attack_time_5():
     # Test attacking with max_attack_time limitation
     respx.route(host="raw.githubusercontent.com").pass_through()
 
-    respx.get("http://perdu.com/README.md").mock(
+    respx.get("http://perdu.com/guestbook/pwd").mock(
+        side_effect=delayed_response()
+    )
+    respx.get("http://perdu.com/cgi-bin/a1disp3.cgi?../../../../../../../../../../etc/passwd").mock(
         return_value=httpx.Response(200, text="root:0:0:")
     )
 
@@ -80,41 +87,7 @@ async def test_max_attack_time_5():
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2, "tasks": 1, "max_attack_time": 5}
-
-        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
-        module.do_get = True
-        await module.attack(request)
-
-        assert persister.add_payload.call_count == 0
-
-
-@pytest.mark.asyncio
-@respx.mock
-async def test_max_attack_time_10():
-    # Test attacking all kind of parameter without crashing
-    respx.route(host="raw.githubusercontent.com").pass_through()
-
-    respx.get("http://perdu.com/README.md").mock(
-        return_value=httpx.Response(200, text="root:0:0:")
-    )
-
-    respx.route(host="perdu.com").mock(
-        return_value=httpx.Response(404, text="Not found")
-    )
-
-    persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
-    base_dir = os.path.join(home_dir, ".wapiti")
-    persister.CONFIG_DIR = os.path.join(base_dir, "config")
-
-    request = Request("http://perdu.com/")
-    request.path_id = 1
-    persister.get_links.return_value = chain([request])
-
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2, "tasks": 1, "max_attack_time": 10}
+        options = {"timeout": 20, "level": 2, "tasks": 1, "max_attack_time": 5}
 
         module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
         module.do_get = True
@@ -124,11 +97,65 @@ async def test_max_attack_time_10():
         assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
         assert persister.add_payload.call_args_list[0][1]["request"].url == (
-            "http://perdu.com/README.md"
+            "http://perdu.com/guestbook/pwd"
         )
         assert (
-                   "Readme Found"
+                   "PHP-Gastebuch 1.60 Beta reveals the md5 hash of the admin password"
                ) in persister.add_payload.call_args_list[0][1]["info"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_max_attack_time_10():
+    # Test attacking with max_attack_time limitation
+    respx.route(host="raw.githubusercontent.com").pass_through()
+
+    respx.get("http://perdu.com/guestbook/pwd").mock(
+        side_effect=delayed_response()
+    )
+    respx.get("http://perdu.com/cgi-bin/a1disp3.cgi?../../../../../../../../../../etc/passwd").mock(
+        return_value=httpx.Response(200, text="root:0:0:")
+    )
+
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(404, text="Not found")
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    persister.get_links.return_value = chain([request])
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 20, "level": 2, "tasks": 1, "max_attack_time": 10}
+
+        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
+        module.do_get = True
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
+        assert persister.add_payload.call_args_list[0][1]["request"].url == (
+            "http://perdu.com/guestbook/pwd"
+        )
+        assert (
+                   "PHP-Gastebuch 1.60 Beta reveals the md5 hash of the admin password"
+               ) in persister.add_payload.call_args_list[0][1]["info"]
+
+        assert persister.add_payload.call_args_list[1][1]["module"] == "nikto"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Potentially dangerous file"
+        assert persister.add_payload.call_args_list[1][1]["request"].url == (
+            "http://perdu.com/cgi-bin/a1disp3.cgi?..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
+        )
+        assert (
+                   "This CGI allows attackers read arbitrary files on the host"
+               ) in persister.add_payload.call_args_list[1][1]["info"]
 
 
 @pytest.mark.asyncio

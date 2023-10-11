@@ -2,9 +2,11 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
+from asyncio import Event, sleep as Sleep
 from unittest.mock import AsyncMock
 
+import httpx
+import respx
 import pytest
 
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -66,34 +68,48 @@ async def test_loknop_lfi_to_rce():
         )
 
 
+async def delayed_response():
+    mock_response = httpx.Response(200, content="Warning: AnotherFunction() Description of the warning \
+               root:x:0:0:root:/root:/bin/bash")
+    await Sleep(6)
+    return mock_response
+
+
 @pytest.mark.asyncio
+@respx.mock
 async def test_max_attack_time_5():
     # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=%2Fetc%2Fpasswd&f=toto").mock(
+        side_effect=delayed_response())
+
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=%2Fetc%2Fpasswd").mock(
+        return_value=httpx.Response(200, text="Warning: AnotherFunction() Description of the warning \
+                   root:x:0:0:root:/root:/bin/bash")
+    )
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/inclusion\.php\?yolo=.*&f=.*").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/inclusion2\.php\?yolo=nawak&f=.*").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/.*").mock(
+        return_value=httpx.Response(404, text="not found")
+    )
     persister = AsyncMock()
-    request = Request("http://127.0.0.1:65085/inclusion.php?" + "yolo=nawak&" * 30 + "f=toto")
-    request.path_id = 42
 
-    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2, "max_attack_time": 5}
-
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
-        module.do_post = False
-        await module.attack(request)
-
-        assert persister.add_payload.call_count == 0
-
-
-@pytest.mark.asyncio
-async def test_max_attack_time_10():
-    # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
-    persister = AsyncMock()
-    request = Request("http://127.0.0.1:65085/inclusion.php?" + "yolo=nawak&" * 30 + "f=toto")
-    request.path_id = 42
-
-    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2, "max_attack_time": 10}
+        options = {"timeout": 20, "level": 1, "max_attack_time": 5}
 
         module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
         module.do_post = False
@@ -102,8 +118,56 @@ async def test_max_attack_time_10():
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "file"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Path Traversal"
-        assert ["f", "/etc/services"] in persister.add_payload.call_args_list[0][1]["request"].get_params
+        assert ["yolo", "/etc/passwd"] in persister.add_payload.call_args_list[0][1]["request"].get_params
 
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_max_attack_time_10():
+    # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=%2Fetc%2Fpasswd&f=toto").mock(
+        side_effect=delayed_response())
+
+    respx.get("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=%2Fetc%2Fpasswd").mock(
+        return_value=httpx.Response(200, text="Warning: AnotherFunction() Description of the warning \
+                   root:x:0:0:root:/root:/bin/bash")
+    )
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/inclusion\.php\?yolo=.*&f=.*").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/inclusion2\.php\?yolo=nawak&f=.*").mock(
+        return_value=httpx.Response(200, text="Hello")
+    )
+
+    respx.get(url__regex=r"http://127\.0\.0\.1:65085/.*").mock(
+        return_value=httpx.Response(404, text="not found")
+    )
+    persister = AsyncMock()
+
+    request = Request("http://127.0.0.1:65085/inclusion.php?yolo=nawak&f=toto")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 20, "level": 1, "max_attack_time": 10}
+
+        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["module"] == "file"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Path Traversal"
+        assert ["yolo", "/etc/passwd"] in persister.add_payload.call_args_list[0][1]["request"].get_params
+        assert persister.add_payload.call_args_list[1][1]["module"] == "file"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Path Traversal"
+        assert ["f", "/etc/passwd"] in persister.add_payload.call_args_list[1][1]["request"].get_params
 
 @pytest.mark.asyncio
 async def test_warning_false_positive():

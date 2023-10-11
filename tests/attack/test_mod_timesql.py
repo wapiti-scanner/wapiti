@@ -51,12 +51,12 @@ async def test_timesql_detection():
             ['vuln1', 'sleep(1)#1']
         ]
 
-
 @pytest.mark.asyncio
 async def test_max_attack_time_5():
     persister = AsyncMock()
-    request = Request("http://127.0.0.1:65082/blind_sql.php?" + "foo=bar&" * 10 + "vuln1=hello%20there")
+    request = Request("http://127.0.0.1:65082/time_sql.php?vuln1=hello%20there&vuln2=hello%20there")
     request.path_id = 42
+
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         # Time out is set to 0 because in blind_sql.php we have a sleep(2) call
@@ -67,29 +67,13 @@ async def test_max_attack_time_5():
         module.do_post = False
         await module.attack(request)
 
-        assert persister.add_payload.call_count == 0
-
-
-@pytest.mark.asyncio
-async def test_max_attack_time_10():
-    persister = AsyncMock()
-    request = Request("http://127.0.0.1:65082/blind_sql.php?" + "foo=bar&" * 10 + "vuln1=hello%20there")
-    request.path_id = 42
-    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65082/"), timeout=1)
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        # Time out is set to 0 because in blind_sql.php we have a sleep(2) call
-        # and in the module we have ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
-        options = {"timeout": 0, "level": 1, "max_attack_time": 10}
-
-        module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
-        module.do_post = False
-        await module.attack(request)
-
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "timesql"
         assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == \
-            [['foo', 'bar']] * 10 + [['vuln1', 'sleep(1)#1']]
+            [['vuln1', 'sleep(1)#1'],
+             ['vuln2', 'hello there']
+             ]
 
 
 @pytest.mark.asyncio
