@@ -46,7 +46,7 @@ dependencies = [
         "loguru>=0.5.3",
         "mako>=1.1.4",
         "markupsafe==2.1.1",
-        "mitmproxy==9.0.0",
+        "mitmproxy>=10.1.1",
         "pyasn1==0.4.8",
         "six>=1.15.0",
         "sqlalchemy>=1.4.26",
