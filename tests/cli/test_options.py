@@ -267,6 +267,38 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
         await wapiti_main()
         mock_async_try_form_login.assert_called_once()
 
+# Test swagger option with a valid url
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+async def test_swagger_valid_url(mock_browse):
+    testargs = [
+        "wapiti",
+        "-u", "https://petstore.swagger.io",
+        "--swagger", "https://petstore.swagger.io/v2/swagger.json",
+        "-m", ""
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_browse.assert_called_once()
+
+# Test swagger option with an invalid url or when option break
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+async def test_swagger_invalid_url(mock_browse):
+    testargs = [
+        "wapiti",
+        "-u", "http://testphp.vulnweb.com",
+        "--swagger", "http://testphp.vulnweb.com/swagger.json",
+        "-m", ""
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        # will raise an exception because the url is not valid
+        with pytest.raises(SystemExit):
+            await wapiti_main()
+            mock_browse.assert_called_once()
+
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")

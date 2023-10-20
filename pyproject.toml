@@ -51,7 +51,8 @@ dependencies = [
         "sqlalchemy==2.0.28",
         "tld==0.13",
         "typing-extensions==4.10.0",
-        "yaswfp==0.9.3"
+        "yaswfp==0.9.3",
+        "prance[osv]>=23.6.21.0"
 ]
 
 [project.urls]
@@ -69,7 +70,7 @@ ssl = [
 ]
 test = [
         "humanize==4.9.0",
-        "pytest==8.0.2", 
+        "pytest==8.0.2",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.23.5",
         "respx==0.20.2",

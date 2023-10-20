@@ -1,0 +1,391 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Fake API OpenAPI 3 Specification",
+        "description": "Fake Cloud API",
+        "termsOfService": "https://fake.openapi.fr/fake_Open_API_Cloud.pdf",
+        "contact": {
+            "name": "Fake contact",
+            "url": "https://fake.openapi.fr/",
+            "email": "fake@openapi.fr"
+        },
+        "version": "1.23.456.x"
+    },
+    "servers": [
+        {
+            "url": "https://fake.openapi.fr/"
+        }
+    ],
+    "paths": {
+        "/v1/Alarms/{alarmId}": {
+            "put": {
+                "tags": [
+                    "Alarms"
+                ],
+                "operationId": "Alarms_Update",
+                "parameters": [
+                    {
+                        "name": "alarmId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AlarmPutModel"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AlarmPutModel"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AlarmPutModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/v1/AdministrationSettings/MailAccount": {
+            "delete": {
+                "tags": [
+                    "AdministrationSettings"
+                ],
+                "operationId": "AdministrationSettings_DeleteMailAccount",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/v1/AdministrationSettings/GroupUsers": {
+            "get": {
+                "tags": [
+                    "AdministrationSettings"
+                ],
+                "operationId": "AdministrationSettings_GetGroupUsers",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GroupUser"
+                                    }
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GroupUser"
+                                    }
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GroupUser"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "AdministrationSettings"
+                ],
+                "operationId": "AdministrationSettings_UpdateGroupUsers",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/GroupUser"
+                                }
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/GroupUser"
+                                }
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/GroupUser"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "AdministrationSettings"
+                ],
+                "operationId": "AdministrationSettings_UpdateGroupUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupUser"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupUser"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupUser"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "AdministrationSettings"
+                ],
+                "operationId": "AdministrationSettings_AddNewUser",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AlarmPutModel": {
+                "required": [
+                    "alarmState"
+                ],
+                "type": "object",
+                "properties": {
+                    "alarmState": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "confirmingUserName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "confirmingDateTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "confirmingNote": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "FtpMailAccounts": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "Reference id to the FtpAccount-Row-Id rsp. the MailAccount-Row-Id",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "isAccountMailNotFtp": {
+                        "type": "boolean",
+                        "description": "Either it is a FTP account or a Mail account. FTP account is very much preferred.\r\nFalse: FTP / True: Mail / Default: False"
+                    },
+                    "ftpAccountHostName": {
+                        "type": "string",
+                        "description": "The account's host name",
+                        "nullable": true
+                    },
+                    "ftpAccountUserName": {
+                        "type": "string",
+                        "description": "The account's user name",
+                        "nullable": true
+                    },
+                    "ftpAccountPassword": {
+                        "type": "string",
+                        "description": "The account's password. IN PLAIN TEXT. Sorry.",
+                        "nullable": true
+                    },
+                    "ftpAccountRestrictToDevicesCommaSeparated": {
+                        "type": "string",
+                        "description": "List of devices to use. If NULL or \"\" then ALL devices will be used.",
+                        "nullable": true
+                    },
+                    "ftpAccountFolderStructure": {
+                        "type": "string",
+                        "description": "When there is a valid folder name then not the FTP root will be taken but the new folder structure on top of the root.",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GroupUser": {
+                "type": "object",
+                "properties": {
+                    "active": {
+                        "type": "boolean",
+                        "description": "Is the user still active are meant to be removed from the group?\r\nTrue: Active, False: Should not see data and is meant to be removed"
+                    },
+                    "userName": {
+                        "type": "string",
+                        "description": "The user's name from AAD B2C",
+                        "nullable": true
+                    },
+                    "emailAddress": {
+                        "type": "string",
+                        "description": "The user's E-Mail address used for authorization.\r\nIt's unclear if this is possible to extract from AAD B2C",
+                        "nullable": true
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleIdValue"
+                    },
+                    "networksVisibility": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        },
+                        "description": "List of networks the user DOES or DOES NOT have access to",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "RoleIdValue": {
+                "enum": [
+                    0,
+                    100,
+                    200,
+                    999
+                ],
+                "type": "integer",
+                "format": "int32"
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "apiKey",
+                "description": "JWT Authorization header using the Bearer scheme. Get the temporary bearer token from https://fake.openapi.fr/user-settings.",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}
