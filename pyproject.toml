@@ -51,7 +51,8 @@ dependencies = [
         "six>=1.15.0",
         "sqlalchemy>=1.4.26",
         "tld>=0.12.5",
-        "yaswfp>=0.9.3" 
+        "yaswfp>=0.9.3",
+        "prance[osv]"
 ]
 
 [project.urls]

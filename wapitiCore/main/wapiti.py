@@ -37,6 +37,7 @@ from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
 from wapitiCore.net.auth import async_try_form_login, load_form_script, check_http_auth, login_with_raw_data
 from wapitiCore.net import Request
 from wapitiCore.report import GENERATORS
+from wapitiCore.parsers.swagger import Swagger
 
 global_stop_event = asyncio.Event()
 
@@ -156,6 +157,11 @@ async def wapiti_main():
         wap.set_attack_options(attack_options)
         await wap.update(args.modules)
         sys.exit()
+
+    if args.swagger_uri:
+        swagger = Swagger(uri=args.swagger_uri)
+        for request in swagger.get_requests():
+            wap.add_start_url(request)
 
     try:
         for start_url in args.starting_urls:

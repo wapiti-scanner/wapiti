@@ -35,6 +35,13 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--swagger",
+        help="Swagger file URI (path or URL) to target API endpoints",
+        metavar="URI", dest="swagger_uri",
+        default=None
+    )
+
+    parser.add_argument(
         "--data",
         help="Urlencoded data to send with the base URL if it is a POST request",
         metavar="data", dest="data",
