@@ -37,6 +37,7 @@ from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
 from wapitiCore.net.auth import async_try_form_login, load_form_script, check_http_auth, login_with_raw_data
 from wapitiCore.net import Request
 from wapitiCore.report import GENERATORS
+from wapitiCore.parsers.swagger import Swagger
 
 global_stop_event = asyncio.Event()
 
@@ -180,15 +181,14 @@ async def wapiti_main():
             attack_options = {"level": args.level, "timeout": args.timeout,\
                               "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"}
         wap.set_attack_options(attack_options)
-        try:
-            await wap.update(args.modules)
-            sys.exit()
-        except InvalidOptionValue as invalid_option:
-            logging.error(invalid_option)
-            raise
-        except ValueError as e:
-            logging.error(f"Value error: {e}")
-            raise
+        await wap.update(args.modules)
+        sys.exit()
+
+    if args.swagger_uri:
+        swagger = Swagger(swagger_url=args.swagger_uri, base_url=url)
+        for request in swagger.get_requests():
+            wap.add_start_url(request)
+
     try:
         for start_url in args.starting_urls:
             if start_url.startswith(("http://", "https://")):
