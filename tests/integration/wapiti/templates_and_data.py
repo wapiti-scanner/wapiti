@@ -9,7 +9,7 @@ EXISTING_MODULES = {
     "backup", "brute_login_form",
     "buster", "cookieflags",
     "crlf", "csp",
-    "csrf", "drupal_enum",
+    "csrf", "cms",
     "exec", "file",
     "htaccess", "htp",
     "http_headers", "https_redirect",

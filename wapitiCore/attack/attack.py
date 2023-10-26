@@ -46,21 +46,19 @@ all_modules = {
     "buster",
     "cookieflags",
     "crlf",
+    "cms",
     "csp",
     "csrf",
-    "drupal_enum",
     "exec",
     "file",
     "htaccess",
     "htp",
     "http_headers",
     "https_redirect",
-    "joomla_enum",
     "log4shell",
     "methods",
     "nikto",
     "permanentxss",
-    "prestashop_enum",
     "redirect",
     "shellshock",
     "spring4shell",
@@ -292,6 +290,11 @@ class Attack:
     @property
     def max_attack_time(self):
         return self.options.get("max_attack_time", 0)
+
+    @property
+    def cms(self):
+        return self.options.get("cms", "drupal,joomla,prestashop")
+
 
     @property
     def proto_endpoint(self):

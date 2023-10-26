@@ -8,7 +8,7 @@
                 "level": 0,
                 "parameter": "",
                 "referer": "",
-                "module": "drupal_enum",
+                "module": "cms",
                 "http_request": "GET / HTTP/1.1",
                 "curl_command": "curl \"http://drupal9/\"",
                 "wstg": [
@@ -28,7 +28,7 @@
                 "info": "{\"name\": \"Drupal\", \"versions\": [\"9.5.9\"], \"categories\": [\"CMS Drupal\"], \"groups\": [\"Content\"]}",
                 "level": 0,
                 "parameter": "",
-                "module": "drupal_enum",
+                "module": "cms",
                 "http_request": "GET / HTTP/1.1",
                 "wstg": [
                     "WSTG-INFO-02",

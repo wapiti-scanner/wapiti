@@ -77,6 +77,11 @@ async def test_options():
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) - 1
 
+        cli.set_modules("cms")
+        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
+        assert len(activated_modules) == 1
+
         # Empty module list: no modules will be used
         cli.set_modules("")
         attak_modules = await cli._load_attack_modules(stop_event, crawler)
@@ -161,3 +166,40 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()
         mock_async_try_form_login.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.validate_cms_choices",return_value=(False, {}, []))
+async def test_validate_cms_choices(mock_validate_cms_choices, _, __):
+    """Let's ensure that the cms validator is called when the --cms is used."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "cms",
+        "--cms", "drupal,joomla,prestashop",
+        "--scope", "url"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_validate_cms_choices.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_mod_cms_set",return_value=(False, {}, []))
+async def test_is_mod_cms_set(mock_is_mod_cms_set, _, __):
+    """Let's ensure that the --cms option is only used when the module cms is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "cms",
+        "--cms", "drupal"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_mod_cms_set.assert_called_once()

@@ -481,4 +481,12 @@ def parse_args():
         version=WAPITI_VERSION
     )
 
+    # Custom type validator function
+
+    parser.add_argument(
+        "--cms",
+        help="Choose the CMS to scan. Possible choices : drupal, joomla, prestashop",
+        metavar="CMS_LIST"
+    )
+
     return parser.parse_args()

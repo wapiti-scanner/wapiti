@@ -73,6 +73,23 @@ def is_valid_endpoint(url_type, url: str):
     return False
 
 
+def is_mod_cms_set(args):
+    if "cms" in args.modules:
+        return True
+    logging.error("Error: Invalid option --cms, module cms is required when this option is used")
+    return False
+
+
+def validate_cms_choices(cms_value):
+    allowed_cms = ["drupal", "joomla", "prestashop"]
+    cms_list = cms_value.split(',')
+    for cms in cms_list:
+        if cms not in allowed_cms:
+            logging.error(f"Invalid CMS choice: {cms_value}. Choose from {', '.join(allowed_cms)}")
+            return False
+    return True
+
+
 def ping(url: str):
     try:
         httpx.get(url, timeout=5)
@@ -242,7 +259,7 @@ async def wapiti_main():
             "tasks": args.tasks,
             "headless": wap.headless_mode,
             "excluded_urls": wap.excluded_urls,
-            "max_attack_time" : args.max_attack_time
+            "max_attack_time": args.max_attack_time,
         }
 
         if "dns_endpoint" in args:
@@ -273,6 +290,19 @@ async def wapiti_main():
                     raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
             else:
                 raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
+
+        if args.cms:
+            allowed_cms = ["drupal", "joomla", "prestashop"]
+            if not is_mod_cms_set(args):
+                raise InvalidOptionValue("--cms", "module cms is required when --cms is used")
+            if not validate_cms_choices(args.cms):
+                raise InvalidOptionValue(
+                    "--cms", f"Invalid CMS choice: {args.cms}. Choose from {', '.join(allowed_cms)}"
+                )
+            attack_options["cms"] = args.cms
+
+        if "cms" in args.modules and not args.cms:
+            attack_options["cms"] = "drupal,joomla,prestashop"
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)

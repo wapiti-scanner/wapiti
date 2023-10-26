@@ -1,6 +1,6 @@
 {
-    "test_mod_drupal_enum": {
-        "modules": "drupal_enum",
+    "test_mod_cms": {
+        "modules": "cms",
         "supplementary_argument": "",
         "report_filter_tree": {
             "vulnerabilities": {
