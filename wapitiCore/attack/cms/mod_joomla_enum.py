@@ -3,39 +3,37 @@ from typing import Optional
 from httpx import RequestError
 
 from wapitiCore.net import Request
-from wapitiCore.attack.mod_cms import ModuleCms, MSG_TECHNO_VERSIONED
+from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_WSTG_CODE
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
-from wapitiCore.main.log import log_blue, logging
+from wapitiCore.main.log import log_blue
 
-MSG_NO_DRUPAL = "No Drupal Detected"
+MSG_NO_JOOMLA = "No Joomla Detected"
 
 
-class ModuleDrupalEnum(ModuleCms):
-    """Detect Drupal version."""
-    name = "drupal_enum"
-    PAYLOADS_HASH = "drupal_hash_files.json"
+class ModuleJoomlaEnum(CommonCMS):
+    """Detect Joomla version."""
+    PAYLOADS_HASH = "joomla_hash_files.json"
 
     versions = []
 
-    async def check_drupal(self, url):
-        check_list = ['core/misc/drupal.js', 'misc/drupal.js']
-        for item in check_list:
-            request = Request(f'{url}{item}', 'GET')
-            try:
-                response: Response = await self.crawler.async_send(request, follow_redirects=True)
-            except RequestError:
-                self.network_errors += 1
-            except Exception as exception:
-                logging.exception(exception)
-            else:
-                if (
-                    response.is_success
-                    and "content-type" in response.headers
-                    and "application/javascript" in response.headers["content-type"]
-                   ):
-                    return True
+    async def check_joomla(self, url):
+
+        request = Request(f'{url}', 'GET')
+        try:
+            response: Response = await self.crawler.async_send(request, follow_redirects=True)
+        except RequestError:
+            self.network_errors += 1
+        else:
+            if (
+                response.is_success and
+                ("/administrator/" in response.content or
+                 "Joomla" in response.headers.get('X-Powered-By', '') or
+                 "media/jui/css" in response.content or
+                 "media/system/js" in response.content)
+               ):
+                return True
         return False
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
@@ -51,20 +49,20 @@ class ModuleDrupalEnum(ModuleCms):
         self.finished = True
         request_to_root = Request(request.url)
 
-        if await self.check_drupal(request_to_root.url):
-            await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
+        if await self.check_joomla(request_to_root.url):
+            await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
 
-            drupal_detected = {
-                "name": "Drupal",
+            joomla_detected = {
+                "name": "Joomla",
                 "versions": self.versions,
-                "categories": ["CMS Drupal"],
+                "categories": ["CMS Joomla"],
                 "groups": ["Content"]
             }
 
             log_blue(
                 MSG_TECHNO_VERSIONED,
-                "Drupal",
+                "Joomla",
                 self.versions
             )
 
@@ -72,14 +70,14 @@ class ModuleDrupalEnum(ModuleCms):
                 await self.add_vuln_info(
                     category=WEB_APP_VERSIONED,
                     request=request_to_root,
-                    info=json.dumps(drupal_detected),
+                    info=json.dumps(joomla_detected),
                     wstg=WEB_WSTG_CODE
                 )
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
-                info=json.dumps(drupal_detected),
+                info=json.dumps(joomla_detected),
                 wstg=WSTG_CODE
             )
         else:
-            log_blue(MSG_NO_DRUPAL)
+            log_blue(MSG_NO_JOOMLA)

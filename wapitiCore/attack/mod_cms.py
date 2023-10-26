@@ -1,118 +1,26 @@
-import asyncio
-import hashlib
-import json
-from os.path import join as path_join
+from asyncio import Event
 
-from typing import Tuple, Optional
-from httpx import RequestError
+from typing import Optional
+
+from wapitiCore.attack.cms.mod_drupal_enum import ModuleDrupalEnum
+from wapitiCore.attack.cms.mod_joomla_enum import ModuleJoomlaEnum
+from wapitiCore.attack.cms.mod_prestashop_enum import ModulePrestashopEnum
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 
 MSG_TECHNO_VERSIONED = "{0} {1} detected"
-
-
-def calculate_git_hash(file_content):
-    # Calculate the size of the file
-    file_size = len(file_content)
-    # Create the string to hash to match the git hash function
-    to_hash = b"blob " + str(file_size).encode() + b"\0" + file_content
-    git_hash = hashlib.sha1(to_hash).hexdigest()
-    return git_hash
+MSG_NO_DRUPAL = "No Drupal Detected"
+MSG_NO_JOOMLA = "No Joomla Detected"
+MSG_NO_PRESTASHOP = "No PrestaShop Detected"
 
 
 class ModuleCms(Attack):
     """Base class for detecting version."""
+    name = "cms"
+
     versions = []
-
-    async def attack(self, request: Request, response: Optional[Response] = None):
-        raise NotImplementedError("Override me bro!")
-
-
-    def get_hashes(self, payloads_hash):
-        with open(path_join(self.DATA_DIR, payloads_hash), errors="ignore", encoding='utf-8') as hashes:
-            data = json.load(hashes)
-            return data
-
-    async def get_url_hash(self, root_url: str, path: str) -> Tuple[str, str]:
-        request = Request(f"{root_url}{path}", "GET")
-        response: Response = await self.crawler.async_send(request, follow_redirects=True)
-        if response.is_error:
-            return "", ""
-
-        file_content = response.bytes
-        git_hash = calculate_git_hash(file_content)
-        return git_hash, path
-
-    async def detect_version(self, payloads_hash, root_url):
-        versions = {}
-        detection_db = self.get_hashes(payloads_hash)
-        tasks = set()
-
-        for path in detection_db:
-            task = asyncio.create_task(self.get_url_hash(root_url, path))
-            tasks.add(task)
-
-            while tasks:
-                done_tasks, pending_tasks = await asyncio.wait(
-                    tasks,
-                    timeout=0.01,
-                    return_when=asyncio.FIRST_COMPLETED
-                )
-
-                for task in done_tasks:
-                    try:
-                        content_hash, path = await task
-                    except RequestError:
-                        self.network_errors += 1
-                    else:
-                        if content_hash and content_hash in detection_db[path]:
-                            versions[path] = detection_db[path][content_hash]
-
-                    tasks.remove(task)
-
-                if self._stop_event.is_set():
-                    for task in pending_tasks:
-                        task.cancel()
-                        tasks.remove(task)
-
-                if len(pending_tasks) > self.options["tasks"]:
-                    continue
-
-                break
-
-            if self._stop_event.is_set():
-                break
-
-        # We reached the end of your list but we may still have some running tasks
-        while tasks:
-            done_tasks, pending_tasks = await asyncio.wait(
-                tasks,
-                timeout=0.01,
-                return_when=asyncio.FIRST_COMPLETED
-            )
-
-            for task in done_tasks:
-                try:
-                    content_hash, path = await task
-                except RequestError:
-                    self.network_errors += 1
-                else:
-                    if content_hash and content_hash in detection_db[path]:
-                        versions[path] = detection_db[path][content_hash]
-
-                tasks.remove(task)
-
-            if self._stop_event.is_set():
-                for task in pending_tasks:
-                    task.cancel()
-                    tasks.remove(task)
-
-                break
-
-        if versions:
-            self.versions = set.intersection(*[set(versions) for versions in versions.values()])
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
@@ -122,3 +30,20 @@ class ModuleCms(Attack):
             return False
 
         return request.url == await self.persister.get_root_url()
+
+    async def attack(self, request: Request, response: Optional[Response] = None):
+        self.finished = True
+        request_to_root = Request(request.url)
+        cms_list = self.cms.split(',')
+
+        if "drupal" in cms_list:
+            module = ModuleDrupalEnum(self.crawler, self.persister, self.options, Event(), self.crawler_configuration)
+            await module.attack(request_to_root)
+        if "joomla" in cms_list:
+            module = ModuleJoomlaEnum(self.crawler, self.persister, self.options, Event(), self.crawler_configuration)
+            await module.attack(request_to_root)
+        if "prestashop" in cms_list:
+            module = ModulePrestashopEnum(
+                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+            )
+            await module.attack(request_to_root)

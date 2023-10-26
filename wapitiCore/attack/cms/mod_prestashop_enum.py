@@ -1,25 +1,25 @@
 import json
 from typing import Optional
+from bs4 import BeautifulSoup
 from httpx import RequestError
 
 from wapitiCore.net import Request
-from wapitiCore.attack.mod_cms import ModuleCms, MSG_TECHNO_VERSIONED
+from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_WSTG_CODE
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue
 
-MSG_NO_JOOMLA = "No Joomla Detected"
+MSG_NO_PRESTASHOP = "No PrestaShop Detected"
 
 
-class ModuleJoomlaEnum(ModuleCms):
-    """Detect Joomla version."""
-    name = "joomla_enum"
-    PAYLOADS_HASH = "joomla_hash_files.json"
+class ModulePrestashopEnum(CommonCMS):
+    """Detect PrestaShop version."""
+    PAYLOADS_HASH = "prestashop_hash_files.json"
 
     versions = []
 
-    async def check_joomla(self, url):
+    async def check_prestashop(self, url):
 
         request = Request(f'{url}', 'GET')
         try:
@@ -27,14 +27,28 @@ class ModuleJoomlaEnum(ModuleCms):
         except RequestError:
             self.network_errors += 1
         else:
-            if (
-                response.is_success and
-                ("/administrator/" in response.content or
-                 "Joomla" in response.headers.get('X-Powered-By', '') or
-                 "media/jui/css" in response.content or
-                 "media/system/js" in response.content)
-               ):
-                return True
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # Look for common PrestaShop elements or text
+            common_prestashop_elements = [
+                "PrestaShop",  # Look for the presence of the text "PrestaShop"
+                "prestashop.min.css",  # Check for the CSS file often used by PrestaShop
+                "PrestaShop.modules",  # Check for JavaScript code often used by PrestaShop
+                "Powered by <a href='https://www.prestashop.com'",  # Detects "Powered by PrestaShop" text
+                "prestashop-bootstrap.min.css",  # Check for another common CSS file
+                "prestashop.js",
+                "/revsliderprestashop/",
+                "prestashop-widget",
+                "for_prestashop",
+                "themes/.*/assets",
+                "prestashop ="
+                # Check for another common JavaScript file
+            ]
+            # Check for the presence of any common PrestaShop elements or text
+            for element in common_prestashop_elements:
+                if element in str(soup):
+                    return True
+
         return False
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
@@ -50,20 +64,20 @@ class ModuleJoomlaEnum(ModuleCms):
         self.finished = True
         request_to_root = Request(request.url)
 
-        if await self.check_joomla(request_to_root.url):
+        if await self.check_prestashop(request_to_root.url):
             await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
 
-            joomla_detected = {
-                "name": "Joomla",
+            prestashop_detected = {
+                "name": "PrestaShop",
                 "versions": self.versions,
-                "categories": ["CMS Joomla"],
+                "categories": ["CMS PrestaShop"],
                 "groups": ["Content"]
             }
 
             log_blue(
                 MSG_TECHNO_VERSIONED,
-                "Joomla",
+                "PrestaShop",
                 self.versions
             )
 
@@ -71,14 +85,14 @@ class ModuleJoomlaEnum(ModuleCms):
                 await self.add_vuln_info(
                     category=WEB_APP_VERSIONED,
                     request=request_to_root,
-                    info=json.dumps(joomla_detected),
+                    info=json.dumps(prestashop_detected),
                     wstg=WEB_WSTG_CODE
                 )
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
-                info=json.dumps(joomla_detected),
+                info=json.dumps(prestashop_detected),
                 wstg=WSTG_CODE
             )
         else:
-            log_blue(MSG_NO_JOOMLA)
+            log_blue(MSG_NO_PRESTASHOP)
