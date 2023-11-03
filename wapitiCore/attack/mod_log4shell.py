@@ -1,6 +1,7 @@
 import copy
 import itertools
 import socket
+from time import monotonic
 import uuid
 from os.path import join as path_join
 from typing import Dict, Iterable, List, Tuple, Optional
@@ -170,12 +171,18 @@ class ModuleLog4Shell(Attack):
         await self._attack_vsphere_url(request)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
+        self.start = monotonic()
         await self._attack_specific_cases(request)
         headers = await self.read_headers()
 
         batch_malicious_headers, headers_uuid_record = self._get_batch_malicious_headers(headers)
 
         for malicious_headers in batch_malicious_headers:
+            if monotonic() - self.start > self.max_attack_time >= 1:
+                logging.info(
+                    f"Skipping: attack time reached for module {self.name}."
+                )
+                break
             modified_request = Request(request.url)
 
             try:
@@ -192,6 +199,11 @@ class ModuleLog4Shell(Attack):
         )
 
         for malicious_request, param_name, param_uuid in injected_get_and_post_requests:
+            if monotonic() - self.start > self.max_attack_time >= 1:
+                logging.info(
+                    f"Skipping: attack time reached for module {self.name}."
+                )
+                break
             try:
                 log_verbose(f"[¨] {malicious_request}")
                 page = await self.crawler.async_send(malicious_request, follow_redirects=True)
