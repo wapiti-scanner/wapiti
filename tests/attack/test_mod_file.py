@@ -48,6 +48,26 @@ async def test_inclusion_detection():
 
 
 @pytest.mark.asyncio
+async def test_open_redirect():
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65085/open_redirect.php?url=toto")
+    #request.path_id = 42
+
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65085/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert pytest.raises(httpx.InvalidURL)
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            assert pytest_wrapped_e.value.code != 0
+
+
+
+@pytest.mark.asyncio
 async def test_loknop_lfi_to_rce():
     # https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d
     persister = AsyncMock()

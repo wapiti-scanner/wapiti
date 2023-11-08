@@ -22,7 +22,7 @@ from os.path import join as path_join
 from time import monotonic
 from typing import Optional, Iterator
 
-from httpx import ReadTimeout, RequestError
+from httpx import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack
@@ -199,6 +199,9 @@ class ModuleFile(Attack):
                 timeouted = True
             except RequestError:
                 self.network_errors += 1
+                continue
+            except InvalidURL:
+                logging.warning(f"Invalid URL: {mutated_request.url} potentially vulnerable to open redirect")
                 continue
             else:
                 file_warning = None
