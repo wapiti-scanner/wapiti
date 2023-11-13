@@ -294,13 +294,20 @@ class ModuleLog4Shell(Attack):
         log_red("---")
 
     async def _verify_dns(self, header_uuid: str) -> bool:
-        resolver = dns.resolver.Resolver(configure=False)
-        resolver.nameservers = [self._dns_host]
-        answer = resolver.resolve(header_uuid + ".c", "TXT")
+        try:
+            resolver = dns.resolver.Resolver(configure=False)
+            resolver.nameservers = [self._dns_host]
+            answer = resolver.resolve(header_uuid + ".c", "TXT")
 
-        if answer[0].strings[0].decode("utf-8") == "true":
-            return True
-        return False
+            return answer[0].strings[0].decode("utf-8") == "true"
+        except dns.resolver.LifetimeTimeout:
+            logging.error(f"Error: DNS server {self._dns_host} is not responding (timeout)")
+            self.finished = True
+            return False
+        except dns.resolver.NoNameservers:
+            logging.error(f"Error: DNS server {self._dns_host} is unreachable")
+            self.finished = True
+            return False
 
     def _get_batch_malicious_headers(self, headers: List[str]) -> Tuple[Dict, Dict]:
         batch_malicious_headers: List[Dict[str, str]] = []
