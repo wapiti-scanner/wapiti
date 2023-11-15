@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment, Doctype, Tag
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
+from httpx import URL
 
 # Internal libraries
 from wapitiCore import parser_name
@@ -122,10 +123,11 @@ class Html:
         self._allow_fragments = allow_fragments
 
         try:
-            # TODO: httpx.URL is interesting, reuse that
             self._fld = get_fld(url)
         except TldDomainNotFound:
-            self._fld = urlparse(url).netloc
+             # urlparse(url).netloc also returns port number so httpx.URL would be
+             # better here as it returns only the domain name.
+            self._fld = URL(url).host
 
         base_tag = self._soup.find("base", href=True)
         if base_tag:
