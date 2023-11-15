@@ -254,7 +254,7 @@ class Html:
             fld = get_fld(url)
         except TldDomainNotFound:
             # Not yet known TLD or IP address or local hostname
-            fld = urlparse(url).netloc
+            fld = URL(url).host
         except TldBadUrl:
             fld = None
         return fld != self._fld
