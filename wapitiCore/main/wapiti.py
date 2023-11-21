@@ -74,7 +74,7 @@ def is_valid_endpoint(url_type, url: str):
 
 
 def is_mod_cms_set(args):
-    if "cms" in args.modules:
+    if args.modules and "cms" in args.modules:
         return True
     logging.error("Error: Invalid option --cms, module cms is required when this option is used")
     return False
@@ -301,7 +301,7 @@ async def wapiti_main():
                 )
             attack_options["cms"] = args.cms
 
-        if "cms" in args.modules and not args.cms:
+        if args.modules and "cms" in args.modules and not args.cms:
             attack_options["cms"] = "drupal,joomla,prestashop"
 
         if args.skipped_parameters:

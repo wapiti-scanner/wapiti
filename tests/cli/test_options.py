@@ -203,3 +203,17 @@ async def test_is_mod_cms_set(mock_is_mod_cms_set, _, __):
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()
         mock_is_mod_cms_set.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+async def test_basic_usage(_, __):
+    """Test without option"""
+    testsagrs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/"
+    ]
+
+    with mock.patch.object(sys, "argv", testsagrs):
+        await wapiti_main()
