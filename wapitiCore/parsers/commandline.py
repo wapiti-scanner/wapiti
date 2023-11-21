@@ -45,7 +45,7 @@ def parse_args():
         "--scope",
         help="Set scan scope",
         default="folder",
-        choices=["page", "folder", "subdomain", "domain", "url", "punk"]
+        choices=["url", "page", "folder", "subdomain", "domain", "punk"]
     )
 
     parser.add_argument(
