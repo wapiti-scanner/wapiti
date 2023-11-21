@@ -24,7 +24,7 @@ TARGET SPECIFICATION:
 
   * `-u`, `--url` <URL>
   * `--data` <URL_ENCODED_DATA>
-  * `--scope` {page,folder,domain,url,punk}
+  * `--scope` {url,page,folder,domain,punk}
 
 ATTACK SPECIFICATION:
 
