@@ -20,12 +20,11 @@ import dataclasses
 import re
 from math import ceil
 from random import randint
-from time import monotonic
 from typing import Optional, Iterator
 
 from httpx import ReadTimeout, RequestError
 
-from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
+from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
@@ -344,7 +343,6 @@ class ModuleSql(Attack):
         return False
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         vulnerable_parameters = await self.error_based_attack(request)
         await self.boolean_based_attack(request, vulnerable_parameters)
 
@@ -359,11 +357,7 @@ class ModuleSql(Attack):
                 request,
                 str_to_payloadinfo(self.payloads),
         ):
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
-                break
+
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
@@ -471,11 +465,7 @@ class ModuleSql(Attack):
         last_response = None
 
         for mutated_request, parameter, payload_info in mutator.mutate(request, generate_boolean_payloads):
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
-                break
+
             # Make sure we always pass through the following block to see changes of payloads formats
             if current_session != payload_info.platform:
                 # We start a new set of payloads, let's analyse results for previous ones

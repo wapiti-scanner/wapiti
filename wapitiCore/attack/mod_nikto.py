@@ -21,7 +21,6 @@ import csv
 import os
 import random
 import re
-from time import monotonic
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -130,7 +129,6 @@ class ModuleNikto(Attack):
         return self.status_codes[request.path] in expected_status_codes
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         try:
             with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
                 reader = csv.reader(nikto_db_file)
@@ -152,11 +150,7 @@ class ModuleNikto(Attack):
         with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
             reader = csv.reader(nikto_db_file)
             while True:
-                if monotonic() - self.start > self.max_attack_time >= 1:
-                    logging.info(
-                        f"Skipping: attack time reached for module {self.name}."
-                    )
-                    break
+
                 if pending_count < self.options["tasks"] and not self._stop_event.is_set():
                     try:
                         line = next(reader)

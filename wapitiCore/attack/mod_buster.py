@@ -19,12 +19,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from os.path import join as path_join
-from time import monotonic
 from typing import Optional
 
 from httpx import RequestError
 
-from wapitiCore.main.log import log_red, log_verbose, logging
+from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.buster import NAME, WSTG_CODE
@@ -100,11 +99,6 @@ class ModuleBuster(Attack):
 
         with open(path_join(self.DATA_DIR, self.PATHS_FILE), encoding="utf-8", errors="ignore") as wordlist:
             while True:
-                if monotonic() - self.start > self.max_attack_time >= 1:
-                    logging.info(
-                        f"Skipping: attack time reached for module {self.name}."
-                    )
-                    break
 
                 if pending_count < self.options["tasks"] and not self._stop_event.is_set():
                     try:
@@ -139,7 +133,6 @@ class ModuleBuster(Attack):
                         tasks.remove(task)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         self.finished = True
         if not self.do_get:
             return
