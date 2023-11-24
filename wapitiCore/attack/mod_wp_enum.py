@@ -3,7 +3,6 @@ import re
 import xml
 import xml.etree.ElementTree as ET
 from os.path import join as path_join
-from time import monotonic
 from typing import Match, Optional
 
 from wapitiCore.attack.attack import Attack
@@ -105,12 +104,6 @@ class ModuleWpEnum(Attack):
             if self._stop_event.is_set():
                 break
 
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
-                break
-
             request = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
             response = await self.crawler.async_send(request)
 
@@ -167,12 +160,6 @@ class ModuleWpEnum(Attack):
     async def detect_theme(self, url):
         for theme in self.get_theme():
             if self._stop_event.is_set():
-                break
-
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
                 break
 
             request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
@@ -238,7 +225,6 @@ class ModuleWpEnum(Attack):
         return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         self.finished = True
         request_to_root = Request(request.url)
 

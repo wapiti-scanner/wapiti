@@ -19,7 +19,6 @@
 import re
 from collections import defaultdict, namedtuple
 from os.path import join as path_join
-from time import monotonic
 from typing import Optional, Iterator
 
 from httpx import ReadTimeout, RequestError, InvalidURL
@@ -145,7 +144,6 @@ class ModuleFile(Attack):
         return False
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         warned = False
         timeouted = False
         page = request.path
@@ -154,11 +152,6 @@ class ModuleFile(Attack):
         vulnerable_parameter = False
 
         for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
-                break
 
             if current_parameter != parameter:
                 # Forget what we know about current parameter

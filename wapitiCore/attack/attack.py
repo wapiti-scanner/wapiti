@@ -289,7 +289,7 @@ class Attack:
 
     @property
     def max_attack_time(self):
-        return self.options.get("max_attack_time", 0)
+        return self.options.get("max_attack_time", None)
 
     @property
     def cms(self):

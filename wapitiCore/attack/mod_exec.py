@@ -17,12 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from os.path import join as path_join
-from time import monotonic
 from typing import Optional, Iterator
 
 from httpx import ReadTimeout, RequestError
 
-from wapitiCore.main.log import log_red, log_verbose, log_orange, logging
+from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
@@ -75,7 +74,6 @@ class ModuleExec(Attack):
         return vuln_info
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        self.start = monotonic()
         warned = False
         timeouted = False
         page = request.path
@@ -84,11 +82,7 @@ class ModuleExec(Attack):
         vulnerable_parameter = False
 
         for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
-            if monotonic() - self.start > self.max_attack_time >= 1:
-                logging.info(
-                    f"Skipping: attack time reached for module {self.name}."
-                )
-                break
+
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter

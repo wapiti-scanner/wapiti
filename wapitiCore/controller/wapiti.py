@@ -178,7 +178,7 @@ class Wapiti:
         self._max_files_per_dir = 0
         self._scan_force = "normal"
         self._max_scan_time = 0
-        self._max_attack_time = 0
+        self._max_attack_time = None
         self._bug_report = True
         self._logfile = ""
         self._auth_state = None
@@ -434,7 +434,6 @@ class Wapiti:
                 if stop_event.is_set():
                     break
 
-                start = datetime.utcnow()
                 if attack_module.do_get is False and attack_module.do_post is False:
                     continue
 
@@ -500,16 +499,17 @@ class Wapiti:
                         if await attack_module.must_attack(original_request, original_response):
                             logging.info(f"[+] {original_request}")
 
-                            await attack_module.attack(original_request, original_response)
+                            try:
+                                await asyncio.wait_for(
+                                    attack_module.attack(original_request, original_response),
+                                    self._max_attack_time
+                                )
+                            except asyncio.TimeoutError:
+                                logging.info(
+                                    f"Max attack time was reached for module {attack_module.name}, stopping."
+                                )
+                                break
 
-                        if (datetime.utcnow() - start).total_seconds() > self._max_attack_time >= 1:
-                            # FIXME: Right now we cannot remove the pylint: disable line because the current I18N system
-                            # uses the string as a token so we cannot use f string
-                            # pylint: disable=consider-using-f-string
-                            logging.info(
-                                f"Max attack time was reached for module {attack_module.name}, stopping."
-                            )
-                            break
                     except RequestError:
                         # Hmm, it should be caught inside the module
                         await asyncio.sleep(1)
