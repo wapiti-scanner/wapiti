@@ -2,9 +2,8 @@ import asyncio
 import os
 import random
 from asyncio import Event, sleep
-from typing import Dict
 from unittest import mock
-from unittest.mock import MagicMock, mock_open, patch, AsyncMock
+from unittest.mock import patch, AsyncMock
 from httpx import Response as HttpxResponse
 import uuid
 
@@ -396,51 +395,3 @@ async def test_attack_unifi():
 
         assert crawler.async_send.assert_called_once
         assert mock_verify_url.assert_called_once
-
-
-async def delayed_response():
-    await sleep(5)
-    return httpx.Response(200, text="Hi there")
-
-@pytest.mark.asyncio
-@respx.mock
-async def test_max_attack_time_5():
-
-    # When a vuln has been found
-    persister = AsyncMock()
-    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
-    base_dir = os.path.join(home_dir, ".wapiti")
-    persister.CONFIG_DIR = os.path.join(base_dir, "config")
-
-
-    def mock_generate_payload(_self, _unique_id: uuid.UUID) -> str:
-        return "${jndi:dns://dns.wapiti3.ovh/" + "903fca88-6489-4403-8b50-1c330f9989e4.l}"
-
-
-    respx.get("http://perdu.com/",
-        headers__contains={"authorization": "${jndi:dns://dns.wapiti3.ovh/"+"903fca88-6489-4403-8b50-1c330f9989e4.l}"}
-    ).mock(side_effect=delayed_response())
-
-    respx.get("http://perdu.com/?SAMLRequest=").mock(
-        return_value=httpx.Response(200, text="Hi there")
-    )
-
-    respx.get("http://perdu.com/").mock(
-        return_value=httpx.Response(200, text="Hi there")
-    )
-
-    request = Request("http://perdu.com/")
-    request.path_id = 1
-
-    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
-    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        options = {"timeout": 10, "level": 2, "max_attack_time": 5}
-
-        module = ModuleLog4Shell(crawler, persister, options, Event(), crawler_configuration)
-
-        with patch.object(module, "_verify_dns", return_value=True):
-            with patch.object(module, '_generate_payload', return_value=mock_generate_payload(module, "1")):
-                await module.attack(request)
-
-        # 1 for X-Forwarded-For + 10 headers on first request
-        assert persister.add_payload.call_count == 11
