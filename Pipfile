@@ -11,7 +11,7 @@ pytest-cov = ">=4.0.0"
 
 [packages]
 aiocache = "==0.12.0"
-aiohttp = "==3.8.6"
+aiohttp = "==3.9.0"
 aiosqlite = "==0.17.0"
 arsenic = "==21.8"
 beautifulsoup4 = ">=4.12.2"
