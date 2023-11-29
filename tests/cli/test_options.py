@@ -178,7 +178,7 @@ async def test_validate_cms_choices(mock_validate_cms_choices, _, __):
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "cms",
-        "--cms", "drupal,joomla,prestashop",
+        "--cms", "drupal,joomla,prestashop,spip",
         "--scope", "url"
     ]
 
