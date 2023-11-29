@@ -293,7 +293,7 @@ class Attack:
 
     @property
     def cms(self):
-        return self.options.get("cms", "drupal,joomla,prestashop")
+        return self.options.get("cms", "drupal,joomla,prestashop,spip")
 
 
     @property
