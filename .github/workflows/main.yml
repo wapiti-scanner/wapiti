@@ -24,6 +24,15 @@ jobs:
         run: |
           pylint-ignore --rcfile=.pylintrc wapitiCore
 
+  dependencies:
+    name: Dependencies consistency
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checking differences between pyproject.toml and Pipfile
+        run: |
+          diff <(cat Pipfile | grep -E ".* = \"(=|>).*\"" | sed -E 's/"?(.*[^"])"? = "(.*)"/\1\2/' | sort | uniq) <(cat pyproject.toml | grep -E '".+(=|>)=.*"' | sed -E "s/\s+\"(.*+)\".*/\1/" | sort | uniq)
+
   docker:
     runs-on: ubuntu-22.04
     steps:
