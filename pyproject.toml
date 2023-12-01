@@ -7,7 +7,7 @@ name = "wapiti3"
 version = "3.1.8"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
-requires-python = ">=3.9" 
+requires-python = ">=3.10" 
 authors = [
         {name="Nicolas Surribas", email="nicolas.surribas@gmail.com"},
 ]
@@ -24,7 +24,6 @@ classifiers = [
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Topic :: Security",
@@ -32,26 +31,26 @@ classifiers = [
         "Topic :: Software Development :: Testing"
 ]
 dependencies = [
-        "aiocache==0.12.0",
-        "aiohttp==3.8.6",
-        "aiosqlite==0.17.0",
+        "aiocache==0.12.2",
+        "aiohttp==3.9.1",
+        "aiosqlite==0.19.0",
         "arsenic==21.8",
         "beautifulsoup4>=4.12.2",
         "browser-cookie3==0.19.1",
-        "dnspython==2.3.0",
+        "dnspython==2.4.2",
         "h11>=0.14.0",
-        "httpcore==0.17.2",
-        "httpx[brotli, socks]==0.24.1",
-        "httpx-ntlm>=1.1.0",
-        "loguru>=0.5.3",
-        "mako>=1.1.4",
-        "markupsafe==2.1.1",
-        "mitmproxy>=10.1.1",
-        "pyasn1==0.4.8",
-        "six>=1.15.0",
-        "sqlalchemy>=1.4.26",
-        "tld>=0.12.5",
-        "typing-extensions==4.4.0",
+        "httpcore==1.0.2",
+        "httpx[brotli, socks]==0.25.2",
+        "httpx-ntlm>=1.4.0",
+        "loguru>=0.7.2",
+        "mako>=1.3.0",
+        "markupsafe==2.1.3",
+        "mitmproxy>=10.1.5",
+        "pyasn1==0.5.1",
+        "six>=1.16.0",
+        "sqlalchemy>=2.0.23",
+        "tld>=0.13",
+        "typing-extensions==4.8.0",
         "yaswfp>=0.9.3" 
 ]
 
@@ -65,17 +64,16 @@ wapiti-getcookie = "wapitiCore.main.getcookie:getcookie_asyncio_wrapper"
 
 [project.optional-dependencies]
 ssl = [
-        "humanize==4.4.0",
-        "sslyze==5.1.1"
+        "humanize==4.9.0",
+        "sslyze==5.2.0"
 ]
 test = [
-        "humanize==4.4.0",
-        "pytest>=7.1.3", 
-        "pytest-cov>=4.0.0",
-        "pytest-asyncio==0.20.1",
-        "respx==0.20.1",
-        "sslyze==5.1.1",
-        "pydantic==1.10.2" # This is to avoid a conflict with sslyze
+        "humanize==4.9.0",
+        "pytest>=7.4.3", 
+        "pytest-cov>=4.1.0",
+        "pytest-asyncio==0.21.1",
+        "respx==0.20.2",
+        "sslyze==5.2.0"
 ]
 
 [tool.setuptools.packages]
