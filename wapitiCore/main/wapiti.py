@@ -81,7 +81,7 @@ def is_mod_cms_set(args):
 
 
 def validate_cms_choices(cms_value):
-    allowed_cms = ["drupal", "joomla", "prestashop", "spip"]
+    allowed_cms = ["drupal", "joomla", "prestashop", "spip", "wp"]
     cms_list = cms_value.split(',')
     for cms in cms_list:
         if cms not in allowed_cms:
@@ -292,7 +292,7 @@ async def wapiti_main():
                 raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
 
         if args.cms:
-            allowed_cms = ["drupal", "joomla", "prestashop"]
+            allowed_cms = ["drupal", "joomla", "prestashop", "spip", "wp"]
             if not is_mod_cms_set(args):
                 raise InvalidOptionValue("--cms", "module cms is required when --cms is used")
             if not validate_cms_choices(args.cms):
@@ -302,7 +302,7 @@ async def wapiti_main():
             attack_options["cms"] = args.cms
 
         if args.modules and "cms" in args.modules and not args.cms:
-            attack_options["cms"] = "drupal,joomla,prestashop,spip"
+            attack_options["cms"] = "drupal,joomla,prestashop,spip,wp"
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)

@@ -41,14 +41,13 @@ class ModuleSpipEnum(CommonCMS):
             has_spip_headers = any(header.lower() in response.headers for header in spip_http_headers)
 
             # Check for common SPIP directories or files
-            common_spip_paths = ['/ecrire/', '/plugins/', '/squelettes/', '/IMG/']
+            common_spip_paths = ['/ecrire/', '/squelettes/']
             has_spip_paths = any(path in response.content for path in common_spip_paths)
 
             has_spip_in_headers = 'composed-by' in response.headers and 'SPIP' in response.headers['composed-by']
 
             # Check if any of the SPIP indicators were found
             return spip_elements or spip_meta_tags or has_spip_headers or has_spip_paths or has_spip_in_headers
-
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished or request.method == "POST":

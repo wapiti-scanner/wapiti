@@ -5,6 +5,7 @@ from typing import Optional
 from wapitiCore.attack.cms.mod_drupal_enum import ModuleDrupalEnum
 from wapitiCore.attack.cms.mod_joomla_enum import ModuleJoomlaEnum
 from wapitiCore.attack.cms.mod_prestashop_enum import ModulePrestashopEnum
+from wapitiCore.attack.cms.mod_wp_enum import ModuleWpEnum
 from wapitiCore.attack.cms.mod_spip_enum import ModuleSpipEnum
 
 
@@ -52,6 +53,11 @@ class ModuleCms(Attack):
             await module.attack(request_to_root)
         if "spip" in cms_list:
             module = ModuleSpipEnum(
+                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+            )
+            await module.attack(request_to_root)
+        if "wp" in cms_list:
+            module = ModuleWpEnum(
                 self.crawler, self.persister, self.options, Event(), self.crawler_configuration
             )
             await module.attack(request_to_root)
