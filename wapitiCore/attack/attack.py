@@ -128,6 +128,7 @@ class ParameterSituation(Flag):
     POST_BODY = auto()
     MULTIPART = auto()
     HEADERS = auto()
+    JSON_BODY = auto()
 
 
 @dataclasses.dataclass

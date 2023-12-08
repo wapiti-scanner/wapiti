@@ -670,6 +670,10 @@ class Request:
         return "multipart" in self._enctype
 
     @property
+    def is_json(self) -> bool:
+        return self._enctype == "application/json"
+
+    @property
     def referer(self) -> str:
         return self._referer
 
