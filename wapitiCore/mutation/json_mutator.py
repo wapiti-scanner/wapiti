@@ -49,29 +49,29 @@ def get_item(json_object, path):
     return ptr
 
 
-class JSONMutator:
+class JSONMutator():
     """The JSONMutator will only mutate the JSON object within the body,
     it won't change parameters in the query string"""
     def __init__(
-            self, methods="FGP", qs_inject=False, max_queries_per_pattern: int = 1000,
-            skip=None  # Must not attack those parameters (blacklist)
+            self, _methods="FGP", _qs_inject=False, _max_queries_per_pattern: int = 1000,
+            _skip=None  # Must not attack those parameters (blacklist)
     ):
         self._attack_hashes = set()
 
-    def mutate(self,
-               request: Request,
+    @staticmethod
+    def mutate(request: Request,
                payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
 
         referer = request.referer
 
         if not request.is_json:
-            raise StopIteration
+            return
 
         try:
             data = json.loads(request.post_params)
         except json.JSONDecodeError:
-            raise StopIteration
+            return
 
         injection_points = find_injectable([], data)
 
