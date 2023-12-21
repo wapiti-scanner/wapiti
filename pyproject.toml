@@ -26,6 +26,7 @@ classifiers = [
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Security",
         "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
         "Topic :: Software Development :: Testing"
@@ -66,7 +67,7 @@ wapiti-getcookie = "wapitiCore.main.getcookie:getcookie_asyncio_wrapper"
 [project.optional-dependencies]
 ssl = [
         "humanize==4.9.0",
-        "sslyze==5.2.0"
+        "sslyze==6.0.0"
 ]
 test = [
         "humanize==4.9.0",
@@ -74,7 +75,7 @@ test = [
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.23.5",
         "respx==0.20.2",
-        "sslyze==5.2.0"
+        "sslyze==6.0.0"
 ]
 
 [tool.setuptools.packages]

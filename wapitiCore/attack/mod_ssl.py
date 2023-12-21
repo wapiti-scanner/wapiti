@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import asyncio
 from os.path import join as path_join
@@ -82,11 +82,6 @@ def process_certificate_info(certinfo_result):
         log_blue(message)
         yield INFO_LEVEL, message
 
-        if not cert_deployment.leaf_certificate_subject_matches_hostname:
-            message = "Requested hostname doesn't match those in the certificate"
-            log_red(message)
-            yield CRITICAL_LEVEL, message
-
         if not cert_deployment.received_chain_has_valid_order:
             message = "Certificate chain is in invalid order"
             log_orange(message)
@@ -114,13 +109,13 @@ def process_certificate_info(certinfo_result):
         log_blue(message)
         yield INFO_LEVEL, message
 
-        if leaf_certificate.not_valid_after > datetime.utcnow():
+        if leaf_certificate.not_valid_after_utc > datetime.now(timezone.utc):
             message = "Certificate expires in " + \
-                      humanize.precisedelta(leaf_certificate.not_valid_after - datetime.utcnow())
+                      humanize.precisedelta(leaf_certificate.not_valid_after_utc - datetime.now(timezone.utc))
             log_green(message)
             yield INFO_LEVEL, message
         else:
-            message = f"Certificate has expired at {leaf_certificate.not_valid_after}"
+            message = f"Certificate has expired at {leaf_certificate.not_valid_after_utc}"
             log_red(message)
             yield CRITICAL_LEVEL, message
 
@@ -160,7 +155,7 @@ def process_certificate_info(certinfo_result):
             if not validation_result.was_validation_successful:
                 message = (
                     f"Certificate is invalid for {validation_result.trust_store.name} "
-                    f"trust store: {validation_result.openssl_error_string}"
+                    f"trust store: {validation_result.validation_error}"
                 )
                 log_red(message)
                 yield CRITICAL_LEVEL, message
