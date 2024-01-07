@@ -54,24 +54,18 @@ class ModuleExec(Attack):
 
     @staticmethod
     def _find_warning_in_response(data) -> str:
-        vuln_info = ""
-        if "eval()'d code</b> on line <b>" in data:
-            vuln_info = "Warning eval()"
-        if "Cannot execute a blank command in" in data:
-            vuln_info = "Warning exec"
-        if "sh: command substitution:" in data:
-            vuln_info = "Warning exec"
-        if "Fatal error</b>:  preg_replace" in data:
-            vuln_info = "preg_replace injection"
-        if "Warning: usort()" in data:
-            vuln_info = "Warning usort()"
-        if "Warning: preg_replace():" in data:
-            vuln_info = "preg_replace injection"
-        if "Warning: assert():" in data:
-            vuln_info = "Warning assert"
-        if "Failure evaluating code:" in data:
-            vuln_info = "Evaluation warning"
-        return vuln_info
+        warnings_and_infos = {
+            "eval()'d code</b> on line <b>":"Warning eval()",
+            "Cannot execute a blank command in":"Warning exec",
+            "sh: command substitution:":"Warning exec",
+            "Warning: usort()":"Warning usort()",
+            "Warning: assert():":"Warning assert",
+            "Failure evaluating code:":"Evaluation warning"
+        }
+        for warning,vuln_info in warnings_and_infos.items():
+            if warning in data:
+                return vuln_info
+        return ""
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         warned = False
