@@ -22,9 +22,10 @@ from math import ceil
 from random import randint
 from typing import Optional, Iterator
 
+from bs4.builder import ParserRejectedMarkup
 from httpx import ReadTimeout, RequestError
 
-from wapitiCore.main.log import log_red, log_orange, log_verbose
+from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack, Mutator
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
@@ -441,6 +442,9 @@ class ModuleSql(Attack):
             good_hash = html.text_only_md5
         except ReadTimeout:
             self.network_errors += 1
+            return
+        except ParserRejectedMarkup as exc:
+            logging.warning(exc)
             return
 
         methods = ""
