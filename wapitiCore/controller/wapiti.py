@@ -424,7 +424,9 @@ class Wapiti:
             async for request, response in self.persister.get_forms(attack_module=module.name):
                 yield request, response
 
-    async def load_and_attack(self, stop_event: asyncio.Event, attack_module: Attack, attacked_ids: set, answer: str):
+    async def load_and_attack(self, stop_event: asyncio.Event, attack_module: Attack):
+        answer = "0"
+        attacked_ids = set()
         async for original_request, original_response in self.load_resources_for_module(attack_module):
             if stop_event.is_set():
                 print('')
@@ -479,6 +481,7 @@ class Wapiti:
             else:
                 if original_request.path_id is not None:
                     attacked_ids.add(original_request.path_id)
+        return attacked_ids, answer
 
 
     async def attack(self, stop_event: asyncio.Event):
@@ -525,8 +528,8 @@ class Wapiti:
                 attacked_ids = set()
 
                 try:
-                    await asyncio.wait_for(
-                        self.load_and_attack(stop_event, attack_module, attacked_ids, answer),
+                    attacked_ids, answer = await asyncio.wait_for(
+                        self.load_and_attack(stop_event, attack_module),
                         self._max_attack_time
                     )
                 except asyncio.TimeoutError:
