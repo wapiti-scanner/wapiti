@@ -1,12 +1,14 @@
 import sys
 from asyncio import Event
+from time import monotonic
 from unittest import mock
 
 from httpcore import URL
+import httpx
 import pytest
 
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
-from wapitiCore.net import Request
+from wapitiCore.net import Request, Response
 from wapitiCore.main.wapiti import wapiti_main
 from wapitiCore.controller.wapiti import Wapiti
 
@@ -93,6 +95,74 @@ async def test_options():
         attak_modules = await cli._load_attack_modules(stop_event, crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.write_report")
+async def test_max_attack_time(_):
+
+    max_attack_time = 10
+    delta = 0.1 # max-attack-time percentage
+
+    class CustomMock:
+        CONFIG_DIR = ""
+
+        def __init__(self):
+            pass
+
+        async def count_paths(self):
+            return 0
+
+        async def count_attacked(self, _name):
+            return 0
+
+        async def set_attacked(self, path_ids, module_name):
+            return
+
+        async def add_payload(self, request_id, payload_type, module,
+            category = None, level = 0, request = None, parameter = "",
+            info = "", wstg = None, response = None):
+            return
+
+        async def get_links(self, attack_module):
+            request = Request("http://perdu.com/test/config/")
+            request.path_id = 0
+            response = Response(
+                httpx.Response(
+                    status_code=200,
+                    headers={"content-type": "text/html"},
+                ),
+                url="http://perdu.com/test/config/"
+            )
+            yield request, response
+
+        async def get_forms(self, attack_module):
+            request = Request("http://perdu.com/test/config/", "POST")
+            request.path_id = 0
+            response = Response(
+                httpx.Response(
+                    status_code=200,
+                    headers={"content-type": "text/html"},
+                ),
+                url="http://perdu.com/test/config/"
+            )
+            yield request, response
+
+        async def get_root_url(self):
+            return "http://perdu.com/"
+
+    with mock.patch("os.makedirs", return_value=True):
+        stop_event = Event()
+        cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
+        cli.persister = CustomMock()
+        cli.set_max_attack_time(max_attack_time)
+        cli.set_attack_options({"timeout": 10, "tasks": 1})
+
+        cli.set_modules("all")
+        time = monotonic()
+        await cli.attack(stop_event)
+        max_run_duration = max_attack_time * (len(all_modules) + delta) # execution time for all modules + delta of uncertainty
+        assert monotonic() - time < max_run_duration
 
 
 @pytest.mark.asyncio
