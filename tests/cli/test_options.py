@@ -185,6 +185,16 @@ async def test_update_without_modules(mock_update):
             await wapiti_main()
             mock_update.assert_called_once_with(None)
 
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+async def test_update_with_wapp_url(mock_update):
+    """Ensure that no module should be updated when no module is requested."""
+    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"]
+    with mock.patch.object(sys, 'argv', testargs):
+        with pytest.raises(SystemExit):
+            await wapiti_main()
+            mock_update.assert_called_once_with(None)
+
 
 @pytest.mark.asyncio
 async def test_update_with_proxy():
@@ -273,6 +283,78 @@ async def test_is_mod_cms_set(mock_is_mod_cms_set, _, __):
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()
         mock_is_mod_cms_set.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
+async def test_mod_wapp_is_set(mock_is_mod_wapp_or_update_set, _, __):
+    """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "wapp",
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_mod_wapp_or_update_set.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
+async def test_mod_wapp_is_not_set(mock_is_mod_wapp_or_update_set, _, __):
+    """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "xss",
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_mod_wapp_or_update_set.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_valid_url", return_value=(False, {}, []))
+async def test_is_valid_url(mock_is_valid_url, _, __):
+    """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "wapp",
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_valid_url.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_valid_url", return_value=(False, {}, []))
+async def test_is_not_valid_url(mock_is_valid_url, _, __):
+    """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "wapp",
+        "--wapp-url", "http::raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_valid_url.assert_called_once()
 
 
 @pytest.mark.asyncio

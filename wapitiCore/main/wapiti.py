@@ -56,6 +56,16 @@ def fix_url_path(url: str):
     return url if urlparse(url).path else url + '/'
 
 
+def is_valid_url(url: str):
+    """Verify if the url provided has the right format"""
+    try:
+        urlparse(url)
+    except ValueError:
+        logging.error(f"ValueError, {url} is not a valid URL")
+        return False
+    return True
+
+
 def is_valid_endpoint(url_type, url: str):
     """Verify if the url provided has the right format"""
     try:
@@ -77,6 +87,13 @@ def is_mod_cms_set(args):
     if args.modules and "cms" in args.modules:
         return True
     logging.error("Error: Invalid option --cms, module cms is required when this option is used")
+    return False
+
+
+def is_mod_wapp_or_update_set(args):
+    if (args.modules and "wapp" in args.modules) or "update" in args:
+        return True
+    logging.error("Error: Invalid option --wapp-url, module wapp or option --update is required when using this option")
     return False
 
 
@@ -152,7 +169,7 @@ async def wapiti_main():
     if args.update:
         await wap.init_persister()
         logging.log("GREEN", "[*] Updating modules")
-        attack_options = {"level": args.level, "timeout": args.timeout}
+        attack_options = {"level": args.level, "timeout": args.timeout, "wapp_url": args.wapp_url}
         wap.set_attack_options(attack_options)
         await wap.update(args.modules)
         sys.exit()
@@ -303,6 +320,14 @@ async def wapiti_main():
 
         if args.modules and "cms" in args.modules and not args.cms:
             attack_options["cms"] = "drupal,joomla,prestashop,spip,wp"
+
+        if "wapp_url" in args:
+            url_value = fix_url_path(args.wapp_url)
+            if is_valid_url(url_value):
+                if not is_mod_wapp_or_update_set(args):
+                    raise InvalidOptionValue("--wapp-url", "module wapp or --update option \
+                    is required when --wapp-url is used")
+                attack_options["wapp_url"] = url_value
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)

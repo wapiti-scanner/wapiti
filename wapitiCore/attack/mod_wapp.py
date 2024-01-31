@@ -60,6 +60,13 @@ SCRIPT = (
 )
 
 
+def _is_valid_json(response):
+    try:
+        return json.loads(response.content)
+    except json.JSONDecodeError:
+        return False
+
+
 def get_tests(data: dict):
     tests = {}
 
@@ -84,32 +91,31 @@ class ModuleWapp(Attack):
 
     name = "wapp"
 
-    WAPP_CATEGORIES_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/categories.json"
+    BASE_URL = Attack.wapp_url
     WAPP_CATEGORIES = "categories.json"
-
-    WAPP_GROUPS_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/groups.json"
     WAPP_GROUPS = "groups.json"
-
-    WAPP_TECHNOLOGIES_BASE_URL = "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/technologies/"
     WAPP_TECHNOLOGIES = "technologies.json"
-
     user_config_dir = None
     finished = False
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
         self.user_config_dir = self.persister.CONFIG_DIR
-
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
 
     async def update(self):
         """Update the Wappalizer database from the web and load the patterns."""
+
+        wapp_categories_url = f"{self.BASE_URL}src/categories.json"
+        wapp_technologies_base_url = f"{self.BASE_URL}src/technologies/"
+        wapp_groups_url = f"{self.BASE_URL}src/groups.json"
+
         try:
             await self._load_wapp_database(
-                self.WAPP_CATEGORIES_URL,
-                self.WAPP_TECHNOLOGIES_BASE_URL,
-                self.WAPP_GROUPS_URL
+                wapp_categories_url,
+                wapp_technologies_base_url,
+                wapp_groups_url
             )
         except IOError:
             logging.error("Error downloading wapp database.")
@@ -216,8 +222,14 @@ class ModuleWapp(Attack):
 
     async def _dump_url_content_to_file(self, url: str, file_path: str):
         request = Request(url)
-        response = await self.crawler.async_send(request)
-
+        try:
+            response = await self.crawler.async_send(request)
+        except RequestError:
+            self.network_errors += 1
+            logging.error(f"Error: Non-200 status code for {url}")
+            return
+        if not _is_valid_json(response):
+            raise ValueError(f"Invalid or empty JSON response for {url}")
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(response.json, file)
 
@@ -231,20 +243,26 @@ class ModuleWapp(Attack):
         # Requesting all technologies one by one
         for technology_file_name in technology_files_names:
             request = Request(technologies_base_url + technology_file_name)
-            response: Response = await self.crawler.async_send(request)
-            # Merging all technologies in one object
+            try:
+                response: Response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+                logging.error(f"Error: Non-200 status code for {technology_file_name}. Skipping.")
+                return
+                # Merging all technologies in one object
             for technology_name in response.json:
                 technologies[technology_name] = response.json[technology_name]
-
-        # Saving categories & groups
-        await asyncio.gather(
-            self._dump_url_content_to_file(categories_url, categories_file_path),
-            self._dump_url_content_to_file(groups_url, groups_file_path)
-        )
-
-        # Saving technologies
-        with open(technologies_file_path, 'w', encoding='utf-8') as file:
-            json.dump(technologies, file)
+            try:
+            # Saving categories & groups
+                await asyncio.gather(
+                    self._dump_url_content_to_file(categories_url, categories_file_path),
+                    self._dump_url_content_to_file(groups_url, groups_file_path))
+            except ValueError:
+                logging.error(f"Invalid or empty JSON response for {categories_url} or {groups_url}")
+                return
+            # Saving technologies
+            with open(technologies_file_path, 'w', encoding='utf-8') as file:
+                json.dump(technologies, file)
 
     async def _verify_wapp_database(
             self,

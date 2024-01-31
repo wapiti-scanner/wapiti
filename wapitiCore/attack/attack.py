@@ -296,6 +296,9 @@ class Attack:
     def cms(self):
         return self.options.get("cms", "drupal,joomla,prestashop,spip,wp")
 
+    @property
+    def wapp_url(self):
+        return self.options.get("wapp_url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/")
 
     @property
     def proto_endpoint(self):

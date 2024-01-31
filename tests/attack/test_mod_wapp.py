@@ -1,6 +1,6 @@
 import os
 from asyncio import Event
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import httpx
 import pytest
@@ -588,3 +588,57 @@ async def test_merge_with_and_without_redirection():
         ]
 
         assert sorted(results) == sorted(expected_results)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exception_json():
+    json_string = {
+    "1C-Bitrix": {
+        "cats": [1, 6],
+        "cookies": {
+            "BITRIX_SM_GUEST_ID": ""
+        },
+        "description": "1C-Bitrix is a system of web project management...",
+        "headers": {
+            "Set-Cookie": "BITRIX_",
+            "X-Powered-CMS": "Bitrix Site Manager"
+        },
+        "icon": "1C-Bitrix.svg",
+        "website": "https://www.1c-bitrix.ru"
+        }
+    }
+
+    respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
+        return_value=httpx.Response(
+            200,
+            text=str(json_string)
+        )
+    )
+
+    respx.get("http://perdu.com/src/groups.json").mock(
+        return_value=httpx.Response(
+            200,
+            content="Test")
+    )
+
+    respx.get("http://perdu.com/src/categories.json").mock(
+        return_value=httpx.Response(
+            200,
+            content="Test''''")
+    )
+
+    request = Request("http://perdu.com/")
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with patch("builtins.open", MagicMock(side_effect=IOError)) as open_mock:
+            try:
+                await module.attack(request)
+                pytest.fail("Should raise an exception ..")
+            except (IOError, ValueError):
+                open_mock.assert_called_with(open_mock.mock_calls[0][1][0], 'r', encoding='utf-8')
