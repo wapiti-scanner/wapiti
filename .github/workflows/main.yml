@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - name: Install dependencies
@@ -28,7 +28,7 @@ jobs:
     name: Dependencies consistency
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Checking differences between pyproject.toml and Pipfile
         run: |
           diff <(cat Pipfile | grep -E ".* = \"(=|>).*\"" | sed -E 's/"?(.*[^"])"? = "(.*)"/\1\2/' | sort | uniq) <(cat pyproject.toml | grep -E '".+(=|>)=.*"' | sed -E "s/\s+\"(.*+)\".*/\1/" | sort | uniq)
@@ -54,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Display Python version
@@ -70,7 +70,7 @@ jobs:
       run: |
         pytest
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -85,14 +85,14 @@ jobs:
 
       - name: Archive production artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: diff-reports-file
           path: tests/integration/.dump_diff_file.txt
 
       - name: Archive production artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: produced-reports
           path: tests/integration/.test/*
