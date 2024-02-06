@@ -257,8 +257,8 @@ async def wapiti_main():
 
         # should be a setter
         wap.verbosity(args.verbosity)
-        if args.detailed_report:
-            wap.set_detail_report()
+        if args.detailed_report_level:
+            wap.set_detail_report(args.detailed_report_level)
         if args.color:
             wap.set_color()
         wap.set_timeout(args.timeout)

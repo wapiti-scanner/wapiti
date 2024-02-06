@@ -41,7 +41,7 @@ class ReportGenerator:
         auth,
         crawled_pages: list,
         crawled_pages_nbr: int,
-        detail_report: bool
+        detailed_report_level: int
     ):
         """Set the information about the scan"""
         self._infos["target"] = target
@@ -50,9 +50,9 @@ class ReportGenerator:
         self._infos["scope"] = scope
         self._infos["auth"] = auth
         self._infos["crawled_pages_nbr"] = crawled_pages_nbr
-        if detail_report is True:
+        if detailed_report_level in (1, 2):
             self._infos["crawled_pages"] = crawled_pages
-        self._infos["detailed_report"] = detail_report
+        self._infos["detailed_report_level"] = detailed_report_level
         self._date = date
 
     @property

@@ -474,7 +474,7 @@ TREE_CHECKER = {
                   }
               }],
               'crawled_pages_nbr': 0,
-              'detailed_report': False,
+              'detailed_report_level': 0,
               'scope': "",
               'target': "",
               'version': ""
