@@ -184,7 +184,7 @@ class TXTReportGenerator(ReportGenerator):
             "module": module,
             "wstg": wstg
         }
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"]:
             vuln_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -229,7 +229,7 @@ class TXTReportGenerator(ReportGenerator):
             "module": module,
             "wstg": wstg
         }
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"]:
             anom_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -282,7 +282,7 @@ class TXTReportGenerator(ReportGenerator):
             "module": module,
             "wstg": wstg
         }
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"]:
             addition_dict["detail"] = {
                 "response": detail_response(response)
             }

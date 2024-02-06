@@ -107,7 +107,7 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg,
         }
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"] == 2:
             vuln_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -152,7 +152,7 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": request.curl_repr,
             "wstg": wstg
         }
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"] == 2:
             anom_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -197,7 +197,7 @@ class JSONReportGenerator(ReportGenerator):
             "wstg": wstg
         }
 
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"] == 2:
             addition_dict["detail"] = {
                 "response": detail_response(response)
             }

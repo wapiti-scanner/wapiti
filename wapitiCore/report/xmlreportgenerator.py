@@ -163,7 +163,7 @@ class XMLReportGenerator(JSONReportGenerator):
                     wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
                     wstg_node.appendChild(wstg_code_node)
                 entry_node.appendChild(wstg_node)
-                if self._infos["detailed_report"] is True:
+                if self._infos["detailed_report_level"]:
                     entry_node.appendChild(self._create_detail_section(flaw))
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
@@ -275,7 +275,7 @@ class XMLReportGenerator(JSONReportGenerator):
         else:
             auth_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
         report_infos.appendChild(auth_node)
-        if self._infos["detailed_report"]:
+        if self._infos["detailed_report_level"]:
             report_infos.appendChild(self._create_crawled_pages_section(self._infos["crawled_pages"]))
         return report_infos
 

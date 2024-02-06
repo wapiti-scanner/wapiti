@@ -184,7 +184,7 @@ class Wapiti:
         self._auth_state = None
         self._mitm_proxy_port = 0
         self._proxy = None
-        self.detailed_report = False
+        self.detailed_report_level = 0
         self._headless_mode = "no"
         self._wait_time = 2.
 
@@ -250,9 +250,10 @@ class Wapiti:
             gmtime(),
             f"Wapiti {WAPITI_VERSION}",
             self._auth_state,
-            await self.persister.get_all_paths() if self.detailed_report else None,
+            await self.persister.get_necessary_paths() if self.detailed_report_level == 1 \
+            else await self.persister.get_all_paths() if self.detailed_report_level == 2 else None,
             await self.count_resources(),
-            self.detailed_report
+            self.detailed_report_level
         )
 
         for vul in vulnerabilities:
@@ -763,8 +764,10 @@ class Wapiti:
         self.color_enabled = True
         self.refresh_logging()
 
-    def set_detail_report(self):
-        self.detailed_report = True
+    def set_detail_report(self, detailed_report_level: int):
+        self.detailed_report_level = detailed_report_level
+        # 1 => normal / level="INFO"
+        # 2 => verbose / level="VERBOSE"
 
     def verbosity(self, verbose: int):
         """Define the level of verbosity of the output."""

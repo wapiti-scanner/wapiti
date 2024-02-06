@@ -554,6 +554,14 @@ class SqlPersister:
                 },
             } for row in result.fetchall()]
 
+    async def get_necessary_paths(self) -> List:
+        requests = []
+        async for request, response in self._get_paths(crawled=False):
+            requests.append({"request": {"url": request.url, "method": request.method,
+                                         "post_params": request.post_params,
+                                         "status_code": response.status if response else None}})
+        return requests
+
     async def count_paths(self) -> int:
         statement = select(sql_count(self.paths.c.path_id)).where(~self.paths.c.evil)
         async with self._engine.begin() as conn:

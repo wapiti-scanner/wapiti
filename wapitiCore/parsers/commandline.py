@@ -458,8 +458,12 @@ def parse_args():
 
     parser.add_argument(
         "-dr", "--detailed-report",
-        action="store_true",
-        help="HTTP responses will appear in the generated report"
+        metavar="DETAILED_REPORT_LEVEL",
+        dest="detailed_report_level",
+        help="level 1 : include only the HTTP requests, level 2 : include HTTP requests and responses",
+        default=0,
+        type=int,
+        choices=[1, 2]
     )
 
     parser.add_argument(

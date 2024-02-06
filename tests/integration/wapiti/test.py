@@ -77,7 +77,7 @@ for key_test, content_test in iter_tests:
                 os.system(f"wapiti -u {target['name']} -m {content_test['modules']} "
                           f"-f json -o {json_output_path} "
                           f"{more_args} "
-                          f"--detailed-report --flush-session --verbose 2 ")
+                          f"--detailed-report 2 --flush-session --verbose 2 ")
                 # Now we reparse the JSON to get only useful tests informations:
                 with open(json_output_path, "r") as bloated_output_file:
                     bloated_output_data = json.load(bloated_output_file)

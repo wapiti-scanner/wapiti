@@ -106,7 +106,7 @@ class HTMLReportGenerator(JSONReportGenerator):
                     additionals=self._additionals,
                     flaws=self._flaw_types,
                     level_to_emoji=level_to_emoji,
-                    detailed_report=self._infos["detailed_report"]
+                    detailed_report_level=self._infos["detailed_report_level"]
                 )
             )
 
