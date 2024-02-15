@@ -51,7 +51,7 @@ dependencies = [
         "sqlalchemy>=2.0.23",
         "tld>=0.13",
         "typing-extensions==4.8.0",
-        "yaswfp>=0.9.3" 
+        "yaswfp>=0.9.3"
 ]
 
 [project.urls]

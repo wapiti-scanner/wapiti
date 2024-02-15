@@ -31,7 +31,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Checking differences between pyproject.toml and Pipfile
         run: |
-          diff <(cat Pipfile | grep -E ".* = \"(=|>).*\"" | sed -E 's/"?(.*[^"])"? = "(.*)"/\1\2/' | sort | uniq) <(cat pyproject.toml | grep -E '".+(=|>)=.*"' | sed -E "s/\s+\"(.*+)\".*/\1/" | sort | uniq)
+          diff <(cat Pipfile | grep -E ".* = \"(=|>).*\"" | grep -v "httpx" | sed -E 's/"?(.*[^"])"? = "(.*)"/\1\2/' | sort | uniq) <(cat pyproject.toml | grep -E '".+(=|>)=.*"' | grep -v "httpx" | sed -E "s/\s+\"(.*+)\".*/\1/" | sort | uniq)
+          diff <(cat Pipfile | grep "httpx[^-]" | sed -E 's/(httpx).*\[\"(.*)\",\s\"(.*)\"\],\s.*\"(.*)\".*/\1[\2, \3] \4/; s/ //g') <(cat pyproject.toml | grep "httpx[^-]" | sed 's/^ *//; s/,*$//; s/"//g; s/ //g')
 
   docker:
     runs-on: ubuntu-22.04
