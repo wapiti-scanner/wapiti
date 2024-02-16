@@ -176,6 +176,16 @@ async def test_update_with_modules(mock_update):
 
 
 @pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.is_valid_url")
+async def test_update_with_not_valid_url(mock_valid_url):
+    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "htp:/perdu"]
+    with mock.patch.object(sys, 'argv', testargs):
+        with pytest.raises(SystemExit) as ve:
+            await wapiti_main()
+            mock_valid_url.assert_called_once_with("htp:/perdu")
+
+
+@pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")
 async def test_update_without_modules(mock_update):
     """Ensure that no module should be updated when no module is requested."""

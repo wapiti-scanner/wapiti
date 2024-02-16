@@ -59,11 +59,15 @@ def fix_url_path(url: str):
 def is_valid_url(url: str):
     """Verify if the url provided has the right format"""
     try:
-        urlparse(url)
+        parts = urlparse(url)
     except ValueError:
-        logging.error(f"ValueError, {url} is not a valid URL")
+        logging.error('ValueError')
         return False
-    return True
+    else:
+        if parts.scheme in ("http", "https") and parts.netloc:
+            return True
+    logging.error(f"Error: {url} is not a valid URL")
+    return False
 
 
 def is_valid_endpoint(url_type, url: str):
@@ -91,9 +95,8 @@ def is_mod_cms_set(args):
 
 
 def is_mod_wapp_or_update_set(args):
-    if (args.modules and "wapp" in args.modules) or "update" in args:
+    if (args.modules and "wapp" in args.modules) or args.update:
         return True
-    logging.error("Error: Invalid option --wapp-url, module wapp or option --update is required when using this option")
     return False
 
 
@@ -169,11 +172,21 @@ async def wapiti_main():
     if args.update:
         await wap.init_persister()
         logging.log("GREEN", "[*] Updating modules")
-        attack_options = {"level": args.level, "timeout": args.timeout, "wapp_url": args.wapp_url}
+        if args.wapp_url:
+            attack_options = {"level": args.level, "timeout": args.timeout, "wapp_url": fix_url_path(args.wapp_url)}
+        else:
+            attack_options = {"level": args.level, "timeout": args.timeout,\
+                              "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"}
         wap.set_attack_options(attack_options)
-        await wap.update(args.modules)
-        sys.exit()
-
+        try:
+            await wap.update(args.modules)
+            sys.exit()
+        except InvalidOptionValue as invalid_option:
+            logging.error(invalid_option)
+            raise
+        except ValueError as e:
+            logging.error(f"Value error: {e}")
+            raise
     try:
         for start_url in args.starting_urls:
             if start_url.startswith(("http://", "https://")):
@@ -321,13 +334,17 @@ async def wapiti_main():
         if args.modules and "cms" in args.modules and not args.cms:
             attack_options["cms"] = "drupal,joomla,prestashop,spip,wp"
 
-        if "wapp_url" in args:
+        if args.wapp_url:
+            if not is_mod_wapp_or_update_set(args):
+                raise InvalidOptionValue("--wapp-url", "module wapp or --update option is required when --wapp-url is "
+                                                       "used")
             url_value = fix_url_path(args.wapp_url)
             if is_valid_url(url_value):
-                if not is_mod_wapp_or_update_set(args):
-                    raise InvalidOptionValue("--wapp-url", "module wapp or --update option \
-                    is required when --wapp-url is used")
                 attack_options["wapp_url"] = url_value
+            else:
+                raise InvalidOptionValue(
+                    "--wapp-url", url_value
+                )
 
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)

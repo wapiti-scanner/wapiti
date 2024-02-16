@@ -1,8 +1,9 @@
 import os
 from asyncio import Event
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 import httpx
+from httpx import RequestError
 import pytest
 import respx
 
@@ -592,43 +593,40 @@ async def test_merge_with_and_without_redirection():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_exception_json():
-    json_string = {
-    "1C-Bitrix": {
-        "cats": [1, 6],
-        "cookies": {
-            "BITRIX_SM_GUEST_ID": ""
-        },
-        "description": "1C-Bitrix is a system of web project management...",
-        "headers": {
-            "Set-Cookie": "BITRIX_",
-            "X-Powered-CMS": "Bitrix Site Manager"
-        },
-        "icon": "1C-Bitrix.svg",
-        "website": "https://www.1c-bitrix.ru"
-        }
-    }
+async def test_raise_on_invalid_json():
+    """Tests that a ValueError is raised when calling _dump_url_content_to_file with invalid or empty Json."""
 
-    respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
-        return_value=httpx.Response(
-            200,
-            text=str(json_string)
-        )
-    )
-
-    respx.get("http://perdu.com/src/groups.json").mock(
+    respx.get("http://perdu.com/src/categories.json").mock(
         return_value=httpx.Response(
             200,
             content="Test")
     )
 
-    respx.get("http://perdu.com/src/categories.json").mock(
-        return_value=httpx.Response(
-            200,
-            content="Test''''")
-    )
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com"}
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
-    request = Request("http://perdu.com/")
+        with pytest.raises(ValueError) as exc_info:
+            await module._dump_url_content_to_file("http://perdu.com/src/categories.json", "test.json")
+
+        assert exc_info.value.args[0] == "Invalid or empty JSON response for http://perdu.com/src/categories.json"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_not_valid_db_url():
+    """Tests that a ValueError is raised when the URL doesn't contain a Wapp DB."""
+    cat_url = "http://perdu.com/src/categories.json"
+    group_url = "http://perdu.com/src/groups.json"
+    tech_url = "http://perdu.com/src/technologies/"
+
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            404,
+            content="Not Found")
+    )
     persister = AsyncMock()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -636,9 +634,155 @@ async def test_exception_json():
 
         module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
 
-        with patch("builtins.open", MagicMock(side_effect=IOError)) as open_mock:
-            try:
-                await module.attack(request)
-                pytest.fail("Should raise an exception ..")
-            except (IOError, ValueError):
-                open_mock.assert_called_with(open_mock.mock_calls[0][1][0], 'r', encoding='utf-8')
+        with pytest.raises(ValueError) as exc_info:
+            await module._load_wapp_database(cat_url, tech_url, group_url)
+
+        assert exc_info.value.args[0] == "http://perdu.com/src/technologies/ is not a valid URL for a wapp database"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_value_error():
+    """Tests that a ValueError is raised when calling the _load_wapp_database function when the json is not valid."""
+
+    example_json_content = {
+        "2B Advice": {
+            "cats": [67],
+            "description": "2B Advice provides a plug-in to manage GDPR cookie consent.",
+            "icon": "2badvice.png",
+            "js": {
+                "BBCookieControler": ""
+            },
+            "saas": True,
+            "scriptSrc": "2badvice-cdn\\.azureedge\\.net",
+            "website": "https://www.2b-advice.com/en/data-privacy-software/cookie-consent-plugin/"
+        },
+        "30namaPlayer": {
+            "cats": [14],
+            "description": "30namaPlayer is a modified version of Video.",
+            "dom": "section[class*='player30nama']",
+            "icon": "30namaPlayer.png",
+            "website": "https://30nama.com/"
+        }}
+
+    cat_url = "http://perdu.com/src/categories.json"
+    group_url = "http://perdu.com/src/groups.json"
+    tech_url = "http://perdu.com/src/technologies/"
+
+    respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
+        return_value=httpx.Response(
+            200,
+            content=str(example_json_content))
+    )
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            200,
+            content="No Json")
+    )
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(ValueError) as exc_info:
+            await module._load_wapp_database(cat_url, tech_url, group_url)
+
+        assert exc_info.value.args[0] == "Invalid or empty JSON response for http://perdu.com/src/categories.json"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_request_error():
+    """Tests that a RequestError is raised when calling the _load_wapp_database function with wrong URL."""
+
+    cat_url = "http://perdu.com/src/categories.json"
+    group_url = "http://perdu.com/src/groups.json"
+    tech_url = "http://perdu.com/src/technologies/"
+
+    respx.get(url__regex=r"http://perdu.com/.*").mock(side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(RequestError) as exc_info:
+            await module._load_wapp_database(cat_url, tech_url, group_url)
+
+        assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_request_error_for_dump_url():
+    """Tests that a RequestError is raised when calling the _dump_url_content_to_file function with wrong URL."""
+
+    url = "http://perdu.com/"
+
+    respx.get(url__regex=r"http://perdu.com/.*").mock(side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(RequestError) as exc_info:
+            await module._dump_url_content_to_file(url, "cat.json")
+
+        assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_request_error_for_update():
+    """Tests that a RequestError is raised when calling the update function with wrong URL."""
+
+    url = "http://perdu.com/"
+    group_url = "http://perdu.com/src/groups.json"
+    tech_url = "http://perdu.com/src/technologies/"
+
+    respx.get(url__regex=r"http://perdu.com/.*").mock(side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(RequestError) as exc_info:
+            await module.update()
+
+        assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_value_error_for_update():
+    """Tests that a ValueError is raised when calling the update function with URL doesn't contain a wapp DB."""
+
+    respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
+        return_value=httpx.Response(
+            200,
+            content=str("{}"))
+    )
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            200,
+            content="No Json")
+    )
+
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(ValueError) as exc_info:
+            await module.update()
+
+        assert exc_info.value.args[0] == "Invalid or empty JSON response for http://perdu.com/src/categories.json"
