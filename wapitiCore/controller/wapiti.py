@@ -335,7 +335,19 @@ class Wapiti:
                     )
                     if hasattr(class_instance, "update"):
                         logging.info(f"Updating module {mod_name}")
-                        await class_instance.update()
+                        try:
+                            await class_instance.update()
+                            logging.success("Update done.")
+                        except RequestError as request_error:
+                            logging.error(request_error)
+                            raise
+                        except InvalidOptionValue as invalid_option_error:
+                            logging.error(invalid_option_error)
+                            raise
+                        except ValueError as value_error:
+                            logging.error(value_error)
+                            raise
+
                 except ImportError:
                     continue
                 except Exception:  # pylint: disable=broad-except
@@ -343,7 +355,6 @@ class Wapiti:
                     logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
                     continue
 
-        logging.success("Update done.")
 
     async def load_scan_state(self):
         async for request in self.persister.get_to_browse():

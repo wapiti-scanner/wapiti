@@ -29,7 +29,9 @@ from arsenic import get_session, browsers, services
 from arsenic.errors import JavascriptError, UnknownError, ArsenicError
 
 from wapitiCore.main.log import logging, log_blue
+from wapitiCore.main.wapiti import is_valid_url
 from wapitiCore.attack.attack import Attack
+from wapitiCore.controller.wapiti import InvalidOptionValue
 from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
@@ -110,15 +112,24 @@ class ModuleWapp(Attack):
         wapp_categories_url = f"{self.BASE_URL}src/categories.json"
         wapp_technologies_base_url = f"{self.BASE_URL}src/technologies/"
         wapp_groups_url = f"{self.BASE_URL}src/groups.json"
-
+        if not is_valid_url(self.BASE_URL):
+            raise InvalidOptionValue(
+                "--wapp-url", self.BASE_URL
+            )
         try:
             await self._load_wapp_database(
                 wapp_categories_url,
                 wapp_technologies_base_url,
                 wapp_groups_url
             )
+        except RequestError:
+            self.network_errors += 1
+            raise
         except IOError:
             logging.error("Error downloading wapp database.")
+        except ValueError as e:
+            logging.error(f"Value error: {e}")
+            raise
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:
@@ -136,7 +147,10 @@ class ModuleWapp(Attack):
         groups_file_path = os.path.join(self.user_config_dir, self.WAPP_GROUPS)
         technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
 
-        await self._verify_wapp_database(categories_file_path, technologies_file_path, groups_file_path)
+        try:
+            await self._verify_wapp_database(categories_file_path, technologies_file_path, groups_file_path)
+        except ValueError:
+            return
 
         try:
             application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
@@ -226,6 +240,8 @@ class ModuleWapp(Attack):
             response = await self.crawler.async_send(request)
         except RequestError:
             self.network_errors += 1
+            raise
+        if response.status != 200:
             logging.error(f"Error: Non-200 status code for {url}")
             return
         if not _is_valid_json(response):
@@ -247,9 +263,10 @@ class ModuleWapp(Attack):
                 response: Response = await self.crawler.async_send(request)
             except RequestError:
                 self.network_errors += 1
-                logging.error(f"Error: Non-200 status code for {technology_file_name}. Skipping.")
-                return
-                # Merging all technologies in one object
+                raise
+            if response.status != 200:
+                raise ValueError(f"{technologies_base_url} is not a valid URL for a wapp database")
+            # Merging all technologies in one object
             for technology_name in response.json:
                 technologies[technology_name] = response.json[technology_name]
             try:
@@ -257,9 +274,12 @@ class ModuleWapp(Attack):
                 await asyncio.gather(
                     self._dump_url_content_to_file(categories_url, categories_file_path),
                     self._dump_url_content_to_file(groups_url, groups_file_path))
-            except ValueError:
-                logging.error(f"Invalid or empty JSON response for {categories_url} or {groups_url}")
-                return
+            except RequestError as req_error:
+                logging.error(f"Caught a RequestError: {req_error}")
+                raise
+            except ValueError as value_error:
+                logging.error(f"Caught a ValueError: {value_error}")
+                raise
             # Saving technologies
             with open(technologies_file_path, 'w', encoding='utf-8') as file:
                 json.dump(technologies, file)

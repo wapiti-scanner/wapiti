@@ -492,7 +492,6 @@ def parse_args():
     parser.add_argument(
         "--wapp-url",
         help="Provide a custom URL for updating Wappalyzer Database",
-        default="https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/",
         metavar="WAPP_URL"
     )
 
