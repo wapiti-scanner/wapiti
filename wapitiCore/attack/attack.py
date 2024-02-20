@@ -57,6 +57,7 @@ all_modules = {
     "https_redirect",
     "log4shell",
     "methods",
+    "network_device",
     "nikto",
     "permanentxss",
     "redirect",
