@@ -346,12 +346,12 @@ class ModuleWapp(Attack):
                                 if version == "undefined":
                                     continue
 
-                                if not expected_format:
+                                if not expected_format or expected_format.startswith(r"\;"):
                                     if VERSION_REGEX.match(version):
                                         final_results[software] = [version]
                                     else:
                                         final_results[software] = []
-                                elif isinstance(version, str):
+                                elif isinstance(version, str) and r"\;version:" in expected_format:
                                     final_results[software] = [version]
                                 # Other cases seems to be some kind of false positives
                             # final_results.update(results)
