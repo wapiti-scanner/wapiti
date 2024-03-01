@@ -302,6 +302,10 @@ class Attack:
         return self.options.get("wapp_url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/")
 
     @property
+    def wapp_dir(self):
+        return self.options.get("wapp_dir", None)
+
+    @property
     def proto_endpoint(self):
         parts = urlparse(self.external_endpoint)
         return parts.netloc + parts.path

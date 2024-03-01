@@ -18,8 +18,9 @@
 import json
 import os
 import asyncio
+import shutil
 import string
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List
 import re
 from urllib.parse import urlparse
 
@@ -69,6 +70,44 @@ def _is_valid_json(response):
         return False
 
 
+def is_json_file(filepath):
+    try:
+        with open(filepath, 'r', encoding="utf-8") as f:
+            json.load(f)
+    except json.JSONDecodeError as json_error:
+        raise ValueError(f"{filepath} is not a valid JSON.") from json_error
+    except FileNotFoundError as file_not_found_error:
+        raise OSError(f"{filepath} does not exist !") from file_not_found_error
+    return True
+
+
+def merge_json_files(directory_path, output_file):
+    # Get a list of all files in the directory
+    files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
+
+    # Check if there are any JSON files in the directory
+    if not files:
+        raise OSError(f"{directory_path} does not contain any file !")
+
+    # Initialize an empty dictionary to store the merged JSON data
+    merged_data = {}
+
+    # Iterate through each JSON file and merge its contents
+    for file_name in files:
+        file_path = os.path.join(directory_path, file_name)
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                file_data = json.load(file)
+                merged_data.update(file_data)
+        except json.JSONDecodeError as json_error:
+            raise ValueError(f"{file_name} is not a valid JSON.") from json_error
+
+    # Write the merged JSON data to the output file
+    with open(output_file, 'w', encoding='utf-8') as output:
+        json.dump(merged_data, output, ensure_ascii=False, indent=2)
+
+
 def get_tests(data: dict):
     tests = {}
 
@@ -94,6 +133,7 @@ class ModuleWapp(Attack):
     name = "wapp"
 
     BASE_URL = Attack.wapp_url
+    WAPP_DIR = Attack.wapp_dir
     WAPP_CATEGORIES = "categories.json"
     WAPP_GROUPS = "groups.json"
     WAPP_TECHNOLOGIES = "technologies.json"
@@ -106,30 +146,74 @@ class ModuleWapp(Attack):
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)
 
+    async def copy_files_to_conf(self, files_to_copy: List[str]):
+        """
+        This function copies wapp DB files specified as arguments to the config directory.
+        """
+        for source_file in files_to_copy:
+            # Check if file exists before attempting to copy
+            if not os.path.isfile(source_file):
+                logging.error(f"Warning: File {source_file} does not exist, skipping.")
+                continue
+
+            # Construct the destination file path using the filename
+            destination_file = os.path.join(self.user_config_dir, os.path.basename(source_file))
+
+            try:
+                shutil.copy(source_file, destination_file)
+                logging.info(f"Copied {source_file} to {destination_file}")
+            except shutil.Error as err:
+                logging.error(f"Error copying {source_file}: {err}")
+
     async def update(self):
         """Update the Wappalizer database from the web and load the patterns."""
 
         wapp_categories_url = f"{self.BASE_URL}src/categories.json"
         wapp_technologies_base_url = f"{self.BASE_URL}src/technologies/"
         wapp_groups_url = f"{self.BASE_URL}src/groups.json"
-        if not is_valid_url(self.BASE_URL):
-            raise InvalidOptionValue(
-                "--wapp-url", self.BASE_URL
-            )
-        try:
-            await self._load_wapp_database(
-                wapp_categories_url,
-                wapp_technologies_base_url,
-                wapp_groups_url
-            )
-        except RequestError:
-            self.network_errors += 1
-            raise
-        except IOError:
-            logging.error("Error downloading wapp database.")
-        except ValueError as e:
-            logging.error(f"Value error: {e}")
-            raise
+        if self.WAPP_DIR:
+            categories_file_path = os.path.join(self.WAPP_DIR, self.WAPP_CATEGORIES)
+            groups_file_path = os.path.join(self.WAPP_DIR, self.WAPP_GROUPS)
+            technologies_directory_path = os.path.join(self.WAPP_DIR, "technologies/")
+            technologies_file_path = os.path.join(self.WAPP_DIR, self.WAPP_TECHNOLOGIES)
+            try:
+                merge_json_files(technologies_directory_path, technologies_file_path)
+            except (ValueError, OSError) as error:
+                logging.error(error)
+                raise ValueError(f"Update failed : Something went wrong with files in {self.WAPP_DIR}") from error
+            try:
+                if is_json_file(categories_file_path) and is_json_file(groups_file_path) \
+                        and is_json_file(technologies_file_path):
+                    files_list = [categories_file_path, groups_file_path, technologies_file_path]
+                    try:
+                        await self.copy_files_to_conf(files_list)
+                    except ValueError:
+                        return
+                else:
+                    return
+            except (ValueError, OSError) as error:
+                logging.error(error)
+                raise ValueError(f"Update failed : Something went wrong with files in {self.WAPP_DIR}") from error
+
+        elif self.BASE_URL:
+            if not is_valid_url(self.BASE_URL):
+                raise InvalidOptionValue(
+                    "--wapp-url", self.BASE_URL
+                )
+            try:
+                await self._load_wapp_database(
+                    wapp_categories_url,
+                    wapp_technologies_base_url,
+                    wapp_groups_url
+                )
+            except RequestError as e:
+                logging.error(f"RequestError occurred: {e}")
+                raise
+            except IOError:
+                logging.error("Error downloading wapp database.")
+            except ValueError as e:
+                logging.error(f"Value error: {e}")
+                raise
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:

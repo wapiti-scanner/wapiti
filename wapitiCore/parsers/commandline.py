@@ -495,4 +495,10 @@ def parse_args():
         metavar="WAPP_URL"
     )
 
+    parser.add_argument(
+        "--wapp-dir",
+        help="Provide a custom URL for updating Wappalyzer Database",
+        metavar="WAPP_DIR"
+    )
+
     return parser.parse_args()

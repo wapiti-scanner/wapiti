@@ -174,6 +174,8 @@ async def wapiti_main():
         logging.log("GREEN", "[*] Updating modules")
         if args.wapp_url:
             attack_options = {"level": args.level, "timeout": args.timeout, "wapp_url": fix_url_path(args.wapp_url)}
+        elif args.wapp_dir:
+            attack_options = {"level": args.level, "timeout": args.timeout, "wapp_dir": args.wapp_dir}
         else:
             attack_options = {"level": args.level, "timeout": args.timeout,\
                               "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"}
@@ -344,6 +346,18 @@ async def wapiti_main():
             else:
                 raise InvalidOptionValue(
                     "--wapp-url", url_value
+                )
+
+        if args.wapp_dir:
+            if not is_mod_wapp_or_update_set(args):
+                raise InvalidOptionValue("--wapp-url", "module wapp or --update option is required when --wapp-url is "
+                                                       "used")
+            dir_value = args.wapp_dir
+            if os.path.isdir(dir_value):
+                attack_options["wapp_dir"] = dir_value
+            else:
+                raise InvalidOptionValue(
+                    "--wapp-dir", dir_value
                 )
 
         if args.skipped_parameters:
