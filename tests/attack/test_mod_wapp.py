@@ -1,6 +1,6 @@
 import os
 from asyncio import Event
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, mock_open
 
 import httpx
 from httpx import RequestError
@@ -786,3 +786,132 @@ async def test_raise_on_value_error_for_update():
             await module.update()
 
         assert exc_info.value.args[0] == "Invalid or empty JSON response for http://perdu.com/src/categories.json"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_not_valid_directory_for_update():
+    """Tests that a ValueError is raised when calling update() with a directory that does not exist."""
+    wapp_dir = "/"
+
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            404,
+            content="Not Found")
+    )
+    persister = AsyncMock()
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_dir": "/"}
+
+        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(ValueError) as exc_info:
+            await module.update()
+
+        assert exc_info.value.args[0] == "Update failed : Something went wrong with files in /"
+
+def read_directory_structure(directory_path):
+    file_a_path = os.path.join(directory_path, 'categories.json')
+    file_b_path = os.path.join(directory_path, 'groups.json')
+    file_c_path = os.path.join(directory_path, 'technologies', 'a.json')
+
+    data_a = read_json_file(file_a_path)
+    data_b = read_json_file(file_b_path)
+    data_c = read_json_file(file_c_path)
+
+    return {'categories': data_a, 'groups': data_b, 'a': data_c}
+
+def read_json_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_not_valid_json_for_update():
+
+    """Tests that a ValueError is raised when calling update() with an invalid json file."""
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            404,
+            content="Not Found")
+    )
+
+    wapp_dir = "wapp/"
+    # Mock os.path.isfile to simulate file existence
+    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+        # Mock os.listdir to simulate the directory structure
+        with patch('os.listdir', return_value=['categories.json', 'groups.json', 'technologies']):
+            # Mock builtins.open to provide content for the JSON files
+            with patch('builtins.open', new_callable=mock_open, read_data='{"key": "value"}'):
+                persister = AsyncMock()
+                crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+                async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                    options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
+
+                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+                    with pytest.raises(ValueError) as exc_info:
+                        await module.update()
+
+            assert exc_info.value.args[0] == "Update failed : Something went wrong with files in wapp/"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_not_valid_json_file_for_update():
+
+    """Tests that a ValueError is raised when calling update() with an invalid json file."""
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            404,
+            content="Not Found")
+    )
+
+    wapp_dir = "wapp/"
+    # Mock os.path.isfile to simulate file existence
+    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+        # Mock os.listdir to simulate the directory structure
+        with patch('os.listdir', return_value=['categories.json', 'groups.json', 'technologies']):
+            # Mock builtins.open to provide content for the JSON files
+            with patch('builtins.open', new_callable=mock_open, read_data='{"{key "value"}'):
+                persister = AsyncMock()
+                crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+                async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                    options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
+
+                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+                    with pytest.raises(ValueError) as exc_info:
+                        await module.update()
+
+            assert exc_info.value.args[0] == "Update failed : Something went wrong with files in wapp/"
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_raise_on_file_does_not_exist_for_update():
+    """Tests that a ValueError is raised when calling update() with a missing json file."""
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        return_value=httpx.Response(
+            404,
+            content="Not Found")
+    )
+
+    wapp_dir = "wapp/"
+    # Mock os.path.isfile to simulate file existence
+    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+        # Mock os.listdir to simulate the directory structure
+        with patch('os.listdir', return_value=['cat.json', 'gr.json', 'technologie']):
+            # Mock builtins.open to provide content for the JSON files
+            with patch('builtins.open', new_callable=mock_open, read_data='{"{key "value"}'):
+                persister = AsyncMock()
+                crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+                async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                    options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
+
+                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+
+                    with pytest.raises(ValueError) as exc_info:
+                        await module.update()
+
+            assert exc_info.value.args[0] == "Update failed : Something went wrong with files in wapp/"

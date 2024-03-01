@@ -205,6 +205,16 @@ async def test_update_with_wapp_url(mock_update):
             await wapiti_main()
             mock_update.assert_called_once_with(None)
 
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+async def test_update_with_wapp_dir(mock_update):
+    """Ensure that no module should be updated when no module is requested."""
+    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-dir", "/"]
+    with mock.patch.object(sys, 'argv', testargs):
+        with pytest.raises(SystemExit):
+            await wapiti_main()
+            mock_update.assert_called_once_with(None)
+
 
 @pytest.mark.asyncio
 async def test_update_with_proxy():
@@ -324,6 +334,41 @@ async def test_mod_wapp_is_not_set(mock_is_mod_wapp_or_update_set, _, __):
         "--url", "http://testphp.vulnweb.com/",
         "-m", "xss",
         "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_mod_wapp_or_update_set.assert_called_once()
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
+async def test_mod_wapp_is_set_with_wapp_dir(mock_is_mod_wapp_or_update_set, _, __):
+    """Let's ensure that the --wapp-dir option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "wapp",
+        "--wapp-dir", "/"
+    ]
+
+    with mock.patch.object(sys, "argv", testargs):
+        await wapiti_main()
+        mock_is_mod_wapp_or_update_set.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
+async def test_mod_wapp_is_not_set_with_wapp_dir(mock_is_mod_wapp_or_update_set, _, __):
+    """Let's ensure that the --wapp-dir option is only used when the module wapp or update option is called."""
+    testargs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "-m", "xss",
+        "--wapp-dir", "/"
     ]
 
     with mock.patch.object(sys, "argv", testargs):
