@@ -11,8 +11,8 @@ RUN apt update \
 
 RUN update-ca-certificates
 RUN python3 -c "import sys; print(sys.version)"
-RUN python3 -m pip install --upgrade pip
-RUN pip3 install -U setuptools --no-cache-dir
+RUN python3 -m pip install --no-cache-dir --upgrade pip
+RUN pip3 install --no-cache-dir -U setuptools
 RUN mkdir /usr/src/app
 
 ENV LANG en_US.UTF-8
@@ -23,5 +23,5 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN pip3 install .[test] --no-cache-dir
+RUN pip3 install --no-cache-dir .[test]
 CMD ["pytest"]

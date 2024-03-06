@@ -14,7 +14,7 @@ RUN apt update \
 
 COPY . .
 
-RUN pip3 install . --break-system-packages
+RUN pip3 install --no-cache-dir . --break-system-packages
 
 FROM debian:bookworm-slim
 
