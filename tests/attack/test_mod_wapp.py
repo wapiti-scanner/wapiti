@@ -1,3 +1,4 @@
+import json
 import os
 from asyncio import Event
 from unittest.mock import AsyncMock, patch, mock_open
@@ -645,7 +646,7 @@ async def test_raise_on_not_valid_db_url():
 async def test_raise_on_value_error():
     """Tests that a ValueError is raised when calling the _load_wapp_database function when the json is not valid."""
 
-    example_json_content = {
+    example_json_content = json.dumps({
         "2B Advice": {
             "cats": [67],
             "description": "2B Advice provides a plug-in to manage GDPR cookie consent.",
@@ -663,7 +664,7 @@ async def test_raise_on_value_error():
             "dom": "section[class*='player30nama']",
             "icon": "30namaPlayer.png",
             "website": "https://30nama.com/"
-        }}
+        }})
 
     cat_url = "http://perdu.com/src/categories.json"
     group_url = "http://perdu.com/src/groups.json"
@@ -672,7 +673,7 @@ async def test_raise_on_value_error():
     respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
         return_value=httpx.Response(
             200,
-            content=str(example_json_content))
+            content=example_json_content)
     )
     respx.get(url__regex=r"http://perdu.com/.*").mock(
         return_value=httpx.Response(
@@ -786,6 +787,143 @@ async def test_raise_on_value_error_for_update():
             await module.update()
 
         assert exc_info.value.args[0] == "Invalid or empty JSON response for http://perdu.com/src/categories.json"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_private_gitlab():
+    """Test for private gitlab url and token."""
+
+    techno_json_content = json.dumps({
+        "Outlook Web App from test": {
+            "cats": [30],
+            "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*",
+            "description": "Outlook on the web is an information manager web app. It includes a web-based email client, a calendar tool, a contact manager, and a task manager.",
+            "headers": {"X-OWA-Version": "([\\d\\.]+)?\\;version:\\1"},
+            "html": "<link[^>]+/owa/auth/([\\d\\.]+)/themes/resources\\;version:\\1",
+            "icon": "Outlook.svg",
+            "implies": "Microsoft ASP.NET",
+            "js": {"IsOwaPremiumBrowser": ""},
+            "url": "/owa/auth/log(?:on|off)\\.aspx",
+            "website": "https://help.outlook.com"
+        },
+        "Microsoft ASP.NET": {
+            "cats": [18],
+            "cookies": {"ASP.NET_SessionId": "", "ASPSESSION": ""},
+            "cpe": "cpe:2.3:a:microsoft:asp.net:*:*:*:*:*:*:*:*",
+            "description": "ASP.NET is an open-source, server-side web-application framework designed for web development to produce dynamic web pages.",
+            "headers": {"X-AspNet-Version": "(.+)\\;version:\\1", "X-Powered-By": "^ASP\\.NET", "set-cookie": "\\.AspNetCore"},
+            "html": "<input[^>]+name=\"__VIEWSTATE",
+            "icon": "Microsoft ASP.NET.svg",
+            "url": "\\.aspx?(?:$|\\?)",
+            "website": "https://www.asp.net"
+        }
+    })
+
+    cat_json_content = json.dumps({
+        "30": {
+            "groups": [4],
+            "name": "Webmail",
+            "priority": 2
+        },
+        "18": {
+            "groups": [9],
+            "name": "Web frameworks",
+            "priority": 7
+        }
+    })
+
+    group_json_content = json.dumps({
+        "4": {
+            "name": "Communication"
+        },
+        "9": {
+            "name": "Web development"
+        }
+    })
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            301,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={"X-OWA-Version": "15.0.1497.26", "Location": "http://perdu.com/auth/login"}
+        )
+    )
+    respx.get("http://perdu.com/auth/login").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <link rel='shortcut icon' href='/owa/auth/15.0.1497/themes/resources/favicon.ico' type='image/x-icon'> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
+            </body></html>",
+            headers={}
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/src%2Ftechnologies%2F.*").mock(
+        return_value=httpx.Response(
+            200,
+            content=techno_json_content)
+    )
+    respx.get("http://perdu.com/src%2Fcategories.json").mock(
+        return_value=httpx.Response(
+            200,
+            content=cat_json_content)
+    )
+    respx.get("http://perdu.com/src%2Fgroups.json").mock(
+        return_value=httpx.Response(
+            200,
+            content=group_json_content)
+    )
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config2")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
+
+        with patch.dict(os.environ, {'GITLAB_PRIVATE_TOKEN': 'test_gitlab_private_token'}):
+            module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+            await module.update()
+            await module.attack(request)
+
+            persister.add_payload.assert_called
+
+            results = [
+                (args[1]["payload_type"], args[1]["info"], args[1]["category"]) for args in persister.add_payload.call_args_list
+            ]
+
+            expected_results = [
+                (
+                    'additional',
+                    '{"name": "Microsoft ASP.NET", "versions": [], "cpe": "cpe:2.3:a:microsoft:asp.net:*:*:*:*:*:*:*:*", '
+                    '"categories": ["Web frameworks"], "groups": ["Web development"]}',
+                    "Fingerprint web technology"
+                ),
+                (
+                    'additional',
+                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                    '"categories": ["Webmail"], "groups": ["Communication"]}',
+                    "Fingerprint web technology"
+                ),
+                (
+                    'vulnerability',
+                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                    '"categories": ["Webmail"], "groups": ["Communication"]}',
+                    "Fingerprint web application framework"
+                ),
+            ]
+
+            assert sorted(results) == sorted(expected_results)
 
 
 @pytest.mark.asyncio
