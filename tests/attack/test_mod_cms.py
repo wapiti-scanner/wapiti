@@ -256,12 +256,12 @@ async def test_joomla_version_detected():
         assert persister.add_payload.call_args_list[0][1]["module"] == "cms"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Joomla", "versions": ["3.10.12"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.10.12"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["module"] == "cms"
         assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "Joomla", "versions": ["3.10.12"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.10.12"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
         )
 
 
@@ -305,11 +305,11 @@ async def test_joomla_multi_versions_detected():
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Joomla", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "Joomla", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
         )
 
 
@@ -351,7 +351,7 @@ async def test_joomla_version_not_detected():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Joomla", "versions": [], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": [], "categories": ["CMS Joomla"], "groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio

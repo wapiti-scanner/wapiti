@@ -54,7 +54,7 @@ class ModuleJoomlaEnum(CommonCMS):
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
 
             joomla_detected = {
-                "name": "Joomla",
+                "name": "Joomla!",
                 "versions": self.versions,
                 "categories": ["CMS Joomla"],
                 "groups": ["Content"]
@@ -62,7 +62,7 @@ class ModuleJoomlaEnum(CommonCMS):
 
             log_blue(
                 MSG_TECHNO_VERSIONED,
-                "Joomla",
+                "Joomla!",
                 self.versions
             )
 
