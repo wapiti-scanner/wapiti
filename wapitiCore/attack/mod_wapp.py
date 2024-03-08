@@ -22,7 +22,7 @@ import shutil
 import string
 from typing import Dict, Tuple, Optional, List
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote_plus
 
 from httpx import RequestError
 
@@ -139,6 +139,8 @@ class ModuleWapp(Attack):
     WAPP_TECHNOLOGIES = "technologies.json"
     user_config_dir = None
     finished = False
+    # Store the gitlab private token from env variable
+    gitlab_private_token = None
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
@@ -167,10 +169,16 @@ class ModuleWapp(Attack):
 
     async def update(self):
         """Update the Wappalizer database from the web and load the patterns."""
+        self.gitlab_private_token = os.environ.get("GITLAB_PRIVATE_TOKEN", None)
 
-        wapp_categories_url = f"{self.BASE_URL}src/categories.json"
-        wapp_technologies_base_url = f"{self.BASE_URL}src/technologies/"
-        wapp_groups_url = f"{self.BASE_URL}src/groups.json"
+        sources = ["src/categories.json", "src/technologies/", "src/groups.json"]
+        if self.gitlab_private_token:
+            # file path needs to be URL-encoded
+            # https://docs.gitlab.com/ee/api/repository_files.html#get-raw-file-from-repository
+            sources = [quote_plus(src) for src in sources]
+        wapp_categories_url = f"{self.BASE_URL}{sources[0]}"
+        wapp_technologies_base_url = f"{self.BASE_URL}{sources[1]}"
+        wapp_groups_url = f"{self.BASE_URL}{sources[2]}"
         if self.WAPP_DIR:
             categories_file_path = os.path.join(self.WAPP_DIR, self.WAPP_CATEGORIES)
             groups_file_path = os.path.join(self.WAPP_DIR, self.WAPP_GROUPS)
@@ -342,9 +350,16 @@ class ModuleWapp(Attack):
 
         # Requesting all technologies one by one
         for technology_file_name in technology_files_names:
-            request = Request(technologies_base_url + technology_file_name)
+            technologies_file_url = technologies_base_url + technology_file_name
+            headers={}
+            if self.gitlab_private_token:
+                technologies_file_url = technologies_file_url + "/raw"
+                headers = {"PRIVATE_TOKEN": self.gitlab_private_token}
+
+            request = Request(technologies_file_url)
+
             try:
-                response: Response = await self.crawler.async_send(request)
+                response: Response = await self.crawler.async_send(request, headers=headers)
             except RequestError:
                 self.network_errors += 1
                 raise
