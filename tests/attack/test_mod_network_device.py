@@ -542,3 +542,83 @@ async def test_detect_harbor_raise_on_request_error():
             await module.check_harbor("http://perdu.com/")
 
         assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_citrix_from_title():
+    respx.get("http://perdu.com/logon/LogonPoint/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Citrix Gateway</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Citrix Gateway", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_citrix_from_class():
+    respx.get("http://perdu.com/logon/LogonPoint/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title class="_ctxstxt_NetscalerGateway">Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "NetscalerGateway", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
