@@ -32,7 +32,7 @@ class ModuleDrupalEnum(CommonCMS):
                 if (
                     response.is_success
                     and "content-type" in response.headers
-                    and "application/javascript" in response.headers["content-type"]
+                    and "javascript" in response.headers["content-type"]
                    ):
                     return True
         return False
