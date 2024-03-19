@@ -181,8 +181,15 @@ async def wapiti_main():
             attack_options = {"level": args.level, "timeout": args.timeout,\
                               "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"}
         wap.set_attack_options(attack_options)
-        await wap.update(args.modules)
-        sys.exit()
+        try:
+            await wap.update(args.modules)
+            sys.exit()
+        except InvalidOptionValue as invalid_option:
+            logging.error(invalid_option)
+            raise
+        except ValueError as e:
+            logging.error(f"Value error: {e}")
+            raise
 
     if args.swagger_uri:
         swagger = Swagger(swagger_url=args.swagger_uri, base_url=url)
