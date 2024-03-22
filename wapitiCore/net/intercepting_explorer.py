@@ -390,6 +390,8 @@ class InterceptingExplorer(Explorer):
         self._cookies = cookies or CookieJar()
         self._wait_time = wait_time
         self._headless_task = None
+        self._mitm_task = None
+        self._queue = None
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
@@ -459,7 +461,6 @@ class InterceptingExplorer(Explorer):
             )
         )
 
-        
         if self._headless == "no":
             # No headless crawler, just intercepting mode so no starting URLs
             to_explore.clear()
