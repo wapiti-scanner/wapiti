@@ -23,7 +23,6 @@ import sys
 from operator import attrgetter
 from collections import deque
 from dataclasses import replace
-from datetime import datetime
 from hashlib import sha256
 from importlib import import_module
 from time import gmtime, strftime
@@ -187,6 +186,7 @@ class Wapiti:
         self.detailed_report_level = 0
         self._headless_mode = "no"
         self._wait_time = 2.
+        self._buffer = []
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
