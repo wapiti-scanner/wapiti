@@ -177,7 +177,7 @@ class Wapiti:
         self._max_links_per_page = 0
         self._max_files_per_dir = 0
         self._scan_force = "normal"
-        self._max_scan_time = 0
+        self._max_scan_time = None
         self._max_attack_time = None
         self._bug_report = True
         self._logfile = ""
@@ -376,6 +376,16 @@ class Wapiti:
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
+    async def explore_and_save_requests(self, explorer):
+        self._buffer = []
+        # Browse URLs are saved them once we have enough in our buffer
+        async for resource, response in explorer.async_explore(self._start_urls, self._excluded_urls):
+            self._buffer.append((resource, response))
+
+            if len(self._buffer) > 100:
+                await self.persister.save_requests(self._buffer)
+                self._buffer = []
+
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
@@ -406,22 +416,21 @@ class Wapiti:
         explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
         explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
 
-        start = datetime.utcnow()
-        buffer = []
+        self._buffer = []
 
-        # Browse URLs are saved them once we have enough in our buffer
-        async for resource, response in explorer.async_explore(self._start_urls, self._excluded_urls):
-            buffer.append((resource, response))
-
-            if len(buffer) > 100:
-                await self.persister.save_requests(buffer)
-                buffer = []
-
-            if not stop_event.is_set() and (datetime.utcnow() - start).total_seconds() > self._max_scan_time >= 1:
-                logging.info("Max scan time was reached, stopping.")
+        try:
+            await asyncio.wait_for(
+               self.explore_and_save_requests(explorer),
+               self._max_scan_time
+            )
+        except asyncio.TimeoutError:
+            logging.info("Max scan time was reached, stopping.")
+            if not stop_event.is_set():
                 stop_event.set()
+        finally:
+            await explorer.clean()
 
-        await self.persister.save_requests(buffer)
+        await self.persister.save_requests(self._buffer)
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")

@@ -446,6 +446,7 @@ class Explorer:
             if not task_to_request and (self._stopped.is_set() or not to_explore):
                 break
 
+    async def clean(self):
         self._cookiejar = self._crawler.cookie_jar
         await self._crawler.close()
 

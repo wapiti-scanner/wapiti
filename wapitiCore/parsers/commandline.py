@@ -329,7 +329,7 @@ def parse_args():
         "--max-scan-time",
         metavar="SECONDS",
         help="Set how many seconds you want the scan to last (floats accepted)",
-        type=float, default=0
+        type=float, default=None
     )
 
     parser.add_argument(

@@ -332,7 +332,7 @@ async def launch_headless_explorer(
                         continue
                 else:
                     try:
-                        response = await crawler.async_send(request)
+                        response = await crawler.async_send(request, timeout=crawler.timeout.connect)
                     except httpx.RequestError as exception:
                         logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
                         continue
@@ -389,66 +389,18 @@ class InterceptingExplorer(Explorer):
         self._final_cookies = None
         self._cookies = cookies or CookieJar()
         self._wait_time = wait_time
+        self._headless_task = None
 
-    async def async_explore(
-            self,
-            to_explore: Deque[Request],
-            excluded_urls: list = None
-    ) -> AsyncIterator[Tuple[Request, Response]]:
-        queue = asyncio.Queue()
-
-        exclusion_regexes = []
-        excluded_requests = []
-
-        if isinstance(excluded_urls, list):
-            for bad_request in excluded_urls:
-                if isinstance(bad_request, str):
-                    exclusion_regexes.append(wildcard_translate(bad_request))
-                elif isinstance(bad_request, Request):
-                    excluded_requests.append(bad_request)
-
-        # Launch proxy as asyncio task
-        mitm_task = asyncio.create_task(
-            launch_proxy(
-                self._mitm_port,
-                queue,
-                self._crawler.headers,
-                self._cookies,
-                self._scope,
-                proxy=self._proxy,
-                drop_cookies=self._drop_cookies,
-            )
-        )
-
-        headless_task = None
-        if self._headless == "no":
-            # No headless crawler, just intercepting mode so no starting URLs
-            to_explore.clear()
-        else:
-            headless_task = asyncio.create_task(
-                launch_headless_explorer(
-                    self._stopped,
-                    self._crawler,
-                    to_explore,
-                    scope=self._scope,
-                    proxy_port=self._mitm_port,
-                    excluded_requests=excluded_requests,
-                    exclusion_regexes=exclusion_regexes,
-                    visibility=self._headless,
-                    wait_time=self._wait_time,
-                    max_depth=self._max_depth,
-                )
-            )
-
+    async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
             try:
-                request, response = queue.get_nowait()
+                request, response = self._queue.get_nowait()
             except asyncio.QueueEmpty:
                 await asyncio.sleep(.1)
             except KeyboardInterrupt:
                 break
             else:
-                queue.task_done()
+                self._queue.task_done()
 
                 # Scope check and deduplication are made here
                 if not self._scope.check(request) or request in self._processed_requests:
@@ -477,15 +429,73 @@ class InterceptingExplorer(Explorer):
             if self._stopped.is_set():
                 break
 
-        await queue.join()
+    async def async_explore(
+            self,
+            to_explore: Deque[Request],
+            excluded_urls: list = None
+    ) -> AsyncIterator[Tuple[Request, Response]]:
+        self._queue = asyncio.Queue()
+
+        exclusion_regexes = []
+        excluded_requests = []
+
+        if isinstance(excluded_urls, list):
+            for bad_request in excluded_urls:
+                if isinstance(bad_request, str):
+                    exclusion_regexes.append(wildcard_translate(bad_request))
+                elif isinstance(bad_request, Request):
+                    excluded_requests.append(bad_request)
+
+        # Launch proxy as asyncio task
+        self._mitm_task = asyncio.create_task(
+            launch_proxy(
+                self._mitm_port,
+                self._queue,
+                self._crawler.headers,
+                self._cookies,
+                self._scope,
+                proxy=self._proxy,
+                drop_cookies=self._drop_cookies,
+            )
+        )
+
+        
+        if self._headless == "no":
+            # No headless crawler, just intercepting mode so no starting URLs
+            to_explore.clear()
+        else:
+            self._headless_task = asyncio.create_task(
+                launch_headless_explorer(
+                    self._stopped,
+                    self._crawler,
+                    to_explore,
+                    scope=self._scope,
+                    proxy_port=self._mitm_port,
+                    excluded_requests=excluded_requests,
+                    exclusion_regexes=exclusion_regexes,
+                    visibility=self._headless,
+                    wait_time=self._wait_time,
+                    max_depth=self._max_depth,
+                )
+            )
+
+        async for request, response in self.process_requests(excluded_requests, exclusion_regexes):
+            yield request, response
+            if self._stopped.is_set():
+                break
+
+    async def clean(self):
+        if not self._queue.empty():
+            await self._queue.join()
+
         # The headless crawler must stop when the stop event is set, let's just wait for it
-        if headless_task:
-            await headless_task
+        if self._headless_task:
+            await self._headless_task
 
         # We are canceling the mitm proxy, but we could have used a special request to shut down the master to.
         # https://docs.mitmproxy.org/stable/addons-examples/#shutdown
-        mitm_task.cancel()
-        self._final_cookies = await mitm_task
+        self._mitm_task.cancel()
+        self._final_cookies = await self._mitm_task
         await self._crawler.close()
 
     @property
