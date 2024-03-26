@@ -1,0 +1,65 @@
+stages:
+  - code_style
+  - tests
+
+variables:
+  PYTHON_10_IMAGE: "docker.io/library/python:3.10-slim-bullseye"
+  PYTHON_11_IMAGE: "docker.io/library/python:3.11-slim-bullseye"
+
+check_coding_style:
+  stage: code_style
+  image: $PYTHON_10_IMAGE
+  tags:
+    - docker-wapiti
+  rules:
+    - if: |
+        $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||
+        $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - '**/*.py'
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install "pylint==2.12.2"
+    - pip install "pylint-ignore==2022.1025"
+  script:
+    - pylint-ignore --rcfile=.pylintrc wapitiCore
+
+test-python:
+  stage: tests
+  tags:
+    - docker-wapiti
+  rules:
+    - if: |
+        $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||
+        $CI_PIPELINE_SOURCE == "merge_request_event"
+  parallel:
+    matrix:
+      - PYTHON_IMAGE: [$PYTHON_10_IMAGE, $PYTHON_11_IMAGE]
+  image: $PYTHON_IMAGE
+  before_script:
+    - python -c "import sys; print(sys.version)"
+    - apt-get update
+    - apt-get install php-cli php-xml -y --no-install-recommends
+    - python -m pip install --upgrade pip
+    - pip install -U setuptools
+    - pip3 install .[test]
+  script:
+    - pytest --cov --cov-report term --cov-report xml:coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+test-build-docker:
+  stage: tests
+  tags:
+    - shell-wapiti
+  rules:
+    - if: |
+        $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||
+        $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - docker build .
