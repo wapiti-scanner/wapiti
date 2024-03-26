@@ -1,3 +1,4 @@
+import json
 from asyncio import Event
 from unittest.mock import AsyncMock
 
@@ -11,6 +12,8 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_network_device import ModuleNetworkDevice
 from wapitiCore.attack.network_devices.mod_forti import ModuleForti
+from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
+
 
 
 @pytest.mark.asyncio
@@ -361,5 +364,171 @@ async def test_raise_on_request_error():
 
         with pytest.raises(RequestError) as exc_info:
             await module.check_forti("http://perdu.com/")
+
+        assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_harbor_with_version():
+    json_data = {
+        "auth_mode": "db_auth",
+        "banner_message": "",
+        "harbor_version": "v2.10",
+        "oidc_provider_name": "",
+        "primary_auth_mode": False,
+        "self_registration": True
+    }
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/api/v2.0/systeminfo").mock(
+        return_value=httpx.Response(
+            200,
+            headers={"Content-Type": "application/json"},
+            content=json.dumps(json_data)
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Harbor", "version": "v2.10", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_harbor_without_version():
+    json_data = {
+        "auth_mode": "db_auth",
+        "banner_message": "",
+        "oidc_provider_name": "",
+        "primary_auth_mode": False,
+        "self_registration": True
+    }
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/api/v2.0/systeminfo").mock(
+        return_value=httpx.Response(
+            200,
+            headers={"Content-Type": "application/json"},
+            content=json.dumps(json_data)
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Harbor", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_harbor_with_json_error():
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/api/v2.0/systeminfo").mock(
+        return_value=httpx.Response(
+            200,
+            headers={"Content-Type": "application/json"},
+            content="Not Json"
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Harbor", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_harbor_raise_on_request_error():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> \
+                        </body></html>'
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleHarbor(crawler, persister, options, Event(), crawler_configuration)
+
+        with pytest.raises(RequestError) as exc_info:
+            await module.check_harbor("http://perdu.com/")
 
         assert exc_info.value.args[0] == "RequestError occurred: [Errno -2] Name or service not known"

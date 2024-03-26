@@ -1,6 +1,7 @@
 from asyncio import Event
 from typing import Optional
 
+from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
 from wapitiCore.attack.network_devices.mod_forti import ModuleForti
 from wapitiCore.attack.network_devices.mod_ubika import ModuleUbika
 from wapitiCore.attack.attack import Attack
@@ -28,7 +29,7 @@ class ModuleNetworkDevice(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
-        modules_list = [ModuleUbika, ModuleForti]
+        modules_list = [ModuleHarbor, ModuleUbika, ModuleForti]
         for module in modules_list:
             mod = module(
                 self.crawler, self.persister, self.options, Event(), self.crawler_configuration
