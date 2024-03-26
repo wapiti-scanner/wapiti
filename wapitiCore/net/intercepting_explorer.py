@@ -485,9 +485,13 @@ class InterceptingExplorer(Explorer):
             if self._stopped.is_set():
                 break
 
+    def empty_queue(self):
+        while not self._queue.empty():
+            self._queue.get_nowait()
+            self._queue.task_done()
+
     async def clean(self):
-        if not self._queue.empty():
-            await self._queue.join()
+        self.empty_queue()
 
         # The headless crawler must stop when the stop event is set, let's just wait for it
         if self._headless_task:
