@@ -120,6 +120,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>-m</code> <var>MODULES_LIST</var></li>
 <li><code>--list-modules</code></li>
 <li><code>-l</code>, <code>--level</code> <var>LEVEL</var></li>
+<li><code>--cms</code> {drupal,joomla,prestashop,spip,wp}</li>
 </ul>
 
 
@@ -208,7 +209,7 @@ More detail on each option can be found in the following sections.</p>
 <ul>
 <li><code>-f</code>, <code>--format</code> {json,html,txt,xml}</li>
 <li><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var></li>
-<li><code>-dr</code>, <code>--detailed-report</code></li>
+<li><code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var></li>
 </ul>
 
 
@@ -217,7 +218,7 @@ More detail on each option can be found in the following sections.</p>
 <ul>
 <li><code>--no-bugreport</code></li>
 <li><code>--version</code></li>
-<li><code>--update</code></li>
+<li><code>--update</code> [<code>--wapp-url</code> <var>WAPP_DB_URL</var>, <code>--wapp-dir</code> <var>WAPP_DB_PATH</var>]</li>
 <li><code>-h</code></li>
 </ul>
 
@@ -263,6 +264,10 @@ While it may be successful in finding vulnerabilities that way, it was causing t
 This behavior is now hidden behind this option and can be reactivated by setting -l to 2.<br />
 It may be useful on CGIs when developers have to parse the query-string themselves.<br />
 Default value for this option is 1.</p></li>
+<li><p><code>--cms</code> <var>CMS_LIST</var>
+This option can only be used when the module cms is selected.
+It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.
+Multiple choices are allowed, all the CMS will be scanned if this option is not set.</p></li>
 </ul>
 
 
@@ -276,17 +281,31 @@ Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li
 <li><p><code>--mitm-port</code> <var>PORT</var>
 If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
 Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p></li>
-<li><p><code>-a</code>, <code>--auth-user</code> <var>USERNAME</var><br />
-Set username to use for HTTP authentication on the target (see available methods bellow).</p></li>
-<li><p><code>-a</code>, <code>--auth-password</code> <var>PASSWORD</var><br />
-Set password to use for HTTP authentication on the target (see available methods bellow).</p></li>
+<li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
+(DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).
+Given value should be in the form login%password (% is used as a separator)</p></li>
+<li><p><code>--auth-user</code> <var>USERNAME</var><br />
+Set username to use for HTTP authentication on the target (see available methods bellow).</p>
+
+<ul>
+<li><code>--auth-password</code> <var>PASSWORD</var><br />
+Set password to use for HTTP authentication on the target (see available methods bellow).</li>
+</ul>
+</li>
 <li><p><code>--auth-method</code> <var>TYPE</var><br />
 Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
 NTLM authentication may require you to install an additional Python module.</p></li>
+<li><p><code>--form-cred</code> <var>CREDENTIALS</var><br />
+(DEPRECATED) Set credentials to use for web form authentication on the target.
+Given value should be in the form login%password (% is used as a separator)</p></li>
 <li><p><code>--form-user</code> <var>USERNAME</var><br />
-Set username to use for web form authentication on the target.</p></li>
-<li><p><code>--form-password</code> <var>PASSWORD</var><br />
-Set password to use for web form authentication on the target.</p></li>
+Set username to use for web form authentication on the target.</p>
+
+<ul>
+<li><code>--form-password</code> <var>PASSWORD</var><br />
+Set password to use for web form authentication on the target.</li>
+</ul>
+</li>
 <li><p><code>--form-url</code> <var>URL</var><br />
 If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
 Otherwise raw credentials are sent directly to the given URL.</p></li>
@@ -451,8 +470,9 @@ Set the format of the report. Valid choices are json, html, txt and xml.<br />
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p></li>
 <li><p><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var><br />
 Set the path were the report will be generated.</p></li>
-<li><p><code>-dr</code>, <code>--detailed-report</code><br />
-HTTP responses (headers and bodies) will appear in the report.</p></li>
+<li><p><code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var>
+Set the level of detailed report for the output.
+Possible values are (1) : includes HTTP requestes in the report, (2) : includes HTTP responses (headers and bodies) in the report.</p></li>
 </ul>
 
 
@@ -466,7 +486,8 @@ If a Wapiti attack module crashes of a non-caught exception a bug report is gene
 You can still prevent reports from being sent using that option.</p></li>
 <li><p><code>--update</code><br />
 Update particular Wapiti modules (download a fresh version of the <code>apps.json</code> and <code>nikto_db</code> files) then exit.
-You can combine it with <code>--store-config</code> to specify where to store downloaded files.</p></li>
+You can combine it with <code>--store-config</code> to specify where to store downloaded files.
+You can also combine it with <code>--wapp-url</code> to update the Wappalyzer DB from a custom git repository, or with <code>--wapp-dir</code> to update it from a local Wappalyzer DB directory.</p></li>
 <li><p><code>-h</code>, <code>--help</code><br />
 Show detailed options description. More details are available in this manpage though.</p></li>
 </ul>
@@ -500,7 +521,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>October 2022</li>
+    <li class='tc'>March 2024</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

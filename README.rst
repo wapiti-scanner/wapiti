@@ -77,6 +77,7 @@ Browsing features
 + Adding some custom HTTP headers or setting a custom User-Agent.
 + Using a Firefox headless browser for crawling
 + Loading your own python code for complicated authentication cases (see `--form-script` option)
++ Adding custom URL or PATH to update Wappalyzer database
 
 
 Supported attacks
@@ -103,12 +104,13 @@ Supported attacks
 + Checking cookie security flags (secure and httponly flags)
 + Cross Site Request Forgery (CSRF) basic detection
 + Fingerprinting of web applications using the Wappalyzer database
-+ Enumeration of Wordpress and Drupal modules
++ Enumeration of CMS module
 + Subdomain takeovers detection
 + Log4Shell (CVE-2021-44228) detection
 + Spring4Shell (CVE-2020-5398) detection
 + Check https redirections
 + Check for file upload vulnerabilities
++ Detection of network devices
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -123,11 +125,11 @@ The aforementioned attacks are tied to the following module names :
 + backup (Search copies of scripts and archives on the web server)
 + brute_login_form (Brute Force login form using a dictionary list)
 + buster (DirBuster like module)
++ cms (Scan to detect CMS and their versions)
 + cookieflags (Checks Secure and HttpOnly flags)
 + crlf (CR-LF injection in HTTP headers)
 + csp (Detect lack of CSP or weak CSP configuration)
 + csrf (Detects forms not protected against CSRF or using weak anti-CSRF tokens)
-+ drupal_enum (Detect version of Drupal)
 + exec (Code execution or command injection)
 + file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)
@@ -136,6 +138,7 @@ The aforementioned attacks are tied to the following module names :
 + https_redirect (Check https redirections)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
 + methods (Look for uncommon available HTTP methods like PUT)
++ network_device (Look for common files to detect network devices)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
 + redirect (Open Redirects)
