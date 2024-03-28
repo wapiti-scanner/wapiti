@@ -31,6 +31,7 @@ ATTACK SPECIFICATION:
   * `-m` <MODULES_LIST>
   * `--list-modules`
   * `-l`, `--level` <LEVEL>
+  * `--cms` {drupal,joomla,prestashop,spip,wp}
 
 PROXY AND AUTHENTICATION OPTIONS:
 
@@ -98,13 +99,13 @@ REPORT OPTIONS:
 
   * `-f`, `--format` {json,html,txt,xml}
   * `-o`, `--output` <OUTPUT_PATH>
-  * `-dr`, `--detailed-report`
+  * `-dr`, `--detailed-report` <LEVEL>
 
 OTHER OPTIONS:
 
   * `--no-bugreport`
   * `--version`
-  * `--update`
+  * `--update` [`--wapp-url` <WAPP_DB_URL>, `--wapp-dir` <WAPP_DB_PATH>]
   * `-h`
 
 ## TARGET SPECIFICATION
@@ -144,6 +145,11 @@ OTHER OPTIONS:
     This behavior is now hidden behind this option and can be reactivated by setting -l to 2.  
     It may be useful on CGIs when developers have to parse the query-string themselves.  
     Default value for this option is 1.
+
+  * `--cms` <CMS_LIST>
+    This option can only be used when the module cms is selected.
+    It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.
+    Multiple choices are allowed, all the CMS will be scanned if this option is not set.
     
 ## PROXY AND AUTHENTICATION
 
@@ -358,8 +364,9 @@ Wapiti will generate a report at the end of the attack process. Several formats 
   * `-o`, `--output` <OUTPUT_PATH>  
     Set the path were the report will be generated.
 
-  * `-dr`, `--detailed-report`  
-    HTTP responses (headers and bodies) will appear in the report.
+  * `-dr`, `--detailed-report` <LEVEL>
+    Set the level of detailed report for the output.
+    Possible values are (1) : includes HTTP requestes in the report, (2) : includes HTTP responses (headers and bodies) in the report.
 
 ## OTHER OPTIONS
 
@@ -373,6 +380,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
   * `--update`  
     Update particular Wapiti modules (download a fresh version of the `apps.json` and `nikto_db` files) then exit. 
     You can combine it with `--store-config` to specify where to store downloaded files.
+    You can also combine it with `--wapp-url` to update the Wappalyzer DB from a custom git repository, or with `--wapp-dir` to update it from a local Wappalyzer DB directory.
 
   * `-h`, `--help`  
     Show detailed options description. More details are available in this manpage though.
