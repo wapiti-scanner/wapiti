@@ -51,12 +51,16 @@ VERSION_REGEX = re.compile(r"\d[\d.]*")
 SCRIPT = (
     "wapiti_results = {};\n"
     "for (var js_tech in wapiti_tests) {\n"
+    "  js_tech_results = [];\n"
     "  for (var i in wapiti_tests[js_tech]) {\n"
     "    try {\n"
-    "      wapiti_results[js_tech] = [String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]; break;\n"
+    "      js_tech_results.push([String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]);\n"
     "    } catch(wapiti_error) {\n"
     "      continue;\n"
     "    }\n"
+    "  }\n"
+    "  if (js_tech_results.length) {\n"
+    "    wapiti_results[js_tech] = js_tech_results;\n"
     "  }\n"
     "}\n"
     "return wapiti_results;\n"
@@ -440,20 +444,32 @@ class ModuleWapp(Attack):
                         try:
                             results = await headless_client.execute_script(script)
                             for software, version_and_js in results.items():
-                                version, js = version_and_js
-                                expected_format = data[software]["js"][js]
-                                if version == "undefined":
-                                    continue
+                                waiting_version = []
+                                validated = False
+                                for version, js in version_and_js:
+                                    expected_format = data[software]["js"][js]
+                                    if version == "undefined":
+                                        continue
 
-                                if not expected_format or expected_format.startswith(r"\;"):
-                                    if VERSION_REGEX.match(version):
-                                        final_results[software] = [version]
-                                    else:
-                                        final_results[software] = []
-                                elif isinstance(version, str) and r"\;version:" in expected_format:
-                                    final_results[software] = [version]
-                                # Other cases seems to be some kind of false positives
-                            # final_results.update(results)
+                                    if not expected_format or expected_format.startswith(r"\;confidence:"):
+                                        if VERSION_REGEX.match(version):
+                                            # some false positives here
+                                            final_results[software] = [version]
+                                            break
+                                        if software not in final_results:
+                                            validated = True
+                                            final_results[software] = []
+                                    elif expected_format.startswith(r"\;version:"):
+                                        final_results[software] = [expected_format.split(':')[1]]
+                                    elif isinstance(version, str):
+                                        if r"\;confidence:0" in expected_format:
+                                            waiting_version.append(version)
+                                        elif r"\;version:" in expected_format:
+                                            final_results[software] = [version]
+                                            break
+                                    # Other cases seems to be some kind of false positives
+                                if validated and waiting_version and not final_results[software]:
+                                    final_results[software] = waiting_version
                         except (JavascriptError, UnknownError) as exception:
                             logging.exception(exception)
                             continue
