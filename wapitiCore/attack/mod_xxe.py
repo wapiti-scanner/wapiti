@@ -25,7 +25,7 @@ from os.path import join as path_join
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
-from wapitiCore.attack.attack import Attack, XXEUploadMutator, Mutator
+from wapitiCore.attack.attack import Attack, XXEUploadMutator, Mutator, Parameter
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.xxe import NAME, WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
@@ -58,7 +58,7 @@ class ModuleXxe(Attack):
         self.payload_to_rules = {}
         self.mutator = self.get_mutator()
 
-    def get_payloads(self) -> Iterator[PayloadInfo]:
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
         parser = IniPayloadReader(path_join(self.DATA_DIR, "xxePayloads.ini"))
         parser.add_key_handler("payload", replace_tags)

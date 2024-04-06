@@ -10,6 +10,7 @@ import respx
 import httpx
 import asyncio
 
+from wapitiCore.attack.attack import Parameter, ParameterSituation
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -121,7 +122,10 @@ async def test_blind_detection():
         module.do_post = False
 
         payloads_until_sleep = 0
-        for payload_info in module.get_payloads():
+        for payload_info in module.get_payloads(
+                request,
+                Parameter(name="vuln", situation=ParameterSituation.QUERY_STRING),
+        ):
             if "sleep" in payload_info.payload:
                 break
             payloads_until_sleep += 1

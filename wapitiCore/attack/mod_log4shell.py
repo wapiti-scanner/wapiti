@@ -1,9 +1,8 @@
 import copy
-import itertools
 import socket
 import uuid
 from os.path import join as path_join
-from typing import Dict, Iterable, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 import dns.resolver
 from httpx import RequestError
@@ -187,20 +186,19 @@ class ModuleLog4Shell(Attack):
                 continue
             await self._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
 
-        injected_get_and_post_requests: Iterable[Tuple[Request, str, uuid.UUID]] = itertools.chain(
-            self._inject_payload(request, request.get_params),
-            self._inject_payload(request, request.post_params)
-        )
+        all_params = [request.get_params]
+        if request.post_params and not request.is_json:
+            all_params.append(request.post_params)
 
-        for malicious_request, param_name, param_uuid in injected_get_and_post_requests:
-
-            try:
-                log_verbose(f"[¨] {malicious_request}")
-                page = await self.crawler.async_send(malicious_request, follow_redirects=True)
-            except RequestError:
-                self.network_errors += 1
-                continue
-            await self._verify_param_vulnerability(malicious_request, param_uuid, param_name, page)
+        for parameters_list in all_params:
+            for malicious_request, param_name, param_uuid in self._inject_payload(request, parameters_list):
+                try:
+                    log_verbose(f"[¨] {malicious_request}")
+                    page = await self.crawler.async_send(malicious_request, follow_redirects=True)
+                except RequestError:
+                    self.network_errors += 1
+                    continue
+                await self._verify_param_vulnerability(malicious_request, param_uuid, param_name, page)
 
     async def _verify_param_vulnerability(
             self,

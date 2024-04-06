@@ -28,7 +28,7 @@ from typing import Optional, Iterator
 from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_red
-from wapitiCore.attack.attack import Attack, random_string
+from wapitiCore.attack.attack import Attack, random_string, Parameter
 from wapitiCore.definitions.backup import NAME, WSTG_CODE
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
@@ -48,7 +48,7 @@ class ModuleBackup(Attack):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.false_positive_directories = {}
 
-    def get_payloads(self) -> Iterator[PayloadInfo]:
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
         payload_reader = TxtPayloadReader(path_join(self.DATA_DIR, "backupPayloads.txt"))
         yield from payload_reader

@@ -23,7 +23,7 @@ from typing import Optional, Iterator
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -47,7 +47,7 @@ class ModuleTimesql(Attack):
         self.mutator = self.get_mutator()
         self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
 
-    def get_payloads(self) -> Iterator[PayloadInfo]:
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
         parser = IniPayloadReader(path_join(self.DATA_DIR, "blindSQLPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)

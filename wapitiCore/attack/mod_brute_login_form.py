@@ -79,7 +79,14 @@ class ModuleBruteLoginForm(Attack):
                 if password:
                     yield password
 
-    async def send_credentials(self, login_form, username_index, password_index, username, password) -> Response:
+    async def send_credentials(
+            self,
+            login_form: Request,
+            username_index: int,
+            password_index: int,
+            username: str,
+            password: str,
+    ) -> Response:
         post_params = login_form.post_params
         get_params = login_form.get_params
 

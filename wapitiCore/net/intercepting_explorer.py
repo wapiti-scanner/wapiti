@@ -26,8 +26,7 @@ from http.cookiejar import CookieJar
 from urllib.parse import urlparse
 import inspect
 import os
-# import sys
-# from traceback import print_tb
+import json
 
 from mitmproxy import addons
 from mitmproxy.master import Master
@@ -92,7 +91,7 @@ def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) ->
     return result
 
 
-def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
+def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Optional[Request]:
     post_params = []
     enctype = ""
     if mitm_request.urlencoded_form:
@@ -106,6 +105,15 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Request:
 
     if not enctype and mitm_request.method == "POST":
         enctype = mitm_request.headers.get("Content-Type", "")
+
+    if enctype == "application/json":
+        try:
+            json.loads(mitm_request.text)
+        except json.JSONDecodeError:
+            # Ignore request if JSON data seems invalid
+            return None
+
+        post_params = mitm_request.text
 
     request = Request(
         path=mitm_request.url,
@@ -164,6 +172,8 @@ class MitmFlowToWapitiRequests:
 
         if "text" in content_type or "json" in content_type or "html" in content_type or "xml" in content_type:
             request = mitm_to_wapiti_request(flow.request)
+            if request is None:
+                return
 
             decoded_headers = decode_key_value_dict(flow.response.headers)
 

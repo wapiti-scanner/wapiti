@@ -26,7 +26,7 @@ from bs4.builder import ParserRejectedMarkup
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
-from wapitiCore.attack.attack import Attack, Mutator
+from wapitiCore.attack.attack import Attack, Mutator, Parameter
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.sql import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
@@ -248,7 +248,7 @@ DBMS_ERROR_PATTERNS = {
 }
 
 
-def generate_boolean_payloads() -> Iterator[PayloadInfo]:
+def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
     # payloads = []
     for use_parenthesis in (False, True):
         for separator in ("", "'", "\""):

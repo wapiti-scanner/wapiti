@@ -22,7 +22,7 @@ from typing import Optional, Iterator
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_verbose, log_orange
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.exec import NAME, WSTG_CODE
 from wapitiCore.model import PayloadInfo
@@ -44,7 +44,7 @@ class ModuleExec(Attack):
         self.false_positive_timeouts = set()
         self.mutator = self.get_mutator()
 
-    def get_payloads(self) -> Iterator[PayloadInfo]:
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
         parser = IniPayloadReader(path_join(self.DATA_DIR, "execPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)
@@ -55,14 +55,14 @@ class ModuleExec(Attack):
     @staticmethod
     def _find_warning_in_response(data) -> str:
         warnings_and_infos = {
-            "eval()'d code</b> on line <b>":"Warning eval()",
-            "Cannot execute a blank command in":"Warning exec",
-            "sh: command substitution:":"Warning exec",
-            "Warning: usort()":"Warning usort()",
-            "Warning: assert():":"Warning assert",
-            "Failure evaluating code:":"Evaluation warning"
+            "eval()'d code</b> on line <b>": "Warning eval()",
+            "Cannot execute a blank command in": "Warning exec",
+            "sh: command substitution:": "Warning exec",
+            "Warning: usort()": "Warning usort()",
+            "Warning: assert():": "Warning assert",
+            "Failure evaluating code:": "Evaluation warning"
         }
-        for warning,vuln_info in warnings_and_infos.items():
+        for warning, vuln_info in warnings_and_infos.items():
             if warning in data:
                 return vuln_info
         return ""

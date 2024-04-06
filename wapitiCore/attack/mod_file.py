@@ -24,7 +24,7 @@ from typing import Optional, Iterator
 from httpx import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.model import PayloadInfo
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 from wapitiCore.language.vulnerability import Messages
@@ -32,7 +32,6 @@ from wapitiCore.definitions.file import NAME, WSTG_CODE
 from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
 from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
 from wapitiCore.net import Request, Response
-
 
 PHP_WARNING_REGEXES = [
     # Most useful regex must be at top
@@ -47,7 +46,6 @@ PHP_WARNING_REGEXES = [
         r"on line (?:<\w+>)?(\d*)(?:</\w+>)?"
     )
 ]
-
 
 FileWarning = namedtuple('FileWarning', ['pattern', 'function', 'uri', 'path'])
 PHP_FUNCTIONS = (
@@ -110,7 +108,7 @@ class ModuleFile(Attack):
         self.known_false_positives = defaultdict(set)
         self.mutator = self.get_mutator()
 
-    def get_payloads(self) -> Iterator[PayloadInfo]:
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
         """Load the payloads from the specified file"""
         parser = IniPayloadReader(path_join(self.DATA_DIR, "fileHandlingPayloads.ini"))
         parser.add_key_handler("payload", replace_tags)

@@ -1,15 +1,13 @@
 import asyncio
 import os
 import random
-from asyncio import Event, sleep
+from asyncio import Event
 from unittest import mock
 from unittest.mock import patch, AsyncMock
 from httpx import Response as HttpxResponse
-import uuid
 
 import pytest
 import respx
-import httpx
 from dns.resolver import Resolver
 
 from tests import get_mock_open

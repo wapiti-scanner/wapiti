@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from wapitiCore.attack.attack import Parameter, ParameterSituation
+from wapitiCore.attack.attack import Parameter, ParameterSituation, Mutator
 from wapitiCore.model import str_to_payloadinfo, PayloadInfo
-from wapitiCore.mutation.json_mutator import find_injectable, set_item, get_item, JSONMutator
+from wapitiCore.mutation.json_mutator import find_injectable, set_item, get_item
 from wapitiCore.net import Request
 
 
@@ -224,7 +224,7 @@ def test_get_item(obj, path, expected):
 
 
 def test_json_mutator_replace_values():
-    mutator = JSONMutator()
+    mutator = Mutator()
     # We will ensure we can inject data inside a string value and an int value
     request = Request(
         "http://perdu.com/api/",
@@ -243,14 +243,14 @@ def test_json_mutator_replace_values():
 
     for i, (mutated_request, parameter, payload_info) in enumerate(mutator.mutate(
             request,
-            lambda: str_to_payloadinfo(["[VALUE]yolo"]),
+            lambda _, __: str_to_payloadinfo(["[VALUE]yolo"]),
     )):
         assert expected[i] == (mutated_request.post_params, parameter, payload_info.payload)
         assert mutated_request.is_json
 
 
 def test_json_mutator_handle_list():
-    mutator = JSONMutator()
+    mutator = Mutator()
     # We will ensure we can inject data inside a string value and an int value
     request = Request(
         "http://perdu.com/api/",
@@ -270,14 +270,14 @@ def test_json_mutator_handle_list():
 
     mutated_request, parameter, payload_info = next(mutator.mutate(
             request,
-            lambda: str_to_payloadinfo(["[VALUE]yolo"]),
+            lambda _, __: str_to_payloadinfo(["[VALUE]yolo"]),
     ))
     assert expected == (mutated_request.post_params, parameter, payload_info.payload)
     assert mutated_request.is_json
 
 
 def test_json_mutator_handle_empty_list():
-    mutator = JSONMutator()
+    mutator = Mutator()
     # We will ensure we can inject data inside an empty list
     request = Request(
         "http://perdu.com/api/",
@@ -297,8 +297,8 @@ def test_json_mutator_handle_empty_list():
 
     mutations = mutator.mutate(
         request,
-        # the first payload should be skipped as it atempts to reuse a valid that doesn't exist
-        lambda: str_to_payloadinfo(["[VALUE]yolo", "Hello there"]),
+        # the first payload should be skipped as it attempts to reuse a valid that doesn't exist
+        lambda _, __: str_to_payloadinfo(["[VALUE]yolo", "Hello there"]),
     )
     mutated_request, parameter, payload_info = next(mutations)
     assert expected == (mutated_request.post_params, parameter, payload_info.payload)
@@ -306,3 +306,38 @@ def test_json_mutator_handle_empty_list():
 
     with pytest.raises(StopIteration):
         next(mutations)
+
+
+def test_json_mutator_query_string():
+    mutator = Mutator()
+    # JSON requests having parameters in the query string should see those parameters fuzzed too
+    request = Request(
+        "http://perdu.com/api/?session=31337",
+        enctype="application/json",
+        post_params=json.dumps({"a": "yolo"})
+    )
+
+    mutated_request: Request
+    parameter: Parameter
+    payload_info: PayloadInfo
+
+    mutated_requests = []
+    for mutated_request, _, _ in mutator.mutate(
+        request,
+        # the first payload should be skipped as it attempts to reuse a valid that doesn't exist
+        lambda _, __: str_to_payloadinfo(["Hello there"]),
+    ):
+        mutated_requests.append(mutated_request)
+
+    assert len(mutated_requests) == 2
+
+    # Following request went through _mutate_urlencoded_multipart
+    assert mutated_requests[0].url == "http://perdu.com/api/?session=Hello%20there"
+    assert mutated_requests[0].post_params == request.post_params
+    # Make sure enctype is kept
+    assert mutated_requests[0].enctype == "application/json"
+
+    # Following request went through _mutate_json
+    assert mutated_requests[1].url == "http://perdu.com/api/?session=31337"
+    assert mutated_requests[1].post_params == json.dumps({"a": "Hello there"})
+    assert mutated_requests[1].enctype == "application/json"

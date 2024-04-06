@@ -70,6 +70,9 @@ class ModuleCsrf(Attack):
 
     def is_csrf_present(self, request: Request, response: Response):
         """Check whether anti-csrf token is present"""
+        if request.is_json:
+            return None
+
         # Look for anti-csrf token in form params
         for param in request.post_params:
             if param[0].lower() in self.TOKEN_FORM_STRINGS:
@@ -131,7 +134,7 @@ class ModuleCsrf(Attack):
         if response.headers and self.csrf_string in response.headers:
             special_headers[self.csrf_string] = "wapiti"
 
-        # Replace anti-csrf token value from request headers with "wapiti"
+        # Replace anti-csrf token value from request headers with "wapiti"
         if request.headers and self.csrf_string in request.headers:
             special_headers[self.csrf_string] = "wapiti"
 
