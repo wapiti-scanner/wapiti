@@ -25,20 +25,21 @@ from enum import Enum, Flag, auto
 import random
 from binascii import hexlify
 from functools import partialmethod
-from typing import Optional, Iterator, Tuple, List
+from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable
 from asyncio import Event
+import json
 
 from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
-from wapitiCore.model import PayloadInfo, PayloadSource
+from wapitiCore.model import PayloadInfo
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request
-
+from wapitiCore.mutation.json_mutator import get_item, set_item, find_injectable
 
 all_modules = {
     "backup",
@@ -105,7 +106,6 @@ presets = {
     "passive": passive_modules
 }
 
-
 VULN = "vulnerability"
 ANOM = "anomaly"
 ADDITION = "additional"
@@ -145,6 +145,9 @@ class Parameter:
     def display_name(self) -> str:
         return "QUERY_STRING" if self.is_qs_injection else self.name
 
+
+PayloadCallback = Callable[[Optional[Request], Optional[Parameter]], Iterable[PayloadInfo]]
+PayloadSource = Union[List[PayloadInfo], PayloadCallback]
 
 COMMON_ANNOYING_PARAMETERS = (
     "__VIEWSTATE",
@@ -287,7 +290,7 @@ class Attack:
 
     @property
     def external_endpoint(self):
-        return self.options.get("external_endpoint", "http://wapiti3.ovh")
+        return self.options.get("external_endpoint", "http://wapiti3.ovh/")
 
     @property
     def max_attack_time(self):
@@ -310,7 +313,11 @@ class Attack:
         parts = urlparse(self.external_endpoint)
         return parts.netloc + parts.path
 
-    async def must_attack(self, request: Request, response: Optional[Response] = None):  # pylint: disable=unused-argument
+    async def must_attack(
+            self,
+            request: Request,  # pylint: disable=unused-argument
+            response: Optional[Response] = None,  # pylint: disable=unused-argument
+    ):
         return not self.finished
 
     @property
@@ -358,17 +365,23 @@ class Mutator:
         self._parameters = parameters if isinstance(parameters, list) else []
         self._skip_list = skip if isinstance(skip, set) else set()
         self._attack_hashes = set()
+        self._json_attack_hashes = set()
         self._skip_list.update(COMMON_ANNOYING_PARAMETERS)
 
-    def mutate(self,
-               request: Request,
-               payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+    def _mutate_urlencoded_multipart(
+            self,
+            request: Request,
+            payloads: PayloadSource
+    ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
         post_params = request.post_params
         file_params = request.file_params
         referer = request.referer
 
-        for params_list in [get_params, post_params, file_params]:
+        # On a JSON body we exclude post and file parameters as it won't work with this mutator
+        # still it may be interesting to fuzz the query string
+        all_params = [get_params] if request.is_json else [get_params, post_params, file_params]
+        for params_list in all_params:
             parameter_situation = None
             if params_list is get_params:
                 parameter_situation = ParameterSituation.QUERY_STRING
@@ -406,13 +419,15 @@ class Mutator:
                     method=request.method,
                     get_params=get_params,
                     post_params=post_params,
-                    file_params=file_params
+                    file_params=file_params,
+                    enctype=request.enctype,
                 )
 
                 if hash(attack_pattern) not in self._attack_hashes:
                     self._attack_hashes.add(hash(attack_pattern))
+                    parameter = Parameter(name=param_name, situation=parameter_situation)
+                    iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
 
-                    iterator = payloads if isinstance(payloads, list) else payloads()
                     for payload_info in iterator:
                         raw_payload = payload_info.payload
 
@@ -460,12 +475,21 @@ class Mutator:
                             post_params=post_params,
                             file_params=file_params,
                             referer=referer,
-                            link_depth=request.link_depth
+                            link_depth=request.link_depth,
+                            enctype=request.enctype,
                         )
                         payload_info.payload = raw_payload
-                        yield evil_req, Parameter(name=param_name, situation=parameter_situation), payload_info
+                        yield evil_req, parameter, payload_info
 
                 params_list[i][1] = saved_value
+
+    def _mutate_query_string(
+            self,
+            request: Request,
+            payloads: PayloadSource
+    ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+        get_params = request.get_params
+        referer = request.referer
 
         if not get_params and request.method == "GET" and self._qs_inject:
             attack_pattern = Request(
@@ -477,8 +501,9 @@ class Mutator:
 
             if hash(attack_pattern) not in self._attack_hashes:
                 self._attack_hashes.add(hash(attack_pattern))
+                parameter = Parameter(name="", situation=ParameterSituation.QUERY_STRING)
+                iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
 
-                iterator = payloads if isinstance(payloads, list) else payloads()
                 for payload_info in iterator:
                     raw_payload = payload_info.payload
 
@@ -511,7 +536,100 @@ class Mutator:
                     )
 
                     payload_info.payload = raw_payload
-                    yield evil_req, Parameter(name="", situation=ParameterSituation.QUERY_STRING), payload_info
+                    yield evil_req, parameter, payload_info
+
+    def _mutate_json(
+            self,
+            request: Request,
+            payloads: PayloadSource
+    ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+        try:
+            data = json.loads(request.post_params)
+        except json.JSONDecodeError:
+            return
+
+        get_params = request.get_params
+        referer = request.referer
+
+        injection_points = find_injectable([], data)
+
+        for json_path in injection_points:
+            saved_value = get_item(data, json_path)
+            set_item(data, json_path, "__PAYLOAD__")
+            attack_hash = hash(request.url + json.dumps(data))
+
+            if attack_hash in self._json_attack_hashes:
+                # restore the object and move to next injection point
+                set_item(data, json_path, saved_value)
+                continue
+
+            self._json_attack_hashes.add(attack_hash)
+
+            parameter = Parameter(
+                name=".".join([str(key) for key in json_path]),
+                situation=ParameterSituation.JSON_BODY,
+            )
+            iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
+
+            payload_info: PayloadInfo
+            for payload_info in iterator:
+                raw_payload = payload_info.payload
+
+                # We will inject some payloads matching those keywords whatever the type of the object to overwrite
+                if ("[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload) and not request.file_name:
+                    continue
+
+                # no quoting: send() will do it for us
+                raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
+                raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+
+                if isinstance(request.path_id, int):
+                    raw_payload = raw_payload.replace("[PATH_ID]", str(request.path_id))
+
+                # We don't want to replace certain placeholders reusing the current value if that value is not a string
+                if any(pattern in raw_payload for pattern in ("[EXTVALUE]", "[DIRVALUE]")):
+                    if not isinstance(saved_value, str):
+                        continue
+
+                    if "[EXTVALUE]" in raw_payload:
+                        if "." not in saved_value[:-1]:
+                            # Nothing that looks like an extension, skip the payload
+                            continue
+                        raw_payload = raw_payload.replace("[EXTVALUE]", saved_value.rsplit(".", 1)[-1])
+
+                    raw_payload = raw_payload.replace("[DIRVALUE]", saved_value.rsplit('/', 1)[0])
+
+                if "[VALUE]" in raw_payload:
+                    if not isinstance(saved_value, (int, str)):
+                        continue
+
+                    raw_payload = raw_payload.replace("[VALUE]", str(saved_value))
+
+                set_item(data, json_path, raw_payload)
+
+                evil_req = Request(
+                    request.path,
+                    method=request.method,
+                    enctype="application/json",
+                    get_params=get_params,
+                    post_params=json.dumps(data),
+                    referer=referer,
+                    link_depth=request.link_depth
+                )
+                payload_info.payload = raw_payload
+                yield evil_req, parameter, payload_info
+                # put back the previous value
+                set_item(data, json_path, saved_value)
+
+    def mutate(self,
+               request: Request,
+               payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+
+        yield from self._mutate_urlencoded_multipart(request, payloads)
+        if request.is_json and self._mutate_post:
+            yield from self._mutate_json(request, payloads)
+
+        yield from self._mutate_query_string(request, payloads)
 
 
 class XXEUploadMutator:
@@ -535,7 +653,8 @@ class XXEUploadMutator:
             if self._parameters and param_name not in self._parameters:
                 continue
 
-            iterator = payloads if isinstance(payloads, list) else payloads()
+            parameter = Parameter(name=param_name, situation=ParameterSituation.MULTIPART)
+            iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
             for payload_info in iterator:
                 if isinstance(payload_info, str):
                     raw_payload = payload_info
@@ -571,4 +690,4 @@ class XXEUploadMutator:
                         link_depth=request.link_depth
                     )
                     payload_info.payload = raw_payload
-                    yield evil_req, Parameter(name=param_name, situation=ParameterSituation.MULTIPART), payload_info
+                    yield evil_req, parameter, payload_info

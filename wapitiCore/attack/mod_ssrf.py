@@ -17,8 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from asyncio import sleep
-from typing import Optional, Iterator, Tuple
-from urllib.parse import quote
+from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
 from httpx import RequestError
@@ -27,120 +26,10 @@ from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
-from wapitiCore.model import PayloadInfo, str_to_payloadinfo, PayloadSource
+from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
-
-
-class SsrfMutator(Mutator):
-    def __init__(
-            self, session_id: str, methods="FGP", qs_inject=False, max_queries_per_pattern: int = 1000,
-            parameters=None,  # Restrict attack to a whitelist of parameters
-            skip=None,  # Must not attack those parameters (blacklist)
-            endpoint: str = "http://wapiti3.ovh/"
-    ):
-        Mutator.__init__(
-            self, methods=methods, qs_inject=qs_inject,
-            max_queries_per_pattern=max_queries_per_pattern, parameters=parameters, skip=skip)
-        self._session_id = session_id
-        self._endpoint = endpoint
-
-    def mutate(
-            self,
-            request: Request,
-            payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
-        get_params = request.get_params
-        post_params = request.post_params
-        file_params = request.file_params
-        referer = request.referer
-
-        for params_list in [get_params, post_params, file_params]:
-            for i, __ in enumerate(params_list):
-                param_name = quote(params_list[i][0])
-
-                if self._skip_list and param_name in self._skip_list:
-                    continue
-
-                if self._parameters and param_name not in self._parameters:
-                    continue
-
-                saved_value = params_list[i][1]
-                if saved_value is None:
-                    saved_value = ""
-
-                if params_list is file_params:
-                    params_list[i][1] = ("__PAYLOAD__", saved_value[1], saved_value[2])
-                else:
-                    params_list[i][1] = "__PAYLOAD__"
-
-                attack_pattern = Request(
-                    request.path,
-                    method=request.method,
-                    get_params=get_params,
-                    post_params=post_params,
-                    file_params=file_params
-                )
-
-                if hash(attack_pattern) not in self._attack_hashes:
-                    self._attack_hashes.add(hash(attack_pattern))
-
-                    payload = SSRF_PAYLOAD.format(
-                        external_endpoint=self._endpoint,
-                        random_id=self._session_id,
-                        path_id=request.path_id,
-                        hex_param=hexlify(param_name.encode("utf-8", errors="replace")).decode()
-                    )
-
-                    if params_list is file_params:
-                        params_list[i][1] = (payload, saved_value[1], saved_value[2])
-                        parameter_situation = ParameterSituation.MULTIPART
-                    else:
-                        params_list[i][1] = payload
-                        if params_list is get_params:
-                            parameter_situation = ParameterSituation.QUERY_STRING
-                        else:
-                            parameter_situation = ParameterSituation.POST_BODY
-
-                    evil_req = Request(
-                        request.path,
-                        method=request.method,
-                        get_params=get_params,
-                        post_params=post_params,
-                        file_params=file_params,
-                        referer=referer,
-                        link_depth=request.link_depth
-                    )
-                    yield evil_req, Parameter(name=param_name, situation=parameter_situation), payload
-
-                params_list[i][1] = saved_value
-
-        if not get_params and request.method == "GET" and self._qs_inject:
-            attack_pattern = Request(
-                f"{request.path}?__PAYLOAD__",
-                method=request.method,
-                referer=referer,
-                link_depth=request.link_depth
-            )
-
-            if hash(attack_pattern) not in self._attack_hashes:
-                self._attack_hashes.add(hash(attack_pattern))
-
-                payload = SSRF_PAYLOAD.format(
-                    external_endpoint=self._endpoint,
-                    random_id=self._session_id,
-                    path_id=request.path_id,
-                    hex_param=hexlify(b"QUERY_STRING").decode()
-                )
-
-                evil_req = Request(
-                    f"{request.path}?{quote(payload)}",
-                    method=request.method,
-                    referer=referer,
-                    link_depth=request.link_depth
-                )
-
-                yield evil_req, Parameter(name="", situation=ParameterSituation.QUERY_STRING), payload
 
 
 class ModuleSsrf(Attack):
@@ -153,25 +42,34 @@ class ModuleSsrf(Attack):
 
     def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+        self.mutator = self.get_mutator()
 
-        methods = ""
-        if self.do_get:
-            methods += "G"
-        if self.do_post:
-            methods += "PF"
+    def get_payloads(
+            self,
+            request: Optional[Request] = None,
+            parameter: Optional[Parameter] = None,
+    ) -> Iterator[PayloadInfo]:
+        """Load the payloads from the specified file"""
+        # The payload will contain the parameter name in hex-encoded format
+        # If the injection is made directly in the query string (no parameter) then the payload would be
+        # the hex value of "QUERY_STRING"
+        if parameter.situation == ParameterSituation.QUERY_STRING and parameter.name == "":
+            parameter_name = "QUERY_STRING"
+        else:
+            parameter_name = parameter.name
 
-        self.mutator = SsrfMutator(
-            session_id=self._session_id,
-            methods=methods,
-            qs_inject=self.must_attack_query_string,
-            skip=self.options.get("skipped_parameters"),
-            endpoint=self.external_endpoint
+        payload = SSRF_PAYLOAD.format(
+            external_endpoint=self.external_endpoint,
+            random_id=self._session_id,
+            path_id=request.path_id,
+            hex_param=hexlify(parameter_name.encode("utf-8", errors="replace")).decode()
         )
+        yield PayloadInfo(payload=payload)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
         # contacted the endpoint.
-        for mutated_request, _parameter, _payload in self.mutator.mutate(request, []):
+        for mutated_request, _parameter, _payload in self.mutator.mutate(request, self.get_payloads):
             log_verbose(f"[¨] {mutated_request}")
 
             try:

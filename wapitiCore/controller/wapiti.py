@@ -504,7 +504,6 @@ class Wapiti:
                     attacked_ids.add(original_request.path_id)
         return attacked_ids, answer
 
-
     async def attack(self, stop_event: asyncio.Event):
         """Launch the attacks based on the preferences set by the command line"""
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:

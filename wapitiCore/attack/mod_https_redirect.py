@@ -46,7 +46,6 @@ class ModuleHttpsRedirect(Attack):
         return True
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-
         url = urlparse(request.url)
 
         is_http = False

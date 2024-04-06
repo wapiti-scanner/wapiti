@@ -35,7 +35,7 @@ from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
 
-def get_random_string_payload() -> Iterator[PayloadInfo]:
+def get_random_string_payload(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
     yield PayloadInfo(payload=random_string())
 
 
