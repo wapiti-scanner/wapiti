@@ -9,10 +9,6 @@ from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 
 
-MSG_TECHNO_VERSIONED = "{0} {1} detected"
-MSG_NO_UBIKA = "No UBIKA Detected"
-
-
 class ModuleNetworkDevice(Attack):
     """Base class for detecting version."""
     name = "network_device"

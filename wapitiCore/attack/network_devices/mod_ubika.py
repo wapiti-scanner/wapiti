@@ -6,18 +6,17 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from httpx import RequestError
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue, logging
 
-MSG_TECHNO_VERSIONED = "{0} {1} detected"
 MSG_NO_UBIKA = "No UBIKA Detected"
 
 
-class ModuleUbika(Attack):
-    """Base class for detecting version."""
+class ModuleUbika(NetworkDeviceCommon):
+    """Detect Ubika."""
     version = ""
 
     async def check_ubika(self, url):
@@ -63,7 +62,7 @@ class ModuleUbika(Attack):
 
                 ubika_detected = {
                     "name": "UBIKA WAAP",
-                    "version": self.version,
+                    "versions": [self.version] if self.version else [],
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }

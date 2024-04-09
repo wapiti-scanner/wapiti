@@ -5,17 +5,16 @@ from urllib.parse import urljoin
 
 from httpx import RequestError
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_HARBOR = "No Harbor Product Detected"
-MSG_HARBOR_DETECTED = "{0} {1} Detected !"
 
 
-class ModuleHarbor(Attack):
+class ModuleHarbor(NetworkDeviceCommon):
     """Detect Harbor."""
 
     device_name = "Harbor"
@@ -61,12 +60,12 @@ class ModuleHarbor(Attack):
             if await self.check_harbor(request_to_root.url):
                 harbor_detected = {
                     "name": self.device_name,
-                    "version": self.version,
+                    "versions": [self.version] if self.version else [],
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
                 log_blue(
-                    MSG_HARBOR_DETECTED,
+                    MSG_TECHNO_VERSIONED,
                     self.device_name,
                     self.version
                 )
