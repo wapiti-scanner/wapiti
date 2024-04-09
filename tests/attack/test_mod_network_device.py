@@ -82,8 +82,9 @@ async def test_ubika_without_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "UBIKA WAAP", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "UBIKA WAAP", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 @pytest.mark.asyncio
 @respx.mock
@@ -133,8 +134,9 @@ async def test_ubika_with_version():
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "UBIKA WAAP", "version": "6.5.6", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "UBIKA WAAP", "versions": ["6.5.6"], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -174,8 +176,9 @@ async def test_detect_fortimanager():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "FortiManager", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "FortiManager", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -214,8 +217,9 @@ async def test_detect_ssl_vpn():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Fortinet SSL-VPN", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Fortinet SSL-VPN", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -253,8 +257,9 @@ async def test_detect_fortinet():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Fortinet", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Fortinet", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -292,8 +297,9 @@ async def test_detect_fortiportal_from_title():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "FortiPortal", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "FortiPortal", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -332,8 +338,9 @@ async def test_detect_fortimail():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "FortiMail", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "FortiMail", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -412,8 +419,9 @@ async def test_detect_harbor_with_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Harbor", "version": "v2.10", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Harbor", "versions": ["v2.10"], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 @pytest.mark.asyncio
 @respx.mock
@@ -458,8 +466,9 @@ async def test_detect_harbor_without_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Harbor", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Harbor", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
@@ -499,8 +508,9 @@ async def test_detect_harbor_with_json_error():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Harbor", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Harbor", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
 
 @pytest.mark.asyncio
