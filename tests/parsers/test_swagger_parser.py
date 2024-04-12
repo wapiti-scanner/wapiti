@@ -141,3 +141,13 @@ def test_openapi_file():
 
     for item in list_request:
         assert item in requests
+
+def test_openapi_yaml_file():
+    url = "tests/data/openapi.yaml"
+    page = Swagger(base_url="https://fake.openapi.fr", swagger_url=url)
+
+    assert{
+        "https://fake.openapi.fr/",
+        "https://fake.openapi.fr/eval?s=default",
+        "https://fake.openapi.fr/help"
+    } == {x.url for x in page.get_requests()}
