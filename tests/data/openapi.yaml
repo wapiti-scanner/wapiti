@@ -1,0 +1,56 @@
+info:
+  description: Vulnerable API
+  title: Vulnerable API
+  version: '0.1'
+openapi: 3.0.1
+paths:
+  /:
+    get:
+      description: Description
+      operationId: get_description
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                type: string
+          description: HTML content generated successfully
+      summary: Generate HTML content
+      x-openapi-router-controller: vAPI
+  /eval:
+    get:
+      description: Evaluate a string
+      operationId: evaluate_str
+      parameters:
+      - example: THISISATOKEN
+        in: header
+        name: X-Auth-Token
+        schema:
+          type: string
+      - in: query
+        name: s
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful command
+      x-openapi-router-controller: vAPI
+  /help:
+    get:
+      description: Description
+      operationId: get_help
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                type: string
+          description: HTML content generated successfully
+      summary: Generate HTML help content
+      x-openapi-router-controller: vAPI
+servers:
+- url: ''

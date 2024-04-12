@@ -294,10 +294,9 @@ async def test_swagger_invalid_url(mock_browse):
     ]
 
     with mock.patch.object(sys, "argv", testargs):
-        # will raise an exception because the url is not valid
-        with pytest.raises(SystemExit):
-            await wapiti_main()
-            mock_browse.assert_called_once()
+        # will not raise an exception because of the invalid url
+        await wapiti_main()
+        mock_browse.assert_called_once()
 
 
 @pytest.mark.asyncio
