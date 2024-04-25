@@ -45,6 +45,9 @@ class ModuleHtaccess(Attack):
         if request.path in self.attacked_get:
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         return response.status in (401, 402, 403, 407)
 
     async def attack(self, request: Request, response: Optional[Response] = None):

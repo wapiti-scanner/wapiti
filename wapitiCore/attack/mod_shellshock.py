@@ -58,6 +58,9 @@ class ModuleShellshock(Attack):
         }
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
+        if response.is_directory_redirection:
+            return False
+
         # We attempt to attach each script once whatever the method
         return request.path not in self.attacked_get
 

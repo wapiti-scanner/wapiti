@@ -318,6 +318,9 @@ class Attack:
             request: Request,  # pylint: disable=unused-argument
             response: Optional[Response] = None,  # pylint: disable=unused-argument
     ):
+        if response.is_directory_redirection:
+            return False
+
         return not self.finished
 
     @property

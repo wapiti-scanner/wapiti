@@ -106,6 +106,9 @@ class ModuleHttpHeaders(Attack):
         if request.method == "POST":
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         if request.is_root and not request.parameters_count:
             return True
 

@@ -65,6 +65,9 @@ class ModulePermanentxss(Attack):
             # Same goes for redirections
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         return True
 
     async def attack(self, request: Request, response: Optional[Response] = None):

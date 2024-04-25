@@ -354,6 +354,9 @@ class ModuleSsl(Attack):
         if request.scheme != "https":
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         if request.hostname in self.tested_targets:
             return False
 

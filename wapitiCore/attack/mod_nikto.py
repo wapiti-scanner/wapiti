@@ -106,6 +106,9 @@ class ModuleNikto(Attack):
         if self.finished:
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         return request.url == await self.persister.get_root_url()
 
     async def is_false_positive(self, evil_request: Request, expected_status_codes: List[int]) -> bool:

@@ -39,6 +39,9 @@ class ModuleCsp(Attack):
         if self.finished:
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         if request.method == "POST":
             return False
 

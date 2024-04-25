@@ -338,8 +338,6 @@ class Explorer:
             await asyncio.sleep(0)
             resources = self.extract_links(response, request)
             # TODO: there's more situations where we would not want to attack the resource... must check this
-            if response.is_directory_redirection:
-                return False, resources, response
 
             return True, resources, response
 

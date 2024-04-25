@@ -118,6 +118,9 @@ class ModuleBruteLoginForm(Attack):
         if "Letm3in_" not in request.encoded_data + request.encoded_params:
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         # We may want to remove this but if not available fallback to target URL
         if not request.referer:
             return False

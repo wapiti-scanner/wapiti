@@ -38,6 +38,9 @@ class ModuleHttpsRedirect(Attack):
         if self.finished:
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         url = urlparse(request.url)
         if not test_port(url.hostname, url.port or 80, self.crawler_configuration.timeout):
             log_orange(f"Port {url.port or 80} appears to be closed on {url.hostname}")

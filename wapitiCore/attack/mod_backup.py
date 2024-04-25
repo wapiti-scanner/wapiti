@@ -73,6 +73,9 @@ class ModuleBackup(Attack):
         page = request.path
         headers = response.headers
 
+        if response.is_directory_redirection:
+            return False
+
         if page in self.attacked_get:
             return False
 

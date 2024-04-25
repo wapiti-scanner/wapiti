@@ -114,6 +114,9 @@ class ModuleUpload(Attack):
         return False
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
+        if response.is_directory_redirection:
+            return False
+
         return request.is_multipart
 
     async def attack(self, request: Request, response: Optional[Response] = None):

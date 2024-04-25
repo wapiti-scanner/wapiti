@@ -173,6 +173,9 @@ class ModuleCsrf(Attack):
         if request.method != "POST":
             return False
 
+        if response.is_directory_redirection:
+            return False
+
         # JSON requests can only be sent using JS with same-origin policy in place
         # so, it is unlikely that a CSRF is possible. Let's filter those requests to prevent false positives
         if request.is_json:

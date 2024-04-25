@@ -83,6 +83,9 @@ class ModuleMethods(Attack):
         return await self.crawler.async_send(request)
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
+
+        if response.is_directory_redirection:
+            return False
         return request.path not in self.excluded_path
 
     async def attack(self, request: Request, response: Optional[Response] = None):
