@@ -22,7 +22,7 @@ class ModuleSpipEnum(CommonCMS):
 
     async def check_spip(self, url):
 
-        request = Request(f'{url}', 'GET')
+        request = Request(url, 'GET')
         try:
             response: Response = await self.crawler.async_send(request, follow_redirects=True)
         except RequestError:
@@ -57,32 +57,44 @@ class ModuleSpipEnum(CommonCMS):
     
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
-        request_to_root = Request(request.url)
+        is_spip_detectd = False
+        target_url = [request.url]
+        root_url = self.get_root_url(request.url)
+        if request.url != root_url:
+            target_url.append(root_url)
 
-        if await self.check_spip(request_to_root.url):
-            await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
-            self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+        request_to_root = request
 
-            spip_detected = {
-                "name": "SPIP",
-                "versions": self.versions,
-                "categories": ["CMS SPIP"],
-                "groups": ["Content"]
-            }
+        for url in target_url:
+            request_to_root = Request(url)
 
+            if await self.check_spip(request_to_root.url):
+                is_spip_detectd = True
+                await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
+                self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+                if self.versions:
+                    break
+
+        spip_detected = {
+            "name": "SPIP",
+            "versions": self.versions,
+            "categories": ["CMS SPIP"],
+            "groups": ["Content"]
+        }
+
+        if self.versions:
+            await self.add_vuln_info(
+                category=WEB_APP_VERSIONED,
+                request=request_to_root,
+                info=json.dumps(spip_detected),
+                wstg=WEB_WSTG_CODE
+            )
+        if is_spip_detectd:
             log_blue(
                 MSG_TECHNO_VERSIONED,
                 "SPIP",
                 self.versions
             )
-
-            if self.versions:
-                await self.add_vuln_info(
-                    category=WEB_APP_VERSIONED,
-                    request=request_to_root,
-                    info=json.dumps(spip_detected),
-                    wstg=WEB_WSTG_CODE
-                )
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,

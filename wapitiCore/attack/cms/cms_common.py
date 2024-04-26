@@ -4,6 +4,8 @@ import json
 from os.path import join as path_join
 
 from typing import Tuple
+from urllib.parse import urlparse
+
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
@@ -26,6 +28,12 @@ class CommonCMS(Attack):
     """Base class for CMS detecting version."""
     name = "cms"
     versions = []
+
+    def get_root_url(self, url):
+        parsed_url = urlparse(url)
+        # Reconstruct the root URL without the path
+        root_url = parsed_url.scheme + '://' + parsed_url.netloc + '/'
+        return root_url
 
     def get_hashes(self, payloads_hash):
         with open(path_join(self.DATA_DIR, payloads_hash), errors="ignore", encoding='utf-8') as hashes:

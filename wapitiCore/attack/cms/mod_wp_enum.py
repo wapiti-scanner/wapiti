@@ -2,6 +2,8 @@ import json
 import re
 from os.path import join as path_join
 from typing import Optional
+from urllib.parse import urljoin
+
 from httpx import RequestError
 
 from wapitiCore.net import Request
@@ -14,8 +16,9 @@ from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_WP = "No WordPress Detected"
 
+
 class ModuleWpEnum(CommonCMS):
-    """Detect Drupal version."""
+    """Detect WordPress version."""
     PAYLOADS_HASH = "wp_hash_files.json"
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
@@ -30,7 +33,7 @@ class ModuleWpEnum(CommonCMS):
             "generator\" content=\"wordpress",  # Check for the generator meta tag
             "wp-embed-responsive",  # Check for WordPress oEmbed script
         ]
-        request = Request(f'{url}', 'GET')
+        request = Request(url, 'GET')
         try:
             response: Response = await self.crawler.async_send(request, follow_redirects=True)
         except RequestError:
@@ -70,7 +73,9 @@ class ModuleWpEnum(CommonCMS):
             if self._stop_event.is_set():
                 break
 
-            request = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
+            plugin_path = f'/wp-content/plugins/{plugin}/readme.txt'
+            plugin_url = urljoin(url, plugin_path)
+            request = Request(plugin_url, 'GET')
             response = await self.crawler.async_send(request)
 
             if response.is_success:
@@ -128,7 +133,9 @@ class ModuleWpEnum(CommonCMS):
             if self._stop_event.is_set():
                 break
 
-            request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
+            theme_path = f'/wp-content/themes/{theme}/readme.txt'
+            theme_url = urljoin(url, theme_path)
+            request = Request(theme_url, 'GET')
             response = await self.crawler.async_send(request)
 
             if response.is_success:
@@ -184,38 +191,50 @@ class ModuleWpEnum(CommonCMS):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
-        request_to_root = Request(request.url)
+        is_wp_detected = False
+        target_url = [request.url]
+        root_url = self.get_root_url(request.url)
+        if request.url != root_url:
+            target_url.append(root_url)
 
-        if await self.check_wp(request_to_root.url):
-            await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
-            self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+        request_to_root = request
 
-            drupal_detected = {
-                "name": "WordPress",
-                "versions": self.versions,
-                "categories": ["CMS WordPress"],
-                "groups": ["Content"]
-            }
+        for url in target_url:
+            request_to_root = Request(url)
 
+            if await self.check_wp(url):
+                is_wp_detected = True
+                await self.detect_version(self.PAYLOADS_HASH, url)  # Call the method on the instance
+                self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+                if self.versions:
+                    break
+
+        wp_detected = {
+            "name": "WordPress",
+            "versions": self.versions,
+            "categories": ["CMS WordPress"],
+            "groups": ["Content"]
+        }
+        if self.versions:
+            await self.add_vuln_info(
+                category=WEB_APP_VERSIONED,
+                request=request_to_root,
+                info=json.dumps(wp_detected),
+                wstg=WEB_WSTG_CODE
+            )
+        if is_wp_detected:
             log_blue(
                 MSG_TECHNO_VERSIONED,
                 "WordPress",
                 self.versions
             )
-
-            if self.versions:
-                await self.add_vuln_info(
-                    category=WEB_APP_VERSIONED,
-                    request=request_to_root,
-                    info=json.dumps(drupal_detected),
-                    wstg=WEB_WSTG_CODE
-                )
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
-                info=json.dumps(drupal_detected),
+                info=json.dumps(wp_detected),
                 wstg=WSTG_CODE
             )
+
             log_blue("Enumeration of WordPress Plugins :")
             await self.detect_plugin(request_to_root.url)
             log_blue("----")

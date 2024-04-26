@@ -20,7 +20,7 @@ class ModuleJoomlaEnum(CommonCMS):
 
     async def check_joomla(self, url):
 
-        request = Request(f'{url}', 'GET')
+        request = Request(url, 'GET')
         try:
             response: Response = await self.crawler.async_send(request, follow_redirects=True)
         except RequestError:
@@ -47,37 +47,49 @@ class ModuleJoomlaEnum(CommonCMS):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
-        request_to_root = Request(request.url)
+        is_joomla_detected = False
+        target_url = [request.url]
+        root_url = self.get_root_url(request.url)
+        if request.url != root_url:
+            target_url.append(root_url)
 
-        if await self.check_joomla(request_to_root.url):
-            await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)
-            self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+        request_to_root = request
 
-            joomla_detected = {
-                "name": "Joomla!",
-                "versions": self.versions,
-                "categories": ["CMS Joomla"],
-                "groups": ["Content"]
-            }
+        for url in target_url:
+            request_to_root = Request(url)
 
+            if await self.check_joomla(request_to_root.url):
+                is_joomla_detected = True
+                await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)
+                self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+                if self.versions:
+                    break
+
+        joomla_detected = {
+            "name": "Joomla!",
+            "versions": self.versions,
+            "categories": ["CMS Joomla"],
+            "groups": ["Content"]
+        }
+
+        if self.versions:
+            await self.add_vuln_info(
+                category=WEB_APP_VERSIONED,
+                request=request_to_root,
+                info=json.dumps(joomla_detected),
+                wstg=WEB_WSTG_CODE
+            )
+        if is_joomla_detected:
             log_blue(
                 MSG_TECHNO_VERSIONED,
                 "Joomla!",
                 self.versions
             )
-
-            if self.versions:
-                await self.add_vuln_info(
-                    category=WEB_APP_VERSIONED,
-                    request=request_to_root,
-                    info=json.dumps(joomla_detected),
-                    wstg=WEB_WSTG_CODE
-                )
             await self.add_addition(
                 category=TECHNO_DETECTED,
                 request=request_to_root,
                 info=json.dumps(joomla_detected),
                 wstg=WSTG_CODE
-            )
+                )
         else:
             log_blue(MSG_NO_JOOMLA)
