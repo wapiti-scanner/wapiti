@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from http.cookiejar import Cookie
 from typing import Optional
+from urllib.parse import urljoin
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
@@ -54,14 +55,18 @@ class ModuleCookieflags(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
+
         for cookie in self.crawler.cookie_jar:
             log_blue(f"Checking cookie : {cookie.name}")
+            cookie_url = urljoin(request.url, cookie.path)
+            cookie_request = Request(cookie_url)
             if not self.check_httponly_flag(cookie):
                 log_red(INFO_COOKIE_HTTPONLY.format(cookie.name))
                 await self.add_vuln_low(
                     category=COOKIE_HTTPONLY_DISABLED,
-                    request=request,
+                    request=cookie_request,
                     info=INFO_COOKIE_HTTPONLY.format(cookie.name),
+                    parameter=cookie.name,
                     wstg=COOKIE_HTTPONLY_WSTG
                 )
 
@@ -69,7 +74,8 @@ class ModuleCookieflags(Attack):
                 log_red(INFO_COOKIE_SECURE.format(cookie.name))
                 await self.add_vuln_low(
                     category=COOKIE_SECURE_DISABLED,
-                    request=request,
+                    request=cookie_request,
                     info=INFO_COOKIE_SECURE.format(cookie.name),
+                    parameter=cookie.name,
                     wstg=COOKIE_SECURE_WSTG
                 )

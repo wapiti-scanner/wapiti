@@ -3,11 +3,11 @@
         "HttpOnly Flag cookie": [
             {
                 "method": "GET",
-                "path": "/",
+                "path": "/insecure",
                 "info": "HttpOnly flag is not set in the cookie : not_httponly_cookie",
-                "parameter": "",
+                "parameter": "not_httponly_cookie",
                 "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /insecure HTTP/1.1",
                 "wstg": [
                     "WSTG-SESS-02"
                 ]
@@ -16,11 +16,11 @@
         "Secure Flag cookie": [
             {
                 "method": "GET",
-                "path": "/",
+                "path": "/insecure",
                 "info": "Secure flag is not set in the cookie : insecure_cookie",
-                "parameter": "",
+                "parameter": "insecure_cookie",
                 "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /insecure HTTP/1.1",
                 "wstg": [
                     "WSTG-SESS-02"
                 ]
