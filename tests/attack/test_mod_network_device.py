@@ -195,6 +195,7 @@ async def test_detect_ssl_vpn():
     respx.get("http://perdu.com/remote/fgt_lang?lang=fr").mock(
         return_value=httpx.Response(
             200,
+            headers={"Content-Type": "application/javascript"},
             content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
                 <h2>Pas de panique, on va vous aider</h2> </body></html>'
         )
@@ -224,11 +225,47 @@ async def test_detect_ssl_vpn():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_detect_fortinet():
+async def test_fortinet_false_positive():
     respx.get("http://perdu.com/login/?next=/").mock(
         return_value=httpx.Response(
             200,
             content='<html><head><title>Login</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> '
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert not persister.add_payload.call_count
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_fortinet():
+    respx.get("http://perdu.com/login/?next=/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Fortinet</title></head><body><h1>Perdu sur Internet ?</h1> \
             <h2>Pas de panique, on va vous aider</h2> '
         )
     )
@@ -339,6 +376,85 @@ async def test_detect_fortimail():
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "FortiMail", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_fortimanager():
+    respx.get("http://perdu.com/p/login/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>FortiManager</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2></body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "FortiManager", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_fortianalyzer():
+    respx.get("http://perdu.com/p/login/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Login</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <div class="sign-in-header">FortiAnalyzer</div></body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "FortiAnalyzer", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
