@@ -198,7 +198,9 @@ class ModuleFile(Attack):
             else:
                 file_warning = None
                 for i, rule in enumerate(payload_info.rules):
-                    if rule in response.content:
+                    rules_words = rule.split()
+                    all_words_present = all(word in response.content for word in rules_words)
+                    if all_words_present:
                         found_pattern = rule
                         vulnerable_method = payload_info.messages[i]
                         inclusion_succeed = True
