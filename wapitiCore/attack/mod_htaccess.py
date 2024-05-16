@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
 # Copyright (C) 2009-2023 Nicolas Surribas
+# Copyright (C) 2021-2024 Cyberwatch
 #
 # Original authors :
 # Anthony DUBOCAGE
