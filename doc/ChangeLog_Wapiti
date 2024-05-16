@@ -1,3 +1,15 @@
+Unrelease
+    Wapiti 3.2.0
+    mod_network_device: New module to detect network devices interface
+    mod_cms: New module to detect CMS Version
+    mod_csrf : ignore JSON requests
+    mod_harbor: New module to detect harbor docker registry version
+    mod_wapp: Add the capabilities to change the update url
+    Core : add swagger api crawler
+    Core : fix headless explorer method
+    Core : fix max-scan-time and missing timeout
+    Python : update dependencies and pip configurations
+
 09/08/2023
     Wapiti 3.1.8
     mod_spring4shell: New Module to detect the Spring4Shell vulnerability
