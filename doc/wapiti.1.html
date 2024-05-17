@@ -162,6 +162,7 @@ More detail on each option can be found in the following sections.</p>
 <ul>
 <li><code>-s</code>, <code>--start</code> <var>URL</var></li>
 <li><code>-x</code>, <code>--exclude</code> <var>URL</var></li>
+<li><code>--swagger</code> <var>URL</var></li>
 <li><code>-r</code>, <code>--remove</code> <var>PARAMETER</var></li>
 <li><code>--skip</code> <var>PARAMETER</var></li>
 <li><code>-d</code>, <code>--depth</code> <var>DEPTH</var></li>
@@ -357,6 +358,9 @@ You can also give it a filename and Wapiti will read URLs from the given file (m
 <li><p><code>-x</code>, <code>--exclude</code> <var>URL</var><br />
 Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).<br />
 This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.</p></li>
+<li><p><code>--swagger</code> <var>URL</var><br />
+Extract API requests from the specified Swagger file.
+Extracted requests are added to the crawler.
 <li><p><code>-r</code>, <code>--remove</code> <var>PARAMETER</var><br />
 If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).<br />
 This option can be used several times.</p></li>

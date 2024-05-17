@@ -64,6 +64,7 @@ SCAN AND ATTACKS TUNING:
 
   * `-s`, `--start` <URL>
   * `-x`, `--exclude` <URL>
+  * `--swagger` <URL>
   * `-r`, `--remove` <PARAMETER>
   * `--skip` <PARAMETER>
   * `-d`, `--depth` <DEPTH>
@@ -243,6 +244,10 @@ Following options allows you to bypass this behavior/
     Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).  
     This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.
     
+  * `--swagger` <URL>  
+    Extract API requests from the specified Swagger file.
+    Extracted requests are added to the crawler.
+
   * `-r`, `--remove` <PARAMETER>  
     If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).  
     This option can be used several times.
