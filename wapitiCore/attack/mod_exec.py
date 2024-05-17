@@ -75,15 +75,18 @@ class ModuleExec(Attack):
         saw_internal_error = False
         current_parameter = None
         vulnerable_parameter = False
+        vulnerable_reversed_parameter = False
 
         for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
 
-            if current_parameter != parameter:
+            if current_parameter != parameter and not parameter.reversed_parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
                 vulnerable_parameter = False
             elif vulnerable_parameter:
                 # If parameter is vulnerable, just skip till next parameter
+                continue
+            if vulnerable_reversed_parameter and parameter.reversed_parameter:
                 continue
 
             if payload_info.type == "time" and request.path_id in self.false_positive_timeouts:
@@ -167,10 +170,12 @@ class ModuleExec(Attack):
                 vuln_info = None
 
                 # No timeout raised, check for patterns in response
-                if all(rule in response.content for rule in payload_info.rules):
+                if any(rule in response.content for rule in payload_info.rules):
                     vuln_info = payload_info.description
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
+                    if parameter.reversed_parameter:
+                        vulnerable_reversed_parameter = True
                 elif not warned:
                     vuln_info = self._find_warning_in_response(response.content)
                     warned = True

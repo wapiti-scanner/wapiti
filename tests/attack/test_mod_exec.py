@@ -80,22 +80,42 @@ async def test_detection():
         return_value=httpx.Response(200, text="Hello there")
     )
 
+    respx.post(url__regex=r"http://perdu\.com/\?env=foo").mock(
+        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+    )
+
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
+
     persister = AsyncMock()
+    all_requests = []
 
     request = Request("http://perdu.com/?vuln=hello")
     request.path_id = 1
+    all_requests.append(request)
+
+    request = Request(
+        "http://perdu.com/",
+        post_params=[["foo", "bar"]]
+    )
+    request.path_id = 2
+    all_requests.append(request)
 
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
         module = ModuleExec(crawler, persister, options, Event(), crawler_configuration)
-        await module.attack(request)
+        module.do_post = True
+        for request in all_requests:
+            await module.attack(request)
 
-        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
+        assert persister.add_payload.call_args_list[1][1]["module"] == "exec"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Command execution"
+        assert persister.add_payload.call_args_list[1][1]["request"].post_params == [["foo", 'env'],["env", "foo"]]
 
 
 @pytest.mark.asyncio
@@ -128,7 +148,7 @@ async def test_blind_detection():
         ):
             if "sleep" in payload_info.payload:
                 break
-            payloads_until_sleep += 1
+            payloads_until_sleep += 2 # paylaod + reversed_payload
 
         await module.attack(request)
 
