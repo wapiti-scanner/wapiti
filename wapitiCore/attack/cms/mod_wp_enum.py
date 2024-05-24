@@ -25,6 +25,7 @@ from httpx import RequestError
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
+from wapitiCore.attack.attack import random_string
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_WSTG_CODE
 from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
@@ -39,6 +40,7 @@ class ModuleWpEnum(CommonCMS):
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
     versions = []
+    false_positive = {"plugins": False, "themes": False}
 
     async def check_wp(self, url):
         check_list = [
@@ -61,6 +63,20 @@ class ModuleWpEnum(CommonCMS):
                 return True  # WordPress indicator found
 
         return False
+
+    async def check_false_positive(self, url):
+        self.false_positive = {"plugins": False, "themes": False}
+        rand = random_string()
+        for wp_type in ["plugins", "themes"]:
+            request = Request(f'{url}/wp-content/{wp_type}/{rand}/readme.txt', 'GET')
+            try:
+                response: Response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+            else:
+                if response.status == 403 or response.is_success:
+                    logging.warning(f"False positive detected for {wp_type} due to status code {response.status}")
+                    self.false_positive[wp_type] = response.status
 
     def get_plugin(self):
         with open(
@@ -90,57 +106,59 @@ class ModuleWpEnum(CommonCMS):
                 break
 
             request = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
-            response = await self.crawler.async_send(request)
+            try:
+                response: Response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+            else:
+                if response.is_success:
+                    version = re.search(r'tag:\s*([\d.]+)', response.content)
 
-            if response.is_success:
-                version = re.search(r'tag:\s*([\d.]+)', response.content)
+                    # This check was added to detect invalid format of "Readme.txt" which can cause a crash
+                    if version:
+                        version = version.group(1)
+                    else:
+                        version = ""
 
-                # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
-                if version:
-                    version = version.group(1)
-                else:
-                    logging.warning("Readme.txt is not in a valid format")
-                    version = ""
-
-                plugin_detected = {
-                    "name": plugin,
-                    "versions": [version],
-                    "categories": ["WordPress plugins"],
-                    "groups": ['Add-ons']
-                }
-
-                log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    plugin,
-                    version
-                )
-
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
-                    request=request,
-                    info=json.dumps(plugin_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=response
-                )
-            elif response.status == 403:
-                plugin_detected = {
-                    "name": plugin,
-                    "versions": [""],
-                    "categories": ["WordPress plugins"],
-                    "groups": ['Add-ons']
-                }
-                log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    plugin,
-                    [""]
-                )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
-                    request=request,
-                    info=json.dumps(plugin_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=response
-                )
+                    if version or \
+                        self.false_positive["plugins"] < 200 or self.false_positive["plugins"] > 299:
+                        plugin_detected = {
+                            "name": plugin,
+                            "versions": [version],
+                            "categories": ["WordPress plugins"],
+                            "groups": ['Add-ons']
+                        }
+                        log_blue(
+                            MSG_TECHNO_VERSIONED,
+                            plugin,
+                            [version]
+                        )
+                        await self.add_addition(
+                            category=TECHNO_DETECTED,
+                            request=request,
+                            info=json.dumps(plugin_detected),
+                            wstg=TECHNO_DETECTED_WSTG_CODE,
+                            response=response
+                        )
+                elif response.status == 403 and self.false_positive["plugins"] != 403:
+                    plugin_detected = {
+                        "name": plugin,
+                        "versions": [""],
+                        "categories": ["WordPress plugins"],
+                        "groups": ['Add-ons']
+                    }
+                    log_blue(
+                        MSG_TECHNO_VERSIONED,
+                        plugin,
+                        [""]
+                    )
+                    await self.add_addition(
+                        category=TECHNO_DETECTED,
+                        request=request,
+                        info=json.dumps(plugin_detected),
+                        wstg=TECHNO_DETECTED_WSTG_CODE,
+                        response=response
+                    )
 
     async def detect_theme(self, url):
         for theme in self.get_theme():
@@ -148,52 +166,58 @@ class ModuleWpEnum(CommonCMS):
                 break
 
             request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
-            response = await self.crawler.async_send(request)
+            try:
+                response: Response = await self.crawler.async_send(request)
+            except RequestError:
+                self.network_errors += 1
+            else:
+                if response.is_success:
+                    version = re.search(r'tag:\s*([\d.]+)', response.content)
+                    # This check was added to detect invalid format of "Readme.txt" which can cause a crash
+                    if version:
+                        version = version.group(1)
+                    else:
+                        version = ""
+                    theme_detected = {
+                        "name": theme,
+                        "versions": [version],
+                        "categories": ["WordPress themes"],
+                        "groups": ['Add-ons']
+                    }
 
-            if response.is_success:
-                version = re.search(r'tag:\s*([\d.]+)', response.content)
-                # This check was added to detect invalid format of "Readme.txt" who can cause a crashe
-                if version:
-                    version = version.group(1)
-                else:
-                    version = ""
-                theme_detected = {
-                    "name": theme,
-                    "versions": [version],
-                    "categories": ["WordPress themes"],
-                    "groups": ['Add-ons']
-                }
-                log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    theme,
-                    version
-                )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
-                    request=request,
-                    info=json.dumps(theme_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=response
-                )
-            elif response.status == 403:
-                theme_detected = {
-                    "name": theme,
-                    "versions": [""],
-                    "categories": ["WordPress themes"],
-                    "groups": ['Add-ons']
-                }
-                log_blue(
-                    MSG_TECHNO_VERSIONED,
-                    theme,
-                    [""]
-                )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
-                    request=request,
-                    info=json.dumps(theme_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
-                    response=response
-                )
+                    if version or \
+                        self.false_positive["themes"] < 200 or self.false_positive["themes"] > 299:
+                        log_blue(
+                            MSG_TECHNO_VERSIONED,
+                            theme,
+                            [version]
+                        )
+                        await self.add_addition(
+                            category=TECHNO_DETECTED,
+                            request=request,
+                            info=json.dumps(theme_detected),
+                            wstg=TECHNO_DETECTED_WSTG_CODE,
+                            response=response
+                        )
+                elif response.status == 403 and self.false_positive["themes"] != 403:
+                    theme_detected = {
+                        "name": theme,
+                        "versions": [""],
+                        "categories": ["WordPress themes"],
+                        "groups": ['Add-ons']
+                    }
+                    log_blue(
+                        MSG_TECHNO_VERSIONED,
+                        theme,
+                        [""]
+                    )
+                    await self.add_addition(
+                        category=TECHNO_DETECTED,
+                        request=request,
+                        info=json.dumps(theme_detected),
+                        wstg=TECHNO_DETECTED_WSTG_CODE,
+                        response=response
+                    )
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished or request.method == "POST":
@@ -235,6 +259,7 @@ class ModuleWpEnum(CommonCMS):
                 info=json.dumps(drupal_detected),
                 wstg=WSTG_CODE
             )
+            await self.check_false_positive(request_to_root.url)
             log_blue("Enumeration of WordPress Plugins :")
             await self.detect_plugin(request_to_root.url)
             log_blue("----")

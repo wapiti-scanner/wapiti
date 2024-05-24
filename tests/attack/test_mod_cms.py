@@ -810,6 +810,230 @@ async def test_wp_no_version_detected():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_wp_false_positive_403():
+
+    # Response to tell that WordPress is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Ce site utilise Wordpress .... /wp-content</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>")
+    )
+
+    # Response for versioned plugin
+    respx.get("http://perdu.com/wp-content/plugins/bbpress/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress wp-content\
+            Stable tag: 2.6.6 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for plugin detected without version (403 forbiden response)
+    respx.get("http://perdu.com/wp-content/plugins/wp-reset/readme.txt").mock(
+        return_value=httpx.Response(403)
+    )
+
+    # Response for bad format readme.txt of plugin
+    respx.get("http://perdu.com/wp-content/plugins/unyson/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress wp-content\
+            Version Tested : 4.5 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for versioned theme
+    respx.get("http://perdu.com/wp-content/themes/twentynineteen/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+               <h2>Pas de panique, on va wordpress vous aider</h2> \
+               Wordpress wordpress WordPress\
+               Stable tag: 1.9 \
+               <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for theme detected without version (403 forbidden response)
+    respx.get("http://perdu.com/wp-content/themes/seedlet/readme.txt").mock(
+        return_value=httpx.Response(403)
+    )
+
+    # Response for bad format readme.txt of theme
+    respx.get("http://perdu.com/wp-content/themes/customify/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wp-content WordPress\
+            Version Tested : 3.2 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(403))
+    respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(403))
+    respx.get(url__regex=r"http://perdu.com.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 5
+
+        assert persister.add_payload.call_args_list[0][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "WordPress", "versions": [], "categories": ["CMS WordPress"], "groups": ["Content"]}'
+        )
+
+        assert persister.add_payload.call_args_list[1][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[4][1]["info"] == (
+            '{"name": "customify", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_wp_false_positive_success():
+
+    # Response to tell that WordPress is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Ce site utilise Wordpress .... /wp-content</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>")
+    )
+
+    # Response for versioned plugin
+    respx.get("http://perdu.com/wp-content/plugins/bbpress/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress wp-content\
+            Stable tag: 2.6.6 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for plugin detected without version (403 forbiden response)
+    respx.get("http://perdu.com/wp-content/plugins/wp-reset/readme.txt").mock(
+        return_value=httpx.Response(403)
+    )
+
+    # Response for bad format readme.txt of plugin
+    respx.get("http://perdu.com/wp-content/plugins/unyson/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wordpress wp-content\
+            Version Tested : 4.5 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for versioned theme
+    respx.get("http://perdu.com/wp-content/themes/twentynineteen/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+               <h2>Pas de panique, on va wordpress vous aider</h2> \
+               Wordpress wordpress WordPress\
+               Stable tag: 1.9 \
+               <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response for theme detected without version (403 forbidden response)
+    respx.get("http://perdu.com/wp-content/themes/seedlet/readme.txt").mock(
+        return_value=httpx.Response(403)
+    )
+
+    # Response for bad format readme.txt of theme
+    respx.get("http://perdu.com/wp-content/themes/customify/readme.txt").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va wordpress vous aider</h2> \
+            Wordpress wp-content WordPress\
+            Version Tested : 3.2 \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(200))
+    respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(200))
+    respx.get(url__regex=r"http://perdu.com.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 5
+
+        assert persister.add_payload.call_args_list[0][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "WordPress", "versions": [], "categories": ["CMS WordPress"], "groups": ["Content"]}'
+        )
+
+        assert persister.add_payload.call_args_list[1][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[3][1]["info"] == (
+            '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[4][1]["info"] == (
+            '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_wp_plugin():
 
     # Response to tell that WordPress is used
