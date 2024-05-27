@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import dataclasses
+from os.path import join as path_join
 import re
 from math import ceil
 from random import randint
@@ -34,6 +35,7 @@ from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WS
 from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
+from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
 @dataclasses.dataclass
@@ -249,6 +251,45 @@ DBMS_ERROR_PATTERNS = {
 }
 
 
+def create_mutated_request(mutated_request, parameter, get_parameters, post_parameters):
+    """
+  Creates a a new mutated request object with modified parameters based on the request type (GET or POST).
+  """
+    # Check if the request is GET or POST
+    if mutated_request.method == "GET":
+        modified_params = update_get_parameters(get_parameters.copy(), parameter)
+        return Request(method=mutated_request.method, get_params=modified_params, path=mutated_request.path)
+    if mutated_request.method == "POST":
+        modified_params = update_post_parameters(post_parameters.copy(), parameter)
+        return Request(method=mutated_request.method, post_params=modified_params, path=mutated_request.path, )
+
+    raise ValueError(f"Unsupported request method: {mutated_request.method}")
+
+
+def update_get_parameters(params, parameter):
+    """
+    Updates the GET parameters list with the modified value for the target parameter.
+    """
+    error_payload = "')"
+    for i, (key, _) in enumerate(params):
+        if key == parameter.name:
+            params[i] = (key, error_payload)
+            break
+    return params
+
+
+def update_post_parameters(params, parameter):
+    """
+    Updates the POST parameters dictionary with the modified value for the target parameter.
+    """
+    error_payload = "')"
+    for i, (key, _) in enumerate(params):
+        if key == parameter.name:
+            params[i] = (key, error_payload)
+            break
+    return params
+
+
 def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
     # payloads = []
     for use_parenthesis in (False, True):
@@ -297,11 +338,28 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
         )
 
 
+async def is_ldap_false_positive(error_response: Response) -> bool:
+    """
+    Determine if the test response is a false positive by comparing it with the original response.
+    """
+    if "LDAP query results: nothing found for query" in error_response.content:
+        return False
+
+    if error_response.is_success:
+        return True
+
+    if not any(ldap_pattern in error_response.content for ldap_pattern in
+               ["Ldap", "Ldap.Client", "ldap.", "LDAP error"]):
+        return True
+
+    return False
+
+
 class ModuleSql(Attack):
     """
     Detect SQL (also LDAP and XPath) injection vulnerabilities using error-based or boolean-based (blind) techniques.
     """
-
+    payloads_injection = []
     time_to_sleep = 6
     name = "sql"
     payloads = ["[VALUE]\xBF'\"("]
@@ -311,6 +369,15 @@ class ModuleSql(Attack):
         super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
         self.mutator = self.get_mutator()
         self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
+
+    def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
+        """Load the payloads from the specified file"""
+        parser = IniPayloadReader(path_join(self.DATA_DIR, "ldapi_payloads.ini"))
+        parser.add_key_handler("payload", replace_tags)
+        parser.add_key_handler("payload", lambda x: x.replace("[TIME]", str(self.time_to_sleep)))
+        parser.add_key_handler("messages", lambda x: x.splitlines())
+
+        yield from parser
 
     @staticmethod
     def _find_pattern_in_response(data):
@@ -329,6 +396,10 @@ class ModuleSql(Attack):
             return "XPath Injection"
         if "Warning: SimpleXMLElement::xpath():" in data:
             return "XPath Injection"
+        if "Error parsing XPath" in data:
+            return "XPath Injection"
+        if "LDAP query results: nothing found for query" in data:
+            return "LDAP Injection"
         if "supplied argument is not a valid ldap" in data or "javax.naming.NameNotFoundException" in data:
             return "LDAP Injection"
 
@@ -347,6 +418,7 @@ class ModuleSql(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         vulnerable_parameters = await self.error_based_attack(request)
         await self.boolean_based_attack(request, vulnerable_parameters)
+        await self.ldap_injection_attack(request, vulnerable_parameters)
 
     async def error_based_attack(self, request: Request):
         page = request.path
@@ -359,7 +431,6 @@ class ModuleSql(Attack):
                 request,
                 str_to_payloadinfo(self.payloads),
         ):
-
             if current_parameter != parameter:
                 # Forget what we know about current parameter
                 current_parameter = parameter
@@ -385,7 +456,7 @@ class ModuleSql(Attack):
 
                     await self.add_vuln_critical(
                         request_id=request.path_id,
-                        category=NAME,
+                        category=vuln_info,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter.display_name,
@@ -409,27 +480,51 @@ class ModuleSql(Attack):
                     vulnerable_parameters.add(parameter.display_name)
 
                 elif response.is_server_error and not saw_internal_error:
-                    saw_internal_error = True
-                    if parameter.is_qs_injection:
-                        anom_msg = Messages.MSG_QS_500
+                    if "LdapClient" in response.content:
+                        vuln_info = "LDAP Injection"
+                        vuln_message = f"{vuln_info} via injection in the parameter {current_parameter.name}"
+                        await self.add_vuln_critical(
+                            request_id=request.path_id,
+                            category=vuln_info,
+                            request=mutated_request,
+                            info=vuln_message,
+                            parameter=parameter.name,
+                            response=response
+                        )
+                        log_red("---")
+                        log_red(
+                            Messages.MSG_QS_INJECT if current_parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
+                            vuln_info,
+                            page,
+                            current_parameter.name
+                        )
+                        log_red(Messages.MSG_EVIL_REQUEST)
+                        log_red(mutated_request.http_repr())
+                        log_red("---")
+                        vulnerable_parameters.add(parameter.display_name)
+
                     else:
-                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
+                        saw_internal_error = True
+                        if parameter.is_qs_injection:
+                            anom_msg = Messages.MSG_QS_500
+                        else:
+                            anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
-                    await self.add_anom_high(
-                        request_id=request.path_id,
-                        category=Messages.ERROR_500,
-                        request=mutated_request,
-                        info=anom_msg,
-                        parameter=parameter.display_name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
-                        response=response
-                    )
+                        await self.add_anom_high(
+                            request_id=request.path_id,
+                            category=Messages.ERROR_500,
+                            request=mutated_request,
+                            info=anom_msg,
+                            parameter=parameter.display_name,
+                            wstg=INTERNAL_ERROR_WSTG_CODE,
+                            response=response
+                        )
 
-                    log_orange("---")
-                    log_orange(Messages.MSG_500, page)
-                    log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
-                    log_orange("---")
+                        log_orange("---")
+                        log_orange(Messages.MSG_500, page)
+                        log_orange(Messages.MSG_EVIL_REQUEST)
+                        log_orange(mutated_request.http_repr())
+                        log_orange("---")
 
         return vulnerable_parameters
 
@@ -539,5 +634,105 @@ class ModuleSql(Attack):
             )
 
             test_results.append(comparison == (payload_info.section is True))
+            last_mutated_request = mutated_request
+            last_response = response
+
+    async def ldap_injection_attack(self, request: Request, parameters_to_skip: set):
+        try:
+            good_response = await self.crawler.async_send(request)
+            good_status = good_response.status
+            good_redirect = good_response.redirection_url
+            html = Html(good_response.content, request.url)
+            good_hash = html.text_only_md5
+        except ReadTimeout:
+            self.network_errors += 1
+            return
+        except ParserRejectedMarkup as exc:
+            logging.warning(exc)
+            return
+
+        methods = ""
+        if self.do_get:
+            methods += "G"
+        if self.do_post:
+            methods += "PF"
+
+        mutator = Mutator(
+            methods=methods,
+            qs_inject=self.must_attack_query_string,
+            skip=self.options.get("skipped_parameters", set()) | parameters_to_skip
+        )
+
+        current_parameter = None
+        skip_till_next_parameter = False
+        test_results = []
+        last_mutated_request = None
+        last_response = None
+        for mutated_request, parameter, _ in mutator.mutate(request, self.get_payloads):
+
+            # Make sure we always pass through the following block to see changes of payloads formats
+            # We start a new set of payloads, let's analyse results for previous ones
+            mutated_request_edited = create_mutated_request(mutated_request, parameter,
+                                                            mutated_request.get_params, mutated_request.post_params)
+            if test_results and all(test_results):
+                # We got a winner
+                vuln_info = "LDAP Injection"
+                skip_till_next_parameter = True
+
+                vuln_message = f"Potential LDAP Injection detected via parameter {parameter.name}"
+                await self.add_vuln_critical(
+                    request_id=request.path_id,
+                    category="LDAP Injection",
+                    request=last_mutated_request,
+                    info=vuln_message,
+                    parameter=parameter.name,
+                    response=last_response
+                )
+                log_red("---")
+                log_red(
+                    Messages.MSG_QS_INJECT if current_parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
+                    vuln_info,
+                    last_mutated_request.path,
+                    current_parameter.name
+                )
+                log_red(Messages.MSG_EVIL_REQUEST)
+                log_red(last_mutated_request.http_repr())
+                log_red("---")
+
+            # Don't forget to reset session and results
+            test_results = []
+
+            if current_parameter != parameter:
+                # Start attacking a new parameter, forget every state we kept
+                current_parameter = parameter
+                skip_till_next_parameter = False
+            elif skip_till_next_parameter:
+                # If parameter is vulnerable, just skip till next parameter
+                continue
+
+            if test_results and not all(test_results):
+                # No need to go further: one of the tests was wrong
+                continue
+
+            log_verbose(f"[¨] {mutated_request}")
+
+            try:
+                response = await self.crawler.async_send(mutated_request)
+                mutated_response = await self.crawler.async_send(mutated_request_edited)
+            except RequestError:
+                self.network_errors += 1
+                # We need all cases to make sure LDAPi is there
+                test_results.append(False)
+                continue
+
+            Html(response.content, url=mutated_request.url)
+            comparison = (
+                    response.status == good_status and
+                    response.redirection_url == good_redirect and
+                    Html(response.content, url=mutated_request.url).text_only_md5 != good_hash and
+                    not await is_ldap_false_positive(mutated_response)
+            )
+
+            test_results.append(comparison)
             last_mutated_request = mutated_request
             last_response = response

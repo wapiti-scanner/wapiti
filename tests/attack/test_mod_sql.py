@@ -103,7 +103,7 @@ async def test_true_positive():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "sql"
-        assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection (DBMS: MySQL)"
 
 
 @pytest.mark.asyncio
@@ -160,7 +160,8 @@ async def test_blind_detection():
 
             assert persister.add_payload.call_count
             # One request for error-based, one to get normal response, four to test boolean-based attack
-            assert respx.calls.call_count == 6
+            # Five requests for the ldap injection attack
+            assert respx.calls.call_count == 11
 
 
 @pytest.mark.asyncio
@@ -185,7 +186,8 @@ async def test_negative_blind():
         # - 1 request for error-based test
         # - 1 request to get normal response
         # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
-        assert respx.calls.call_count == 8
+        # - 5 requests for the ldap injection attack
+        assert respx.calls.call_count == 13
 
 
 @pytest.mark.asyncio
@@ -248,4 +250,5 @@ async def test_blind_detection_parenthesis():
             # - 1 request for boolean True test without parenthesis => this check fails
             # - 2 requests for boolean False test WITH parenthesis
             # - 2 requests for boolean True test WITH parenthesis
-            assert respx.calls.call_count == 9
+            # - 5 requests for the ldap injection attack
+            assert respx.calls.call_count == 14
