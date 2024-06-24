@@ -67,6 +67,20 @@ class Swagger():
     def _get_base_url(swagger_dict: dict, url: str) -> str:
         try:
             parsed_host = urllib.parse.urlparse(url)
+            if 'servers' in swagger_dict:
+                for server in swagger_dict['servers']:
+                    if 'url' in server and server['url'] != "":
+                        if server['url'].endswith("/"):
+                            server['url'] = server['url'][:-1]
+                        swagger_url = server['url']
+                        if 'variables' in server:
+                            for variable in server['variables']:
+                                swagger_url = swagger_url.replace(
+                                    "{" + variable + "}", server['variables'][variable]['default']
+                                )
+                        swagger_dict['basePath'] = ""
+                        swagger_dict['host'] = swagger_url
+                        return swagger_url
             if 'schemes' not in swagger_dict:
                 # get http or https from url
                 swagger_dict['schemes'] = parsed_host.scheme
