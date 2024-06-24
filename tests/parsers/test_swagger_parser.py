@@ -151,3 +151,13 @@ def test_openapi_yaml_file():
         "https://fake.openapi.fr/eval?s=default",
         "https://fake.openapi.fr/help"
     } == {x.url for x in page.get_requests()}
+
+def test_openapi3():
+    url = "tests/data/openapi3.yaml"
+    page = Swagger(base_url="https://fake.openapi.fr", swagger_url=url)
+
+    assert{
+        "https://fake.openapi.fr:8080/v1/pets?limit=1337",
+        "https://fake.openapi.fr:8080/v1/pets",
+        "https://fake.openapi.fr:8080/v1/pets/default"
+    } == {x.url for x in page.get_requests()}
