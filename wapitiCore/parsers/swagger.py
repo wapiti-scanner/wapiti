@@ -60,7 +60,7 @@ class Swagger():
             logging.error("[-] Error: No URL or file")
 
         if self.swagger_dict:
-            self.routes = self._get_routes(self.swagger_dict, swagger_url, base_url)
+            self.routes = self._get_routes(self.swagger_dict, base_url)
 
 
     @staticmethod
@@ -196,11 +196,9 @@ class Swagger():
             return False
 
 
-    def _get_routes(self, swagger_dict: dict, swagger_url: str, base_url: str) -> dict:
-        if Swagger.is_valid_url(swagger_url):
-            url = swagger_url
-        else:
-            url = base_url
+    def _get_routes(self, swagger_dict: dict, base_url: str) -> dict:
+        # We use the url from the -u unless the swagger file has one
+        url = base_url
         request = {}
         base_path = self._get_base_url(swagger_dict, url)
         for path in swagger_dict['paths']:

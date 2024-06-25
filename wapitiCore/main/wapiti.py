@@ -194,8 +194,14 @@ async def wapiti_main():
 
     if args.swagger_uri:
         swagger = Swagger(swagger_url=args.swagger_uri, base_url=url)
+        nb_out = 0
         for request in swagger.get_requests():
-            wap.add_start_url(request)
+            if wap.target_scope.check(request):
+                wap.add_start_url(request)
+            else:
+                nb_out += 1
+        if nb_out > 0:
+            logging.warning(f"[!] {nb_out} out of scope requests from the Swagger file are not added.")
 
     try:
         for start_url in args.starting_urls:
