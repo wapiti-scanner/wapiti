@@ -270,7 +270,8 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
 # Test swagger option with a valid url
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-async def test_swagger_valid_url(mock_browse):
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+async def test_swagger_valid_url(mock_browse, _):
     testargs = [
         "wapiti",
         "-u", "https://petstore.swagger.io",
@@ -285,7 +286,8 @@ async def test_swagger_valid_url(mock_browse):
 # Test swagger option with an invalid url or when option break
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-async def test_swagger_invalid_url(mock_browse):
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+async def test_swagger_invalid_url(mock_browse, _):
     testargs = [
         "wapiti",
         "-u", "http://testphp.vulnweb.com",
@@ -297,6 +299,24 @@ async def test_swagger_invalid_url(mock_browse):
         # will not raise an exception because of the invalid url
         await wapiti_main()
         mock_browse.assert_called_once()
+
+
+@pytest.mark.asyncio
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
+@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.controller.wapiti.Wapiti.add_start_url")
+async def test_out_of_scope_swagger(mock_add_start_url, _, __):
+    """Test with out of scope swagger"""
+    testsagrs = [
+        "wapiti",
+        "--url", "http://testphp.vulnweb.com/",
+        "--swagger", "./tests/data/openapi3.yaml",
+        "-m", ""
+    ]
+
+    with mock.patch.object(sys, "argv", testsagrs):
+        await wapiti_main()
+        mock_add_start_url.assert_not_called()
 
 
 @pytest.mark.asyncio
