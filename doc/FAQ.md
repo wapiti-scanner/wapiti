@@ -36,8 +36,8 @@ If you are really lost, feel free to contact me.
 
 ### I have a warning about the ssl module not working ! ###
 
-The `ssl` module requires the Python libraries [SSLyze](https://github.com/nabla-c0d3/sslyze) and [humanize](https://github.com/python-humanize/humanize).  
-The module is optional therefore you need to install those dependencies to use the `ssl` module.
+The `ssl` module requires the [sslscan](binary) to be present in your PATH.  
+Check if the software is available with your package manager.
 
 ### I have some UnicodeDecodeError as soon as I launch Wapiti ! ###
 

@@ -9,6 +9,7 @@ Unrelease
     Core : fix headless explorer method
     Core : fix max-scan-time and missing timeout
     Python : update dependencies and pip configurations
+    mod_ssl: Move to sslscan for the ssl module instead of sslyze
 
 09/08/2023
     Wapiti 3.1.8

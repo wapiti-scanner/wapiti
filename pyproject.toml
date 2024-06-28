@@ -42,6 +42,7 @@ dependencies = [
         "httpcore==1.0.4",
         "httpx[brotli, socks]==0.27.0",
         "httpx-ntlm==1.4.0",
+        "humanize==4.9.0",
         "loguru==0.7.2",
         "mako==1.3.2",
         "markupsafe==2.1.5",
@@ -64,17 +65,12 @@ wapiti = "wapitiCore.main.wapiti:wapiti_asyncio_wrapper"
 wapiti-getcookie = "wapitiCore.main.getcookie:getcookie_asyncio_wrapper"
 
 [project.optional-dependencies]
-ssl = [
-        "humanize==4.9.0",
-        "sslyze==5.2.0"
-]
 test = [
         "humanize==4.9.0",
         "pytest==8.0.2",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.23.5",
         "respx==0.20.2",
-        "sslyze==5.2.0"
 ]
 
 [tool.setuptools.packages]

@@ -31,8 +31,6 @@ See `INSTALL.md <https://github.com/wapiti-scanner/wapiti/blob/master/INSTALL.md
 
 Running Wapiti on Windows can be accomplished through the use of `WSL <https://learn.microsoft.com/en-us/training/modules/get-started-with-windows-subsystem-for-linux/>`__.
 
-The `ssl` module used to scan TLS/SSL misconfiguration won't work on ARM processors (see `SSLyze documentation <https://nabla-c0d3.github.io/sslyze/documentation/installation.html>`__).
-
 How it works
 ============
 
@@ -145,7 +143,7 @@ The aforementioned attacks are tied to the following module names :
 + shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
 + spring4shell (Detects websites vulnerable to CVE-2020-5398)
 + sql (Error-based and boolean-based SQL injection detection)
-+ ssl (Evaluate the security of SSL/TLS certificate configuration, requires `SSLyze <https://github.com/nabla-c0d3/sslyze>`__)
++ ssl (Evaluate the security of SSL/TLS certificate configuration, requires `sslscan <https://github.com/rbsec/sslscan>`__)
 + ssrf (Server Side Request Forgery)
 + takeover (Subdomain takeover)
 + timesql (SQL injection vulnerabilities detected with time-based methodology)
