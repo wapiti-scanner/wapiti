@@ -86,6 +86,7 @@ async def test_ubika_without_version():
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_ubika_with_version():
@@ -771,3 +772,128 @@ async def test_detect_citrix_in_root_url():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "NetScaler ADC", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_checkpoint_without_version():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    respx.get("http://perdu.com/Login/Login").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Hello</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                <h2>Check Point Software Technologies Ltd</h2> \
+                <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Check Point", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_checkpoint_based_on_realmsArrJSON():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    respx.get("http://perdu.com/Login/Login").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Hello</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                <h2>Hello</h2><script type='text/javascript'>var realmsArrJSON = '[]'</script> \
+                <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Check Point", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_checkpoint_with_version():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    respx.get("http://perdu.com/cgi-bin/home.tcl").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Login</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> \
+                <div><script src='/login/login.js'></script></div> <script>var hostname='';var version='R80.20';</script>\
+                <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Check Point", "versions": ["R80.20"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
