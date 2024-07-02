@@ -36,7 +36,7 @@ MSG_NO_UBIKA = "No UBIKA Detected"
 
 class ModuleUbika(NetworkDeviceCommon):
     """Detect Ubika."""
-    version = ""
+    version = []
 
     async def check_ubika(self, url):
         check_list = ['app/monitor/']
@@ -53,7 +53,7 @@ class ModuleUbika(NetworkDeviceCommon):
             return response.is_success and title_tag and "UBIKA" in title_tag.text.strip()
 
     async def get_ubika_version(self, url):
-        version = ""
+        versions = []
         version_uri = "app/monitor/api/info/product"
         full_url = urljoin(url, version_uri)
         request = Request(full_url, 'GET')
@@ -65,7 +65,9 @@ class ModuleUbika(NetworkDeviceCommon):
 
         if response.is_success:
             version = response.json.get("result", {}).get("product", {}).get("version", '')
-        return version
+            if version:
+                versions.append(version)
+        return versions
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
@@ -81,7 +83,7 @@ class ModuleUbika(NetworkDeviceCommon):
 
                 ubika_detected = {
                     "name": "UBIKA WAAP",
-                    "versions": [self.version] if self.version else [],
+                    "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
@@ -97,6 +99,7 @@ class ModuleUbika(NetworkDeviceCommon):
                     info=json.dumps(ubika_detected),
                     wstg=WSTG_CODE
                 )
+                self.version.clear()
             else:
                 log_blue(MSG_NO_UBIKA)
         except RequestError as req_error:

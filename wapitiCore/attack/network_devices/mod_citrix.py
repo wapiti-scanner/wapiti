@@ -39,10 +39,10 @@ class ModuleCitrix(Attack):
     """Detect Citrix Devices."""
 
     device_name = "Citrix"
-    version = ""
+    version = []
 
     async def check_citrix(self, url):
-        check_list = ['logon/LogonPoint/']
+        check_list = ['logon/LogonPoint/', '']
 
         for item in check_list:
             full_url = urljoin(url, item)
@@ -80,6 +80,17 @@ class ModuleCitrix(Attack):
                     # Extract the product name from the title
                     self.device_name = title
                     return True
+                if "NetScaler" in title:
+                    # Search the product name in the content
+                    product_names = ["NetScaler ADC", "Citrix NetScaler", "NetScaler", "NetScaler AWS"]
+                    matches = soup.find_all('span', text=lambda text: text in product_names)
+                    if matches:
+                        # Set product_name to the first matched product name
+                        self.device_name = matches[0].text
+                    else:
+                        self.device_name = "Citrix"
+                    return True
+
         return False
 
     async def attack(self, request: Request, response: Optional[Response] = None):
@@ -90,7 +101,7 @@ class ModuleCitrix(Attack):
             if await self.check_citrix(request_to_root.url):
                 citrix_detected = {
                     "name": self.device_name,
-                    "version": "",
+                    "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }

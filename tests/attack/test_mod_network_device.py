@@ -696,7 +696,7 @@ async def test_detect_citrix_from_title():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Citrix Gateway", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Citrix Gateway", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
 
 
@@ -736,5 +736,38 @@ async def test_detect_citrix_from_class():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "NetscalerGateway", "version": "", "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "NetscalerGateway", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_citrix_in_root_url():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>NetScaler ADC</title></head><body><h1>Perdu sur Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider <span>NetScaler ADC</span></h2> \
+                    </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "NetScaler ADC", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )

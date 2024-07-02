@@ -37,7 +37,7 @@ class ModuleHarbor(NetworkDeviceCommon):
     """Detect Harbor."""
 
     device_name = "Harbor"
-    version = ""
+    version = []
 
     async def check_harbor(self, url):
         check_list = ['api/v2.0/systeminfo']
@@ -67,7 +67,7 @@ class ModuleHarbor(NetworkDeviceCommon):
             data = json.loads(response_content)
             # Extract the harbor_version value
             if data.get("harbor_version"):
-                self.version = data.get("harbor_version")
+                self.version.append(data.get("harbor_version"))
         except (json.JSONDecodeError, KeyError) as json_error:
             raise ValueError("The URL doesn't contain a valid JSON.") from json_error
 
@@ -79,7 +79,7 @@ class ModuleHarbor(NetworkDeviceCommon):
             if await self.check_harbor(request_to_root.url):
                 harbor_detected = {
                     "name": self.device_name,
-                    "versions": [self.version] if self.version else [],
+                    "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
@@ -95,6 +95,7 @@ class ModuleHarbor(NetworkDeviceCommon):
                     info=json.dumps(harbor_detected),
                     wstg=WSTG_CODE
                 )
+                self.version.clear()
             else:
                 log_blue(MSG_NO_HARBOR)
         except RequestError as req_error:

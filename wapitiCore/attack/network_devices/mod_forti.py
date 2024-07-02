@@ -37,7 +37,7 @@ MSG_NO_FORTI = "No Forti Product Detected"
 class ModuleForti(NetworkDeviceCommon):
     """Detect Forti."""
     device_name = "Fortinet"
-    version = ""
+    version = []
     fortinet_pattern = re.compile(r'Forti\w+')
 
     async def check_forti(self, url):
@@ -169,7 +169,7 @@ class ModuleForti(NetworkDeviceCommon):
 
                 forti_detected = {
                     "name": self.device_name,
-                    "versions": [],
+                    "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
