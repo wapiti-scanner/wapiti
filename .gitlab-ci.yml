@@ -40,7 +40,7 @@ test-python:
   before_script:
     - python -c "import sys; print(sys.version)"
     - apt-get update
-    - apt-get install php-cli php-xml -y --no-install-recommends
+    - apt-get install php-cli php-xml sslscan -y --no-install-recommends
     - python -m pip install --upgrade pip
     - pip install -U setuptools
     - pip3 install .[test]
