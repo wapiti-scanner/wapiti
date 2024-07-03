@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim as build
+FROM debian:bookworm-slim AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
   LANG=en_US.UTF-8
