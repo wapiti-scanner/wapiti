@@ -1,7 +1,7 @@
 import asyncio
 import os
 from asyncio import Event
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock
 from httpx import Response as HttpxResponse
 
 import pytest

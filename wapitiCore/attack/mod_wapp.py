@@ -36,9 +36,9 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.controller.wapiti import InvalidOptionValue
 from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
-from wapitiCore.definitions.fingerprint_webserver import NAME as WEB_SERVER_VERSIONED, WSTG_CODE as WEB_SERVER_WSTG_CODE
-from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_APP_WSTG_CODE
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
+from wapitiCore.definitions.fingerprint_webserver import WebServerVersionDisclosureFinding
+from wapitiCore.definitions.fingerprint_webapp import SoftwareVersionDisclosureFinding
 from wapitiCore.net import Request
 
 MSG_TECHNO_VERSIONED = "{0} {1} detected"
@@ -277,29 +277,26 @@ class ModuleWapp(Attack):
             if cpe:
                 log_blue(MSG_CPE, cpe)
             log_blue("")
-            await self.add_addition(
-                category=TECHNO_DETECTED,
+            await self.add_info(
+                finding_class=SoftwareNameDisclosureFinding,
                 request=request_to_root,
                 info=json.dumps(detected_applications[application_name]),
-                wstg=TECHNO_DETECTED_WSTG_CODE,
                 response=response
             )
 
             if versions:
                 if "Web servers" in categories:
-                    await self.add_vuln_info(
-                        category=WEB_SERVER_VERSIONED,
+                    await self.add_info(
+                        finding_class=WebServerVersionDisclosureFinding,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name]),
-                        wstg=WEB_SERVER_WSTG_CODE,
                         response=response
                     )
                 else:
-                    await self.add_vuln_info(
-                        category=WEB_APP_VERSIONED,
+                    await self.add_info(
+                        finding_class=SoftwareVersionDisclosureFinding,
                         request=request_to_root,
                         info=json.dumps(detected_applications[application_name]),
-                        wstg=WEB_APP_WSTG_CODE,
                         response=response
                     )
 

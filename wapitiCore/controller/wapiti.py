@@ -259,29 +259,29 @@ class Wapiti:
 
         for vul in vulnerabilities:
             self.report_gen.add_vulnerability_type(
-                vul.NAME,
-                vul.DESCRIPTION,
-                vul.SOLUTION,
-                flatten_references(vul.REFERENCES),
-                vul.WSTG_CODE
+                vul.name(),
+                vul.description(),
+                vul.solution(),
+                flatten_references(vul.references()),
+                vul.wstg_code()
             )
 
         for anomaly in anomalies:
             self.report_gen.add_anomaly_type(
-                anomaly.NAME,
-                anomaly.DESCRIPTION,
-                anomaly.SOLUTION,
-                flatten_references(anomaly.REFERENCES),
-                anomaly.WSTG_CODE
+                anomaly.name(),
+                anomaly.description(),
+                anomaly.solution(),
+                flatten_references(anomaly.references()),
+                anomaly.wstg_code()
             )
 
         for additional in additionals:
             self.report_gen.add_additional_type(
-                additional.NAME,
-                additional.DESCRIPTION,
-                additional.SOLUTION,
-                flatten_references(additional.REFERENCES),
-                additional.WSTG_CODE
+                additional.name(),
+                additional.description(),
+                additional.solution(),
+                flatten_references(additional.references()),
+                additional.wstg_code()
             )
 
     async def _load_attack_modules(self, stop_event: asyncio.Event, crawler: AsyncCrawler) -> List[Attack]:
@@ -356,7 +356,6 @@ class Wapiti:
                     # Catch every possible exceptions and print it
                     logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
                     continue
-
 
     async def load_scan_state(self):
         async for request in self.persister.get_to_browse():

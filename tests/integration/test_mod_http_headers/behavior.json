@@ -4,7 +4,29 @@
         "supplementary_argument": "",
         "report_filter_tree": {
             "vulnerabilities": {
-                "HTTP Secure Headers": [
+                "Clickjacking Protection": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ],
+                "HTTP Strict Transport Security (HSTS)": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ],
+                "MIME Type Confusion": [
                     {
                         "method": "",
                         "path": "",

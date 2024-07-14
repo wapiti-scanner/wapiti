@@ -1,13 +1,14 @@
 from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
-from asyncio import Event, sleep
+from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
 import respx
 import pytest
 
+from wapitiCore.definitions.sql import SqlInjectionFinding
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -103,7 +104,7 @@ async def test_true_positive():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "sql"
-        assert persister.add_payload.call_args_list[0][1]["category"] == "SQL Injection (DBMS: MySQL)"
+        assert persister.add_payload.call_args_list[0][1]["category"] == SqlInjectionFinding.name()
 
 
 @pytest.mark.asyncio

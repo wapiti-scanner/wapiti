@@ -13,7 +13,7 @@ from dns.resolver import Resolver
 from tests import get_mock_open
 from wapitiCore.attack.attack import VULN
 from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
-from wapitiCore.definitions.log4shell import NAME
+from wapitiCore.definitions.log4shell import Log4ShellFinding
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -156,12 +156,12 @@ async def test_verify_headers_vuln_found():
                 request_id=-1,
                 payload_type=VULN,
                 module="log4shell",
-                category=NAME,
+                category=Log4ShellFinding.name(),
                 level=CRITICAL_LEVEL,
                 request=request,
                 parameter="Header: payload",
                 info=f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header Header",
-                wstg=["WSTG-INPV-11"],
+                wstg=Log4ShellFinding.wstg_code(),
                 response=page,
             )
 

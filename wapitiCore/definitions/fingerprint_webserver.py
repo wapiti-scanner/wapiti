@@ -17,23 +17,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-TYPE = "vulnerability"
+from typing import List
 
-NAME = "Fingerprint web server"
-SHORT_NAME = NAME
+from wapitiCore.definitions.base import FindingBase
 
-WSTG_CODE = ["WSTG-INFO-02"]
 
-DESCRIPTION = "The version of a web server can be identified due to the presence of its specific fingerprints."
+class WebServerVersionDisclosureFinding(FindingBase):
+    @classmethod
+    def name(cls) -> str:
+        return "Fingerprint web server"
 
-SOLUTION = "This is only for informational purposes."
+    @classmethod
+    def description(cls) -> str:
+        return "The version of a web server can be identified due to the presence of its specific fingerprints."
 
-REFERENCES = [
-    {
-        "title": "OWASP: Fingerprint Web Server",
-        "url": (
-            "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/"
-            "01-Information_Gathering/02-Fingerprint_Web_Server.html"
-        )
-    }
-]
+    @classmethod
+    def references(cls) -> list:
+        return [
+            {
+                "title": "OWASP: Fingerprint Web Server",
+                "url": (
+                    "https://owasp.org/www-project-web-security-testing-guide/stable/"
+                    "4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server.html"
+                )
+            }
+        ]
+
+    @classmethod
+    def solution(cls) -> str:
+        return "This is only for informational purposes."
+
+    @classmethod
+    def short_name(cls) -> str:
+        return cls.name()
+
+    @classmethod
+    def type(cls) -> str:
+        return "vulnerability"
+
+    @classmethod
+    def wstg_code(cls) -> List[str]:
+        return ["WSTG-INFO-02"]

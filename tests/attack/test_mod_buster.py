@@ -1,12 +1,11 @@
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 from asyncio import Event, sleep
 
 import httpx
 import respx
 import pytest
 
-from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration

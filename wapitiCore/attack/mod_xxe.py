@@ -28,9 +28,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, XXEUploadMutator, Mutator, Parameter
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.xxe import NAME, WSTG_CODE
-from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.xxe import XxeFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
@@ -146,13 +146,12 @@ class ModuleXxe(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
-                await self.add_anom_medium(
+                await self.add_medium(
                     request_id=request.path_id,
-                    category=Messages.RES_CONSUMPTION,
+                    finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     info=anom_msg,
                     parameter=parameter.display_name,
-                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -167,13 +166,12 @@ class ModuleXxe(Attack):
                     else:
                         vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
 
-                    await self.add_vuln_high(
+                    await self.add_high(
                         request_id=request.path_id,
-                        category=NAME,
+                        finding_class=XxeFinding,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter.display_name,
-                        wstg=WSTG_CODE,
                         response=response
                     )
 
@@ -199,13 +197,12 @@ class ModuleXxe(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
-                    await self.add_anom_high(
+                    await self.add_high(
                         request_id=request.path_id,
-                        category=Messages.ERROR_500,
+                        finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter.display_name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )
 
@@ -232,13 +229,12 @@ class ModuleXxe(Attack):
             else:
                 pattern = search_patterns(response.content, payload_info.rules)
                 if pattern and not await self.false_positive(original_request, pattern):
-                    await self.add_vuln_high(
+                    await self.add_high(
                         request_id=original_request.path_id,
-                        category=NAME,
+                        finding_class=XxeFinding,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
                         parameter="raw body",
-                        wstg=WSTG_CODE,
                         response=response
                     )
 
@@ -277,13 +273,12 @@ class ModuleXxe(Attack):
             else:
                 pattern = search_patterns(response.content, payload_info.rules)
                 if pattern and not await self.false_positive(original_request, pattern):
-                    await self.add_vuln_high(
+                    await self.add_high(
                         request_id=original_request.path_id,
-                        category=NAME,
+                        finding_class=XxeFinding,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
                         parameter=parameter.display_name,
-                        wstg=WSTG_CODE,
                         response=response
                     )
 
@@ -395,19 +390,18 @@ class ModuleXxe(Attack):
                         mutated_request, __, __ = next(mutator.mutate(original_request, [used_payload]))
 
                     if request_size:
-                        add_vuln_method = self.add_vuln_high
+                        add_vuln_method = self.add_high
                         log_method = log_red
                     else:
-                        add_vuln_method = self.add_vuln_medium
+                        add_vuln_method = self.add_medium
                         log_method = log_orange
 
                     await add_vuln_method(
                         request_id=original_request.path_id,
-                        category=NAME,
+                        finding_class=XxeFinding,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter_name,
-                        wstg=WSTG_CODE
                     )
 
                     log_method("---")

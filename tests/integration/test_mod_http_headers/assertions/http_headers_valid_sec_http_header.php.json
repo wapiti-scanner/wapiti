@@ -1,6 +1,8 @@
 {
     "vulnerabilities": {
-        "HTTP Secure Headers": []
+        "Clickjacking Protection": [],
+        "HTTP Strict Transport Security (HSTS)": [],
+        "MIME Type Confusion": []
     },
     "infos": {
         "target": "https://http_headers/valid_sec_http_header.php",

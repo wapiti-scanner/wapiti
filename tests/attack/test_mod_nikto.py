@@ -1,5 +1,5 @@
 import os
-from asyncio import Event, sleep
+from asyncio import Event
 from itertools import chain
 from unittest.mock import AsyncMock
 

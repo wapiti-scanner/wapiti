@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock
 import pytest
 import respx
 import httpx
-import asyncio
 
 from wapitiCore.attack.attack import Parameter, ParameterSituation
 from wapitiCore.net.classes import CrawlerConfiguration

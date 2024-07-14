@@ -30,8 +30,9 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack, Mutator, Parameter
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.sql import NAME, WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.sql import SqlInjectionFinding
+from wapitiCore.definitions.ldapi import LdapInjectionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
@@ -454,13 +455,12 @@ class ModuleSql(Attack):
                     else:
                         vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
-                    await self.add_vuln_critical(
+                    await self.add_critical(
                         request_id=request.path_id,
-                        category=vuln_info,
+                        finding_class=SqlInjectionFinding,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter.display_name,
-                        wstg=WSTG_CODE,
                         response=response
                     )
 
@@ -483,9 +483,9 @@ class ModuleSql(Attack):
                     if "LdapClient" in response.content:
                         vuln_info = "LDAP Injection"
                         vuln_message = f"{vuln_info} via injection in the parameter {current_parameter.name}"
-                        await self.add_vuln_critical(
+                        await self.add_critical(
                             request_id=request.path_id,
-                            category=vuln_info,
+                            finding_class=LdapInjectionFinding,
                             request=mutated_request,
                             info=vuln_message,
                             parameter=parameter.name,
@@ -510,13 +510,12 @@ class ModuleSql(Attack):
                         else:
                             anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
-                        await self.add_anom_high(
+                        await self.add_high(
                             request_id=request.path_id,
-                            category=Messages.ERROR_500,
+                            finding_class=InternalErrorFinding,
                             request=mutated_request,
                             info=anom_msg,
                             parameter=parameter.display_name,
-                            wstg=INTERNAL_ERROR_WSTG_CODE,
                             response=response
                         )
 
@@ -579,13 +578,12 @@ class ModuleSql(Attack):
                     else:
                         vuln_message = f"{vuln_info} via injection in the parameter {current_parameter.name}"
 
-                    await self.add_vuln_critical(
+                    await self.add_critical(
                         request_id=request.path_id,
-                        category=NAME,
+                        finding_class=SqlInjectionFinding,
                         request=last_mutated_request,
                         info=vuln_message,
                         parameter=current_parameter.name,
-                        wstg=WSTG_CODE,
                         response=last_response
                     )
 
@@ -680,9 +678,9 @@ class ModuleSql(Attack):
                 skip_till_next_parameter = True
 
                 vuln_message = f"Potential LDAP Injection detected via parameter {parameter.name}"
-                await self.add_vuln_critical(
+                await self.add_critical(
                     request_id=request.path_id,
-                    category="LDAP Injection",
+                    finding_class=LdapInjectionFinding,
                     request=last_mutated_request,
                     info=vuln_message,
                     parameter=parameter.name,

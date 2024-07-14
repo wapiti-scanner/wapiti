@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
-import re
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -27,7 +26,7 @@ from httpx import RequestError
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_HARBOR = "No Harbor Product Detected"
@@ -89,11 +88,10 @@ class ModuleHarbor(NetworkDeviceCommon):
                     self.version
                 )
 
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(harbor_detected),
-                    wstg=WSTG_CODE
                 )
                 self.version.clear()
             else:

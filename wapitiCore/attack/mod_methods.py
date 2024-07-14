@@ -24,7 +24,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_verbose, log_orange
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.methods import NAME, WSTG_CODE
+from wapitiCore.definitions.methods import MethodsFinding
 from wapitiCore.net import Request, Response
 
 
@@ -140,11 +140,10 @@ class ModuleMethods(Attack):
                 # Log this only once per netloc
                 self.hosts_with_trace.add(request.netloc)
                 log_orange("[!] TRACE method is allowed on the server")
-                await self.add_addition(
-                    category=NAME,
+                await self.add_info(
+                    finding_class=MethodsFinding,
                     request=request,
                     info="HTTP TRACE method is allowed on the webserver",
-                    wstg=WSTG_CODE,
                 )
 
             status_different = method_response.status != get_response.status
@@ -168,9 +167,8 @@ class ModuleMethods(Attack):
             f"on {page}: {format_statuses(statuses)}"
         )
 
-        await self.add_addition(
-            category=NAME,
+        await self.add_info(
+            finding_class=MethodsFinding,
             request=request,
             info=message,
-            wstg=WSTG_CODE,
         )

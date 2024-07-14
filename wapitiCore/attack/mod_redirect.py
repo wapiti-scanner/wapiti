@@ -25,7 +25,7 @@ from httpx import RequestError
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.redirect import NAME, WSTG_CODE
+from wapitiCore.definitions.redirect import RedirectFinding
 from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
@@ -62,13 +62,12 @@ class ModuleRedirect(Attack):
             html = Html(response.content, mutated_request.url)
             all_redirections = {response.redirection_url} | html.all_redirections
             if any(urlparse(url).netloc.endswith("openbugbounty.org") for url in all_redirections):
-                await self.add_vuln_low(
+                await self.add_low(
                     request_id=request.path_id,
-                    category=NAME,
+                    finding_class=RedirectFinding,
                     request=mutated_request,
                     parameter=parameter.display_name,
                     info=f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}",
-                    wstg=WSTG_CODE,
                     response=response
                 )
 

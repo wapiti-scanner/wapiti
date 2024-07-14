@@ -24,8 +24,8 @@ from httpx import RequestError
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
 from wapitiCore.net.response import Response
-from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_WSTG_CODE
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
+from wapitiCore.definitions.fingerprint_webapp import SoftwareVersionDisclosureFinding
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_DRUPAL = "No Drupal Detected"
@@ -87,17 +87,15 @@ class ModuleDrupalEnum(CommonCMS):
             )
 
             if self.versions:
-                await self.add_vuln_info(
-                    category=WEB_APP_VERSIONED,
+                await self.add_info(
+                    finding_class=SoftwareVersionDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(drupal_detected),
-                    wstg=WEB_WSTG_CODE
                 )
-            await self.add_addition(
-                category=TECHNO_DETECTED,
+            await self.add_info(
+                finding_class=SoftwareNameDisclosureFinding,
                 request=request_to_root,
                 info=json.dumps(drupal_detected),
-                wstg=WSTG_CODE
             )
         else:
             log_blue(MSG_NO_DRUPAL)

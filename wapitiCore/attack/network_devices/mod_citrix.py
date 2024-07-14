@@ -28,7 +28,7 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_CITRIX = "No Citrix Product Detected"
@@ -111,11 +111,10 @@ class ModuleCitrix(Attack):
                     self.version
                 )
 
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(citrix_detected),
-                    wstg=WSTG_CODE
                 )
             else:
                 log_blue(MSG_NO_CITRIX)

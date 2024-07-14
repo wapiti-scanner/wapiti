@@ -25,8 +25,8 @@ import socket
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.https_redirect import NAME, WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.https_redirect import HstsFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
@@ -101,11 +101,10 @@ class ModuleHttpsRedirect(Attack):
 
         if http_response.is_success:
             log_red(f"URL {http_response.url} does not redirect to https")
-            await self.add_vuln_low(
-                category=NAME,
+            await self.add_low(
+                finding_class=HstsFinding,
                 request=http_request,
                 info=self.MSG_VULN_NO_REDIRECT,
-                wstg=WSTG_CODE,
                 response=http_response
             )
 
@@ -114,21 +113,19 @@ class ModuleHttpsRedirect(Attack):
             # might cause false positive in case of multiple redirections
             if urlparse(http_response.headers["location"]).scheme != "https":
                 log_red("Location : " + http_response.headers["location"])
-                await self.add_vuln_low(
-                    category=NAME,
+                await self.add_low(
+                    finding_class=HstsFinding,
                     request=http_request,
                     info=f"{self.MSG_VULN_REDIRECT} location : {http_response.headers['location']}",
-                    wstg=WSTG_CODE,
                     response=http_response
                 )
         else:
             log_orange(http_response.url + " responded with code " + str(http_response.status))
 
             if http_response.status >= 500:
-                await self.add_anom_medium(
-                    category=Messages.ERROR_500,
+                await self.add_medium(
+                    finding_class=InternalErrorFinding,
                     request=http_request,
                     info=Messages.MSG_500.format(http_response.url + " : " + str(http_response.status)),
-                    wstg=INTERNAL_ERROR_WSTG_CODE,
                     response=http_response
                 )

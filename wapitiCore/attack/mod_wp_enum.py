@@ -25,9 +25,8 @@ from os.path import join as path_join
 from typing import Match, Optional
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED
-from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
-from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
+from wapitiCore.definitions.fingerprint_webapp import SoftwareVersionDisclosureFinding
 from wapitiCore.main.log import log_blue, log_orange, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -106,14 +105,14 @@ class ModuleWpEnum(Attack):
 
         if detected_version:
             info_content["versions"].append(detected_version)
-            await self.add_vuln_info(
-                category=WEB_APP_VERSIONED,
+            await self.add_info(
+                finding_class=SoftwareVersionDisclosureFinding,
                 request=request,
                 info=json.dumps(info_content)
             )
 
-        await self.add_addition(
-            category=TECHNO_DETECTED,
+        await self.add_info(
+            finding_class=SoftwareNameDisclosureFinding,
             request=request,
             info=json.dumps(info_content)
         )
@@ -149,11 +148,10 @@ class ModuleWpEnum(Attack):
                     version
                 )
 
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request,
                     info=json.dumps(plugin_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
                     response=response
                 )
             elif response.status == 403:
@@ -168,11 +166,10 @@ class ModuleWpEnum(Attack):
                     plugin,
                     [""]
                 )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request,
                     info=json.dumps(plugin_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
                     response=response
                 )
 
@@ -202,11 +199,10 @@ class ModuleWpEnum(Attack):
                     theme,
                     version
                 )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request,
                     info=json.dumps(theme_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
                     response=response
                 )
             elif response.status == 403:
@@ -221,11 +217,10 @@ class ModuleWpEnum(Attack):
                     theme,
                     [""]
                 )
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request,
                     info=json.dumps(theme_detected),
-                    wstg=TECHNO_DETECTED_WSTG_CODE,
                     response=response
                 )
 

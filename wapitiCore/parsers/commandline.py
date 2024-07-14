@@ -155,7 +155,7 @@ def parse_args():
         choices=["basic", "digest", "ntlm"]
     )
 
-    # This option is deprecated
+    # This option is deprecated
     # Should be removed in a future version
     parser.add_argument(
         "--form-cred",

@@ -9,6 +9,7 @@ import pytest
 import respx
 
 from wapitiCore.attack.mod_htp import ModuleHtp, get_matching_versions
+from wapitiCore.definitions.fingerprint_webserver import WebServerVersionDisclosureFinding
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -161,7 +162,7 @@ async def test_finish_no_technologies():
     request = Request("http://perdu.com/")
     request.path_id = 1
 
-    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_info", autospec=True) as mock_add_info, \
             patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db:
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -171,7 +172,7 @@ async def test_finish_no_technologies():
             await module_htp.finish()
 
             mock_db.assert_called()
-            mock_add_vuln_info.assert_not_called()
+            mock_add_info.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -201,7 +202,7 @@ async def test_finish_one_range():
         pass
 
     MagicMock.__await__ = lambda x: async_magic().__await__()
-    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_info", autospec=True) as mock_add_info, \
             patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
             patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
@@ -214,9 +215,9 @@ async def test_finish_one_range():
 
             await module_htp.finish()
 
-            mock_add_vuln_info.assert_called_once_with(
+            mock_add_info.assert_called_once_with(
                 module_htp,
-                category="Fingerprint web server",
+                finding_class=WebServerVersionDisclosureFinding,
                 request=Request("http://perdu.com/"),
                 info='{"name": "techno", "versions": ["1.2", "1.2.1", "1.3"]}'
             )
@@ -249,7 +250,7 @@ async def test_finish_two_ranges():
         pass
 
     MagicMock.__await__ = lambda x: async_magic().__await__()
-    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_vuln_info", autospec=True) as mock_add_vuln_info, \
+    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_info", autospec=True) as mock_add_info, \
             patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
             patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
@@ -262,9 +263,9 @@ async def test_finish_two_ranges():
 
             await module_htp.finish()
 
-            mock_add_vuln_info.assert_called_once_with(
+            mock_add_info.assert_called_once_with(
                 module_htp,
-                category="Fingerprint web server",
+                finding_class=WebServerVersionDisclosureFinding,
                 request=Request("http://perdu.com/"),
                 info='{"name": "techno", "versions": ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"]}'
             )

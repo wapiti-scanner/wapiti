@@ -26,8 +26,8 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.sql import NAME, WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.sql import SqlInjectionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
@@ -90,13 +90,12 @@ class ModuleTimesql(Attack):
                     vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
                     log_message = Messages.MSG_PARAM_INJECT
 
-                await self.add_vuln_critical(
+                await self.add_critical(
                     request_id=request.path_id,
-                    category=NAME,
+                    finding_class=SqlInjectionFinding,
                     request=mutated_request,
                     info=vuln_message,
                     parameter=parameter.display_name,
-                    wstg=WSTG_CODE
                 )
 
                 log_red("---")
@@ -124,13 +123,12 @@ class ModuleTimesql(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
-                    await self.add_anom_high(
+                    await self.add_high(
                         request_id=request.path_id,
-                        category=Messages.ERROR_500,
+                        finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter.display_name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )
 
