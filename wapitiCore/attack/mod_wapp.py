@@ -47,7 +47,7 @@ MSG_GROUPS = "  -> Group(s): {0}"
 MSG_CPE = "  -> CPE: {0}"
 
 BULK_SIZE = 50
-VERSION_REGEX = re.compile(r"\d[\d.]*")
+VERSION_REGEX = re.compile(r"^\d[\w.-]*$")
 
 SCRIPT = (
     "wapiti_results = {};\n"
