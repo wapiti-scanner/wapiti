@@ -15,7 +15,6 @@ from wapitiCore.attack.network_devices.mod_forti import ModuleForti
 from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
 
 
-
 @pytest.mark.asyncio
 @respx.mock
 async def test_no_net_device():
@@ -45,6 +44,7 @@ async def test_no_net_device():
         await module.attack(request)
 
         assert not persister.add_payload.call_count
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -473,7 +473,8 @@ async def test_raise_on_request_error():
         )
     )
 
-    respx.get(url__regex=r"http://perdu.com/.*").mock(side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
+    respx.get(url__regex=r"http://perdu.com/.*").mock(
+        side_effect=RequestError("RequestError occurred: [Errno -2] Name or service not known"))
 
     persister = AsyncMock()
 
@@ -540,6 +541,7 @@ async def test_detect_harbor_with_version():
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_detect_harbor_without_version():
@@ -591,7 +593,6 @@ async def test_detect_harbor_without_version():
 @pytest.mark.asyncio
 @respx.mock
 async def test_detect_harbor_with_json_error():
-
     respx.get("http://perdu.com/").mock(
         return_value=httpx.Response(
             200,

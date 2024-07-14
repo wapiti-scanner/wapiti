@@ -25,10 +25,10 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, ParameterSituation, random_string, Parameter
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.reflected_xss import NAME as XSS_NAME, WSTG_CODE as XSS_WSTG_CODE
-from wapitiCore.definitions.html_injection import NAME as HTMLI_NAME, WSTG_CODE as HTMLI_WSTG_CODE
-from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
+from wapitiCore.definitions.reflected_xss import XssFinding
+from wapitiCore.definitions.html_injection import HtmlInjectionFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
@@ -156,13 +156,12 @@ class ModuleXss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param.name)
 
-                await self.add_anom_medium(
+                await self.add_medium(
                     request_id=original_request.path_id,
-                    category=Messages.RES_CONSUMPTION,
+                    finding_class=ResourceConsumptionFinding,
                     request=evil_request,
                     info=anom_msg,
                     parameter=xss_param.name,
-                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -183,18 +182,17 @@ class ModuleXss(Attack):
                         )
                 ):
                     self.successful_xss[taint] = (evil_request, xss_payload)
-                    message = XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME
-                    message += f" vulnerability found via injection in the parameter {xss_param.name}"
+                    finding = XssFinding if xss_payload.injection_type == "javascript" else HtmlInjectionFinding
+                    message = f"{finding.name()} vulnerability found via injection in the parameter {xss_param.name}"
                     if has_strong_csp(response, html):
                         message += ".\nWarning: Content-Security-Policy is present!"
 
-                    await self.add_vuln_medium(
+                    await self.add_medium(
                         request_id=original_request.path_id,
-                        category=XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME,
+                        finding_class=finding,
                         request=evil_request,
                         parameter=xss_param.name,
                         info=message,
-                        wstg=XSS_WSTG_CODE if xss_payload.injection_type == "javascript" else HTMLI_WSTG_CODE,
                         response=response
                     )
 
@@ -206,7 +204,7 @@ class ModuleXss(Attack):
                     log_red("---")
                     log_red(
                         injection_msg,
-                        XSS_NAME if xss_payload.injection_type == "javascript" else HTMLI_NAME,
+                        finding.name(),
                         page,
                         xss_param.name
                     )
@@ -227,13 +225,12 @@ class ModuleXss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param.name)
 
-                    await self.add_anom_high(
+                    await self.add_high(
                         request_id=original_request.path_id,
-                        category=Messages.ERROR_500,
+                        finding_class=InternalErrorFinding,
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param.name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )
 

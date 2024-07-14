@@ -15,13 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.http_headers import (
-    NAME, WSTG_CODE_CONTENT_TYPE_OPTIONS, WSTG_CODE_FRAME_OPTIONS,
-    WSTG_CODE_STRICT_TRANSPORT_SECURITY)
+from wapitiCore.definitions import FindingBase
+from wapitiCore.definitions.http_headers import ClickjackingFinding, MimeTypeConfusionFinding, HstsFinding
 from wapitiCore.main.log import log_blue, log_green, log_orange, log_red
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -32,6 +31,7 @@ XFRAME_OPTIONS_NOT_SET = "X-Frame-Options is not set"
 INVALID_HSTS = "Strict-Transport-Security has an invalid value"
 INVALID_XCONTENT_TYPE = "X-Content-Type-Options has an invalid value"
 INVALID_XFRAME_OPTIONS = "X-Frame-Options has an invalid value"
+
 
 class ModuleHttpHeaders(Attack):
     """Evaluate the security of HTTP headers."""
@@ -45,19 +45,19 @@ class ModuleHttpHeaders(Attack):
             "list": check_list_xframe,
             "info": {"error": XFRAME_OPTIONS_NOT_SET, "warning": INVALID_XFRAME_OPTIONS},
             "log": "Checking X-Frame-Options:",
-            "wstg": WSTG_CODE_FRAME_OPTIONS
+            "finding": ClickjackingFinding,
         },
         "X-Content-Type-Options": {
             "list": check_list_xcontent,
             "info": {"error": XCONTENT_TYPE_NOT_SET, "warning": INVALID_XCONTENT_TYPE},
             "log": "Checking X-Content-Type-Options:",
-            "wstg": WSTG_CODE_CONTENT_TYPE_OPTIONS
+            "finding": MimeTypeConfusionFinding,
         },
         "Strict-Transport-Security": {
             "list": check_list_hsts,
             "info": {"error": HSTS_NOT_SET, "warning": INVALID_HSTS},
             "log": "Checking Strict-Transport-Security:",
-            "wstg": WSTG_CODE_STRICT_TRANSPORT_SECURITY
+            "finding": HstsFinding,
         }
     }
 
@@ -79,25 +79,23 @@ class ModuleHttpHeaders(Attack):
         check_list: List[str],
         info: dict[str, str],
         log: str,
-        wstg: str
+        finding: Type[FindingBase],
     ):
         log_blue(log)
         if not self.is_set(response, header):
             log_red(info["error"])
-            await self.add_vuln_low(
-                category=NAME,
+            await self.add_low(
+                finding_class=finding,
                 request=request,
                 info=info["error"],
-                wstg=wstg,
                 response=response
             )
         elif not self.contains(response, header, check_list):
             log_orange(info["warning"])
-            await self.add_vuln_low(
-                category=NAME,
+            await self.add_low(
+                finding_class=finding,
                 request=request,
                 info=info["warning"],
-                wstg=wstg,
                 response=response
             )
         else:
@@ -139,5 +137,5 @@ class ModuleHttpHeaders(Attack):
                 value["list"],
                 value["info"],
                 value["log"],
-                value["wstg"]
+                value["finding"],
             )

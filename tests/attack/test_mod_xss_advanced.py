@@ -8,6 +8,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from wapitiCore.definitions.html_injection import HtmlInjectionFinding
+from wapitiCore.definitions.reflected_xss import XssFinding
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -27,7 +29,7 @@ def run_around_tests():
 
 @pytest.mark.asyncio
 async def test_title_false_positive():
-    # We should fail at escaping the title tag and we should be aware of it
+    # We should fail at escaping the title tag, and we should be aware of it
     persister = AsyncMock()
     request = Request("http://127.0.0.1:65081/title_false_positive.php?title=yolo&fixed=yes")
     request.path_id = 42
@@ -58,7 +60,7 @@ async def test_title_positive():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "xss"
-        assert persister.add_payload.call_args_list[0][1]["category"] == "Reflected Cross Site Scripting"
+        assert persister.add_payload.call_args_list[0][1]["category"] == XssFinding.name()
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "title"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].startswith("</title>")
         assert "Warning: Content-Security-Policy is present!" not in persister.add_payload.call_args_list[0][1]["info"]
@@ -435,7 +437,7 @@ async def test_fallback_to_html_injection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "name"
-        assert persister.add_payload.call_args_list[0][1]["category"] == "HTML Injection"
+        assert persister.add_payload.call_args_list[0][1]["category"] == HtmlInjectionFinding.name()
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             "HTML Injection vulnerability found via injection in the parameter name"
         )

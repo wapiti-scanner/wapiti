@@ -22,7 +22,7 @@ import uuid
 from typing import Optional
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.spring4shell import NAME, WSTG_CODE
+from wapitiCore.definitions.spring4shell import Spring4ShellFinding
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net import Request, Response
 
@@ -84,12 +84,11 @@ class ModuleSpring4Shell(Attack):
         return False
 
     async def _vulnerable(self, request: Request):
-        await self.add_vuln_critical(
-            category=NAME,
+        await self.add_critical(
+            finding_class=Spring4ShellFinding,
             request=request,
             info=f"URL {request.url} seems vulnerable to Spring4Shell attack",
             parameter="",
-            wstg=WSTG_CODE
         )
 
         log_red("---")

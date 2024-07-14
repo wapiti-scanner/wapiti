@@ -18,33 +18,57 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-TYPE = "vulnerability"
+from typing import List
 
-NAME = "Command execution"
-SHORT_NAME = NAME
+from wapitiCore.definitions.base import FindingBase
 
-WSTG_CODE = ["WSTG-INPV-12"]
 
-DESCRIPTION = (
-    "This attack consists in executing system commands on the server."
-) + " " + (
-    "The attacker tries to inject this commands in the request parameters."
-)
+class CommandExecutionFinding(FindingBase):
+    @classmethod
+    def name(cls) -> str:
+        return "Command execution"
 
-SOLUTION = (
-    "Prefer working without user input when using file system calls."
-)
-
-REFERENCES = [
-    {
-        "title": "OWASP: Command Injection",
-        "url": (
-            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
-            "07-Input_Validation_Testing/12-Testing_for_Command_Injection"
+    @classmethod
+    def description(cls) -> str:
+        return (
+            "This attack consists in executing system commands on the server."
+        ) + " " + (
+            "The attacker tries to inject this commands in the request parameters."
         )
-    },
-    {
-        "title": "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
-        "url": "https://cwe.mitre.org/data/definitions/78.html"
-    },
-]
+
+    @classmethod
+    def references(cls) -> list:
+        return [
+            {
+                "title": "OWASP: Command Injection",
+                "url": (
+                    "https://owasp.org/www-project-web-security-testing-guide/latest/"
+                    "4-Web_Application_Security_Testing/"
+                    "07-Input_Validation_Testing/12-Testing_for_Command_Injection"
+                )
+            },
+            {
+                "title": (
+                    "CWE-78: Improper Neutralization of Special Elements used in an OS Command (OS Command Injection)"
+                ),
+                "url": "https://cwe.mitre.org/data/definitions/78.html"
+            },
+        ]
+
+    @classmethod
+    def solution(cls) -> str:
+        return (
+            "Prefer working without user input when using file system calls."
+        )
+
+    @classmethod
+    def short_name(cls) -> str:
+        return cls.name()
+
+    @classmethod
+    def type(cls) -> str:
+        return "vulnerability"
+
+    @classmethod
+    def wstg_code(cls) -> List[str]:
+        return ["WSTG-INPV-12"]

@@ -25,14 +25,14 @@ from collections import defaultdict
 from enum import Enum, Flag, auto
 import random
 from binascii import hexlify
-from functools import partialmethod
-from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable
+from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type
 from asyncio import Event
 import json
 
 from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
+from wapitiCore.definitions import FindingBase
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -246,34 +246,47 @@ class Attack:
         # Must be left empty in the code
         self.deps = []
 
-    async def add_payload(self, payload_type: str, category: str, request_id: int = -1,
+    async def add_payload(self, finding_class: Type[FindingBase], request_id: int = -1,
                           level: int = 0, request: Request = None, parameter: str = "", info: str = "",
-                          wstg: Optional[List[str]] = None,
                           response: Response = None):
         await self.persister.add_payload(
             request_id=request_id,
-            payload_type=payload_type,
+            payload_type=finding_class.type(),
             module=self.name,
-            category=category,
+            category=finding_class.name(),
             level=level,
             request=request,
             parameter=parameter,
             info=info,
-            wstg=wstg,
+            wstg=finding_class.wstg_code(),
             response=response
         )
 
-    add_vuln = partialmethod(add_payload, payload_type=VULN)
-    add_vuln_critical = partialmethod(add_payload, payload_type=VULN, level=CRITICAL_LEVEL)
-    add_vuln_high = partialmethod(add_payload, payload_type=VULN, level=HIGH_LEVEL)
-    add_vuln_medium = partialmethod(add_payload, payload_type=VULN, level=MEDIUM_LEVEL)
-    add_vuln_low = partialmethod(add_payload, payload_type=VULN, level=LOW_LEVEL)
-    add_vuln_info = partialmethod(add_payload, payload_type=VULN, level=INFO_LEVEL)
+    # Define explicit wrapper functions for each severity level
+    async def add_info(self, finding_class: Type[FindingBase], request_id: int = -1,
+                       request: Optional[Request] = None, parameter: str = "",
+                       info: str = "", response: Optional[Response] = None):
+        await self.add_payload(finding_class, request_id, INFO_LEVEL, request, parameter, info, response)
 
-    add_anom_high = partialmethod(add_payload, payload_type=ANOM, level=HIGH_LEVEL)
-    add_anom_medium = partialmethod(add_payload, payload_type=ANOM, level=MEDIUM_LEVEL)
+    async def add_low(self, finding_class: Type[FindingBase], request_id: int = -1,
+                      request: Optional[Request] = None, parameter: str = "",
+                      info: str = "", response: Optional[Response] = None):
+        await self.add_payload(finding_class, request_id, LOW_LEVEL, request, parameter, info, response)
 
-    add_addition = partialmethod(add_payload, payload_type=ADDITION, level=INFO_LEVEL)
+    async def add_medium(self, finding_class: Type[FindingBase], request_id: int = -1,
+                         request: Optional[Request] = None, parameter: str = "",
+                         info: str = "", response: Optional[Response] = None):
+        await self.add_payload(finding_class, request_id, MEDIUM_LEVEL, request, parameter, info, response)
+
+    async def add_high(self, finding_class: Type[FindingBase], request_id: int = -1,
+                       request: Optional[Request] = None, parameter: str = "",
+                       info: str = "", response: Optional[Response] = None):
+        await self.add_payload(finding_class, request_id, HIGH_LEVEL, request, parameter, info, response)
+
+    async def add_critical(self, finding_class: Type[FindingBase], request_id: int = -1,
+                           request: Optional[Request] = None, parameter: str = "",
+                           info: str = "", response: Optional[Response] = None):
+        await self.add_payload(finding_class, request_id, CRITICAL_LEVEL, request, parameter, info, response)
 
     def load_require(self, dependencies: list = None):
         self.deps = dependencies
@@ -507,7 +520,6 @@ class Mutator:
                                 enctype=request.enctype,
                             )
                             yield reverse_evil_req, reverse_parameter, reverse_payload_info
-
 
                 params_list[i][1] = saved_value
 

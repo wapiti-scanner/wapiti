@@ -27,7 +27,7 @@ from typing import Optional
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.htaccess import NAME, WSTG_CODE
+from wapitiCore.definitions.htaccess import HtaccessBypassFinding
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import log_red, log_verbose
 
@@ -72,12 +72,11 @@ class ModuleHtaccess(Attack):
             unblocked_content = response.content
 
             log_red("---")
-            await self.add_vuln_medium(
+            await self.add_medium(
                 request_id=request.path_id,
-                category=NAME,
+                finding_class=HtaccessBypassFinding,
                 request=evil_req,
                 info=f"{evil_req.url} bypassable weak restriction",
-                wstg=WSTG_CODE,
                 response=response
             )
             log_red(f"Weak restriction bypass vulnerability: {evil_req.url}")

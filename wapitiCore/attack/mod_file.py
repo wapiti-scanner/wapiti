@@ -29,9 +29,9 @@ from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.model import PayloadInfo
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.file import NAME, WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.file import PathTraversalFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.net import Request, Response
 
 PHP_WARNING_REGEXES = [
@@ -180,13 +180,12 @@ class ModuleFile(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
-                await self.add_anom_medium(
+                await self.add_medium(
                     request_id=request.path_id,
-                    category=Messages.RES_CONSUMPTION,
+                    finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     info=anom_msg,
                     parameter=parameter.display_name,
-                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -240,14 +239,13 @@ class ModuleFile(Attack):
                             constraint_message += "Constraints: " + ", ".join(constraints)
                             vuln_message += " (" + constraint_message + ")"
 
-                    await self.add_vuln_critical(
+                    await self.add_critical(
                         request_id=request.path_id,
-                        category=NAME,
+                        finding_class=PathTraversalFinding,
                         request=mutated_request,
                         info=vuln_message,
                         parameter=parameter.display_name,
-                        wstg=WSTG_CODE,
-                        response=response
+                        response=response,
                     )
 
                     log_red("---")
@@ -277,13 +275,12 @@ class ModuleFile(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
-                    await self.add_anom_high(
+                    await self.add_high(
                         request_id=request.path_id,
-                        category=Messages.ERROR_500,
+                        finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,
                         parameter=parameter.display_name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )
 

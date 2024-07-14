@@ -76,23 +76,44 @@ TREE_CHECKER = {
                                             'path': '',
                                             'referer': '',
                                             'wstg': []}],
+                        'Clickjacking Protection': [
+                            {
+                                'curl_command': '',
+                                'detail': {
+                                    'response': {
+                                        'body': '',
+                                        'headers': [],
+                                        'status_code': 0
+                                    }
+                                },
+                                'http_request': '',
+                                'info': '',
+                                'level': 0,
+                                'method': '',
+                                'module': '',
+                                'parameter': '',
+                                'path': '',
+                                'referer': '',
+                                'wstg': []
+                            }
+                        ],
                         'Command execution': [{'curl_command': '',
-                                              'detail': {
-                                                  'response': {
-                                                      'body': '',
-                                                      'headers': [],
-                                                      'status_code': 0
-                                                  }
-                                              },
-                            'http_request': '',
-                            'info': '',
-                            'level': 0,
-                            'method': '',
-                            'module': '',
-                            'parameter': '',
-                            'path': '',
-                            'referer': '',
-                            'wstg': []}],
+                                               'detail': {
+                                                   'response': {
+                                                       'body': '',
+                                                       'headers': [],
+                                                       'status_code': 0
+                                                   }
+                                               },
+                                               'http_request': '',
+                                               'info': '',
+                                               'level': 0,
+                                               'method': '',
+                                               'module': '',
+                                               'parameter': '',
+                                               'path': '',
+                                               'referer': '',
+                                               'wstg': []}],
                         'Content Security Policy Configuration': [{'curl_command': '',
                                                                    'detail': {
                                                                        'response': {
@@ -161,23 +182,27 @@ TREE_CHECKER = {
                                                     'path': '',
                                                     'referer': '',
                                                     'wstg': []}],
-                        'HTTP Secure Headers': [{'curl_command': '',
-                                                 'detail': {
-                                                     'response': {
-                                                         'body': '',
-                                                         'headers': [],
-                                                         'status_code': 0
-                                                     }
-                                                 },
-                                                 'http_request': '',
-                                                 'info': '',
-                                                 'level': 0,
-                                                 'method': '',
-                                                 'module': '',
-                                                 'parameter': '',
-                                                 'path': '',
-                                                 'referer': '',
-                                                 'wstg': []}],
+                        'HTTP Strict Transport Security (HSTS)': [
+                            {
+                                'curl_command': '',
+                                'detail': {
+                                    'response': {
+                                        'body': '',
+                                        'headers': [],
+                                        'status_code': 0
+                                    }
+                                },
+                                'http_request': '',
+                                'info': '',
+                                'level': 0,
+                                'method': '',
+                                'module': '',
+                                'parameter': '',
+                                'path': '',
+                                'referer': '',
+                                'wstg': []
+                            }
+                        ],
                         'Htaccess Bypass': [{'curl_command': '',
                                              'detail': {
                                                  'response': {
@@ -229,6 +254,27 @@ TREE_CHECKER = {
                                        'path': '',
                                        'referer': '',
                                        'wstg': []}],
+                        'MIME Type Confusion': [
+                            {
+                                'curl_command': '',
+                                'detail': {
+                                    'response': {
+                                        'body': '',
+                                        'headers': [],
+                                        'status_code': 0
+                                    }
+                                },
+                                'http_request': '',
+                                'info': '',
+                                'level': 0,
+                                'method': '',
+                                'module': '',
+                                'parameter': '',
+                                'path': '',
+                                'referer': '',
+                                'wstg': []
+                            }
+                        ],
                         'Open Redirect': [{'curl_command': '',
                                            'detail': {
                                                'response': {
@@ -399,23 +445,27 @@ TREE_CHECKER = {
                                                        'path': '',
                                                        'referer': '',
                                                        'wstg': []}],
-                        'Unencrypted Channels': [{'curl_command': '',
-                                                       'detail': {
-                                                           'response': {
-                                                               'body': '',
-                                                               'headers': [],
-                                                               'status_code': 0
-                                                           }
-                                                       },
-                                                       'http_request': '',
-                                                       'info': '',
-                                                       'level': 0,
-                                                       'method': '',
-                                                       'module': '',
-                                                       'parameter': '',
-                                                       'path': '',
-                                                       'referer': '',
-                                                       'wstg': []}],
+                        'Unencrypted Channels': [
+                            {
+                                'curl_command': '',
+                                'detail': {
+                                    'response': {
+                                        'body': '',
+                                        'headers': [],
+                                        'status_code': 0
+                                    }
+                                },
+                                'http_request': '',
+                                'info': '',
+                                'level': 0,
+                                'method': '',
+                                'module': '',
+                                'parameter': '',
+                                'path': '',
+                                'referer': '',
+                                'wstg': []
+                            }
+                        ],
                         'Weak credentials': [{'curl_command': '',
                                               'detail': {
                                                   'response': {

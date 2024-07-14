@@ -20,8 +20,10 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL, MEDIUM_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_ssl import ModuleSsl, NAME, extract_altnames, match_address, check_ocsp_must_staple, \
-    check_ev_certificate, process_vulnerabilities, process_bad_protocols
+from wapitiCore.attack.mod_ssl import (
+    ModuleSsl, SslInformationFinding, SslVulnerabilityFinding, extract_altnames,
+    match_address, check_ocsp_must_staple, check_ev_certificate, process_vulnerabilities, process_bad_protocols
+)
 
 
 def https_server(cert_directory: str):
@@ -62,18 +64,15 @@ async def test_ssl_scanner():
         module = ModuleSsl(crawler, persister, options, Event(), crawler_configuration)
         await module.attack(request)
 
-        # Depending on installed python/openssl version different vulnerabilities may be present but the following
-        # vulnerabilities and information should be there everytime
-
         persister.add_payload.assert_any_call(
             request_id=-1,
             payload_type="additional",
             module="ssl",
-            category=NAME,
+            category=SslInformationFinding.name(),
             level=INFO_LEVEL,
             request=request,
             parameter='',
-            wstg=["WSTG-CRYP-01"],
+            wstg=SslInformationFinding.wstg_code(),
             info="Certificate subject: yolo.com",
             response=None
         )
@@ -82,11 +81,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=NAME,
+            category=SslInformationFinding.name(),
             level=CRITICAL_LEVEL,
             request=request,
             parameter='',
-            wstg=["WSTG-CRYP-01"],
+            wstg=SslInformationFinding.wstg_code(),
             info="Requested hostname doesn't match those in the certificate",
             response=None
         )
@@ -95,11 +94,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=NAME,
+            category=SslInformationFinding.name(),
             level=HIGH_LEVEL,
             request=request,
             parameter='',
-            wstg=["WSTG-CRYP-01"],
+            wstg=SslInformationFinding.wstg_code(),
             info="Strict Transport Security (HSTS) is not set",
             response=None
         )
@@ -108,11 +107,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=NAME,
+            category=SslInformationFinding.name(),
             level=MEDIUM_LEVEL,
             request=request,
             parameter='',
-            wstg=["WSTG-CRYP-01"],
+            wstg=SslInformationFinding.wstg_code(),
             info="Self-signed certificate detected: The certificate is not signed by a trusted Certificate Authority",
             response=None
         )

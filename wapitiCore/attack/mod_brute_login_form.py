@@ -28,7 +28,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.credentials import NAME, WSTG_CODE
+from wapitiCore.definitions.credentials import CredentialsFinding
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -36,7 +36,7 @@ from wapitiCore.main.log import log_red
 
 
 class ModuleBruteLoginForm(Attack):
-    """Attempt to login on authentication forms using known weak credentials (like admin/admin)."""
+    """Attempt to log in on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
     PASSWORDS_FILE = "passwords.txt"
     USERS_FILE = "users.txt"
@@ -218,12 +218,11 @@ class ModuleBruteLoginForm(Attack):
                             link_depth=login_form.link_depth
                         )
 
-                        await self.add_vuln_low(
+                        await self.add_low(
                             request_id=request.path_id,
-                            category=NAME,
+                            finding_class=CredentialsFinding,
                             request=evil_request,
                             info=vuln_message,
-                            wstg=WSTG_CODE,
                             response=response
                         )
 

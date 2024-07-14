@@ -28,7 +28,7 @@ from httpx import RequestError
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging, log_verbose
 
 MSG_NO_FORTI = "No Forti Product Detected"
@@ -42,14 +42,16 @@ class ModuleForti(NetworkDeviceCommon):
 
     async def check_forti(self, url):
         fortivpn_list = ['remote/fgt_lang?lang=en',
-                         'remote/fgt_lang?lang=fr'] 
+                         'remote/fgt_lang?lang=fr']
         fortiweb_list = ['fgt_lang.js?paths=lang/en:com_info',
                          'fgt_lang.js?paths=lang/fr:com_info']
-        check_list = fortivpn_list + fortiweb_list + ['logindisclaimer',
-                                      'remote/login?lang=en',
-                                      'remote/login?lang=fr',
-                                      'fpc/app/login',
-                                      'login/?next=/']
+        check_list = fortivpn_list + fortiweb_list + [
+            'logindisclaimer',
+            'remote/login?lang=en',
+            'remote/login?lang=fr',
+            'fpc/app/login',
+            'login/?next=/'
+        ]
 
         for item in check_list:
             full_url = urljoin(url, item)
@@ -63,7 +65,7 @@ class ModuleForti(NetworkDeviceCommon):
 
             if response.is_success:
                 if "content-type" in response.headers and \
-                "javascript" in response.headers["content-type"]:
+                        "javascript" in response.headers["content-type"]:
                     if item in fortivpn_list:
                         self.device_name = "Fortinet SSL-VPN"
                         return True
@@ -123,7 +125,7 @@ class ModuleForti(NetworkDeviceCommon):
             soup = BeautifulSoup(response.content, 'html.parser')
             title_tag = soup.title
             sign_in_header_div = soup.find('div', class_='sign-in-header')
-            
+
             for device_name in ["FortiManager", "FortiAnalyzer"]:
                 if title_tag:
                     if device_name in title_tag.string:
@@ -179,11 +181,10 @@ class ModuleForti(NetworkDeviceCommon):
                     self.version
                 )
 
-                await self.add_addition(
-                    category=TECHNO_DETECTED,
+                await self.add_info(
+                    finding_class=SoftwareNameDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(forti_detected),
-                    wstg=WSTG_CODE
                 )
             else:
                 log_blue(MSG_NO_FORTI)

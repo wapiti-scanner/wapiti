@@ -6,7 +6,6 @@ from asyncio import Event, sleep as Sleep
 from unittest.mock import AsyncMock
 
 import httpx
-import respx
 import pytest
 
 from wapitiCore.net.classes import CrawlerConfiguration

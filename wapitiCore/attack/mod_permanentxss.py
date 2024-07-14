@@ -25,10 +25,10 @@ from httpx import ReadTimeout, RequestError
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, random_string, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.stored_xss import NAME as XSS_NAME, WSTG_CODE as XSS_WSTG_CODE
-from wapitiCore.definitions.stored_html_injection import NAME as HTMLI_NAME, WSTG_CODE as HTMLI_WSTG_CODE
-from wapitiCore.definitions.internal_error import WSTG_CODE as INTERNAL_ERROR_WSTG_CODE
-from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.stored_xss import StoredXssFinding
+from wapitiCore.definitions.stored_html_injection import StoredHtmlFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
@@ -118,27 +118,26 @@ class ModulePermanentxss(Attack):
                         taint
                     ):
                         # Success, this is a stored XSS / HTML injection vulnerability
-                        vuln_type = XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME
+                        finding = StoredXssFinding if payload_info.injection_type == "javascript" else StoredHtmlFinding
                         if request.path == evil_request.path:
                             description = (
-                                f"{vuln_type} vulnerability found via injection "
+                                f"{finding.name()} vulnerability found via injection "
                                 f"in the parameter {parameter.name}"
                             )
                         else:
                             description = (
-                                f"{vuln_type} vulnerability found in {request.url} by injecting"
+                                f"{finding.name()} vulnerability found in {request.url} by injecting"
                                 f" the parameter {parameter.name} of {input_request.path}"
                             )
                         if has_strong_csp(response, html):
                             description += ".\nWarning: Content-Security-Policy is present!"
 
-                        await self.add_vuln_high(
+                        await self.add_high(
                             request_id=request.path_id,
-                            category=HTMLI_NAME if payload_info.injection_type == "html" else XSS_NAME,
+                            finding_class=finding,
                             request=evil_request,
                             parameter=parameter.name,
                             info=description,
-                            wstg=HTMLI_WSTG_CODE if payload_info.injection_type == "html" else XSS_WSTG_CODE,
                         )
 
                         if parameter.is_qs_injection:
@@ -149,7 +148,7 @@ class ModulePermanentxss(Attack):
                         log_red("---")
                         log_red(
                             injection_msg,
-                            XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME,
+                            finding.name(),
                             request.path,
                             parameter.name
                         )
@@ -216,13 +215,12 @@ class ModulePermanentxss(Attack):
                 else:
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param.display_name)
 
-                await self.add_anom_medium(
+                await self.add_medium(
                     request_id=injection_request.path_id,
-                    category=Messages.RES_CONSUMPTION,
+                    finding_class=ResourceConsumptionFinding,
                     request=evil_request,
                     info=anom_msg,
                     parameter=xss_param.display_name,
-                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE
                 )
                 timeouted = True
             except RequestError:
@@ -251,27 +249,27 @@ class ModulePermanentxss(Attack):
                         )
                 ):
 
-                    vuln_type = XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME
+                    finding = StoredXssFinding if payload_info.injection_type == "javascript" else StoredHtmlFinding
                     if page == output_request.path:
                         description = (
-                            f"{vuln_type} vulnerability found via injection in the parameter {xss_param.display_name}"
+                            f"{finding.name()} vulnerability found via injection "
+                            f"in the parameter {xss_param.display_name}"
                         )
                     else:
                         description = (
-                            f"{vuln_type} vulnerability found in {output_request.url} by injecting"
+                            f"{finding.name()} vulnerability found in {output_request.url} by injecting"
                             f" the parameter {parameter} of {page}"
                         )
 
                     if has_strong_csp(response, html):
                         description += ".\nWarning: Content-Security-Policy is present!"
 
-                    await self.add_vuln_high(
+                    await self.add_high(
                         request_id=injection_request.path_id,
-                        category=HTMLI_NAME if payload_info.injection_type == "html" else XSS_NAME,
+                        finding_class=finding,
                         request=evil_request,
                         parameter=xss_param.display_name,
                         info=description,
-                        wstg=HTMLI_WSTG_CODE if payload_info.injection_type == "html" else XSS_WSTG_CODE,
                         response=response
                     )
 
@@ -284,7 +282,7 @@ class ModulePermanentxss(Attack):
                     # TODO: use a more detailed description like the one used for the report
                     log_red(
                         injection_msg,
-                        XSS_NAME if payload_info.injection_type == "javascript" else HTMLI_NAME,
+                        finding.name(),
                         output_url,
                         xss_param.display_name,
                     )
@@ -305,13 +303,12 @@ class ModulePermanentxss(Attack):
                     else:
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param.display_name)
 
-                    await self.add_anom_high(
+                    await self.add_high(
                         request_id=injection_request.path_id,
-                        category=Messages.ERROR_500,
+                        finding_class=InternalErrorFinding,
                         request=evil_request,
                         info=anom_msg,
                         parameter=xss_param.display_name,
-                        wstg=INTERNAL_ERROR_WSTG_CODE,
                         response=response
                     )
 

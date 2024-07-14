@@ -26,7 +26,7 @@ from prance.util.url import ResolutionError
 from wapitiCore.net import Request
 from wapitiCore.main.log import logging
 
-class Swagger():
+class Swagger:
     AUTOFILL_VALUES = {
         "file": ("pix.gif", b"GIF89a", "image/gif"),
         "integer": "1337",

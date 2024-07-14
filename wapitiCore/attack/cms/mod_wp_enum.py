@@ -27,12 +27,12 @@ from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
 from wapitiCore.attack.attack import random_string
 from wapitiCore.net.response import Response
-from wapitiCore.definitions.fingerprint_webapp import NAME as WEB_APP_VERSIONED, WSTG_CODE as WEB_WSTG_CODE
-from wapitiCore.definitions.fingerprint import WSTG_CODE as TECHNO_DETECTED_WSTG_CODE
-from wapitiCore.definitions.fingerprint import NAME as TECHNO_DETECTED, WSTG_CODE
+from wapitiCore.definitions.fingerprint_webapp import SoftwareVersionDisclosureFinding
+from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_WP = "No WordPress Detected"
+
 
 class ModuleWpEnum(CommonCMS):
     """Detect Drupal version."""
@@ -133,11 +133,10 @@ class ModuleWpEnum(CommonCMS):
                             plugin,
                             [version]
                         )
-                        await self.add_addition(
-                            category=TECHNO_DETECTED,
+                        await self.add_info(
+                            finding_class=SoftwareNameDisclosureFinding,
                             request=request,
                             info=json.dumps(plugin_detected),
-                            wstg=TECHNO_DETECTED_WSTG_CODE,
                             response=response
                         )
                 elif response.status == 403 and self.false_positive["plugins"] != 403:
@@ -152,11 +151,10 @@ class ModuleWpEnum(CommonCMS):
                         plugin,
                         [""]
                     )
-                    await self.add_addition(
-                        category=TECHNO_DETECTED,
+                    await self.add_info(
+                        finding_class=SoftwareNameDisclosureFinding,
                         request=request,
                         info=json.dumps(plugin_detected),
-                        wstg=TECHNO_DETECTED_WSTG_CODE,
                         response=response
                     )
 
@@ -178,6 +176,7 @@ class ModuleWpEnum(CommonCMS):
                         version = version.group(1)
                     else:
                         version = ""
+
                     theme_detected = {
                         "name": theme,
                         "versions": [version],
@@ -192,11 +191,10 @@ class ModuleWpEnum(CommonCMS):
                             theme,
                             [version]
                         )
-                        await self.add_addition(
-                            category=TECHNO_DETECTED,
+                        await self.add_info(
+                            finding_class=SoftwareNameDisclosureFinding,
                             request=request,
                             info=json.dumps(theme_detected),
-                            wstg=TECHNO_DETECTED_WSTG_CODE,
                             response=response
                         )
                 elif response.status == 403 and self.false_positive["themes"] != 403:
@@ -211,11 +209,10 @@ class ModuleWpEnum(CommonCMS):
                         theme,
                         [""]
                     )
-                    await self.add_addition(
-                        category=TECHNO_DETECTED,
+                    await self.add_info(
+                        finding_class=SoftwareNameDisclosureFinding,
                         request=request,
                         info=json.dumps(theme_detected),
-                        wstg=TECHNO_DETECTED_WSTG_CODE,
                         response=response
                     )
 
@@ -247,17 +244,15 @@ class ModuleWpEnum(CommonCMS):
             )
 
             if self.versions:
-                await self.add_vuln_info(
-                    category=WEB_APP_VERSIONED,
+                await self.add_info(
+                    finding_class=SoftwareVersionDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(drupal_detected),
-                    wstg=WEB_WSTG_CODE
                 )
-            await self.add_addition(
-                category=TECHNO_DETECTED,
+            await self.add_info(
+                finding_class=SoftwareNameDisclosureFinding,
                 request=request_to_root,
                 info=json.dumps(drupal_detected),
-                wstg=WSTG_CODE
             )
             await self.check_false_positive(request_to_root.url)
             log_blue("Enumeration of WordPress Plugins :")

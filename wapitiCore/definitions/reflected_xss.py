@@ -17,49 +17,70 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-TYPE = "vulnerability"
+from typing import List
 
-NAME = "Reflected Cross Site Scripting"
+from wapitiCore.definitions.base import FindingBase
 
-SHORT_NAME = "XSS"
 
-WSTG_CODE = ["WSTG-INPV-01"]
+class XssFinding(FindingBase):
+    @classmethod
+    def name(cls) -> str:
+        return "Reflected Cross Site Scripting"
 
-DESCRIPTION = (
-    "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications "
-    "which allow code injection by malicious web users into the web pages viewed by other users. "
-    "Examples of such code include HTML code and client-side scripts."
-)
-
-SOLUTION = (
-    "The best way to protect a web application from XSS attacks is ensure that the application performs validation of "
-    "all headers, cookies, query strings, form fields, and hidden fields."
-) + " " + (
-    "Encoding user supplied output in the server side can also defeat XSS vulnerabilities by preventing inserted "
-    "scripts from being transmitted to users in an executable form."
-) + " " + (
-    "Applications can gain significant protection from javascript based attacks by converting the following characters "
-    "in all generated output to the appropriate HTML entity encoding:"
-) + "<, >, &, ', (, ), #, %, ; , +, -"
-
-REFERENCES = [
-    {
-        "title": "OWASP: Cross Site Scripting (XSS)",
-        "url": "https://owasp.org/www-community/attacks/xss/"
-    },
-    {
-        "title": "Wikipedia: Cross-site scripting",
-        "url": "https://en.wikipedia.org/wiki/Cross-site_scripting"
-    },
-    {
-        "title": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
-        "url": "https://cwe.mitre.org/data/definitions/79.html"
-    },
-    {
-        "title": "OWASP: Reflected Cross Site Scripting",
-        "url": (
-            "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/"
-            "07-Input_Validation_Testing/01-Testing_for_Reflected_Cross_Site_Scripting"
+    @classmethod
+    def description(cls) -> str:
+        return (
+            "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web "
+            "applications which allow code injection by malicious web users into the web pages viewed by other users. "
+            "Examples of such code include HTML code and client-side scripts."
         )
-    }
-]
+
+    @classmethod
+    def references(cls) -> list:
+        return [
+            {
+                "title": "OWASP: Cross Site Scripting (XSS)",
+                "url": "https://owasp.org/www-community/attacks/xss/"
+            },
+            {
+                "title": "Wikipedia: Cross-site scripting",
+                "url": "https://en.wikipedia.org/wiki/Cross-site_scripting"
+            },
+            {
+                "title": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "url": "https://cwe.mitre.org/data/definitions/79.html"
+            },
+            {
+                "title": "OWASP: Reflected Cross Site Scripting",
+                "url": (
+                    "https://owasp.org/www-project-web-security-testing-guide/latest/"
+                    "4-Web_Application_Security_Testing/07-Input_Validation_Testing/"
+                    "01-Testing_for_Reflected_Cross_Site_Scripting"
+                )
+            }
+        ]
+
+    @classmethod
+    def solution(cls) -> str:
+        return (
+            "The best way to protect a web application from XSS attacks is ensure that the application performs "
+            "validation of all headers, cookies, query strings, form fields, and hidden fields."
+        ) + " " + (
+            "Encoding user supplied output in the server side can also defeat XSS vulnerabilities by preventing "
+            "inserted scripts from being transmitted to users in an executable form."
+        ) + " " + (
+            "Applications can gain significant protection from javascript based attacks by converting the following "
+            "characters in all generated output to the appropriate HTML entity encoding:"
+        ) + "<, >, &, ', (, ), #, %, ; , +, -"
+
+    @classmethod
+    def short_name(cls) -> str:
+        return "XSS"
+
+    @classmethod
+    def type(cls) -> str:
+        return "vulnerability"
+
+    @classmethod
+    def wstg_code(cls) -> List[str]:
+        return ["WSTG-INPV-01"]

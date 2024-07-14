@@ -42,7 +42,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
 from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
-from wapitiCore.definitions.ssl import NAME, WSTG_CODE
+from wapitiCore.definitions.ssl import SslInformationFinding, SslVulnerabilityFinding
 
 
 def sslscan_level_to_color(security_level: str) -> str:
@@ -341,10 +341,13 @@ class ModuleSsl(Attack):
         scan_results = await loop.run_in_executor(None, self.process_sslscan, request.hostname, request.port)
 
         async for level, message in scan_results:
-            if level == INFO_LEVEL:
-                await self.add_addition(category=NAME, request=request, info=message, wstg=WSTG_CODE)
-            else:
-                await self.add_vuln(level=level, category=NAME, request=request, info=message, wstg=WSTG_CODE)
+            finding = SslInformationFinding if level == INFO_LEVEL else SslVulnerabilityFinding
+            await self.add_payload(
+                level=level,
+                finding_class=finding,
+                request=request,
+                info=message
+            )
 
     async def check_hsts(self, hostname: str, port: int) -> int:
         """

@@ -26,7 +26,7 @@ from httpx import RequestError
 from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.ssrf import NAME, WSTG_CODE
+from wapitiCore.definitions.ssrf import SsrfFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 
@@ -132,13 +132,12 @@ class ModuleSsrf(Attack):
                                 str_to_payloadinfo(["http://external.url/page"])
                             ))
 
-                            await self.add_vuln_critical(
+                            await self.add_critical(
                                 request_id=original_request.path_id,
-                                category=NAME,
+                                finding_class=SsrfFinding,
                                 request=mutated_request,
                                 info=vuln_message,
                                 parameter=parameter,
-                                wstg=WSTG_CODE,
                                 response=response
                             )
 

@@ -29,7 +29,7 @@ from httpx import RequestError
 
 from wapitiCore.main.log import log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string, Parameter
-from wapitiCore.definitions.backup import NAME, WSTG_CODE
+from wapitiCore.definitions.backup import BackupFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.txt_payload_parser import TxtPayloadReader
@@ -124,11 +124,10 @@ class ModuleBackup(Attack):
             if response and response.is_success:
                 log_red(f"Found backup file {evil_req.url}")
 
-                await self.add_vuln_low(
+                await self.add_low(
                     request_id=request.path_id,
-                    category=NAME,
+                    finding_class=BackupFinding,
                     request=evil_req,
                     info=f"Backup file {url} found for {page}",
-                    wstg=WSTG_CODE,
                     response=response
                 )

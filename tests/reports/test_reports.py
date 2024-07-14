@@ -36,26 +36,26 @@ def test_reports():
 
         for vul in vulnerabilities:
             report_gen.add_vulnerability_type(
-                vul.NAME,
-                vul.DESCRIPTION,
-                vul.SOLUTION,
-                flatten_references(vul.REFERENCES)
+                vul.name(),
+                vul.description(),
+                vul.solution(),
+                flatten_references(vul.references())
             )
 
         for anomaly in anomalies:
             report_gen.add_anomaly_type(
-                anomaly.NAME,
-                anomaly.DESCRIPTION,
-                anomaly.SOLUTION,
-                flatten_references(anomaly.REFERENCES)
+                anomaly.name(),
+                anomaly.description(),
+                anomaly.solution(),
+                flatten_references(anomaly.references())
             )
 
         for additional in additionals:
             report_gen.add_additional_type(
-                additional.NAME,
-                additional.DESCRIPTION,
-                additional.SOLUTION,
-                flatten_references(additional.REFERENCES)
+                additional.name(),
+                additional.description(),
+                additional.solution(),
+                flatten_references(additional.references())
             )
 
         if report_format == "html":

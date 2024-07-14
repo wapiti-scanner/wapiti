@@ -26,7 +26,7 @@ from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
-from wapitiCore.definitions.exec import NAME, WSTG_CODE
+from wapitiCore.definitions.exec import CommandExecutionFinding
 from wapitiCore.main.log import log_red
 
 
@@ -83,11 +83,10 @@ class ModuleShellshock(Attack):
             if self.rand_string in data:
                 log_red(f"URL {url} seems vulnerable to Shellshock attack!")
 
-                await self.add_vuln_high(
+                await self.add_high(
                     request_id=request.path_id,
-                    category=NAME,
+                    finding_class=CommandExecutionFinding,
                     request=evil_req,
                     info=f"URL {url} seems vulnerable to Shellshock attack",
-                    wstg=WSTG_CODE,
                     response=response
                 )

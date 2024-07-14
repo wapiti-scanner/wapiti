@@ -22,7 +22,7 @@ from random import randint, shuffle
 
 from httpx import RequestError
 
-from wapitiCore.definitions.unrestricted_upload import NAME, WSTG_CODE
+from wapitiCore.definitions.unrestricted_upload import UnrestrictedUploadFinding
 from wapitiCore.attack.attack import Attack, Parameter, ParameterSituation, random_string
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.main.log import log_red
@@ -132,19 +132,18 @@ class ModuleUpload(Attack):
                 self.network_errors += 1
             else:
                 if payload_info.payload in upload_response.content:
-                    await self.add_vuln_critical(
+                    await self.add_critical(
                         request_id=request.path_id,
-                        category=NAME,
+                        finding_class=UnrestrictedUploadFinding,
                         request=mutated_request,
                         info=f"Unrestricted file upload vulnerability in the parameter {parameter.display_name}",
                         parameter=parameter.display_name,
-                        wstg=WSTG_CODE
                     )
 
                     log_red("---")
                     log_red(
                         Messages.MSG_PARAM_INJECT,
-                        NAME,
+                        str(UnrestrictedUploadFinding),
                         mutated_request.path,
                         parameter.display_name
                     )
@@ -163,22 +162,21 @@ class ModuleUpload(Attack):
                             self.network_errors += 1
                         else:
                             if payload_info.payload in link_response.content:
-                                await self.add_vuln_critical(
+                                await self.add_critical(
                                     request_id=request.path_id,
-                                    category=NAME,
+                                    finding_class=UnrestrictedUploadFinding,
                                     request=mutated_request,
                                     info=(
                                         "Unrestricted file upload vulnerability in the parameter "
                                         f"{parameter.display_name}"
                                     ),
                                     parameter=parameter.display_name,
-                                    wstg=WSTG_CODE
                                 )
 
                                 log_red("---")
                                 log_red(
                                     Messages.MSG_PARAM_INJECT,
-                                    NAME,
+                                    str(UnrestrictedUploadFinding),
                                     mutated_request.path,
                                     parameter.display_name
                                 )

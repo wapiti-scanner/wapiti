@@ -23,7 +23,7 @@ import math
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.csrf import NAME, WSTG_CODE
+from wapitiCore.definitions.csrf import CsrfFinding
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import Response
 from wapitiCore.main.log import log_red
@@ -207,10 +207,9 @@ class ModuleCsrf(Attack):
         log_red(request.http_repr())
         log_red("---")
 
-        await self.add_vuln_medium(
+        await self.add_medium(
             request_id=request.path_id,
-            category=NAME,
+            finding_class=CsrfFinding,
             request=request,
             info=vuln_message,
-            wstg=WSTG_CODE
         )

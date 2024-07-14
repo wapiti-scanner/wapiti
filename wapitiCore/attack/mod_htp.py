@@ -28,8 +28,7 @@ from itertools import chain
 
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.fingerprint_webserver import \
-    NAME as WEB_SERVER_VERSIONED
+from wapitiCore.definitions.fingerprint_webserver import WebServerVersionDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -220,8 +219,8 @@ class ModuleHtp(Attack):
                 "versions": matching_versions
             }
 
-            await self.add_vuln_info(
-                category=WEB_SERVER_VERSIONED,
+            await self.add_info(
+                finding_class=WebServerVersionDisclosureFinding,
                 request=Request(root_url),
                 info=json.dumps(tech_info)
             )

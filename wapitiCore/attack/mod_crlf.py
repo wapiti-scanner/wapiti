@@ -23,8 +23,8 @@ from httpx import ReadTimeout, HTTPStatusError, RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
-from wapitiCore.definitions.crlf import NAME, WSTG_CODE
-from wapitiCore.definitions.resource_consumption import WSTG_CODE as RESOURCE_CONSUMPTION_WSTG_CODE
+from wapitiCore.definitions.crlf import CrlfFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
@@ -57,13 +57,12 @@ class ModuleCrlf(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except ReadTimeout:
                 self.network_errors += 1
-                await self.add_anom_medium(
+                await self.add_medium(
                     request_id=request.path_id,
-                    category=Messages.RES_CONSUMPTION,
+                    finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     parameter=parameter.display_name,
                     info="Timeout (" + parameter.display_name + ")",
-                    wstg=RESOURCE_CONSUMPTION_WSTG_CODE,
                 )
 
                 log_orange("---")
@@ -78,14 +77,13 @@ class ModuleCrlf(Attack):
                 self.network_errors += 1
             else:
                 if "wapiti" in response.headers:
-                    await self.add_vuln_low(
+                    await self.add_low(
                         request_id=request.path_id,
-                        category=NAME,
+                        finding_class=CrlfFinding,
                         request=mutated_request,
                         parameter=parameter.display_name,
                         info=f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}",
-                        wstg=WSTG_CODE,
-                        response=response
+                        response=response,
                     )
 
                     if parameter.is_qs_injection:

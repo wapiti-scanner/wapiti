@@ -26,7 +26,7 @@ from typing import Dict, List, Tuple, Optional
 import dns.resolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
-from wapitiCore.definitions.log4shell import NAME, WSTG_CODE
+from wapitiCore.definitions.log4shell import Log4ShellFinding
 from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -231,12 +231,11 @@ class ModuleLog4Shell(Attack):
 
         element_type = "query parameter" if request.method == "GET" else "body parameter"
 
-        await self.add_vuln_critical(
-            category=NAME,
+        await self.add_critical(
+            finding_class=Log4ShellFinding,
             request=request,
             info=f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}",
             parameter=f"{param_name}",
-            wstg=WSTG_CODE,
             response=response
         )
 
@@ -266,12 +265,11 @@ class ModuleLog4Shell(Attack):
         response: Response
     ):
         if await self._verify_dns(str(unique_id)) is True:
-            await self.add_vuln_critical(
-                category=NAME,
+            await self.add_critical(
+                finding_class=Log4ShellFinding,
                 request=modified_request,
                 info=f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}",
                 parameter=f"{header}: {payload}",
-                wstg=WSTG_CODE,
                 response=response
             )
 
@@ -286,12 +284,11 @@ class ModuleLog4Shell(Attack):
         if not await self._verify_dns(str(param_uuid)):
             return
 
-        await self.add_vuln_critical(
-            category=NAME,
+        await self.add_critical(
+            finding_class=Log4ShellFinding,
             request=request,
             info=f"URL {request.url} seems vulnerable to Log4Shell attack",
             parameter="",
-            wstg=WSTG_CODE,
             response=response
         )
 
