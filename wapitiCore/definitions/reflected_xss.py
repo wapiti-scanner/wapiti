@@ -64,14 +64,13 @@ class XssFinding(FindingBase):
     def solution(cls) -> str:
         return (
             "The best way to protect a web application from XSS attacks is ensure that the application performs "
-            "validation of all headers, cookies, query strings, form fields, and hidden fields."
-        ) + " " + (
+            "validation of all headers, cookies, query strings, form fields, and hidden fields. "
             "Encoding user supplied output in the server side can also defeat XSS vulnerabilities by preventing "
-            "inserted scripts from being transmitted to users in an executable form."
-        ) + " " + (
+            "inserted scripts from being transmitted to users in an executable form. "
             "Applications can gain significant protection from javascript based attacks by converting the following "
-            "characters in all generated output to the appropriate HTML entity encoding:"
-        ) + "<, >, &, ', (, ), #, %, ; , +, -"
+            "characters in all generated output to the appropriate HTML entity encoding: "
+            "<, >, &, ', (, ), #, %, ; , +, -"
+        )
 
     @classmethod
     def short_name(cls) -> str:

@@ -31,12 +31,9 @@ class PathTraversalFinding(FindingBase):
     @classmethod
     def description(cls) -> str:
         return (
-            "This attack is known as Path or Directory Traversal."
-        ) + " " + (
-            "Its aim is the access to files and directories that are stored outside the web root folder."
-        ) + " " + (
-            "The attacker tries to explore the directories stored in the web server."
-        ) + " " + (
+            "This attack is known as Path or Directory Traversal. "
+            "Its aim is the access to files and directories that are stored outside the web root folder. "
+            "The attacker tries to explore the directories stored in the web server. "
             "The attacker uses some techniques, for instance, the manipulation of variables that reference files with "
             "'dot-dot-slash (../)' sequences and its variations to move up to root directory to navigate through "
             "the file system."
@@ -66,16 +63,12 @@ class PathTraversalFinding(FindingBase):
     @classmethod
     def solution(cls) -> str:
         return (
-            "Prefer working without user input when using file system calls."
-        ) + " " + (
+            "Prefer working without user input when using file system calls. "
             "Use indexes rather than actual portions of file names when templating or using language files "
             "(eg: value 5 from the user submission = Czechoslovakian, rather than expecting the user to return "
-            "'Czechoslovakian')."
-        ) + " " + (
-            "Ensure the user cannot supply all parts of the path - surround it with your path code."
-        ) + " " + (
-            "Validate the user's input by only accepting known good - do not sanitize the data."
-        ) + " " + (
+            "'Czechoslovakian'). "
+            "Ensure the user cannot supply all parts of the path - surround it with your path code. "
+            "Validate the user's input by only accepting known good - do not sanitize the data. "
             "Use chrooted jails and code access policies to restrict where the files can be obtained or saved to."
         )
 

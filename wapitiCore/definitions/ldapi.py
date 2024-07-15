@@ -31,11 +31,9 @@ class LdapInjectionFinding(FindingBase):
     def description(cls) -> str:
         return (
             "LDAP Injection is an attack used to exploit web based applications that construct LDAP statements "
-            "based on user input."
-        ) + " " + (
+            "based on user input. "
             "When an application fails to properly sanitize user input, it’s possible to modify LDAP statements using "
-            "a local proxy."
-        ) + " " + (
+            "a local proxy. "
             "This could result in the execution of arbitrary commands such as granting permissions "
             "to unauthorized queries."
         )
@@ -60,8 +58,7 @@ class LdapInjectionFinding(FindingBase):
     @classmethod
     def solution(cls) -> str:
         return (
-            "To protect against XPATH injection, Escape all variables using the right LDAP encoding function."
-        ) + " " + (
+            "To protect against XPATH injection, Escape all variables using the right LDAP encoding function. "
             "Use Frameworks that Automatically Protect from LDAP Injection."
         )
 

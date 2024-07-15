@@ -31,8 +31,7 @@ class ResourceConsumptionFinding(FindingBase):
     @classmethod
     def description(cls) -> str:
         return (
-            "It took an abnormal time to the server to respond to a query."
-        ) + " " + (
+            "It took an abnormal time to the server to respond to a query. "
             "An attacker might leverage this kind of weakness to overload the server."
         )
 
