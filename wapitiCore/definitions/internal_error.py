@@ -31,8 +31,7 @@ class InternalErrorFinding(FindingBase):
     @classmethod
     def description(cls) -> str:
         return (
-            "An error occurred on the server's side, preventing it to process the request."
-        ) + " " + (
+            "An error occurred on the server's side, preventing it to process the request. "
             "It may be the sign of a vulnerability."
         )
 

@@ -31,8 +31,7 @@ class XPathInjectionFinding(FindingBase):
     def description(cls) -> str:
         return (
             "XPath Injection attacks occur when a web site uses user-supplied information to construct an XPath query "
-            "for XML data."
-        ) + " " + (
+            "for XML data. "
             "By sending intentionally malformed information into the web site, an attacker can find out how "
             "the XML data is structured, or access data that they may not normally have access to."
         )
@@ -54,8 +53,7 @@ class XPathInjectionFinding(FindingBase):
     def solution(cls) -> str:
         return (
             "To protect against XPATH injection, you need to use a parameterized XPath interface if one is available, "
-            "or escape the user input to make it safe to include in a dynamically constructed query."
-        ) + " " + (
+            "or escape the user input to make it safe to include in a dynamically constructed query. "
             "Instead, user input must be escaped or filtered or parameterized statements must be used."
         )
 

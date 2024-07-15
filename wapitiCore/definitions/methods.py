@@ -31,8 +31,7 @@ class MethodsFinding(FindingBase):
     def description(cls) -> str:
         return (
             "While GET and POST are by far the most common methods that are used to access "
-            "information provided by a web server, HTTP allows several other (and somewhat less known) methods."
-        ) + " " + (
+            "information provided by a web server, HTTP allows several other (and somewhat less known) methods. "
             "Some of these can be used for nefarious purposes if the web server is misconfigured."
         )
 

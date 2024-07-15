@@ -31,8 +31,7 @@ class HtaccessBypassFinding(FindingBase):
     @classmethod
     def description(cls) -> str:
         return (
-            "Htaccess files are used to restrict access to some files or HTTP method."
-        ) + " " + (
+            "Htaccess files are used to restrict access to some files or HTTP method. "
             "In some case it may be possible to bypass this restriction and access the files."
         )
 

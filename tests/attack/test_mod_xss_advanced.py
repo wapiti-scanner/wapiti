@@ -60,7 +60,7 @@ async def test_title_positive():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["module"] == "xss"
-        assert persister.add_payload.call_args_list[0][1]["category"] == XssFinding.name()
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Reflected Cross Site Scripting"
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "title"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].startswith("</title>")
         assert "Warning: Content-Security-Policy is present!" not in persister.add_payload.call_args_list[0][1]["info"]
@@ -437,7 +437,7 @@ async def test_fallback_to_html_injection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "name"
-        assert persister.add_payload.call_args_list[0][1]["category"] == HtmlInjectionFinding.name()
+        assert persister.add_payload.call_args_list[0][1]["category"] == "HTML Injection"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             "HTML Injection vulnerability found via injection in the parameter name"
         )

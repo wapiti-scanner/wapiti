@@ -32,8 +32,7 @@ class BlindSqlInjectionFinding(FindingBase):
     def description(cls) -> str:
         return (
             "Blind SQL injection is a technique that exploits a vulnerability occurring in the database "
-            "of an application."
-        ) + " " + (
+            "of an application. "
             "This kind of vulnerability is harder to detect than basic SQL injections because no error message will be "
             "displayed on the webpage."
         )
@@ -65,8 +64,7 @@ class BlindSqlInjectionFinding(FindingBase):
     @classmethod
     def solution(cls) -> str:
         return (
-            "To protect against SQL injection, user input must not directly be embedded in SQL statements."
-        ) + " " + (
+            "To protect against SQL injection, user input must not directly be embedded in SQL statements. "
             "Instead, user input must be escaped or filtered or parameterized statements must be used."
         )
 

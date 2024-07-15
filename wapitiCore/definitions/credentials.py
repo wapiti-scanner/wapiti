@@ -58,8 +58,7 @@ class CredentialsFinding(FindingBase):
     @classmethod
     def solution(cls) -> str:
         return (
-            "Do not ship or deploy with any default credentials, particularly for admin users."
-        ) + " " + (
+            "Do not ship or deploy with any default credentials, particularly for admin users. "
             "Implement weak-password checks, such as testing new or changed passwords "
             "against a list of the top 10000 worst passwords."
         )

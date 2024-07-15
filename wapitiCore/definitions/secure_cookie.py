@@ -32,8 +32,7 @@ class SecureCookieFinding(FindingBase):
     def description(cls) -> str:
         return (
             "The secure flag is an option that can be set by the application server when sending a new cookie to the "
-            "user within an HTTP Response."
-        ) + " " + (
+            "user within an HTTP Response. "
             "The purpose of the secure flag is to prevent cookies from being observed by unauthorized parties due "
             "to the transmission of a the cookie in clear text."
         )
