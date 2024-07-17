@@ -92,7 +92,7 @@ def is_mod_wapp_or_update_set(args):
 
 
 def validate_cms_choices(cms_value):
-    allowed_cms = ["drupal", "joomla", "prestashop", "spip", "wp"]
+    allowed_cms = ["drupal", "joomla", "magento", "prestashop", "spip", "wp"]
     cms_list = cms_value.split(',')
     for cms in cms_list:
         if cms not in allowed_cms:
@@ -229,7 +229,7 @@ def build_attack_options_from_args(args: Namespace) -> dict:
             raise InvalidOptionValue("--internal-endpoint", internal_endpoint)
 
     if args.cms:
-        allowed_cms = ["drupal", "joomla", "prestashop", "spip", "wp"]
+        allowed_cms = ["drupal", "magento", "joomla", "prestashop", "spip", "wp"]
         if not is_mod_cms_set(args):
             raise InvalidOptionValue("--cms", "module cms is required when --cms is used")
         if not validate_cms_choices(args.cms):
