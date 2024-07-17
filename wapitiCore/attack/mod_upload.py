@@ -143,7 +143,7 @@ class ModuleUpload(Attack):
                     log_red("---")
                     log_red(
                         Messages.MSG_PARAM_INJECT,
-                        str(UnrestrictedUploadFinding),
+                        UnrestrictedUploadFinding.name(),
                         mutated_request.path,
                         parameter.display_name
                     )
@@ -176,7 +176,7 @@ class ModuleUpload(Attack):
                                 log_red("---")
                                 log_red(
                                     Messages.MSG_PARAM_INJECT,
-                                    str(UnrestrictedUploadFinding),
+                                    UnrestrictedUploadFinding.name(),
                                     mutated_request.path,
                                     parameter.display_name
                                 )
