@@ -8,7 +8,6 @@ import httpx
 import respx
 import pytest
 
-from wapitiCore.definitions.sql import SqlInjectionFinding
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler

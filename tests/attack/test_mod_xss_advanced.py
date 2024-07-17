@@ -8,8 +8,6 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from wapitiCore.definitions.html_injection import HtmlInjectionFinding
-from wapitiCore.definitions.reflected_xss import XssFinding
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
