@@ -522,7 +522,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--cms",
-        help="Choose the CMS to scan. Possible choices : drupal, joomla, prestashop, spip, wp",
+        help="Choose the CMS to scan. Possible choices : drupal, joomla, magento, prestashop, spip, wp",
         metavar="CMS_LIST"
     )
 
