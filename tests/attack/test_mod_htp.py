@@ -2,14 +2,13 @@ import asyncio
 import json
 import os
 from asyncio import Event
-from unittest.mock import patch, MagicMock, PropertyMock, AsyncMock
+from unittest.mock import patch, PropertyMock, AsyncMock
 
 import httpx
 import pytest
 import respx
 
 from wapitiCore.attack.mod_htp import ModuleHtp, get_matching_versions
-from wapitiCore.definitions.fingerprint_webserver import WebServerVersionDisclosureFinding
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -198,12 +197,7 @@ async def test_finish_one_range():
 
     versions = ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4"]
 
-    async def async_magic():
-        pass
-
-    MagicMock.__await__ = lambda x: async_magic().__await__()
-    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_info", autospec=True) as mock_add_info, \
-            patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
+    with patch.object(ModuleHtp, "_db", new_callable=PropertyMock), \
             patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -215,12 +209,15 @@ async def test_finish_one_range():
 
             await module_htp.finish()
 
-            mock_add_info.assert_called_once_with(
-                module_htp,
-                finding_class=WebServerVersionDisclosureFinding,
-                request=Request("http://perdu.com/"),
-                info='{"name": "techno", "versions": ["1.2", "1.2.1", "1.3"]}'
+            assert persister.add_payload.call_count
+            assert persister.add_payload.call_args_list[0][1]["module"] == "htp"
+            assert persister.add_payload.call_args_list[0][1]["payload_type"] == "vulnerability"
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web server"
+            assert persister.add_payload.call_args_list[0][1]["level"] == 0
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "techno", "versions": ["1.2", "1.2.1", "1.3"]}'
             )
+            assert persister.add_payload.call_args_list[0][1]["wstg"] == ['WSTG-INFO-02']
 
 
 @pytest.mark.asyncio
@@ -246,12 +243,7 @@ async def test_finish_two_ranges():
 
     versions = ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5", "1.6"]
 
-    async def async_magic():
-        pass
-
-    MagicMock.__await__ = lambda x: async_magic().__await__()
-    with patch("wapitiCore.attack.mod_htp.ModuleHtp.add_info", autospec=True) as mock_add_info, \
-            patch.object(ModuleHtp, "_db", new_callable=PropertyMock) as mock_db, \
+    with patch.object(ModuleHtp, "_db", new_callable=PropertyMock), \
             patch.object(ModuleHtp, "_get_versions", return_value=versions):
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -263,12 +255,16 @@ async def test_finish_two_ranges():
 
             await module_htp.finish()
 
-            mock_add_info.assert_called_once_with(
-                module_htp,
-                finding_class=WebServerVersionDisclosureFinding,
-                request=Request("http://perdu.com/"),
-                info='{"name": "techno", "versions": ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"]}'
+            assert persister.add_payload.call_count
+            assert persister.add_payload.call_args_list[0][1]["module"] == "htp"
+            assert persister.add_payload.call_args_list[0][1]["payload_type"] == "vulnerability"
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web server"
+            assert persister.add_payload.call_args_list[0][1]["level"] == 0
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "techno", "versions": ["1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.5"]}'
             )
+            assert persister.add_payload.call_args_list[0][1]["wstg"] == ['WSTG-INFO-02']
+            assert persister.add_payload.call_args_list[0][1]["request"] ==Request("http://perdu.com/")
 
 
 @pytest.mark.asyncio
