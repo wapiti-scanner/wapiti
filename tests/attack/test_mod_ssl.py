@@ -21,7 +21,7 @@ from wapitiCore.net import Request
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_LEVEL, MEDIUM_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssl import (
-    ModuleSsl, SslInformationFinding, SslVulnerabilityFinding, extract_altnames,
+    ModuleSsl, extract_altnames,
     match_address, check_ocsp_must_staple, check_ev_certificate, process_vulnerabilities, process_bad_protocols
 )
 
@@ -68,11 +68,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="additional",
             module="ssl",
-            category=SslInformationFinding.name(),
+            category="TLS/SSL misconfigurations",
             level=INFO_LEVEL,
             request=request,
             parameter='',
-            wstg=SslInformationFinding.wstg_code(),
+            wstg=["WSTG-CRYP-01"],
             info="Certificate subject: yolo.com",
             response=None
         )
@@ -81,11 +81,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=SslInformationFinding.name(),
+            category="TLS/SSL misconfigurations",
             level=CRITICAL_LEVEL,
             request=request,
             parameter='',
-            wstg=SslInformationFinding.wstg_code(),
+            wstg=["WSTG-CRYP-01"],
             info="Requested hostname doesn't match those in the certificate",
             response=None
         )
@@ -94,11 +94,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=SslInformationFinding.name(),
+            category="TLS/SSL misconfigurations",
             level=HIGH_LEVEL,
             request=request,
             parameter='',
-            wstg=SslInformationFinding.wstg_code(),
+            wstg=["WSTG-CRYP-01"],
             info="Strict Transport Security (HSTS) is not set",
             response=None
         )
@@ -107,11 +107,11 @@ async def test_ssl_scanner():
             request_id=-1,
             payload_type="vulnerability",
             module="ssl",
-            category=SslInformationFinding.name(),
+            category="TLS/SSL misconfigurations",
             level=MEDIUM_LEVEL,
             request=request,
             parameter='',
-            wstg=SslInformationFinding.wstg_code(),
+            wstg=["WSTG-CRYP-01"],
             info="Self-signed certificate detected: The certificate is not signed by a trusted Certificate Authority",
             response=None
         )
