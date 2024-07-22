@@ -1,10 +1,12 @@
 stages:
   - code_style
   - tests
+  - update
 
 variables:
   PYTHON_10_IMAGE: "docker.io/library/python:3.10-slim-bullseye"
   PYTHON_11_IMAGE: "docker.io/library/python:3.11-slim-bullseye"
+  ACCESS_TOKEN_NAME: "gitlab-ci-token"
 
 check_coding_style:
   stage: code_style
@@ -63,3 +65,38 @@ test-build-docker:
         $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - docker build .
+
+update_hash :
+    stage: update
+    tags:
+      - docker-wapiti
+    rules:
+        - if: '$UPDATE_HASH == "true"'
+    image: $IMAGE_UPDATE_HASH
+    before_script:
+        - apt update && apt install -y git curl grep
+    script:
+        - git clone https://$ACCESS_TOKEN_NAME:$ACCESS_TOKEN@$PROJECT_URL/wapiti.git
+        - cd ./wapiti/wapitiCore/data/attacks/
+        - BRANCH_NAME=cms_update_`date +'%Y_%m_%d'`
+        - git switch -c $BRANCH_NAME
+        - curl -Lo "collected_data.db" https://github.com/Cyberwatch/HashThePlanet/releases/download/latest/hashtheplanet.db
+        - python3 update_hash_files.py --db ./collected_data.db --source-file ./src_cms_files/
+        - git add ./*.json
+        - |
+            if git diff --cached --quiet
+            then
+                exit 0
+            else
+                git config --global user.email "$COMMITER_MAIL"
+                git config --global user.name "$COMMITER_NAME"
+                git commit -m "AUTO-COMMIT: Update CMS hash `date +'%Y-%m-%d'`"
+                git push --set-upstream origin $BRANCH_NAME
+                curl -X POST --header "Private-Token: $ACCESS_TOKEN" \
+                "https://$GITLAB_URL/api/v4/projects/$CI_PROJECT_ID/merge_requests" \
+                --data "source_branch=$BRANCH_NAME" \
+                --data "target_branch=master" \
+                --data "title=Update hash files for CMS module" \
+                --data "description=This MR is generated automatically by the CI JOB "update_hash". It allows us to update hash files for CMS module."\
+                --data "remove_source_branch=true"
+            fi
