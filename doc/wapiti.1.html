@@ -141,6 +141,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--form-enctype</code> <var>ENCTYPE</var></li>
 <li><code>--form-script</code> <var>FILENAME</var></li>
 <li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
+<li><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var></li>
 <li><code>--drop-set-cookie</code></li>
 </ul>
 
@@ -317,6 +318,10 @@ Use a custom Python authentication plugin</p></li>
 <li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
 Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
+<li><p><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var>
+Set cookies from a valid user cookies.
+You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.
+For example: --cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"</p></li>
 <li><p><code>--drop-set-cookie</code><br />
 Ignore cookies given in HTTP responses. Cookies that have been loaded using <code>-c</code> will be kept.</p></li>
 </ul>
@@ -360,7 +365,7 @@ Prevent the given URL from being scanned. Common use is to exclude the logout UR
 This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.</p></li>
 <li><p><code>--swagger</code> <var>URL</var><br />
 Extract API requests from the specified Swagger file.
-Extracted requests are added to the crawler.
+Extracted requests are added to the crawler.</p></li>
 <li><p><code>-r</code>, <code>--remove</code> <var>PARAMETER</var><br />
 If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).<br />
 This option can be used several times.</p></li>
@@ -525,7 +530,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>March 2024</li>
+    <li class='tc'>August 2024</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

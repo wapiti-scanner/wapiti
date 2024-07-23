@@ -227,6 +227,16 @@ def parse_args():
     )
 
     parser.add_argument(
+        "-C", "--cookie-value",
+        default=argparse.SUPPRESS,
+        help=("Set a cookie to use for every request for authenticated scan.\n"
+              "You can put multiple cookies separated by semicolons as a value"
+              ),
+        metavar="COOKIE_VALUE",
+        dest="cookie_value"
+    )
+
+    parser.add_argument(
         "--drop-set-cookie",
         action="store_true",
         help="Ignore Set-Cookie header from HTTP responses"

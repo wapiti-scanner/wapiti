@@ -284,6 +284,9 @@ async def wapiti_main():
         if "user_agent" in args:
             wap.add_custom_header("User-Agent", args.user_agent)
 
+        if "cookie_value" in args:
+            wap.add_custom_header("Cookie", args.cookie_value)
+
         for custom_header in args.headers:
             if ":" in custom_header:
                 hdr_name, hdr_value = custom_header.split(":", 1)

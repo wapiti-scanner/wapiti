@@ -49,6 +49,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--form-enctype` <ENCTYPE>
   * `--form-script` <FILENAME>
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
+  * `-C`, `--cookie-value` <COOKIE_VALUE>
   * `--drop-set-cookie`
 
 SESSION OPTIONS:
@@ -201,6 +202,11 @@ OTHER OPTIONS:
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  
     You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).
+
+  * `-C`, `--cookie-value` <COOKIE_VALUE>
+    Set cookies from a valid user cookies.
+    You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.
+    For example: --cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"
     
   * `--drop-set-cookie`  
     Ignore cookies given in HTTP responses. Cookies that have been loaded using `-c` will be kept.

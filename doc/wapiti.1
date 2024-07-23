@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "March 2024" "" ""
+.TH "WAPITI" "1" "August 2024" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -101,6 +101,9 @@ PROXY AND AUTHENTICATION OPTIONS:
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
 .
 .IP "\(bu" 4
+\fB\-C\fR, \fB\-\-cookie\-value\fR \fICOOKIE_VALUE\fR
+.
+.IP "\(bu" 4
 \fB\-\-drop\-set\-cookie\fR
 .
 .IP "" 0
@@ -136,6 +139,9 @@ SCAN AND ATTACKS TUNING:
 .
 .IP "\(bu" 4
 \fB\-x\fR, \fB\-\-exclude\fR \fIURL\fR
+.
+.IP "\(bu" 4
+\fB\-\-swagger\fR \fIURL\fR
 .
 .IP "\(bu" 4
 \fB\-r\fR, \fB\-\-remove\fR \fIPARAMETER\fR
@@ -439,6 +445,9 @@ Load cookies from a Wapiti JSON cookie file\. See wapiti\-getcookie(1) for more 
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported)\.
 .
 .IP "\(bu" 4
+\fB\-C\fR, \fB\-\-cookie\-value\fR \fICOOKIE_VALUE\fR Set cookies from a valid user cookies\. You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user\. For example: \-\-cookie\-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"
+.
+.IP "\(bu" 4
 \fB\-\-drop\-set\-cookie\fR
 .
 .br
@@ -526,6 +535,12 @@ Prevent the given URL from being scanned\. Common use is to exclude the logout U
 This option can be applied several times\. Excluded URL given as a parameter can contain wildcards for basic pattern matching\.
 .
 .IP "\(bu" 4
+\fB\-\-swagger\fR \fIURL\fR
+.
+.br
+Extract API requests from the specified Swagger file\. Extracted requests are added to the crawler\.
+.
+.IP "\(bu" 4
 \fB\-r\fR, \fB\-\-remove\fR \fIPARAMETER\fR
 .
 .br
@@ -533,15 +548,6 @@ If the given parameter is found in scanned URL it will be automatically removed 
 .
 .br
 This option can be used several times\.
-.
-.IP "\(bu" 4
-\fB\-\-swagger\fR \fIURL\fR
-.
-.br
-Extract API requests from the specified Swagger file\.
-.
-.br
-Extracted requests are added to the crawler\.
 .
 .IP "\(bu" 4
 \fB\-\-skip\fR \fIPARAMETER\fR
