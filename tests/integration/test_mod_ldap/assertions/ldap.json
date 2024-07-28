@@ -1,0 +1,64 @@
+{
+    "vulnerabilities": {
+        "LDAP Injection": [
+            {
+                "method": "POST",
+                "path": "/login.php",
+                "info": "LDAP Injection via injection in the parameter user_id",
+                "parameter": "user_id",
+                "module": "ldap",
+                "http_request": "POST /login.php HTTP/1.1\nhost: ldap\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://ldap/login.php\ncookie: PHPSESSID=fab84e2ce831e3a6f8b5449b046f98c6\ncontent-length: 71\nContent-Type: application/x-www-form-urlencoded\n\nuser_id=%2A%29%29%00nosuchvalue&password=Letm3in_&login=1&submit=Submit",
+                "wstg": [
+                    "WSTG-INPV-06"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/login2.php",
+                "info": "LDAP Injection via injection in the parameter user_id",
+                "parameter": "user_id",
+                "module": "ldap",
+                "http_request": "POST /login2.php HTTP/1.1\nhost: ldap\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://ldap/login2.php\ncookie: PHPSESSID=fab84e2ce831e3a6f8b5449b046f98c6\ncontent-length: 71\nContent-Type: application/x-www-form-urlencoded\n\nuser_id=%2A%29%29%00nosuchvalue&password=Letm3in_&login=1&submit=Submit",
+                "wstg": [
+                    "WSTG-INPV-06"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/login2.php",
+                "info": "Potential LDAP injection via injection in the parameter password",
+                "parameter": "password",
+                "module": "ldap",
+                "http_request": "POST /login2.php HTTP/1.1\nhost: ldap\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://ldap/login2.php\ncookie: PHPSESSID=fab84e2ce831e3a6f8b5449b046f98c6\ncontent-length: 65\nContent-Type: application/x-www-form-urlencoded\n\nuser_id=alice&password=%2A%29%00nosuchvalue&login=1&submit=Submit",
+                "wstg": [
+                    "WSTG-INPV-06"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/search.php",
+                "info": "LDAP Injection via injection in the parameter searchTerm",
+                "parameter": "searchTerm",
+                "module": "ldap",
+                "http_request": "POST /search.php HTTP/1.1\nhost: ldap\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://ldap/search.php\ncookie: PHPSESSID=fab84e2ce831e3a6f8b5449b046f98c6\ncontent-length: 34\nContent-Type: application/x-www-form-urlencoded\n\nsearchTerm=%2A%29%29%00nosuchvalue",
+                "wstg": [
+                    "WSTG-INPV-06"
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/search_exact.php",
+                "info": "LDAP Injection via injection in the parameter searchTerm",
+                "parameter": "searchTerm",
+                "module": "ldap",
+                "http_request": "POST /search_exact.php HTTP/1.1\nhost: ldap\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://ldap/search_exact.php\ncookie: PHPSESSID=fab84e2ce831e3a6f8b5449b046f98c6\ncontent-length: 34\nContent-Type: application/x-www-form-urlencoded\n\nsearchTerm=%2A%29%29%00nosuchvalue",
+                "wstg": [
+                    "WSTG-INPV-06"
+                ]
+            }
+        ]
+    },
+    "infos": {
+        "target": "http://ldap/"
+    }
+}

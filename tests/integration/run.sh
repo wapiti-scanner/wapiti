@@ -14,6 +14,7 @@ test_mod_cms \
 test_mod_htaccess \
 test_mod_http_headers \
 test_mod_https_redirect \
+test_mod_ldap \
 test_mod_exec \
 test_mod_file \
 test_mod_log4shell \

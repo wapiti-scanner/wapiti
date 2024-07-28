@@ -1,0 +1,48 @@
+# Admin user
+dn: cn=admin,dc=example,dc=org
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword: {SSHA}WEPHcYzko/HnrL/aCm+I1PhL4Btyp/P/
+
+# Organizational Units
+dn: ou=users,dc=example,dc=org
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=example,dc=org
+objectClass: organizationalUnit
+ou: groups
+
+# Sample user
+dn: uid=jdoe,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+cn: John Doe
+sn: Doe
+givenName: John
+mail: jdoe@example.org
+uid: jdoe
+userPassword: {SSHA}IZONwW7UI6YaXgXHAe2aMB4PSyZy17VW
+description: Password is mustang
+title: purple77
+
+# Sample user
+dn: uid=acooper,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+cn: Alice Cooper
+sn: Cooper
+givenName: Alice
+mail: acooper@example.org
+uid: acooper
+userPassword: {SSHA}dLY8YmdSwjRp/K6+mQhucUu5DHo+oExF
+description: My favorite singer is tge godfather of punk
+title: yellow88
+
+# Sample group
+dn: cn=developers,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: developers
+member: uid=jdoe,ou=users,dc=example,dc=org
+
+

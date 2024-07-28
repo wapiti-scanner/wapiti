@@ -160,7 +160,7 @@ def test_warning_false_postitives():
         "<b>Warning</b>:  file_get_contents() expects parameter 1 to be a valid path, string given in "
         "<b>/home/blah/public_html/skin/blah/page-boatprice.php</b> on line <b>34</b><br />"
     )
-    assert find_warning_message(pattern, "http://wapiti3.ovh/e.php\0") is None
+    assert find_warning_message(pattern, "http://wapiti3.ovh/e.php[NULL]") is None
 
     pattern = (
         "<b>Warning</b>:  file_get_contents(): Filename cannot be empty in "

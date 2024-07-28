@@ -1,0 +1,71 @@
+version: '3.9'
+
+x-healthcheck_web:
+  &healthcheck_web
+  healthcheck:
+    test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}
+    interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+    timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+    start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+    retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+services:
+  # Apache container for the ldap module
+  ldap:
+    build:
+      context: ./test_mod_ldap/
+      dockerfile: Dockerfile
+    <<: *healthcheck_web
+    depends_on:
+      - ldap-server
+    volumes:
+      - ./test_mod_ldap/src/public:/var/www/html
+    networks:
+      - test-network
+
+  # LDAP server
+  ldap-server:
+    image: osixia/openldap:1.5.0
+    container_name: openldap-container
+    environment:
+      LDAP_ORGANISATION: "Example Inc."
+      LDAP_DOMAIN: "example.org"
+      LDAP_ADMIN_PASSWORD: "mysecretpw"
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+      - ./test_mod_ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    networks:
+      - test-network
+    command: --copy-service
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=example,dc=org", "-D", "cn=admin,dc=example,dc=org", "-w", "mysecretpw"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Wapiti container
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+    depends_on:
+      ldap-server:
+        condition: service_healthy
+      ldap:
+        condition: service_healthy
+
+volumes:
+  ldap_data:
+  ldap_config:
+
+networks:
+  test-network:

@@ -7,7 +7,7 @@ from wapitiCore.parsers.ini_payload_parser import IniPayloadReader
 
 def test_txt_payload_reader():
     files = {
-        "payloads.txt": "[TAB]\\0[EXTERNAL_ENDPOINT][LF][TIME] \nThis is dope\n",
+        "payloads.txt": "[TAB][NULL][EXTERNAL_ENDPOINT][LF][TIME] \nThis is dope\n",
     }
 
     with mock.patch("builtins.open", get_mock_open(files)):
@@ -16,7 +16,7 @@ def test_txt_payload_reader():
         reader.add_handler(lambda x: x.replace("[TIME]", "6"))
         reader.add_handler(lambda x: x.replace("dope", "success"))
         payloads = [line.payload for line in reader]
-        assert payloads == ["\t\0http://perdu.com/\n6", "This is success"]
+        assert payloads == ["\t[NULL]http://perdu.com/\n6", "This is success"]
 
 
 def test_ini_payload_reader():
