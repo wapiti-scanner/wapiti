@@ -20,7 +20,7 @@ import dataclasses
 import html
 from collections import defaultdict
 from os.path import join as path_join
-from typing import Optional, Iterator, List, Tuple
+from typing import Optional, Iterator, List, Tuple, Dict, Any
 from hashlib import md5
 
 from httpx import RequestError
@@ -99,6 +99,13 @@ def find_ldap_error(text: str) -> Optional[str]:
     return None
 
 
+def group_mutations_per_context(mutations: List[Tuple[Request, PayloadInfo]]) -> Dict[str, List[Any]]:
+    mutations_per_context = defaultdict(list)
+    for mutated_request, payload_info in mutations:
+        mutations_per_context[payload_info.context].append((mutated_request, payload_info))
+    return mutations_per_context
+
+
 class ModuleLdap(Attack):
     """
     Detect scripts vulnerable to LDAP injection.
@@ -126,8 +133,6 @@ class ModuleLdap(Attack):
 
         no_results_md5 = None
         error_md5 = None
-        mutations_per_context = defaultdict(list)
-        page = original_request.path
 
         vuln_request = None
         vuln_response = None
@@ -138,10 +143,7 @@ class ModuleLdap(Attack):
 
         # We group mutated requests per their related payload context.
         # We do so because we must forget about all previous tests for each context.
-        for mutated_request, payload_info in mutations:
-            mutations_per_context[payload_info.context].append((mutated_request, payload_info))
-
-        for context_name, tuples in mutations_per_context.items():
+        for _, tuples in group_mutations_per_context(mutations).items():
             tests = []
 
             for mutated_request, payload_info in tuples:
@@ -167,7 +169,7 @@ class ModuleLdap(Attack):
                         if payload_info.status is True:
                             # Our payload is trying to get all entries. The md5 should be different from
                             # the "no results" response and different from the LDAP error response.
-                            current_test = (page_md5 != no_results_md5) and (page_md5 != error_md5)
+                            current_test = page_md5 not in (no_results_md5, error_md5)
                             if vuln_request is None:
                                 vuln_request = mutated_request
                                 vuln_response = response
@@ -176,13 +178,12 @@ class ModuleLdap(Attack):
                             # It should therefore be equal to no_results_md5.
                             # It may also be equal to error_md5 because some webpage will hide the error and pretend no
                             # results are available
-                            current_test = (page_md5 == no_results_md5) or (page_md5 == error_md5)
+                            current_test = page_md5 in (no_results_md5, error_md5)
 
                         tests.append(current_test)
 
                         if not current_test:
-                            error_message = find_ldap_error(response.content)
-                            if error_message and warn_request is None:
+                            if find_ldap_error(response.content) and warn_request is None:
                                 warn_request = mutated_request
                                 warn_response = response
                             elif response.status == 500 and http500_request is None:
@@ -191,11 +192,13 @@ class ModuleLdap(Attack):
 
             # If we found a vulnerability thanks to our tests then warn the user
             if len(tests) >= 2 and all(tests):
-                vuln_info = LdapInjectionFinding.name()
                 if parameter.is_qs_injection:
-                    vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
+                    vuln_message = Messages.MSG_QS_INJECT.format(LdapInjectionFinding.name(), original_request.path)
                 else:
-                    vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
+                    vuln_message = (
+                        f"{LdapInjectionFinding.name()} via injection in the parameter "
+                        f"{parameter.display_name}"
+                    )
 
                 await self.add_critical(
                     request_id=original_request.path_id,
@@ -210,7 +213,7 @@ class ModuleLdap(Attack):
                 log_red(
                     Messages.MSG_QS_INJECT if parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
                     LdapInjectionFinding.name(),
-                    page,
+                    original_request.path,
                     parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
@@ -225,7 +228,7 @@ class ModuleLdap(Attack):
         if warn_request:
             vuln_info = "Potential LDAP injection"
             if parameter.is_qs_injection:
-                vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, page)
+                vuln_message = Messages.MSG_QS_INJECT.format(vuln_info, original_request.path)
             else:
                 vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
@@ -242,7 +245,7 @@ class ModuleLdap(Attack):
             log_red(
                 Messages.MSG_QS_INJECT if parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
                 vuln_info,
-                page,
+                original_request.path,
                 parameter.display_name
             )
             log_red(Messages.MSG_EVIL_REQUEST)
@@ -264,7 +267,7 @@ class ModuleLdap(Attack):
             )
 
             log_orange("---")
-            log_orange(Messages.MSG_500, page)
+            log_orange(Messages.MSG_500, original_request.path)
             log_orange(Messages.MSG_EVIL_REQUEST)
             log_orange(http500_request.http_repr())
             log_orange("---")
@@ -288,5 +291,3 @@ class ModuleLdap(Attack):
             mutated_requests.append((mutated_request, payload_info))
 
         await self.attack_parameter(current_parameter, request, mutated_requests)
-
-
