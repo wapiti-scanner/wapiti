@@ -57,6 +57,7 @@ all_modules = {
     "htp",
     "http_headers",
     "https_redirect",
+    "ldap",
     "log4shell",
     "methods",
     "network_device",

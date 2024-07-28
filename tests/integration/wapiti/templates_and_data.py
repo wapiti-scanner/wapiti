@@ -13,7 +13,8 @@ EXISTING_MODULES = {
     "exec", "file",
     "htaccess", "htp",
     "http_headers", "https_redirect",
-    "log4shell", "methods", "nikto",
+    "ldap", "log4shell",
+    "methods", "nikto",
     "permanentxss", "redirect",
     "shellshock", "sql",
     "ssl", "ssrf",
@@ -258,6 +259,27 @@ TREE_CHECKER = {
             }
         ],
         'HttpOnly Flag cookie': [
+            {
+                'curl_command': '',
+                'detail': {
+                    'response': {
+                        'body': '',
+                        'headers': [],
+                        'status_code': 0
+                    }
+                },
+                'http_request': '',
+                'info': '',
+                'level': 0,
+                'method': '',
+                'module': '',
+                'parameter': '',
+                'path': '',
+                'referer': '',
+                'wstg': []
+            }
+        ],
+        'LDAP Injection': [
             {
                 'curl_command': '',
                 'detail': {

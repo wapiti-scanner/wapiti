@@ -1,0 +1,29 @@
+{
+    "test_mod_ldap": {
+        "modules": "ldap",
+        "supplementary_argument": "",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "LDAP Injection": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "parameter": "",
+                        "module": "",
+                        "http_request": "",
+                        "wstg": ""
+                    }
+                ]
+            },
+            "infos": {
+                "target": ""
+            }
+        },
+        "targets": [
+            {
+                "name": "http://ldap"
+            }
+        ]
+    }
+}
