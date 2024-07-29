@@ -122,6 +122,21 @@ class ModuleLdap(Attack):
         parser.add_key_handler("payload", replace_tags)
         yield from parser
 
+    async def is_page_dynamic(self, request: Request, payload_info: PayloadInfo, previous_md5: str) -> bool:
+        """Compare the MD5 hash of an HTTP response to the one obtained earlier."""
+        try:
+            response = await self.crawler.async_send(request)
+        except RequestError:
+            self.network_errors += 1
+        else:
+            page_md5 = md5(
+                string_without_payload(response.content, payload_info.payload).encode(errors="ignore")
+            ).hexdigest()
+            return page_md5 != previous_md5
+
+        # Do you feel lucky, punk?
+        return False
+
     async def attack_parameter(
             self,
             parameter: Parameter,
@@ -160,8 +175,9 @@ class ModuleLdap(Attack):
                     ).hexdigest()
 
                     if payload_info.context == "no_results":
-                        # Hash used for responses with no results
-                        no_results_md5 = page_md5
+                        if not await self.is_page_dynamic(mutated_request, payload_info, page_md5):
+                            # Hash used for responses with no results
+                            no_results_md5 = page_md5
                     elif payload_info.context == "error":
                         # Hash used for responses bumping into an invalid (bad syntax) LDAP query
                         error_md5 = page_md5
