@@ -1,32 +1,18 @@
-from subprocess import Popen
-import os
-import sys
-from time import sleep
-from asyncio import Event, sleep as Sleep
+from asyncio import Event
+from fnmatch import fnmatch
 from unittest.mock import AsyncMock
 
 import pytest
 import respx
 import httpx
 
-from wapitiCore.attack.attack import Parameter, ParameterSituation, random_string
+from wapitiCore.attack.attack import random_string
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ldap import (
     ModuleLdap, string_without_payload, find_ldap_error, PayloadInfo, group_mutations_per_context
 )
-
-
-@pytest.fixture(autouse=True)
-def run_around_tests():
-    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
-    test_directory = os.path.join(base_dir, "..", "tests/data/")
-
-    proc = Popen(["php", "-S", "127.0.0.1:65083", "-a", "-t", test_directory])
-    sleep(.5)
-    yield
-    proc.terminate()
 
 
 def test_string_without_payload():
@@ -128,3 +114,72 @@ async def test_random_responses():
             await module.attack(request)
 
         persister.add_payload.assert_not_called()
+
+
+def web_ldap_mock(request):
+    users = ["John", "Karlee", "Rufus"]
+    username = request.url.params.get("user")
+    password = request.url.params.get("password")
+    if ")\0" in username:
+        password = None
+        username = username.split(")\0")[0]
+
+    for user in users:
+        if fnmatch(user, username):
+            if password is None:
+                return httpx.Response(200, text=f"Welcome {username}")
+            else:
+                return httpx.Response(200, text="Bad password")
+
+    if password is not None and ")\0" in password:
+        return httpx.Response(500, text="Internal Server Error")
+
+    return httpx.Response(200, text="No such user")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_vulnerabilities():
+    respx.get(url__regex=r"http://perdu\.com/vuln\?.*").mock(side_effect=web_ldap_mock)
+    respx.get(url__regex=r"http://perdu\.com/").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+    all_requests = []
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    all_requests.append(request)
+
+    request = Request("http://perdu.com/vuln?user=foo&password=bar")
+    request.path_id = 2
+    all_requests.append(request)
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        for request in all_requests:
+            await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["module"] == "ldap"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "LDAP Injection"
+        assert persister.add_payload.call_args_list[0][1]["request"].url == (
+            "http://perdu.com/vuln?user=%2A%29%29%00nosuchvalue&password=bar"
+        )
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            "LDAP Injection via injection in the parameter user"
+        )
+
+        assert persister.add_payload.call_args_list[1][1]["module"] == "ldap"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Internal Server Error"
+        assert persister.add_payload.call_args_list[1][1]["request"].url == (
+            "http://perdu.com/vuln?user=foo&password=nosuchvalue%29%29%00"
+        )
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            "The server responded with a 500 HTTP error code while attempting "
+            "to inject a payload in the parameter password"
+        )
+
+    assert module.network_errors == 0
