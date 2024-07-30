@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv='content-type' content='text/html;charset=utf8'>
-  <meta name='generator' content='Ronn-NG/v0.9.1 (http://github.com/apjanke/ronn-ng/tree/0.9.1)'>
+  <meta http-equiv='content-type' content='text/html;charset=utf-8'>
+  <meta name='generator' content='Ronn-NG/v0.10.1 (http://github.com/apjanke/ronn-ng/tree/0.10.1)'>
   <title>wapiti(1) - A web application vulnerability scanner in Python</title>
   <style type='text/css' media='all'>
   /* style: man */
@@ -184,6 +184,9 @@ More detail on each option can be found in the following sections.</p>
 </li>
   <li>
 <code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var>
+</li>
+  <li>
+<code>--jwt</code> <var>JWT</var>
 </li>
   <li><code>--drop-set-cookie</code></li>
 </ul>
@@ -461,6 +464,11 @@ Set cookies from a valid user cookies.<br>
 You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.<br>
 For example:<br>
     <code>--cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"</code></p>
+  </li>
+  <li>
+    <p>--jwt` <var>JWT</var>
+Set JWT token from a valid user session.
+You can import the JWT token value to be sent with every request for an authenticated scan.</p>
   </li>
   <li>
     <p><code>--drop-set-cookie</code><br>
@@ -758,7 +766,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>November 2025</li>
+    <li class='tc'>January 2026</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 
