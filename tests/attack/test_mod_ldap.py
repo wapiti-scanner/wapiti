@@ -1,5 +1,6 @@
 from asyncio import Event
 from fnmatch import fnmatch
+from hashlib import md5
 from unittest.mock import AsyncMock
 
 import pytest
@@ -183,3 +184,36 @@ async def test_vulnerabilities():
         )
 
     assert module.network_errors == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_is_page_dynamic():
+    respx.get("http://perdu.com/").mock(side_effect=httpx.RequestError("error"))
+    respx.get("http://perdu.com/hello").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        assert not await module.is_page_dynamic(
+            Request("http://perdu.com/"),
+            PayloadInfo("", "", True),
+            "hash"
+        )
+        assert module.network_errors == 1
+
+        assert not await module.is_page_dynamic(
+            Request("http://perdu.com/hello"),
+            PayloadInfo("", "", True),
+            md5(b"Hello there").hexdigest(),
+        )
+
+        assert await module.is_page_dynamic(
+            Request("http://perdu.com/hello"),
+            PayloadInfo("", "", True),
+            "yolo",
+        )
