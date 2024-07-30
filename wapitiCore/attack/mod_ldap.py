@@ -248,7 +248,7 @@ class ModuleLdap(Attack):
             else:
                 vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
-            await self.add_critical(
+            await self.add_high(
                 request_id=original_request.path_id,
                 finding_class=LdapInjectionFinding,
                 request=warn_request,
