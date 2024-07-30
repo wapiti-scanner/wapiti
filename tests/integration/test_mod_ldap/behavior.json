@@ -6,6 +6,7 @@
             "vulnerabilities": {
                 "LDAP Injection": [
                     {
+                        "level": 0,
                         "method": "",
                         "path": "",
                         "info": "",

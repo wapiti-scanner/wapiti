@@ -8,6 +8,7 @@ import respx
 import httpx
 
 from wapitiCore.attack.attack import random_string
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
@@ -166,6 +167,7 @@ async def test_vulnerabilities():
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["module"] == "ldap"
         assert persister.add_payload.call_args_list[0][1]["category"] == "LDAP Injection"
+        assert persister.add_payload.call_args_list[0][1]["level"] == CRITICAL_LEVEL
         assert persister.add_payload.call_args_list[0][1]["request"].url == (
             "http://perdu.com/vuln?user=%2A%29%29%00nosuchvalue&password=bar"
         )
@@ -175,6 +177,7 @@ async def test_vulnerabilities():
 
         assert persister.add_payload.call_args_list[1][1]["module"] == "ldap"
         assert persister.add_payload.call_args_list[1][1]["category"] == "Internal Server Error"
+        assert persister.add_payload.call_args_list[1][1]["level"] == HIGH_LEVEL
         assert persister.add_payload.call_args_list[1][1]["request"].url == (
             "http://perdu.com/vuln?user=foo&password=nosuchvalue%29%29%00"
         )
