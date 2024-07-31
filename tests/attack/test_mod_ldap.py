@@ -20,6 +20,8 @@ from wapitiCore.attack.mod_ldap import (
 def test_string_without_payload():
     assert string_without_payload("Hello <there>", "<there>") == "Hello "
     assert string_without_payload("Hello &lt;there&gt;", "<there>") == "Hello "
+    assert string_without_payload("Hello+%3Cthere%3E", " <there>") == "Hello"
+    assert string_without_payload("Hello%20%3Cthere%3E", " <there>") == "Hello"
 
 
 def test_find_ldap_error():
