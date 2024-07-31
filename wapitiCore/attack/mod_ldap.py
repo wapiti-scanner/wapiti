@@ -22,6 +22,7 @@ from collections import defaultdict
 from os.path import join as path_join
 from typing import Optional, Iterator, List, Tuple, Dict, Any
 from hashlib import md5
+from urllib.parse import quote_plus, quote
 
 from httpx import RequestError
 
@@ -44,7 +45,15 @@ class PayloadInfo:
 def string_without_payload(text: str, payload: str) -> str:
     # Most search pages will show your search term. This will make the hash of the page change each time
     # We remove here the search term its possible HTML escaped version.
-    return text.replace(payload, "").replace(html.escape(payload), "")
+    return text.replace(
+        payload, ""
+    ).replace(
+        html.escape(payload), ""
+    ).replace(
+        quote_plus(payload), ""
+    ).replace(
+        quote(payload), "",
+    )
 
 
 # from https://github.com/andresriancho/w3af/blob/master/w3af/plugins/audit/ldapi.py
