@@ -10,6 +10,7 @@ Unrelease
     Core : fix max-scan-time and missing timeout
     Python : update dependencies and pip configurations
     mod_ssl: Move to sslscan for the ssl module instead of sslyze
+    Python: Support for Python 3.12
 
 09/08/2023
     Wapiti 3.1.8

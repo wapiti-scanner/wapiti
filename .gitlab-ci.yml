@@ -5,6 +5,7 @@ stages:
 variables:
   PYTHON_10_IMAGE: "docker.io/library/python:3.10-slim-bullseye"
   PYTHON_11_IMAGE: "docker.io/library/python:3.11-slim-bullseye"
+  PYTHON_12_IMAGE: "docker.io/library/python:3.12-slim-bullseye"
 
 check_coding_style:
   stage: code_style
@@ -35,7 +36,7 @@ test-python:
         $CI_PIPELINE_SOURCE == "merge_request_event"
   parallel:
     matrix:
-      - PYTHON_IMAGE: [$PYTHON_10_IMAGE, $PYTHON_11_IMAGE]
+      - PYTHON_IMAGE: [$PYTHON_10_IMAGE, $PYTHON_11_IMAGE, $PYTHON_12_IMAGE]
   image: $PYTHON_IMAGE
   before_script:
     - python -c "import sys; print(sys.version)"

@@ -26,6 +26,7 @@ classifiers = [
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Security",
         "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
         "Topic :: Software Development :: Testing"
@@ -48,6 +49,7 @@ dependencies = [
         "markupsafe==2.1.5",
         "mitmproxy==10.2.3",
         "pyasn1==0.5.1",
+        "setuptools==70.2.0",
         "six==1.16.0",
         "sqlalchemy==2.0.28",
         "tld==0.13",
