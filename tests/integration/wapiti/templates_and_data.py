@@ -573,6 +573,27 @@ TREE_CHECKER = {
                 'wstg': []
             }
         ],
+        'Vulnerable software': [
+            {
+                'curl_command': '',
+                'detail': {
+                    'response': {
+                        'body': '',
+                        'headers': [],
+                        'status_code': 0
+                    }
+                },
+                'http_request': '',
+                'info': '',
+                'level': 0,
+                'method': '',
+                'module': '',
+                'parameter': '',
+                'path': '',
+                'referer': '',
+                'wstg': []
+            }
+        ],
         'Weak credentials': [
             {
                 'curl_command': '',

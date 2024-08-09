@@ -1,0 +1,42 @@
+{
+  "WordPress": {
+    "cats": [
+      1,
+      11
+    ],
+    "cpe": "cpe:2.3:a:wordpress:wordpress:*:*:*:*:*:*:*:*",
+    "description": "WordPress is a free and open-source content management system written in PHP and paired with a MySQL or MariaDB database. Features include a plugin architecture and a template system.",
+    "headers": {
+      "X-Pingback": "/xmlrpc\\.php$",
+      "link": "rel=\"https://api\\.w\\.org/\""
+    },
+    "html": [
+      "<link rel=[\"']stylesheet[\"'] [^>]+/wp-(?:content|includes)/",
+      "<link[^>]+s\\d+\\.wp\\.com"
+    ],
+    "icon": "WordPress.svg",
+    "implies": [
+      "PHP",
+      "MySQL"
+    ],
+    "js": {
+      "wp_username": ""
+    },
+    "meta": {
+      "generator": "^WordPress(?: ([\\d.]+))?\\;version:\\1",
+      "shareaholic:wp_version": ""
+    },
+    "oss": true,
+    "pricing": [
+      "low",
+      "recurring",
+      "freemium"
+    ],
+    "saas": true,
+    "scriptSrc": [
+      "/wp-(?:content|includes)/",
+      "wp-embed\\.min\\.js"
+    ],
+    "website": "https://wordpress.org"
+  }
+}
