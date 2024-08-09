@@ -20,8 +20,11 @@
 import sys
 from functools import partial
 import logging as legacy_logger
+from typing import Any
 
 from loguru import logger as logging
+
+from wapitiCore.language.vulnerability import MEDIUM_LEVEL
 
 legacy_logger.getLogger("charset_normalizer").setLevel(legacy_logger.ERROR)
 logging.remove()
@@ -51,3 +54,10 @@ log_verbose = partial(logging.log, "VERBOSE")
 
 # Set default logging
 logging.add(sys.stdout, colorize=False, format="{message}", level="INFO")
+
+
+def log_severity(level: int, message: str, *args: Any, **kwargs: Any) -> None:
+    if level < MEDIUM_LEVEL:
+        log_orange(message, args, kwargs)
+    else:
+        log_red(message, args, kwargs)

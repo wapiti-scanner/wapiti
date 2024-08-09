@@ -34,6 +34,14 @@ RUN apt-get -y update &&\
 COPY --from=build /usr/local/lib/python3.11/dist-packages/ /usr/local/lib/python3.11/dist-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
 
+# Create the Wapiti config directory
+RUN mkdir -p /root/.wapiti/config/cves
+
+# Download the NVD CVE files directly from GitHub
+RUN curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/nginx.json.xz -o /root/.wapiti/config/cves/nginx.json.xz && \
+    curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/cherokee.json.xz -o /root/.wapiti/config/cves/cherokee.json.xz && \
+    curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/jquery.json.xz -o /root/.wapiti/config/cves/jquery.json.xz
+
 COPY ./tests/integration/wapiti/test.py /usr/local/bin/test.py
 COPY ./tests/integration/wapiti/templates_and_data.py /usr/local/bin/templates_and_data.py
 COPY ./tests/integration/wapiti/misc_functions.py /usr/local/bin/misc_functions.py

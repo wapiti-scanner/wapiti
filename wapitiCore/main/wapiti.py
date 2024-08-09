@@ -179,8 +179,11 @@ async def wapiti_main():
         elif args.wapp_dir:
             attack_options = {"level": args.level, "timeout": args.timeout, "wapp_dir": args.wapp_dir}
         else:
-            attack_options = {"level": args.level, "timeout": args.timeout,\
-                              "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"}
+            attack_options = {
+                "level": args.level,
+                "timeout": args.timeout,
+                "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+            }
         wap.set_attack_options(attack_options)
         try:
             await wap.update(args.modules)

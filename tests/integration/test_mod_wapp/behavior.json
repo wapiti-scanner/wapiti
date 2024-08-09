@@ -21,6 +21,15 @@
                         "http_request": "",
                         "wstg": []
                     }
+                ],
+                "Vulnerable software": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
                 ]
             },
             "additionals": {
