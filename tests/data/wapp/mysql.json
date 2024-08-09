@@ -1,0 +1,11 @@
+{
+  "MySQL": {
+    "cats": [
+      34
+    ],
+    "cpe": "cpe:2.3:a:mysql:mysql:*:*:*:*:*:*:*:*",
+    "description": "MySQL is an open-source relational database management system.",
+    "icon": "MySQL.svg",
+    "website": "https://mysql.com"
+  }
+}
