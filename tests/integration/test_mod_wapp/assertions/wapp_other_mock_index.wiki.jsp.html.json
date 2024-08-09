@@ -20,6 +20,15 @@
                     "WSTG-INFO-02"
                 ]
             }
+        ],
+        "Vulnerable software": [
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "nginx CVE-2023-44487: The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1",
+                "wstg": []
+            }
         ]
     },
     "additionals": {
