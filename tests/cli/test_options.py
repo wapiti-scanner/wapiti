@@ -199,7 +199,7 @@ async def test_update_without_modules(mock_update):
 @mock.patch("wapitiCore.main.wapiti.Wapiti.update")
 async def test_update_with_wapp_url(mock_update):
     """Ensure that no module should be updated when no module is requested."""
-    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"]
+    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"]
     with mock.patch.object(sys, 'argv', testargs):
         with pytest.raises(SystemExit):
             await wapiti_main()
@@ -366,7 +366,7 @@ async def test_mod_wapp_is_set(mock_is_mod_wapp_or_update_set, _, __):
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "wapp",
-        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"
     ]
 
     with mock.patch.object(sys, "argv", testargs):
@@ -384,7 +384,7 @@ async def test_mod_wapp_is_not_set(mock_is_mod_wapp_or_update_set, _, __):
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "xss",
-        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"
     ]
 
     with mock.patch.object(sys, "argv", testargs):
@@ -437,7 +437,7 @@ async def test_is_valid_url(mock_is_valid_url, _, __):
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "wapp",
-        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+        "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"
     ]
 
     with mock.patch.object(sys, "argv", testargs):
@@ -455,7 +455,7 @@ async def test_is_not_valid_url(mock_is_valid_url, _, __):
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
         "-m", "wapp",
-        "--wapp-url", "http::raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+        "--wapp-url", "http::raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"
     ]
 
     with mock.patch.object(sys, "argv", testargs):

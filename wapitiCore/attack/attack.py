@@ -318,7 +318,7 @@ class Attack:
 
     @property
     def wapp_url(self):
-        return self.options.get("wapp_url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/")
+        return self.options.get("wapp_url", "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/")
 
     @property
     def wapp_dir(self):

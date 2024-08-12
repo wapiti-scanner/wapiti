@@ -182,7 +182,7 @@ async def wapiti_main():
             attack_options = {
                 "level": args.level,
                 "timeout": args.timeout,
-                "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/"
+                "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/"
             }
         wap.set_attack_options(attack_options)
         try:
