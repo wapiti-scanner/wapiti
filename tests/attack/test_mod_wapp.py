@@ -427,10 +427,10 @@ async def test_multi_detection():
         )
     )
 
-    # Now let's mock wapiti-scanner/wappalyzer. Wappalyzer files are split over the first character of software names.
+    # Now let's mock wapiti-scanner/webappanalyzer. Wappalyzer files are split over the first character of software names.
     for letter, filename in [("m", "mysql.json"), ("p", "php.json"), ("w", "wordpress.json")]:
         respx.get(
-            f"https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/technologies/{letter}.json"
+            f"https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/src/technologies/{letter}.json"
         ).mock(
             return_value=httpx.Response(
                 status_code=200,
@@ -440,14 +440,14 @@ async def test_multi_detection():
         )
 
     # Give an empty dict for all uninteresting files
-    respx.get(url__startswith="https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/techno").mock(
+    respx.get(url__startswith="https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/src/techno").mock(
         return_value=httpx.Response(
             status_code=200,
             json={},
         )
     )
 
-    respx.get("https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/categories.json").mock(
+    respx.get("https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/src/categories.json").mock(
         return_value=httpx.Response(
             status_code=200,
             content=(fixture_folder / "categories.json").open("rb").read(),
@@ -455,7 +455,7 @@ async def test_multi_detection():
         )
     )
 
-    respx.get("https://raw.githubusercontent.com/wapiti-scanner/wappalyzer/main/src/groups.json").mock(
+    respx.get("https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/main/src/groups.json").mock(
         return_value=httpx.Response(
             status_code=200,
             content=(fixture_folder / "groups.json").open("rb").read(),
