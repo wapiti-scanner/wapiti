@@ -40,7 +40,7 @@ class ApplicationDataException(Exception):
 class ApplicationData:
     """
     Store application database.
-    For instance https://raw.githubusercontent.com/wapiti-scanner/webappanalyzer/master/src/technologies/.
+    For instance https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/master/src/technologies/.
     """
 
     def __init__(self, categories_file_path=None, groups_file_path=None, technologies_file_path=None):
