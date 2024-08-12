@@ -23,7 +23,7 @@ http://wapiti-scanner.github.io/
 
 Requirements
 ============
-In order to work correctly, Wapiti needs Python 3.x where x is >= 10 (3.10, 3.11)
+In order to work correctly, Wapiti needs Python 3.10 or 3.11
 
 All Python module dependencies will be installed automatically if you use the setup.py script or `pip install wapiti3`
 
@@ -76,15 +76,16 @@ Browsing features
 + Using a Firefox headless browser for crawling
 + Loading your own python code for complicated authentication cases (see `--form-script` option)
 + Adding custom URL or PATH to update Wappalyzer database
++ Scan REST APIs given an OpenAPI (swagger) file
 
 
 Supported attacks
 =================
 
 + SQL Injections (Error based, boolean based, time based) and XPath Injections
++ LDAP injections (Error based and boolean based)
 + Cross Site Scripting (XSS) reflected and permanent
-+ File disclosure detection (local and remote include, require, fopen,
-  readfile...)
++ File disclosure detection (local and remote include, require, fopen, readfile...)
 + Command Execution detection (eval(), system(), passtru()...)
 + XXE (Xml eXternal Entity) injection
 + CRLF Injection
@@ -101,14 +102,15 @@ Supported attacks
 + Checking HTTP security headers
 + Checking cookie security flags (secure and httponly flags)
 + Cross Site Request Forgery (CSRF) basic detection
-+ Fingerprinting of web applications using the Wappalyzer database
-+ Enumeration of CMS module
++ Fingerprinting of web applications using the Wappalyzer database, gives related CVE information
++ Enumeration of CMS modules for Wordpress, Drupal, Joomla, SPIP, etc
 + Subdomain takeovers detection
 + Log4Shell (CVE-2021-44228) detection
 + Spring4Shell (CVE-2020-5398) detection
 + Check https redirections
 + Check for file upload vulnerabilities
 + Detection of network devices
++ Inject payloads inside JSON body too
 
 Wapiti supports both GET and POST HTTP methods for attacks.  
 It also supports multipart and can inject payloads in filenames (upload).  
@@ -134,6 +136,7 @@ The aforementioned attacks are tied to the following module names :
 + htp (Identify web technologies used the HashThePlanet database)
 + http_header (Check HTTP security headers)
 + https_redirect (Check https redirections)
++ ldap (Error-based and boolean-based LDAP injection detection)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
 + methods (Look for uncommon available HTTP methods like PUT)
 + network_device (Look for common files to detect network devices)
@@ -148,7 +151,7 @@ The aforementioned attacks are tied to the following module names :
 + takeover (Subdomain takeover)
 + timesql (SQL injection vulnerabilities detected with time-based methodology)
 + upload (File upload vulnerabilities)
-+ wapp (Not an attack module, retrieves web technologies with versions and categories in use on the target)
++ wapp (Not an attack module, retrieves web technologies with versions and categories in use on the target, find corresponding CVEs)
 + wp_enum (Enumerate plugins and themes on a Wordpress website)
 + xss (XSS injection module)
 + xxe (XML External Entity attack)

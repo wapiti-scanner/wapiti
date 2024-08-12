@@ -4,12 +4,15 @@ Unrelease
     mod_cms: New module to detect CMS Version
     mod_csrf : ignore JSON requests
     mod_harbor: New module to detect harbor docker registry version
-    mod_wapp: Add the capabilities to change the update url
-    Core : add swagger api crawler
+    mod_wapp: Add the capabilities to change the update url, retrieves CVEs tied to detected software versions
+    mod_ldap: module for error-based and boolean-based LDAP injection
+    Core : add Swagger / OpenAPI API crawler
+    Core: inject payloads inside JSON bodies
     Core : fix headless explorer method
     Core : fix max-scan-time and missing timeout
     Python : update dependencies and pip configurations
     mod_ssl: Move to sslscan for the ssl module instead of sslyze
+    mod_nikto, mod_wapp: update external databases
 
 09/08/2023
     Wapiti 3.1.8
