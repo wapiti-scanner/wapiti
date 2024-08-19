@@ -259,6 +259,9 @@ async def test_wp_version():
         )
     )
 
+    respx.get(url__regex=r"http://perdu.com/wp-content/plugins/.*?/readme.txt").mock(return_value=httpx.Response(404))
+    respx.get(url__regex=r"http://perdu.com/wp-content/themes/.*?/readme.txt").mock(return_value=httpx.Response(404))
+
     persister = AsyncMock()
 
     request = Request("http://perdu.com")

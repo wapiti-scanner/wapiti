@@ -230,7 +230,7 @@ class ModuleWpEnum(CommonCMS):
             await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
 
-            drupal_detected = {
+            wp_detected = {
                 "name": "WordPress",
                 "versions": self.versions,
                 "categories": ["CMS WordPress"],
@@ -247,12 +247,12 @@ class ModuleWpEnum(CommonCMS):
                 await self.add_info(
                     finding_class=SoftwareVersionDisclosureFinding,
                     request=request_to_root,
-                    info=json.dumps(drupal_detected),
+                    info=json.dumps(wp_detected),
                 )
             await self.add_info(
                 finding_class=SoftwareNameDisclosureFinding,
                 request=request_to_root,
-                info=json.dumps(drupal_detected),
+                info=json.dumps(wp_detected),
             )
             await self.check_false_positive(request_to_root.url)
             log_blue("Enumeration of WordPress Plugins :")
