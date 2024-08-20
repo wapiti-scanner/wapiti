@@ -316,7 +316,7 @@ class Request:
             self._method = method
 
         self._enctype = ""
-        if self._method == "POST":
+        if self._method in ["POST", "PUT", "PATCH"]:
             if enctype:
                 self._enctype = enctype.lower().strip()
             else:

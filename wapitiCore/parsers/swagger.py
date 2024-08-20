@@ -26,6 +26,7 @@ from prance.util.url import ResolutionError
 from wapitiCore.net import Request
 from wapitiCore.main.log import logging
 
+
 class Swagger:
     AUTOFILL_VALUES = {
         "file": ("pix.gif", b"GIF89a", "image/gif"),
@@ -33,8 +34,9 @@ class Swagger:
         "number": "13.37",
         "string": "default",
         "time": "13:37",
+        "date-time": "2024-08-16T16:03:08",
         "url": "https://wapiti-scanner.github.io/",
-        "boolean": "true",
+        "boolean": True,
         "object": {},
     }
 
@@ -138,7 +140,10 @@ class Swagger:
                                 ref = self._check_properties(model_name[key]['items'])
                                 model[key]["array"] = self._parse_object(ref)
                     else:
-                        model[key] = model_name[key]['type']
+                        if 'format' in model_name[key] and 'date-time' in model_name[key]['format']:
+                            model[key] = model_name[key]['format']
+                        else:
+                            model[key] = model_name[key]['type']
                 else:
                     model[key] = model_name[key]
             except ValueError as e:
@@ -215,6 +220,8 @@ class Swagger:
                         request_route['params'] = []
                         if 'requestBody' in params:
                             request_route['params'] += self._check_params(params['requestBody']['content'])
+                        if 'parameters' in params:
+                            request_route['params'] += self._check_params(params['parameters'])
                         request_route['params'] += self._check_params(params)
                         request[route].append(request_route)
                     else:
@@ -246,7 +253,8 @@ class Swagger:
             for path in swagger_dict['paths']:
                 if route == path:
                     if 'parameters' in swagger_dict['paths'][path][method]:
-                        return swagger_dict['paths'][path][method]['parameters']
+                        if 'requestBody' not in swagger_dict['paths'][path][method]:
+                            return swagger_dict['paths'][path][method]['parameters']
                     return swagger_dict['paths'][path][method]
             return None
         except KeyError as e:
@@ -283,7 +291,10 @@ class Swagger:
             elif 'array' in param['type']:
                 option += self.AUTOFILL_VALUES[param['type']['array']]
             else:
-                option += self.AUTOFILL_VALUES[param['type']]
+                if isinstance(self.AUTOFILL_VALUES[param['type']], bool):
+                    option += str(self.AUTOFILL_VALUES[param['type']])
+                else:
+                    option += self.AUTOFILL_VALUES[param['type']]
         elif "in" in param:
             if param['in'] == "query":
                 if self.swagger_dict['basePath']:
@@ -308,6 +319,7 @@ class Swagger:
                         option += self.AUTOFILL_VALUES[param['type']]
 
         return option
+
 
     def _transform_url(self, param: dict, url: str, route: str) -> str:
         name = param['name']
@@ -372,6 +384,8 @@ class Swagger:
                     if 'in' in param:
                         if param['in'] == "path":
                             url = self._transform_url(param, url, route)
+                            if 'model' in param:
+                                data = self._transform_body(param)
                         elif param['in'] == "query":
                             option = self._transform_query(route, param, option)
                         elif param['in'] == "body" and 'model' in param:
@@ -382,7 +396,8 @@ class Swagger:
                             if not 'type' in param:
                                 param["type"] = "string"
                             header[param['name']] = self.AUTOFILL_VALUES[param['type']]
-            request = Request(path=url+option, method=urls[0]['method'], post_params=data, file_params=files)
+            request = Request(path=url+option, method=urls[0]['method'], post_params=data, file_params=files,
+                              enctype="application/json")
             request.set_headers(header)
             requests_list.append(request)
         return requests_list

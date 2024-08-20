@@ -335,6 +335,10 @@ class AsyncCrawler:
         @rtype: Response
         """
         form_headers = {}
+
+        if not form.is_multipart:
+            form_headers = {"Content-Type": form.enctype}
+
         if isinstance(headers, dict) and headers:
             form_headers.update(headers)
 
