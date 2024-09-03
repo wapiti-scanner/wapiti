@@ -104,7 +104,7 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Optional[Request]:
         # so we will consider values as simple fields but still send using multipart encoding
         post_params.extend(decode_key_value_dict(mitm_request.multipart_form))
 
-    if not enctype and mitm_request.method == "POST":
+    if not enctype and mitm_request.method in ["POST", "PUT", "PATCH"]:
         enctype = mitm_request.headers.get("Content-Type", "")
 
     if enctype == "application/json":
