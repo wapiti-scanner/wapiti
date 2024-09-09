@@ -48,6 +48,7 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--form-url` <URL>
   * `--form-enctype` <ENCTYPE>
   * `--form-script` <FILENAME>
+  * `--side-file` <FILENAME>
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `-C`, `--cookie-value` <COOKIE_VALUE>
   * `--drop-set-cookie`
@@ -198,6 +199,9 @@ OTHER OPTIONS:
 
   * `--form-script` <FILENAME>  
     Use a custom Python authentication plugin
+
+  * `--side-file` <FILENAME>
+    Use a .side file generated using Selenium IDE to perform an authenticated scan.
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  

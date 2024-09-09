@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "WAPITI" "1" "August 2024" "" ""
+.TH "WAPITI" "1" "September 2024" "" ""
 .
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
@@ -96,6 +96,9 @@ PROXY AND AUTHENTICATION OPTIONS:
 .
 .IP "\(bu" 4
 \fB\-\-form\-script\fR \fIFILENAME\fR
+.
+.IP "\(bu" 4
+\fB\-\-side\-file\fR \fIFILENAME\fR
 .
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
@@ -434,6 +437,9 @@ Send data specified with \fB\-\-form\-data\fR using the given content\-type (def
 .
 .br
 Use a custom Python authentication plugin
+.
+.IP "\(bu" 4
+\fB\-\-side\-file\fR \fIFILENAME\fR Use a \.side file generated using Selenium IDE to perform an authenticated scan\.
 .
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR

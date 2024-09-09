@@ -227,6 +227,16 @@ def parse_args():
     )
 
     parser.add_argument(
+        "-sf", "--side-file",
+        help=(
+            "Set a JSON cookie file to use. "
+            "You can also pass 'firefox' or 'chrome' to load cookies from your browser."
+        ),
+        default=argparse.SUPPRESS,
+        metavar="SIDE_FILE"
+    )
+
+    parser.add_argument(
         "-C", "--cookie-value",
         default=argparse.SUPPRESS,
         help=("Set a cookie to use for every request for authenticated scan.\n"

@@ -140,6 +140,7 @@ More detail on each option can be found in the following sections.</p>
 <li><code>--form-url</code> <var>URL</var></li>
 <li><code>--form-enctype</code> <var>ENCTYPE</var></li>
 <li><code>--form-script</code> <var>FILENAME</var></li>
+<li><code>--side-file</code> <var>FILENAME</var></li>
 <li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
 <li><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var></li>
 <li><code>--drop-set-cookie</code></li>
@@ -315,6 +316,8 @@ Otherwise raw credentials are sent directly to the given URL.</p></li>
 Send data specified with <code>--form-data</code> using the given content-type (default is "application/x-www-form-urlencoded")</p></li>
 <li><p><code>--form-script</code> <var>FILENAME</var><br />
 Use a custom Python authentication plugin</p></li>
+<li><p><code>--side-file</code> <var>FILENAME</var>
+Use a .side file generated using Selenium IDE to perform an authenticated scan.</p></li>
 <li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
 Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
@@ -530,7 +533,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>August 2024</li>
+    <li class='tc'>September 2024</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

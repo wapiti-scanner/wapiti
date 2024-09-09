@@ -17,14 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import sys
+import json
+from http.cookiejar import CookieJar
 from typing import Tuple, List, Dict, Optional
 import asyncio
 from urllib.parse import urlparse
 import importlib.util
 
 from httpx import RequestError
-from arsenic import get_session, browsers, services
-from arsenic.errors import ArsenicError
+from arsenic import get_session, browsers, services, errors, constants
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
@@ -118,7 +119,7 @@ async def async_fetch_login_page(
                 page_source = await headless_client.get_page_source()
                 crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
                 return page_source
-        except (ArsenicError, asyncio.TimeoutError) as exception:
+        except (errors.ArsenicError, asyncio.TimeoutError) as exception:
             logging.error(f"[!] {exception.__class__.__name__} with URL {url}")
             return
     else:
@@ -238,3 +239,107 @@ async def load_form_script(
         sys.exit(1)
     except TypeError as exception:
         raise RuntimeError("The provided auth script seems to have some syntax issues") from exception
+
+
+async def authenticate_with_side_file(
+        crawler_configuration: CrawlerConfiguration,
+        side_file_path: str,
+        headless_value: str
+) -> Optional[CookieJar]:
+    """
+    Authenticate using a .side file.
+    """
+    # Load and parse the .side file
+    with open(side_file_path, 'r', encoding='utf-8') as file:
+        try:
+            side_data = json.load(file)
+        except json.JSONDecodeError as json_error:
+            raise ValueError("The file content is not valid JSON.") from json_error
+
+    url = side_data['url']
+    login_test = side_data['tests'][0]  # Assuming the first test is the login test
+
+    proxy_settings = None
+    if crawler_configuration.proxy:
+        proxy = urlparse(crawler_configuration.proxy).netloc
+        proxy_settings = {
+            "proxyType": 'manual',
+            "httpProxy": proxy,
+            "sslProxy": proxy
+        }
+
+    service = services.Geckodriver()
+    browser = browsers.Firefox(
+        proxy=proxy_settings,
+        acceptInsecureCerts=True,
+        **{
+            "moz:firefoxOptions": {
+                "prefs": {
+                    "network.proxy.allow_hijacking_localhost": True,
+                    "devtools.jsonview.enabled": False,
+                },
+                "args": ["-headless"] if headless_value in ["hidden", "no"] else [],
+            }
+        }
+    )
+
+    try:
+        async with get_session(service, browser) as headless_client:
+            for command in login_test['commands']:
+                await asyncio.sleep(3)
+                cmd = command['command']
+                target = command['target']
+                value = command.get('value', '')
+
+                if cmd == "open":
+                    await headless_client.get(url + target)
+
+                elif cmd == "type":
+                    if target.startswith("id="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            f"#{selector_value}", constants.SelectorType.css_selector
+                        )
+                    elif target.startswith("css="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            selector_value, constants.SelectorType.css_selector
+                        )
+                    elif target.startswith("xpath="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            selector_value, constants.SelectorType.xpath
+                        )
+                    else:
+                        raise ValueError(f"Unknown selector type: {target}")
+
+                    await element.send_keys(value)
+
+                elif cmd == "click":
+                    if target.startswith("id="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            f"#{selector_value}", constants.SelectorType.css_selector
+                        )
+                    elif target.startswith("css="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            selector_value, constants.SelectorType.css_selector
+                        )
+                    elif target.startswith("xpath="):
+                        selector_value = target.split("=", 1)[1]
+                        element = await headless_client.get_element(
+                            selector_value, constants.SelectorType.xpath
+                        )
+                    else:
+                        raise ValueError(f"Unknown selector type: {target}")
+                    await element.click()
+
+            await asyncio.sleep(.1)
+            crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
+
+            return crawler_configuration.cookies
+
+
+    except (errors.ArsenicError, asyncio.TimeoutError) as exception:
+        logging.error(f"[!] {exception.__class__.__name__} with URL {url}")

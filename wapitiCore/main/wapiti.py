@@ -35,7 +35,8 @@ from wapitiCore.main.banners import print_banner
 from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.main.log import logging
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
-from wapitiCore.net.auth import async_try_form_login, load_form_script, check_http_auth, login_with_raw_data
+from wapitiCore.net.auth import (async_try_form_login, load_form_script, check_http_auth, login_with_raw_data,
+                                 authenticate_with_side_file)
 from wapitiCore.net import Request
 from wapitiCore.report import GENERATORS
 from wapitiCore.parsers.swagger import Swagger
@@ -234,6 +235,12 @@ async def wapiti_main():
 
         wap.set_headless(args.headless)
         wap.set_wait_time(args.wait_time)
+
+        if "side_file" in args:
+            if os.path.isfile(args.side_file):
+                wap.crawler_configuration.cookies = await authenticate_with_side_file(
+                    wap.crawler_configuration, args.side_file, args.headless
+                )
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):

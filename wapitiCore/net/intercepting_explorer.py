@@ -327,6 +327,7 @@ async def launch_headless_explorer(
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
                 excluded_requests.append(request)
+                request.set_cookies(crawler.cookie_jar)
 
                 if request.method == "GET":
                     try:
