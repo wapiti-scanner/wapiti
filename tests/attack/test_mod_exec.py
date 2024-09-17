@@ -159,3 +159,97 @@ async def test_blind_detection():
 async def delayed_response():
     await Sleep(6)
     return httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_no_false_positive_content_type_based():
+    #In this test, the response is a javascript file that contains "uid=" which can provoke a false positive avoid with content-type check
+
+    respx.get("http://perdu.com/").mock(
+        return_value=
+        httpx.Response(200, text="Hello there")
+    )
+
+    respx.get(url__regex=r"http://perdu\.com/test.js\?test=.*").mock(
+        return_value=httpx.Response(
+            200,
+            content="/*! jQuery v3.7.1 | (c) OpenJS Foundation and other contributors | jquery.org/license */ "
+                 "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&(ce.fn[Symbol.iterator]=oe[Symbol.iterator])",
+            headers={"content-type": "text/javascript"})
+    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(404, text="Not Found")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/test.js?test=hello")
+    request.path_id = 2
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
+
+        module = ModuleExec(crawler, persister, options, crawler_configuration)
+        module.do_post = False
+
+        payloads_until_sleep = 0
+        for payload_info in module.get_payloads(
+                request,
+                Parameter(name="vuln", situation=ParameterSituation.QUERY_STRING),
+        ):
+            if "sleep" in payload_info.payload:
+                break
+            payloads_until_sleep += 2  # paylaod + reversed_payload
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_no_false_positive_file_extension_based():
+    # In this test, the response is a javascript file that contains "uid=" which can provoke a false positive avoid with file extension check
+
+    respx.get("http://perdu.com/").mock(
+        return_value=
+        httpx.Response(200, text="Hello there")
+    )
+
+    respx.get(url__regex=r"http://perdu\.com/test.js\?test=.*").mock(
+        return_value=httpx.Response(
+            200,
+            content="/*! jQuery v3.7.1 | (c) OpenJS Foundation and other contributors | jquery.org/license */ "
+                    "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&(ce.fn[Symbol.iterator]=oe[Symbol.iterator])")
+    )
+
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(404, text="Not Found")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/test.js?test=hello")
+    request.path_id = 2
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 1, "level": 1}
+
+        module = ModuleExec(crawler, persister, options, crawler_configuration)
+        module.do_post = False
+
+        payloads_until_sleep = 0
+        for payload_info in module.get_payloads(
+                request,
+                Parameter(name="vuln", situation=ParameterSituation.QUERY_STRING),
+        ):
+            if "sleep" in payload_info.payload:
+                break
+            payloads_until_sleep += 2  # paylaod + reversed_payload
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0

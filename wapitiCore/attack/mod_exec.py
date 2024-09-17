@@ -70,6 +70,25 @@ class ModuleExec(Attack):
                 return vuln_info
         return ""
 
+    @staticmethod
+    def _is_valid_content_type(response: Response) -> bool:
+        """
+        Check if the Content-Type header of the response is acceptable for executing code.
+        Acceptable types typically include text-based responses (HTML, plain text, etc.)
+        """
+        valid_content_types = ["text/html", "text/plain", "application/json", "application/javascript"]
+        content_type = response.headers.get('Content-Type', '').split(';')[0].strip()
+        return content_type in valid_content_types
+
+    @staticmethod
+    def _has_valid_file_extension(url: str) -> bool:
+        """
+        Check if the URL points to a valid file extension.
+        Typically, we want to avoid static resources like images, CSS, etc.
+        """
+        invalid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.css', '.js', '.woff', '.woff2', '.svg', '.ico']
+        return not any(url.lower().endswith(ext) for ext in invalid_extensions)
+
     async def attack(self, request: Request, response: Optional[Response] = None):
         warned = False
         timeouted = False
@@ -97,10 +116,19 @@ class ModuleExec(Attack):
 
             try:
                 response: Response = await self.crawler.async_send(mutated_request)
+
+                # Check Content-Type header before further analysis
+                if not self._is_valid_content_type(response):
+                    log_verbose(f"Skipping due to invalid content-type: {response.headers.get('Content-Type', '')}")
+                    continue
+
+                # Check file extension before further analysis
+                if not self._has_valid_file_extension(request.url):
+                    log_verbose(f"Skipping due to invalid file extension: {request.url}")
+                    continue
+
             except ReadTimeout:
-                # Is the webpage expected to timeout?
                 if payload_info.type == "time":
-                    # Check for false-positive by asking the original request
                     if await self.does_timeout(request):
                         self.network_errors += 1
                         self.false_positive_timeouts.add(request.path_id)
