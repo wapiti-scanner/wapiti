@@ -1,3 +1,4 @@
+.env
 index.php
 search.php
 cron.php
