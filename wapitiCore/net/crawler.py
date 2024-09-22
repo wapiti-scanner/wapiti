@@ -231,6 +231,7 @@ class AsyncCrawler:
         @param headers: Dictionary of additional headers to send with the request.
         @type headers: dict
         @type stream: bool
+        @type timeout: float
         @rtype: Response
         """
         timeout = self.timeout if timeout is None else httpx.Timeout(timeout)
@@ -262,6 +263,7 @@ class AsyncCrawler:
         @type follow_redirects: bool
         @type headers: dict
         @type stream: bool
+        @type timeout: float
         @rtype: Response
         """
         form_headers = {}
@@ -332,6 +334,7 @@ class AsyncCrawler:
         @type follow_redirects: bool
         @type headers: dict
         @type stream: bool
+        @type timeout: float
         @rtype: Response
         """
         form_headers = {}

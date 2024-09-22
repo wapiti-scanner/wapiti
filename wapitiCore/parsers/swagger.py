@@ -43,17 +43,16 @@ class Swagger:
     swagger_dict = None
     routes = None
 
-
     def __init__(self, swagger_url: str = None, base_url: str = None) -> None:
         if swagger_url:
             try:
                 self.swagger_dict = ResolvingParser(swagger_url, backend='openapi-spec-validator',
-                                                strict=False, recursion_limit=5).specification
+                                                    strict=False, recursion_limit=5).specification
             except ParseError as e:
                 logging.error("[-] Error: Swagger file format invalid : " + str(e.args[0]))
             except ValidationError as e:
                 logging.error("[-] Error: Swagger file is not valid : " + str(e.args[0]) +
-                                ". See https://swagger.io/specification/ for more information.")
+                              ". See https://swagger.io/specification/ for more information.")
             except AssertionError:
                 logging.error("[-] Error: File not found")
             except ResolutionError:
@@ -63,7 +62,6 @@ class Swagger:
 
         if self.swagger_dict:
             self.routes = self._get_routes(self.swagger_dict, base_url)
-
 
     @staticmethod
     def _get_base_url(swagger_dict: dict, url: str) -> str:
@@ -115,10 +113,9 @@ class Swagger:
             return model_name['additionalProperties']
         return model_name
 
-
     # Parse object in swagger file.
     # Replace all object by their type and all array by their type
-    # acording to their properties and definitions.
+    # according to their properties and definitions.
     # It will be easier to create request with default value.
     def _parse_object(self, model_name):
         model = {}
@@ -151,7 +148,6 @@ class Swagger:
                               "\nSee https://swagger.io/specification/ for more information")
         return model
 
-
     def _check_params(self, params: dict) -> list:
         raws = []
         for param in params:
@@ -178,9 +174,9 @@ class Swagger:
             if 'type' in param:
                 if param['type'] == "array":
                     if 'enum' in param['items']:
-                        raw['type'] = {"enum" : param['items']['enum']}
+                        raw['type'] = {"enum": param['items']['enum']}
                     else:
-                        raw['type'] = {"array" : param['items']['type']}
+                        raw['type'] = {"array": param['items']['type']}
                 else:
                     raw['type'] = param['type']
             if 'name' in param:
@@ -191,7 +187,6 @@ class Swagger:
                 raws.append(raw)
         return raws
 
-
     @staticmethod
     def is_valid_url(url) -> bool:
         try:
@@ -199,7 +194,6 @@ class Swagger:
             return all([result.scheme, result.netloc])
         except ValueError:
             return False
-
 
     def _get_routes(self, swagger_dict: dict, base_url: str) -> dict:
         # We use the url from the -u unless the swagger file has one
@@ -216,10 +210,15 @@ class Swagger:
                 request[route] = []
                 try:
                     if params:
-                        request_route = {"method": method.upper(), "route": route.replace(method.upper() + ' ', '')}
-                        request_route['params'] = []
+                        request_route = {
+                            "method": method.upper(),
+                            "route": route.replace(method.upper() + ' ', ''),
+                            'params': []
+                        }
+
                         if 'requestBody' in params:
                             request_route['params'] += self._check_params(params['requestBody']['content'])
+
                         if 'parameters' in params:
                             request_route['params'] += self._check_params(params['parameters'])
                         request_route['params'] += self._check_params(params)
@@ -231,7 +230,6 @@ class Swagger:
                     logging.error("[-] Error: " + str(e))
         return request
 
-
     def _parse_parameters(self, params: list, route: str) -> str:
         for param in params:
             if not "type" in param:
@@ -242,7 +240,6 @@ class Swagger:
                 elif param['in'] == "query":
                     route += "&" + param['name'] + "=" + self.AUTOFILL_VALUES[param['type']]
         return route
-
 
     def _get_parameters(self, swagger_dict: dict, route: str, url: str) -> list:
         try:
@@ -261,7 +258,6 @@ class Swagger:
             logging.warning("[-] Skipping " + route + " : " + str(e))
             return None
 
-
     # transform dict {array: something} and if something is a dict and contains {array: something} transform it
     def _transform_array(self, array: dict) -> list:
         if 'array' in array:
@@ -278,7 +274,6 @@ class Swagger:
                 else:
                     array[key] = self.AUTOFILL_VALUES[array[key]]
         return array
-
 
     def _transform_query(self, route: str, param: dict, option: str):
         if '?' in self.routes[route][0]['route'] or '?' in option:
@@ -320,7 +315,6 @@ class Swagger:
 
         return option
 
-
     def _transform_url(self, param: dict, url: str, route: str) -> str:
         name = param['name']
         if "{" in url:
@@ -332,13 +326,12 @@ class Swagger:
                 # we will use the target url from -u option
                 pass
             method = route.split(' ')[0].lower()
-            if not 'type' in param:
+            if 'type' not in param:
                 param = self.swagger_dict['paths'][route_parsed][method]['parameters'][0]['schema']
-                if not 'type' in param:
+                if 'type' not in param:
                     # if still missing, we add a default type string
                     param['type'] = "string"
         return url.replace("{" + name + "}", self.AUTOFILL_VALUES[param['type']])
-
 
     def _transform_body(self, param: dict) -> str:
         json_dict = {}
@@ -351,7 +344,6 @@ class Swagger:
                 else:
                     json_dict[key] = self.AUTOFILL_VALUES[param['model'][key]]
         return json.dumps(json_dict)
-
 
     def _transform_formData(self, param: dict, files: list) -> str:
         data = ""
@@ -366,7 +358,6 @@ class Swagger:
                 else:
                     data = self._add_data(data, param['name'], self.AUTOFILL_VALUES[param['type']])
         return data
-
 
     # create request with default value from swagger file
     def _create_request(self, routes: dict) -> list[Request]:
@@ -396,12 +387,11 @@ class Swagger:
                             if not 'type' in param:
                                 param["type"] = "string"
                             header[param['name']] = self.AUTOFILL_VALUES[param['type']]
-            request = Request(path=url+option, method=urls[0]['method'], post_params=data, file_params=files,
+            request = Request(path=url + option, method=urls[0]['method'], post_params=data, file_params=files,
                               enctype="application/json")
             request.set_headers(header)
             requests_list.append(request)
         return requests_list
-
 
     @staticmethod
     def _add_data(data, name: str, value: str) -> str:
@@ -410,7 +400,6 @@ class Swagger:
         else:
             data += name + "=" + value
         return data
-
 
     def _replace_param(self, json_dict: dict) -> dict:
         if 'array' in json_dict:

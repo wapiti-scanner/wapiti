@@ -34,7 +34,7 @@ import shutil
 
 from httpx import RequestError
 import humanize
-from cryptography.hazmat._oid import NameOID
+from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography import x509
 
