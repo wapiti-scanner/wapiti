@@ -360,3 +360,49 @@ async def test_async_send():
         assert response.headers.get("abc") == "123"
         assert "user-agent" in request.headers
         assert request.headers.get("foo") == "bar"
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_async_put_enctype():
+    request = Request("http://perdu.com/", "PUT", post_params='{"id": 31337}', enctype="application/json")
+
+    route = respx.put("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            status_code=200,
+            text="Whatever",
+        )
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        await crawler.async_send(request)
+
+        assert route.called
+        # Check if the request headers contain the expected headers
+        caught_request = route.calls[0].request
+        assert caught_request.headers["Content-Type"] == "application/json"
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_async_put_missing_enctype():
+    request = Request("http://perdu.com/", "PUT", post_params='a=b')
+
+    route = respx.put("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            status_code=200,
+            text="Whatever",
+        )
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        await crawler.async_send(request)
+
+        # Check if the request was made
+        assert route.called
+        # Check if the request headers contain the expected headers
+        caught_request = route.calls[0].request
+        assert caught_request.headers["Content-Type"] == "application/x-www-form-urlencoded"
+        assert caught_request.content == b"a=b"

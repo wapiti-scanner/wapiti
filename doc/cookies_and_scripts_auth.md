@@ -74,7 +74,7 @@ async def run(crawler_configuration: CrawlerConfiguration, auth_url: str,headles
                 enctype="application/json"
         )
         # Send it
-        response = await crawler.async_post(request)
+        response = await crawler.async_send(request)
         data = response.json
         if not data:
             print("authentication failed")
