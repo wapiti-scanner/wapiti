@@ -2,14 +2,12 @@ from collections import defaultdict
 from re import findall, MULTILINE
 from json import dumps
 
-from templates_and_data import TREE_CHECKER
-
 
 def purge_irrelevant_data(data) -> None:
     """
-    Look recursively for any pattern matching a 2 lenght sized list with 
-    "date", "last-modified", "keep-alive" or "etag" in a dictionnary containing lists, 
-    dictionnaries, and other non-collections structures. Removing them because those 
+    Look recursively for any pattern matching a 2 length sized list with
+    "date", "last-modified", "keep-alive" or "etag" in a dictionary containing lists,
+    dictionaries, and other non-collections structures. Removing them because those
     datas can change from one test to another and aren't really relevant 
     """
     if isinstance(data, dict):
@@ -30,8 +28,9 @@ def purge_irrelevant_data(data) -> None:
 
 def filter_data(data, filter):
     """
-    Filter recursively data from report using a filter, is sensitive to report changes and don't check if the filter is correct 
-    make sure to write filter correctly or reinforce this function 
+    Filter recursively data from report using a filter, is sensitive to report changes and don't check
+    if the filter is correct.
+    Make sure to write filter correctly or reinforce this function
     """
     # Another check, type based, also considering if filter and data order match
     assert (type(data) is type(filter)) or (type(data) is type(None)), \

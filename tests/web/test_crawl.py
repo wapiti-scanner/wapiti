@@ -63,7 +63,7 @@ async def test_resume_crawling():
     remaining_requests = set([request async for request in wapiti.persister.get_to_browse()])
     all_requests = set([request async for request, __ in wapiti.persister.get_links()])
     # We stop giving new links at page > 20 but page 20 will give urls for 21 and 22
-    # so we have 24 paginated pages (23 from 0 to 22) + root url here
+    # so, we have 24 paginated pages (23 from 0 to 22) + root url here
     assert len(all_requests) == 24
     # We are done as we scanned all the pages
     assert not remaining_requests - all_requests

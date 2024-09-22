@@ -17,7 +17,7 @@ with open('/usr/local/bin/behavior.json', 'r') as integration_file:
     integration_data = json.load(integration_file)
     wanted_modules = set(chain.from_iterable([test["modules"].split(",")
                                               for _, test in integration_data.items()]))
-    assert wanted_modules.issubset(EXISTING_MODULES), f"{wanted_modules-EXISTING_MODULES} modules not existing"
+    assert wanted_modules.issubset(EXISTING_MODULES), f"{wanted_modules - EXISTING_MODULES} modules not existing"
 
 # Adding on-the-fly uuid for each target for each test
 # and using quotes for empty modules
@@ -48,7 +48,7 @@ targets_done = set()
 iter_tests = cycle(integration_data.items())
 total_targets = sum([len(test["targets"]) for _, test in integration_data.items()])
 
-# If any target recieve too many requests, it might not have
+# If any target receive too many requests, it might not have
 # started well, this is another way to fill the set to break
 # the loop
 requests_counter = defaultdict(int)
@@ -66,19 +66,22 @@ for key_test, content_test in iter_tests:
             requests_counter[target['name']] += 1
             try:
                 requests.get(f"{target['name']}", verify=False)
-                json_output_path = f"/home/{key_test}/{re.sub(r'[/:]','_',re.sub(r'^https?://', '', target['name']))}.out"
+                json_output_path = f"/home/{key_test}/{re.sub(r'[/:]', '_', re.sub(r'^https?://', '', target['name']))}.out"
 
                 # We define supplementary arguments globally and for each target:
                 more_args = target.get('supplementary_argument', '') + \
-                    ('' if target.get("erase_global_supplementary", False)
-                     else content_test.get('supplementary_argument', ''))
+                            ('' if target.get("erase_global_supplementary", False)
+                             else content_test.get('supplementary_argument', ''))
 
                 # We then call wapiti on each target of each module, generating a detailed JSON report
-                os.system(f"wapiti -u {target['name']} -m {content_test['modules']} "
-                          f"-f json -o {json_output_path} "
-                          f"{more_args} "
-                          f"--detailed-report 2 --flush-session --verbose 2 ")
-                # Now we reparse the JSON to get only useful tests informations:
+                os.system(
+                    f"wapiti -u {target['name']} -m {content_test['modules']} "
+                    f"-f json -o {json_output_path} "
+                    f"{more_args} "
+                    f"--detailed-report 2 --flush-session --verbose 2 "
+                )
+
+                # Now we reparse the JSON to get only useful tests information:
                 with open(json_output_path, "r") as bloated_output_file:
                     bloated_output_data = json.load(bloated_output_file)
                 with open(json_output_path, "w") as output_file:
@@ -112,6 +115,7 @@ for key_test, content_test in iter_tests:
                 # 0.5 seconds penalty in case of no response to avoid requests spamming and being
                 # too fast at blacklisting targets
                 sleep(0.5)
+
             if requests_counter[target['name']] > MAX_REQ:
                 sys.stdout.write(
                     f"Target {target['name']} from test {key_test} takes too long to respond\nSkipping...\n")

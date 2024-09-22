@@ -1,9 +1,11 @@
 from typing import Dict
 from unittest import mock
 from unittest.mock import MagicMock, mock_open
+
 import respx
 import httpx
 import pytest
+
 from wapitiCore.wappalyzer.wappalyzer import ApplicationData, Wappalyzer
 from wapitiCore.net.response import Response
 
@@ -101,6 +103,7 @@ async def test_applicationdata():
                 if filename == expected_filename:
                     return mock_open(read_data=content).return_value
             raise FileNotFoundError('(mock) Unable to open {filename}')
+
         return MagicMock(side_effect=open_mock)
 
     files = {
