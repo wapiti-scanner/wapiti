@@ -37,10 +37,8 @@ COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/loc
 # Create the Wapiti config directory
 RUN mkdir -p /root/.wapiti/config/cves
 
-# Download the NVD CVE files directly from GitHub
-RUN curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/nginx.json.xz -o /root/.wapiti/config/cves/nginx.json.xz && \
-    curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/cherokee.json.xz -o /root/.wapiti/config/cves/cherokee.json.xz && \
-    curl -k -L https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240809/jquery.json.xz -o /root/.wapiti/config/cves/jquery.json.xz
+# Copy NVD files to .wapiti/config/cves
+COPY ./tests/integration/wapiti/*.json.xz /root/.wapiti/config/cves/
 
 COPY ./tests/integration/wapiti/test.py /usr/local/bin/test.py
 COPY ./tests/integration/wapiti/templates_and_data.py /usr/local/bin/templates_and_data.py
