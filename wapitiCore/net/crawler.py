@@ -249,75 +249,6 @@ class AsyncCrawler:
         return Response(response)
 
     @retry(delay=1, times=3)
-    async def async_post(
-            self,
-            form: web.Request,
-            follow_redirects: bool = False,
-            headers: dict = None,
-            stream: bool = False,
-            timeout: float = None,
-    ) -> Response:
-        """Submit the given form, returns a Response on success, None otherwise.
-
-        @type form: web.Request
-        @type follow_redirects: bool
-        @type headers: dict
-        @type stream: bool
-        @type timeout: float
-        @rtype: Response
-        """
-        form_headers = {}
-        if form.enctype and not form.is_multipart:
-            form_headers = {"Content-Type": form.enctype}
-
-        if isinstance(headers, (dict, httpx.Headers)) and headers:
-            form_headers.update(headers)
-
-        if form.referer:
-            form_headers["referer"] = form.referer
-
-        if form.is_multipart or "urlencoded" in form.enctype:
-            file_params = form.file_params
-            post_params = form.post_params
-        else:
-            file_params = None
-            post_params = form.post_params
-
-        content = None
-
-        if post_params:
-            if isinstance(post_params, str):
-                content = post_params
-                post_params = None
-            else:
-                content = None
-                post_params = dict(post_params)
-        else:
-            post_params = None
-
-        request = self._client.build_request(
-            "POST",
-            form.path,
-            params=form.get_params,
-            data=post_params,  # httpx expects a dict, hope to see more types soon
-            content=content,
-            files=file_params or None,
-            headers=form_headers,
-            timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
-        )
-        try:
-            response = await self._client.send(
-                request, stream=stream, follow_redirects=follow_redirects
-            )
-        except httpx.TransportError as exception:
-            if "Read timed out" in str(exception):
-                raise httpx.ReadTimeout("Request time out", request=None)
-
-            raise exception
-
-        return Response(response)
-
-    @retry(delay=1, times=3)
     async def async_request(
             self,
             method: str,
@@ -348,7 +279,13 @@ class AsyncCrawler:
         if form.referer:
             form_headers["referer"] = form.referer
 
-        post_params = form.post_params
+        if form.is_multipart or "urlencoded" in form.enctype:
+            file_params = form.file_params
+            post_params = form.post_params
+        else:
+            file_params = None
+            post_params = form.post_params
+
         content = None
 
         if post_params:
@@ -363,10 +300,11 @@ class AsyncCrawler:
 
         request = self._client.build_request(
             method,
-            form.url,
-            data=post_params,
+            form.path,
+            params=form.get_params,
+            data=post_params,  # httpx expects a dict, hope to see more types soon
             content=content,
-            files=form.file_params or None,
+            files=file_params,
             headers=form_headers,
             timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
         )
@@ -391,12 +329,7 @@ class AsyncCrawler:
             timeout: float = None
     ) -> Response:
         if request.method == "GET":
-            response = await self.async_get(request, headers=headers,
-                                            follow_redirects=follow_redirects, stream=stream,
-                                            timeout=timeout
-            )
-        elif request.method == "POST":
-            response = await self.async_post(
+            response = await self.async_get(
                 request,
                 headers=headers,
                 follow_redirects=follow_redirects,
@@ -404,9 +337,13 @@ class AsyncCrawler:
                 timeout=timeout
             )
         else:
-            response = await self.async_request(request.method, request,
-                                                headers=headers, follow_redirects=follow_redirects,
-                                                stream=stream, timeout=timeout
+            response = await self.async_request(
+                request.method,
+                request,
+                headers=headers,
+                follow_redirects=follow_redirects,
+                stream=stream,
+                timeout=timeout
             )
 
         request.set_cookies(self._client.cookies)
