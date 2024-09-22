@@ -267,7 +267,7 @@ class AsyncCrawler:
         @rtype: Response
         """
         form_headers = {}
-        if not form.is_multipart:
+        if form.enctype and not form.is_multipart:
             form_headers = {"Content-Type": form.enctype}
 
         if isinstance(headers, (dict, httpx.Headers)) and headers:
@@ -339,7 +339,7 @@ class AsyncCrawler:
         """
         form_headers = {}
 
-        if not form.is_multipart:
+        if form.enctype and not form.is_multipart:
             form_headers = {"Content-Type": form.enctype}
 
         if isinstance(headers, dict) and headers:
