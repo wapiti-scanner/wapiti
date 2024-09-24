@@ -39,7 +39,7 @@ MSG_WP_VERSION = "WordPress Version : {0}"
 
 
 class ModuleWpEnum(Attack):
-    """Detect WordPress Plugins with version."""
+    """Detect WordPress Plugins with version - DEPRECATED (replaced by the module cms)."""
     name = "wp_enum"
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
@@ -261,6 +261,7 @@ class ModuleWpEnum(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
+        logging.warning("[!] This module is DEPRECATED. You should try the module cms with \"--cms wp\".")
         request_to_root = Request(request.url)
 
         response = await self.crawler.async_send(request_to_root, follow_redirects=True)
