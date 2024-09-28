@@ -49,7 +49,6 @@ dependencies = [
         "mitmproxy==10.2.3",
         "packaging==24.1",
         "pyasn1==0.5.1",
-        "six==1.16.0",
         "sqlalchemy==2.0.28",
         "tld==0.13",
         "typing-extensions==4.10.0",
