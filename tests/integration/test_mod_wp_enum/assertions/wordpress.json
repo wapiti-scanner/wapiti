@@ -7,7 +7,7 @@
             {
                 "method": "GET",
                 "path": "//wp-content/plugins/akismet/readme.txt",
-                "info": "{\"name\": \"akismet\", \"versions\": [\"\"], \"categories\": [\"WordPress plugins\"], \"groups\": [\"Add-ons\"]}",
+                "info": "{\"name\": \"akismet\", \"versions\": [], \"categories\": [\"WordPress plugins\"], \"groups\": [\"Add-ons\"]}",
                 "level": 0,
                 "parameter": null,
                 "module": "wp_enum",

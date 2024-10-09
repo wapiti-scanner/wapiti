@@ -120,10 +120,10 @@ async def test_plugin():
             '{"name": "bbpress", "versions": ["2.6.6"], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
         )
         assert persister.add_payload.call_args_list[2][1]["info"] == (
-            '{"name": "wp-reset", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+            '{"name": "wp-reset", "versions": [], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
         )
         assert persister.add_payload.call_args_list[3][1]["info"] == (
-            '{"name": "unyson", "versions": [""], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
+            '{"name": "unyson", "versions": [], "categories": ["WordPress plugins"], "groups": ["Add-ons"]}'
         )
 
 
@@ -198,10 +198,10 @@ async def test_theme():
             '{"name": "twentynineteen", "versions": ["1.9"], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
         )
         assert persister.add_payload.call_args_list[2][1]["info"] == (
-            '{"name": "seedlet", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+            '{"name": "seedlet", "versions": [], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
         )
         assert persister.add_payload.call_args_list[3][1]["info"] == (
-            '{"name": "customify", "versions": [""], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
+            '{"name": "customify", "versions": [], "categories": ["WordPress themes"], "groups": ["Add-ons"]}'
         )
 
 

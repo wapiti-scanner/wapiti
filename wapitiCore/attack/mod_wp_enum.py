@@ -152,27 +152,29 @@ class ModuleWpEnum(Attack):
             except RequestError:
                 self.network_errors += 1
             else:
+                plugin_detected = {
+                    "name": plugin,
+                    "versions": [],
+                    "categories": ["WordPress plugins"],
+                    "groups": ['Add-ons']
+                }
+
                 if response.is_success:
                     version = re.search(r'tag:\s*([\d.]+)', response.content)
 
                     # This check was added to detect an invalid format of "Readme.txt" which can cause a crash
                     if version:
                         version = version.group(1)
+                        plugin_detected["versions"] = [version]
                     else:
-                        version = ""
+                        logging.warning("Readme.txt for %s has an invalid format.", plugin)
 
                     if version or \
                         self.false_positive["plugins"] < 200 or self.false_positive["plugins"] > 299:
-                        plugin_detected = {
-                            "name": plugin,
-                            "versions": [version],
-                            "categories": ["WordPress plugins"],
-                            "groups": ['Add-ons']
-                        }
                         log_blue(
                             MSG_TECHNO_VERSIONED,
                             plugin,
-                            [version]
+                            [version] if version else []
                         )
                         await self.add_info(
                             finding_class=SoftwareNameDisclosureFinding,
@@ -181,16 +183,10 @@ class ModuleWpEnum(Attack):
                             response=response
                         )
                 elif response.status == 403 and self.false_positive["plugins"] != 403:
-                    plugin_detected = {
-                        "name": plugin,
-                        "versions": [""],
-                        "categories": ["WordPress plugins"],
-                        "groups": ['Add-ons']
-                    }
                     log_blue(
                         MSG_TECHNO_VERSIONED,
                         plugin,
-                        [""]
+                        []
                     )
                     await self.add_info(
                         finding_class=SoftwareNameDisclosureFinding,
@@ -207,27 +203,28 @@ class ModuleWpEnum(Attack):
             except RequestError:
                 self.network_errors += 1
             else:
+                theme_detected = {
+                    "name": theme,
+                    "versions": [],
+                    "categories": ["WordPress themes"],
+                    "groups": ['Add-ons']
+                }
+
                 if response.is_success:
                     version = re.search(r'tag:\s*([\d.]+)', response.content)
                     # This check was added to detect invalid format of "Readme.txt" which can cause a crash
                     if version:
                         version = version.group(1)
+                        theme_detected["versions"] = [version]
                     else:
-                        version = ""
-
-                    theme_detected = {
-                        "name": theme,
-                        "versions": [version],
-                        "categories": ["WordPress themes"],
-                        "groups": ['Add-ons']
-                    }
+                        logging.warning("Readme.txt for %s has an invalid format.", theme)
 
                     if version or \
                         self.false_positive["themes"] < 200 or self.false_positive["themes"] > 299:
                         log_blue(
                             MSG_TECHNO_VERSIONED,
                             theme,
-                            [version]
+                            [version] if version else []
                         )
                         await self.add_info(
                             finding_class=SoftwareNameDisclosureFinding,
@@ -236,16 +233,10 @@ class ModuleWpEnum(Attack):
                             response=response
                         )
                 elif response.status == 403 and self.false_positive["themes"] != 403:
-                    theme_detected = {
-                        "name": theme,
-                        "versions": [""],
-                        "categories": ["WordPress themes"],
-                        "groups": ['Add-ons']
-                    }
                     log_blue(
                         MSG_TECHNO_VERSIONED,
                         theme,
-                        [""]
+                        []
                     )
                     await self.add_info(
                         finding_class=SoftwareNameDisclosureFinding,
