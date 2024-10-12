@@ -228,10 +228,7 @@ def parse_args():
 
     parser.add_argument(
         "-sf", "--side-file",
-        help=(
-            "Set a JSON cookie file to use. "
-            "You can also pass 'firefox' or 'chrome' to load cookies from your browser."
-        ),
+        help="Use a .side file generated using Selenium IDE to perform an authenticated scan.",
         default=argparse.SUPPRESS,
         metavar="SIDE_FILE"
     )
@@ -529,7 +526,7 @@ def parse_args():
 
     parser.add_argument(
         "--wapp-dir",
-        help="Provide a custom URL for updating Wappalyzer Database",
+        help="Provide a custom directory path for updating Wappalyzer Database",
         metavar="WAPP_DIR"
     )
 
