@@ -46,9 +46,10 @@ PROXY AND AUTHENTICATION OPTIONS:
   * `--form-user` <USERNAME>
   * `--form-password` <PASSWORD>
   * `--form-url` <URL>
+  * `--form-data` <DATA>
   * `--form-enctype` <ENCTYPE>
   * `--form-script` <FILENAME>
-  * `--side-file` <FILENAME>
+  * `-sf`, `--side-file` <FILENAME>
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>
   * `-C`, `--cookie-value` <COOKIE_VALUE>
   * `--drop-set-cookie`
@@ -62,11 +63,10 @@ SESSION OPTIONS:
   * `--store-session` <PATH>
   * `--store-config` <PATH>
 
-SCAN AND ATTACKS TUNING:
+CRAWLING:
 
   * `-s`, `--start` <URL>
   * `-x`, `--exclude` <URL>
-  * `--swagger` <URL>
   * `-r`, `--remove` <PARAMETER>
   * `--skip` <PARAMETER>
   * `-d`, `--depth` <DEPTH>
@@ -75,6 +75,12 @@ SCAN AND ATTACKS TUNING:
   * `--max-scan-time` <MAX_SCAN_TIME>
   * `--max-attack-time` <MAX_ATTACK_TIME>
   * `--max-parameters` <MAX>
+  * `--swagger` <URL>
+  * `--headless` {no,hidden,visible}
+  * `--wait` <TIME>
+
+PERFORMANCE:
+
   * `-S`, `--scan-force` {paranoid,sneaky,polite,normal,aggressive,insane}
   * `--tasks` <TASKS>
 
@@ -114,85 +120,89 @@ OTHER OPTIONS:
 ## TARGET SPECIFICATION
 
   * `-u`, `--url` <URL>  
-    The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see --scope for details).  
+    The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see `--scope` for details).  
     This is the only required argument. The scheme part of the URL must be either http or https.
 
   * `--data` <URL_ENCODED_DATA>  
-    If you need to attack only a specific POST request you can give this option a url-encoded string. It will be used as POST parameters for the URL specified by the `-u` option.  
-    
+    If you need to attack only a specific POST request you can give this option a url-encoded string. It will be used as POST parameters for the URL specified by the `-u` option.
+
   * `--scope` <SCOPE>  
-    Define the scope of the scan and attacks. Valid choices are :
-      - url : will only scan and attack the exact base URL given with -u option.
-      - page : will attack every URL matching the path of the base URL (every query string variation).
-      - folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename).
-      - domain : will scan and attack every URL whose domain name match the one from the base URL.
-      - punk : will scan and attack every URL found whatever the domain. Think twice before using that scope.
+    Define the scope of the scan and attacks. Valid choices are :  
     
+        - url : will only scan and attack the exact base URL given with -u option.
+        - page : will attack every URL matching the path of the base URL (every query string variation).
+        - folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename).
+        - domain : will scan and attack every URL whose domain name match the one from the base URL.
+        - punk : will scan and attack every URL found whatever the domain. Think twice before using that scope.
+
 ## ATTACKS SPECIFICATION
 
   * `-m`, `--module` <MODULE_LIST>  
     Set the list of attack modules (modules names separated with commas) to launch against the target.  
     Default behavior (when the option is not set) is to use the most common modules.  
     Common modules can also be specified using the "common" keyword.  
-    If you want to use common modules along with XXE module you can pass -m common,xxe.  
+    If you want to use common modules along with XXE module you can pass `-m common,xxe`.  
     Activating all modules can be done with the "all" keyword (not recommended though).  
     To launch a scan without launching any attack, just give an empty value (-m "").  
-    You can filter on http methods too (only get or post). For example -m "xss:get,exec:post".
-    
+    You can filter on http methods too (only get or post). For example `-m "xss:get,exec:post"`.
+
   * `--list-modules`  
     Print the list of available Wapiti modules along with a short description then exit.
-    
+
   * `-l`, `--level` <LEVEL>  
     In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL.  
     While it may be successful in finding vulnerabilities that way, it was causing too many requests for not enough success.  
     This behavior is now hidden behind this option and can be reactivated by setting -l to 2.  
     It may be useful on CGIs when developers have to parse the query-string themselves.  
-    Default value for this option is 1.
+    Default value for this option is 1.  
 
-  * `--cms` <CMS_LIST>
-    This option can only be used when the module cms is selected.
-    It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.
+  * `--cms` <CMS_LIST>  
+    This option can only be used when the module cms is selected.  
+    It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.  
     Multiple choices are allowed, all the CMS will be scanned if this option is not set.
-    
+
 ## PROXY AND AUTHENTICATION
 
   * `-p`, `--proxy` <PROXY_URL>  
     The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.
-    
-  * `--tor`  
-    Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
 
-  * `--mitm-port` <PORT>
-    If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
+  * `--tor`  
+    Make Wapiti use a Tor listener (same as `--proxy socks://127.0.0.1:9050/`)
+
+  * `--mitm-port` <PORT>  
+    If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.  
     Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).
+    (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).  
     Given value should be in the form login%password (% is used as a separator)
 
   * `--auth-user` <USERNAME>  
     Set username to use for HTTP authentication on the target (see available methods bellow).
 
-    * `--auth-password` <PASSWORD>  
+  * `--auth-password` <PASSWORD>  
     Set password to use for HTTP authentication on the target (see available methods bellow).
 
   * `--auth-method` <TYPE>  
-    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
+    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.  
     NTLM authentication may require you to install an additional Python module.
 
   * `--form-cred` <CREDENTIALS>  
-    (DEPRECATED) Set credentials to use for web form authentication on the target.
+    (DEPRECATED) Set credentials to use for web form authentication on the target.  
     Given value should be in the form login%password (% is used as a separator)
 
   * `--form-user` <USERNAME>  
     Set username to use for web form authentication on the target.
 
-    * `--form-password` <PASSWORD>  
+  * `--form-password` <PASSWORD>  
     Set password to use for web form authentication on the target.
 
   * `--form-url` <URL>  
-    If `--form-data` is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
+    If `--form-data` is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.  
     Otherwise raw credentials are sent directly to the given URL.
+
+  * `--form-data` <DATA>  
+    Raw body to send to the form URL specified with `--form-url`.
 
   * `--form-enctype` <ENCTYPE>  
     Send data specified with `--form-data` using the given content-type (default is "application/x-www-form-urlencoded")
@@ -200,49 +210,50 @@ OTHER OPTIONS:
   * `--form-script` <FILENAME>  
     Use a custom Python authentication plugin
 
-  * `--side-file` <FILENAME>
+  * `-sf`, `--side-file` <FILENAME>  
     Use a .side file generated using Selenium IDE to perform an authenticated scan.
 
   * `-c`, `--cookie` <COOKIE_FILE_OR_BROWSER_NAME>  
     Load cookies from a Wapiti JSON cookie file. See wapiti-getcookie(1) for more information.  
     You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).
 
-  * `-C`, `--cookie-value` <COOKIE_VALUE>
-    Set cookies from a valid user cookies.
-    You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.
-    For example: --cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"
-    
+  * `-C`, `--cookie-value` <COOKIE_VALUE>  
+    Set cookies from a valid user cookies.  
+    You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.  
+    For example:  
+        `--cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"`
+
   * `--drop-set-cookie`  
     Ignore cookies given in HTTP responses. Cookies that have been loaded using `-c` will be kept.
-    
+
 ## SESSIONS
 
 Since Wapiti 3.0.0, scanned URLs, discovered vulnerabilities and attacks status are stored in sqlite3 databases used as Wapiti session files.  
 Default behavior when a previous scan session exists for the given base URL and scope is to resume the scan and attack status.  
-Following options allows you to bypass this behavior/
+Following options allows you to bypass this behavior:
 
   * `--skip-crawl`  
-    If a previous scan was performed but wasn't finished, don't resume the scan.
+    If a previous scan was performed but wasn't finished, don't resume the scan.  
     Attack will be made on currently known URLs without scanning more.
-    
+
   * `--resume-crawl`  
     If the crawl was previously stopped and attacks started, default behavior is to skip crawling if the session is restored.  
     Use this option in order to continue the scan process while keeping vulnerabilities and attacks in the session.
-    
+
   * `--flush-attacks`  
     Forget everything about discovered vulnerabilities and which URL was attacked by which module.  
     Only the scan (crawling) information will be kept.
-    
+
   * `--flush-session`  
     Forget everything about the target for the given scope.
-    
+
   * `--store-session` <PATH>  
     Specify an alternative path for storing session (.db and .pkl) files.
 
   * `--store-config` <PATH>  
     Specify an alternative path for storing particular module (`apps.json` and `nikto_db`) files.
 
-## SCAN AND ATTACKS TUNING
+## CRAWLING
 
   * `-s`, `--start` <URL>  
     If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with.  
@@ -253,48 +264,63 @@ Following options allows you to bypass this behavior/
   * `-x`, `--exclude` <URL>  
     Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).  
     This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.
-    
-  * `--swagger` <URL>  
-    Extract API requests from the specified Swagger file.
-    Extracted requests are added to the crawler.
 
   * `-r`, `--remove` <PARAMETER>  
     If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).  
     This option can be used several times.
-    
+
   * `--skip` <PARAMETER>  
     Given parameter will be kept in URLs and forms but won't be attacked.  
     Useful if you already know non-vulnerable parameters.
-    
+
   * `-d`, `--depth` <DEPTH>  
     When Wapiti crawls a website it gives each found URL a depth value.  
     The base URL, and additional starting URLs (-s) are given a depth of 0.  
     Each link found in those URLs got a depth of 1, and so on.  
     Default maximum depth is 40 and is very large.  
     This limit make sure the scan will stop at some time.  
-    For a fast scan a depth inferior to 5 is recommended.
-    
+    For a fast scan a depth inferior to 5 is recommended.  
+
   * `--max-links-per-page` <MAX>  
     This is another option to be able to reduce the number of URLs discovered by the crawler.  
     Only the first MAX links of each webpage will be extracted.  
     This option is not really effective as the same link may appear on different webpages.  
-    It should be useful is rare conditions, for example when there is a lot a webpages without query string.
-    
+    It should be useful is rare conditions, for example when there is a lot a webpages without query string.  
+
   * `--max-files-per-dir` <MAX>  
     Limit the number of URLs to crawl under each folder found on the webserver.  
     Note that a URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.  
     Like the previous option it should be useful only in certain situations.
-    
+
   * `--max-scan-time` <SECONDS>  
-    Stop the scan after `SECONDS` seconds if it is still running.
-    Should be useful to automatise scanning from another process (continuous testing).
+    Stop the scan after `SECONDS` seconds if it is still running.  
+    Should be useful to automatise scanning from another process (continuous testing).  
 
   * `--max-attack-time` <SECONDS>  
-    Each attack module will stop after `SECONDS` seconds if it is still running.
-    Should be useful to automatise scanning from another process (continuous testing).
-    
+    Each attack module will stop after `SECONDS` seconds if it is still running.  
+    Should be useful to automatise scanning from another process (continuous testing).  
+
   * `--max-parameters` <MAX>  
     URLs and forms having more than MAX input parameters will be discarded before launching attack modules.
+
+  * `--swagger` <URL>  
+    Extract API requests from the specified Swagger file.  
+    Extracted requests are added to the crawler.
+
+  * `--headless` <MODE>  
+    Choose to use the Firefox headless browser for crawling or not (default).  
+    Using that option allows to catch XHR requests but makes the crawling slower.  
+    
+    Possible values are:
+    
+        - no: legacy crawler is used
+        - hidden: headless crawler is used but the Firefox window is hidden
+        - visible: headless Firefox is used and visible (can be useful to interact with it if stuck)
+
+  * `--wait` <TIME>  
+    Wait the specified amount of seconds before analyzing a webpage (headless mode only)
+
+## PERFORMANCE
     
   * `-S`, `--scan-force` <FORCE>  
     The more input parameters a URL or form have, the more requests Wapiti will send.  
@@ -379,9 +405,9 @@ Wapiti will generate a report at the end of the attack process. Several formats 
   * `-o`, `--output` <OUTPUT_PATH>  
     Set the path were the report will be generated.
 
-  * `-dr`, `--detailed-report` <LEVEL>
-    Set the level of detailed report for the output.
-    Possible values are (1) : includes HTTP requestes in the report, (2) : includes HTTP responses (headers and bodies) in the report.
+  * `-dr`, `--detailed-report` <LEVEL>  
+    Set the level of detailed report for the output.  
+    Possible values are (1) : includes HTTP requests in the report, (2) : includes HTTP responses (headers and bodies) in the report.
 
 ## OTHER OPTIONS
 
@@ -394,7 +420,7 @@ Wapiti will generate a report at the end of the attack process. Several formats 
 
   * `--update`  
     Update particular Wapiti modules (download a fresh version of the `apps.json` and `nikto_db` files) then exit. 
-    You can combine it with `--store-config` to specify where to store downloaded files.
+    You can combine it with `--store-config` to specify where to store downloaded files.  
     You can also combine it with `--wapp-url` to update the Wappalyzer DB from a custom git repository, or with `--wapp-dir` to update it from a local Wappalyzer DB directory.
 
   * `-h`, `--help`  
@@ -407,7 +433,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2023 Nicolas Surribas.
+Copyright (c) 2006-2024 Nicolas Surribas.
 
 ## AUTHORS
 

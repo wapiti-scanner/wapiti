@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv='content-type' value='text/html;charset=utf8'>
-  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <meta http-equiv='content-type' content='text/html;charset=utf-8'>
+  <meta name='generator' content='Ronn-NG/v0.10.1 (http://github.com/apjanke/ronn-ng/tree/0.10.1)'>
   <title>wapiti(1) - A web application vulnerability scanner in Python</title>
   <style type='text/css' media='all'>
   /* style: man */
@@ -61,7 +61,8 @@
     <a href="#ATTACKS-SPECIFICATION">ATTACKS SPECIFICATION</a>
     <a href="#PROXY-AND-AUTHENTICATION">PROXY AND AUTHENTICATION</a>
     <a href="#SESSIONS">SESSIONS</a>
-    <a href="#SCAN-AND-ATTACKS-TUNING">SCAN AND ATTACKS TUNING</a>
+    <a href="#CRAWLING">CRAWLING</a>
+    <a href="#PERFORMANCE">PERFORMANCE</a>
     <a href="#ENDPOINT-OPTIONS">ENDPOINT OPTIONS</a>
     <a href="#HTTP-AND-NETWORK-OPTIONS">HTTP AND NETWORK OPTIONS</a>
     <a href="#OUTPUT-OPTIONS">OUTPUT OPTIONS</a>
@@ -81,11 +82,12 @@
     <li class='tr'>wapiti(1)</li>
   </ol>
 
-  <h2 id="NAME">NAME</h2>
+  
+
+<h2 id="NAME">NAME</h2>
 <p class="man-name">
   <code>wapiti</code> - <span class="man-whatis">A web application vulnerability scanner in Python</span>
 </p>
-
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
 <p><code>wapiti</code> -u <var>BASE_URL</var> [options]</p>
@@ -108,402 +110,626 @@ More detail on each option can be found in the following sections.</p>
 <p>TARGET SPECIFICATION:</p>
 
 <ul>
-<li><code>-u</code>, <code>--url</code> <var>URL</var></li>
-<li><code>--data</code> <var>URL_ENCODED_DATA</var></li>
-<li><code>--scope</code> {url,page,folder,subdomain,domain,punk}</li>
+  <li>
+<code>-u</code>, <code>--url</code> <var>URL</var>
+</li>
+  <li>
+<code>--data</code> <var>URL_ENCODED_DATA</var>
+</li>
+  <li>
+<code>--scope</code> {url,page,folder,subdomain,domain,punk}</li>
 </ul>
-
 
 <p>ATTACK SPECIFICATION:</p>
 
 <ul>
-<li><code>-m</code> <var>MODULES_LIST</var></li>
-<li><code>--list-modules</code></li>
-<li><code>-l</code>, <code>--level</code> <var>LEVEL</var></li>
-<li><code>--cms</code> {drupal,joomla,prestashop,spip,wp}</li>
+  <li>
+<code>-m</code> <var>MODULES_LIST</var>
+</li>
+  <li><code>--list-modules</code></li>
+  <li>
+<code>-l</code>, <code>--level</code> <var>LEVEL</var>
+</li>
+  <li>
+<code>--cms</code> {drupal,joomla,prestashop,spip,wp}</li>
 </ul>
-
 
 <p>PROXY AND AUTHENTICATION OPTIONS:</p>
 
 <ul>
-<li><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var></li>
-<li><code>--tor</code></li>
-<li><code>--mitm-port</code> <var>PORT</var></li>
-<li><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var></li>
-<li><code>--auth-user</code> <var>USERNAME</var></li>
-<li><code>--auth-password</code> <var>PASSWORD</var></li>
-<li><code>--auth-method</code> {basic,digest,ntlm}</li>
-<li><code>--form-cred</code> <var>CREDENTIALS</var></li>
-<li><code>--form-user</code> <var>USERNAME</var></li>
-<li><code>--form-password</code> <var>PASSWORD</var></li>
-<li><code>--form-url</code> <var>URL</var></li>
-<li><code>--form-enctype</code> <var>ENCTYPE</var></li>
-<li><code>--form-script</code> <var>FILENAME</var></li>
-<li><code>--side-file</code> <var>FILENAME</var></li>
-<li><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var></li>
-<li><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var></li>
-<li><code>--drop-set-cookie</code></li>
+  <li>
+<code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var>
+</li>
+  <li><code>--tor</code></li>
+  <li>
+<code>--mitm-port</code> <var>PORT</var>
+</li>
+  <li>
+<code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var>
+</li>
+  <li>
+<code>--auth-user</code> <var>USERNAME</var>
+</li>
+  <li>
+<code>--auth-password</code> <var>PASSWORD</var>
+</li>
+  <li>
+<code>--auth-method</code> {basic,digest,ntlm}</li>
+  <li>
+<code>--form-cred</code> <var>CREDENTIALS</var>
+</li>
+  <li>
+<code>--form-user</code> <var>USERNAME</var>
+</li>
+  <li>
+<code>--form-password</code> <var>PASSWORD</var>
+</li>
+  <li>
+<code>--form-url</code> <var>URL</var>
+</li>
+  <li>
+<code>--form-data</code> <var>DATA</var>
+</li>
+  <li>
+<code>--form-enctype</code> <var>ENCTYPE</var>
+</li>
+  <li>
+<code>--form-script</code> <var>FILENAME</var>
+</li>
+  <li>
+<code>-sf</code>, <code>--side-file</code> <var>FILENAME</var>
+</li>
+  <li>
+<code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var>
+</li>
+  <li>
+<code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var>
+</li>
+  <li><code>--drop-set-cookie</code></li>
 </ul>
-
 
 <p>SESSION OPTIONS:</p>
 
 <ul>
-<li><code>--skip-crawl</code></li>
-<li><code>--resume-crawl</code></li>
-<li><code>--flush-attacks</code></li>
-<li><code>--flush-session</code></li>
-<li><code>--store-session</code> <var>PATH</var></li>
-<li><code>--store-config</code> <var>PATH</var></li>
+  <li><code>--skip-crawl</code></li>
+  <li><code>--resume-crawl</code></li>
+  <li><code>--flush-attacks</code></li>
+  <li><code>--flush-session</code></li>
+  <li>
+<code>--store-session</code> <var>PATH</var>
+</li>
+  <li>
+<code>--store-config</code> <var>PATH</var>
+</li>
 </ul>
 
-
-<p>SCAN AND ATTACKS TUNING:</p>
+<p>CRAWLING:</p>
 
 <ul>
-<li><code>-s</code>, <code>--start</code> <var>URL</var></li>
-<li><code>-x</code>, <code>--exclude</code> <var>URL</var></li>
-<li><code>--swagger</code> <var>URL</var></li>
-<li><code>-r</code>, <code>--remove</code> <var>PARAMETER</var></li>
-<li><code>--skip</code> <var>PARAMETER</var></li>
-<li><code>-d</code>, <code>--depth</code> <var>DEPTH</var></li>
-<li><code>--max-links-per-page</code> <var>MAX_LINKS_PER_PAGE</var></li>
-<li><code>--max-files-per-dir</code> <var>MAX_FILES_PER_DIR</var></li>
-<li><code>--max-scan-time</code> <var>MAX_SCAN_TIME</var></li>
-<li><code>--max-attack-time</code> <var>MAX_ATTACK_TIME</var></li>
-<li><code>--max-parameters</code> <var>MAX</var></li>
-<li><code>-S</code>, <code>--scan-force</code> {paranoid,sneaky,polite,normal,aggressive,insane}</li>
-<li><code>--tasks</code> <var>TASKS</var></li>
+  <li>
+<code>-s</code>, <code>--start</code> <var>URL</var>
+</li>
+  <li>
+<code>-x</code>, <code>--exclude</code> <var>URL</var>
+</li>
+  <li>
+<code>-r</code>, <code>--remove</code> <var>PARAMETER</var>
+</li>
+  <li>
+<code>--skip</code> <var>PARAMETER</var>
+</li>
+  <li>
+<code>-d</code>, <code>--depth</code> <var>DEPTH</var>
+</li>
+  <li>
+<code>--max-links-per-page</code> <var>MAX_LINKS_PER_PAGE</var>
+</li>
+  <li>
+<code>--max-files-per-dir</code> <var>MAX_FILES_PER_DIR</var>
+</li>
+  <li>
+<code>--max-scan-time</code> <var>MAX_SCAN_TIME</var>
+</li>
+  <li>
+<code>--max-attack-time</code> <var>MAX_ATTACK_TIME</var>
+</li>
+  <li>
+<code>--max-parameters</code> <var>MAX</var>
+</li>
+  <li>
+<code>--swagger</code> <var>URL</var>
+</li>
+  <li>
+<code>--headless</code> {no,hidden,visible}</li>
+  <li>
+<code>--wait</code> <var>TIME</var>
+</li>
 </ul>
 
+<p>PERFORMANCE:</p>
+
+<ul>
+  <li>
+<code>-S</code>, <code>--scan-force</code> {paranoid,sneaky,polite,normal,aggressive,insane}</li>
+  <li>
+<code>--tasks</code> <var>TASKS</var>
+</li>
+</ul>
 
 <p>ENDPOINT OPTIONS:</p>
 
 <ul>
-<li><code>--external-endpoint</code> <var>EXTERNAL_ENDPOINT_URL</var></li>
-<li><code>--internal-endpoint</code> <var>INTERNAL_ENDPOINT_URL</var></li>
-<li><code>--endpoint</code> <var>ENDPOINT_URL</var></li>
-<li><code>--dns-endpoint</code> <var>DNS_ENDPOINT_DOMAIN</var></li>
+  <li>
+<code>--external-endpoint</code> <var>EXTERNAL_ENDPOINT_URL</var>
+</li>
+  <li>
+<code>--internal-endpoint</code> <var>INTERNAL_ENDPOINT_URL</var>
+</li>
+  <li>
+<code>--endpoint</code> <var>ENDPOINT_URL</var>
+</li>
+  <li>
+<code>--dns-endpoint</code> <var>DNS_ENDPOINT_DOMAIN</var>
+</li>
 </ul>
-
 
 <p>HTTP AND NETWORK OPTIONS:</p>
 
 <ul>
-<li><code>-t</code>, <code>--timeout</code> <var>SECONDS</var></li>
-<li><code>-H</code>, <code>--header</code> <var>HEADER</var></li>
-<li><code>-A</code>, <code>--user-agent</code> <var>AGENT</var></li>
-<li> <code>--verify-ssl</code> {0,1}</li>
+  <li>
+<code>-t</code>, <code>--timeout</code> <var>SECONDS</var>
+</li>
+  <li>
+<code>-H</code>, <code>--header</code> <var>HEADER</var>
+</li>
+  <li>
+<code>-A</code>, <code>--user-agent</code> <var>AGENT</var>
+</li>
+  <li>
+<code>--verify-ssl</code> {0,1}</li>
 </ul>
-
 
 <p>OUTPUT OPTIONS:</p>
 
 <ul>
-<li><code>--color</code></li>
-<li><code>-v</code>, <code>--verbose</code> <var>LEVEL</var></li>
-<li><code>--log</code> <var>OUTPUT_PATH</var></li>
+  <li><code>--color</code></li>
+  <li>
+<code>-v</code>, <code>--verbose</code> <var>LEVEL</var>
+</li>
+  <li>
+<code>--log</code> <var>OUTPUT_PATH</var>
+</li>
 </ul>
-
 
 <p>REPORT OPTIONS:</p>
 
 <ul>
-<li><code>-f</code>, <code>--format</code> {json,html,txt,xml}</li>
-<li><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var></li>
-<li><code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var></li>
+  <li>
+<code>-f</code>, <code>--format</code> {json,html,txt,xml}</li>
+  <li>
+<code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var>
+</li>
+  <li>
+<code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var>
+</li>
 </ul>
-
 
 <p>OTHER OPTIONS:</p>
 
 <ul>
-<li><code>--no-bugreport</code></li>
-<li><code>--version</code></li>
-<li><code>--update</code> [<code>--wapp-url</code> <var>WAPP_DB_URL</var>, <code>--wapp-dir</code> <var>WAPP_DB_PATH</var>]</li>
-<li><code>-h</code></li>
+  <li><code>--no-bugreport</code></li>
+  <li><code>--version</code></li>
+  <li>
+<code>--update</code> [<code>--wapp-url</code> <var>WAPP_DB_URL</var>, <code>--wapp-dir</code> <var>WAPP_DB_PATH</var>]</li>
+  <li><code>-h</code></li>
 </ul>
-
 
 <h2 id="TARGET-SPECIFICATION">TARGET SPECIFICATION</h2>
 
 <ul>
-<li><p><code>-u</code>, <code>--url</code> <var>URL</var><br />
-The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see --scope for details).<br />
-This is the only required argument. The scheme part of the URL must be either http or https.</p></li>
-<li><p><code>--data</code> <var>URL_ENCODED_DATA</var><br />
-If you need to attack only a specific POST request you can give this option a url-encoded string. It will be used as POST parameters for the URL specified by the <code>-u</code> option.</p></li>
-<li><p><code>--scope</code> <var>SCOPE</var><br />
+  <li>
+    <p><code>-u</code>, <code>--url</code> <var>URL</var><br>
+The URL that will be used as the base for the scan. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see <code>--scope</code> for details).<br>
+This is the only required argument. The scheme part of the URL must be either http or https.</p>
+  </li>
+  <li>
+    <p><code>--data</code> <var>URL_ENCODED_DATA</var><br>
+If you need to attack only a specific POST request you can give this option a url-encoded string. It will be used as POST parameters for the URL specified by the <code>-u</code> option.</p>
+  </li>
+  <li>
+    <p><code>--scope</code> <var>SCOPE</var><br>
 Define the scope of the scan and attacks. Valid choices are :</p>
 
-<ul>
-<li>url : will only scan and attack the exact base URL given with -u option.</li>
-<li>page : will attack every URL matching the path of the base URL (every query string variation).</li>
-<li>folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename).</li>
-<li>domain : will scan and attack every URL whose domain name match the one from the base URL.</li>
-<li>punk : will scan and attack every URL found whatever the domain. Think twice before using that scope.</li>
+    <pre><code>- url : will only scan and attack the exact base URL given with -u option.
+- page : will attack every URL matching the path of the base URL (every query string variation).
+- folder : will scan and attack every URL starting with the base URL value. This base URL should have a trailing slash (no filename).
+- domain : will scan and attack every URL whose domain name match the one from the base URL.
+- punk : will scan and attack every URL found whatever the domain. Think twice before using that scope.
+</code></pre>
+  </li>
 </ul>
-</li>
-</ul>
-
 
 <h2 id="ATTACKS-SPECIFICATION">ATTACKS SPECIFICATION</h2>
 
 <ul>
-<li><p><code>-m</code>, <code>--module</code> <var>MODULE_LIST</var><br />
-Set the list of attack modules (modules names separated with commas) to launch against the target.<br />
-Default behavior (when the option is not set) is to use the most common modules.<br />
-Common modules can also be specified using the "common" keyword.<br />
-If you want to use common modules along with XXE module you can pass -m common,xxe.<br />
-Activating all modules can be done with the "all" keyword (not recommended though).<br />
-To launch a scan without launching any attack, just give an empty value (-m "").<br />
-You can filter on http methods too (only get or post). For example -m "xss:get,exec:post".</p></li>
-<li><p><code>--list-modules</code><br />
-Print the list of available Wapiti modules along with a short description then exit.</p></li>
-<li><p><code>-l</code>, <code>--level</code> <var>LEVEL</var><br />
-In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL.<br />
-While it may be successful in finding vulnerabilities that way, it was causing too many requests for not enough success.<br />
-This behavior is now hidden behind this option and can be reactivated by setting -l to 2.<br />
-It may be useful on CGIs when developers have to parse the query-string themselves.<br />
-Default value for this option is 1.</p></li>
-<li><p><code>--cms</code> <var>CMS_LIST</var>
-This option can only be used when the module cms is selected.
-It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.
-Multiple choices are allowed, all the CMS will be scanned if this option is not set.</p></li>
+  <li>
+    <p><code>-m</code>, <code>--module</code> <var>MODULE_LIST</var><br>
+Set the list of attack modules (modules names separated with commas) to launch against the target.<br>
+Default behavior (when the option is not set) is to use the most common modules.<br>
+Common modules can also be specified using the "common" keyword.<br>
+If you want to use common modules along with XXE module you can pass <code>-m common,xxe</code>.<br>
+Activating all modules can be done with the "all" keyword (not recommended though).<br>
+To launch a scan without launching any attack, just give an empty value (-m "").<br>
+You can filter on http methods too (only get or post). For example <code>-m "xss:get,exec:post"</code>.</p>
+  </li>
+  <li>
+    <p><code>--list-modules</code><br>
+Print the list of available Wapiti modules along with a short description then exit.</p>
+  </li>
+  <li>
+    <p><code>-l</code>, <code>--level</code> <var>LEVEL</var><br>
+In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL.<br>
+While it may be successful in finding vulnerabilities that way, it was causing too many requests for not enough success.<br>
+This behavior is now hidden behind this option and can be reactivated by setting -l to 2.<br>
+It may be useful on CGIs when developers have to parse the query-string themselves.<br>
+Default value for this option is 1.</p>
+  </li>
+  <li>
+    <p><code>--cms</code> <var>CMS_LIST</var><br>
+This option can only be used when the module cms is selected.<br>
+It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.<br>
+Multiple choices are allowed, all the CMS will be scanned if this option is not set.</p>
+  </li>
 </ul>
-
 
 <h2 id="PROXY-AND-AUTHENTICATION">PROXY AND AUTHENTICATION</h2>
 
 <ul>
-<li><p><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var><br />
-The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.</p></li>
-<li><p><code>--tor</code><br />
-Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li>
-<li><p><code>--mitm-port</code> <var>PORT</var>
-If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.
-Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p></li>
-<li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
-(DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).
-Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--auth-user</code> <var>USERNAME</var><br />
+  <li>
+    <p><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var><br>
+The given URL will be used as a proxy for HTTP and HTTPS requests. This URL can have one of the following scheme : http, https, socks.</p>
+  </li>
+  <li>
+    <p><code>--tor</code><br>
+Make Wapiti use a Tor listener (same as <code>--proxy socks://127.0.0.1:9050/</code>)</p>
+  </li>
+  <li>
+    <p><code>--mitm-port</code> <var>PORT</var><br>
+If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.<br>
+Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.</p>
+  </li>
+  <li>
+    <p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br>
+(DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).<br>
+Given value should be in the form login%password (% is used as a separator)</p>
+  </li>
+  <li>
+    <p><code>--auth-user</code> <var>USERNAME</var><br>
 Set username to use for HTTP authentication on the target (see available methods bellow).</p>
-
-<ul>
-<li><code>--auth-password</code> <var>PASSWORD</var><br />
-Set password to use for HTTP authentication on the target (see available methods bellow).</li>
-</ul>
-</li>
-<li><p><code>--auth-method</code> <var>TYPE</var><br />
-Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.
-NTLM authentication may require you to install an additional Python module.</p></li>
-<li><p><code>--form-cred</code> <var>CREDENTIALS</var><br />
-(DEPRECATED) Set credentials to use for web form authentication on the target.
-Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--form-user</code> <var>USERNAME</var><br />
+  </li>
+  <li>
+    <p><code>--auth-password</code> <var>PASSWORD</var><br>
+Set password to use for HTTP authentication on the target (see available methods bellow).</p>
+  </li>
+  <li>
+    <p><code>--auth-method</code> <var>TYPE</var><br>
+Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.<br>
+NTLM authentication may require you to install an additional Python module.</p>
+  </li>
+  <li>
+    <p><code>--form-cred</code> <var>CREDENTIALS</var><br>
+(DEPRECATED) Set credentials to use for web form authentication on the target.<br>
+Given value should be in the form login%password (% is used as a separator)</p>
+  </li>
+  <li>
+    <p><code>--form-user</code> <var>USERNAME</var><br>
 Set username to use for web form authentication on the target.</p>
-
-<ul>
-<li><code>--form-password</code> <var>PASSWORD</var><br />
-Set password to use for web form authentication on the target.</li>
+  </li>
+  <li>
+    <p><code>--form-password</code> <var>PASSWORD</var><br>
+Set password to use for web form authentication on the target.</p>
+  </li>
+  <li>
+    <p><code>--form-url</code> <var>URL</var><br>
+If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.<br>
+Otherwise raw credentials are sent directly to the given URL.</p>
+  </li>
+  <li>
+    <p><code>--form-data</code> <var>DATA</var><br>
+Raw body to send to the form URL specified with <code>--form-url</code>.</p>
+  </li>
+  <li>
+    <p><code>--form-enctype</code> <var>ENCTYPE</var><br>
+Send data specified with <code>--form-data</code> using the given content-type (default is "application/x-www-form-urlencoded")</p>
+  </li>
+  <li>
+    <p><code>--form-script</code> <var>FILENAME</var><br>
+Use a custom Python authentication plugin</p>
+  </li>
+  <li>
+    <p><code>-sf</code>, <code>--side-file</code> <var>FILENAME</var><br>
+Use a .side file generated using Selenium IDE to perform an authenticated scan.</p>
+  </li>
+  <li>
+    <p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br>
+Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br>
+You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p>
+  </li>
+  <li>
+    <p><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var><br>
+Set cookies from a valid user cookies.<br>
+You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.<br>
+For example:<br>
+    <code>--cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"</code></p>
+  </li>
+  <li>
+    <p><code>--drop-set-cookie</code><br>
+Ignore cookies given in HTTP responses. Cookies that have been loaded using <code>-c</code> will be kept.</p>
+  </li>
 </ul>
-</li>
-<li><p><code>--form-url</code> <var>URL</var><br />
-If <code>--form-data</code> is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials.
-Otherwise raw credentials are sent directly to the given URL.</p></li>
-<li><p><code>--form-enctype</code> <var>ENCTYPE</var><br />
-Send data specified with <code>--form-data</code> using the given content-type (default is "application/x-www-form-urlencoded")</p></li>
-<li><p><code>--form-script</code> <var>FILENAME</var><br />
-Use a custom Python authentication plugin</p></li>
-<li><p><code>--side-file</code> <var>FILENAME</var>
-Use a .side file generated using Selenium IDE to perform an authenticated scan.</p></li>
-<li><p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE_OR_BROWSER_NAME</var><br />
-Load cookies from a Wapiti JSON cookie file. See <span class="man-ref">wapiti-getcookie<span class="s">(1)</span></span> for more information.<br />
-You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported).</p></li>
-<li><p><code>-C</code>, <code>--cookie-value</code> <var>COOKIE_VALUE</var>
-Set cookies from a valid user cookies.
-You can import all the session cookies by copying the value of the cookies sent with headers from a request sent by an authenticated user.
-For example: --cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"</p></li>
-<li><p><code>--drop-set-cookie</code><br />
-Ignore cookies given in HTTP responses. Cookies that have been loaded using <code>-c</code> will be kept.</p></li>
-</ul>
-
 
 <h2 id="SESSIONS">SESSIONS</h2>
 
-<p>Since Wapiti 3.0.0, scanned URLs, discovered vulnerabilities and attacks status are stored in sqlite3 databases used as Wapiti session files.<br />
-Default behavior when a previous scan session exists for the given base URL and scope is to resume the scan and attack status.<br />
-Following options allows you to bypass this behavior/</p>
+<p>Since Wapiti 3.0.0, scanned URLs, discovered vulnerabilities and attacks status are stored in sqlite3 databases used as Wapiti session files.<br>
+Default behavior when a previous scan session exists for the given base URL and scope is to resume the scan and attack status.<br>
+Following options allows you to bypass this behavior:</p>
 
 <ul>
-<li><p><code>--skip-crawl</code><br />
-If a previous scan was performed but wasn't finished, don't resume the scan.
-Attack will be made on currently known URLs without scanning more.</p></li>
-<li><p><code>--resume-crawl</code><br />
-If the crawl was previously stopped and attacks started, default behavior is to skip crawling if the session is restored.<br />
-Use this option in order to continue the scan process while keeping vulnerabilities and attacks in the session.</p></li>
-<li><p><code>--flush-attacks</code><br />
-Forget everything about discovered vulnerabilities and which URL was attacked by which module.<br />
-Only the scan (crawling) information will be kept.</p></li>
-<li><p><code>--flush-session</code><br />
-Forget everything about the target for the given scope.</p></li>
-<li><p><code>--store-session</code> <var>PATH</var><br />
-Specify an alternative path for storing session (.db and .pkl) files.</p></li>
-<li><p><code>--store-config</code> <var>PATH</var><br />
-Specify an alternative path for storing particular module (<code>apps.json</code> and <code>nikto_db</code>) files.</p></li>
+  <li>
+    <p><code>--skip-crawl</code><br>
+If a previous scan was performed but wasn't finished, don't resume the scan.<br>
+Attack will be made on currently known URLs without scanning more.</p>
+  </li>
+  <li>
+    <p><code>--resume-crawl</code><br>
+If the crawl was previously stopped and attacks started, default behavior is to skip crawling if the session is restored.<br>
+Use this option in order to continue the scan process while keeping vulnerabilities and attacks in the session.</p>
+  </li>
+  <li>
+    <p><code>--flush-attacks</code><br>
+Forget everything about discovered vulnerabilities and which URL was attacked by which module.<br>
+Only the scan (crawling) information will be kept.</p>
+  </li>
+  <li>
+    <p><code>--flush-session</code><br>
+Forget everything about the target for the given scope.</p>
+  </li>
+  <li>
+    <p><code>--store-session</code> <var>PATH</var><br>
+Specify an alternative path for storing session (.db and .pkl) files.</p>
+  </li>
+  <li>
+    <p><code>--store-config</code> <var>PATH</var><br>
+Specify an alternative path for storing particular module (<code>apps.json</code> and <code>nikto_db</code>) files.</p>
+  </li>
 </ul>
 
-
-<h2 id="SCAN-AND-ATTACKS-TUNING">SCAN AND ATTACKS TUNING</h2>
+<h2 id="CRAWLING">CRAWLING</h2>
 
 <ul>
-<li><p><code>-s</code>, <code>--start</code> <var>URL</var><br />
-If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with.<br />
-Those URLs will be given a depth of 0, just like the base URL.<br />
-This option can be called several times.<br />
-You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.</p></li>
-<li><p><code>-x</code>, <code>--exclude</code> <var>URL</var><br />
-Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).<br />
-This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.</p></li>
-<li><p><code>--swagger</code> <var>URL</var><br />
-Extract API requests from the specified Swagger file.
-Extracted requests are added to the crawler.</p></li>
-<li><p><code>-r</code>, <code>--remove</code> <var>PARAMETER</var><br />
-If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).<br />
-This option can be used several times.</p></li>
-<li><p><code>--skip</code> <var>PARAMETER</var><br />
-Given parameter will be kept in URLs and forms but won't be attacked.<br />
-Useful if you already know non-vulnerable parameters.</p></li>
-<li><p><code>-d</code>, <code>--depth</code> <var>DEPTH</var><br />
-When Wapiti crawls a website it gives each found URL a depth value.<br />
-The base URL, and additional starting URLs (-s) are given a depth of 0.<br />
-Each link found in those URLs got a depth of 1, and so on.<br />
-Default maximum depth is 40 and is very large.<br />
-This limit make sure the scan will stop at some time.<br />
-For a fast scan a depth inferior to 5 is recommended.</p></li>
-<li><p><code>--max-links-per-page</code> <var>MAX</var><br />
-This is another option to be able to reduce the number of URLs discovered by the crawler.<br />
-Only the first MAX links of each webpage will be extracted.<br />
-This option is not really effective as the same link may appear on different webpages.<br />
-It should be useful is rare conditions, for example when there is a lot a webpages without query string.</p></li>
-<li><p><code>--max-files-per-dir</code> <var>MAX</var><br />
-Limit the number of URLs to crawl under each folder found on the webserver.<br />
-Note that a URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.<br />
-Like the previous option it should be useful only in certain situations.</p></li>
-<li><p><code>--max-scan-time</code> <var>SECONDS</var><br />
-Stop the scan after <code>SECONDS</code> seconds if it is still running.
-Should be useful to automatise scanning from another process (continuous testing).</p></li>
-<li><p><code>--max-attack-time</code> <var>SECONDS</var><br />
-Each attack module will stop after <code>SECONDS</code> seconds if it is still running.
-Should be useful to automatise scanning from another process (continuous testing).</p></li>
-<li><p><code>--max-parameters</code> <var>MAX</var><br />
-URLs and forms having more than MAX input parameters will be discarded before launching attack modules.</p></li>
-<li><p><code>-S</code>, <code>--scan-force</code> <var>FORCE</var><br />
-The more input parameters a URL or form have, the more requests Wapiti will send.<br />
-The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge amount of time.<br />
+  <li>
+    <p><code>-s</code>, <code>--start</code> <var>URL</var><br>
+If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with.<br>
+Those URLs will be given a depth of 0, just like the base URL.<br>
+This option can be called several times.<br>
+You can also give it a filename and Wapiti will read URLs from the given file (must be UTF-8 encoded), one URL per line.</p>
+  </li>
+  <li>
+    <p><code>-x</code>, <code>--exclude</code> <var>URL</var><br>
+Prevent the given URL from being scanned. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with --cookie).<br>
+This option can be applied several times. Excluded URL given as a parameter can contain wildcards for basic pattern matching.</p>
+  </li>
+  <li>
+    <p><code>-r</code>, <code>--remove</code> <var>PARAMETER</var><br>
+If the given parameter is found in scanned URL it will be automatically removed (URLs are edited).<br>
+This option can be used several times.</p>
+  </li>
+  <li>
+    <p><code>--skip</code> <var>PARAMETER</var><br>
+Given parameter will be kept in URLs and forms but won't be attacked.<br>
+Useful if you already know non-vulnerable parameters.</p>
+  </li>
+  <li>
+    <p><code>-d</code>, <code>--depth</code> <var>DEPTH</var><br>
+When Wapiti crawls a website it gives each found URL a depth value.<br>
+The base URL, and additional starting URLs (-s) are given a depth of 0.<br>
+Each link found in those URLs got a depth of 1, and so on.<br>
+Default maximum depth is 40 and is very large.<br>
+This limit make sure the scan will stop at some time.<br>
+For a fast scan a depth inferior to 5 is recommended.</p>
+  </li>
+  <li>
+    <p><code>--max-links-per-page</code> <var>MAX</var><br>
+This is another option to be able to reduce the number of URLs discovered by the crawler.<br>
+Only the first MAX links of each webpage will be extracted.<br>
+This option is not really effective as the same link may appear on different webpages.<br>
+It should be useful is rare conditions, for example when there is a lot a webpages without query string.</p>
+  </li>
+  <li>
+    <p><code>--max-files-per-dir</code> <var>MAX</var><br>
+Limit the number of URLs to crawl under each folder found on the webserver.<br>
+Note that a URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is.<br>
+Like the previous option it should be useful only in certain situations.</p>
+  </li>
+  <li>
+    <p><code>--max-scan-time</code> <var>SECONDS</var><br>
+Stop the scan after <code>SECONDS</code> seconds if it is still running.<br>
+Should be useful to automatise scanning from another process (continuous testing).</p>
+  </li>
+  <li>
+    <p><code>--max-attack-time</code> <var>SECONDS</var><br>
+Each attack module will stop after <code>SECONDS</code> seconds if it is still running.<br>
+Should be useful to automatise scanning from another process (continuous testing).</p>
+  </li>
+  <li>
+    <p><code>--max-parameters</code> <var>MAX</var><br>
+URLs and forms having more than MAX input parameters will be discarded before launching attack modules.</p>
+  </li>
+  <li>
+    <p><code>--swagger</code> <var>URL</var><br>
+Extract API requests from the specified Swagger file.<br>
+Extracted requests are added to the crawler.</p>
+  </li>
+  <li>
+    <p><code>--headless</code> <var>MODE</var><br>
+Choose to use the Firefox headless browser for crawling or not (default).<br>
+Using that option allows to catch XHR requests but makes the crawling slower.</p>
+
+    <p>Possible values are:</p>
+
+    <pre><code>- no: legacy crawler is used
+- hidden: headless crawler is used but the Firefox window is hidden
+- visible: headless Firefox is used and visible (can be useful to interact with it if stuck)
+</code></pre>
+  </li>
+  <li>
+    <p><code>--wait</code> <var>TIME</var><br>
+Wait the specified amount of seconds before analyzing a webpage (headless mode only)</p>
+  </li>
+</ul>
+
+<h2 id="PERFORMANCE">PERFORMANCE</h2>
+
+<ul>
+  <li>
+    <p><code>-S</code>, <code>--scan-force</code> <var>FORCE</var><br>
+The more input parameters a URL or form have, the more requests Wapiti will send.<br>
+The sum of requests can grow rapidly and attacking a form with 40 or more input fields can take a huge amount of time.<br>
 Wapiti use a mathematical formula to reduce the numbers of URLs scanned for a given pattern (same variables names) when
-the number of parameters grows.<br />
+the number of parameters grows.<br>
 The formula is <code>maximum_allowed_patterns = 220 / (math.exp(number_of_parameters * factor) ** 2)</code>
-where factor is an internal value controller by the <var>FORCE</var> value you give as an option.<br />
-Available choices are : paranoid, sneaky, polite, normal, aggressive, insane.<br />
-Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).<br />
-Insane mode just remove the calculation of those limits, every URL will be attacked.<br />
-Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).</p></li>
-<li><p><code>--tasks</code> <var>TASKS</var><br />
-Set how many concurrent tasks Wapiti should use.<br />
-Wapiti leverages Python's asyncio framework for this.</p></li>
+where factor is an internal value controller by the <var>FORCE</var> value you give as an option.<br>
+Available choices are : paranoid, sneaky, polite, normal, aggressive, insane.<br>
+Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 or more).<br>
+Insane mode just remove the calculation of those limits, every URL will be attacked.<br>
+Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more).</p>
+  </li>
+  <li>
+    <p><code>--tasks</code> <var>TASKS</var><br>
+Set how many concurrent tasks Wapiti should use.<br>
+Wapiti leverages Python's asyncio framework for this.</p>
+  </li>
 </ul>
-
 
 <h2 id="ENDPOINT-OPTIONS">ENDPOINT OPTIONS</h2>
 
-<p>Some attack modules are using an HTTP endpoint to check for vulnerabilities.<br />
-For example the SSRF module inject the endpoint URL into webpage arguments to check if the target script try to fetch that URL.<br />
-Default HTTP endpoint is http://wapiti3.ovh/. Keep in mind that the target and your computer must be able to join that endpoint for the module to work.<br />
+<p>Some attack modules are using an HTTP endpoint to check for vulnerabilities.<br>
+For example the SSRF module inject the endpoint URL into webpage arguments to check if the target script try to fetch that URL.<br>
+Default HTTP endpoint is http://wapiti3.ovh/. Keep in mind that the target and your computer must be able to join that endpoint for the module to work.<br>
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint.</p>
 
 <ul>
-<li><p><code>--internal-endpoint</code> <var>URL</var><br />
-You may want to specify an internal endpoint different from the external one.<br />
-The internal endpoint is used by Wapiti to fetch results of attacks.<br />
-If you are behind a NAT it may be a URL for a local server (for example http://192.168.0.1/)</p></li>
-<li><p><code>--external-endpoint</code> <var>URL</var><br />
-Set the endpoint URL (the one that the target will fetch in case of vulnerability).<br />
-Using your own endpoint may reduce risk of being caught by NIDS or WAF.</p></li>
-<li><p><code>--endpoint</code> <var>URL</var><br />
-This option will set both internal and external endpoint URL to the same value.</p></li>
-<li><p><code>--dns-endpoint</code> <var>DNS</var><br />
-This options specify the DNS endpoint to use for the log4shell attack module.<br />
-The default value is dns.wapiti3.ovh</p></li>
+  <li>
+    <p><code>--internal-endpoint</code> <var>URL</var><br>
+You may want to specify an internal endpoint different from the external one.<br>
+The internal endpoint is used by Wapiti to fetch results of attacks.<br>
+If you are behind a NAT it may be a URL for a local server (for example http://192.168.0.1/)</p>
+  </li>
+  <li>
+    <p><code>--external-endpoint</code> <var>URL</var><br>
+Set the endpoint URL (the one that the target will fetch in case of vulnerability).<br>
+Using your own endpoint may reduce risk of being caught by NIDS or WAF.</p>
+  </li>
+  <li>
+    <p><code>--endpoint</code> <var>URL</var><br>
+This option will set both internal and external endpoint URL to the same value.</p>
+  </li>
+  <li>
+    <p><code>--dns-endpoint</code> <var>DNS</var><br>
+This options specify the DNS endpoint to use for the log4shell attack module.<br>
+The default value is dns.wapiti3.ovh</p>
+  </li>
 </ul>
-
 
 <h2 id="HTTP-AND-NETWORK-OPTIONS">HTTP AND NETWORK OPTIONS</h2>
 
 <ul>
-<li><p><code>-t</code>, <code>--timeout</code> <var>SECONDS</var><br />
-Time to wait (in seconds) for a HTTP response before considering failure.</p></li>
-<li><p><code>-H</code>, <code>--header</code> <var>HEADER</var><br />
+  <li>
+    <p><code>-t</code>, <code>--timeout</code> <var>SECONDS</var><br>
+Time to wait (in seconds) for a HTTP response before considering failure.</p>
+  </li>
+  <li>
+    <p><code>-H</code>, <code>--header</code> <var>HEADER</var><br>
 Set a custom HTTM header to inject in every request sent by Wapiti.
-This option can be used several times.<br />
-Value should be a standard HTTP header line (parameter and value separated with a : sign).</p></li>
-<li><p><code>-A</code>, <code>--user-agent</code> <var>AGENT</var><br />
-Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.<br />
-But you may have to change it to bypass some restrictions so this option is here.</p></li>
-<li><p><code>--verify-ssl</code> <var>VALUE</var><br />
-Wapiti doesn't care of certificates validation by default. That behavior can be changed by passing 1 as a value to that option.</p></li>
+This option can be used several times.<br>
+Value should be a standard HTTP header line (parameter and value separated with a : sign).</p>
+  </li>
+  <li>
+    <p><code>-A</code>, <code>--user-agent</code> <var>AGENT</var><br>
+Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.<br>
+But you may have to change it to bypass some restrictions so this option is here.</p>
+  </li>
+  <li>
+    <p><code>--verify-ssl</code> <var>VALUE</var><br>
+Wapiti doesn't care of certificates validation by default. That behavior can be changed by passing 1 as a value to that option.</p>
+  </li>
 </ul>
-
 
 <h2 id="OUTPUT-OPTIONS">OUTPUT OPTIONS</h2>
 
 <p>Wapiti prints its status to standard output. The two following options allow to tune the output.</p>
 
 <ul>
-<li><p><code>--color</code><br />
-Output will be colorized based on the severity of the information (red is critical, orange for warnings, green for information).</p></li>
-<li><p><code>-v</code>, <code>--verbose</code> <var>LEVEL</var><br />
+  <li>
+    <p><code>--color</code><br>
+Output will be colorized based on the severity of the information (red is critical, orange for warnings, green for information).</p>
+  </li>
+  <li>
+    <p><code>-v</code>, <code>--verbose</code> <var>LEVEL</var><br>
 Set the level of verbosity for the output.
-Possible values are quiet (O), normal (1, default behavior) and verbose (2).</p></li>
-<li><p><code>--log</code> <var>OUTPUT_PATH</var><br />
-In addition to getting information from the console you can also log the output to a local file.<br />
-Debug information will also be stored in that file so this option should be mainly used to debug Wapiti.</p></li>
+Possible values are quiet (O), normal (1, default behavior) and verbose (2).</p>
+  </li>
+  <li>
+    <p><code>--log</code> <var>OUTPUT_PATH</var><br>
+In addition to getting information from the console you can also log the output to a local file.<br>
+Debug information will also be stored in that file so this option should be mainly used to debug Wapiti.</p>
+  </li>
 </ul>
-
 
 <h2 id="REPORT-OPTIONS">REPORT OPTIONS</h2>
 
 <p>Wapiti will generate a report at the end of the attack process. Several formats of reports are available.</p>
 
 <ul>
-<li><p><code>-f</code>, <code>--format</code> <var>FORMAT</var><br />
-Set the format of the report. Valid choices are json, html, txt and xml.<br />
-Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p></li>
-<li><p><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var><br />
-Set the path were the report will be generated.</p></li>
-<li><p><code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var>
-Set the level of detailed report for the output.
-Possible values are (1) : includes HTTP requestes in the report, (2) : includes HTTP responses (headers and bodies) in the report.</p></li>
+  <li>
+    <p><code>-f</code>, <code>--format</code> <var>FORMAT</var><br>
+Set the format of the report. Valid choices are json, html, txt and xml.<br>
+Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p>
+  </li>
+  <li>
+    <p><code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var><br>
+Set the path were the report will be generated.</p>
+  </li>
+  <li>
+    <p><code>-dr</code>, <code>--detailed-report</code> <var>LEVEL</var><br>
+Set the level of detailed report for the output.<br>
+Possible values are (1) : includes HTTP requests in the report, (2) : includes HTTP responses (headers and bodies) in the report.</p>
+  </li>
 </ul>
-
 
 <h2 id="OTHER-OPTIONS">OTHER OPTIONS</h2>
 
 <ul>
-<li><p><code>--version</code><br />
-Print Wapiti version then exit.</p></li>
-<li><p><code>--no-bugreport</code><br />
-If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.<br />
-You can still prevent reports from being sent using that option.</p></li>
-<li><p><code>--update</code><br />
-Update particular Wapiti modules (download a fresh version of the <code>apps.json</code> and <code>nikto_db</code> files) then exit.
-You can combine it with <code>--store-config</code> to specify where to store downloaded files.
-You can also combine it with <code>--wapp-url</code> to update the Wappalyzer DB from a custom git repository, or with <code>--wapp-dir</code> to update it from a local Wappalyzer DB directory.</p></li>
-<li><p><code>-h</code>, <code>--help</code><br />
-Show detailed options description. More details are available in this manpage though.</p></li>
+  <li>
+    <p><code>--version</code><br>
+Print Wapiti version then exit.</p>
+  </li>
+  <li>
+    <p><code>--no-bugreport</code><br>
+If a Wapiti attack module crashes of a non-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability. Note that only the content of the report is kept.<br>
+You can still prevent reports from being sent using that option.</p>
+  </li>
+  <li>
+    <p><code>--update</code><br>
+Update particular Wapiti modules (download a fresh version of the <code>apps.json</code> and <code>nikto_db</code> files) then exit. 
+You can combine it with <code>--store-config</code> to specify where to store downloaded files.<br>
+You can also combine it with <code>--wapp-url</code> to update the Wappalyzer DB from a custom git repository, or with <code>--wapp-dir</code> to update it from a local Wappalyzer DB directory.</p>
+  </li>
+  <li>
+    <p><code>-h</code>, <code>--help</code><br>
+Show detailed options description. More details are available in this manpage though.</p>
+  </li>
 </ul>
-
 
 <h2 id="LICENSE">LICENSE</h2>
 
@@ -512,7 +738,7 @@ Please read the LICENSE file for more information.</p>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
 
-<p>Copyright (c) 2006-2023 Nicolas Surribas.</p>
+<p>Copyright (c) 2006-2024 Nicolas Surribas.</p>
 
 <h2 id="AUTHORS">AUTHORS</h2>
 
@@ -530,10 +756,9 @@ Please read the LICENSE file for more information.</p>
 
 <p>The INSTALL.md file that comes with Wapiti contains every information required to install Wapiti.</p>
 
-
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>September 2024</li>
+    <li class='tc'>October 2024</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

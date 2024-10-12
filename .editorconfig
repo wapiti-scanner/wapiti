@@ -1,0 +1,7 @@
+# Root editorconfig file
+root = true
+
+# For all Ronn files
+[*.ronn]
+trim_trailing_whitespace = false
+
