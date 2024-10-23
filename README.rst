@@ -185,12 +185,11 @@ In the prompt, just type the following command to get the basic usage :
 
 You can also take a look at the manpage (wapiti.1 or wapiti.1.html) for more details on each option.
 
+We also have an official wiki which is more exhaustive : https://github.com/wapiti-scanner/wapiti/wiki
+
 If you have another question, first check the `FAQ <https://github.com/wapiti-scanner/wapiti/blob/master/doc/FAQ.md>`__
 
 If you find a bug, fill an issue : https://github.com/wapiti-scanner/wapiti/issues
-
-The official wiki can be helpful too :  
-https://sourceforge.net/p/wapiti/wiki/browse_pages/
 
 
 How to help the Wapiti project
