@@ -22,6 +22,7 @@ import codecs
 import os
 import signal
 import sys
+import platform
 from importlib import import_module
 from inspect import getdoc
 from sqlite3 import OperationalError
@@ -35,8 +36,7 @@ from wapitiCore.main.banners import print_banner
 from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.main.log import logging
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
-from wapitiCore.net.auth import (async_try_form_login, load_form_script, check_http_auth, login_with_raw_data,
-                                 authenticate_with_side_file)
+from wapitiCore.net.auth import async_try_form_login, load_form_script, check_http_auth, login_with_raw_data
 from wapitiCore.net import Request
 from wapitiCore.report import GENERATORS
 from wapitiCore.parsers.swagger import Swagger
@@ -235,12 +235,6 @@ async def wapiti_main():
 
         wap.set_headless(args.headless)
         wap.set_wait_time(args.wait_time)
-
-        if "side_file" in args:
-            if os.path.isfile(args.side_file):
-                wap.crawler_configuration.cookies = await authenticate_with_side_file(
-                    wap.crawler_configuration, args.side_file, args.headless
-                )
 
         if "cookie" in args:
             if os.path.isfile(args.cookie):
@@ -472,6 +466,11 @@ async def wapiti_main():
     loop = asyncio.get_event_loop()
 
     try:
+        # Only add the signal handler if not on Windows
+        if platform.system() != 'Windows':
+            loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
+        
+        # Begin the crawling or scanning process
         if not args.skip_crawl:
             if await wap.have_attacks_started() and not args.resume_crawl:
                 pass
@@ -480,11 +479,15 @@ async def wapiti_main():
                     logging.info("[*] Resuming scan from previous session, please wait")
 
                 await wap.load_scan_state()
-                loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
+                
                 await wap.browse(global_stop_event, parallelism=args.tasks)
-                loop.remove_signal_handler(signal.SIGINT)
+                
+                if platform.system() != 'Windows':
+                    loop.remove_signal_handler(signal.SIGINT)
+                
                 await wap.save_scan_state()
 
+        # Other parts of the code
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)
             logging.info(
@@ -492,9 +495,14 @@ async def wapiti_main():
             )
 
         logging.info(f"[*] Wapiti found {await wap.count_resources()} URLs and forms during the scan")
-        loop.add_signal_handler(signal.SIGINT, stop_attack_process)
+        
+        if platform.system() != 'Windows':
+            loop.add_signal_handler(signal.SIGINT, stop_attack_process)
+        
         await wap.attack(global_stop_event)
-        loop.remove_signal_handler(signal.SIGINT)
+        
+        if platform.system() != 'Windows':
+            loop.remove_signal_handler(signal.SIGINT)
 
     except OperationalError:
         logging.error(
