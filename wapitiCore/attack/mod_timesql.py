@@ -43,8 +43,8 @@ class ModuleTimesql(Attack):
 
     MSG_VULN = "Blind SQL vulnerability"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.mutator = self.get_mutator()
         self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
 

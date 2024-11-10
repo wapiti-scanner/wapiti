@@ -62,8 +62,8 @@ class ModuleXss(Attack):
 
     RANDOM_WEBSITE = f"https://{random_string(length=6)}.com/"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         methods = ""
         if self.do_get:
             methods += "G"

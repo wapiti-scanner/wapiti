@@ -1,5 +1,4 @@
 import os
-from asyncio import Event
 from itertools import chain
 from unittest.mock import AsyncMock
 
@@ -40,7 +39,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNikto(crawler, persister, options, crawler_configuration)
         module.do_get = True
         await module.attack(request)
 
@@ -92,7 +91,7 @@ async def test_false_positives():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNikto(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNikto(crawler, persister, options, crawler_configuration)
         module.do_get = True
         module.NIKTO_DB = "temp_nikto_db"
         await module.attack(request)

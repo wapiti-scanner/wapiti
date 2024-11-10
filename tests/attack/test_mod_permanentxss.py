@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -57,7 +56,7 @@ async def test_second_order_injection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModulePermanentxss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModulePermanentxss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         module.tried_xss["iamgroot"] = (
             comment_request,
@@ -95,7 +94,7 @@ async def test_first_order_injection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModulePermanentxss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModulePermanentxss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         module.tried_xss["iamgroot"] = (
             comment_request,

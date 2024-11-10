@@ -135,9 +135,6 @@ class ModuleWpEnum(Attack):
 
     async def detect_plugin(self, url):
         for plugin in self.get_plugin():
-            if self._stop_event.is_set():
-                break
-
             request = Request(f'{url}/wp-content/plugins/{plugin}/readme.txt', 'GET')
             try:
                 response: Response = await self.crawler.async_send(request)
@@ -193,9 +190,6 @@ class ModuleWpEnum(Attack):
 
     async def detect_theme(self, url):
         for theme in self.get_theme():
-            if self._stop_event.is_set():
-                break
-
             request = Request(f'{url}/wp-content/themes/{theme}/readme.txt', 'GET')
             try:
                 response: Response = await self.crawler.async_send(request)

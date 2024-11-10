@@ -88,18 +88,8 @@ class CommonCMS(Attack):
 
                     tasks.remove(task)
 
-                if self._stop_event.is_set():
-                    for task in pending_tasks:
-                        task.cancel()
-                        tasks.remove(task)
-
-                if len(pending_tasks) > self.options["tasks"]:
-                    continue
-
-                break
-
-            if self._stop_event.is_set():
-                break
+                if len(pending_tasks) <= self.options["tasks"]:
+                    break
 
         # We reached the end of your list, but we may still have some running tasks
         while tasks:
@@ -119,13 +109,6 @@ class CommonCMS(Attack):
                         versions[path] = detection_db[path][content_hash]
 
                 tasks.remove(task)
-
-            if self._stop_event.is_set():
-                for task in pending_tasks:
-                    task.cancel()
-                    tasks.remove(task)
-
-                break
 
         if versions:
             self.versions = set.intersection(*[set(versions) for versions in versions.values()])

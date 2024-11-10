@@ -1,5 +1,4 @@
 import sys
-from asyncio import Event
 from time import monotonic
 from unittest import mock
 
@@ -25,74 +24,73 @@ async def test_options():
             return 0
 
     with mock.patch("os.makedirs", return_value=True):
-        stop_event = Event()
         cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
         cli.persister = CustomMock()
         crawler = mock.MagicMock()
         cli.set_attack_options({"timeout": 10})
 
         cli.set_modules("-all,xxe")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
         cli.set_modules("xxe")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
         cli.set_modules("common,xxe")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) + 1
 
         cli.set_modules("common,-exec")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) - 1
 
         cli.set_modules("all,-xxe")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - 1
 
         cli.set_modules("all,-common")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - len(common_modules)
 
         cli.set_modules("common,-all,xss")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == 1
 
         cli.set_modules("passive")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules)
 
         cli.set_modules("passive,xxe")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) + 1
 
         cli.set_modules("passive,-wapp")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) - 1
 
         cli.set_modules("cms")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == 1
 
         # Empty module list: no modules will be used
         cli.set_modules("")
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert not activated_modules
 
         # Use default settings: only use "commons" modules
         cli.set_modules(None)
-        attak_modules = await cli._load_attack_modules(stop_event, crawler)
+        attak_modules = await cli._load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
 
@@ -152,7 +150,6 @@ async def test_max_attack_time(_):
             return "http://perdu.com/"
 
     with mock.patch("os.makedirs", return_value=True):
-        stop_event = Event()
         cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
         cli.persister = CustomMock()
         cli.set_max_attack_time(max_attack_time)
@@ -160,7 +157,7 @@ async def test_max_attack_time(_):
 
         cli.set_modules("all")
         time = monotonic()
-        await cli.attack(stop_event)
+        await cli.attack()
         max_run_duration = max_attack_time * (len(all_modules) + delta) # execution time for all modules + delta of uncertainty
         assert monotonic() - time < max_run_duration
 

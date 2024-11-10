@@ -1,7 +1,6 @@
 import asyncio
 import json
 import os
-from asyncio import Event
 from unittest.mock import patch, PropertyMock, AsyncMock
 
 import httpx
@@ -28,7 +27,7 @@ async def test_must_attack():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
-        module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+        module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
         assert await module_htp.must_attack(Request("http://perdu.com", method="POST")) is False
         assert await module_htp.must_attack(Request("http://perdu.com", method="GET")) is True
@@ -59,7 +58,7 @@ async def test_analyze_file_detection():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
             found_technology = await module_htp._analyze_file(Request("http://perdu.com/"))
 
@@ -89,7 +88,7 @@ async def test_analyze_file_no_detection():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
             assert await module_htp._analyze_file(Request("http://perdu.com")) is None
 
@@ -112,7 +111,7 @@ async def test_analyze_file_none_content():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
-        module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+        module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
         assert await module_htp._analyze_file(Request("http://perdu.com")) is None
 
@@ -135,7 +134,7 @@ async def test_analyze_file_request_error():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
-        module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+        module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
         found_technology = await module_htp._analyze_file(Request("http://perdu.com"))
 
@@ -166,7 +165,7 @@ async def test_finish_no_technologies():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
 
             await module_htp.finish()
 
@@ -202,7 +201,7 @@ async def test_finish_one_range():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
             module_htp._root_url = "http://perdu.com/"
 
             module_htp.tech_versions[techno] = [["1.2", "1.2.1", "1.3"]]
@@ -248,7 +247,7 @@ async def test_finish_two_ranges():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
             module_htp._root_url = "http://perdu.com/"
 
             module_htp.tech_versions[techno] = [["1.2", "1.2.1", "1.3"], ["1.3", "1.4"], ["1.5", "1.5"], ["1.0", "1.2"]]
@@ -305,7 +304,7 @@ async def test_root_attack_root_url():
         crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2, "tasks": 20}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
             module_htp._root_url = target_url
             target_request = Request(target_url)
             mock_analyze_file.return_value = None
@@ -356,7 +355,7 @@ async def test_attack():
         crawler_configuration = CrawlerConfiguration(Request(target_url))
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 2, "tasks": 20}
-            module_htp = ModuleHtp(crawler, persister, options, Event(), crawler_configuration)
+            module_htp = ModuleHtp(crawler, persister, options, crawler_configuration)
             module_htp._root_url = target_url
             target_request = Request(target_url + "index.html")
             options = {"timeout": 10, "level": 2, "tasks": 20}

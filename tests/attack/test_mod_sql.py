@@ -1,7 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -44,7 +43,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             await module.attack(request)
@@ -66,7 +65,7 @@ async def test_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
         module.do_post = True
         await module.attack(request)
 
@@ -97,7 +96,7 @@ async def test_true_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
         module.do_post = True
         await module.attack(request)
 
@@ -154,7 +153,7 @@ async def test_blind_detection():
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 1}
 
-            module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleSql(crawler, persister, options, crawler_configuration)
             module.do_post = True
             await module.attack(request)
 
@@ -177,7 +176,7 @@ async def test_negative_blind():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         assert not persister.add_payload.call_count
@@ -236,7 +235,7 @@ async def test_blind_detection_parenthesis():
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             options = {"timeout": 10, "level": 1}
 
-            module = ModuleSql(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleSql(crawler, persister, options, crawler_configuration)
             module.do_post = True
             await module.attack(request)
 

@@ -40,8 +40,8 @@ class ModuleRedirect(Attack):
     do_get = True
     do_post = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.mutator = self.get_mutator()
 
     async def attack(self, request: Request, response: Optional[Response] = None):

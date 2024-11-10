@@ -49,11 +49,6 @@ def inner_ctrl_c_signal_handler():
     global_stop_event.set()
 
 
-def stop_attack_process():
-    logging.info("Waiting for all payload tasks to finish for current resource, please wait.")
-    global_stop_event.set()
-
-
 def fix_url_path(url: str):
     """Fix the url path if it's not defined"""
     return url if urlparse(url).path else url + '/'
@@ -265,7 +260,7 @@ async def wapiti_main():
             wap.set_http_credentials(HttpCredential(args.http_user, args.http_password, args.auth_method))
 
         if ("http_user" in args and "http_password" not in args) or \
-           ("http_user" not in args and "http_password" in args):
+                ("http_user" not in args and "http_password" in args):
             raise InvalidOptionValue("--auth-user and --auth-password",
                                      "Both options are required when one is used")
 
@@ -418,14 +413,13 @@ async def wapiti_main():
                 "This option is required when --form-user and --form-password or form-cred is used")
         # This option is deprecated, but we still support it
         # Should be removed in the future
-        username, password = None, None
         if "%" in args.form_credentials:
             username, password = args.form_credentials.split("%", 1)
             form_credential = FormCredential(
-            username,
-            password,
-            args.form_url,
-        )
+                username,
+                password,
+                args.form_url,
+            )
         else:
             raise InvalidOptionValue("--form-cred", args.form_credentials)
     elif "form_user" in args and "form_password" in args:
@@ -492,9 +486,7 @@ async def wapiti_main():
             )
 
         logging.info(f"[*] Wapiti found {await wap.count_resources()} URLs and forms during the scan")
-        loop.add_signal_handler(signal.SIGINT, stop_attack_process)
-        await wap.attack(global_stop_event)
-        loop.remove_signal_handler(signal.SIGINT)
+        await wap.attack()
 
     except OperationalError:
         logging.error(

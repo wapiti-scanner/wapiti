@@ -20,7 +20,9 @@
 import asyncio
 import os
 import shutil
+import signal
 import sys
+from enum import Enum
 from operator import attrgetter
 from collections import deque
 from dataclasses import replace
@@ -28,7 +30,7 @@ from hashlib import sha256
 from importlib import import_module
 from time import gmtime, strftime
 from traceback import print_tb
-from typing import Dict, List, Deque, AsyncGenerator, Optional
+from typing import Dict, List, Deque, AsyncGenerator, Optional, Set
 from urllib.parse import urlparse
 from uuid import uuid1
 
@@ -57,6 +59,13 @@ SCAN_FORCE_VALUES = {
     "aggressive": 0.06,
     "insane": 0  # Special value that won't be really used
 }
+
+
+class UserChoice(Enum):
+    REPORT = "r"
+    NEXT = "n"
+    QUIT = "q"
+    CONTINUE = "c"
 
 
 class InvalidOptionValue(Exception):
@@ -188,6 +197,7 @@ class Wapiti:
         self._headless_mode = "no"
         self._wait_time = 2.
         self._buffer = []
+        self._user_choice = UserChoice.CONTINUE
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -284,9 +294,8 @@ class Wapiti:
                 additional.wstg_code()
             )
 
-    async def _load_attack_modules(self, stop_event: asyncio.Event, crawler: AsyncCrawler) -> List[Attack]:
+    async def _load_attack_modules(self, crawler: AsyncCrawler) -> List[Attack]:
         await self._init_report()
-        stop_event.clear()
 
         logging.info("[*] Existing modules:")
         logging.info(f"\t {', '.join(sorted(all_modules))}")
@@ -305,7 +314,6 @@ class Wapiti:
                     crawler,
                     self.persister,
                     self.attack_options,
-                    stop_event,
                     self.crawler_configuration,
                 )
             except Exception as exception:  # pylint: disable=broad-except
@@ -320,7 +328,6 @@ class Wapiti:
 
     async def update(self, requested_modules: str = "all"):
         """Update modules that implement an update method"""
-        stop_event = asyncio.Event()
         modules = all_modules if (not requested_modules or requested_modules == "all") else requested_modules.split(",")
 
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
@@ -332,7 +339,6 @@ class Wapiti:
                         crawler,
                         self.persister,
                         self.attack_options,
-                        stop_event,
                         self.crawler_configuration,
                     )
                     if hasattr(class_instance, "update"):
@@ -445,38 +451,10 @@ class Wapiti:
             async for request, response in self.persister.get_forms(attack_module=module.name):
                 yield request, response
 
-    async def load_and_attack(self, stop_event: asyncio.Event, attack_module: Attack):
-        answer = "0"
-        attacked_ids = set()
+    async def load_and_attack(self, attack_module: Attack, attacked_ids: Set[int]) -> None:
+        original_request: Request
+        original_response: Response
         async for original_request, original_response in self.load_resources_for_module(attack_module):
-            if stop_event.is_set():
-                print('')
-                print("Attack process was interrupted. Do you want to:")
-                print("\tr) stop everything here and generate the (R)eport")
-                print("\tn) move to the (N)ext attack module (if any)")
-                print("\tq) (Q)uit without generating the report")
-                print("\tc) (C)ontinue the current attack")
-
-                while True:
-                    try:
-                        answer = input("? ").strip().lower()
-                    except UnicodeDecodeError:
-                        pass
-
-                    if answer not in ("r", "n", "q", "c"):
-                        print("Invalid choice. Valid choices are r, n, q and c.")
-                    else:
-                        break
-
-                if answer in ("n", "c"):
-                    stop_event.clear()
-
-                if answer in ("r", "n", "q"):
-                    break
-
-                if answer == "c":
-                    continue
-
             try:
                 if await attack_module.must_attack(original_request, original_response):
                     logging.info(f"[+] {original_request}")
@@ -502,18 +480,69 @@ class Wapiti:
             else:
                 if original_request.path_id is not None:
                     attacked_ids.add(original_request.path_id)
-        return attacked_ids, answer
 
-    async def attack(self, stop_event: asyncio.Event):
+    def handle_user_interruption(self, task) -> None:
+        """
+        Attack handler for Ctrl+C interruption.
+        """
+        print("Attack process was interrupted. Do you want to:")
+        print("\tr) stop everything here and generate the (R)eport")
+        print("\tn) move to the (N)ext attack module (if any)")
+        print("\tq) (Q)uit without generating the report")
+        print("\tc) (C)ontinue the current attack")
+
+        while True:
+            try:
+                self._user_choice = UserChoice(input("? ").strip().lower())
+                if self._user_choice != UserChoice.CONTINUE:
+                    task.cancel()
+                return
+            except (UnicodeDecodeError, ValueError):
+                print("Invalid choice. Valid choices are r, n, q, and c.")
+
+    async def run_attack_module(self, attack_module):
+        """Run a single attack module, handling persistence and timeouts."""
+        logging.log("GREEN", "[*] Launching module {0}", attack_module.name)
+
+        already_attacked = await self.persister.count_attacked(attack_module.name)
+        if already_attacked:
+            logging.success(
+                "[*] {0} pages were previously attacked and will be skipped",
+                already_attacked
+            )
+
+        attacked_ids = set()
+
+        try:
+            await asyncio.wait_for(
+                self.load_and_attack(attack_module, attacked_ids),
+                self._max_attack_time
+            )
+        except asyncio.TimeoutError:
+            logging.info(
+                f"Max attack time was reached for module {attack_module.name}, stopping."
+            )
+        finally:
+            # In ALL cases we want to persist the IDs of requests that have been attacked so far
+            # especially if the user it ctrl+c
+            await self.persister.set_attacked(attacked_ids, attack_module.name)
+
+            # We also want to check the external endpoints to see if some attacks succeeded despite the module being
+            # potentially stopped
+            if hasattr(attack_module, "finish"):
+                await attack_module.finish()
+
+            if attack_module.network_errors:
+                logging.warning(f"{attack_module.network_errors} requests were skipped due to network issues")
+
+    async def attack(self):
         """Launch the attacks based on the preferences set by the command line"""
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
-            attack_modules = await self._load_attack_modules(stop_event, crawler)
-            answer = "0"
+            attack_modules = await self._load_attack_modules(crawler)
+
+            loop = asyncio.get_running_loop()
 
             for attack_module in attack_modules:
-                if stop_event.is_set():
-                    break
-
                 if attack_module.do_get is False and attack_module.do_post is False:
                     continue
 
@@ -535,50 +564,32 @@ class Wapiti:
                         [attack for attack in attack_modules if attack.name in attack_module.require]
                     )
 
-                logging.log("GREEN", "[*] Launching module {0}", attack_module.name)
+                # Create and run each attack module as an asyncio task
+                current_attack_task = asyncio.create_task(
+                    self.run_attack_module(attack_module)
+                )
 
-                already_attacked = await self.persister.count_attacked(attack_module.name)
-                if already_attacked:
-                    logging.success(
-                        "[*] {0} pages were previously attacked and will be skipped",
-                        already_attacked
-                    )
-
-                answer = "0"
-                attacked_ids = set()
+                # Setup signal handler to prompt the user for task cancellation
+                loop.add_signal_handler(signal.SIGINT, self.handle_user_interruption, current_attack_task)
 
                 try:
-                    attacked_ids, answer = await asyncio.wait_for(
-                        self.load_and_attack(stop_event, attack_module),
-                        self._max_attack_time
-                    )
-                except asyncio.TimeoutError:
-                    logging.info(
-                        f"Max attack time was reached for module {attack_module.name}, stopping."
-                    )
+                    await current_attack_task  # Await the attack module task
+                except asyncio.CancelledError:
+                    # The user chose to stop the current module
+                    pass
+                finally:
+                    # Clean up the signal handler for the next loop
+                    loop.remove_signal_handler(signal.SIGINT)
 
-                await self.persister.set_attacked(attacked_ids, attack_module.name)
-
-                if hasattr(attack_module, "finish"):
-                    await attack_module.finish()
-
-                if attack_module.network_errors:
-                    logging.warning(f"{attack_module.network_errors} requests were skipped due to network issues")
-
-                if answer == "r":
-                    # Do not process remaining modules
+                # As the handler directly continue or cancel the current_attack_task module, we don't have
+                # cases where we have to call `continue`. Just check for the two other options
+                if self._user_choice in (UserChoice.REPORT, UserChoice.QUIT):
                     break
 
-            if answer == "q":
+            if self._user_choice == UserChoice.QUIT:
                 await self.persister.close()
                 return
 
-            # if self.crawler.get_uploads():
-            #     print('')
-            #     print(_("Upload scripts found:"))
-            #     print("----------------------")
-            #     for upload_form in self.crawler.get_uploads():
-            #         print(upload_form)
             await self.write_report()
 
     async def write_report(self):
@@ -636,7 +647,7 @@ class Wapiti:
     async def send_bug_report(self, exception: Exception, traceback_, module_name: str, original_request: Request):
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
             traceback_file = str(uuid1())
-            with open(traceback_file, "w", encoding='utf-8') as traceback_fd:
+            with open(traceback_file, "w", encoding="utf-8") as traceback_fd:
                 print_tb(traceback_, file=traceback_fd)
                 print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
                 print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)

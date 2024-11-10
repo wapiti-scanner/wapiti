@@ -1,6 +1,5 @@
 import re
 from binascii import unhexlify
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -44,7 +43,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleShellshock(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleShellshock(crawler, persister, options, crawler_configuration)
         module.do_get = True
         for request in all_requests:
             await module.attack(request)

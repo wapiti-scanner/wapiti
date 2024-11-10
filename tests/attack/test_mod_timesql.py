@@ -2,7 +2,6 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import pytest
@@ -39,7 +38,7 @@ async def test_timesql_detection():
         # and in the module we have ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
         options = {"timeout": 0, "level": 1}
 
-        module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleTimesql(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -63,7 +62,7 @@ async def test_timesql_false_positive():
         # and in the module we have ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
         options = {"timeout": 0, "level": 1}
 
-        module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleTimesql(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -83,7 +82,7 @@ async def test_false_positive_request_count():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 1, "level": 1}
 
-        module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleTimesql(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -108,7 +107,7 @@ async def test_true_positive_request_count():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 1, "level": 1}
 
-        module = ModuleTimesql(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleTimesql(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 

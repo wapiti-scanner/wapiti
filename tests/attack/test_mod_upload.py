@@ -1,5 +1,4 @@
 import logging
-from asyncio import Event
 from unittest.mock import AsyncMock, patch
 import re
 
@@ -87,7 +86,7 @@ async def test_extension_blacklist():
             # Also make sure we respect the exclusion list
             options = {"timeout": 10, "level": 2, "excluded_urls": ["http://*logout*"]}
 
-            module = ModuleUpload(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleUpload(crawler, persister, options, crawler_configuration)
             await module.attack(request)
 
         assert persister.add_payload.call_count

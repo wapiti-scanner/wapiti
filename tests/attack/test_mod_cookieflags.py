@@ -1,4 +1,3 @@
-import asyncio
 import re
 from unittest.mock import AsyncMock
 
@@ -35,7 +34,7 @@ async def test_cookieflags():
         await crawler.async_send(request)  # Put cookies in our crawler object
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleCookieflags(crawler, persister, options, asyncio.Event(), crawler_configuration)
+        module = ModuleCookieflags(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         cookie_flags = []

@@ -1,4 +1,3 @@
-from asyncio import Event
 from fnmatch import fnmatch
 from hashlib import md5
 from unittest.mock import AsyncMock
@@ -77,7 +76,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleLdap(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             await module.attack(request)
@@ -113,7 +112,7 @@ async def test_random_responses():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleLdap(crawler, persister, options, crawler_configuration)
         for request in all_requests:
             await module.attack(request)
 
@@ -162,7 +161,7 @@ async def test_vulnerabilities():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleLdap(crawler, persister, options, crawler_configuration)
         for request in all_requests:
             await module.attack(request)
 
@@ -203,7 +202,7 @@ async def test_is_page_dynamic():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleLdap(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleLdap(crawler, persister, options, crawler_configuration)
         assert not await module.is_page_dynamic(
             Request("http://perdu.com/"),
             PayloadInfo("", "", True),

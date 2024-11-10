@@ -197,8 +197,8 @@ class ModuleTakeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.processed_domains = set()
         self.takeover = TakeoverChecker()
 
@@ -232,9 +232,6 @@ class ModuleTakeover(Attack):
                         await asyncio.sleep(.01)
                     else:
                         break
-
-                if self._stop_event.is_set():
-                    break
 
         # send stop command to every worker
         for __ in range(CONCURRENT_TASKS):

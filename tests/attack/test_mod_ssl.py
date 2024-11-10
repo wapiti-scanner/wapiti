@@ -2,7 +2,6 @@ from multiprocessing import Process
 import os
 import sys
 from time import sleep
-from asyncio import Event
 import http.server
 import ssl
 from unittest.mock import AsyncMock
@@ -61,7 +60,7 @@ async def test_ssl_scanner():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsl(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSsl(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         persister.add_payload.assert_any_call(
@@ -192,7 +191,7 @@ async def test_certificate_transparency():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsl(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSsl(crawler, persister, options, crawler_configuration)
         assert 1 == await module.check_certificate_transparency(cert)
 
 

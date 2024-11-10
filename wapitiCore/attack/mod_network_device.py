@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from asyncio import Event
 from typing import Optional
 
 from wapitiCore.attack.network_devices.mod_checkpoint import ModuleCheckPoint
@@ -52,6 +51,6 @@ class ModuleNetworkDevice(Attack):
         modules_list = [ModuleCheckPoint, ModuleCitrix, ModuleForti, ModuleHarbor, ModuleUbika]
         for module in modules_list:
             mod = module(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await mod.attack(request_to_root)

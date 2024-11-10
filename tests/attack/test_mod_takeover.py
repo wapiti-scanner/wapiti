@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -63,7 +62,7 @@ async def test_unregistered_cname():
             async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                 options = {"timeout": 10, "level": 2}
 
-                module = ModuleTakeover(crawler, persister, options, Event(), crawler_configuration)
+                module = ModuleTakeover(crawler, persister, options, crawler_configuration)
 
                 for request in all_requests:
                     await module.attack(request)

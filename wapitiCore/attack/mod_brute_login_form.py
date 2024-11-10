@@ -160,7 +160,7 @@ class ModuleBruteLoginForm(Attack):
 
         creds_iterator = product(self.get_usernames(), self.get_passwords())
         while True:
-            if pending_count < self.options["tasks"] and not self._stop_event.is_set() and not found:
+            if pending_count < self.options["tasks"] and not found:
                 try:
                     username, password = next(creds_iterator)
                 except StopIteration:
@@ -234,7 +234,7 @@ class ModuleBruteLoginForm(Attack):
 
                 tasks.remove(task)
 
-            if self._stop_event.is_set() or found:
+            if found:
                 # If we found valid credentials we need to stop pending tasks as they may generate false positives
                 # because the session is opened on the website and next attempts may appear as logged in
                 for task in pending_tasks:
