@@ -42,8 +42,8 @@ class ModuleBuster(Attack):
     do_get = True
     do_post = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.known_dirs = []
         self.known_pages = []
         self.new_resources = []
@@ -99,7 +99,7 @@ class ModuleBuster(Attack):
         with open(path_join(self.DATA_DIR, self.PATHS_FILE), encoding="utf-8", errors="ignore") as wordlist:
             while True:
 
-                if pending_count < self.options["tasks"] and not self._stop_event.is_set():
+                if pending_count < self.options["tasks"]:
                     try:
                         candidate = next(wordlist).strip()
                     except StopIteration:
@@ -126,11 +126,6 @@ class ModuleBuster(Attack):
                         self.network_errors += 1
                     tasks.remove(task)
 
-                if self._stop_event.is_set():
-                    for task in pending_tasks:
-                        task.cancel()
-                        tasks.remove(task)
-
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         if not self.do_get:
@@ -148,12 +143,10 @@ class ModuleBuster(Attack):
 
         # Then for each known webdirs we look for unknown webpages inside
         for current_dir in self.known_dirs:
-            if self._stop_event.is_set():
-                break
             await self.test_directory(current_dir)
 
         # Finally, for each discovered webdirs we look for more webpages
-        while self.new_resources and not self._stop_event.is_set():
+        while self.new_resources:
             current_res = self.new_resources.pop(0)
             if current_res.endswith("/"):
                 # Mark as known then explore

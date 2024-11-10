@@ -26,7 +26,6 @@ from enum import Enum, Flag, auto
 import random
 from binascii import hexlify
 from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type
-from asyncio import Event
 import json
 
 from pkg_resources import resource_filename
@@ -225,13 +224,11 @@ class Attack:
             crawler: AsyncCrawler,
             persister: SqlPersister,
             attack_options: dict,
-            stop_event: Event,
             crawler_configuration: CrawlerConfiguration):
         super().__init__()
         self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
         self.crawler = crawler
         self.persister = persister
-        self._stop_event = stop_event
         self.options = attack_options
         self.crawler_configuration = crawler_configuration
         self.start = 0

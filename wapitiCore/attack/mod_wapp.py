@@ -152,8 +152,8 @@ class ModuleWapp(Attack):
     # Store the gitlab private token from env variable
     gitlab_private_token = None
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.user_config_dir = self.persister.CONFIG_DIR
         if not os.path.isdir(self.user_config_dir):
             os.makedirs(self.user_config_dir)

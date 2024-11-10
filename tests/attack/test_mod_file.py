@@ -2,7 +2,7 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event, sleep as Sleep
+from asyncio import sleep as Sleep
 from unittest.mock import AsyncMock
 
 import httpx
@@ -36,7 +36,7 @@ async def test_inclusion_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -56,7 +56,7 @@ async def test_open_redirect():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -74,7 +74,7 @@ async def test_loknop_lfi_to_rce():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -101,7 +101,7 @@ async def test_warning_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -130,7 +130,7 @@ async def test_no_crash():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleFile(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
         module.do_post = False
         for request in all_requests:
             await module.attack(request)

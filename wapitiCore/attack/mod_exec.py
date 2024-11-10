@@ -40,8 +40,8 @@ class ModuleExec(Attack):
     """
     name = "exec"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.false_positive_timeouts = set()
         self.mutator = self.get_mutator()
 

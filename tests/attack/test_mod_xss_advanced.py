@@ -3,7 +3,6 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import pytest
@@ -35,7 +34,7 @@ async def test_title_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -52,7 +51,7 @@ async def test_title_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -74,7 +73,7 @@ async def test_script_filter_bypass():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -93,7 +92,7 @@ async def test_script_src_protocol_relative():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -114,7 +113,7 @@ async def test_attr_quote_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -133,7 +132,7 @@ async def test_attr_double_quote_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -152,7 +151,7 @@ async def test_attr_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -171,7 +170,7 @@ async def test_tag_name_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -190,7 +189,7 @@ async def test_partial_tag_name_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -208,7 +207,7 @@ async def test_xss_inside_tag_input():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -227,7 +226,7 @@ async def test_xss_inside_tag_link():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -246,7 +245,7 @@ async def test_xss_inside_href_link():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -265,7 +264,7 @@ async def test_xss_inside_src_iframe():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -284,7 +283,7 @@ async def test_xss_uppercase_no_script():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -303,7 +302,7 @@ async def test_frame_src_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -322,7 +321,7 @@ async def test_frame_src_no_escape():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -341,7 +340,7 @@ async def test_bad_separator_used():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -359,7 +358,7 @@ async def test_escape_with_style():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -377,7 +376,7 @@ async def test_rare_tag_and_event():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -395,7 +394,7 @@ async def test_xss_with_strong_csp():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -412,7 +411,7 @@ async def test_xss_with_weak_csp():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -429,7 +428,7 @@ async def test_fallback_to_html_injection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXss(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXss(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 

@@ -3,7 +3,6 @@ import os
 import sys
 from time import sleep
 import logging
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import pytest
@@ -43,7 +42,7 @@ async def test_direct_body():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -64,7 +63,7 @@ async def test_direct_param():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -81,7 +80,7 @@ async def test_direct_query_string():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -113,7 +112,7 @@ async def test_out_of_band_body():
             "internal_endpoint": "http://wapiti3.ovh/"
         }
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
 
         respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
             return_value=httpx.Response(
@@ -162,7 +161,7 @@ async def test_out_of_band_param():
             "internal_endpoint": "http://wapiti3.ovh/"
         }
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
 
         respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
             return_value=httpx.Response(
@@ -211,7 +210,7 @@ async def test_out_of_band_query_string():
             "internal_endpoint": "http://wapiti3.ovh/"
         }
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
         module.do_post = False
         await module.attack(request)
 
@@ -264,7 +263,7 @@ async def test_direct_upload():
             "internal_endpoint": "http://wapiti3.ovh/"
         }
 
-        module = ModuleXxe(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 

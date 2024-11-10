@@ -1,6 +1,6 @@
 from unittest import mock
 from unittest.mock import AsyncMock
-from asyncio import Event, sleep
+from asyncio import sleep
 
 import httpx
 import respx
@@ -41,7 +41,7 @@ async def test_whole_stuff():
             "wordlist.txt": "nawak\nadmin\nconfig.inc\nauthconfig.php",
         }
         with mock.patch("builtins.open", get_mock_open(files)):
-            module = ModuleBuster(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleBuster(crawler, persister, options, crawler_configuration)
             module.DATA_DIR = ""
             module.PATHS_FILE = "wordlist.txt"
             module.do_get = True

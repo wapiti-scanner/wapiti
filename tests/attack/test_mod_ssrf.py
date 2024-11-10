@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -49,7 +48,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsrf(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
         module.do_post = True
 
         respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
@@ -103,7 +102,7 @@ async def test_query_string_injection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleSsrf(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
         module._session_id = "yolo"
         mutated_request, parameter, payload_info = next(module.mutator.mutate(request, module.get_payloads))
         # Make sure get_payloads will correctly inject the session ID and hex-encoded parameter name in such case

@@ -1,5 +1,4 @@
 import json
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -39,7 +38,7 @@ async def test_no_net_device():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -76,7 +75,7 @@ async def test_ubika_without_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -128,7 +127,7 @@ async def test_ubika_with_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -171,7 +170,7 @@ async def test_detect_fortimanager():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -213,7 +212,7 @@ async def test_detect_ssl_vpn():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -253,7 +252,7 @@ async def test_fortinet_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -289,7 +288,7 @@ async def test_detect_fortinet():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -329,7 +328,7 @@ async def test_detect_fortiportal_from_title():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -370,7 +369,7 @@ async def test_detect_fortimail():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -409,7 +408,7 @@ async def test_detect_fortimanager():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -449,7 +448,7 @@ async def test_detect_fortianalyzer():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -485,7 +484,7 @@ async def test_raise_on_request_error():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleForti(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleForti(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(RequestError) as exc_info:
             await module.check_forti("http://perdu.com/")
@@ -531,7 +530,7 @@ async def test_detect_harbor_with_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -579,7 +578,7 @@ async def test_detect_harbor_without_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -620,7 +619,7 @@ async def test_detect_harbor_with_json_error():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -654,7 +653,7 @@ async def test_detect_harbor_raise_on_request_error():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleHarbor(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHarbor(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(RequestError) as exc_info:
             await module.check_harbor("http://perdu.com/")
@@ -692,7 +691,7 @@ async def test_detect_citrix_from_title():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -732,7 +731,7 @@ async def test_detect_citrix_from_class():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -765,7 +764,7 @@ async def test_detect_citrix_in_root_url():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -805,7 +804,7 @@ async def test_checkpoint_without_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -845,7 +844,7 @@ async def test_checkpoint_based_on_realmsArrJSON():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -888,7 +887,7 @@ async def test_checkpoint_with_version():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleNetworkDevice(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 

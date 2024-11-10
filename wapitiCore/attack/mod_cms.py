@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from asyncio import Event
-
 from typing import Optional
 
 from wapitiCore.attack.cms.mod_drupal_enum import ModuleDrupalEnum
@@ -57,26 +55,26 @@ class ModuleCms(Attack):
 
         if "drupal" in cms_list:
             module = ModuleDrupalEnum(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await module.attack(request_to_root)
         if "joomla" in cms_list:
             module = ModuleJoomlaEnum(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await module.attack(request_to_root)
         if "prestashop" in cms_list:
             module = ModulePrestashopEnum(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await module.attack(request_to_root)
         if "spip" in cms_list:
             module = ModuleSpipEnum(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await module.attack(request_to_root)
         if "wp" in cms_list:
             module = ModuleWpEnum(
-                self.crawler, self.persister, self.options, Event(), self.crawler_configuration
+                self.crawler, self.persister, self.options, self.crawler_configuration
             )
             await module.attack(request_to_root)

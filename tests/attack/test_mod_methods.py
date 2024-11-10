@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -81,7 +80,7 @@ async def test_trivial():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleMethods(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleMethods(crawler, persister, options, crawler_configuration)
         module.do_get = True
         for request, response in all_requests:
             await module.attack(request, response)
@@ -156,7 +155,7 @@ async def test_advanced():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleMethods(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleMethods(crawler, persister, options, crawler_configuration)
         module.do_get = True
         await module.attack(request, response)
 
@@ -208,7 +207,7 @@ async def test_blind_with_trace():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleMethods(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleMethods(crawler, persister, options, crawler_configuration)
         module.do_get = True
         await module.attack(request, response)
 

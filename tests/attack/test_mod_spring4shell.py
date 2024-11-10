@@ -1,6 +1,5 @@
 import asyncio
 import os
-from asyncio import Event
 from unittest.mock import AsyncMock
 from httpx import Response as HttpxResponse
 
@@ -33,7 +32,7 @@ async def test_detect_spring4shell():
     crawler_configuration = CrawlerConfiguration(request)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
 
-        module = ModuleSpring4Shell(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
         assert await module._check_spring4shell("GET", request, payload) == False
 
@@ -64,7 +63,7 @@ async def test_detect_spring4shell_get():
     crawler_configuration = CrawlerConfiguration(request)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
 
-        module = ModuleSpring4Shell(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
         assert await module._check_spring4shell("GET", request, payload) == True
         assert await module._check_spring4shell("POST", request, payload) == False
@@ -88,7 +87,7 @@ async def test_no_spring4shell():
     crawler_configuration = CrawlerConfiguration(request)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
 
-        module = ModuleSpring4Shell(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
         assert await module._check_spring4shell("GET", request, payload) == False
         assert await module._check_spring4shell("POST", request, payload) == False

@@ -2,7 +2,6 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -90,7 +89,7 @@ async def test_csrf_cases():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 1}
 
-        module = ModuleCsrf(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCsrf(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request, response in all_requests:
             if await module.must_attack(request, response):

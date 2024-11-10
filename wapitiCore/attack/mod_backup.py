@@ -44,8 +44,8 @@ class ModuleBackup(Attack):
     do_get = True
     do_post = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.false_positive_directories = {}
 
     def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:
@@ -94,8 +94,6 @@ class ModuleBackup(Attack):
 
         for payload_info in self.get_payloads():
             raw_payload = payload_info.payload
-            if self._stop_event.is_set():
-                break
 
             if request.file_name:
                 if "[FILE_" not in raw_payload:

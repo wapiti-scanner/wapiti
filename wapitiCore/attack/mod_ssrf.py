@@ -41,8 +41,8 @@ class ModuleSsrf(Attack):
     name = "ssrf"
     MSG_VULN = "SSRF vulnerability"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.mutator = self.get_mutator()
 
     def get_payloads(

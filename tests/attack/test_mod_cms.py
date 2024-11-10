@@ -1,7 +1,6 @@
 import os
 import sys
 from os.path import join as path_join
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import httpx
@@ -41,7 +40,7 @@ async def test_no_drupal():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -79,7 +78,7 @@ async def test_drupal_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -129,7 +128,7 @@ async def test_drupal_multi_versions_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -175,7 +174,7 @@ async def test_drupal_version_not_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -209,7 +208,7 @@ async def test_no_joomla():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -248,7 +247,7 @@ async def test_joomla_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -298,7 +297,7 @@ async def test_joomla_multi_versions_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -345,7 +344,7 @@ async def test_joomla_version_not_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -379,7 +378,7 @@ async def test_no_prestashop():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -420,7 +419,7 @@ async def test_prestashop_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -470,7 +469,7 @@ async def test_prestashop_multi_versions_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -515,7 +514,7 @@ async def test_prestashop_version_not_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -558,7 +557,7 @@ async def test_spip_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -609,7 +608,7 @@ async def test_spip_multi_versions_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -655,7 +654,7 @@ async def test_spip_version_not_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -698,7 +697,7 @@ async def test_wp_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -750,7 +749,7 @@ async def test_wp_multi_versions_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -797,7 +796,7 @@ async def test_wp_no_version_detected():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -892,7 +891,7 @@ async def test_wp_false_positive_403():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -1004,7 +1003,7 @@ async def test_wp_false_positive_success():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -1094,7 +1093,7 @@ async def test_wp_plugin():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -1181,7 +1180,7 @@ async def test_wp_theme():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "tasks": 20}
 
-        module = ModuleCms(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 

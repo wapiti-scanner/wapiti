@@ -104,8 +104,8 @@ class ModuleFile(Attack):
     """Detect file-related vulnerabilities such as directory traversal and include() vulnerabilities."""
     name = "file"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.known_false_positives = defaultdict(set)
         self.mutator = self.get_mutator()
 

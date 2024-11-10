@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import respx
@@ -29,7 +28,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleCrlf(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleCrlf(crawler, persister, options, crawler_configuration)
         module.do_get = True
         await module.attack(request)
 

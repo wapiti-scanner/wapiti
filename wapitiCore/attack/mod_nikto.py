@@ -67,8 +67,8 @@ class ModuleNikto(Attack):
     user_config_dir = None
     finished = False
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.user_config_dir = self.persister.CONFIG_DIR
         self.junk_string = "w" + "".join(
             [random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 5000)]
@@ -155,7 +155,7 @@ class ModuleNikto(Attack):
             reader = csv.reader(nikto_db_file)
             while True:
 
-                if pending_count < self.options["tasks"] and not self._stop_event.is_set():
+                if pending_count < self.options["tasks"]:
                     try:
                         line = next(reader)
                     except StopIteration:
@@ -179,11 +179,6 @@ class ModuleNikto(Attack):
                 for task in done_tasks:
                     await task
                     tasks.remove(task)
-
-                if self._stop_event.is_set():
-                    for task in pending_tasks:
-                        task.cancel()
-                        tasks.remove(task)
 
     async def process_line(self, line):
         match = match_or = match_and = False

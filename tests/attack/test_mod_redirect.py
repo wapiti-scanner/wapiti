@@ -2,7 +2,6 @@ from subprocess import Popen
 import os
 import sys
 from time import sleep
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import pytest
@@ -34,7 +33,7 @@ async def test_redirect_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleRedirect(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -53,7 +52,7 @@ async def test_redirect_detection_no_url():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleRedirect(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_args_list[0][1]["module"] == "redirect"
@@ -92,7 +91,7 @@ async def test_whole_stuff():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             await module.attack(request)

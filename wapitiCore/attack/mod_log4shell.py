@@ -48,8 +48,8 @@ class ModuleLog4Shell(Attack):
     SOLR_URL = "solr/admin/cores"
     UNIFI_URL = "api/login"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
 
         dns_endpoint = attack_options.get("dns_endpoint")
         try:

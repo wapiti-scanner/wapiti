@@ -68,8 +68,8 @@ class ModuleHtp(Attack):
     HTP_DATABASE = "hashtheplanet.db"
     HTP_DATABASE_URL = "https://github.com/Cyberwatch/HashThePlanet/releases/download/latest/hashtheplanet.db"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.tech_versions: Dict[Technology, List[Versions]] = {}
         self.user_config_dir = self.persister.CONFIG_DIR
 
@@ -136,18 +136,8 @@ class ModuleHtp(Attack):
 
                     tasks.remove(task)
 
-                if self._stop_event.is_set():
-                    for task in pending_tasks:
-                        task.cancel()
-                        tasks.remove(task)
-
-                if len(pending_tasks) > self.options["tasks"]:
-                    continue
-
-                break
-
-            if self._stop_event.is_set():
-                break
+                if len(pending_tasks) <= self.options["tasks"]:
+                    break
 
         # We reached the end of your list, but we may still have some running tasks
         while tasks:
@@ -169,13 +159,6 @@ class ModuleHtp(Attack):
                     self.tech_versions[technology_name].append(json.loads(technology_info)["versions"])
 
                 tasks.remove(task)
-
-            if self._stop_event.is_set():
-                for task in pending_tasks:
-                    task.cancel()
-                    tasks.remove(task)
-
-                break
 
     async def _init_db(self):
         if self._db is None:

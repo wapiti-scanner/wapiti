@@ -40,8 +40,8 @@ class ModuleShellshock(Attack):
     do_get = True
     do_post = True
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        Attack.__init__(self, crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         empty_func = "() { :;}; "
 
         self.rand_string = "".join([random.choice(string.hexdigits) for _ in range(32)])

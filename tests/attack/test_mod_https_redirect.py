@@ -1,4 +1,3 @@
-from asyncio import Event
 from unittest.mock import AsyncMock
 
 import pytest
@@ -9,6 +8,7 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_https_redirect import ModuleHttpsRedirect
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -34,7 +34,7 @@ async def test_no_redirect():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleHttpsRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHttpsRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             if not module.finished:
@@ -76,7 +76,7 @@ async def test_redirect_http():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleHttpsRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHttpsRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             if not module.finished:
@@ -112,7 +112,7 @@ async def test_error_response():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleHttpsRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHttpsRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             if not module.finished:
@@ -146,7 +146,7 @@ async def test_http_url_provided():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleHttpsRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHttpsRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             if not module.finished:
@@ -180,7 +180,7 @@ async def test_specific_port_provided():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleHttpsRedirect(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleHttpsRedirect(crawler, persister, options, crawler_configuration)
         module.do_post = True
         for request in all_requests:
             if not module.finished:

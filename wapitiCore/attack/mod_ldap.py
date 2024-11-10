@@ -121,8 +121,8 @@ class ModuleLdap(Attack):
     """
     name = "ldap"
 
-    def __init__(self, crawler, persister, attack_options, stop_event, crawler_configuration):
-        super().__init__(crawler, persister, attack_options, stop_event, crawler_configuration)
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
         self.mutator = self.get_mutator()
 
     def get_payloads(self, _: Optional[Request] = None, __: Optional[Parameter] = None) -> Iterator[PayloadInfo]:

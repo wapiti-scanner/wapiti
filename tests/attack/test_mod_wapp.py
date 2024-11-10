@@ -2,7 +2,6 @@ import json
 import lzma
 import os
 import tempfile
-from asyncio import Event
 from pathlib import Path
 from unittest.mock import AsyncMock, patch, mock_open, ANY
 
@@ -46,7 +45,7 @@ async def test_false_positive():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -78,7 +77,7 @@ async def test_url_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -140,7 +139,7 @@ async def test_html_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -185,7 +184,7 @@ async def test_dom_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
         await module.attack(request)
 
         assert persister.add_payload.call_count
@@ -231,7 +230,7 @@ async def test_script_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -269,7 +268,7 @@ async def test_cookies_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -307,7 +306,7 @@ async def test_cookies_whatever_value_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -345,7 +344,7 @@ async def test_headers_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -384,7 +383,7 @@ async def test_meta_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -490,7 +489,7 @@ async def test_multi_detection():
             # To prevent any issue the config directory is a newly created temporary directory
             persister.CONFIG_DIR = temp_dir
 
-            module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
             await module.attack(request)
 
@@ -582,7 +581,7 @@ async def test_implies_detection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -624,7 +623,7 @@ async def test_vulnerabilities():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -680,7 +679,7 @@ async def test_merge_with_and_without_redirection():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         await module.attack(request)
 
@@ -732,7 +731,7 @@ async def test_raise_on_invalid_json():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com"}
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(ValueError) as exc_info:
             await module._dump_url_content_to_file("http://perdu.com/src/categories.json", "test.json")
@@ -760,7 +759,7 @@ async def test_raise_on_not_valid_db_url():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(ValueError) as exc_info:
             await module._load_wapp_database(cat_url, tech_url, group_url)
@@ -819,7 +818,7 @@ async def test_raise_on_value_error():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(ValueError) as exc_info:
             await module._load_wapp_database(cat_url, tech_url, group_url)
@@ -845,7 +844,7 @@ async def test_raise_on_request_error():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(RequestError) as exc_info:
             await module._load_wapp_database(cat_url, tech_url, group_url)
@@ -868,7 +867,7 @@ async def test_raise_on_request_error_for_dump_url():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(RequestError) as exc_info:
             await module._dump_url_content_to_file(url, "cat.json")
@@ -889,7 +888,7 @@ async def test_wappalyzer_raise_on_request_error_for_update():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(RequestError) as exc_info:
             await module.update_wappalyzer()
@@ -921,7 +920,7 @@ async def test_wappalyzer_raise_on_value_error_for_update():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(ValueError) as exc_info:
             await module.update_wappalyzer()
@@ -1045,7 +1044,7 @@ async def test_private_gitlab():
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
 
         with patch.dict(os.environ, {'GITLAB_PRIVATE_TOKEN': 'test_gitlab_private_token'}):
-            module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleWapp(crawler, persister, options, crawler_configuration)
             await module.update_wappalyzer()
             await module.attack(request)
 
@@ -1095,7 +1094,7 @@ async def test_wappalyzer_raise_on_not_valid_directory_for_update():
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_dir": "/"}
 
-        module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
         with pytest.raises(ValueError) as exc_info:
             await module.update_wappalyzer()
@@ -1143,7 +1142,7 @@ async def test_wappalyzer_raise_on_not_valid_json_for_update():
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
 
-                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+                    module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
                     with pytest.raises(ValueError) as exc_info:
                         await module.update_wappalyzer()
@@ -1174,7 +1173,7 @@ async def test_wappalyzer_raise_on_not_valid_json_file_for_update():
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
 
-                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+                    module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
                     with pytest.raises(ValueError) as exc_info:
                         await module.update_wappalyzer()
@@ -1205,7 +1204,7 @@ async def test_wappalyzer_raise_on_file_does_not_exist_for_update():
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
 
-                    module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+                    module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
                     with pytest.raises(ValueError) as exc_info:
                         await module.update_wappalyzer()
@@ -1253,7 +1252,7 @@ async def test_get_vulnerabilities():
             # To prevent any issue the config directory is a newly created temporary directory
             persister.CONFIG_DIR = temp_dir
 
-            module = ModuleWapp(crawler, persister, options, Event(), crawler_configuration)
+            module = ModuleWapp(crawler, persister, options, crawler_configuration)
             os.mkdir(os.path.join(temp_dir, "cves"))
             with lzma.open(os.path.join(temp_dir, "cves", "wordpress.json.xz"), "wb") as fd:
                 fd.write(json.dumps(cve_data).encode())
