@@ -14,7 +14,7 @@ ADD Gemfile .
 COPY healthcheck.rb /usr/local/bin/healthcheck.rb
 
 RUN gem install bundler && \
-    apt update && apt install sqlite3 && \
+    apt update && apt install -y sqlite3 && \
     bundle install
 
 USER appuser
