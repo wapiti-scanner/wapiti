@@ -1,4 +1,11 @@
-Unrelease
+12/11/2024
+    Wapiti 3.2.1
+    doc: fix and update documentation (usage, manpage, etc)
+    Core: authentication possible using .side files
+    Core: improve parsing of swagger files for API importation
+    Core: improve stopping mechanism with ctrl+c
+
+12/08/2024
     Wapiti 3.2.0
     mod_network_device: New module to detect network devices interface
     mod_cms: New module to detect CMS Version
