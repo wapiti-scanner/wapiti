@@ -21,18 +21,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from difflib import SequenceMatcher
 from os.path import splitext, join as path_join
 from urllib.parse import urljoin
 from typing import Optional, Iterator
 
 from httpx import RequestError
 
-from wapitiCore.main.log import log_verbose, log_red
+from wapitiCore.main.log import log_verbose, log_red, log_orange
 from wapitiCore.attack.attack import Attack, random_string, Parameter
 from wapitiCore.definitions.backup import BackupFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.txt_payload_parser import TxtPayloadReader
+
+
+def compare_responses(response1: str, response2: str) -> bool:
+    """
+    Compare two responses to determine if they are too similar.
+    return True if the responses are too similar (false positive), False otherwise.
+    """
+    similarity_threshold: float = 0.9
+    # Compute similarity ratio directly on raw responses
+    similarity = SequenceMatcher(None, response1, response2).quick_ratio()
+    return similarity > similarity_threshold
 
 
 class ModuleBackup(Attack):
@@ -105,7 +117,6 @@ class ModuleBackup(Attack):
             else:
                 if "[FILE_" in raw_payload:
                     continue
-
                 url = urljoin(request.path, raw_payload)
 
             log_verbose(f"[¨] {url}")
@@ -114,12 +125,15 @@ class ModuleBackup(Attack):
             evil_req = Request(url)
 
             try:
+                original_response = await self.crawler.async_send(request)
                 response = await self.crawler.async_send(evil_req)
             except RequestError:
                 self.network_errors += 1
                 continue
-
             if response and response.is_success:
+                if compare_responses(response.content or "", original_response.content or ""):
+                    log_orange(f"Skipping {evil_req.url} because it's too similar to the response from {request.url}")
+                    continue
                 log_red(f"Found backup file {evil_req.url}")
 
                 await self.add_low(
