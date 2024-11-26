@@ -44,7 +44,7 @@ from wapitiCore.parsers.swagger import Swagger
 global_stop_event = asyncio.Event()
 
 
-def inner_ctrl_c_signal_handler():
+def inner_ctrl_c_signal_handler(_, __):
     logging.info("Waiting for running crawler tasks to finish, please wait.")
     global_stop_event.set()
 
@@ -463,8 +463,6 @@ async def wapiti_main():
         for url in excluded_urls:
             wap.add_excluded_url(url)
 
-    loop = asyncio.get_event_loop()
-
     try:
         if not args.skip_crawl:
             if await wap.have_attacks_started() and not args.resume_crawl:
@@ -474,10 +472,12 @@ async def wapiti_main():
                     logging.info("[*] Resuming scan from previous session, please wait")
 
                 await wap.load_scan_state()
-                loop.add_signal_handler(signal.SIGINT, inner_ctrl_c_signal_handler)
-                await wap.browse(global_stop_event, parallelism=args.tasks)
-                loop.remove_signal_handler(signal.SIGINT)
-                await wap.save_scan_state()
+                signal.signal(signal.SIGINT, inner_ctrl_c_signal_handler)
+                try:
+                    await wap.browse(global_stop_event, parallelism=args.tasks)
+                finally:
+                    signal.signal(signal.SIGINT, signal.SIG_DFL)
+                    await wap.save_scan_state()
 
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)

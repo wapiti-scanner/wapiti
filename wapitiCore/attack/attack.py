@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import dataclasses
 import os
-from os.path import splitext, join as path_join
+from os.path import splitext
 from urllib.parse import quote, urlparse
 from collections import defaultdict
 from enum import Enum, Flag, auto
@@ -27,8 +27,8 @@ import random
 from binascii import hexlify
 from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type
 import json
+from importlib.resources import files
 
-from pkg_resources import resource_filename
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.definitions import FindingBase
@@ -191,7 +191,7 @@ class Attack:
     # Must be defined in the code of the module
     require = []
 
-    DATA_DIR = resource_filename("wapitiCore", os.path.join("data", "attacks"))
+    DATA_DIR = str(files("wapitiCore").joinpath("data", "attacks"))
     HOME_DIR = os.getenv("HOME") or os.getenv("USERPROFILE") or "home"
 
     # Color codes
@@ -217,7 +217,7 @@ class Attack:
 
     @staticmethod
     def get_resource(resource_path: str):
-        return resource_filename("wapitiCore", path_join("data", "attacks", resource_path))
+        return str(files("wapitiCore").joinpath("data", "attacks", resource_path))
 
     def __init__(
             self,
