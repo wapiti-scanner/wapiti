@@ -198,6 +198,7 @@ class Wapiti:
         self._wait_time = 2.
         self._buffer = []
         self._user_choice = UserChoice.CONTINUE
+        self._current_attack_task: Optional[asyncio.Task] = None
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -481,7 +482,7 @@ class Wapiti:
                 if original_request.path_id is not None:
                     attacked_ids.add(original_request.path_id)
 
-    def handle_user_interruption(self, task) -> None:
+    def handle_user_interruption(self, _, __) -> None:
         """
         Attack handler for Ctrl+C interruption.
         """
@@ -495,7 +496,8 @@ class Wapiti:
             try:
                 self._user_choice = UserChoice(input("? ").strip().lower())
                 if self._user_choice != UserChoice.CONTINUE:
-                    task.cancel()
+                    if self._current_attack_task is not None:
+                        self._current_attack_task.cancel()
                 return
             except (UnicodeDecodeError, ValueError):
                 print("Invalid choice. Valid choices are r, n, q, and c.")
@@ -540,8 +542,6 @@ class Wapiti:
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
             attack_modules = await self._load_attack_modules(crawler)
 
-            loop = asyncio.get_running_loop()
-
             for attack_module in attack_modules:
                 if attack_module.do_get is False and attack_module.do_post is False:
                     continue
@@ -565,21 +565,21 @@ class Wapiti:
                     )
 
                 # Create and run each attack module as an asyncio task
-                current_attack_task = asyncio.create_task(
+                self._current_attack_task = asyncio.create_task(
                     self.run_attack_module(attack_module)
                 )
 
                 # Setup signal handler to prompt the user for task cancellation
-                loop.add_signal_handler(signal.SIGINT, self.handle_user_interruption, current_attack_task)
+                signal.signal(signal.SIGINT, self.handle_user_interruption)
 
                 try:
-                    await current_attack_task  # Await the attack module task
+                    await self._current_attack_task  # Await the attack module task
                 except asyncio.CancelledError:
                     # The user chose to stop the current module
                     pass
                 finally:
                     # Clean up the signal handler for the next loop
-                    loop.remove_signal_handler(signal.SIGINT)
+                    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
                 # As the handler directly continue or cancel the current_attack_task module, we don't have
                 # cases where we have to call `continue`. Just check for the two other options
