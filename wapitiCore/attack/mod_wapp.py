@@ -28,8 +28,8 @@ from urllib.parse import urlparse, quote_plus
 from aiocache import cached
 from httpx import RequestError
 
-from arsenic import get_session, browsers, services
-from arsenic.errors import JavascriptError, UnknownError, ArsenicError
+from wapiti_arsenic import get_session, browsers, services
+from wapiti_arsenic.errors import JavascriptError, UnknownError, ArsenicError
 
 from wapitiCore.attack.cve.checker import (
     CVEChecker, cvss_score_to_wapiti_level, CVE_DIRECTORY, SUPPORTED_SOFTWARES, is_cve_supported_software
