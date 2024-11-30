@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 import importlib.util
 
 from httpx import RequestError
-from arsenic import get_session, browsers, services, errors, constants
+from wapiti_arsenic import get_session, browsers, services, errors, constants
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html

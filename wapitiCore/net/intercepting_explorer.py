@@ -34,9 +34,9 @@ from mitmproxy.master import Master
 from mitmproxy.options import Options
 from mitmproxy.http import Request as MitmRequest
 import httpx
-from arsenic import get_session, browsers, services
-from arsenic.constants import SelectorType
-from arsenic.errors import ArsenicError, ElementNotInteractable, UnknownArsenicError, NoSuchElement
+from wapiti_arsenic import get_session, browsers, services
+from wapiti_arsenic.constants import SelectorType
+from wapiti_arsenic.errors import ArsenicError, ElementNotInteractable, UnknownArsenicError, NoSuchElement
 import structlog
 
 from wapitiCore.net import Request
@@ -68,7 +68,7 @@ def is_interpreted_type(mime_type: str) -> bool:
 
 def set_arsenic_log_level(level: int = WARNING):
     # Create logger
-    logger = getLogger('arsenic')
+    logger = getLogger('wapiti_arsenic')
 
     # We need factory, to return application-wide logger
     def logger_factory():
