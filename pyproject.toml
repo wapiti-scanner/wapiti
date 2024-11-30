@@ -34,7 +34,7 @@ dependencies = [
         "aiocache==0.12.2",
         "aiohttp==3.10.2",
         "aiosqlite==0.20.0",
-        "arsenic==21.8",
+        "arsenic @ https://github.com/wapiti-scanner/arsenic/releases/download/28.1%2Bremove-distutils/arsenic-28.1+remove.distutils-py3-none-any.whl",
         "beautifulsoup4==4.12.3",
         "browser-cookie3==0.19.1",
         "dnspython==2.6.1",
