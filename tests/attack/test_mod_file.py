@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
+import respx
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -82,6 +83,51 @@ async def test_loknop_lfi_to_rce():
         assert persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].startswith(
             "php://filter/convert.iconv.UTF8.CSISO2022KR|convert.base64-encode|convert.iconv.UTF8.UTF7|"
         )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_image_with_parameter():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> \
+                <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+    # Response to tell that the image take a parameter
+    respx.get(f"http://perdu.com/image_with_par.jpg?f=test").mock(
+        return_value=httpx.Response(
+            200,
+            content="test"
+        )
+    )
+
+    respx.get(
+        url__startswith="http://perdu.com/image_with_par.jpg?f=php%3A%2F%2Ffilter%2Fconvert.iconv.UTF8.CSISO2022KR"
+    ).mock(
+        return_value=httpx.Response(200, content=" ¸")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/image_with_par.jpg?f=.*?").mock(
+        httpx.Response(200, content="toto")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com/image_with_par.jpg?f=test")
+    request.path_id = 42
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleFile(crawler, persister, options, crawler_configuration)
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
 
 
 async def delayed_response():
