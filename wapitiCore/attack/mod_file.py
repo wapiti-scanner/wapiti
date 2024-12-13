@@ -152,6 +152,13 @@ class ModuleFile(Attack):
         current_parameter = None
         vulnerable_parameter = False
 
+        # Define a list of image file extensions to exclude
+        excluded_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.ico']
+
+        if any(page.lower().endswith(ext) for ext in excluded_extensions):
+            log_verbose(f"Skipping testing for image file: {page}")
+            return
+
         for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
 
             if current_parameter != parameter:
