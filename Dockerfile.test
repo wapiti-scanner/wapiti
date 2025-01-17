@@ -10,17 +10,9 @@ RUN apt update \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
-RUN update-ca-certificates
-RUN python3 -c "import sys; print(sys.version)"
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --upgrade pip
-RUN pip install -U setuptools --no-cache-dir
-RUN mkdir /usr/src/app
-
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+RUN pip install --upgrade pip \
+    && python3 -c "import sys; print(sys.version)" \
+    && mkdir /usr/src/app
 
 WORKDIR /usr/src/app
 
