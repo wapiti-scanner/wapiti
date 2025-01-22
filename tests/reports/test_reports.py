@@ -41,7 +41,8 @@ def test_reports(report_format):
             vul.name(),
             vul.description(),
             vul.solution(),
-            flatten_references(vul.references())
+            flatten_references(vul.references()),
+            vul.wstg_code()
         )
 
     for anomaly in anomalies:
@@ -49,7 +50,8 @@ def test_reports(report_format):
             anomaly.name(),
             anomaly.description(),
             anomaly.solution(),
-            flatten_references(anomaly.references())
+            flatten_references(anomaly.references()),
+            anomaly.wstg_code()
         )
 
     for additional in additionals:
@@ -57,7 +59,8 @@ def test_reports(report_format):
             additional.name(),
             additional.description(),
             additional.solution(),
-            flatten_references(additional.references())
+            flatten_references(additional.references()),
+            additional.wstg_code()
         )
 
     request = Request("http://perdu.com/riri?foo=bar")
@@ -172,7 +175,8 @@ def test_detailed_reports(report_format, level):
             vul.name(),
             vul.description(),
             vul.solution(),
-            flatten_references(vul.references())
+            flatten_references(vul.references()),
+            vul.wstg_code()
         )
 
     request = Request("http://perdu.com/riri?foo=bar")
