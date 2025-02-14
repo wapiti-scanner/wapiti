@@ -21,6 +21,7 @@ from typing import Optional
 
 from wapitiCore.attack.network_devices.mod_checkpoint import ModuleCheckPoint
 from wapitiCore.attack.network_devices.mod_citrix import ModuleCitrix
+from wapitiCore.attack.network_devices.mod_ivanti import ModuleIvanti
 from wapitiCore.attack.network_devices.mod_forti import ModuleForti
 from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
 from wapitiCore.attack.network_devices.mod_ubika import ModuleUbika
@@ -48,7 +49,7 @@ class ModuleNetworkDevice(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
-        modules_list = [ModuleCheckPoint, ModuleCitrix, ModuleForti, ModuleHarbor, ModuleUbika]
+        modules_list = [ModuleCheckPoint, ModuleCitrix, ModuleForti, ModuleHarbor, ModuleIvanti, ModuleUbika]
         for module in modules_list:
             mod = module(
                 self.crawler, self.persister, self.options, self.crawler_configuration
