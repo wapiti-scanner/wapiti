@@ -1114,3 +1114,328 @@ async def test_detect_cve_forti():
             'URL http://perdu.com/ seems vulnerable to CVE-2024-55591'
         )
         assert persister.add_payload.call_args_list[1][1]["module"] == "network_device"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_connect_in_title():
+    respx.get("http://perdu.com/dana-na/auth/url_default/welcome.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Ivanti Connect Secure</title></head><body> \
+            <h2>Pas de panique, on va vous aider </h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti Connect Secure", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_connect_in_frmLogin():
+    respx.get("http://perdu.com/dana-na/auth/url_default/welcome.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Ivanti Connect Secure</title></head><body> \
+            <h2>Pas de panique, on va vous aider <form name="frmLogin"> </form></h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti Connect Secure", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_Service_Manager_in_Title():
+    respx.get("http://perdu.com/dana/home/index.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Ivanti Service Manager</title></head><body> \
+            <h2>Pas de panique, on va vous aider</h2> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti Service Manager", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_Service_Manager_in_h1():
+    respx.get("http://perdu.com/dana/home/index.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head>Vous Perdu ?<title></title></head><body> \
+            <h1>Ivanti Service Manager</h1> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti Service Manager", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_Service_Manager_in_file():
+    respx.get("http://perdu.com/dana/home/index.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title> \
+            <script src="/lib/RespondJs/respond.min.js" type="text/javascript"></script> </head><body>\
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti Service Manager", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_User_Portal_in_Title():
+    respx.get("http://perdu.com/mifs/user/login.jsp").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Ivanti User Portal</title></head><body> \
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti User Portal", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_ivanti_User_Portal_in_H1():
+    respx.get("http://perdu.com/mifs/user/login.jsp").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body> \
+                    <h1>MI_LOGIN_SCREEN</h1></body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Ivanti User Portal", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_no_info():
+    respx.get("http://perdu.com/dana/home/index.cgi").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head> \
+            </head><body>\
+                    </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html></body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
+        
