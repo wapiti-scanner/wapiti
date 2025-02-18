@@ -333,7 +333,7 @@ class Attack(AttackProtocol):
 
     @property
     def cms(self):
-        return self.options.get("cms", "drupal,joomla,prestashop,spip,wp")
+        return self.options.get("cms", "drupal,joomla,magento,prestashop,spip,typo3,wp")
 
     @property
     def wapp_url(self):
