@@ -168,7 +168,7 @@ class ModuleExec(Attack):
                 vuln_info = None
 
                 # No timeout raised, check for patterns in response
-                if any(rule in response.content for rule in payload_info.rules):
+                if any(rule.replace("[SPACE]", " ") in response.content for rule in payload_info.rules):
                     vuln_info = payload_info.description
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
