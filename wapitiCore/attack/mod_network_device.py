@@ -25,6 +25,8 @@ from wapitiCore.attack.network_devices.mod_ivanti import ModuleIvanti
 from wapitiCore.attack.network_devices.mod_forti import ModuleForti
 from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
 from wapitiCore.attack.network_devices.mod_ubika import ModuleUbika
+from wapitiCore.attack.network_devices.mod_paloalto import ModulePaloAlto
+
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
@@ -49,7 +51,15 @@ class ModuleNetworkDevice(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
         request_to_root = Request(request.url)
-        modules_list = [ModuleCheckPoint, ModuleCitrix, ModuleForti, ModuleHarbor, ModuleIvanti, ModuleUbika]
+        modules_list = [
+            ModuleCheckPoint,
+            ModuleCitrix,
+            ModuleForti,
+            ModuleHarbor,
+            ModulePaloAlto,
+            ModuleIvanti,
+            ModuleUbika
+        ]
         for module in modules_list:
             mod = module(
                 self.crawler, self.persister, self.options, self.crawler_configuration

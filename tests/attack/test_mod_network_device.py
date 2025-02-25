@@ -1115,7 +1115,6 @@ async def test_detect_cve_forti():
         )
         assert persister.add_payload.call_args_list[1][1]["module"] == "network_device"
 
-
 @pytest.mark.asyncio
 @respx.mock
 async def test_detect_ivanti_connect_in_title():
@@ -1438,4 +1437,237 @@ async def test_detect_no_info():
         await module.attack(request)
 
         assert persister.add_payload.call_count == 0
-        
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_in_Title():
+    respx.get("http://perdu.com/global-protect/login.esp").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>GlobalProtect Portal</title></head> \
+            <body><h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Palo Alto GlobalProtect Portal", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_in_Div():
+    respx.get("http://perdu.com/global-protect/login.esp").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>perdu</title></head><body> \
+                    <div id="heading">GlobalProtect Portal</div></body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    respx.post(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+        print(module)
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Palo Alto GlobalProtect Portal", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_form():
+    respx.get("http://perdu.com/global-protect/login.esp").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body> \
+                    <pan_form></pan_form></body></html>'
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Palo Alto GlobalProtect Portal", "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_version():
+    respx.get("http://perdu.com/global-protect/portal/css/bootstrap.min.css").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body> \
+                    <h2>Pas de panique, on va vous aider</h2> </body></html>',
+            headers=httpx.Headers({"Etag":"661c69a8-2606e"})
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", "11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_version_format2():
+    respx.get("http://perdu.com/global-protect/portal/css/bootstrap.min.css").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body> \
+                    <h2>Pas de panique, on va vous aider</h2> </body></html>',
+            headers=httpx.Headers({"Etag":"2606e661c69a8"})
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", "11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_palo_alto_version_format3():
+    respx.get("http://perdu.com/global-protect/portal/css/bootstrap.min.css").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body> \
+                    <h2>Pas de panique, on va vous aider</h2> </body></html>',
+            headers=httpx.Headers({"Etag":""})
+        )
+    )
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
+                <h2>Pas de panique, on va vous aider</h2> </body></html>'
+        )
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNetworkDevice(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
