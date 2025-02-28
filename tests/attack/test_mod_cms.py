@@ -185,6 +185,97 @@ async def test_drupal_version_not_detected():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_drupal_plugin_detected():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
+    changelog_edited = "CHANGELOG_EDITED.txt"
+
+    with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
+        data = changelog.read()
+
+    # Response to tell that Drupal is used
+    respx.get("http://perdu.com/misc/drupal.js").mock(
+        return_value=httpx.Response(
+            200,
+            headers={"Content-Type": "application/javascript"}
+        )
+    )
+
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+    # Response for installed plugin
+    respx.get("http://perdu.com/modules/contrib/ctools/").mock(return_value=httpx.Response(403, content="Forbidden"))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Drupal", "versions": [], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "ctools", "versions": [], "categories": ["Drupal Plugin"], "groups": ["Add-ons"]}'
+        )
+@pytest.mark.asyncio
+@respx.mock
+async def test_drupal_plugins_403():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
+    changelog_edited = "CHANGELOG_EDITED.txt"
+
+    with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
+        data = changelog.read()
+
+    # Response to tell that Drupal is used
+    respx.get("http://perdu.com/misc/drupal.js").mock(
+        return_value=httpx.Response(
+            200,
+            headers={"Content-Type": "application/javascript"}
+        )
+    )
+
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+    # Response for installed plugin
+    respx.get("http://perdu.com/modules/contrib/ctools/").mock(return_value=httpx.Response(403, content="Forbidden"))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(403))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Drupal", "versions": [], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+        )
+       
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_no_joomla():
     respx.get("http://perdu.com/").mock(
         return_value=httpx.Response(
