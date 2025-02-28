@@ -18,8 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
+
 from typing import Optional
 from httpx import RequestError
+from os.path import join as path_join
+from urllib.parse import urljoin
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
@@ -34,8 +37,49 @@ MSG_NO_DRUPAL = "No Drupal Detected"
 class ModuleDrupalEnum(CommonCMS):
     """Detect Drupal version."""
     PAYLOADS_HASH = "drupal_hash_files.json"
-
+    PAYLOADS_FILE_PLUGINS = "drupal_plugins.txt"
     versions = []
+    plugins_list = []
+
+    async def check_drupal_plugins(self, url, plugins_file):
+        """
+        Check if specific Drupal Plugins are installed on the given URL.
+        """
+        installed_plugins = []
+        # Sending a request to a non-existing plugin
+        no_plugin_url = urljoin(url, "modules/contrib/non_existing_plugin/")
+        no_plugin_request = Request(f'{no_plugin_url}', 'GET')
+        try:
+            no_plugin_response: Response = await self.crawler.async_send(no_plugin_request, follow_redirects=True)
+            if no_plugin_response.status == 403:
+                # If the no_plugin_response returns 403, assume all folder requests return 403
+                return []
+        except RequestError:
+            self.network_errors += 1
+            return []
+        try :
+            with open(
+            path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS),
+            errors = "ignore",
+            encoding = 'utf-8') as plugins_list:
+                for plugin in plugins_list:
+                    plugin = plugin.strip()
+                    plugin_url = urljoin(url, f"modules/contrib/{plugin}/")
+                    request = Request(f'{plugin_url}', 'GET')
+                    try:
+                        response: Response = await self.crawler.async_send(request, follow_redirects=True)
+                    except RequestError:
+                        self.network_errors += 1
+                        continue
+
+                    if response.status == 403:
+                        installed_plugins.append(plugin)
+
+        except FileNotFoundError:
+            print(f"Error: File '{plugins_file}' not found.")
+            return []
+
+        return installed_plugins
 
     async def check_drupal(self, url):
         check_list = ['core/misc/drupal.js', 'misc/drupal.js']
@@ -56,14 +100,6 @@ class ModuleDrupalEnum(CommonCMS):
                     return True
         return False
 
-    async def must_attack(self, request: Request, response: Optional[Response] = None):
-        if self.finished:
-            return False
-
-        if request.method == "POST":
-            return False
-
-        return request.url == await self.persister.get_root_url()
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
@@ -72,6 +108,7 @@ class ModuleDrupalEnum(CommonCMS):
         if await self.check_drupal(request_to_root.url):
             await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
+            self.plugins_list = await self.check_drupal_plugins(request_to_root.url, self.PAYLOADS_FILE_PLUGINS)
 
             drupal_detected = {
                 "name": "Drupal",
@@ -97,5 +134,25 @@ class ModuleDrupalEnum(CommonCMS):
                 request=request_to_root,
                 info=json.dumps(drupal_detected),
             )
+            if self.plugins_list:
+                for plugin in self.plugins_list:
+                    plugin_detected = {
+                        "name": plugin,
+                        "versions": [],
+                        "categories": ["Drupal Plugin"],
+                        "groups": ['Add-ons']
+                    }
+                    log_blue(
+                        MSG_TECHNO_VERSIONED,
+                        plugin,
+                        []
+                    )
+                    await self.add_info(
+                        finding_class=SoftwareNameDisclosureFinding,
+                        request=request,
+                        info=json.dumps(plugin_detected),
+                        response=response
+                    )
+
         else:
             log_blue(MSG_NO_DRUPAL)
