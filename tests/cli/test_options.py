@@ -1,7 +1,9 @@
 import sys
+from pathlib import Path
 from time import monotonic
 from unittest import mock
 
+import respx
 from httpcore import URL
 import httpx
 import pytest
@@ -9,7 +11,7 @@ import pytest
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
 from wapitiCore.net import Request, Response
 from wapitiCore.main.wapiti import wapiti_main
-from wapitiCore.controller.wapiti import Wapiti
+from wapitiCore.controller.wapiti import Wapiti, InvalidOptionValue
 
 
 @pytest.mark.asyncio
@@ -265,14 +267,26 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
         mock_async_try_form_login.assert_called_once()
 
 # Test swagger option with a valid url
+@respx.mock
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
 @mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
 async def test_swagger_valid_url(mock_browse, _):
+    swagger_url = "https://petstore.swagger.io/v2/swagger.json"
+
+    swagger_path = Path(__file__).parent.parent / "parsers" / "data" / "swagger.json"
+    with swagger_path.open(encoding="utf-8") as file_obj:
+        respx.get(swagger_url).mock(
+            return_value=httpx.Response(
+                200,
+                text=file_obj.read()
+            )
+        )
+
     testargs = [
         "wapiti",
         "-u", "https://petstore.swagger.io",
-        "--swagger", "https://petstore.swagger.io/v2/swagger.json",
+        "--swagger", swagger_url,
         "-m", ""
     ]
 
@@ -281,21 +295,27 @@ async def test_swagger_valid_url(mock_browse, _):
         mock_browse.assert_called_once()
 
 # Test swagger option with an invalid url or when option break
+@respx.mock
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
-async def test_swagger_invalid_url(mock_browse, _):
+async def test_swagger_invalid_url():
+    swagger_url = "http://testphp.vulnweb.com/swagger.json"
+    respx.get(swagger_url).mock(
+        return_value=httpx.Response(
+            404,
+            text="Not found"
+        )
+    )
+
     testargs = [
         "wapiti",
         "-u", "http://testphp.vulnweb.com",
-        "--swagger", "http://testphp.vulnweb.com/swagger.json",
+        "--swagger", swagger_url,
         "-m", ""
     ]
 
     with mock.patch.object(sys, "argv", testargs):
-        # will not raise an exception because of the invalid url
-        await wapiti_main()
-        mock_browse.assert_called_once()
+        with pytest.raises(InvalidOptionValue):
+            await wapiti_main()
 
 
 @pytest.mark.asyncio
@@ -303,11 +323,11 @@ async def test_swagger_invalid_url(mock_browse, _):
 @mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
 @mock.patch("wapitiCore.controller.wapiti.Wapiti.add_start_url")
 async def test_out_of_scope_swagger(mock_add_start_url, _, __):
-    """Test with out of scope swagger"""
+    """Test with out-of-scope swagger"""
     testsagrs = [
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
-        "--swagger", "./tests/data/openapi3.yaml",
+        "--swagger", "./tests/parsers/data/openapi3.yaml",
         "-m", ""
     ]
 

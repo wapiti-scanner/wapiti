@@ -192,13 +192,17 @@ async def wapiti_main():
             raise
 
     if args.swagger_uri:
-        swagger = Swagger(swagger_url=args.swagger_uri, base_url=url)
+        swagger = Swagger(swagger_url=args.swagger_uri, base_url=url, crawler_configuration=wap.crawler_configuration)
         nb_out = 0
-        for request in swagger.get_requests():
-            if wap.target_scope.check(request):
-                wap.add_start_url(request)
-            else:
-                nb_out += 1
+        try:
+            for request in await swagger.get_requests():
+                if wap.target_scope.check(request):
+                    wap.add_start_url(request)
+                else:
+                    nb_out += 1
+        except (ValueError, FileNotFoundError, RuntimeError) as exception:
+            raise InvalidOptionValue("--swagger", f"Could not parse swagger file: {exception}") from exception
+
         if nb_out > 0:
             logging.warning(f"[!] {nb_out} out of scope requests from the Swagger file are not added.")
 
@@ -208,8 +212,8 @@ async def wapiti_main():
                 wap.add_start_url(Request(start_url))
             elif os.path.isfile(start_url):
                 try:
-                    with codecs.open(start_url, encoding="UTF-8") as urlfd:
-                        for urlline in urlfd:
+                    with codecs.open(start_url, encoding="UTF-8") as url_fd:
+                        for urlline in url_fd:
                             urlline = urlline.strip()
                             if urlline.startswith(("http://", "https://")):
                                 wap.add_start_url(Request(urlline))

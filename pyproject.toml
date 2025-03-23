@@ -7,7 +7,7 @@ name = "wapiti3"
 version = "3.2.2"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
-requires-python = ">=3.10" 
+requires-python = ">=3.10,<3.13"
 authors = [
         {name="Nicolas Surribas", email="nicolas.surribas@gmail.com"},
 ]
@@ -53,7 +53,7 @@ dependencies = [
         "tld==0.13",
         "typing-extensions==4.10.0",
         "yaswfp==0.9.3",
-        "prance[osv]>=23.6.21.0"
+        "wapiti-swagger==0.1.9"
 ]
 
 [project.urls]
