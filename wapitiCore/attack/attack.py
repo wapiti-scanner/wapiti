@@ -585,6 +585,9 @@ class Mutator:
             data = json.loads(request.post_params)
         except json.JSONDecodeError:
             return
+        except TypeError:
+            # we may bump into POST/PUT/etc requests without body
+            return
 
         get_params = request.get_params
         referer = request.referer
