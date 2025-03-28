@@ -32,10 +32,10 @@ RUN apt update \
   && apt-get install -y --no-install-recommends --no-install-suggests \
     `apt-cache depends firefox-esr | awk '/Depends:/{print$2}'` \
      # additional 'firefox-esl' dependencies which is not in 'depends' list
-     libasound2 libxt6 libxtst6 \
+     libasound2 libxt6 libxtst6 xz-utils \
   && curl -fL -o /tmp/firefox.tar.bz2 \
-     https://ftp.mozilla.org/pub/firefox/releases/${firefox_ver}/linux-x86_64/en-GB/firefox-${firefox_ver}.tar.bz2 \
-  && tar -xjf /tmp/firefox.tar.bz2 -C /tmp/ \
+     https://ftp.mozilla.org/pub/firefox/releases/${firefox_ver}/linux-x86_64/en-GB/firefox-${firefox_ver}.tar.xz \
+  && tar -xJf /tmp/firefox.tar.bz2 -C /tmp/ \
   && mv /tmp/firefox /opt/firefox \
   # Download and install geckodriver
   && curl -fL -o /tmp/geckodriver.tar.gz \
@@ -53,3 +53,4 @@ COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/loc
 COPY --chmod=644 openssl_conf /etc/wapiti/
 
 ENTRYPOINT ["wapiti"]
+
