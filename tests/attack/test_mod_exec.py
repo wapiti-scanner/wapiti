@@ -69,7 +69,7 @@ async def test_whole_stuff():
 @respx.mock
 async def test_detection():
     respx.get(url__regex=r"http://perdu\.com/\?vuln=.*env.*").mock(
-        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin\nPWD=/\nHOME=/home/user\nNAME=user\nLOGNAME=user")
     )
     respx.get(url__regex=r"http://perdu\.com/\?test=.*&vuln=.*").mock(
         return_value=httpx.Response(200, text="Hello there")
@@ -80,7 +80,7 @@ async def test_detection():
     )
 
     respx.post(url__regex=r"http://perdu\.com/\?env=foo").mock(
-        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+        return_value=httpx.Response(200, text="PATH=/bin:/usr/bin\nPWD=/\nHOME=/home/user\nNAME=user\nLOGNAME=user")
     )
 
     respx.post(url__regex=r"http://perdu\.com/.*").mock(httpx.Response(200, text="Hello there"))
@@ -158,7 +158,7 @@ async def test_blind_detection():
 
 async def delayed_response():
     await Sleep(6)
-    return httpx.Response(200, text="PATH=/bin:/usr/bin;PWD=/")
+    return httpx.Response(200, text="PATH=/bin:/usr/bin\nPWD=/\nHOME=/home/user\nNAME=user\nLOGNAME=user")
 
 
 @pytest.mark.asyncio
