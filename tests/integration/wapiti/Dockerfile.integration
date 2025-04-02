@@ -31,7 +31,7 @@ RUN apt-get -y update &&\
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
   truncate -s 0 /var/log/*log
 
-COPY --from=build /usr/local/lib/python3.12/dist-packages/ /usr/local/lib/python3.12/dist-packages/
+COPY --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
 
 # Create the Wapiti config directory
