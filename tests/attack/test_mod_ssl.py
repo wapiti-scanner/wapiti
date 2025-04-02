@@ -28,13 +28,17 @@ from wapitiCore.attack.mod_ssl import (
 def https_server(cert_directory: str):
     server_address = ("127.0.0.1", 4443)
     httpd = http.server.HTTPServer(server_address, http.server.SimpleHTTPRequestHandler)
-    httpd.socket = ssl.wrap_socket(
-        httpd.socket,
-        server_side=True,
+
+    # Create an SSL context
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(
         certfile=os.path.join(cert_directory, "cert.pem"),
-        keyfile=os.path.join(cert_directory, "key.pem"),
-        ssl_version=ssl.PROTOCOL_TLS
+        keyfile=os.path.join(cert_directory, "key.pem")
     )
+
+    # Wrap the socket with the context
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+
     httpd.serve_forever()
 
 
