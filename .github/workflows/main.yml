@@ -7,13 +7,13 @@ on: [push, pull_request]
 jobs:
   code_style:
     name: Code Style Analysis
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -24,7 +24,7 @@ jobs:
           pylint --rcfile=.pylintrc wapitiCore
 
   docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker
@@ -37,10 +37,10 @@ jobs:
           docker build .
 
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.12", "3.13"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -52,7 +52,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install php8.1-cli php8.1-xml sslscan -y --no-install-recommends
+        sudo apt-get install php8.3-cli php8.3-xml sslscan -y --no-install-recommends
         python -m pip install --upgrade pip
         pip install -U setuptools
         pip3 install .[test]
@@ -65,7 +65,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
   integrate:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

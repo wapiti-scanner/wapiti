@@ -1,9 +1,9 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update \
- && apt install ca-certificates python3 python3-pip php8.1-cli php8.1-xml sslscan -y --no-install-recommends \
+ && apt install ca-certificates python3 python3-venv python3-pip php8.3-cli php8.3-xml sslscan -y --no-install-recommends \
  && apt clean -yq \
  && apt autoremove -yq \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
@@ -11,8 +11,10 @@ RUN apt update \
 
 RUN update-ca-certificates
 RUN python3 -c "import sys; print(sys.version)"
-RUN python3 -m pip install --upgrade pip
-RUN pip3 install -U setuptools --no-cache-dir
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --upgrade pip
+RUN pip install -U setuptools --no-cache-dir
 RUN mkdir /usr/src/app
 
 ENV LANG=en_US.UTF-8
@@ -23,5 +25,5 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN pip3 install .[test] --no-cache-dir
+RUN pip install .[test] --no-cache-dir
 CMD ["pytest"]

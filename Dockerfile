@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim AS build
+FROM python:3.13-slim AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
   LANG=en_US.UTF-8
@@ -16,7 +16,7 @@ COPY . .
 
 RUN pip3 install . --break-system-packages
 
-FROM debian:bookworm-slim
+FROM python:3.13-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
   LANG=en_US.UTF-8 \
@@ -30,7 +30,7 @@ RUN apt update \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
-COPY --from=build /usr/local/lib/python3.11/dist-packages/ /usr/local/lib/python3.11/dist-packages/
+COPY --from=build /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
 COPY --chmod=644 openssl_conf /etc/wapiti/
 

@@ -1,7 +1,7 @@
 Introduction
 ============
 
-All installation methods assume you already have a Python 3.10 or more recent on your system.
+All installation methods assume you already have a Python 3.12 or 3.13 on your system.
 
 Note that if you have all the requirements pre-installed on your system, it is not necessary to use the setup.py script
 to use Wapiti : just extract the archive and launch the "wapiti" command line in the "bin" folder :
