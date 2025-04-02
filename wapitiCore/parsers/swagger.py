@@ -140,6 +140,7 @@ class Swagger:
             file_params = None
 
             final_path = request.path
+            content_type = "application/json"
 
             for parameter in request.parameters:
                 if parameter.location == "body":
@@ -149,6 +150,7 @@ class Swagger:
                     )
                     if parameter.media_type == "application/x-www-form-urlencoded":
                         json_body = urlencode(json_body, doseq=True)
+                        content_type = "application/x-www-form-urlencoded"
                     else:
                         json_body = json.dumps(json_body)
                 else:
@@ -172,6 +174,7 @@ class Swagger:
                     elif parameter.location == "query":
                         get_params.append([parameter.name, value])
                     elif parameter.location == "formData":
+                        content_type = "application/x-www-form-urlencoded"
                         if parameter.param_type == "file":
                             file_params = file_params or []
                             file_params.append([parameter.name, ("pix.gif", b"GIF89a", "image/gif")])
@@ -184,7 +187,7 @@ class Swagger:
                 get_params=get_params,
                 post_params=json_body or post_params,
                 file_params=file_params,
-                enctype="application/json"
+                enctype="multipart/form-data" if file_params else content_type,
             )
             results.append(request)
 
