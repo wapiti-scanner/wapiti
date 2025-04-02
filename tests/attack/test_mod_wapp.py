@@ -728,6 +728,7 @@ async def test_raise_on_invalid_json():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com"}
@@ -755,6 +756,7 @@ async def test_raise_on_not_valid_db_url():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -814,6 +816,7 @@ async def test_raise_on_value_error():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -840,6 +843,7 @@ async def test_raise_on_request_error():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -863,6 +867,7 @@ async def test_raise_on_request_error_for_dump_url():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -884,6 +889,7 @@ async def test_wappalyzer_raise_on_request_error_for_update():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -900,7 +906,6 @@ async def test_wappalyzer_raise_on_request_error_for_update():
 @respx.mock
 async def test_wappalyzer_raise_on_value_error_for_update():
     """Tests that a ValueError is raised when calling the update function with URL doesn't contain a wapp DB."""
-
     respx.get(url__regex=r"http://perdu.com/src/technologies/.*").mock(
         return_value=httpx.Response(
             200,
@@ -916,6 +921,7 @@ async def test_wappalyzer_raise_on_value_error_for_update():
     )
 
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_url": "http://perdu.com/"}
@@ -1090,6 +1096,7 @@ async def test_wappalyzer_raise_on_not_valid_directory_for_update():
         )
     )
     persister = AsyncMock()
+    persister.CONFIG_DIR = tempfile.mkdtemp()
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         options = {"timeout": 10, "level": 2, "wapp_dir": "/"}

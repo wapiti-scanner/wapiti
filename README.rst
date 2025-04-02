@@ -23,7 +23,7 @@ http://wapiti-scanner.github.io/
 
 Requirements
 ============
-In order to work correctly, Wapiti needs Python 3.10, 3.11 or 3.12
+In order to work correctly, Wapiti needs Python 3.12 or 3.13.
 
 All Python module dependencies will be installed automatically if you use the setup.py script or `pip install wapiti3`
 
