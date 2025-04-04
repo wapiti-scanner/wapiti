@@ -21,7 +21,7 @@ import json
 import os
 import re
 import warnings
-from typing import Set
+from typing import Set, Dict, Any, Union, List
 from collections import defaultdict
 from soupsieve.util import SelectorSyntaxError
 
@@ -265,7 +265,7 @@ def with_groups(func):
     return wrapper_func
 
 
-def extract_version(regex_params, content) -> Set[str]:
+def extract_version(regex_params: Dict[str, Any], content: str) -> Set[str]:
     """
     Add a new detected version of application.
     """
@@ -296,7 +296,7 @@ def extract_version(regex_params, content) -> Set[str]:
     return versions
 
 
-def detect_versions_normalize_list(rules: list, contents) -> Set[str]:
+def detect_versions_normalize_list(rules: list, contents: Union[str, List[str]]) -> Set[str]:
     """
     Determine whether the content matches the application regex
     Add a new version of application if the content matches
@@ -323,19 +323,19 @@ def detect_versions_normalize_dict(rules: dict, contents) -> Set[str]:
     """
     versions = set()
     lowercase_keys_content = {key.lower(): value for key, value in contents.items()}
-    for (key, regex_params) in rules.items():
+    for (key, regex_params_list) in rules.items():
         # If the key is in lowercase, we erase 'contents' by its lowercased-key version
         if (key in contents) or (key in (contents := lowercase_keys_content)):
-            # regex_params is a list : [{"application_pattern": "..", "regex": "re.compile(..)"}, ...]
-            for i, _ in enumerate(regex_params):
+            # regex_params_list is a list of dict : [{"application_pattern": "..", "regex": "re.compile(..)"}, ...]
+            for regex_param in regex_params_list:
                 for content_value in contents[key]:
                     # If the regex fails, it can be due to the fact that we are looking for the key instead
                     # The value can be set to the key so we compare
-                    if re.search(regex_params[i]['regex'], content_value) or\
-                       regex_params[i]['application_pattern'] == key.lower():
+                    if re.search(regex_param['regex'], content_value) or\
+                       regex_param['application_pattern'] == key.lower():
                         # Use that special string to show we detected the app once but not necessarily a version
                         versions.add("__detected__")
-                        versions.update(extract_version(regex_params[i], content_value))
+                        versions.update(extract_version(regex_param, content_value))
     return versions
 
 

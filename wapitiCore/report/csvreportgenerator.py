@@ -60,6 +60,7 @@ class CSVReportGenerator(ReportGenerator):
             writer.writerows(self._anomalies)
             writer.writerows(self._additionals)
 
+    # pylint: disable=too-many-positional-arguments
     def add_vulnerability(
         self,
         module: str,
@@ -83,6 +84,7 @@ class CSVReportGenerator(ReportGenerator):
                 ]
             )
 
+    # pylint: disable=too-many-positional-arguments
     def add_anomaly(
         self,
         module: str,
@@ -104,6 +106,7 @@ class CSVReportGenerator(ReportGenerator):
                 ]
             )
 
+    # pylint: disable=too-many-positional-arguments
     def add_additional(
         self,
         module: str,

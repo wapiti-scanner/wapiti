@@ -61,9 +61,10 @@ def is_valid_url(url: str):
     except ValueError:
         logging.error('ValueError')
         return False
-    else:
-        if parts.scheme in ("http", "https") and parts.netloc:
-            return True
+
+    if parts.scheme in ("http", "https") and parts.netloc:
+        return True
+
     logging.error(f"Error: {url} is not a valid URL")
     return False
 
@@ -75,12 +76,13 @@ def is_valid_endpoint(url_type, url: str):
     except ValueError:
         logging.error('ValueError')
         return False
-    else:
-        if parts.params or parts.query or parts.fragment:
-            logging.error(f"Error: {url_type} must not contain params, query or fragment!")
-            return False
-        if parts.scheme in ("http", "https") and parts.netloc:
-            return True
+
+    if parts.params or parts.query or parts.fragment:
+        logging.error(f"Error: {url_type} must not contain params, query or fragment!")
+        return False
+    if parts.scheme in ("http", "https") and parts.netloc:
+        return True
+
     logging.error(f"Error: {url_type} must contain scheme and host")
     return False
 
@@ -88,6 +90,7 @@ def is_valid_endpoint(url_type, url: str):
 def is_mod_cms_set(args):
     if args.modules and "cms" in args.modules:
         return True
+
     logging.error("Error: Invalid option --cms, module cms is required when this option is used")
     return False
 
@@ -116,6 +119,7 @@ def ping(url: str):
     return True
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
 async def wapiti_main():
     print_banner()
     args = parse_args()

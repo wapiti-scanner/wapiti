@@ -87,89 +87,121 @@ class TakeoverChecker:
         return False
 
     async def check(self, origin: str, domain: str) -> bool:
-        if "." not in domain or domain.endswith((".local", ".internal")):
-            # Stuff like "localhost": internal CNAMEs we can't control
+        # Use a result variable instead of multiple returns
+        is_vulnerable = False
+
+        # Early validation checks
+        if ("." not in domain or
+                domain.endswith((".local", ".internal")) or
+                IPV4_REGEX.match(domain)):
             return False
 
-        # Check for known false positives first
+        # Check for known false positives
         for regex in self.ignore:
             if regex.search(domain):
                 return False
 
-        if IPV4_REGEX.match(domain):
-            # Obviously we can't take control over any IP on the Internet
-            return False
-
-        # Is the pointed domain part of some particular takeover case?
+        # Check for service-specific takeover opportunities
+        service_match_found = False
         for service_entry in self.services:
+            # Skip further processing if we've already determined vulnerability
+            if is_vulnerable:
+                break
+
             for cname_regex in service_entry["cname"]:
-                if re.search(cname_regex, domain):
-                    # The pointed domain match one of the rules, check the content on the website if necessary
-                    result = await self.check_content(origin, service_entry["fingerprint"])
-                    if result:
-                        search = GITHUB_IO_REGEX.search(domain)
-                        if search:
-                            # This is a github.io website, we need to check is the username/organization exists
-                            username = search.group(1)
-                            try:
-                                async with httpx.AsyncClient() as client:
-                                    response = await client.head(f"https://github.com/{username}", timeout=10.)
-                                    if response.is_client_error:
-                                        return True
-                            except httpx.RequestError:
-                                logging.warning(f"HTTP request to https://github.com/{username} failed")
-                            return False
+                if not re.search(cname_regex, domain):
+                    continue
 
-                        search = MY_SHOPIFY_REGEX.search(domain)
-                        if search:
-                            # Check for myshopify false positives
-                            shop_name = search.group(1)
-                            try:
-                                async with httpx.AsyncClient() as client:
-                                    # Tip from https://github.com/buckhacker/SubDomainTakeoverTools
-                                    response = await client.get(
-                                        (
-                                            "https://app.shopify.com/services/signup/check_availability.json?"
-                                            f"shop_name={shop_name}&email=test@example.com"
-                                        ),
-                                        timeout=10.
-                                    )
-                                    data = response.json()
-                                    if data["status"] == "available":
-                                        return True
-                            except httpx.RequestError:
-                                logging.warning("HTTP request to Shopify API failed")
+                # The pointed domain matches one of the rules
+                service_match_found = True
 
-                            return False
+                # Check the content on the website if necessary
+                content_match = await self.check_content(origin, service_entry["fingerprint"])
+                if content_match:
+                    # Handle GitHub.io case
+                    github_match = GITHUB_IO_REGEX.search(domain)
+                    if github_match:
+                        is_vulnerable = await _check_github_availability(github_match.group(1))
+                        break
 
-                        return True
+                    # Handle Shopify case
+                    shopify_match = MY_SHOPIFY_REGEX.search(domain)
+                    if shopify_match:
+                        is_vulnerable = await _check_shopify_availability(shopify_match.group(1))
+                        break
 
-                    # Otherwise if the pointed domain doesn't exist it may be enough
-                    if service_entry["nxdomain"]:
-                        try:
-                            await dns.asyncresolver.resolve(domain)
-                        except dns.asyncresolver.NXDOMAIN:
-                            return True
-                        except BaseException:
-                            continue
+                    # If not a special case and content matches, it's vulnerable
+                    is_vulnerable = True
+                    break
 
-        # What remains is potentially unregistered domain.
-        # First: get root domain of the pointed domain
-        try:
-            root_domain = get_root_domain(domain)
-        except (TldDomainNotFound, TldBadUrl):
-            # We can't register the pointed domain as it is invalid
-            logging.warning(f"Pointed domain {domain} is not a valid domain name")
-            return False
+                # Check if NXDOMAIN is sufficient for this service
+                if service_entry["nxdomain"]:
+                    is_vulnerable = await _check_nxdomain(domain)
+                    if is_vulnerable:
+                        break
 
-        try:
-            # Second: using SOA on this root domain we check if it is available
-            await dns.asyncresolver.resolve(root_domain, "SOA", raise_on_no_answer=False)
-        except dns.resolver.NXDOMAIN:
-            return True
-        except BaseException as exception:
-            logging.warning(f"ANY request for {root_domain}: {exception}")
+        # If not vulnerable yet and no service match was found, check if it's an unregistered domain
+        if not is_vulnerable and not service_match_found:
+            is_vulnerable = await _check_unregistered_domain(domain)
 
+        return is_vulnerable
+
+
+async def _check_github_availability(username: str) -> bool:
+    """Check if a GitHub username/organization is available."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.head(f"https://github.com/{username}", timeout=10.)
+            return response.is_client_error
+    except httpx.RequestError:
+        logging.warning(f"HTTP request to https://github.com/{username} failed")
+        return False
+
+
+async def _check_shopify_availability(shop_name: str) -> bool:
+    """Check if a Shopify shop name is available."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                (
+                    "https://app.shopify.com/services/signup/check_availability.json?"
+                    f"shop_name={shop_name}&email=test@example.com"
+                ),
+                timeout=10.
+            )
+            data = response.json()
+            return data["status"] == "available"
+    except httpx.RequestError:
+        logging.warning("HTTP request to Shopify API failed")
+        return False
+
+
+async def _check_nxdomain(domain: str) -> bool:
+    """Check if a domain has NXDOMAIN response."""
+    try:
+        await dns.asyncresolver.resolve(domain)
+        return False
+    except dns.asyncresolver.NXDOMAIN:
+        return True
+    except BaseException:  # pylint: disable=broad-exception-caught
+        return False
+
+
+async def _check_unregistered_domain(domain: str) -> bool:
+    """Check if a root domain is unregistered."""
+    try:
+        root_domain = get_root_domain(domain)
+    except (TldDomainNotFound, TldBadUrl):
+        logging.warning(f"Pointed domain {domain} is not a valid domain name")
+        return False
+
+    try:
+        await dns.asyncresolver.resolve(root_domain, "SOA", raise_on_no_answer=False)
+        return False
+    except dns.resolver.NXDOMAIN:
+        return True
+    except BaseException as exception:  # pylint: disable=broad-exception-caught
+        logging.warning(f"ANY request for {root_domain}: {exception}")
         return False
 
 

@@ -80,6 +80,7 @@ class ModuleBruteLoginForm(Attack):
                 if password:
                     yield password
 
+    # pylint: disable=too-many-positional-arguments
     async def send_credentials(
             self,
             login_form: Request,
@@ -241,6 +242,7 @@ class ModuleBruteLoginForm(Attack):
                     task.cancel()
                     tasks.remove(task)
 
+    # pylint: disable=too-many-positional-arguments
     async def test_credentials(self, login_form, username_idx, password_idx, username, password, failure_text):
         response = await self.send_credentials(
                 login_form,

@@ -134,11 +134,11 @@ class ModuleFile(Attack):
             self.network_errors += 1
             # Can't check out, avoid false negative
             return False
-        else:
-            if pattern in response.content:
-                # Store false positive information in order to prevent doing unnecessary requests
-                self.known_false_positives[request.path_id].add(pattern)
-                return True
+
+        if pattern in response.content:
+            # Store false positive information in order to prevent doing unnecessary requests
+            self.known_false_positives[request.path_id].add(pattern)
+            return True
 
         return False
 

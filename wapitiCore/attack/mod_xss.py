@@ -118,6 +118,7 @@ class ModuleXss(Attack):
 
                     await self.attempt_exploit(method, payloads, request, parameter.name, payload_info.payload)
 
+    # pylint: disable=too-many-positional-arguments
     async def attempt_exploit(
             self, method: str, payloads: List[PayloadInfo], original_request: Request, parameter: str, taint: str
     ):

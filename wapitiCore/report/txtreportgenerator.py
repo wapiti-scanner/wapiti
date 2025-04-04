@@ -160,6 +160,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._vulns:
             self._vulns[name] = []
 
+    # pylint: disable=too-many-positional-arguments
     def add_vulnerability(
         self,
         module: str,
@@ -205,6 +206,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._anomalies:
             self._anomalies[name] = []
 
+    # pylint: disable=too-many-positional-arguments
     def add_anomaly(
         self,
         module: str,
@@ -258,6 +260,7 @@ class TXTReportGenerator(ReportGenerator):
         if name not in self._additionals:
             self._additionals[name] = []
 
+    # pylint: disable=too-many-positional-arguments
     def add_additional(
         self,
         module: str,

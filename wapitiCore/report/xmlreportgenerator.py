@@ -62,6 +62,7 @@ class XMLReportGenerator(JSONReportGenerator):
         self._anomalies = {}
         self._additionals = {}
 
+    # pylint: disable=too-many-locals
     def generate_report(self, output_path):
         """
         Create a xml file with a report of the vulnerabilities which have been logged with
