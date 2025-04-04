@@ -297,6 +297,31 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
         )
 
 
+def find_pattern_in_response(data):
+    # Check for SQL DBMS specific patterns
+    for dbms, regex_list in DBMS_ERROR_PATTERNS.items():
+        for regex in regex_list:
+            if regex.search(data):
+                return f"SQL Injection (DBMS: {dbms})"
+
+    # Define a mapping of patterns to their corresponding injection types
+    pattern_to_injection = {
+        "Unclosed quotation mark after the character string": ".NET SQL Injection",
+        "StatementCallback; bad SQL grammar": "Spring JDBC Injection",
+        "XPathException": "XPath Injection",
+        "Warning: SimpleXMLElement::xpath():": "XPath Injection",
+        "Error parsing XPath": "XPath Injection"
+    }
+
+    # Check for each pattern
+    for pattern, injection_type in pattern_to_injection.items():
+        if pattern in data:
+            return injection_type
+
+    # Default return
+    return ""
+
+
 class ModuleSql(Attack):
     """
     Detect SQL (also XPath) injection vulnerabilities using error-based or boolean-based (blind) techniques.
@@ -311,35 +336,13 @@ class ModuleSql(Attack):
         self.mutator = self.get_mutator()
         self.time_to_sleep = ceil(attack_options.get("timeout", self.time_to_sleep)) + 1
 
-    @staticmethod
-    def _find_pattern_in_response(data):
-        for dbms, regex_list in DBMS_ERROR_PATTERNS.items():
-            for regex in regex_list:
-                if regex.search(data):
-                    return f"SQL Injection (DBMS: {dbms})"
-
-        # Can't guess the DBMS but may be useful
-        if "Unclosed quotation mark after the character string" in data:
-            return ".NET SQL Injection"
-        if "StatementCallback; bad SQL grammar" in data:
-            return "Spring JDBC Injection"
-
-        if "XPathException" in data:
-            return "XPath Injection"
-        if "Warning: SimpleXMLElement::xpath():" in data:
-            return "XPath Injection"
-        if "Error parsing XPath" in data:
-            return "XPath Injection"
-
-        return ""
-
     async def is_false_positive(self, request):
         try:
             response = await self.crawler.async_send(request)
         except RequestError:
             self.network_errors += 1
         else:
-            if self._find_pattern_in_response(response.content):
+            if find_pattern_in_response(response.content):
                 return True
         return False
 
@@ -373,7 +376,7 @@ class ModuleSql(Attack):
             except RequestError:
                 self.network_errors += 1
             else:
-                vuln_info = self._find_pattern_in_response(response.content)
+                vuln_info = find_pattern_in_response(response.content)
                 if vuln_info and not await self.is_false_positive(request):
                     # An error message implies that a vulnerability may exist
                     if parameter.is_qs_injection:

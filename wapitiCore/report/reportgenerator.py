@@ -33,6 +33,7 @@ class ReportGenerator:
         self._infos = {}
         self._date = None
 
+    # pylint: disable=too-many-positional-arguments
     def set_report_info(
         self,
         target: str,
@@ -67,6 +68,7 @@ class ReportGenerator:
     def add_vulnerability_type(self, name: str, description: str = "", solution: str = "", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
+    # pylint: disable=too-many-positional-arguments
     def add_vulnerability(
         self,
         module: str,
@@ -84,6 +86,7 @@ class ReportGenerator:
     def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
+    # pylint: disable=too-many-positional-arguments
     def add_anomaly(
         self,
         module: str,
@@ -101,6 +104,7 @@ class ReportGenerator:
     def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
         raise NotImplementedError("Must be overridden")
 
+    # pylint: disable=too-many-positional-arguments
     def add_additional(
         self,
         module: str,

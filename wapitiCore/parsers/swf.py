@@ -164,8 +164,7 @@ def analyze_action(action):
                 yield from analyze_action(subaction)
     elif action.name == "ActionConstantPool":
         if hasattr(action, "ConstantPool"):
-            for constant in action.ConstantPool:
-                yield constant
+            yield from action.ConstantPool
 
 
 def analyze_tag(tag):

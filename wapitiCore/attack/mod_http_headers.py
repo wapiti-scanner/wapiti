@@ -71,6 +71,7 @@ class ModuleHttpHeaders(Attack):
     def contains(response: Response, header_name, check_list):
         return any(element in response.headers[header_name].lower() for element in check_list)
 
+    # pylint: disable=too-many-positional-arguments
     async def check_header(
         self,
         response: Response,

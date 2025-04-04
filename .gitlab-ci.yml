@@ -23,10 +23,9 @@ check_coding_style:
   before_script:
     - python -m pip install --upgrade pip
     - pip install -e .
-    - pip install "pylint==2.12.2"
-    - pip install "pylint-ignore==2022.1025"
+    - pip install "pylint==3.3.6"
   script:
-    - pylint-ignore --rcfile=.pylintrc wapitiCore
+    - pylint --rcfile=.pylintrc wapitiCore
 
 test-python:
   stage: tests

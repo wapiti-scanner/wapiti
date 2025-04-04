@@ -181,6 +181,7 @@ class ModulePermanentxss(Attack):
                     self.successful_xss = module.successful_xss
                     self.tried_xss = module.tried_xss
 
+    # pylint: disable=too-many-positional-arguments
     async def attempt_exploit(self, method, payloads, injection_request, parameter: str, taint: str, output_request):
         timeouted = False
         page = injection_request.path

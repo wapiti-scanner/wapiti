@@ -134,6 +134,7 @@ class JsonCookie:
                     cookie_jar.set_cookie(cookie)
         return cookie_jar
 
+    # pylint: disable=too-many-return-statements
     def delete(self, domain, path=None, key=None):
         if not domain:
             return False

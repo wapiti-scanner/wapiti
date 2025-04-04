@@ -256,6 +256,7 @@ class ModuleLog4Shell(Attack):
             header_uuid = headers_uuid_record.get(header)
             await self._verify_header_vulnerability(modified_request, header, payload, header_uuid, response)
 
+    # pylint: disable=too-many-positional-arguments
     async def _verify_header_vulnerability(
         self,
         modified_request: Request,

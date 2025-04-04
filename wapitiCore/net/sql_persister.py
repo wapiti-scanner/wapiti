@@ -615,6 +615,7 @@ class SqlPersister:
 
             return False
 
+    # pylint: disable=too-many-positional-arguments
     async def add_payload(
             self,
             request_id: int,

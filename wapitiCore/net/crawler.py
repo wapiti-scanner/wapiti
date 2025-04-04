@@ -28,6 +28,8 @@ import ssl
 
 # Third-parties
 import httpx
+# https://github.com/ulodciv/httpx-ntlm
+from httpx_ntlm import HttpNtlmAuth
 
 # Internal libraries
 from wapitiCore.net import web
@@ -145,8 +147,6 @@ class AsyncCrawler:
                     configuration.http_credential.password
                 )
             elif configuration.http_credential.method == "ntlm":
-                # https://github.com/ulodciv/httpx-ntlm
-                from httpx_ntlm import HttpNtlmAuth
                 auth = HttpNtlmAuth(
                     configuration.http_credential.username,  # username should be in the form "domain\user"
                     configuration.http_credential.password

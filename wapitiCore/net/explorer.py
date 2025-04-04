@@ -242,7 +242,7 @@ class Explorer:
                 if url and self._scope.check(url):
                     allowed_links.append(url)
 
-        for new_url in allowed_links:
+        for new_url in list(allowed_links):
             if "?" in new_url:
                 path_only = new_url.split("?")[0]
                 if path_only not in allowed_links and self._scope.check(path_only):

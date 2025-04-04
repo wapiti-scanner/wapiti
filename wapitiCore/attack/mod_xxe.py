@@ -89,8 +89,8 @@ class ModuleXxe(Attack):
         except RequestError:
             self.network_errors += 1
             return False
-        else:
-            return pattern in response.content
+
+        return pattern in response.content
 
     def flag_to_patterns(self, flags):
         try:

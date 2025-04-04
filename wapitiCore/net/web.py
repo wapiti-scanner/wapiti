@@ -249,6 +249,7 @@ def make_absolute(base: str, url: str, allow_fragments=True) -> str:
 
 
 class Request:
+    # pylint: disable=too-many-positional-arguments
     def __init__(
             self,
             path: str,
@@ -392,12 +393,12 @@ class Request:
     # having read-only params in Request class would be more Pythonic. More work on the Mutator in a future version ?
     def __hash__(self):
         if self._cached_hash is None:
-            get_kv = tuple([tuple(param) for param in self._get_params])
+            get_kv = tuple(tuple(param) for param in self._get_params)
             if isinstance(self._post_params, list):
-                post_kv = tuple([tuple(param) for param in self._post_params])
+                post_kv = tuple(tuple(param) for param in self._post_params)
             else:
                 post_kv = self._enctype + str(len(self._post_params))
-            file_kv = tuple([tuple([param[0], param[1][0]]) for param in self._file_params])
+            file_kv = tuple(tuple([param[0], param[1][0]]) for param in self._file_params)
 
             self._cached_hash = hash((self._method, self._resource_path, get_kv, post_kv, file_kv))
         return self._cached_hash

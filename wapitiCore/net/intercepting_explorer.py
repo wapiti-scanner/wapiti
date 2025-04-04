@@ -279,6 +279,7 @@ async def click_in_webpage(headless_client, request: Request, wait_time: float, 
                     await headless_client.get(request.url_with_fragment, timeout=timeout)
 
 
+# pylint: disable=too-many-positional-arguments
 async def launch_headless_explorer(
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
@@ -380,6 +381,7 @@ async def launch_headless_explorer(
 
 
 class InterceptingExplorer(Explorer):
+    # pylint: disable=too-many-positional-arguments
     def __init__(
             self,
             crawler_configuration: CrawlerConfiguration,

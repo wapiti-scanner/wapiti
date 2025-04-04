@@ -244,6 +244,7 @@ class Attack:
         # Must be left empty in the code
         self.deps = []
 
+    # pylint: disable=too-many-positional-arguments
     async def add_payload(self, finding_class: Type[FindingBase], request_id: int = -1,
                           level: int = 0, request: Request = None, parameter: str = "", info: str = "",
                           response: Response = None):
@@ -261,26 +262,31 @@ class Attack:
         )
 
     # Define explicit wrapper functions for each severity level
+    # pylint: disable=too-many-positional-arguments
     async def add_info(self, finding_class: Type[FindingBase], request_id: int = -1,
                        request: Optional[Request] = None, parameter: str = "",
                        info: str = "", response: Optional[Response] = None):
         await self.add_payload(finding_class, request_id, INFO_LEVEL, request, parameter, info, response)
 
+    # pylint: disable=too-many-positional-arguments
     async def add_low(self, finding_class: Type[FindingBase], request_id: int = -1,
                       request: Optional[Request] = None, parameter: str = "",
                       info: str = "", response: Optional[Response] = None):
         await self.add_payload(finding_class, request_id, LOW_LEVEL, request, parameter, info, response)
 
+    # pylint: disable=too-many-positional-arguments
     async def add_medium(self, finding_class: Type[FindingBase], request_id: int = -1,
                          request: Optional[Request] = None, parameter: str = "",
                          info: str = "", response: Optional[Response] = None):
         await self.add_payload(finding_class, request_id, MEDIUM_LEVEL, request, parameter, info, response)
 
+    # pylint: disable=too-many-positional-arguments
     async def add_high(self, finding_class: Type[FindingBase], request_id: int = -1,
                        request: Optional[Request] = None, parameter: str = "",
                        info: str = "", response: Optional[Response] = None):
         await self.add_payload(finding_class, request_id, HIGH_LEVEL, request, parameter, info, response)
 
+    # pylint: disable=too-many-positional-arguments
     async def add_critical(self, finding_class: Type[FindingBase], request_id: int = -1,
                            request: Optional[Request] = None, parameter: str = "",
                            info: str = "", response: Optional[Response] = None):
@@ -368,6 +374,7 @@ class Attack:
 
 
 class Mutator:
+    # pylint: disable=too-many-positional-arguments
     def __init__(
             self, methods="FGP", qs_inject=False, max_queries_per_pattern: int = 1000,
             parameters=None,  # Restrict attack to a whitelist of parameters

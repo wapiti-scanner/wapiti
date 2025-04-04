@@ -181,162 +181,209 @@ class ModuleNikto(Attack):
                     tasks.remove(task)
 
     async def process_line(self, line):
-        match = match_or = match_and = False
-        fail = fail_or = False
+        # Extract data from line
+        osv_id, path, method, vuln_desc, post_data = line[1], line[3], line[4], line[10], line[11]
 
-        osv_id = line[1]
-        path = line[3]
-        method = line[4]
-        vuln_desc = line[10]
-        post_data = line[11]
+        # Process path
+        path = self._process_path(path)
+        if path is None:
+            return
 
-        path = path.replace("@CGIDIRS", "/cgi-bin/")
-        path = path.replace("@ADMIN", "/admin/")
-        path = path.replace("@NUKE", "/modules/")
-        path = path.replace("@PHPMYADMIN", "/phpMyAdmin/")
-        path = path.replace("@POSTNUKE", "/postnuke/")
+        # Create request
+        evil_request = self._create_request(path, method, post_data)
+        if evil_request is None:
+            return
+
+        _log_request(evil_request, method)
+
+        # Send request and get response
+        response, _, code, raw = await self._send_request(evil_request)
+        if response is None:
+            return
+
+        # Evaluate conditions
+        match, match_or, match_and = _evaluate_match_conditions(line, code, raw)
+        fail, fail_or = _evaluate_fail_conditions(line, code, raw)
+
+        # Check if vulnerability is present
+        if ((match or match_or) and match_and) and not (fail or fail_or):
+            expected_status_codes = _get_expected_status_codes(line)
+            if expected_status_codes and await self.is_false_positive(evil_request, expected_status_codes):
+                return
+
+            # Report vulnerability
+            await self._report_vulnerability(evil_request, vuln_desc, osv_id, response)
+
+    def _process_path(self, path):
+        """Process the path by replacing placeholders"""
+        replacements = {
+            "@CGIDIRS": "/cgi-bin/",
+            "@ADMIN": "/admin/",
+            "@NUKE": "/modules/",
+            "@PHPMYADMIN": "/phpMyAdmin/",
+            "@POSTNUKE": "/postnuke/"
+        }
+
+        for placeholder, replacement in replacements.items():
+            path = path.replace(placeholder, replacement)
+
+        # Handle JUNK replacement
         path = re.sub(r"JUNK\((\d+)\)", lambda x: self.junk_string[:int(x.group(1))], path)
 
         if path[0] == "@":
-            return
+            return None
 
         if not path.startswith("/"):
             path = "/" + path
 
+        return path
+
+    def _create_request(self, path, method, post_data):
+        """Create request object based on method and data"""
         try:
             url = f"{self.parts.scheme}://{self.parts.netloc}{path}"
         except UnicodeDecodeError:
-            return
+            return None
 
         if method == "GET":
-            evil_request = Request(url)
-        elif method == "POST":
-            evil_request = Request(url, post_params=post_data, method=method)
-        else:
-            evil_request = Request(url, post_params=post_data, method=method)
+            return Request(url)
 
-        if method == "GET":
-            log_verbose(f"[¨] {evil_request.url}")
-        else:
-            log_verbose(f"[¨] {evil_request.http_repr()}")
+        return Request(url, post_params=post_data, method=method)
 
+    async def _send_request(self, request):
+        """Send the request and handle errors"""
         try:
-            response = await self.crawler.async_send(evil_request)
+            response = await self.crawler.async_send(request)
             page = response.content
             code = response.status
+            raw = " ".join([f"{x}: {y}" for x, y in response.headers.items()]) + page
+            return response, page, code, raw
         except (RequestError, ConnectionResetError):
             self.network_errors += 1
-            return
-        except Exception as exception:
-            logging.warning(f"{exception} occurred with URL {evil_request.url}")
-            return
+            return None, None, None, None
+        except Exception as exception:  # pylint: disable=broad-except
+            logging.warning(f"{exception} occurred with URL {request.url}")
+            return None, None, None, None
 
-        raw = " ".join([x + ": " + y for x, y in response.headers.items()])
-        raw += page
+    async def _report_vulnerability(self, request, vuln_desc, osv_id, response):
+        """Report found vulnerability"""
+        log_red("---")
+        log_red(vuln_desc)
+        log_red(request.url)
 
-        # See https://github.com/sullo/nikto/blob/master/program/plugins/nikto_tests.plugin for reference
-        expected_status_codes = []
-        # First condition (match)
-        if len(line[5]) == 3 and line[5].isdigit():
-            expected_status_code = int(line[5])
-            expected_status_codes.append(expected_status_code)
-            if code == expected_status_code:
-                match = True
+        refs = _collect_references(osv_id, vuln_desc)
+
+        info = vuln_desc
+        if refs:
+            log_red("References:")
+            log_red("  " + "\n  ".join(refs))
+
+            info += "\nReferences: \n"
+            info += "\n".join(refs)
+
+        log_red("---")
+
+        await self.add_high(
+            finding_class=DangerousResourceFinding,
+            request=request,
+            info=info,
+            response=response
+        )
+
+
+def _log_request(request, method):
+    """Log the request details"""
+    if method == "GET":
+        log_verbose(f"[¨] {request.url}")
+    else:
+        log_verbose(f"[¨] {request.http_repr()}")
+
+
+def _evaluate_match_conditions(line, code, raw):
+    """Evaluate the match conditions"""
+    match = match_or = False
+    match_and = True  # Default to True if line[7] is empty
+
+    # First condition (match)
+    if len(line[5]) == 3 and line[5].isdigit():
+        if code == int(line[5]):
+            match = True
+    elif line[5] in raw:
+        match = True
+
+    # Second condition (or)
+    if line[6]:
+        if len(line[6]) == 3 and line[6].isdigit():
+            if code == int(line[6]):
+                match_or = True
+        elif line[6] in raw:
+            match_or = True
+
+    # Third condition (and)
+    if line[7]:
+        if len(line[7]) == 3 and line[7].isdigit():
+            match_and = code == int(line[7])
         else:
-            if line[5] in raw:
-                match = True
+            match_and = line[7] in raw
 
-        # Second condition (or)
-        if line[6] != "":
-            if len(line[6]) == 3 and line[6].isdigit():
-                expected_status_code = int(line[6])
-                expected_status_codes.append(expected_status_code)
-                if code == expected_status_code:
-                    match_or = True
-            else:
-                if line[6] in raw:
-                    match_or = True
+    return match, match_or, match_and
 
-        # Third condition (and)
-        if line[7] != "":
-            if len(line[7]) == 3 and line[7].isdigit():
-                if code == int(line[7]):
-                    match_and = True
-            else:
-                if line[7] in raw:
-                    match_and = True
+def _evaluate_fail_conditions(line, code, raw):
+    """Evaluate the fail conditions"""
+    fail = fail_or = False
+
+    # Fourth condition (fail)
+    if line[8]:
+        if len(line[8]) == 3 and line[8].isdigit():
+            fail = code == int(line[8])
         else:
-            match_and = True
+            fail = line[8] in raw
 
-        # Fourth condition (fail)
-        if line[8] != "":
-            if len(line[8]) == 3 and line[8].isdigit():
-                if code == int(line[8]):
-                    fail = True
+    # Fifth condition (or)
+    if line[9]:
+        if len(line[9]) == 3 and line[9].isdigit():
+            fail_or = code == int(line[9])
+        else:
+            fail_or = line[9] in raw
+
+    return fail, fail_or
+
+def _get_expected_status_codes(line):
+    """Extract expected status codes from conditions"""
+    expected_status_codes = []
+
+    if len(line[5]) == 3 and line[5].isdigit():
+        expected_status_codes.append(int(line[5]))
+
+    if line[6] and len(line[6]) == 3 and line[6].isdigit():
+        expected_status_codes.append(int(line[6]))
+
+    return expected_status_codes
+
+
+def _collect_references(osv_id, vuln_desc):
+    """Collect references for the vulnerability"""
+    refs = []
+
+    # OSVDB reference
+    if osv_id != "0":
+        refs.append(f"https://vulners.com/osvdb/OSVDB:{osv_id}")
+
+    # Extract references from vulnerability description
+    reference_patterns = [
+        (r"(CA-[0-9]{4}-[0-9]{2})", "http://www.cert.org/advisories/{0}.html"),
+        (r"BID-([0-9]{4})", "http://www.securityfocus.com/bid/{0}"),
+        (r"((CVE|CAN)-[0-9]{4}-[0-9]{4,})", "http://cve.mitre.org/cgi-bin/cvename.cgi?name={0}"),
+        (r"(IN-[0-9]{4}-[0-9]{2})", "http://www.cert.org/incident_notes/{0}.html"),
+        (r"(MS[0-9]{2}-[0-9]{3})", "http://www.microsoft.com/technet/security/bulletin/{0}.asp")
+    ]
+
+    for pattern, url_template in reference_patterns:
+        match = re.search(pattern, vuln_desc)
+        if match:
+            if '{0}' in url_template:
+                refs.append(url_template.format(match.group(1)))
             else:
-                if line[8] in raw:
-                    fail = True
+                refs.append(url_template.format(match.group(0)))
 
-        # Fifth condition (or)
-        if line[9] != "":
-            if len(line[9]) == 3 and line[9].isdigit():
-                if code == int(line[9]):
-                    fail_or = True
-            else:
-                if line[9] in raw:
-                    fail_or = True
-
-        if ((match or match_or) and match_and) and not (fail or fail_or):
-            if expected_status_codes:
-                if await self.is_false_positive(evil_request, expected_status_codes):
-                    return
-
-            log_red("---")
-            log_red(vuln_desc)
-            log_red(url)
-
-            refs = []
-            if osv_id != "0":
-                refs.append("https://vulners.com/osvdb/OSVDB:" + osv_id)
-
-            # CERT
-            cert_advisory = re.search("(CA-[0-9]{4}-[0-9]{2})", vuln_desc)
-            if cert_advisory is not None:
-                refs.append("http://www.cert.org/advisories/" + cert_advisory.group(0) + ".html")
-
-            # SecurityFocus
-            securityfocus_bid = re.search("BID-([0-9]{4})", vuln_desc)
-            if securityfocus_bid is not None:
-                refs.append("http://www.securityfocus.com/bid/" + securityfocus_bid.group(1))
-
-            # Mitre.org
-            mitre_cve = re.search("((CVE|CAN)-[0-9]{4}-[0-9]{4,})", vuln_desc)
-            if mitre_cve is not None:
-                refs.append("http://cve.mitre.org/cgi-bin/cvename.cgi?name=" + mitre_cve.group(0))
-
-            # CERT Incidents
-            cert_incident = re.search("(IN-[0-9]{4}-[0-9]{2})", vuln_desc)
-            if cert_incident is not None:
-                refs.append("http://www.cert.org/incident_notes/" + cert_incident.group(0) + ".html")
-
-            # Microsoft Technet
-            ms_bulletin = re.search("(MS[0-9]{2}-[0-9]{3})", vuln_desc)
-            if ms_bulletin is not None:
-                refs.append("http://www.microsoft.com/technet/security/bulletin/" + ms_bulletin.group(0) + ".asp")
-
-            info = vuln_desc
-            if refs:
-                log_red("References:")
-                log_red("  " + "\n  ".join(refs))
-
-                info += "\nReferences: \n"
-                info += "\n".join(refs)
-
-            log_red("---")
-
-            await self.add_high(
-                finding_class=DangerousResourceFinding,
-                request=evil_request,
-                info=info,
-                response=response
-            )
+    return refs
