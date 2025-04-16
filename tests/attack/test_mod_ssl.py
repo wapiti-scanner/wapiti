@@ -216,6 +216,7 @@ async def test_process_vulnerabilities():
     results = [info async for info in process_vulnerabilities(xml_file)]
     assert [
         (4, 'Server is vulnerable to Heartbleed attack via TLSv1.0'),
+        (4, 'Server is vulnerable to CRIME attack (compression is supported)'),
         (3, 'Server honors client-initiated renegotiations (vulnerable to DoS attacks)')
     ] == results
 
