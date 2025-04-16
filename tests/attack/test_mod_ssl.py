@@ -5,7 +5,7 @@ from time import sleep
 import http.server
 import ssl
 from unittest.mock import AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import httpx
 import pytest
@@ -161,9 +161,9 @@ def generate_cert(include_organization_name: bool = True, include_ocsp_must_stap
     ).serial_number(
         x509.random_serial_number()
     ).not_valid_before(
-        datetime.utcnow()
+        datetime.now(UTC)
     ).not_valid_after(
-        datetime.utcnow() + timedelta(days=10)
+        datetime.now(UTC) + timedelta(days=10)
     ).add_extension(
         x509.SubjectAlternativeName([x509.DNSName(u"localhost")]),
         critical=False,

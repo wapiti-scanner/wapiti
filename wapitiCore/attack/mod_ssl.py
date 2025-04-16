@@ -21,7 +21,7 @@ import os
 import socket
 import ssl
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 import json
 import asyncio
 from os.path import join as path_join, exists
@@ -54,7 +54,7 @@ def sslscan_level_to_color(security_level: str) -> str:
     return "GREEN"
 
 
-def sslscan_level_to_wapiti_level(security_level: str) -> str:
+def sslscan_level_to_wapiti_level(security_level: str) -> int:
     if security_level == "weak":
         return CRITICAL_LEVEL
     if security_level == "acceptable":
@@ -164,7 +164,7 @@ async def process_cert_info(xml_file: str) -> AsyncIterator[Tuple[int, str]]:
             yield MEDIUM_LEVEL, message
 
         not_valid_after = sslscan_date_to_utc(cert.find("not-valid-after").text)
-        utcnow = datetime.utcnow().replace(tzinfo=timezone.utc)
+        utcnow = datetime.now(UTC).replace(tzinfo=timezone.utc)
         if not_valid_after > utcnow:
             message = "Certificate expires in " + humanize.precisedelta(not_valid_after - utcnow)
             log_green(message)
@@ -250,25 +250,26 @@ async def process_vulnerabilities(xml_file: str) -> AsyncIterator[Tuple[int, str
         log_red(message)
         yield CRITICAL_LEVEL, message
 
-    if root.find(".//compression[@supported='1']"):
+    if root.find(".//compression[@supported='1']") is not None:
         message = "Server is vulnerable to CRIME attack (compression is supported)"
         log_red(message)
         yield CRITICAL_LEVEL, message
 
-    if root.find(".//fallback[@supported='1']"):
+    if root.find(".//fallback[@supported='1']") is not None:
         message = "Server is vulnerable to OpenSSL CCS (CVE-2014-0224)"
         log_red(message)
         yield CRITICAL_LEVEL, message
 
     renegotiation = root.find(".//renegotiation")
-    if int(renegotiation.get("supported")) == 0:
-        message = "Server doesn't support secure renegotiations"
-        log_orange(message)
-        yield MEDIUM_LEVEL, message
-    elif int(renegotiation.get("secure")) == 0:
-        message = "Server honors client-initiated renegotiations (vulnerable to DoS attacks)"
-        log_red(message)
-        yield HIGH_LEVEL, message
+    if renegotiation is not None:
+        if int(renegotiation.get("supported")) == 0:
+            message = "Server doesn't support secure renegotiations"
+            log_orange(message)
+            yield MEDIUM_LEVEL, message
+        elif int(renegotiation.get("secure")) == 0:
+            message = "Server honors client-initiated renegotiations (vulnerable to DoS attacks)"
+            log_red(message)
+            yield HIGH_LEVEL, message
 
 
 def process_cipher_suites(results, version: str):
