@@ -25,6 +25,7 @@ from typing import Set, Dict, Any, Union, List
 from collections import defaultdict
 from soupsieve.util import SelectorSyntaxError
 
+from wapitiCore.main.log import logging
 from wapitiCore.net.crawler import Response
 from wapitiCore.parsers.html_parser import Html
 
@@ -203,8 +204,7 @@ class ApplicationData:
                 try:
                     regex_params['regex'] = re.compile(expression, re.I)
                 except re.error as err:
-                    warnings.warn(
-                        f"Caught {err} while compiling regex: {pattern}")
+                    logging.debug("Caught '%s' while compiling regex `%s`", err, expression)
                     # regex that never matches:
                     # http://stackoverflow.com/a/1845097/413622
                     regex_params['regex'] = re.compile(r'(?!x)x')
@@ -410,9 +410,9 @@ class Wappalyzer:
         try:
             match = soup.select(css_selector)
         except SelectorSyntaxError as err:
-            warnings.warn(
-                        f"Caught {err} while selecting css selector: {css_selector}")
+            logging.debug("Caught '%s' while selecting css selector `%s`", err, css_selector)
             return
+
         for attribute, data in value.items():
             if attribute == "exists":
                 self.check_dom_attribute_exists(match, versions)
