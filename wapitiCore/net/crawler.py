@@ -22,7 +22,7 @@
 from urllib.parse import urlparse, urlunparse
 import warnings
 import functools
-from typing import Dict, Optional
+from typing import Optional
 import asyncio
 import ssl
 
