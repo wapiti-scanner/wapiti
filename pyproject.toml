@@ -38,7 +38,7 @@ dependencies = [
         "beautifulsoup4==4.12.3",
         "browser-cookie3==0.19.1",
         "dnspython==2.6.1",
-        "h11==0.14.0",
+        "h11==0.16.0",
         "httpcore==1.0.4",
         "httpx[brotli, socks]==0.27.0",
         "httpx-ntlm==1.4.0",
