@@ -18,5 +18,8 @@ wapiti-endpoint:
 clean:
 	rm -rf dist/ build/ wapiti3.egg-info/
 
+style:
+	pylint --rcfile=.pylintrc wapitiCore
+
 release: clean
 	python -m build --sdist --wheel

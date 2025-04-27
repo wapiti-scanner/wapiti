@@ -20,30 +20,22 @@
 import asyncio
 import os
 import shutil
-import signal
 import sys
-from enum import Enum
-from operator import attrgetter
 from collections import deque
 from dataclasses import replace
 from hashlib import sha256
-from importlib import import_module
 from time import gmtime, strftime
-from traceback import print_tb
-from typing import Dict, List, Deque, AsyncGenerator, Optional, Set
+from typing import List, Deque
 from urllib.parse import urlparse
-from uuid import uuid1
 
 import browser_cookie3
-import httpx
-from httpx import RequestError
 
 from wapitiCore import WAPITI_VERSION
-from wapitiCore.attack.attack import Attack, presets, all_modules
+from wapitiCore.attack.active_scanner import ActiveScanner
+from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.definitions import vulnerabilities, flatten_references, anomalies, additionals
-from wapitiCore.net import Request, Response, jsoncookie
+from wapitiCore.net import Request, jsoncookie
 from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential
-from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.explorer import Explorer
 from wapitiCore.net.intercepting_explorer import InterceptingExplorer
 from wapitiCore.net.scope import Scope
@@ -59,96 +51,6 @@ SCAN_FORCE_VALUES = {
     "aggressive": 0.06,
     "insane": 0  # Special value that won't be really used
 }
-
-
-class UserChoice(Enum):
-    REPORT = "r"
-    NEXT = "n"
-    QUIT = "q"
-    CONTINUE = "c"
-
-
-class InvalidOptionValue(Exception):
-    def __init__(self, opt_name, opt_value):
-        super().__init__()
-        self.opt_name = opt_name
-        self.opt_value = opt_value
-
-    def __str__(self):
-        return f"Invalid argument for option {self.opt_name} : {self.opt_value}"
-
-
-def module_to_class_name(module_name: str) -> str:
-    return "Module" + module_name.removeprefix("mod_").title().replace("_", "")
-
-
-def activate_method_module(module: Attack, method: str, status: bool):
-    if not method:
-        module.do_get = module.do_post = status
-    elif method == "get":
-        module.do_get = status
-    elif method == "post":
-        module.do_post = status
-
-
-def filter_modules_with_options(module_options: str, loaded_modules: Dict[str, Attack]) -> List[Attack]:
-    activated_modules: Dict[str, Attack] = {}
-
-    if module_options == "":
-        return []
-
-    if module_options is None:
-        # Default is to use common modules
-        module_options = "common"
-
-    for module_opt in module_options.split(","):
-        if module_opt.strip() == "":
-            # Trailing comma, etc
-            continue
-
-        method = ""
-        if module_opt.find(":") > 0:
-            module_name, method = module_opt.split(":", 1)
-        else:
-            module_name = module_opt
-
-        if module_name.startswith("-"):
-            # The whole module or some of the methods needs to be deactivated
-            module_name = module_name[1:]
-
-            for bad_module in presets.get(module_name, [module_name]):
-                if bad_module not in loaded_modules:
-                    logging.error(f"[!] Unable to find a module named {bad_module}")
-                    continue
-
-                if bad_module not in activated_modules:
-                    # You can't deactivate a module that is not used
-                    continue
-
-                if not method:
-                    activated_modules.pop(bad_module)
-                else:
-                    activate_method_module(activated_modules[bad_module], method, False)
-        else:
-            # The whole module or some of the methods needs to be deactivated
-            if module_name.startswith("+"):
-                module_name = module_name[1:]
-
-            for good_module in presets.get(module_name, [module_name]):
-                if good_module not in loaded_modules:
-                    logging.error(f"[!] Unable to find a module named {good_module}")
-                    continue
-
-                if good_module in activated_modules:
-                    continue
-
-                if good_module not in activated_modules:
-                    activated_modules[good_module] = loaded_modules[good_module]
-
-                if method:
-                    activate_method_module(activated_modules[good_module], method, False)
-
-    return sorted(activated_modules.values(), key=attrgetter("PRIORITY"))
 
 
 class Wapiti:
@@ -177,8 +79,6 @@ class Wapiti:
 
         self.color_enabled = False
         self.verbose = 0
-        self.module_options = None
-        self.attack_options = {}
         self._start_urls: Deque[Request] = deque([self.base_request])
         self._excluded_urls = []
         self._bad_params = set()
@@ -187,8 +87,6 @@ class Wapiti:
         self._max_files_per_dir = 0
         self._scan_force = "normal"
         self._max_scan_time = None
-        self._max_attack_time = None
-        self._bug_report = True
         self._logfile = ""
         self._auth_state = None
         self._mitm_proxy_port = 0
@@ -197,8 +95,6 @@ class Wapiti:
         self._headless_mode = "no"
         self._wait_time = 2.
         self._buffer = []
-        self._user_choice = UserChoice.CONTINUE
-        self._current_attack_task: Optional[asyncio.Task] = None
 
         if session_dir:
             SqlPersister.CRAWLER_DATA_DIR = session_dir
@@ -218,6 +114,7 @@ class Wapiti:
             os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
         self.persister = SqlPersister(self._history_file)
+        self._active_scanner = ActiveScanner(persister=self.persister, crawler_configuration=self.crawler_configuration)
 
     def refresh_logging(self):
         message_format = "{message}"
@@ -253,7 +150,7 @@ class Wapiti:
     def history_file(self):
         return self._history_file
 
-    async def _init_report(self):
+    async def init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
         self.report_gen.set_report_info(
@@ -294,75 +191,6 @@ class Wapiti:
                 flatten_references(additional.references()),
                 additional.wstg_code()
             )
-
-    async def _load_attack_modules(self, crawler: AsyncCrawler) -> List[Attack]:
-        await self._init_report()
-
-        logging.info("[*] Existing modules:")
-        logging.info(f"\t {', '.join(sorted(all_modules))}")
-
-        modules = {}
-        for mod_name in all_modules:
-            try:
-                try:
-                    mod = import_module("wapitiCore.attack.mod_" + mod_name)
-                except ImportError as error:
-                    logging.error(f"[!] Unable to import module {mod_name}: {error}")
-                    continue
-
-                class_name = module_to_class_name(mod_name)
-                class_instance = getattr(mod, class_name)(
-                    crawler,
-                    self.persister,
-                    self.attack_options,
-                    self.crawler_configuration,
-                )
-            except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
-                logging.exception(exception.__class__.__name__, exception)
-                continue
-
-            modules[mod_name] = class_instance
-
-        return filter_modules_with_options(self.module_options, modules)
-
-    async def update(self, requested_modules: str = "all"):
-        """Update modules that implement an update method"""
-        modules = all_modules if (not requested_modules or requested_modules == "all") else requested_modules.split(",")
-
-        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
-            for mod_name in modules:
-                try:
-                    mod = import_module("wapitiCore.attack.mod_" + mod_name)
-                    class_name = module_to_class_name(mod_name)
-                    class_instance = getattr(mod, class_name)(
-                        crawler,
-                        self.persister,
-                        self.attack_options,
-                        self.crawler_configuration,
-                    )
-                    if hasattr(class_instance, "update"):
-                        logging.info(f"Updating module {mod_name}")
-                        try:
-                            await class_instance.update()
-                            logging.success("Update done.")
-                        except RequestError as request_error:
-                            logging.error(request_error)
-                            raise
-                        except InvalidOptionValue as invalid_option_error:
-                            logging.error(invalid_option_error)
-                            raise
-                        except ValueError as value_error:
-                            logging.error(value_error)
-                            raise
-
-                except ImportError:
-                    continue
-                except Exception:  # pylint: disable=broad-except
-                    # Catch every possible exceptions and print it
-                    logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
-                    continue
 
     async def load_scan_state(self):
         async for request in self.persister.get_to_browse():
@@ -444,154 +272,6 @@ class Wapiti:
         # Overwrite cookies for next (attack) step
         self.crawler_configuration.cookies = explorer.cookie_jar
 
-    async def load_resources_for_module(self, module: Attack) -> AsyncGenerator[Request, Response]:
-        if module.do_get:
-            async for request, response in self.persister.get_links(attack_module=module.name):
-                yield request, response
-        if module.do_post:
-            async for request, response in self.persister.get_forms(attack_module=module.name):
-                yield request, response
-
-    async def load_and_attack(self, attack_module: Attack, attacked_ids: Set[int]) -> None:
-        original_request: Request
-        original_response: Response
-        async for original_request, original_response in self.load_resources_for_module(attack_module):
-            try:
-                if await attack_module.must_attack(original_request, original_response):
-                    logging.info(f"[+] {original_request}")
-
-                    await attack_module.attack(original_request, original_response)
-
-            except RequestError:
-                # Hmm, it should be caught inside the module
-                await asyncio.sleep(1)
-                continue
-            except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                exception_traceback = sys.exc_info()[2]
-                logging.exception(exception.__class__.__name__, exception)
-
-                if self._bug_report:
-                    await self.send_bug_report(
-                        exception,
-                        exception_traceback,
-                        attack_module.name,
-                        original_request
-                    )
-            else:
-                if original_request.path_id is not None:
-                    attacked_ids.add(original_request.path_id)
-
-    def handle_user_interruption(self, _, __) -> None:
-        """
-        Attack handler for Ctrl+C interruption.
-        """
-        print("Attack process was interrupted. Do you want to:")
-        print("\tr) stop everything here and generate the (R)eport")
-        print("\tn) move to the (N)ext attack module (if any)")
-        print("\tq) (Q)uit without generating the report")
-        print("\tc) (C)ontinue the current attack")
-
-        while True:
-            try:
-                self._user_choice = UserChoice(input("? ").strip().lower())
-                if self._user_choice != UserChoice.CONTINUE:
-                    if self._current_attack_task is not None:
-                        self._current_attack_task.cancel()
-                return
-            except (UnicodeDecodeError, ValueError):
-                print("Invalid choice. Valid choices are r, n, q, and c.")
-
-    async def run_attack_module(self, attack_module):
-        """Run a single attack module, handling persistence and timeouts."""
-        logging.log("GREEN", "[*] Launching module {0}", attack_module.name)
-
-        already_attacked = await self.persister.count_attacked(attack_module.name)
-        if already_attacked:
-            logging.success(
-                "[*] {0} pages were previously attacked and will be skipped",
-                already_attacked
-            )
-
-        attacked_ids = set()
-
-        try:
-            await asyncio.wait_for(
-                self.load_and_attack(attack_module, attacked_ids),
-                self._max_attack_time
-            )
-        except asyncio.TimeoutError:
-            logging.info(
-                f"Max attack time was reached for module {attack_module.name}, stopping."
-            )
-        finally:
-            # In ALL cases we want to persist the IDs of requests that have been attacked so far
-            # especially if the user it ctrl+c
-            await self.persister.set_attacked(attacked_ids, attack_module.name)
-
-            # We also want to check the external endpoints to see if some attacks succeeded despite the module being
-            # potentially stopped
-            if hasattr(attack_module, "finish"):
-                await attack_module.finish()
-
-            if attack_module.network_errors:
-                logging.warning(f"{attack_module.network_errors} requests were skipped due to network issues")
-
-    async def attack(self):
-        """Launch the attacks based on the preferences set by the command line"""
-        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
-            attack_modules = await self._load_attack_modules(crawler)
-
-            for attack_module in attack_modules:
-                if attack_module.do_get is False and attack_module.do_post is False:
-                    continue
-
-                print('')
-                if attack_module.require:
-                    attack_name_list = [
-                        attack.name for attack in attack_modules
-                        if attack.name in attack_module.require and (attack.do_get or attack.do_post)
-                    ]
-
-                    if attack_module.require != attack_name_list:
-                        logging.error(f"[!] Missing dependencies for module {attack_module.name}:")
-                        logging.error("  {0}", ",".join(
-                            [attack for attack in attack_module.require if attack not in attack_name_list]
-                        ))
-                        continue
-
-                    attack_module.load_require(
-                        [attack for attack in attack_modules if attack.name in attack_module.require]
-                    )
-
-                # Create and run each attack module as an asyncio task
-                self._current_attack_task = asyncio.create_task(
-                    self.run_attack_module(attack_module)
-                )
-
-                # Setup signal handler to prompt the user for task cancellation
-                signal.signal(signal.SIGINT, self.handle_user_interruption)
-
-                try:
-                    await self._current_attack_task  # Await the attack module task
-                except asyncio.CancelledError:
-                    # The user chose to stop the current module
-                    pass
-                finally:
-                    # Clean up the signal handler for the next loop
-                    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-                # As the handler directly continue or cancel the current_attack_task module, we don't have
-                # cases where we have to call `continue`. Just check for the two other options
-                if self._user_choice in (UserChoice.REPORT, UserChoice.QUIT):
-                    break
-
-            if self._user_choice == UserChoice.QUIT:
-                await self.persister.close()
-                return
-
-            await self.write_report()
-
     async def write_report(self):
         if not self.output_file:
             if self.report_generator_type == "html":
@@ -643,29 +323,6 @@ class Wapiti:
             logging.success(f"Open {self.report_gen.final_path} with a browser to see this report.")
 
         await self.persister.close()
-
-    async def send_bug_report(self, exception: Exception, traceback_, module_name: str, original_request: Request):
-        async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
-            traceback_file = str(uuid1())
-            with open(traceback_file, "w", encoding="utf-8") as traceback_fd:
-                print_tb(traceback_, file=traceback_fd)
-                print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
-                print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)
-                logging.info(f"Wapiti {WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
-
-            try:
-                with open(traceback_file, "rb") as traceback_byte_fd:
-                    upload_request = Request(
-                        "https://wapiti3.ovh/upload.php",
-                        file_params=[
-                            ["crash_report", (traceback_file, traceback_byte_fd.read(), "text/plain")]
-                        ]
-                    )
-                page = await crawler.async_send(upload_request)
-                logging.success(f"Sending crash report {traceback_file} ... {page.content}")
-            except RequestError:
-                logging.error("Error sending crash report")
-            os.unlink(traceback_file)
 
     def set_timeout(self, timeout: float = 10.0):
         """Set the timeout for the time waiting for a HTTP response"""
@@ -775,9 +432,6 @@ class Wapiti:
     def set_max_scan_time(self, seconds: float):
         self._max_scan_time = seconds
 
-    def set_max_attack_time(self, seconds: float):
-        self._max_attack_time = seconds
-
     def set_color(self):
         """Put colors in the console output (terminal must support colors)"""
         self.color_enabled = True
@@ -795,16 +449,6 @@ class Wapiti:
         # 0 => quiet / level="SUCCESS"
         # 1 => normal / level="INFO"
         # 2 => verbose / level="VERBOSE"
-
-    def set_bug_reporting(self, value: bool):
-        self._bug_report = value
-
-    def set_attack_options(self, options: dict = None):
-        self.attack_options = options if isinstance(options, dict) else {}
-
-    def set_modules(self, options: Optional[str] = ""):
-        """Activate or deactivate (default) all attacks"""
-        self.module_options = options
 
     def set_report_generator_type(self, report_type: str = "xml"):
         """Set the format of the generated report. Can be html, json, txt or xml"""
@@ -852,3 +496,7 @@ class Wapiti:
             "logged_in": is_logged_in,
             "form": form,
         }
+
+    @property
+    def active_scanner(self):
+        return self._active_scanner

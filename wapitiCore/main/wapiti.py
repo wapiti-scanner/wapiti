@@ -29,8 +29,11 @@ from urllib.parse import urlparse
 
 import httpx
 from httpx import RequestError
+
+from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.attack import (all_modules, common_modules)
-from wapitiCore.controller.wapiti import InvalidOptionValue, module_to_class_name, Wapiti
+from wapitiCore.controller.exceptions import InvalidOptionValue
+from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner
 from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.main.log import logging
@@ -184,9 +187,9 @@ async def wapiti_main():
                 "timeout": args.timeout,
                 "wapp_url": "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/"
             }
-        wap.set_attack_options(attack_options)
+        wap.active_scanner.set_attack_options(attack_options)
         try:
-            await wap.update(args.modules)
+            await wap.active_scanner.update(args.modules)
             sys.exit()
         except InvalidOptionValue as invalid_option:
             logging.error(invalid_option)
@@ -280,7 +283,7 @@ async def wapiti_main():
         wap.set_max_links_per_page(args.max_links_per_page)
         wap.set_scan_force(args.scan_force)
         wap.set_max_scan_time(args.max_scan_time)
-        wap.set_max_attack_time(args.max_attack_time)
+        wap.active_scanner.set_max_attack_time(args.max_attack_time)
 
         # should be a setter
         wap.verbosity(args.verbosity)
@@ -289,10 +292,10 @@ async def wapiti_main():
         if args.color:
             wap.set_color()
         wap.set_timeout(args.timeout)
-        wap.set_modules(args.modules)
+        wap.active_scanner.set_modules(args.modules)
 
         if args.no_bugreport:
-            wap.set_bug_reporting(False)
+            wap.active_scanner.set_bug_reporting(False)
 
         if "user_agent" in args:
             wap.add_custom_header("User-Agent", args.user_agent)
@@ -393,7 +396,7 @@ async def wapiti_main():
         if args.skipped_parameters:
             attack_options["skipped_parameters"] = set(args.skipped_parameters)
 
-        wap.set_attack_options(attack_options)
+        wap.active_scanner.set_attack_options(attack_options)
 
         await wap.init_persister()
         if args.flush_attacks:
@@ -494,7 +497,10 @@ async def wapiti_main():
             )
 
         logging.info(f"[*] Wapiti found {await wap.count_resources()} URLs and forms during the scan")
-        await wap.attack()
+
+        await wap.init_report()
+        if await wap.active_scanner.attack():
+            await wap.write_report()
 
     except OperationalError:
         logging.error(
