@@ -22,6 +22,7 @@ from urllib.parse import urlparse, urlunparse
 import argparse
 import sys
 
+from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.net import jsoncookie
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential, RawCredential
@@ -29,15 +30,6 @@ from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 from wapitiCore.net.auth import login_with_raw_data, async_fetch_login_page
 
-
-class InvalidOptionValue(Exception):
-    def __init__(self, opt_name, opt_value):
-        super().__init__()
-        self.opt_name = opt_name
-        self.opt_value = opt_value
-
-    def __str__(self):
-        return f"Invalid argument for option {self.opt_name} : {self.opt_value}"
 
 
 def args_to_crawlerconfiguration(arguments) -> CrawlerConfiguration:

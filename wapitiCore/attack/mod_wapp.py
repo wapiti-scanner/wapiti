@@ -34,11 +34,11 @@ from wapiti_arsenic.errors import JavascriptError, UnknownError, ArsenicError
 from wapitiCore.attack.cve.checker import (
     CVEChecker, cvss_score_to_wapiti_level, CVE_DIRECTORY, SUPPORTED_SOFTWARES, is_cve_supported_software
 )
+from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.definitions.vulnerable_software_version import VulnerableSoftwareFinding
 from wapitiCore.main.log import logging, log_blue, log_severity
 from wapitiCore.main.wapiti import is_valid_url
 from wapitiCore.attack.attack import Attack
-from wapitiCore.controller.wapiti import InvalidOptionValue
 from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding

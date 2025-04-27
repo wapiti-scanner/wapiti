@@ -25,7 +25,7 @@ from collections import defaultdict
 from enum import Enum, Flag, auto
 import random
 from binascii import hexlify
-from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type
+from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type, Protocol
 import json
 from importlib.resources import files
 
@@ -179,7 +179,14 @@ def random_string_with_flags():
     return random_string()
 
 
-class Attack:
+class AttackProtocol(Protocol):
+    name: str
+    do_get: bool
+    do_post: bool
+    PRIORITY: int
+
+
+class Attack(AttackProtocol):
     """This class represents an attack, it must be extended	for any class which implements a new type of attack"""
 
     name = "attack"

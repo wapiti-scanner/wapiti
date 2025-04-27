@@ -8,10 +8,12 @@ from httpcore import URL
 import httpx
 import pytest
 
+from wapitiCore.attack.active_scanner import ActiveScanner
 from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
 from wapitiCore.net import Request, Response
 from wapitiCore.main.wapiti import wapiti_main
 from wapitiCore.controller.wapiti import Wapiti, InvalidOptionValue
+from wapitiCore.net.classes import CrawlerConfiguration
 
 
 @pytest.mark.asyncio
@@ -26,73 +28,75 @@ async def test_options():
             return 0
 
     with mock.patch("os.makedirs", return_value=True):
-        cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
-        cli.persister = CustomMock()
+        persister = CustomMock()
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+        scanner = ActiveScanner(persister, crawler_configuration)
+
+        scanner.set_attack_options({"timeout": 10})
+
         crawler = mock.MagicMock()
-        cli.set_attack_options({"timeout": 10})
-
-        cli.set_modules("-all,xxe")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("-all,xxe")
+        attak_modules = await scanner.load_attack_modules(crawler)
         assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
-        cli.set_modules("xxe")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("xxe")
+        attak_modules = await scanner.load_attack_modules(crawler)
         assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
 
-        cli.set_modules("common,xxe")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("common,xxe")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) + 1
 
-        cli.set_modules("common,-exec")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("common,-exec")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(common_modules) - 1
 
-        cli.set_modules("all,-xxe")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("all,-xxe")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - 1
 
-        cli.set_modules("all,-common")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("all,-common")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(all_modules) - len(common_modules)
 
-        cli.set_modules("common,-all,xss")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("common,-all,xss")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == 1
 
-        cli.set_modules("passive")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("passive")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules)
 
-        cli.set_modules("passive,xxe")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("passive,xxe")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) + 1
 
-        cli.set_modules("passive,-wapp")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("passive,-wapp")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == len(passive_modules) - 1
 
-        cli.set_modules("cms")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("cms")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert len(activated_modules) == 1
 
         # Empty module list: no modules will be used
-        cli.set_modules("")
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules("")
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert not activated_modules
 
         # Use default settings: only use "commons" modules
-        cli.set_modules(None)
-        attak_modules = await cli._load_attack_modules(crawler)
+        scanner.set_modules(None)
+        attak_modules = await scanner.load_attack_modules(crawler)
         activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
         assert activated_modules == set(common_modules)
 
@@ -154,18 +158,19 @@ async def test_max_attack_time(_):
     with mock.patch("os.makedirs", return_value=True):
         cli = Wapiti(Request("http://perdu.com/"), session_dir="/dev/shm")
         cli.persister = CustomMock()
-        cli.set_max_attack_time(max_attack_time)
-        cli.set_attack_options({"timeout": 10, "tasks": 1})
+        cli._active_scanner.persister = CustomMock()
+        cli.active_scanner.set_max_attack_time(max_attack_time)
+        cli.active_scanner.set_attack_options({"timeout": 10, "tasks": 1})
 
-        cli.set_modules("all")
+        cli.active_scanner.set_modules("all")
         time = monotonic()
-        await cli.attack()
+        await cli.active_scanner.attack()
         max_run_duration = max_attack_time * (len(all_modules) + delta) # execution time for all modules + delta of uncertainty
         assert monotonic() - time < max_run_duration
 
 
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.update")
 async def test_update_with_modules(mock_update):
     testargs = ["wapiti", "--update", "-m", "wapp,nikto"]
     with mock.patch.object(sys, 'argv', testargs):
@@ -185,7 +190,7 @@ async def test_update_with_not_valid_url(mock_valid_url):
 
 
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.update")
 async def test_update_without_modules(mock_update):
     """Ensure that no module should be updated when no module is requested."""
     testargs = ["wapiti", "--update"]
@@ -195,7 +200,7 @@ async def test_update_without_modules(mock_update):
             mock_update.assert_called_once_with(None)
 
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.update")
 async def test_update_with_wapp_url(mock_update):
     """Ensure that no module should be updated when no module is requested."""
     testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/"]
@@ -205,7 +210,7 @@ async def test_update_with_wapp_url(mock_update):
             mock_update.assert_called_once_with(None)
 
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.update")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.update")
 async def test_update_with_wapp_dir(mock_update):
     """Ensure that no module should be updated when no module is requested."""
     testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-dir", "/"]
@@ -235,9 +240,8 @@ async def test_update_with_proxy():
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
 @mock.patch("wapitiCore.main.wapiti.check_http_auth", return_value=True)
-async def test_use_http_creds(mock_check_http_auth, _, __):
+async def test_use_http_creds(mock_check_http_auth, _ ):
     """Let's ensure that the proxy is used when updating modules resources."""
     testargs = ["wapiti", "--auth-user", "test", "--auth-password", "test", "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"]
 
@@ -248,9 +252,8 @@ async def test_use_http_creds(mock_check_http_auth, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
 @mock.patch("wapitiCore.main.wapiti.async_try_form_login", return_value=(False, {}, []))
-async def test_use_web_creds(mock_async_try_form_login, _, __):
+async def test_use_web_creds(mock_async_try_form_login, _):
     """Let's ensure that the proxy is used when updating modules resources."""
     testargs = [
         "wapiti",
@@ -269,9 +272,9 @@ async def test_use_web_creds(mock_async_try_form_login, _, __):
 # Test swagger option with a valid url
 @respx.mock
 @pytest.mark.asyncio
-@mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
-async def test_swagger_valid_url(mock_browse, _):
+@mock.patch("wapitiCore.main.wapiti.Wapiti.browse", name="mock_browse")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack", name="mock_attack")
+async def test_swagger_valid_url(mock_attack, mock_browse):
     swagger_url = "https://petstore.swagger.io/v2/swagger.json"
 
     swagger_path = Path(__file__).parent.parent / "parsers" / "data" / "swagger.json"
@@ -293,6 +296,7 @@ async def test_swagger_valid_url(mock_browse, _):
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()
         mock_browse.assert_called_once()
+        mock_attack.assert_called_once()
 
 # Test swagger option with an invalid url or when option break
 @respx.mock
@@ -320,14 +324,15 @@ async def test_swagger_invalid_url():
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.controller.wapiti.Wapiti.add_start_url")
 async def test_out_of_scope_swagger(mock_add_start_url, _, __):
     """Test with out-of-scope swagger"""
+    test_file = Path(__file__).parent.parent / "parsers" / "data" / "openapi3.yaml"
     testsagrs = [
         "wapiti",
         "--url", "http://testphp.vulnweb.com/",
-        "--swagger", "./tests/parsers/data/openapi3.yaml",
+        "--swagger", str(test_file),
         "-m", ""
     ]
 
@@ -338,7 +343,7 @@ async def test_out_of_scope_swagger(mock_add_start_url, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.validate_cms_choices",return_value=(False, {}, []))
 async def test_validate_cms_choices(mock_validate_cms_choices, _, __):
     """Let's ensure that the cms validator is called when the --cms is used."""
@@ -357,7 +362,7 @@ async def test_validate_cms_choices(mock_validate_cms_choices, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_mod_cms_set",return_value=(False, {}, []))
 async def test_is_mod_cms_set(mock_is_mod_cms_set, _, __):
     """Let's ensure that the --cms option is only used when the module cms is called."""
@@ -375,7 +380,7 @@ async def test_is_mod_cms_set(mock_is_mod_cms_set, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
 async def test_mod_wapp_is_set(mock_is_mod_wapp_or_update_set, _, __):
     """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
@@ -393,7 +398,7 @@ async def test_mod_wapp_is_set(mock_is_mod_wapp_or_update_set, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
 async def test_mod_wapp_is_not_set(mock_is_mod_wapp_or_update_set, _, __):
     """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
@@ -410,7 +415,7 @@ async def test_mod_wapp_is_not_set(mock_is_mod_wapp_or_update_set, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
 async def test_mod_wapp_is_set_with_wapp_dir(mock_is_mod_wapp_or_update_set, _, __):
     """Let's ensure that the --wapp-dir option is only used when the module wapp or update option is called."""
@@ -428,7 +433,7 @@ async def test_mod_wapp_is_set_with_wapp_dir(mock_is_mod_wapp_or_update_set, _, 
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_mod_wapp_or_update_set",return_value=(False, {}, []))
 async def test_mod_wapp_is_not_set_with_wapp_dir(mock_is_mod_wapp_or_update_set, _, __):
     """Let's ensure that the --wapp-dir option is only used when the module wapp or update option is called."""
@@ -446,7 +451,7 @@ async def test_mod_wapp_is_not_set_with_wapp_dir(mock_is_mod_wapp_or_update_set,
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_valid_url", return_value=(False, {}, []))
 async def test_is_valid_url(mock_is_valid_url, _, __):
     """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
@@ -464,7 +469,7 @@ async def test_is_valid_url(mock_is_valid_url, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.main.wapiti.is_valid_url", return_value=(False, {}, []))
 async def test_is_not_valid_url(mock_is_valid_url, _, __):
     """Let's ensure that the --wapp-url option is only used when the module wapp or update option is called."""
@@ -482,7 +487,7 @@ async def test_is_not_valid_url(mock_is_valid_url, _, __):
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
-@mock.patch("wapitiCore.main.wapiti.Wapiti.attack")
+@mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 async def test_basic_usage(_, __):
     """Test without option"""
     testsagrs = [
