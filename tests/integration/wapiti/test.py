@@ -1,16 +1,19 @@
+from collections import defaultdict
+from itertools import chain, cycle
 import json
 import os
-import sys
-import requests
 import re
-from itertools import cycle
-from collections import defaultdict
-from itertools import chain
-from uuid import uuid4
+import ssl
+import sys
 from time import sleep
+from uuid import uuid4
+
+import httpx
+from httpx import ConnectError
 
 from misc_functions import purge_irrelevant_data, filter_data, all_keys_dicts, sort_lists_in_dict
 from templates_and_data import DEFAULT_FILTER_TREE, EXISTING_MODULES, TREE_CHECKER
+
 
 # parsing and checking the json file containing the modules
 with open('/usr/local/bin/behavior.json', 'r') as integration_file:
@@ -65,7 +68,10 @@ for key_test, content_test in iter_tests:
             sys.stdout.write(f"Querying target {target['name']}...\n")
             requests_counter[target['name']] += 1
             try:
-                requests.get(f"{target['name']}", verify=False)
+                ssl_context = httpx.create_ssl_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                httpx.get(f"{target['name']}", verify=ssl_context)
                 json_output_path = f"/home/{key_test}/{re.sub(r'[/:]', '_', re.sub(r'^https?://', '', target['name']))}.out"
 
                 # We define supplementary arguments globally and for each target:
@@ -110,7 +116,7 @@ for key_test, content_test in iter_tests:
                     # Rewriting the file
                     json.dump(filtered_data, output_file, indent=4)
                 targets_done.add(target['uid'])
-            except requests.exceptions.ConnectionError:
+            except ConnectError:
                 sys.stdout.write(f"Target {target['name']} from test {key_test} is not read...(yet ?)\n")
                 # 0.5 seconds penalty in case of no response to avoid requests spamming and being
                 # too fast at blacklisting targets
