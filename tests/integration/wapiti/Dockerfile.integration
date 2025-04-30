@@ -15,7 +15,7 @@ RUN apt-get -y update &&\
 
 COPY . .
 
-RUN pip3 install . requests --break-system-packages
+RUN pip3 install . --break-system-packages
 
 FROM python:3.13-slim
 
