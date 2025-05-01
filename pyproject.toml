@@ -38,21 +38,21 @@ dependencies = [
         "beautifulsoup4==4.12.3",
         "browser-cookie3==0.19.1",
         "dnspython==2.6.1",
-        "h11>=0.14.0,<0.17",
-        "httpcore==1.0.7",
+        "h11>=0.16.0,<0.17",
+        "httpcore==1.0.9",
         "httpx[brotli, socks]==0.28.1",
         "httpx-ntlm==1.4.0",
         "humanize==4.9.0",
         "loguru==0.7.2",
         "mako==1.3.2",
         "markupsafe==2.1.5",
-        "mitmproxy==11.1.3",
+        "mitmproxy==12.0.0",
         "msgpack==1.0.0",  # required by mitmproxy, lower version may require g++
         "packaging==24.1",
         "pyasn1==0.5.1",
         "sqlalchemy==2.0.40",
         "tld==0.13",
-        "typing-extensions==4.12.0",  # prevent annotation assertion errors within sqlalchemy
+        "typing-extensions>=4.12.0",  # prevent annotation assertion errors within sqlalchemy
         "urwid==2.6.15",  # required by mitmproxy, lower versions conflict with typing-extensions
         "yaswfp==0.9.3",
         "wapiti-swagger==0.1.9",
