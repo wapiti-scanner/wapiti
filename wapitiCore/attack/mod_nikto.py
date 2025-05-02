@@ -197,9 +197,13 @@ class ModuleNikto(Attack):
         _log_request(evil_request, method)
 
         # Send request and get response
-        response, _, code, raw = await self._send_request(evil_request)
+        response, text, code, raw = await self._send_request(evil_request)
         if response is None:
             return
+
+        # We exploited a RFI vulnerability using our "e.php" endpoint
+        if "w4p1t1_cleartext" in text or "aa9d05b9ab864e169d723e9668d3dc77" in text:
+            await self._report_vulnerability(evil_request, vuln_desc, osv_id, response)
 
         # Evaluate conditions
         match, match_or, match_and = _evaluate_match_conditions(line, code, raw)
@@ -217,11 +221,44 @@ class ModuleNikto(Attack):
     def _process_path(self, path):
         """Process the path by replacing placeholders"""
         replacements = {
+            # see https://github.com/sullo/nikto/blob/master/program/databases/db_variables for reference
             "@CGIDIRS": "/cgi-bin/",
             "@ADMIN": "/admin/",
             "@NUKE": "/modules/",
             "@PHPMYADMIN": "/phpMyAdmin/",
-            "@POSTNUKE": "/postnuke/"
+            "@POSTNUKE": "/postnuke/",
+            "@WORDPRESS": "/",
+            "@FCKEDITOR": "/fckeditor/",
+            "@AXIS2": "/",
+            "@PASSWORDDIRS": "/",
+            "@CRYSTALREPORTS": "/",
+            "@OWNCLOUD": "/",
+            "@SECLORE": "/",
+            "@TYPO3": "/",
+            "@MODIR": "/",
+            "@ADOBEXML": "/",
+            "@JENKINS": "/",
+            "@RAINLOOP": "/",
+            "@TOMCATADMIN": "/",
+            "@PHPINFODIRS": "/",
+            "@MANTIS": "/",
+            "@DOKUWIKI": "/",
+            "@ROCKMONGO": "/",
+            "@MAGENTO": "/",
+            "@MAGMI": "/",
+            "@HYBRIS": "/",
+            "@PIWIK": "/",
+            "@FORUM": "/",
+            "@VBULLETIN": "/",
+            "@PAGESPEED": "/",
+            "@SYMPHONY": "/",
+            "@STRUTSACTIONS": "/",
+            # Non-directories
+            "@RFIURL": self.external_endpoint + "e.php",
+            "@USERS": "www-data",
+            "@OCFILES": "data/owncloud.db",
+            "@PHPINFOFILES": "phpinfo.php",
+            "@MOFILE": "moadmin.php",
         }
 
         for placeholder, replacement in replacements.items():

