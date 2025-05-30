@@ -249,9 +249,10 @@ def extract_requests(html: Html, request: Request):
             yield next_request
 
     for form in html.iter_forms():
-        # if scope.check(form) and form not in to_explore and form not in excluded_requests:
-        form.link_depth = request.link_depth + 1
-        yield form
+        for form_request in form.to_requests():
+            # if scope.check(form) and form not in to_explore and form not in excluded_requests:
+            form_request.link_depth = request.link_depth + 1
+            yield form_request
 
 
 async def click_in_webpage(headless_client, request: Request, wait_time: float, timeout: float):

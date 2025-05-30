@@ -227,14 +227,15 @@ class Explorer:
                 allowed_links.append(extra_url)
 
             for form in html.iter_forms():
-                # TODO: apply bad_params filtering in form URLs
-                if self._scope.check(form):
-                    if form.hostname not in self._hostnames:
-                        form.link_depth = 0
-                    else:
-                        form.link_depth = request.link_depth + 1
+                for form_request in form.to_requests():
+                    # TODO: apply bad_params filtering in form URLs
+                    if self._scope.check(form_request):
+                        if form_request.hostname not in self._hostnames:
+                            form_request.link_depth = 0
+                        else:
+                            form_request.link_depth = request.link_depth + 1
 
-                    new_requests.append(form)
+                        new_requests.append(form_request)
 
         for url in swf_links + js_links:
             if url:

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form action="http://perdu.com/get_form?a=b">
+    <input type="text" name="name" />
+    <input type="submit" value="Go" />
+</form>
+
+
+<form action="/post_select.php?id=3" method="POST">
+    Firstname:<input type="text" name="fname" value="Smith">
+    <input type="hidden" name="csrf" value="9877665" />
+    <select name="carlist" form="carform">
+      <option value="saab">Saab</option>
+      <option value="volvo" selected>Volvo</option>
+      <option value="opel">Opel</option>
+      <option value="audi">Audi</option>
+    </select>
+    <input type="submit">
+</form>
+
+<form action="/fields.php" method="POST">
+    <input type="checkbox" name="vehicle1" value="car"> I have a MX-5 NBFL<br>
+    <input type="checkbox" name="vehicle2" value="boat" checked> I have a MX-5 NC<br>
+    <input type="color" name="color" />
+    <input type="date" name="date" />
+    <input type="datetime" name="datetime" />
+    <input type="datetime-local" name="datetime-local" />
+    <input type="email" name="email" />
+    <input type="file" name="file" />
+    <input type="hidden" name="hidden" />
+    <input type="image" name="image" />
+    <input type="month" name="month" />
+    <input type="number" name="number" />
+    <input type="password" name="password" />
+
+    <input type="radio" name="gender" value="male"> Male<br>
+    <input type="radio" name="gender" value="female" checked> Female<br>
+    <input type="radio" name="gender" value="other"> Other
+
+    <input type="radio" name="radio">
+
+    <input type="range" name="range" />
+    <input type="search" name="search" />
+    <input type="tel" name="tel" />
+    <input type="text" name="text" />
+    <textarea name="textarea"></textarea>
+    <input type="time" name="time" />
+    <input type="url" name="url" />
+    <input type="week" name="week" />
+
+    <input type="submit" name="submit" />
+</form>
+
+<form action="/upload.php" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" />
+</form>
+
+<!-- missing action attribute -->
+<form method="POST">
+    <input type="text" name="yolo" />
+    <button type="submit" formaction="/alt.php">Submit to another page</button>
+</form>
+
+<form action="/upload_empty_value.php" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" value="" />
+</form>
+
+<!-- empty action attribute -->
+<form method="POST" action="">
+    <input type="text" name="yolo2" />
+    <input type="submit" value="Submit" />
+</form>
+
+<FORM METHOD="POST" ACTION="/select_no_defaults.php">
+<SELECT NAME="choices">
+    <OPTION VALUE="1st_choice">blah</OPTION>
+    <OPTION VALUE="2nd_choice">trololol</OPTION>
+    <OPTION VALUE="3rd_choice">Hi there!</OPTION>
+</SELECT>
+<INPUT TYPE="SUBMIT" VALUE="Submit"> | <INPUT TYPE="RESET" VALUE="Reset">
+</FORM>
+
+<!-- won't be submitted because button types doesn't generate network requests and can only be used with JS
+ so in fact it's an empty form -->
+<form method="POST" action="/go_to_nowhere.php">
+    <input type="button" name="benjamin" value="bradpitt" />
+</form>
+</body>
+</html>

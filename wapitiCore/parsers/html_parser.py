@@ -23,10 +23,10 @@ from functools import lru_cache
 from hashlib import md5
 from posixpath import normpath
 from urllib.parse import urlparse, urlunparse
-from typing import Iterator, List, Optional, Dict, Set, Tuple
+from typing import Iterator, List, Optional, Dict, Set, Tuple, Union, Any
 
 from bs4 import BeautifulSoup
-from bs4.element import Comment, Doctype, Tag
+from bs4.element import Comment, Doctype
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
 
@@ -60,6 +60,7 @@ def not_empty(original_function):
 
 
 AUTOFILL_VALUES = {
+    "button_submit": "",
     "checkbox": "default",
     "color": "#bada55",
     "date": "2023-03-03",
@@ -68,6 +69,7 @@ AUTOFILL_VALUES = {
     "email": "wapiti2021@mailinator.com",
     "file": ("pix.gif", b"GIF89a", "image/gif"),
     "hidden": "default",
+    "image": "1",
     "month": "2023-03",
     "number": "1337",
     "password": "Letm3in_",  # 8 characters with uppercase, digit and special char for common rules
@@ -77,6 +79,7 @@ AUTOFILL_VALUES = {
     "submit": "submit",
     "tel": "0606060606",
     "text": "default",
+    "textarea": "Hi there!",
     "time": "13:37",
     "url": "https://wapiti-scanner.github.io/",
     "username": "alice",
@@ -92,43 +95,187 @@ NON_EMPTY_FIELD_TYPES = (
 )
 
 
-def is_required(input_field: Tag) -> bool:
-    """Returns True if the given input field should be filled"""
-    if "required" in input_field.attrs or "checked" in input_field.attrs:
-        return True
+# def is_required(field: "HtmlFormField") -> bool:
+#     """
+#     Returns True if the given HtmlFormField should be filled based on its attributes or tag_type.
+#     """
+#     if "required" in field.attributes:
+#         return True
+#
+#     # For text-like fields, and also select/textarea, they are often considered "required"
+#     # in a sense that they should be filled even if not explicitly marked 'required'.
+#     if field.tag_type in NON_EMPTY_FIELD_TYPES or field.tag_type in {"select", "textarea"}:
+#         return True
+#
+#     return False
 
-    if input_field.attrs.get("type", "text").lower() in NON_EMPTY_FIELD_TYPES:
-        return True
 
-    return False
+def get_input_field_value(field: "HtmlFormField") -> Any:
+    """
+    Determines the final value to send for an HtmlFormField, applying autofill logic if enabled.
+    This function centralizes the value selection logic.
+    Returns: The value (str, tuple for file, or empty string).
+    """
+    if field.tag_type in {"reset", "button"} or not field.name:
+        # Those input types doesn't send any value so let's ignore them
+        return None
+
+    if field.tag_type == "radio" or field.tag_type == "select":
+        chosen_option_value = "on" if field.tag_type == "radio" else None
+        if field.value and isinstance(field.value, list):
+            chosen_option_value = field.value[0]
+
+        return chosen_option_value
+
+    if field.value and isinstance(field.value, str):
+        return field.value
+
+    if not field.value:
+        input_name = field.name.lower()
+        if field.tag_type == "text":
+            if "mail" in input_name:
+                return AUTOFILL_VALUES.get("email", "")
+            if "pass" in input_name or "pwd" in input_name:
+                return AUTOFILL_VALUES.get("password", "")
+            if "user" in input_name or "login" in input_name:
+                return AUTOFILL_VALUES.get("username", "")
+
+    return AUTOFILL_VALUES.get(field.tag_type, "default")
 
 
-def get_input_field_value(input_field: Tag, autofill: bool = False) -> str:
-    """Returns the value that we should the field with"""
-    # When attribute "type" is missing, it is considered as text type
-    input_type = input_field.attrs.get("type", "text").lower()
-    # Function should always be used with a field that has a name
-    input_name = input_field["name"].lower()
-    autofill |= is_required(input_field)
-    fallback = input_field.get("value", "")
+class HtmlFormField:
+    """Represents a single HTML form field."""
+    def __init__(self, name: str, tag_type: str, value: Optional[Union[str, list]], attributes: Dict[str, str]):
+        self.name = name
+        self.tag_type = tag_type
+        self.value = value
+        self.attributes = attributes # All original HTML attributes
 
-    # If there is a non-empty default value, use it
-    # If it is empty, it is OK if autofill is not set
-    if fallback or not autofill:
-        return fallback
+    def __repr__(self):
+        if self.value is None:
+            display_value = "<undefined>"
+        elif isinstance(self.value, str):
+            display_value = self.value
+            if len(self.value) > 30:
+                display_value = display_value + "..."
+        elif isinstance(self.value, list):
+            display_value = self.value[0] if self.value else "<undefined>"
+        else:
+            display_value = self.value
 
-    # Otherwise use our hardcoded values
-    if input_type == "text":
-        if "mail" in input_name:
-            # If an input text match name "mail" then put a valid email address in it
-            return AUTOFILL_VALUES["email"]
-        if "pass" in input_name or "pwd" in input_name:
-            # Looks like a text field but waiting for a password
-            return AUTOFILL_VALUES["password"]
-        if "user" in input_name or "login" in input_name:
-            return AUTOFILL_VALUES["username"]
+        return f"HtmlFormField(name='{self.name}', type='{self.tag_type}', value='{display_value}')"
 
-    return AUTOFILL_VALUES[input_type]
+
+class HtmlForm:
+    """Represents an HTML form element (<form> tag)."""
+    def __init__(self,
+                 action: str,
+                 method: str,
+                 enctype: str,
+                 url: str, # The URL of the page where the form was found
+                 fields: List[HtmlFormField],
+                 form_actions: Set[str] = None): # For formaction attributes on buttons/inputs
+        self.action = action
+        self.method = method
+        self.enctype = enctype
+        self.url = url # The URL of the page where this form was found (for referer)
+        self.fields = fields
+        self.form_actions = form_actions if form_actions is not None else set()
+
+    def __repr__(self):
+        return f"HtmlForm(action='{self.action}', method='{self.method}', fields={len(self.fields)})"
+
+    def _build_request_params(self, final_field_values: Dict[str, Any]) -> Tuple[
+        List[List[str]], List[List[Any]], List[List[Any]]]:
+        """
+        Helper to build GET, POST, and file parameters for a request
+        using the values determined by final_field_values.
+        Autofill logic is NOT applied here; it's assumed final_field_values contains the desired values.
+        Returns: (get_params, post_params, file_params)
+        """
+        get_params = []
+        post_params = []
+        file_params = []
+
+        for field in self.fields:
+            if field.name not in final_field_values:
+                continue
+
+            value_to_send = final_field_values[field.name]
+            is_file_field = (field.tag_type == "file")
+
+            if is_file_field:
+                if self.method == "POST" and "multipart" in self.enctype:
+                    file_params.append(
+                        [field.name, value_to_send])  # value_to_send should be (filename, content, mimetype) tuple
+                else:  # Files sent via GET or POST application/x-www-form-urlencoded
+                    # For GET/urlencoded, only send the filename string from the tuple
+                    filename = value_to_send[0] if isinstance(value_to_send, tuple) else value_to_send
+                    if self.method == "GET":
+                        get_params.append([field.name, filename])
+                    else:
+                        post_params.append([field.name, filename])
+            elif self.method == "GET":
+                get_params.append([field.name, value_to_send])
+            else:  # POST
+                post_params.append([field.name, value_to_send])
+
+        return get_params, post_params, file_params
+
+    def to_requests(self) -> List[Request]:
+        """
+        Converts the HtmlForm into a list of Wapiti Request objects,
+        applying autofill logic via get_input_field_value.
+        """
+        all_requests: List[Request] = []
+        seen_request_fingerprints: Set[Tuple] = set()
+
+        # Collect all unique target URLs from the form's action and any formaction attributes
+        target_urls: Set[str] = {self.action}
+        for fa_url in self.form_actions:
+            target_urls.add(fa_url if fa_url else self.action)
+
+        # This map will store the chosen value for each field name
+        final_field_values: Dict[str, Any] = {}
+
+        for field in self.fields:
+            value_to_use = get_input_field_value(field)
+            if value_to_use is None:
+                continue
+
+            final_field_values[field.name] = value_to_use
+
+        if not final_field_values:
+            # Form without fields or for example just a `type=button` field with JS event
+            return []
+
+        # Now populate the param lists based on final_field_values using the helper
+        autofilled_get_params, autofilled_post_params, autofilled_file_params = self._build_request_params(
+            final_field_values)
+
+        for url in target_urls:
+            req = Request(
+                url,
+                method=self.method,
+                get_params=autofilled_get_params,
+                post_params=autofilled_post_params,
+                file_params=autofilled_file_params,
+                encoding="utf-8",
+                referer=self.url,
+                enctype=self.enctype
+            )
+
+            fp_get = frozenset(tuple(x) for x in req.get_params)
+            fp_post = frozenset(tuple(x) for x in req.post_params)
+            fp_file = frozenset(tuple(x) for x in req.file_params)
+
+            fingerprint = (req.url, req.method, fp_get, fp_post, fp_file)
+
+            if fingerprint not in seen_request_fingerprints:
+                all_requests.append(req)
+                seen_request_fingerprints.add(fingerprint)
+
+        return all_requests
 
 
 class Html:
@@ -469,155 +616,150 @@ class Html:
         return result
 
     # pylint: disable=too-many-branches
-    def iter_forms(self, autofill=True) -> Iterator[Request]:
-        """Returns a generator of Request extracted from the Response.
+    def iter_forms(self) -> Iterator[HtmlForm]:
+        """Returns a generator of HtmlForm objects extracted from the Response.
 
         @rtype: generator
         """
         for form in self.soup.find_all("form"):
             url = self._make_absolute(form.attrs.get("action", "").strip() or self._url)
-            # If no method is specified then it's GET. If an invalid method is set it's GET.
+            # If no method is specified then it's GET. If an invalid method is used then it fallbacks to GET too.
             method = "POST" if form.attrs.get("method", "GET").upper() == "POST" else "GET"
             enctype = "" if method == "GET" else form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
-            get_params = []
-            post_params = []
-            # If the form must be sent in multipart, everything should be given to requests in the files parameter
-            # but internally we use the file_params list only for file inputs sent with multipart (as they must be
-            # threated differently in persister). Crawler.post() method will join post_params and file_params for us
-            # if the enctype is multipart.
-            file_params = []
-            form_actions = set()
 
+            form_fields: List[HtmlFormField] = []
+            form_actions: Set[str] = set()
             radio_inputs = {}
+
+            # Check "input" tags first
             for input_field in form.find_all("input", attrs={"name": True}):
+                input_name = input_field["name"]
+                input_value = input_field.get("value")
                 input_type = input_field.attrs.get("type", "text").lower()
 
-                if input_type in {"reset", "button"}:
-                    # Those input types doesn't send any value
+                if input_type == "image":
+                    for axis in ("x", "y"):
+                        form_fields.append(
+                            HtmlFormField(
+                                name=f"{input_name}.{axis}",
+                                tag_type="image",  # Custom type to distinguish from input types
+                                value=None,
+                                attributes={}
+                            )
+                        )
                     continue
 
-                if input_type == "image":
-                    if method == "GET":
-                        get_params.append([input_field["name"] + ".x", "1"])
-                        get_params.append([input_field["name"] + ".y", "1"])
-                    else:
-                        post_params.append([input_field["name"] + ".x", "1"])
-                        post_params.append([input_field["name"] + ".y", "1"])
-                elif input_type in AUTOFILL_VALUES:
-                    if input_type == "file":
-                        # With file inputs the content is only sent if the method is POST and enctype multipart
-                        # otherwise only the file name is sent.
-                        # Having a default value set in HTML for a file input doesn't make sense... force our own.
-                        if method == "GET":
-                            get_params.append([input_field["name"], "pix.gif"])
-                        else:
-                            if "multipart" in enctype:
-                                file_params.append([input_field["name"], AUTOFILL_VALUES["file"]])
-                            else:
-                                post_params.append([input_field["name"], "pix.gif"])
-                    else:
-                        input_value = get_input_field_value(input_field, autofill)
-                        if input_type == "radio":
-                            # Do not put in forms now, do it at the end
-                            radio_inputs[input_field["name"]] = input_value
-                        else:
-                            if method == "GET":
-                                get_params.append([input_field["name"], input_value])
-                            else:
-                                post_params.append([input_field["name"], input_value])
+                # Handle radio buttons: collect all values first
+                if input_type == "radio":
+                    if input_name not in radio_inputs:
+                        radio_inputs[input_name] = []
 
-            # A formaction doesn't need a name
+                    radio_inputs[input_name].append({
+                        "value": input_value,
+                        "checked": "checked" in input_field.attrs
+                    })
+                else:
+                    form_fields.append(
+                        HtmlFormField(
+                            name=input_name,
+                            tag_type=input_type,
+                            value=input_value,
+                            attributes=input_field.attrs or {},
+                        )
+                    )
+
+            # Now process radio buttons after all options for a name are collected
+            for radio_name, options in radio_inputs.items():
+                values = []
+                for option in options:
+                    if option["value"] is None:
+                        # Missing a "value" attribute
+                        continue
+
+                    if option["checked"]:
+                        values.insert(0, option["value"])
+                    else:
+                        values.append(option["value"])
+
+                form_fields.append(
+                    HtmlFormField(
+                        name=radio_name,
+                        tag_type="radio",
+                        value=values or None,
+                        attributes={},
+                    )
+                )
+
+            # Collect formaction attributes
             for input_field in form.find_all("input", attrs={"formaction": True}):
                 form_actions.add(self._make_absolute(input_field["formaction"].strip() or self._url))
 
             for button_field in form.find_all("button"):
                 if "name" in button_field.attrs:
-                    input_name = button_field["name"]
-                    input_value = button_field.get("value", "")
-                    if method == "GET":
-                        get_params.append([input_name, input_value])
-                    else:
-                        post_params.append([input_name, input_value])
-
+                    form_fields.append(
+                        HtmlFormField(
+                            name=button_field["name"],
+                            tag_type="button_submit",  # Custom type to distinguish from input types
+                            value=button_field.get("value"),
+                            attributes=button_field.attrs or {}
+                        )
+                    )
                 if "formaction" in button_field.attrs:
-                    # If formaction is empty it basically send to the current URL
-                    # which can be different from the defined action attribute on the form...
                     form_actions.add(self._make_absolute(button_field["formaction"].strip() or self._url))
 
             if form.find("input", attrs={"name": False, "type": "image"}):
-                # Unnamed input type file => names will be set as x and y
-                if method == "GET":
-                    get_params.append(["x", "1"])
-                    get_params.append(["y", "1"])
-                else:
-                    post_params.append(["x", "1"])
-                    post_params.append(["y", "1"])
+                for axis in ("x", "y"):
+                    form_fields.append(
+                        HtmlFormField(
+                            name=axis,
+                            tag_type="image",  # Custom type to distinguish from input types
+                            value=None,
+                            attributes={}
+                        )
+                    )
 
             for select in form.find_all("select", attrs={"name": True}):
                 all_values = []
                 selected_value = None
                 for option in select.find_all("option", value=True):
-                    all_values.append(option["value"])
                     if "selected" in option.attrs:
                         selected_value = option["value"]
+                    else:
+                        all_values.append(option["value"])
 
-                if selected_value is None and all_values:
-                    # First value may be a placeholder but last entry should be valid
-                    selected_value = all_values[-1]
+                all_values = all_values[::-1]
+                if selected_value is not None:
+                    all_values.insert(0, selected_value)
 
-                if method == "GET":
-                    get_params.append([select["name"], selected_value])
-                else:
-                    post_params.append([select["name"], selected_value])
-
-            # if form.find("input", attrs={"type": "image", "name": False}):
-            #     new_form.add_image_field()
+                form_fields.append(
+                    HtmlFormField(
+                        name=select["name"],
+                        tag_type="select",
+                        value=all_values,
+                        attributes=select.attrs or {}
+                    )
+                )
 
             for text_area in form.find_all("textarea", attrs={"name": True}):
-                if method == "GET":
-                    get_params.append([text_area["name"], "Hi there!" if autofill else ""])
-                else:
-                    post_params.append([text_area["name"], "Hi there!" if autofill else ""])
-
-            # I guess I should raise a new form for every possible radio values...
-            # For the moment, just use the last value
-            for radio_name, radio_value in radio_inputs.items():
-                if method == "GET":
-                    get_params.append([radio_name, radio_value])
-                else:
-                    post_params.append([radio_name, radio_value])
-
-            if method == "POST" and not post_params and not file_params:
-                # Ignore empty forms. Those are either webdev issues or forms having only "button" types that
-                # only rely on JS code.
-                continue
-
-            # First raise the form with the URL specified in the action attribute
-            new_form = Request(
-                url,
-                method=method,
-                get_params=get_params,
-                post_params=post_params,
-                file_params=file_params,
-                encoding=self._encoding,
-                referer=self._url,
-                enctype=enctype
-            )
-            yield new_form
-
-            # Then if we saw some formaction attribute, raise the form with the given formaction URL
-            for url in form_actions:
-                new_form = Request(
-                    url,
-                    method=method,
-                    get_params=get_params,
-                    post_params=post_params,
-                    file_params=file_params,
-                    encoding=self._encoding,
-                    referer=self._url,
-                    enctype=enctype
+                form_fields.append(
+                    HtmlFormField(
+                        name=text_area["name"],
+                        tag_type="textarea",
+                        value=text_area.text or "",
+                        attributes=text_area.attrs or {}
+                    )
                 )
-                yield new_form
+
+            # Create the HtmlForm object
+            html_form = HtmlForm(
+                action=url,
+                method=method,
+                enctype=enctype,
+                url=self._url,  # The URL of the page where the form was found
+                fields=form_fields,
+                form_actions=form_actions
+            )
+            yield html_form
 
     def find_login_form(self) -> Tuple[Optional[Request], int, int]:
         """Returns the login Request extracted from the Response, the username and password fields."""
