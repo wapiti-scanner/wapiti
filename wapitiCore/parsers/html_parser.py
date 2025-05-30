@@ -120,7 +120,7 @@ def get_input_field_value(field: "HtmlFormField") -> Any:
         # Those input types doesn't send any value so let's ignore them
         return None
 
-    if field.tag_type == "radio" or field.tag_type == "select":
+    if field.tag_type in ('radio', 'select'):
         chosen_option_value = "on" if field.tag_type == "radio" else None
         if field.value and isinstance(field.value, list):
             chosen_option_value = field.value[0]
@@ -130,17 +130,18 @@ def get_input_field_value(field: "HtmlFormField") -> Any:
     if field.value and isinstance(field.value, str):
         return field.value
 
+    result = AUTOFILL_VALUES.get(field.tag_type, "default")
     if not field.value:
         input_name = field.name.lower()
         if field.tag_type == "text":
             if "mail" in input_name:
-                return AUTOFILL_VALUES.get("email", "")
+                result = AUTOFILL_VALUES.get("email", "")
             if "pass" in input_name or "pwd" in input_name:
-                return AUTOFILL_VALUES.get("password", "")
+                result = AUTOFILL_VALUES.get("password", "")
             if "user" in input_name or "login" in input_name:
-                return AUTOFILL_VALUES.get("username", "")
+                result = AUTOFILL_VALUES.get("username", "")
 
-    return AUTOFILL_VALUES.get(field.tag_type, "default")
+    return result
 
 
 class HtmlFormField:
@@ -202,9 +203,8 @@ class HtmlForm:
                 continue
 
             value_to_send = final_field_values[field.name]
-            is_file_field = (field.tag_type == "file")
 
-            if is_file_field:
+            if field.tag_type == "file":
                 if self.method == "POST" and "multipart" in self.enctype:
                     file_params.append(
                         [field.name, value_to_send])  # value_to_send should be (filename, content, mimetype) tuple
