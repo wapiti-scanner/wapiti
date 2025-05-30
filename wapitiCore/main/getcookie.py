@@ -212,12 +212,14 @@ async def getcookie_main(arguments):
         # Not data specified, try interactive mode by fetching forms
         forms = []
         html = Html(page_source, args.url)
-        for i, form in enumerate(html.iter_forms(autofill=False)):
+        for i, form in enumerate(html.iter_forms()):
+            form_request = form.to_requests()[0]
             if i == 0:
                 print('')
                 print("Choose the form you want to use or enter 'q' to leave :")
-            print(f"{i}) {form}")
-            forms.append(form)
+
+            print(f"{i}) {form_request}")
+            forms.append(form_request)
 
         valid_choice_done = False
         if forms:

@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 
 import pytest
 import httpx
@@ -181,14 +182,18 @@ async def test_persister_upload():
 @pytest.mark.asyncio
 @respx.mock
 async def test_persister_forms():
-    with open("tests/data/forms.html") as data_body:
+    fixture = Path(__file__).parent / "data" / "forms.html"
+    with fixture.open() as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
         resp = httpx.get(url, follow_redirects=False)
         page = Html(Response(resp).content, url)
 
-        forms = list(page.iter_forms())
+        requests = []
+        for form in page.iter_forms():
+            for request in form.to_requests():
+                requests.append(request)
 
         try:
             os.unlink("/tmp/crawl.db")
@@ -198,13 +203,14 @@ async def test_persister_forms():
         persister = SqlPersister("/tmp/crawl.db")
         await persister.create()
         await persister.set_root_url("http://httpbin.org/")
-        await persister.set_to_browse(forms)
+        await persister.set_to_browse(requests)
 
+        # 8 forms but one with a formaction button
         assert await persister.count_paths() == 9
 
         extracted_forms = [__ async for __ in persister.get_to_browse()]
         assert len(extracted_forms) == 9
-        assert set(forms) == set(extracted_forms)
+        assert set(requests) == set(extracted_forms)
 
         for form in extracted_forms:
             if form.file_path == "/upload.php":

@@ -186,8 +186,11 @@ def test_page():
     assert len(html.js_redirections) == 0
     assert len(html.html_redirections) == 0
     assert len(html.all_redirections) == 0
-    for request in html.iter_forms():
-        assert request.url in page_form_requests
+
+    for html_form in html.iter_forms():
+        for form_request in html_form.to_requests():
+            assert form_request.url in page_form_requests
+
     login_form, username_field, password_field = html.find_login_form()
     assert username_field == 0
     assert password_field == 1

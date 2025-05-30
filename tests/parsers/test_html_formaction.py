@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import httpx
 import respx
 
@@ -7,7 +9,8 @@ from wapitiCore.parsers.html_parser import Html
 
 @respx.mock
 def test_formactions():
-    with open("tests/data/formactions.html") as form_action:
+    fixture_file = Path(__file__).parent / "data" / "formactions.html"
+    with fixture_file.open() as form_action:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=form_action.read()))
 
@@ -15,14 +18,15 @@ def test_formactions():
         page = Html(Response(resp).content, url)
         count = 0
 
-        for form in page.iter_forms():
-            count += 1
-            if form.file_path == "/form":
-                assert form.post_params == [["name", "doe"]]
-            elif form.file_path == "/form2":
-                assert form.post_params == [["name2", "doe"]]
-            elif form.file_path == "/":
-                assert form.method == "POST"
-                assert form.post_params[0][1] == "doe"
+        for html_form in page.iter_forms():
+            for request in html_form.to_requests():
+                count += 1
+                if request.file_path == "/form":
+                    assert request.post_params == [["name", "doe"]]
+                elif request.file_path == "/form2":
+                    assert request.post_params == [["name2", "doe"]]
+                elif request.file_path == "/":
+                    assert request.method == "POST"
+                    assert request.post_params[0][1] == "doe"
 
         assert count == 4
