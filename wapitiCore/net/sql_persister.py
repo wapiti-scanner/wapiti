@@ -26,13 +26,13 @@ from aiocache import cached
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_,
-                        literal_column, or_, select)
+                        literal_column, select)
 from sqlalchemy.sql.functions import max as sql_max
 from sqlalchemy.sql.functions import count as sql_count
 from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import Request, Response
 
-Payload = namedtuple("Payload", "evil_request,original_request,category,level,parameter,info,type,wstg,module,response")
+Payload = namedtuple("Payload", "evil_request,category,level,parameter,info,type,wstg,module,response")
 
 
 class SqlPersister:
@@ -818,15 +818,13 @@ class SqlPersister:
             result = await conn.execute(select(self.payloads))
 
         for row in result.fetchall():
-            evil_id, original_id, module, category, level, parameter, info, payload_type, wstg, response_id = row
+            evil_id, module, category, level, parameter, info, payload_type, wstg, response_id = row
 
             evil_request = await self.get_path_by_id(evil_id)
-            original_request = await self.get_path_by_id(original_id)
             response = await self.get_response_by_id(response_id)
 
             yield Payload(
                 evil_request,
-                original_request,
                 category,
                 level,
                 parameter,
