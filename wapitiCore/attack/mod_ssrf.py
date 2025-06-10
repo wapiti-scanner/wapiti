@@ -133,7 +133,6 @@ class ModuleSsrf(Attack):
                             ))
 
                             await self.add_critical(
-                                request_id=original_request.path_id,
                                 finding_class=SsrfFinding,
                                 request=mutated_request,
                                 info=vuln_message,

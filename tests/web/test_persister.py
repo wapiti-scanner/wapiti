@@ -74,7 +74,6 @@ async def test_persister_basic():
         naughty_get = Request("http://httpbin.org/?k=1%20%OR%200")
 
         await persister.add_payload(
-            1,  # request_id
             "vulnerability",  # payload_type
             "sql",  # module
             "SQL Injection",  # category
@@ -97,7 +96,6 @@ async def test_persister_basic():
         )
 
         await persister.add_payload(
-            1,  # request_id
             "vulnerability",  # payload_type
             "exec",  # module
             "Command Execution",  # category
@@ -164,7 +162,6 @@ async def test_persister_upload():
         )
 
         await persister.add_payload(
-            1,  # request_id
             "vulnerability",  # payload_type
             "exec",  # module
             "Command Execution",  # category
@@ -248,7 +245,6 @@ async def test_raw_post():
         enctype="application/json"
     )
     await persister.add_payload(
-        1,  # request_id
         "vulnerability",  # payload_type
         "exec",  # module
         "Command Execution",  # category

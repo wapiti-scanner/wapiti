@@ -147,7 +147,6 @@ class ModuleXxe(Attack):
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
                 await self.add_medium(
-                    request_id=request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     info=anom_msg,
@@ -167,7 +166,6 @@ class ModuleXxe(Attack):
                         vuln_message = f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=XxeFinding,
                         request=mutated_request,
                         info=vuln_message,
@@ -198,7 +196,6 @@ class ModuleXxe(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,
@@ -230,7 +227,6 @@ class ModuleXxe(Attack):
                 pattern = search_patterns(response.content, payload_info.rules)
                 if pattern and not await self.false_positive(original_request, pattern):
                     await self.add_high(
-                        request_id=original_request.path_id,
                         finding_class=XxeFinding,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
@@ -274,7 +270,6 @@ class ModuleXxe(Attack):
                 pattern = search_patterns(response.content, payload_info.rules)
                 if pattern and not await self.false_positive(original_request, pattern):
                     await self.add_high(
-                        request_id=original_request.path_id,
                         finding_class=XxeFinding,
                         request=mutated_request,
                         info="XXE vulnerability leading to file disclosure",
@@ -397,7 +392,6 @@ class ModuleXxe(Attack):
                         log_method = log_orange
 
                     await add_vuln_method(
-                        request_id=original_request.path_id,
                         finding_class=XxeFinding,
                         request=mutated_request,
                         info=vuln_message,

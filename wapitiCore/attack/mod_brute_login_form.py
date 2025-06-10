@@ -220,7 +220,6 @@ class ModuleBruteLoginForm(Attack):
                         )
 
                         await self.add_low(
-                            request_id=request.path_id,
                             finding_class=CredentialsFinding,
                             request=evil_request,
                             info=vuln_message,

@@ -226,7 +226,6 @@ class ModuleLdap(Attack):
                     )
 
                 await self.add_critical(
-                    request_id=original_request.path_id,
                     finding_class=LdapInjectionFinding,
                     request=vuln_request,
                     info=vuln_message,
@@ -258,7 +257,6 @@ class ModuleLdap(Attack):
                 vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
             await self.add_high(
-                request_id=original_request.path_id,
                 finding_class=LdapInjectionFinding,
                 request=warn_request,
                 info=vuln_message,
@@ -283,7 +281,6 @@ class ModuleLdap(Attack):
                 anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
             await self.add_high(
-                request_id=original_request.path_id,
                 finding_class=InternalErrorFinding,
                 request=http500_request,
                 info=anom_msg,

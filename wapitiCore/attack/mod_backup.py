@@ -123,7 +123,6 @@ class ModuleBackup(Attack):
                 log_red(f"Found backup file {evil_req.url}")
 
                 await self.add_low(
-                    request_id=request.path_id,
                     finding_class=BackupFinding,
                     request=evil_req,
                     info=f"Backup file {url} found for {page}",

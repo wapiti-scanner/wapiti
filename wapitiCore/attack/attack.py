@@ -252,11 +252,10 @@ class Attack(AttackProtocol):
         self.deps = []
 
     # pylint: disable=too-many-positional-arguments
-    async def add_payload(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_payload(self, finding_class: Type[FindingBase],
                           level: int = 0, request: Request = None, parameter: str = "", info: str = "",
                           response: Response = None):
         await self.persister.add_payload(
-            request_id=request_id,
             payload_type=finding_class.type(),
             module=self.name,
             category=finding_class.name(),
@@ -270,34 +269,34 @@ class Attack(AttackProtocol):
 
     # Define explicit wrapper functions for each severity level
     # pylint: disable=too-many-positional-arguments
-    async def add_info(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_info(self, finding_class: Type[FindingBase],
                        request: Optional[Request] = None, parameter: str = "",
                        info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, request_id, INFO_LEVEL, request, parameter, info, response)
+        await self.add_payload(finding_class, INFO_LEVEL, request, parameter, info, response)
 
     # pylint: disable=too-many-positional-arguments
-    async def add_low(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_low(self, finding_class: Type[FindingBase],
                       request: Optional[Request] = None, parameter: str = "",
                       info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, request_id, LOW_LEVEL, request, parameter, info, response)
+        await self.add_payload(finding_class, LOW_LEVEL, request, parameter, info, response)
 
     # pylint: disable=too-many-positional-arguments
-    async def add_medium(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_medium(self, finding_class: Type[FindingBase],
                          request: Optional[Request] = None, parameter: str = "",
                          info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, request_id, MEDIUM_LEVEL, request, parameter, info, response)
+        await self.add_payload(finding_class, MEDIUM_LEVEL, request, parameter, info, response)
 
     # pylint: disable=too-many-positional-arguments
-    async def add_high(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_high(self, finding_class: Type[FindingBase],
                        request: Optional[Request] = None, parameter: str = "",
                        info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, request_id, HIGH_LEVEL, request, parameter, info, response)
+        await self.add_payload(finding_class, HIGH_LEVEL, request, parameter, info, response)
 
     # pylint: disable=too-many-positional-arguments
-    async def add_critical(self, finding_class: Type[FindingBase], request_id: int = -1,
+    async def add_critical(self, finding_class: Type[FindingBase],
                            request: Optional[Request] = None, parameter: str = "",
                            info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, request_id, CRITICAL_LEVEL, request, parameter, info, response)
+        await self.add_payload(finding_class, CRITICAL_LEVEL, request, parameter, info, response)
 
     def load_require(self, dependencies: list = None):
         self.deps = dependencies
@@ -516,8 +515,11 @@ class Mutator:
                         yield evil_req, parameter, payload_info
 
                         if self._module == "exec":
-                            reverse_parameter = Parameter(name=payload_info.payload,
-                                                          situation=parameter_situation, reversed_parameter=True)
+                            reverse_parameter = Parameter(
+                                name=payload_info.payload,
+                                situation=parameter_situation,
+                                reversed_parameter=True
+                            )
                             reverse_payload_info = payload_info
                             reverse_payload_info.payload = param_name
 

@@ -63,7 +63,6 @@ class ModuleRedirect(Attack):
             all_redirections = {response.redirection_url} | html.all_redirections
             if any(urlparse(url).netloc.endswith("openbugbounty.org") for url in all_redirections):
                 await self.add_low(
-                    request_id=request.path_id,
                     finding_class=RedirectFinding,
                     request=mutated_request,
                     parameter=parameter.display_name,

@@ -58,7 +58,6 @@ class ModuleCrlf(Attack):
             except ReadTimeout:
                 self.network_errors += 1
                 await self.add_medium(
-                    request_id=request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     parameter=parameter.display_name,
@@ -78,7 +77,6 @@ class ModuleCrlf(Attack):
             else:
                 if "wapiti" in response.headers:
                     await self.add_low(
-                        request_id=request.path_id,
                         finding_class=CrlfFinding,
                         request=mutated_request,
                         parameter=parameter.display_name,

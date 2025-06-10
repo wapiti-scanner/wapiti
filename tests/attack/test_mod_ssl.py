@@ -68,7 +68,6 @@ async def test_ssl_scanner():
         await module.attack(request)
 
         persister.add_payload.assert_any_call(
-            request_id=-1,
             payload_type="additional",
             module="ssl",
             category="TLS/SSL misconfigurations",
@@ -81,7 +80,6 @@ async def test_ssl_scanner():
         )
 
         persister.add_payload.assert_any_call(
-            request_id=-1,
             payload_type="vulnerability",
             module="ssl",
             category="TLS/SSL misconfigurations",
@@ -94,7 +92,6 @@ async def test_ssl_scanner():
         )
 
         persister.add_payload.assert_any_call(
-            request_id=-1,
             payload_type="vulnerability",
             module="ssl",
             category="TLS/SSL misconfigurations",
@@ -107,7 +104,6 @@ async def test_ssl_scanner():
         )
 
         persister.add_payload.assert_any_call(
-            request_id=-1,
             payload_type="vulnerability",
             module="ssl",
             category="TLS/SSL misconfigurations",

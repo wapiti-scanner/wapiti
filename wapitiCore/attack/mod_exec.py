@@ -114,7 +114,6 @@ class ModuleExec(Attack):
                         vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=CommandExecutionFinding,
                         request=mutated_request,
                         info=vuln_message,
@@ -152,7 +151,6 @@ class ModuleExec(Attack):
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
                 await self.add_medium(
-                    request_id=request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     info=anom_msg,
@@ -189,7 +187,6 @@ class ModuleExec(Attack):
                         log_message = Messages.MSG_PARAM_INJECT
 
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=CommandExecutionFinding,
                         request=mutated_request,
                         info=vuln_message,
@@ -215,7 +212,6 @@ class ModuleExec(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,

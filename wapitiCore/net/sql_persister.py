@@ -129,14 +129,13 @@ class SqlPersister:
             Column("position", Integer, nullable=False),
             Column("name", Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
             Column("value1", Text),  # Can be really huge
-            Column("value2", Text),  # File content. Will be short most of the time but we plan on more usage
+            Column("value2", Text),  # File content. Will be short most of the time, but we plan on more usage
             Column("meta", String(255))  # File mime-type
         )
 
         self.payloads = Table(
             f"{table_prefix}payloads", self.metadata,
             Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
-            Column("original_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
             Column("level", Integer, nullable=False),
@@ -618,7 +617,6 @@ class SqlPersister:
     # pylint: disable=too-many-positional-arguments
     async def add_payload(
             self,
-            request_id: int,
             payload_type: str,
             module: str,
             category: Optional[str] = None,
@@ -714,7 +712,6 @@ class SqlPersister:
         # request_id is the ID of the original (legit) request
         statement = self.payloads.insert().values(
             evil_path_id=path_id,
-            original_path_id=request_id,
             module=module,
             category=category,
             level=level,
@@ -861,10 +858,7 @@ class SqlPersister:
         async with self._engine.begin() as conn:
             await conn.execute(
                 self.payloads.delete().where(
-                    or_(
-                        self.payloads.c.evil_path_id == path_id,
-                        self.payloads.c.original_path_id == path_id
-                    )
+                    self.payloads.c.evil_path_id == path_id,
                 )
             )
             await conn.execute(self.attack_logs.delete().where(self.attack_logs.c.path_id == path_id))

@@ -507,7 +507,6 @@ async def test_multi_detection():
             }
 
             persister.add_payload.assert_any_call(
-                request_id=-1,
                 payload_type=VULN,
                 module="wapp",
                 category="Fingerprint web application framework",
@@ -520,7 +519,6 @@ async def test_multi_detection():
             )
 
             persister.add_payload.assert_any_call(
-                request_id=-1,
                 payload_type=ADDITION,
                 module="wapp",
                 category="Fingerprint web technology",
@@ -533,7 +531,6 @@ async def test_multi_detection():
             )
 
             persister.add_payload.assert_any_call(
-                request_id=-1,
                 payload_type=VULN,
                 module="wapp",
                 category="Vulnerable software",
