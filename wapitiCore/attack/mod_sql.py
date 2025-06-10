@@ -385,7 +385,6 @@ class ModuleSql(Attack):
                         vuln_message = f"{vuln_info} via injection in the parameter {parameter.display_name}"
 
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=SqlInjectionFinding,
                         request=mutated_request,
                         info=vuln_message,
@@ -416,7 +415,6 @@ class ModuleSql(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,
@@ -484,7 +482,6 @@ class ModuleSql(Attack):
                         vuln_message = f"{vuln_info} via injection in the parameter {current_parameter.name}"
 
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=SqlInjectionFinding,
                         request=last_mutated_request,
                         info=vuln_message,

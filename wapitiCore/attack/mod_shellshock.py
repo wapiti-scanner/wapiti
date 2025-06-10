@@ -84,7 +84,6 @@ class ModuleShellshock(Attack):
                 log_red(f"URL {url} seems vulnerable to Shellshock attack!")
 
                 await self.add_high(
-                    request_id=request.path_id,
                     finding_class=CommandExecutionFinding,
                     request=evil_req,
                     info=f"URL {url} seems vulnerable to Shellshock attack",

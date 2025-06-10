@@ -91,7 +91,6 @@ class ModuleTimesql(Attack):
                     log_message = Messages.MSG_PARAM_INJECT
 
                 await self.add_critical(
-                    request_id=request.path_id,
                     finding_class=SqlInjectionFinding,
                     request=mutated_request,
                     info=vuln_message,
@@ -124,7 +123,6 @@ class ModuleTimesql(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,

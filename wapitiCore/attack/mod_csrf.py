@@ -208,7 +208,6 @@ class ModuleCsrf(Attack):
         log_red("---")
 
         await self.add_medium(
-            request_id=request.path_id,
             finding_class=CsrfFinding,
             request=request,
             info=vuln_message,

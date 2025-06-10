@@ -181,7 +181,6 @@ class ModuleFile(Attack):
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
 
                 await self.add_medium(
-                    request_id=request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=mutated_request,
                     info=anom_msg,
@@ -240,7 +239,6 @@ class ModuleFile(Attack):
                             vuln_message += " (" + constraint_message + ")"
 
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=PathTraversalFinding,
                         request=mutated_request,
                         info=vuln_message,
@@ -276,7 +274,6 @@ class ModuleFile(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
 
                     await self.add_high(
-                        request_id=request.path_id,
                         finding_class=InternalErrorFinding,
                         request=mutated_request,
                         info=anom_msg,

@@ -158,7 +158,6 @@ class ModuleXss(Attack):
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param.name)
 
                 await self.add_medium(
-                    request_id=original_request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=evil_request,
                     info=anom_msg,
@@ -189,7 +188,6 @@ class ModuleXss(Attack):
                         message += ".\nWarning: Content-Security-Policy is present!"
 
                     await self.add_medium(
-                        request_id=original_request.path_id,
                         finding_class=finding,
                         request=evil_request,
                         parameter=xss_param.name,
@@ -227,7 +225,6 @@ class ModuleXss(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param.name)
 
                     await self.add_high(
-                        request_id=original_request.path_id,
                         finding_class=InternalErrorFinding,
                         request=evil_request,
                         info=anom_msg,

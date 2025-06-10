@@ -133,7 +133,6 @@ class ModuleUpload(Attack):
             else:
                 if payload_info.payload in upload_response.content:
                     await self.add_critical(
-                        request_id=request.path_id,
                         finding_class=UnrestrictedUploadFinding,
                         request=mutated_request,
                         info=f"Unrestricted file upload vulnerability in the parameter {parameter.display_name}",
@@ -163,7 +162,6 @@ class ModuleUpload(Attack):
                         else:
                             if payload_info.payload in link_response.content:
                                 await self.add_critical(
-                                    request_id=request.path_id,
                                     finding_class=UnrestrictedUploadFinding,
                                     request=mutated_request,
                                     info=(

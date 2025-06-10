@@ -133,7 +133,6 @@ class ModulePermanentxss(Attack):
                             description += ".\nWarning: Content-Security-Policy is present!"
 
                         await self.add_high(
-                            request_id=request.path_id,
                             finding_class=finding,
                             request=evil_request,
                             parameter=parameter.name,
@@ -217,7 +216,6 @@ class ModulePermanentxss(Attack):
                     anom_msg = Messages.MSG_PARAM_TIMEOUT.format(xss_param.display_name)
 
                 await self.add_medium(
-                    request_id=injection_request.path_id,
                     finding_class=ResourceConsumptionFinding,
                     request=evil_request,
                     info=anom_msg,
@@ -266,7 +264,6 @@ class ModulePermanentxss(Attack):
                         description += ".\nWarning: Content-Security-Policy is present!"
 
                     await self.add_high(
-                        request_id=injection_request.path_id,
                         finding_class=finding,
                         request=evil_request,
                         parameter=xss_param.display_name,
@@ -305,7 +302,6 @@ class ModulePermanentxss(Attack):
                         anom_msg = Messages.MSG_PARAM_500.format(xss_param.display_name)
 
                     await self.add_high(
-                        request_id=injection_request.path_id,
                         finding_class=InternalErrorFinding,
                         request=evil_request,
                         info=anom_msg,

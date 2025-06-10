@@ -73,7 +73,6 @@ class ModuleHtaccess(Attack):
 
             log_red("---")
             await self.add_medium(
-                request_id=request.path_id,
                 finding_class=HtaccessBypassFinding,
                 request=evil_req,
                 info=f"{evil_req.url} bypassable weak restriction",

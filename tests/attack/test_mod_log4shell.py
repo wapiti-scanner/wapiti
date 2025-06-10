@@ -151,7 +151,6 @@ async def test_verify_headers_vuln_found():
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_called_once()
             persister.add_payload.assert_called_once_with(
-                request_id=-1,
                 payload_type=VULN,
                 module="log4shell",
                 category="Log4Shell",
