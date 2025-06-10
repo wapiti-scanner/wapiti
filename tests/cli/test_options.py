@@ -8,97 +8,10 @@ from httpcore import URL
 import httpx
 import pytest
 
-from wapitiCore.attack.active_scanner import ActiveScanner
-from wapitiCore.attack.attack import common_modules, all_modules, passive_modules
+from wapitiCore.attack.modules.core import all_modules
 from wapitiCore.net import Request, Response
 from wapitiCore.main.wapiti import wapiti_main
 from wapitiCore.controller.wapiti import Wapiti, InvalidOptionValue
-from wapitiCore.net.classes import CrawlerConfiguration
-
-
-@pytest.mark.asyncio
-async def test_options():
-    class CustomMock:
-        CONFIG_DIR = ""
-
-        def __init__(self):
-            pass
-
-        async def count_paths(self):
-            return 0
-
-    with mock.patch("os.makedirs", return_value=True):
-        persister = CustomMock()
-        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
-        scanner = ActiveScanner(persister, crawler_configuration)
-
-        scanner.set_attack_options({"timeout": 10})
-
-        crawler = mock.MagicMock()
-        scanner.set_modules("-all,xxe")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
-
-        scanner.set_modules("xxe")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        assert {module.name for module in attak_modules if module.do_get or module.do_post} == {"xxe"}
-
-        scanner.set_modules("common,xxe")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(common_modules) + 1
-
-        scanner.set_modules("common,-exec")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(common_modules) - 1
-
-        scanner.set_modules("all,-xxe")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(all_modules) - 1
-
-        scanner.set_modules("all,-common")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(all_modules) - len(common_modules)
-
-        scanner.set_modules("common,-all,xss")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == 1
-
-        scanner.set_modules("passive")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(passive_modules)
-
-        scanner.set_modules("passive,xxe")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(passive_modules) + 1
-
-        scanner.set_modules("passive,-wapp")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == len(passive_modules) - 1
-
-        scanner.set_modules("cms")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert len(activated_modules) == 1
-
-        # Empty module list: no modules will be used
-        scanner.set_modules("")
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert not activated_modules
-
-        # Use default settings: only use "commons" modules
-        scanner.set_modules(None)
-        attak_modules = await scanner.load_attack_modules(crawler)
-        activated_modules = {module.name for module in attak_modules if module.do_get or module.do_post}
-        assert activated_modules == set(common_modules)
 
 
 @pytest.mark.asyncio

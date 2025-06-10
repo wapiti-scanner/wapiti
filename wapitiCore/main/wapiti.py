@@ -32,7 +32,7 @@ import httpx
 from httpx import RequestError
 
 from wapitiCore.attack.active_scanner import module_to_class_name
-from wapitiCore.attack.attack import (all_modules, common_modules)
+from wapitiCore.attack.modules.core import all_modules, common_modules, resolve_module_settings
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner
@@ -371,7 +371,14 @@ async def wapiti_main():
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
 
-        wap.active_scanner.set_modules(args.modules)
+        try:
+            activated_modules = resolve_module_settings(args.modules)
+        except ValueError as exception:
+            raise InvalidOptionValue(
+                "-m", f"Invalid module specified: {exception}"
+            ) from exception
+        wap.active_scanner.set_modules(activated_modules)
+        wap.passive_scaner.set_modules(activated_modules)
 
         if "user_agent" in args:
             wap.add_custom_header("User-Agent", args.user_agent)

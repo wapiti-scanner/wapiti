@@ -32,6 +32,7 @@ import browser_cookie3
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.attack.active_scanner import ActiveScanner
+from wapitiCore.attack.passive_scanner import PassiveScanner
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.definitions import vulnerabilities, flatten_references, anomalies, additionals
 from wapitiCore.net import Request, jsoncookie
@@ -115,6 +116,7 @@ class Wapiti:
 
         self.persister = SqlPersister(self._history_file)
         self._active_scanner = ActiveScanner(persister=self.persister, crawler_configuration=self.crawler_configuration)
+        self._passive_scanner = PassiveScanner(persister=self.persister)
 
     def refresh_logging(self):
         message_format = "{message}"
@@ -214,8 +216,10 @@ class Wapiti:
     async def explore_and_save_requests(self, explorer):
         self._buffer = []
         # Browse URLs are saved them once we have enough in our buffer
-        async for resource, response in explorer.async_explore(self._start_urls, self._excluded_urls):
-            self._buffer.append((resource, response))
+        async for request, response in explorer.async_explore(self._start_urls, self._excluded_urls):
+            self._buffer.append((request, response))
+
+            await self._passive_scanner.scan(request, response)
 
             if len(self._buffer) > 100:
                 await self.persister.save_requests(self._buffer)
@@ -500,3 +504,7 @@ class Wapiti:
     @property
     def active_scanner(self):
         return self._active_scanner
+
+    @property
+    def passive_scaner(self):
+        return self._passive_scanner

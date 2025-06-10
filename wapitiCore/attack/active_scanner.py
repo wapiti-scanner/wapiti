@@ -5,8 +5,9 @@ import sys
 from enum import Enum
 from importlib import import_module
 from operator import attrgetter
+from pathlib import Path
 from traceback import print_tb
-from typing import List, Dict, Optional, Set, AsyncIterator, Tuple
+from typing import List, Dict, Optional, Set, AsyncIterator, Tuple, Type
 from uuid import uuid1
 
 import httpx
@@ -15,7 +16,8 @@ from httpx import RequestError
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.main.log import logging
-from wapitiCore.attack.attack import all_modules, Attack, presets, AttackProtocol
+from wapitiCore.attack.attack import Attack, AttackProtocol
+from wapitiCore.attack.modules.core import all_modules, ModuleActivationSettings
 from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
 
@@ -32,73 +34,13 @@ def module_to_class_name(module_name: str) -> str:
 
 
 def activate_method_module(module: AttackProtocol, method: str, status: bool):
+    method = method.lower()
     if not method:
         module.do_get = module.do_post = status
     elif method == "get":
         module.do_get = status
     elif method == "post":
         module.do_post = status
-
-
-def filter_modules_with_options(module_options: str, loaded_modules: Dict[str, AttackProtocol]) -> List[Attack]:
-    activated_modules: Dict[str, Attack] = {}
-
-    if module_options == "":
-        return []
-
-    if module_options is None:
-        # Default is to use common modules
-        module_options = "common"
-
-    for module_opt in module_options.split(","):
-        if module_opt.strip() == "":
-            # Trailing comma, etc
-            continue
-
-        method = ""
-        if module_opt.find(":") > 0:
-            module_name, method = module_opt.split(":", 1)
-        else:
-            module_name = module_opt
-
-        if module_name.startswith("-"):
-            # The whole module or some of the methods needs to be deactivated
-            module_name = module_name[1:]
-
-            for bad_module in presets.get(module_name, [module_name]):
-                if bad_module not in loaded_modules:
-                    logging.error(f"[!] Unable to find a module named {bad_module}")
-                    continue
-
-                if bad_module not in activated_modules:
-                    # You can't deactivate a module that is not used
-                    continue
-
-                if not method:
-                    activated_modules.pop(bad_module)
-                else:
-                    activate_method_module(activated_modules[bad_module], method, False)
-        else:
-            # The whole module or some of the methods needs to be deactivated
-            if module_name.startswith("+"):
-                module_name = module_name[1:]
-
-            for good_module in presets.get(module_name, [module_name]):
-                if good_module not in loaded_modules:
-                    logging.error(f"[!] Unable to find a module named {good_module}")
-                    continue
-
-                if good_module in activated_modules:
-                    continue
-
-                if good_module not in activated_modules:
-                    activated_modules[good_module] = loaded_modules[good_module]
-
-                if method:
-                    activate_method_module(activated_modules[good_module], method, False)
-
-    return sorted(activated_modules.values(), key=attrgetter("PRIORITY"))
-
 
 
 class ActiveScanner:
@@ -114,15 +56,39 @@ class ActiveScanner:
         self.persister = persister
         self.attack_options = {}
         self.crawler_configuration = crawler_configuration
-        self.module_options = None
+        self._activated_modules: ModuleActivationSettings = {}
         self._current_attack_task: Optional[asyncio.Task] = None
         self._bug_report = True
         self._max_attack_time = None
         self._user_choice = UserChoice.CONTINUE
+        self._modules: Dict[str, Type[Attack]] = self._load_attack_modules()
 
-    def set_modules(self, options: Optional[str] = ""):
+    @staticmethod
+    def _load_attack_modules() -> Dict[str, Type[Attack]]:
+        modules = {}
+        modules_directory = Path(__file__).parent
+        for module_file in modules_directory.glob("mod_*.py"):
+            try:
+                try:
+                    mod = import_module("wapitiCore.attack." + module_file.stem)
+                except ImportError as error:
+                    logging.error(f"[!] Unable to import module {module_file.stem}: {error}")
+                    continue
+
+                class_name = module_to_class_name(module_file.stem)
+                class_ = getattr(mod, class_name)
+                modules[module_file.stem] = class_
+            except Exception as exception:  # pylint: disable=broad-except
+                # Catch every possible exceptions and print it
+                logging.error(f"[!] Module {module_file.stem} seems broken and will be skipped")
+                logging.exception(exception.__class__.__name__, exception)
+                continue
+
+        return modules
+
+    def set_modules(self, options: ModuleActivationSettings):
         """Activate or deactivate (default) all attacks"""
-        self.module_options = options
+        self._activated_modules = options
 
     def set_attack_options(self, options: dict = None):
         self.attack_options = options if isinstance(options, dict) else {}
@@ -133,21 +99,14 @@ class ActiveScanner:
     def set_bug_reporting(self, value: bool):
         self._bug_report = value
 
-    async def load_attack_modules(self, crawler: AsyncCrawler) -> List[Attack]:
-        logging.info("[*] Existing modules:")
-        logging.info(f"\t {', '.join(sorted(all_modules))}")
+    async def init_attack_modules(self, crawler: AsyncCrawler) -> List[Attack]:
+        modules = []
+        for mod_name, class_ in self._modules.items():
+            if class_.name not in self._activated_modules:
+                continue
 
-        modules = {}
-        for mod_name in all_modules:
             try:
-                try:
-                    mod = import_module("wapitiCore.attack.mod_" + mod_name)
-                except ImportError as error:
-                    logging.error(f"[!] Unable to import module {mod_name}: {error}")
-                    continue
-
-                class_name = module_to_class_name(mod_name)
-                class_instance = getattr(mod, class_name)(
+                class_instance = class_(
                     crawler,
                     self.persister,
                     self.attack_options,
@@ -159,9 +118,12 @@ class ActiveScanner:
                 logging.exception(exception.__class__.__name__, exception)
                 continue
 
-            modules[mod_name] = class_instance
+            for method in ("GET", "POST"):
+                activate_method_module(class_instance, method, method in self._activated_modules[class_.name])
 
-        return filter_modules_with_options(self.module_options, modules)
+            modules.append(class_instance)
+
+        return sorted(modules, key=attrgetter("PRIORITY"))
 
     async def update(self, requested_modules: str = "all"):
         """Update modules that implement an update method"""
@@ -212,6 +174,7 @@ class ActiveScanner:
         if module.do_get:
             async for request, response in self.persister.get_links(attack_module=module.name):
                 yield request, response
+
         if module.do_post:
             async for request, response in self.persister.get_forms(attack_module=module.name):
                 yield request, response
@@ -305,7 +268,11 @@ class ActiveScanner:
     async def attack(self) -> bool:
         """Launch the attacks based on the preferences set by the command line"""
         async with AsyncCrawler.with_configuration(self.crawler_configuration) as crawler:
-            attack_modules = await self.load_attack_modules(crawler)
+            attack_modules = await self.init_attack_modules(crawler)
+
+            if not attack_modules:
+                # Only passive modules were selected or only the crawl was made
+                return True
 
             for attack_module in attack_modules:
                 if attack_module.do_get is False and attack_module.do_post is False:

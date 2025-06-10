@@ -25,7 +25,17 @@ from collections import defaultdict
 from enum import Enum, Flag, auto
 import random
 from binascii import hexlify
-from typing import Optional, Iterator, Tuple, List, Callable, Union, Iterable, Type, Protocol
+from typing import (
+    Optional,
+    Iterator,
+    Tuple,
+    List,
+    Callable,
+    Union,
+    Iterable,
+    Type,
+    Protocol,
+)
 import json
 from importlib.resources import files
 
@@ -35,81 +45,18 @@ from wapitiCore.definitions import FindingBase
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
-from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
+from wapitiCore.language.vulnerability import (
+    CRITICAL_LEVEL,
+    HIGH_LEVEL,
+    MEDIUM_LEVEL,
+    LOW_LEVEL,
+    INFO_LEVEL,
+)
 from wapitiCore.net.response import Response
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net import Request
 from wapitiCore.mutation.json_mutator import get_item, set_item, find_injectable
 
-all_modules = {
-    "backup",
-    "brute_login_form",
-    "buster",
-    "cookieflags",
-    "crlf",
-    "cms",
-    "csp",
-    "csrf",
-    "exec",
-    "file",
-    "htaccess",
-    "htp",
-    "http_headers",
-    "https_redirect",
-    "ldap",
-    "log4shell",
-    "methods",
-    "network_device",
-    "nikto",
-    "permanentxss",
-    "redirect",
-    "shellshock",
-    "spring4shell",
-    "sql",
-    "ssl",
-    "ssrf",
-    "takeover",
-    "timesql",
-    "upload",
-    "wapp",
-    "wp_enum",
-    "xss",
-    "xxe"
-}
-
-# Modules that will be used if option -m isn't used
-common_modules = {
-    "cookieflags",
-    "csp",
-    "exec",
-    "file",
-    "http_headers",
-    "permanentxss",
-    "redirect",
-    "sql",
-    "ssl",
-    "ssrf",
-    "upload",
-    "xss"
-}
-
-# Modules that will be used in passive mode -m passive
-passive_modules = {
-    "cookieflags",
-    "csp",
-    "http_headers",
-    "wapp"
-}
-
-presets = {
-    "all": all_modules,
-    "common": common_modules,
-    "passive": passive_modules
-}
-
-VULN = "vulnerability"
-ANOM = "anomaly"
-ADDITION = "additional"
 
 # File extensions to attempt to upload for XXE
 XXE_FILE_EXTENSIONS = ("svg", "xml")
@@ -148,7 +95,9 @@ class Parameter:
         return "QUERY_STRING" if self.is_qs_injection else self.name
 
 
-PayloadCallback = Callable[[Optional[Request], Optional[Parameter]], Iterable[PayloadInfo]]
+PayloadCallback = Callable[
+    [Optional[Request], Optional[Parameter]], Iterable[PayloadInfo]
+]
 PayloadSource = Union[List[PayloadInfo], PayloadCallback]
 
 COMMON_ANNOYING_PARAMETERS = (
@@ -162,7 +111,7 @@ COMMON_ANNOYING_PARAMETERS = (
     "ASP.NET_SESSIONID",
     "JSESSIONID",
     "CFID",
-    "CFTOKEN"
+    "CFTOKEN",
 )
 
 
@@ -170,13 +119,12 @@ def random_string(prefix: str = "w", length: int = 10) -> str:
     """Create a random unique ID that will be used to test injection."""
     # doesn't uppercase letters as BeautifulSoup make some data lowercase
     code = prefix + "".join(
-        [random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, length - len(prefix))]
+        [
+            random.choice("0123456789abcdefghjijklmnopqrstuvwxyz")
+            for __ in range(0, length - len(prefix))
+        ]
     )
     return code
-
-
-def random_string_with_flags():
-    return random_string()
 
 
 class AttackProtocol(Protocol):
@@ -213,27 +161,48 @@ class Attack(AttackProtocol):
     GB = "\033[0;30m\033[47m"
 
     allowed = [
-        'php', 'html', 'htm', 'xml', 'xhtml', 'xht', 'xhtm',
-        'asp', 'aspx', 'php3', 'php4', 'php5', 'txt', 'shtm',
-        'shtml', 'phtm', 'phtml', 'jhtml', 'pl', 'jsp', 'cfm',
-        'cfml', 'py'
+        "php",
+        "html",
+        "htm",
+        "xml",
+        "xhtml",
+        "xht",
+        "xhtm",
+        "asp",
+        "aspx",
+        "php3",
+        "php4",
+        "php5",
+        "txt",
+        "shtm",
+        "shtml",
+        "phtm",
+        "phtml",
+        "jhtml",
+        "pl",
+        "jsp",
+        "cfm",
+        "cfml",
+        "py",
     ]
 
     # The priority of the module, from 0 (first) to 10 (last). Default is 5
     PRIORITY = 5
 
-    @staticmethod
-    def get_resource(resource_path: str):
-        return str(files("wapitiCore").joinpath("data", "attacks", resource_path))
-
     def __init__(
-            self,
-            crawler: AsyncCrawler,
-            persister: SqlPersister,
-            attack_options: dict,
-            crawler_configuration: CrawlerConfiguration):
+        self,
+        crawler: AsyncCrawler,
+        persister: SqlPersister,
+        attack_options: dict,
+        crawler_configuration: CrawlerConfiguration,
+    ):
         super().__init__()
-        self._session_id = "".join([random.choice("0123456789abcdefghjijklmnopqrstuvwxyz") for __ in range(0, 6)])
+        self._session_id = "".join(
+            [
+                random.choice("0123456789abcdefghjijklmnopqrstuvwxyz")
+                for __ in range(0, 6)
+            ]
+        )
         self.crawler = crawler
         self.persister = persister
         self.options = attack_options
@@ -252,9 +221,15 @@ class Attack(AttackProtocol):
         self.deps = []
 
     # pylint: disable=too-many-positional-arguments
-    async def add_payload(self, finding_class: Type[FindingBase],
-                          level: int = 0, request: Request = None, parameter: Optional[str] = None, info: str = "",
-                          response: Response = None):
+    async def add_payload(
+        self,
+        finding_class: Type[FindingBase],
+        level: int = 0,
+        request: Request = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Response = None,
+    ):
         await self.persister.add_payload(
             payload_type=finding_class.type(),
             module=self.name,
@@ -264,39 +239,74 @@ class Attack(AttackProtocol):
             parameter=parameter,
             info=info,
             wstg=finding_class.wstg_code(),
-            response=response
+            response=response,
         )
 
     # Define explicit wrapper functions for each severity level
     # pylint: disable=too-many-positional-arguments
-    async def add_info(self, finding_class: Type[FindingBase],
-                       request: Optional[Request] = None, parameter: Optional[str] = None,
-                       info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, INFO_LEVEL, request, parameter, info, response)
+    async def add_info(
+        self,
+        finding_class: Type[FindingBase],
+        request: Optional[Request] = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Optional[Response] = None,
+    ):
+        await self.add_payload(
+            finding_class, INFO_LEVEL, request, parameter, info, response
+        )
 
     # pylint: disable=too-many-positional-arguments
-    async def add_low(self, finding_class: Type[FindingBase],
-                      request: Optional[Request] = None, parameter: Optional[str] = None,
-                      info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, LOW_LEVEL, request, parameter, info, response)
+    async def add_low(
+        self,
+        finding_class: Type[FindingBase],
+        request: Optional[Request] = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Optional[Response] = None,
+    ):
+        await self.add_payload(
+            finding_class, LOW_LEVEL, request, parameter, info, response
+        )
 
     # pylint: disable=too-many-positional-arguments
-    async def add_medium(self, finding_class: Type[FindingBase],
-                         request: Optional[Request] = None, parameter: Optional[str] = None,
-                         info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, MEDIUM_LEVEL, request, parameter, info, response)
+    async def add_medium(
+        self,
+        finding_class: Type[FindingBase],
+        request: Optional[Request] = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Optional[Response] = None,
+    ):
+        await self.add_payload(
+            finding_class, MEDIUM_LEVEL, request, parameter, info, response
+        )
 
     # pylint: disable=too-many-positional-arguments
-    async def add_high(self, finding_class: Type[FindingBase],
-                       request: Optional[Request] = None, parameter: Optional[str] = None,
-                       info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, HIGH_LEVEL, request, parameter, info, response)
+    async def add_high(
+        self,
+        finding_class: Type[FindingBase],
+        request: Optional[Request] = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Optional[Response] = None,
+    ):
+        await self.add_payload(
+            finding_class, HIGH_LEVEL, request, parameter, info, response
+        )
 
     # pylint: disable=too-many-positional-arguments
-    async def add_critical(self, finding_class: Type[FindingBase],
-                           request: Optional[Request] = None, parameter: Optional[str] = None,
-                           info: str = "", response: Optional[Response] = None):
-        await self.add_payload(finding_class, CRITICAL_LEVEL, request, parameter, info, response)
+    async def add_critical(
+        self,
+        finding_class: Type[FindingBase],
+        request: Optional[Request] = None,
+        parameter: Optional[str] = None,
+        info: str = "",
+        response: Optional[Response] = None,
+    ):
+        await self.add_payload(
+            finding_class, CRITICAL_LEVEL, request, parameter, info, response
+        )
 
     def load_require(self, dependencies: list = None):
         self.deps = dependencies
@@ -327,7 +337,10 @@ class Attack(AttackProtocol):
 
     @property
     def wapp_url(self):
-        return self.options.get("wapp_url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/")
+        return self.options.get(
+            "wapp_url",
+            "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/",
+        )
 
     @property
     def wapp_dir(self):
@@ -339,9 +352,9 @@ class Attack(AttackProtocol):
         return parts.netloc + parts.path
 
     async def must_attack(
-            self,
-            request: Request,  # pylint: disable=unused-argument
-            response: Optional[Response] = None,  # pylint: disable=unused-argument
+        self,
+        request: Request,  # pylint: disable=unused-argument
+        response: Optional[Response] = None,  # pylint: disable=unused-argument
     ):
         if response.is_directory_redirection:
             return False
@@ -366,7 +379,7 @@ class Attack(AttackProtocol):
             methods=methods,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters"),
-            module=self.name
+            module=self.name,
         )
 
     async def does_timeout(self, request, timeout: float = None):
@@ -382,10 +395,13 @@ class Attack(AttackProtocol):
 class Mutator:
     # pylint: disable=too-many-positional-arguments
     def __init__(
-            self, methods="FGP", qs_inject=False, max_queries_per_pattern: int = 1000,
-            parameters=None,  # Restrict attack to a whitelist of parameters
-            skip=None,  # Must not attack those parameters (blacklist)
-            module=None
+        self,
+        methods="FGP",
+        qs_inject=False,
+        max_queries_per_pattern: int = 1000,
+        parameters=None,  # Restrict attack to a whitelist of parameters
+        skip=None,  # Must not attack those parameters (blacklist)
+        module=None,
     ):
         self._mutate_get = "G" in methods.upper()
         self._mutate_file = "F" in methods.upper()
@@ -401,9 +417,7 @@ class Mutator:
         self._module = module
 
     def _mutate_urlencoded_multipart(
-            self,
-            request: Request,
-            payloads: PayloadSource
+        self, request: Request, payloads: PayloadSource
     ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
         post_params = request.post_params
@@ -412,7 +426,9 @@ class Mutator:
 
         # On a JSON body we exclude post and file parameters as it won't work with this mutator
         # still it may be interesting to fuzz the query string
-        all_params = [get_params] if request.is_json else [get_params, post_params, file_params]
+        all_params = (
+            [get_params] if request.is_json else [get_params, post_params, file_params]
+        )
         for params_list in all_params:
             parameter_situation = None
             if params_list is get_params:
@@ -442,7 +458,10 @@ class Mutator:
                     saved_value = ""
 
                 if params_list is file_params:
-                    params_list[i][1] = ["__PAYLOAD__", params_list[i][1][1]]  # second entry is file content
+                    params_list[i][1] = [
+                        "__PAYLOAD__",
+                        params_list[i][1][1],
+                    ]  # second entry is file content
                 else:
                     params_list[i][1] = "__PAYLOAD__"
 
@@ -457,26 +476,43 @@ class Mutator:
 
                 if hash(attack_pattern) not in self._attack_hashes:
                     self._attack_hashes.add(hash(attack_pattern))
-                    parameter = Parameter(name=param_name, situation=parameter_situation)
+                    parameter = Parameter(
+                        name=param_name, situation=parameter_situation
+                    )
                     reverse_parameter = None
-                    iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
+                    iterator = (
+                        payloads
+                        if isinstance(payloads, list)
+                        else payloads(request, parameter)
+                    )
 
                     for payload_info in iterator:
                         raw_payload = payload_info.payload
 
-                        if ("[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload) and not request.file_name:
+                        if (
+                            "[FILE_NAME]" in raw_payload
+                            or "[FILE_NOEXT]" in raw_payload
+                        ) and not request.file_name:
                             continue
 
                         # no quoting: send() will do it for us
-                        raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
-                        raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                        raw_payload = raw_payload.replace(
+                            "[FILE_NAME]", request.file_name
+                        )
+                        raw_payload = raw_payload.replace(
+                            "[FILE_NOEXT]", splitext(request.file_name)[0]
+                        )
 
                         if isinstance(request.path_id, int):
-                            raw_payload = raw_payload.replace("[PATH_ID]", str(request.path_id))
+                            raw_payload = raw_payload.replace(
+                                "[PATH_ID]", str(request.path_id)
+                            )
 
                         raw_payload = raw_payload.replace(
                             "[PARAM_AS_HEX]",
-                            hexlify(param_name.encode("utf-8", errors="replace")).decode()
+                            hexlify(
+                                param_name.encode("utf-8", errors="replace")
+                            ).decode(),
                         )
 
                         if params_list is file_params:
@@ -484,21 +520,33 @@ class Mutator:
                                 if "." not in saved_value[0][:-1]:
                                     # Nothing that looks like an extension, skip the payload
                                     continue
-                                raw_payload = raw_payload.replace("[EXTVALUE]", saved_value[0].rsplit(".", 1)[-1])
+                                raw_payload = raw_payload.replace(
+                                    "[EXTVALUE]", saved_value[0].rsplit(".", 1)[-1]
+                                )
 
                             # Injection takes place on the filename here
                             raw_payload = raw_payload.replace("[VALUE]", saved_value[0])
-                            raw_payload = raw_payload.replace("[DIRVALUE]", saved_value[0].rsplit('/', 1)[0])
-                            params_list[i][1] = (raw_payload, saved_value[1], saved_value[2])
+                            raw_payload = raw_payload.replace(
+                                "[DIRVALUE]", saved_value[0].rsplit("/", 1)[0]
+                            )
+                            params_list[i][1] = (
+                                raw_payload,
+                                saved_value[1],
+                                saved_value[2],
+                            )
                         else:
                             if "[EXTVALUE]" in raw_payload:
                                 if "." not in saved_value[:-1]:
                                     # Nothing that looks like an extension, skip the payload
                                     continue
-                                raw_payload = raw_payload.replace("[EXTVALUE]", saved_value.rsplit(".", 1)[-1])
+                                raw_payload = raw_payload.replace(
+                                    "[EXTVALUE]", saved_value.rsplit(".", 1)[-1]
+                                )
 
                             raw_payload = raw_payload.replace("[VALUE]", saved_value)
-                            raw_payload = raw_payload.replace("[DIRVALUE]", saved_value.rsplit('/', 1)[0])
+                            raw_payload = raw_payload.replace(
+                                "[DIRVALUE]", saved_value.rsplit("/", 1)[0]
+                            )
                             params_list[i][1] = raw_payload
 
                         evil_req = Request(
@@ -518,7 +566,7 @@ class Mutator:
                             reverse_parameter = Parameter(
                                 name=payload_info.payload,
                                 situation=parameter_situation,
-                                reversed_parameter=True
+                                reversed_parameter=True,
                             )
                             reverse_payload_info = payload_info
                             reverse_payload_info.payload = param_name
@@ -526,8 +574,20 @@ class Mutator:
                             reverse_evil_req = Request(
                                 request.path,
                                 method=request.method,
-                                get_params=get_params+[[reverse_parameter.name, reverse_payload_info.payload]],
-                                post_params=post_params+[[reverse_parameter.name, reverse_payload_info.payload]],
+                                get_params=get_params
+                                + [
+                                    [
+                                        reverse_parameter.name,
+                                        reverse_payload_info.payload,
+                                    ]
+                                ],
+                                post_params=post_params
+                                + [
+                                    [
+                                        reverse_parameter.name,
+                                        reverse_payload_info.payload,
+                                    ]
+                                ],
                                 file_params=file_params,
                                 referer=referer,
                                 link_depth=request.link_depth,
@@ -538,9 +598,7 @@ class Mutator:
                 params_list[i][1] = saved_value
 
     def _mutate_query_string(
-            self,
-            request: Request,
-            payloads: PayloadSource
+        self, request: Request, payloads: PayloadSource
     ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
         referer = request.referer
@@ -550,13 +608,19 @@ class Mutator:
                 f"{request.path}?__PAYLOAD__",
                 method=request.method,
                 referer=referer,
-                link_depth=request.link_depth
+                link_depth=request.link_depth,
             )
 
             if hash(attack_pattern) not in self._attack_hashes:
                 self._attack_hashes.add(hash(attack_pattern))
-                parameter = Parameter(name="", situation=ParameterSituation.QUERY_STRING)
-                iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
+                parameter = Parameter(
+                    name="", situation=ParameterSituation.QUERY_STRING
+                )
+                iterator = (
+                    payloads
+                    if isinstance(payloads, list)
+                    else payloads(request, parameter)
+                )
 
                 for payload_info in iterator:
                     raw_payload = payload_info.payload
@@ -568,34 +632,37 @@ class Mutator:
                     if "[DIRVALUE]" in raw_payload:
                         continue
 
-                    if ("[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload) and not request.file_name:
+                    if (
+                        "[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload
+                    ) and not request.file_name:
                         continue
 
                     raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
-                    raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                    raw_payload = raw_payload.replace(
+                        "[FILE_NOEXT]", splitext(request.file_name)[0]
+                    )
 
                     if isinstance(request.path_id, int):
-                        raw_payload = raw_payload.replace("[PATH_ID]", str(request.path_id))
+                        raw_payload = raw_payload.replace(
+                            "[PATH_ID]", str(request.path_id)
+                        )
 
                     raw_payload = raw_payload.replace(
-                        "[PARAM_AS_HEX]",
-                        hexlify(b"QUERY_STRING").decode()
+                        "[PARAM_AS_HEX]", hexlify(b"QUERY_STRING").decode()
                     )
 
                     evil_req = Request(
                         f"{request.path}?{quote(raw_payload)}",
                         method=request.method,
                         referer=referer,
-                        link_depth=request.link_depth
+                        link_depth=request.link_depth,
                     )
 
                     payload_info.payload = raw_payload
                     yield evil_req, parameter, payload_info
 
     def _mutate_json(
-            self,
-            request: Request,
-            payloads: PayloadSource
+        self, request: Request, payloads: PayloadSource
     ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         try:
             data = json.loads(request.post_params)
@@ -626,25 +693,33 @@ class Mutator:
                 name=".".join([str(key) for key in json_path]),
                 situation=ParameterSituation.JSON_BODY,
             )
-            iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
+            iterator = (
+                payloads if isinstance(payloads, list) else payloads(request, parameter)
+            )
 
             payload_info: PayloadInfo
             for payload_info in iterator:
                 raw_payload = payload_info.payload
 
                 # We will inject some payloads matching those keywords whatever the type of the object to overwrite
-                if ("[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload) and not request.file_name:
+                if (
+                    "[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload
+                ) and not request.file_name:
                     continue
 
                 # no quoting: send() will do it for us
                 raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
-                raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                raw_payload = raw_payload.replace(
+                    "[FILE_NOEXT]", splitext(request.file_name)[0]
+                )
 
                 if isinstance(request.path_id, int):
                     raw_payload = raw_payload.replace("[PATH_ID]", str(request.path_id))
 
                 # We don't want to replace certain placeholders reusing the current value if that value is not a string
-                if any(pattern in raw_payload for pattern in ("[EXTVALUE]", "[DIRVALUE]")):
+                if any(
+                    pattern in raw_payload for pattern in ("[EXTVALUE]", "[DIRVALUE]")
+                ):
                     if not isinstance(saved_value, str):
                         continue
 
@@ -652,9 +727,13 @@ class Mutator:
                         if "." not in saved_value[:-1]:
                             # Nothing that looks like an extension, skip the payload
                             continue
-                        raw_payload = raw_payload.replace("[EXTVALUE]", saved_value.rsplit(".", 1)[-1])
+                        raw_payload = raw_payload.replace(
+                            "[EXTVALUE]", saved_value.rsplit(".", 1)[-1]
+                        )
 
-                    raw_payload = raw_payload.replace("[DIRVALUE]", saved_value.rsplit('/', 1)[0])
+                    raw_payload = raw_payload.replace(
+                        "[DIRVALUE]", saved_value.rsplit("/", 1)[0]
+                    )
 
                 if "[VALUE]" in raw_payload:
                     if not isinstance(saved_value, (int, str)):
@@ -671,16 +750,16 @@ class Mutator:
                     get_params=get_params,
                     post_params=json.dumps(data),
                     referer=referer,
-                    link_depth=request.link_depth
+                    link_depth=request.link_depth,
                 )
                 payload_info.payload = raw_payload
                 yield evil_req, parameter, payload_info
                 # put back the previous value
                 set_item(data, json_path, saved_value)
 
-    def mutate(self,
-               request: Request,
-               payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+    def mutate(
+        self, request: Request, payloads: PayloadSource
+    ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
 
         yield from self._mutate_urlencoded_multipart(request, payloads)
         if request.is_json and self._mutate_post:
@@ -695,7 +774,9 @@ class XXEUploadMutator:
         self._parameters = parameters if isinstance(parameters, list) else []
         self._skip_list = skip if isinstance(skip, set) else set()
 
-    def mutate(self, request: Request, payloads: PayloadSource) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
+    def mutate(
+        self, request: Request, payloads: PayloadSource
+    ) -> Iterator[Tuple[Request, Parameter, PayloadInfo]]:
         get_params = request.get_params
         post_params = request.post_params
         referer = request.referer
@@ -710,32 +791,44 @@ class XXEUploadMutator:
             if self._parameters and param_name not in self._parameters:
                 continue
 
-            parameter = Parameter(name=param_name, situation=ParameterSituation.MULTIPART)
-            iterator = payloads if isinstance(payloads, list) else payloads(request, parameter)
+            parameter = Parameter(
+                name=param_name, situation=ParameterSituation.MULTIPART
+            )
+            iterator = (
+                payloads if isinstance(payloads, list) else payloads(request, parameter)
+            )
             for payload_info in iterator:
                 if isinstance(payload_info, str):
                     raw_payload = payload_info
                 else:
                     raw_payload = payload_info.payload
 
-                if ("[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload) and not request.file_name:
+                if (
+                    "[FILE_NAME]" in raw_payload or "[FILE_NOEXT]" in raw_payload
+                ) and not request.file_name:
                     continue
 
                 # no quoting: send() will do it for us
                 raw_payload = raw_payload.replace("[FILE_NAME]", request.file_name)
-                raw_payload = raw_payload.replace("[FILE_NOEXT]", splitext(request.file_name)[0])
+                raw_payload = raw_payload.replace(
+                    "[FILE_NOEXT]", splitext(request.file_name)[0]
+                )
 
                 if isinstance(request.path_id, int):
                     raw_payload = raw_payload.replace("[PATH_ID]", str(request.path_id))
 
                 raw_payload = raw_payload.replace(
                     "[PARAM_AS_HEX]",
-                    hexlify(param_name.encode("utf-8", errors="replace")).decode()
+                    hexlify(param_name.encode("utf-8", errors="replace")).decode(),
                 )
 
                 for file_extension in XXE_FILE_EXTENSIONS:
                     # httpx needs bytes as content value
-                    new_params[i][1] = (f"content.{file_extension}", raw_payload.encode(errors="replace"), "text/xml")
+                    new_params[i][1] = (
+                        f"content.{file_extension}",
+                        raw_payload.encode(errors="replace"),
+                        "text/xml",
+                    )
 
                     evil_req = Request(
                         request.path,
@@ -744,7 +837,7 @@ class XXEUploadMutator:
                         post_params=post_params,
                         file_params=new_params,
                         referer=referer,
-                        link_depth=request.link_depth
+                        link_depth=request.link_depth,
                     )
                     payload_info.payload = raw_payload
                     yield evil_req, parameter, payload_info
