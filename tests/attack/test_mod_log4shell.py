@@ -10,7 +10,6 @@ import respx
 from dns.resolver import Resolver
 
 from tests import get_mock_open
-from wapitiCore.attack.attack import VULN
 from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL
 from wapitiCore.net.crawler import AsyncCrawler
@@ -151,7 +150,7 @@ async def test_verify_headers_vuln_found():
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_called_once()
             persister.add_payload.assert_called_once_with(
-                payload_type=VULN,
+                payload_type="vulnerability",
                 module="log4shell",
                 category="Log4Shell",
                 level=CRITICAL_LEVEL,

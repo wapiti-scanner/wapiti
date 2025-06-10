@@ -4,7 +4,7 @@
             {
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
-                "info": "X-Frame-Options has an invalid value",
+                "info": "X-Frame-Options has an invalid value ('deny' or 'sameorigin' or not found)",
                 "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -17,7 +17,7 @@
             {
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
-                "info": "Strict-Transport-Security has an invalid value",
+                "info": "Strict-Transport-Security has an invalid value ('max-age' not found)",
                 "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -31,7 +31,7 @@
             {
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
-                "info": "X-Content-Type-Options has an invalid value",
+                "info": "X-Content-Type-Options has an invalid value ('nosniff' not found)",
                 "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -44,6 +44,240 @@
     "infos": {
         "target": "https://http_headers/invalid_sec_http_header.php",
         "crawled_pages": [
+            {
+                "request": {
+                    "url": "https://http_headers/invalid_sec_http_header.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "http_headers"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "103"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "strict-transport-security",
+                            "min-age=0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "fullsniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "ALLOW"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "https://http_headers/invalid_sec_http_header.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "http_headers"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "103"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "strict-transport-security",
+                            "min-age=0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "fullsniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "ALLOW"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "https://http_headers/invalid_sec_http_header.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "http_headers"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Headers tests</title>\n</head>\n<body>\n\t<p>Lorem ipsum</p>\n</body>\n</html>\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "103"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "strict-transport-security",
+                            "min-age=0"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-content-type-options",
+                            "fullsniff"
+                        ],
+                        [
+                            "x-frame-options",
+                            "ALLOW"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
             {
                 "request": {
                     "url": "https://http_headers/invalid_sec_http_header.php",

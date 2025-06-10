@@ -15,7 +15,6 @@ from wapitiCore.language.vulnerability import INFO_LEVEL, HIGH_LEVEL, MEDIUM_LEV
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
-from wapitiCore.attack.attack import VULN, ADDITION
 
 
 @pytest.mark.asyncio
@@ -524,7 +523,7 @@ async def test_multi_detection():
             }
 
             persister.add_payload.assert_any_call(
-                payload_type=VULN,
+                payload_type="vulnerability",
                 module="wapp",
                 category="Fingerprint web application framework",
                 level=INFO_LEVEL,
@@ -536,7 +535,7 @@ async def test_multi_detection():
             )
 
             persister.add_payload.assert_any_call(
-                payload_type=ADDITION,
+                payload_type="additional",
                 module="wapp",
                 category="Fingerprint web technology",
                 level=INFO_LEVEL,
@@ -548,7 +547,7 @@ async def test_multi_detection():
             )
 
             persister.add_payload.assert_any_call(
-                payload_type=VULN,
+                payload_type="vulnerability",
                 module="wapp",
                 category="Vulnerable software",
                 # Level is high as we use the most recent CVSS format which is CVSS 3.1 here. Score is 8.8.

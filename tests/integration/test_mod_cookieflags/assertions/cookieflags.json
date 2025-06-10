@@ -3,11 +3,11 @@
         "HttpOnly Flag cookie": [
             {
                 "method": "GET",
-                "path": "/",
-                "info": "HttpOnly flag is not set in the cookie : not_httponly_cookie",
+                "path": "/insecure/cookieflags_not_httponly.php",
+                "info": "HttpOnly flag is not set on the cookie 'not_httponly_cookie' set at 'http://cookieflags/insecure/cookieflags_not_httponly.php'",
                 "parameter": null,
                 "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /insecure/cookieflags_not_httponly.php HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-SESS-02"
                 ]
@@ -16,11 +16,11 @@
         "Secure Flag cookie": [
             {
                 "method": "GET",
-                "path": "/",
-                "info": "Secure flag is not set in the cookie : insecure_cookie",
+                "path": "/insecure/cookieflags_insecure.php",
+                "info": "Secure flag is not set on the cookie: 'insecure_cookie' set at 'http://cookieflags/insecure/cookieflags_insecure.php'",
                 "parameter": null,
                 "module": "cookieflags",
-                "http_request": "GET / HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /insecure/cookieflags_insecure.php HTTP/1.1\nhost: cookieflags\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-SESS-02"
                 ]
@@ -154,6 +154,146 @@
                         [
                             "set-cookie",
                             "insecure_cookie=example_value; path=/insecure; HttpOnly"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://cookieflags/insecure/cookieflags_insecure.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "cookieflags"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title>Set Cookie Example</title>\n\t</head>\n\t<body>\n\t\t<p>Cookie set successfully.</p>\n\t</body>\n</html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "119"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "set-cookie",
+                            "insecure_cookie=example_value; path=/insecure; HttpOnly"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ],
+                        [
+                            "x-powered-by",
+                            "PHP/8.1.18"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://cookieflags/insecure/cookieflags_not_httponly.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "cookieflags"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title>Set Cookie Example</title>\n\t</head>\n\t<body>\n\t\t<p>Cookie set successfully.</p>\n\t</body>\n</html>",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "119"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "set-cookie",
+                            "not_httponly_cookie=example_value; path=/insecure; secure"
                         ],
                         [
                             "vary",

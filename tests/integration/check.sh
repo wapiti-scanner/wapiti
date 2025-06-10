@@ -34,7 +34,7 @@ if [[ ${#assertions[@]} -eq 0 ]]; then
 fi
 
 # Since the assertions and the target reports must have the same name 
-# (except their extention names, .json and .out), we extract the targets names
+# (except their extension names, .json and .out), we extract the targets names
 # from the assertion array. We also use their names to log some informations 
 # so keeping an array is somewhat useful
 declare -a targets_name

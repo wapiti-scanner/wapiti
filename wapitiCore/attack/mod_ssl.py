@@ -22,9 +22,8 @@ import socket
 import ssl
 import subprocess
 from datetime import datetime, timezone, UTC
-import json
 import asyncio
-from os.path import join as path_join, exists
+from os.path import exists
 from typing import List, Tuple, Optional, AsyncIterator
 from collections import defaultdict
 import xml.etree.ElementTree as ET
@@ -270,38 +269,6 @@ async def process_vulnerabilities(xml_file: str) -> AsyncIterator[Tuple[int, str
             message = "Server honors client-initiated renegotiations (vulnerable to DoS attacks)"
             log_red(message)
             yield HIGH_LEVEL, message
-
-
-def process_cipher_suites(results, version: str):
-    accepted_ciphers = results.accepted_cipher_suites
-    if not accepted_ciphers:
-        return
-
-    with open(path_join(Attack.DATA_DIR, "cipher_suites.json"), encoding="utf-8") as fd:
-        ciphers = json.load(fd)
-
-    group_by_severity = defaultdict(list)
-    log_blue(f"\nAccepted cipher suites for {version}:")
-    for accepted_cipher_suite in accepted_ciphers:
-        try:
-            security_level = ciphers[accepted_cipher_suite.cipher_suite.name]["security"].title()
-        except KeyError:
-            # Cipher that isn't in our database... certainly fresh and secure but let's ignore it
-            continue
-
-        logging.log(
-            sslscan_level_to_color(security_level),
-            f"* {accepted_cipher_suite.cipher_suite.name} "
-            f"{accepted_cipher_suite.cipher_suite.openssl_name} "
-            # f"{accepted_cipher_suite.cipher_suite.key_size} "
-            f"{security_level}"
-        )
-        # Group ciphers using severity to reduce entries in the report
-        group_by_severity[security_level].append(accepted_cipher_suite.cipher_suite.openssl_name)
-
-    for security_level, ciphers in group_by_severity.items():
-        message = f"The following ciphers are {security_level.lower()} for {version}: {', '.join(sorted(ciphers))}"
-        yield sslscan_level_to_wapiti_level(security_level), message
 
 
 class ModuleSsl(Attack):
