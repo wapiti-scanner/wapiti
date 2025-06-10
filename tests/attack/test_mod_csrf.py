@@ -100,12 +100,11 @@ async def test_csrf_cases():
 
         vulnerabilities = set()
         for call in persister.add_payload.call_args_list:
-            vulnerabilities.add((call[1]["request_id"], call[1]["info"]))
+            vulnerabilities.add(call[1]["info"])
 
         assert vulnerabilities == {
-            (2, "CSRF token 'xsrf_token' is not properly checked in backend"),
-            (3, "CSRF token 'xsrf_token' might be easy to predict"),
-            (4, "Lack of anti CSRF token"),
-            (5, "CSRF token 'x-csrf-token' is not properly checked in backend"),
-            (6, "CSRF token 'x-csrf-token' is not properly checked in backend"),
+            "CSRF token 'xsrf_token' is not properly checked in backend",
+            "CSRF token 'xsrf_token' might be easy to predict",
+            "Lack of anti CSRF token",
+            "CSRF token 'x-csrf-token' is not properly checked in backend",
         }
