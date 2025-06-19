@@ -88,7 +88,7 @@ class ModuleSpring4Shell(Attack):
             finding_class=Spring4ShellFinding,
             request=request,
             info=f"URL {request.url} seems vulnerable to Spring4Shell attack",
-            parameter="",
+            parameter=None,
         )
 
         log_red("---")

@@ -289,7 +289,7 @@ class ModuleLog4Shell(Attack):
             finding_class=Log4ShellFinding,
             request=request,
             info=f"URL {request.url} seems vulnerable to Log4Shell attack",
-            parameter="",
+            parameter=None,
             response=response
         )
 
