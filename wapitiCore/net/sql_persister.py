@@ -139,7 +139,7 @@ class SqlPersister:
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
             Column("level", Integer, nullable=False),
-            Column("parameter", Text, nullable=False),  # Vulnerable parameter, can be huge
+            Column("parameter", Text),  # Vulnerable parameter, can be huge
             Column("info", Text, nullable=False),
             # Vulnerability description. If it contains the parameter name then huge.
             Column("type", String(255), nullable=False),  # Something like additional/anomaly/vulnerability
@@ -622,7 +622,7 @@ class SqlPersister:
             category: Optional[str] = None,
             level: int = 0,
             request: Request = None,
-            parameter: str = "",
+            parameter: Optional[str] = None,
             info: str = "",
             wstg: Optional[List[str]] = None,
             response: Response = None
