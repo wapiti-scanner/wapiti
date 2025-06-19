@@ -73,7 +73,7 @@ async def test_ssl_scanner():
             category="TLS/SSL misconfigurations",
             level=INFO_LEVEL,
             request=request,
-            parameter='',
+            parameter=None,
             wstg=["WSTG-CRYP-01"],
             info="Certificate subject: yolo.com",
             response=None
@@ -85,7 +85,7 @@ async def test_ssl_scanner():
             category="TLS/SSL misconfigurations",
             level=CRITICAL_LEVEL,
             request=request,
-            parameter='',
+            parameter=None,
             wstg=["WSTG-CRYP-01"],
             info="Requested hostname doesn't match those in the certificate",
             response=None
@@ -97,7 +97,7 @@ async def test_ssl_scanner():
             category="TLS/SSL misconfigurations",
             level=HIGH_LEVEL,
             request=request,
-            parameter='',
+            parameter=None,
             wstg=["WSTG-CRYP-01"],
             info="Strict Transport Security (HSTS) is not set",
             response=None
@@ -109,7 +109,7 @@ async def test_ssl_scanner():
             category="TLS/SSL misconfigurations",
             level=MEDIUM_LEVEL,
             request=request,
-            parameter='',
+            parameter=None,
             wstg=["WSTG-CRYP-01"],
             info="Self-signed certificate detected: The certificate is not signed by a trusted Certificate Authority",
             response=None

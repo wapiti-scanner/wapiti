@@ -512,7 +512,7 @@ async def test_multi_detection():
                 category="Fingerprint web application framework",
                 level=INFO_LEVEL,
                 request=request,
-                parameter="",
+                parameter=None,
                 info='{"name": "WordPress", "versions": ["5.6.1"], "cpe": "cpe:2.3:a:wordpress:wordpress:*:*:*:*:*:*:*:*", "categories": ["CMS", "Blogs"], "groups": ["Content"]}',
                 wstg=["WSTG-INFO-08"],
                 response=ANY,
@@ -524,7 +524,7 @@ async def test_multi_detection():
                 category="Fingerprint web technology",
                 level=INFO_LEVEL,
                 request=request,
-                parameter="",
+                parameter=None,
                 info='{"name": "PHP", "versions": [], "cpe": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*", "categories": ["Programming languages"], "groups": ["Web development"]}',
                 wstg=['WSTG-INFO-02', 'WSTG-INFO-08'],
                 response=ANY,
@@ -537,7 +537,7 @@ async def test_multi_detection():
                 # Level is high as we use the most recent CVSS format which is CVSS 3.1 here. Score is 8.8.
                 level=HIGH_LEVEL,
                 request=request,
-                parameter="",
+                parameter=None,
                 info=(
                     "wordpress CVE-2022-21664: WordPress is a free and open-source content management system written "
                     "in PHP and paired with a MariaDB database. Due to lack of proper sanitization in one of the "
