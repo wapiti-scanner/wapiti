@@ -5,7 +5,7 @@
                 "method": "GET",
                 "path": "/",
                 "info": "No HTTPS redirection",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET / HTTP/1.1\nhost: https_redirect:8080\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"

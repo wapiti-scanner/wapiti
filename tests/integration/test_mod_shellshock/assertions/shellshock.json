@@ -5,7 +5,7 @@
                 "method": "GET",
                 "path": "/cgi-bin/vuln.cgi",
                 "info": "URL http://shellshock/cgi-bin/vuln.cgi seems vulnerable to Shellshock attack",
-                "parameter": "",
+                "parameter": null,
                 "module": "shellshock",
                 "wstg": [
                     "WSTG-INPV-12"

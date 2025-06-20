@@ -6,7 +6,7 @@
                 "path": "/",
                 "info": "{\"name\": \"Drupal\", \"versions\": [\"10.0.9\"], \"categories\": [\"CMS Drupal\"], \"groups\": [\"Content\"]}",
                 "level": 0,
-                "parameter": "",
+                "parameter": null,
                 "referer": "",
                 "module": "cms",
                 "http_request": "GET / HTTP/1.1",
@@ -27,7 +27,7 @@
                 "path": "/",
                 "info": "{\"name\": \"Drupal\", \"versions\": [\"10.0.9\"], \"categories\": [\"CMS Drupal\"], \"groups\": [\"Content\"]}",
                 "level": 0,
-                "parameter": "",
+                "parameter": null,
                 "module": "cms",
                 "http_request": "GET / HTTP/1.1",
                 "wstg": [

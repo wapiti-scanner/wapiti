@@ -8,7 +8,7 @@
                         "method": "",
                         "path": "",
                         "info": "",
-                        "parameter": "",
+                        "parameter": null,
                         "http_request": "",
                         "wstg": [],
                         "detail": {

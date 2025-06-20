@@ -10,7 +10,7 @@
                         "path": "",
                         "info": "",
                         "level": "",
-                        "parameter": "",
+                        "parameter": null,
                         "http_request": "",
                         "wstg": []
                     }
