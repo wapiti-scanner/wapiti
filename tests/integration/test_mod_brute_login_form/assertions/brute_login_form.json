@@ -5,7 +5,7 @@
                 "method": "POST",
                 "path": "/index.php",
                 "info": "Credentials found for URL http://brute_login_form/ : admin / admin",
-                "parameter": "",
+                "parameter": null,
                 "module": "brute_login_form",
                 "http_request": "POST /index.php HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\n\nusername=admin&password=admin",
                 "wstg": [

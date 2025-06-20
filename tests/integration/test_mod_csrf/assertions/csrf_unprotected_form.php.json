@@ -5,7 +5,7 @@
                 "method": "POST",
                 "path": "/unprotected_form.php",
                 "info": "Lack of anti CSRF token",
-                "parameter": "",
+                "parameter": null,
                 "module": "csrf",
                 "http_request": "POST /unprotected_form.php HTTP/1.1\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://csrf/unprotected_form.php\ncookie: PHPSESSID=8f6s47ef68wse4f38esfsfew864fqdez\ncontent-length: 12\nContent-Type: application/x-www-form-urlencoded\n\nname=default",
                 "wstg": [

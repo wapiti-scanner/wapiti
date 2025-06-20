@@ -5,7 +5,7 @@
                 "method": "POST",
                 "path": "/fake_protected_form.php",
                 "info": "CSRF token 'csrf_token' might be easy to predict",
-                "parameter": "",
+                "parameter": null,
                 "module": "csrf",
                 "http_request": "POST /fake_protected_form.php HTTP/1.1\ncontent-type: application/x-www-form-urlencoded, application/x-www-form-urlencoded\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\nreferer: http://csrf/fake_protected_form.php\ncookie: PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932\ncontent-length: 39\nContent-Type: application/x-www-form-urlencoded\n\ncsrf_token=AAAAAAAAAAAAAAA&name=default",
                 "wstg": [

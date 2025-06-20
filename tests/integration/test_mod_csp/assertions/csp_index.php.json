@@ -5,7 +5,7 @@
                 "method": "GET",
                 "path": "/index.php",
                 "info": "CSP is not set",
-                "parameter": "",
+                "parameter": null,
                 "module": "csp",
                 "http_request": "GET /index.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [

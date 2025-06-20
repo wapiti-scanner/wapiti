@@ -5,7 +5,7 @@
                 "method": "ABC",
                 "path": "/admin/private.php",
                 "info": "http://htaccess/admin/private.php bypassable weak restriction",
-                "parameter": "",
+                "parameter": null,
                 "module": "htaccess",
                 "http_request": "ABC /admin/private.php HTTP/1.1\nhost: htaccess\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [

@@ -9,7 +9,7 @@
                         "method": "",
                         "path": "",
                         "info": "",
-                        "parameter": "",
+                        "parameter": null,
                         "module": "",
                         "http_request": "",
                         "wstg": ""
@@ -20,7 +20,7 @@
                         "method": "",
                         "path": "",
                         "info": "",
-                        "parameter": "",
+                        "parameter": null,
                         "module": "",
                         "http_request": "",
                         "wstg": ""

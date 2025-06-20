@@ -5,7 +5,7 @@
                 "method": "GET",
                 "path": "/",
                 "info": "No HTTPS redirection",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET / HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
@@ -46,7 +46,7 @@
                 "method": "GET",
                 "path": "/http_redirect.php",
                 "info": "Redirected to HTTP location : http://https_redirect:80/index.php",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET /http_redirect.php HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
@@ -87,7 +87,7 @@
                 "method": "GET",
                 "path": "/index.php",
                 "info": "No HTTPS redirection",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET /index.php HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
@@ -128,7 +128,7 @@
                 "method": "GET",
                 "path": "/no_redirect.php",
                 "info": "No HTTPS redirection",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET /no_redirect.php HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
@@ -169,7 +169,7 @@
                 "method": "GET",
                 "path": "/relative_redirect.php",
                 "info": "Redirected to HTTP location : /index.php",
-                "parameter": "",
+                "parameter": null,
                 "http_request": "GET /relative_redirect.php HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"

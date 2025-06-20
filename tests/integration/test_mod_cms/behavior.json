@@ -13,7 +13,7 @@
                         "path": "",
                         "info": "",
                         "level": 0,
-                        "parameter": "",
+                        "parameter": null,
                         "module": "",
                         "http_request": "",
                         "wstg": [],

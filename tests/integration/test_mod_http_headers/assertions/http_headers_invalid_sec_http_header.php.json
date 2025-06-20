@@ -5,7 +5,7 @@
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
                 "info": "X-Frame-Options has an invalid value",
-                "parameter": "",
+                "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
@@ -18,7 +18,7 @@
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
                 "info": "Strict-Transport-Security has an invalid value",
-                "parameter": "",
+                "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
@@ -32,7 +32,7 @@
                 "method": "GET",
                 "path": "/invalid_sec_http_header.php",
                 "info": "X-Content-Type-Options has an invalid value",
-                "parameter": "",
+                "parameter": null,
                 "module": "http_headers",
                 "http_request": "GET /invalid_sec_http_header.php HTTP/1.1\nhost: http_headers\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
