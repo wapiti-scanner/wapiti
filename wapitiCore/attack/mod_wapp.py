@@ -321,6 +321,9 @@ class ModuleWapp(Attack):
                         response=response
                     )
 
+                if application_name == "Apache HTTP Server":
+                    application_name = "apache"
+
                 if is_cve_supported_software(application_name):
                     if await self.download_latest_release_asset(application_name.lower(), self.user_config_dir):
                         async for severity, message in self.get_vulnerabilities(application_name.lower(), versions):
