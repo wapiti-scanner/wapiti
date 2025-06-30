@@ -400,10 +400,9 @@ async def test_multi_detection():
     fixture_folder = Path(__file__).parent.parent / "data" / "wapp"
 
     # Let's mock wapiti-scanner/nvd-web-cves repository
-    wordpress_json_xz_url = (
-        "https://github.com/wapiti-scanner/nvd-web-cves/releases/download/"
-        "nvd-web-cves-20240808/wordpress.json.xz"
-    )
+    nvd_cve_xz_base = "https://github.com/wapiti-scanner/nvd-web-cves/releases/download/nvd-web-cves-20240808/"
+    wordpress_json_xz_url = nvd_cve_xz_base + "wordpress.json.xz"
+    apache_json_xz_url = nvd_cve_xz_base + "apache.json.xz"
 
     respx.get("https://api.github.com/repos/wapiti-scanner/nvd-web-cves/releases/latest").mock(
         return_value=httpx.Response(
@@ -414,6 +413,10 @@ async def test_multi_detection():
                         "name": "wordpress.json.xz",
                         "browser_download_url": wordpress_json_xz_url,
                     },
+                    {
+                        "name": "apache.json.xz",
+                        "browser_download_url": apache_json_xz_url,
+                    },
                 ]
             }
         )
@@ -422,12 +425,19 @@ async def test_multi_detection():
     respx.get(wordpress_json_xz_url).mock(
         return_value=httpx.Response(
             status_code=200,
-            content=lzma.compress((fixture_folder / "cve.json").open("rb").read())
+            content=lzma.compress((fixture_folder / "wordpress_cve.json").open("rb").read())
+        )
+    )
+
+    respx.get(apache_json_xz_url).mock(
+        return_value=httpx.Response(
+            status_code=200,
+            content=lzma.compress((fixture_folder / "apache_cve.json").open("rb").read())
         )
     )
 
     # Now let's mock wapiti-scanner/wappalyzerfork. Wappalyzer files are split over the 1st character of software names.
-    for letter, filename in [("m", "mysql.json"), ("p", "php.json"), ("w", "wordpress.json")]:
+    for letter, filename in [("a", "apache.json"), ("m", "mysql.json"), ("p", "php.json"), ("w", "wordpress.json")]:
         respx.get(
             f"https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/src/technologies/{letter}.json"
         ).mock(
@@ -473,7 +483,10 @@ async def test_multi_detection():
             <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong> \
             <script type=\"text/javascript\" src=\"https://perdu.com/wp-includes/js/wp-embed.min.js\" ></script> \
             </body></html>",
-            headers={"link": "<http://perdu.com/wp-json/>; rel=\"https://api.w.org/\""}
+            headers={
+                "link": "<http://perdu.com/wp-json/>; rel=\"https://api.w.org/\"",
+                "Server": "Apache/2.4.29 (Ubuntu)"
+            }
         )
     )
 
@@ -494,14 +507,18 @@ async def test_multi_detection():
             await module.attack(request)
 
             # Findings:
+            # - Fingerprint for Apache
+            # - Fingerprint for Apache version
+            # - Vulnerable software for Apache
             # - Fingerprint for Wordpress as a technology
             # - Fingerprint for Wordpress as a framework
             # - Fingerprint for PHP that was deduced from Wordpress
             # - Fingerprint for MySQL that was deduced from Wordpress
             # - Vulnerable software for Wordpress
-            assert persister.add_payload.call_count == 5
+            assert persister.add_payload.call_count == 8
             assert {parameters[1]["category"] for parameters in persister.add_payload.call_args_list} == {
                 "Fingerprint web application framework",
+                "Fingerprint web server",
                 "Fingerprint web technology",
                 "Vulnerable software"
             }
