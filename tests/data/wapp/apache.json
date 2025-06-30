@@ -1,0 +1,15 @@
+{
+    "Apache HTTP Server": {
+    "cats": [
+      22
+    ],
+    "cpe": "cpe:2.3:a:apache:http_server:*:*:*:*:*:*:*:*",
+    "description": "Apache is a free and open-source cross-platform web server software.",
+    "headers": {
+      "Server": "(?:Apache(?:$|/([\\d.]+)|[^/-])|(?:^|\\b)HTTPD)\\;version:\\1"
+    },
+    "icon": "Apache.svg",
+    "oss": true,
+    "website": "https://httpd.apache.org/"
+  }
+}
