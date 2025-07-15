@@ -37,7 +37,7 @@ from wapitiCore.attack.cve.checker import (
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.definitions.vulnerable_software_version import VulnerableSoftwareFinding
 from wapitiCore.main.log import logging, log_blue, log_severity
-from wapitiCore.main.wapiti import is_valid_url
+from wapitiCore.net.web import is_valid_url
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net.response import Response
 from wapitiCore.wappalyzer.wappalyzer import Wappalyzer, ApplicationData, ApplicationDataException

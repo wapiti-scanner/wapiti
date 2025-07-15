@@ -36,6 +36,7 @@ from wapitiCore.attack.attack import (all_modules, common_modules)
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner
+from wapitiCore.net.web import is_valid_url
 from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.main.log import logging
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
@@ -56,21 +57,6 @@ def inner_ctrl_c_signal_handler(_, __):
 def fix_url_path(url: str):
     """Fix the url path if it's not defined"""
     return url if urlparse(url).path else url + '/'
-
-
-def is_valid_url(url: str):
-    """Verify if the url provided has the right format"""
-    try:
-        parts = urlparse(url)
-    except ValueError:
-        logging.error('ValueError')
-        return False
-
-    if parts.scheme in ("http", "https") and parts.netloc:
-        return True
-
-    logging.error(f"Error: {url} is not a valid URL")
-    return False
 
 
 def is_valid_endpoint(url_type, url: str):
@@ -124,7 +110,7 @@ def ping(url: str):
 
 
 def handle_special_commands(args: Namespace):
-    """Gère les commandes spéciales avant le traitement principal."""
+    """Handle special commands before main processing."""
     if args.scope == "punk":
         print("[*] Do you feel lucky punk?")
 
@@ -144,7 +130,7 @@ def handle_special_commands(args: Namespace):
 
 
 def validate_basic_args(args: Namespace):
-    """Valide les arguments de base et lève une exception si problème."""
+    """Validate base arguments and exit in case of problem."""
     if args.tasks < 1:
         logging.error("Number of concurrent tasks must be 1 or above!")
         sys.exit(2)
@@ -159,15 +145,15 @@ def validate_basic_args(args: Namespace):
 
 
 def create_base_request(url, args):
-    """Crée la requête de base selon les arguments."""
+    """Generate base Request object."""
     if args.data:
         return Request(url, method="POST", post_params=args.data)
-    else:
-        return Request(url)
+
+    return Request(url)
 
 
 def configure_wapiti_basic_settings(wap, args):
-    """Configure les paramètres de base de Wapiti."""
+    """Configure Wapiti's base settings."""
     if args.log:
         wap.set_logfile(args.log)
 
