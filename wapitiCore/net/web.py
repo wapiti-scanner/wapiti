@@ -24,8 +24,9 @@ from urllib.parse import urlparse, urlunparse, unquote, quote, urljoin
 from typing import Optional, List, Tuple, Union
 import re
 
-
 import httpx
+
+from wapitiCore.main.log import logging
 
 Parameters = Optional[Union[List[List[str]], str]]
 
@@ -791,3 +792,18 @@ class Request:
     @path_id.setter
     def path_id(self, value: int):
         self._path_id = value
+
+
+def is_valid_url(url: str):
+    """Verify if the url provided has the right format"""
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        logging.error('ValueError')
+        return False
+
+    if parts.scheme in ("http", "https") and parts.netloc:
+        return True
+
+    logging.error(f"Error: {url} is not a valid URL")
+    return False
