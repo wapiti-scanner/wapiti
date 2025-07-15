@@ -33,6 +33,7 @@ def test_detail_response():
     ("http://", False),
     ("example.com", False),
     ("", False),
+    ("http://example.com:777777777", False),
 ])
 def test_is_valid_url(url, expected):
     """Test paramétré pour is_valid_url"""

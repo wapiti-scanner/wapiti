@@ -798,8 +798,9 @@ def is_valid_url(url: str):
     """Verify if the url provided has the right format"""
     try:
         parts = urlparse(url)
+        _ = parts.port
     except ValueError:
-        logging.error('ValueError')
+        logging.error(f"Invalid port number given in URL {url}")
         return False
 
     if parts.scheme in ("http", "https") and parts.netloc:
