@@ -22,6 +22,7 @@ import codecs
 import os
 import signal
 import sys
+from argparse import Namespace
 from importlib import import_module
 from inspect import getdoc
 from sqlite3 import OperationalError
@@ -122,15 +123,8 @@ def ping(url: str):
     return True
 
 
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
-async def wapiti_main():
-    print_banner()
-    args = parse_args()
-
-    if args.tasks < 1:
-        logging.error("Number of concurrent tasks must be 1 or above!")
-        sys.exit(2)
-
+def handle_special_commands(args: Namespace):
+    """Gère les commandes spéciales avant le traitement principal."""
     if args.scope == "punk":
         print("[*] Do you feel lucky punk?")
 
@@ -148,23 +142,32 @@ async def wapiti_main():
                 continue
         sys.exit()
 
-    url = fix_url_path(args.base_url)
-    if args.data:
-        base_request = Request(
-            url,
-            method="POST",
-            post_params=args.data
-        )
-    else:
-        base_request = Request(url)
 
+def validate_basic_args(args: Namespace):
+    """Valide les arguments de base et lève une exception si problème."""
+    if args.tasks < 1:
+        logging.error("Number of concurrent tasks must be 1 or above!")
+        sys.exit(2)
+
+    url = fix_url_path(args.base_url)
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc:
         logging.error("Invalid base URL was specified, please give a complete URL with protocol scheme.")
         sys.exit()
 
-    wap = Wapiti(base_request, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+    return url
 
+
+def create_base_request(url, args):
+    """Crée la requête de base selon les arguments."""
+    if args.data:
+        return Request(url, method="POST", post_params=args.data)
+    else:
+        return Request(url)
+
+
+def configure_wapiti_basic_settings(wap, args):
+    """Configure les paramètres de base de Wapiti."""
     if args.log:
         wap.set_logfile(args.log)
 
@@ -173,6 +176,45 @@ async def wapiti_main():
 
     if args.tor:
         wap.set_proxy("socks5://127.0.0.1:9050/")
+
+    wap.set_headless(args.headless)
+    wap.set_wait_time(args.wait_time)
+    wap.set_max_depth(args.depth)
+    wap.set_max_files_per_dir(args.max_files_per_dir)
+    wap.set_max_links_per_page(args.max_links_per_page)
+    wap.set_scan_force(args.scan_force)
+    wap.set_max_scan_time(args.max_scan_time)
+    wap.active_scanner.set_max_attack_time(args.max_attack_time)
+    wap.verbosity(args.verbosity)
+    wap.set_timeout(args.timeout)
+
+    if args.detailed_report_level:
+        wap.set_detail_report(args.detailed_report_level)
+    if args.color:
+        wap.set_color()
+    if args.no_bugreport:
+        wap.active_scanner.set_bug_reporting(False)
+    if args.drop_set_cookie:
+        wap.set_drop_cookies()
+    if "output" in args:
+        wap.set_output_file(args.output)
+
+    wap.set_report_generator_type(args.format)
+    wap.set_verify_ssl(bool(args.check_ssl))
+
+
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+async def wapiti_main():
+    print_banner()
+    args = parse_args()
+
+    handle_special_commands(args)
+    url = validate_basic_args(args)
+    base_request = create_base_request(url, args)
+
+    wap = Wapiti(base_request, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
+
+    configure_wapiti_basic_settings(wap, args)
 
     if args.update:
         await wap.init_persister()
@@ -239,9 +281,6 @@ async def wapiti_main():
         if "mitm_port" in args:
             wap.set_intercepting_proxy_port(args.mitm_port)
 
-        wap.set_headless(args.headless)
-        wap.set_wait_time(args.wait_time)
-
         if "side_file" in args:
             if os.path.isfile(args.side_file):
                 wap.crawler_configuration.cookies = await authenticate_with_side_file(
@@ -278,24 +317,7 @@ async def wapiti_main():
         for bad_param in args.excluded_parameters:
             wap.add_bad_param(bad_param)
 
-        wap.set_max_depth(args.depth)
-        wap.set_max_files_per_dir(args.max_files_per_dir)
-        wap.set_max_links_per_page(args.max_links_per_page)
-        wap.set_scan_force(args.scan_force)
-        wap.set_max_scan_time(args.max_scan_time)
-        wap.active_scanner.set_max_attack_time(args.max_attack_time)
-
-        # should be a setter
-        wap.verbosity(args.verbosity)
-        if args.detailed_report_level:
-            wap.set_detail_report(args.detailed_report_level)
-        if args.color:
-            wap.set_color()
-        wap.set_timeout(args.timeout)
         wap.active_scanner.set_modules(args.modules)
-
-        if args.no_bugreport:
-            wap.active_scanner.set_bug_reporting(False)
 
         if "user_agent" in args:
             wap.add_custom_header("User-Agent", args.user_agent)
@@ -308,15 +330,8 @@ async def wapiti_main():
                 hdr_name, hdr_value = custom_header.split(":", 1)
                 wap.add_custom_header(hdr_name.strip(), hdr_value.strip())
 
-        if "output" in args:
-            wap.set_output_file(args.output)
-
         if args.format not in GENERATORS:
             raise InvalidOptionValue("-f", args.format)
-
-        wap.set_report_generator_type(args.format)
-
-        wap.set_verify_ssl(bool(args.check_ssl))
 
         attack_options = {
             "level": args.level,

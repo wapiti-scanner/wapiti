@@ -23,7 +23,7 @@ from wapitiCore import WAPITI_VERSION
 from wapitiCore.report import GENERATORS
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=f"Wapiti {WAPITI_VERSION}: Web application vulnerability scanner")
 
     group = parser.add_mutually_exclusive_group(required=True)
