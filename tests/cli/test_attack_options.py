@@ -128,3 +128,29 @@ def test_invalid_wapp_dir_raises(tmp_path):
     with pytest.raises(InvalidOptionValue) as exc_info:
         build_attack_options_from_args(args)
     assert "--wapp-dir" in str(exc_info.value)
+
+
+def test_build_attack_options_with_invalid_external_endpoint_raises():
+    """Case where '--external-endpoint' is not valid."""
+    args = Namespace(
+        level=1, timeout=5, tasks=1, headless=False, excluded_urls=[], max_attack_time=30,
+        update=False, wapp_url=None, wapp_dir=None, cms=None, modules=[], skipped_parameters=[],
+        dns_endpoint=None, external_endpoint="ftp://invalid.external/",
+    )
+    with pytest.raises(InvalidOptionValue) as exc_info:
+        build_attack_options_from_args(args)
+    assert "--external-endpoint" in str(exc_info.value)
+
+
+def test_build_attack_options_with_internal_endpoint_not_accessible_raises():
+    """Case where '--internal-endpoint' is valid but can't be joined."""
+    args = Namespace(
+        level=1, timeout=5, tasks=1, headless=False, excluded_urls=[], max_attack_time=30,
+        update=False, wapp_url=None, wapp_dir=None, cms=None, modules=[], skipped_parameters=[],
+        dns_endpoint=None, internal_endpoint="http://192.0.2.1/private/", # TEST-NET-1, non routable
+    )
+    with pytest.raises(InvalidOptionValue) as exc_info:
+        build_attack_options_from_args(args)
+        assert "--internal-endpoint" in str(exc_info.value)
+        assert "Invalid argument for option --internal-endpoint : http://192.0.2.1/private/" in str(exc_info.value)
+
