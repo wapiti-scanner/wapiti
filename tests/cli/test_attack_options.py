@@ -57,7 +57,28 @@ from wapitiCore.main.wapiti import build_attack_options_from_args
                 modules=["cms", "wapp"],
                 skipped_parameters=["debug"]
             ),
-            {"level", "timeout", "tasks", "headless", "excluded_urls", "max_attack_time", "wapp_url", "cms", "skipped_parameters"}
+            {
+                "level", "timeout", "tasks", "headless", "excluded_urls", "max_attack_time", "wapp_url", "cms",
+                "skipped_parameters"
+            }
+        ),
+        (
+                Namespace(
+                    level=1,
+                    timeout=5,
+                    tasks=1,
+                    headless=False,
+                    excluded_urls=[],
+                    max_attack_time=30,
+                    update=False,
+                    wapp_url=None, wapp_dir=None, cms=None, modules=[], skipped_parameters=[],
+                    dns_endpoint="http://dns.example.com/",
+                    endpoint="http://http.example.com/",
+                ),
+                {
+                    "level", "timeout", "tasks", "headless", "excluded_urls", "max_attack_time",
+                    "dns_endpoint", "internal_endpoint", "external_endpoint"
+                }
         )
     ]
 )
