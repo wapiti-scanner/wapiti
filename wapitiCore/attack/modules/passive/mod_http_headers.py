@@ -23,7 +23,7 @@ from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.definitions.http_headers import ClickjackingFinding, MimeTypeConfusionFinding, HstsFinding
-from wapitiCore.main.log import log_red, log_orange, log_green
+from wapitiCore.main.log import log_red, log_orange
 from wapitiCore.language.vulnerability import LOW_LEVEL
 
 HSTS_NOT_SET = "Strict-Transport-Security is not set"
@@ -117,8 +117,6 @@ class ModuleHttpHeaders:
                     info=finding_info,
                     severity=LOW_LEVEL,
                 )
-        else:
-            log_green(f"{header_name} OK on {request.url}")
 
         return None
 
