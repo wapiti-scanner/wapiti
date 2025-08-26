@@ -30,7 +30,6 @@ URL_HTTPS = "https://example.com"
 def patch_logs(monkeypatch):
     monkeypatch.setattr(mod_http_headers, "log_red", MagicMock())
     monkeypatch.setattr(mod_http_headers, "log_orange", MagicMock())
-    monkeypatch.setattr(mod_http_headers, "log_green", MagicMock())
 
 
 @pytest.fixture
