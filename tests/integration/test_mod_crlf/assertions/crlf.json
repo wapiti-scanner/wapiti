@@ -7,7 +7,7 @@
                 "info": "CRLF Injection via injection in the parameter user-agent",
                 "parameter": "user-agent",
                 "module": "crlf",
-                "http_request": "GET /index.php?user-agent=http%3A%2F%2Fwww.google.fr%0D%0Awapiti%3A%203.2.4%20version HTTP/1.1\nhost: crlf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /index.php?user-agent=http%3A%2F%2Fwww.google.fr%0D%0Awapiti%3A%203.2.5%20version HTTP/1.1\nhost: crlf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INPV-15"
                 ]
