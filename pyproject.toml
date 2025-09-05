@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wapiti3"
-version = "3.2.4"
+version = "3.2.5"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
 requires-python = ">=3.12,<3.14"

@@ -19,4 +19,4 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 parser_name = "html.parser"
-WAPITI_VERSION = "3.2.4"
+WAPITI_VERSION = "3.2.5"

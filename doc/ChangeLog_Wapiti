@@ -1,3 +1,7 @@
+05/09/2025
+    Wapiti 3.2.5
+    Attack: add passive modules mechanism along with some new modules
+
 05/04/2025
     Wapiti 3.2.4
     Core: support Python 3.14, remove support for python <3.12
