@@ -39,7 +39,7 @@ async def test_unregistered_cname():
     # Test attacking all kind of parameter without crashing
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    async def resolve(qname, rdtype, raise_on_no_answer: bool = False):
+    async def resolve(qname, rdtype, **kwargs):
         if qname.startswith("supercalifragilisticexpialidocious."):
             # No wildcard responses
             return []
