@@ -26,11 +26,72 @@ flags QR RD RA
 ;ADDITIONAL"""
 
 
+NS_TEMPLATE = """id 5395
+opcode QUERY
+rcode NOERROR
+flags QR RD RA
+;QUESTION
+{qname}. IN NS
+;ANSWER
+{qname}. 3035 IN NS {ns_name}.
+;AUTHORITY
+;ADDITIONAL"""
+
+
 def make_cname_answer(qname, cname):
     message = dns.message.from_text(CNAME_TEMPLATE.format(qname=qname, cname=cname))
     qname = dns.name.from_text(qname)
     answer = dns.resolver.Answer(qname, dns.rdatatype.A, dns.rdataclass.IN, message)
     return answer
+
+
+def make_ns_answer(qname, ns_name):
+    message = dns.message.from_text(NS_TEMPLATE.format(qname=qname, ns_name=ns_name))
+    qname = dns.name.from_text(qname)
+    answer = dns.resolver.Answer(qname, dns.rdatatype.NS, dns.rdataclass.IN, message)
+    return answer
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_ns_takeover():
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    async def resolve(qname, rdtype, **kwargs):
+        if rdtype == "CNAME":
+            # No CNAMEs for this test, which is a common scenario
+            return []
+        if qname == "perdu.com" and rdtype == "NS":
+            return make_ns_answer("perdu.com", "unregistered-ns.com")
+
+        raise dns.resolver.NXDOMAIN("Yolo")
+
+    with patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.resolve") as mocked_resolve_:
+        with patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.Resolver.resolve") as mocked_resolve:
+            mocked_resolve.side_effect = resolve
+            mocked_resolve_.side_effect = resolve
+            persister = AsyncMock()
+            all_requests = []
+
+            request = Request("http://perdu.com/")
+            request.path_id = 1
+            all_requests.append(request)
+
+            crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+            async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                options = {"timeout": 10, "level": 2}
+                module = ModuleTakeover(crawler, persister, options, crawler_configuration)
+
+                # The NS takeover check happens on the root domain, not on a path
+                await module.attack(request)
+
+                # Assert that a finding was added and that it is of the new NSTakeoverFinding class
+                # This assertion ensures the correct finding class is used
+                assert persister.add_payload.call_count == 1
+                assert persister.add_payload.call_args_list[0][1]["category"] == "NS takeover"
+                assert persister.add_payload.call_args_list[0][1]["info"] == (
+                    "NS record for perdu.com pointing to unregistered-ns.com seems vulnerable to takeover"
+                )
 
 
 @pytest.mark.asyncio
@@ -45,6 +106,7 @@ async def test_unregistered_cname():
             return []
         if qname.startswith("admin.") and rdtype == "CNAME":
             return make_cname_answer("perdu.com", "unregistered.com")
+
         raise dns.resolver.NXDOMAIN("Yolo")
 
     with patch("wapitiCore.attack.mod_takeover.dns.asyncresolver.resolve") as mocked_resolve_:
