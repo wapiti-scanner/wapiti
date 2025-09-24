@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2021-2023 Nicolas Surribas
+# Copyright (C) 2021-2025 Nicolas Surribas
 # Copyright (C) 2021-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@ import dns.exception
 import dns.name
 import dns.resolver
 
+from wapitiCore.definitions.ns_takeovers import NSTakeoverFinding
 from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net import Request, Response
 from wapitiCore.attack.attack import Attack
@@ -43,6 +44,7 @@ from wapitiCore.definitions.subdomain_takeovers import SubdomainTakeoverFinding
 
 
 FINGERPRINTS_FILENAME = "takeover_fingerprints.json"
+# We can rely on lists such as https://github.com/trickest/resolvers
 RESOLVERS_FILENAME = "resolvers.txt"
 SUBDOMAINS_FILENAME = "subdomain-wordlist.txt"
 
@@ -212,17 +214,30 @@ def load_resolvers() -> List[str]:
         return resolvers
 
 
-async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[str]:
-    # Ask for an improbable subdomain to see if there are any responses
+async def resolve_dns_record(domain: str, record_type: str, resolvers: Iterator[str]) -> list:
+    """Generic function to resolve a DNS record and handle common errors."""
     resolver = dns.asyncresolver.Resolver()
     resolver.timeout = 10.
     resolver.nameservers = [next(resolvers) for __ in range(10)]
 
     try:
-        results = await resolver.resolve(f"supercalifragilisticexpialidocious.{domain}", "CNAME")
-    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout, dns.resolver.NoNameservers):
+        answers = await resolver.resolve(domain, record_type, raise_on_no_answer=False, lifetime=20.0)
+        return [answer.to_text().strip(".") for answer in answers]
+    except (
+        socket.gaierror,
+        UnicodeError,
+        dns.asyncresolver.NXDOMAIN,
+        dns.exception.Timeout,
+        dns.name.EmptyLabel,
+        dns.resolver.NoNameservers,
+    ) as exception:
+        logging.debug(f"DNS request for {domain} ({record_type}): {exception}")
         return []
-    return [record.to_text().strip(".") for record in results]
+
+
+async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[str]:
+    # Ask for an improbable subdomain to see if there are any responses
+    return await resolve_dns_record(f"supercalifragilisticexpialidocious.{domain}", "CNAME", resolvers)
 
 
 class ModuleTakeover(Attack):
@@ -286,22 +301,8 @@ class ModuleTakeover(Attack):
                 if domain == "__exit__":
                     break
 
-                try:
-                    resolver = dns.asyncresolver.Resolver()
-                    resolver.timeout = 10.
-                    resolver.nameservers = [next(resolvers) for __ in range(10)]
-                    answers = await resolver.resolve(domain, 'CNAME', raise_on_no_answer=False)
-                except (socket.gaierror, UnicodeError):
-                    continue
-                except (dns.asyncresolver.NXDOMAIN, dns.exception.Timeout):
-                    continue
-                except (dns.name.EmptyLabel, dns.resolver.NoNameservers) as exception:
-                    logging.warning(f"{domain}: {exception}")
-                    continue
-
-                for answer in answers:
-                    cname = answer.to_text().strip(".")
-
+                cnames = await resolve_dns_record(domain, 'CNAME', resolvers)
+                for cname in cnames:
                     if cname in bad_responses:
                         continue
 
@@ -334,9 +335,34 @@ class ModuleTakeover(Attack):
         resolvers = load_resolvers()
         resolvers_cycle = cycle(resolvers)
         wildcard_responses = await get_wildcard_responses(request.hostname, resolvers_cycle)
+
+        tasks.append(asyncio.create_task(self.check_ns_takeovers(request, resolvers_cycle)))
         for __ in range(CONCURRENT_TASKS):
             tasks.append(
                 asyncio.create_task(self.worker(sub_queue, resolvers_cycle, request.hostname, set(wildcard_responses)))
             )
 
         await asyncio.gather(*tasks)
+
+    async def check_ns_takeovers(self, request: Request, resolvers_cycle):
+        target_domain = get_root_domain(request.hostname)
+        ns_records = await resolve_dns_record(target_domain, 'NS', resolvers_cycle)
+        for ns_record in ns_records:
+            try:
+                ns_etld_plus_1 = get_root_domain(ns_record)
+            except (TldDomainNotFound, TldBadUrl):
+                logging.warning(f"NS domain {ns_record} is not a valid domain name")
+                continue
+
+            if ns_etld_plus_1 == target_domain:
+                continue
+
+            if await self.takeover.check(request.hostname, ns_etld_plus_1):
+                log_red("---")
+                log_red(f"NS record for {target_domain} pointing to {ns_record} seems vulnerable to takeover")
+                log_red("---")
+                await self.add_high(
+                    finding_class=NSTakeoverFinding,
+                    info=f"NS record for {target_domain} pointing to {ns_record} seems vulnerable to takeover",
+                    request=Request(f"https://{request.hostname}/"),
+                )
