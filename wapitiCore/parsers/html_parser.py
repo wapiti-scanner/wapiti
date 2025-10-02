@@ -50,6 +50,26 @@ CONNECT_ERROR_REGEX = r'(invalid|'\
                       r'erreur)'
 
 
+# Patterns that indicate a user is logged in
+LOGGED_IN_INDICATORS_REGEX = r'(?i)(my\s+(account|profile|dashboard|settings)|'\
+                              r'welcome\s+back|'\
+                              r'signed\s+in\s+as|'\
+                              r'logged\s+in\s+as|'\
+                              r'view\s+profile|'\
+                              r'edit\s+profile|'\
+                              r'account\s+settings|'\
+                              r'user\s+profile)'
+
+# URL patterns that suggest authentication pages (being on these suggests NOT logged in)
+AUTH_PAGE_URL_PATTERNS = [
+    r'/login',
+    r'/signin',
+    r'/auth',
+    r'/authentication',
+    r'/logon',
+    r'/signon'
+]
+
 def not_empty(original_function):
     def wrapped(*args, **kwargs):
         generator = original_function(*args, **kwargs)
@@ -823,8 +843,59 @@ class Html:
         return disconnect_urls
 
     def is_logged_in(self) -> bool:
-        # If we find logging errors on the page
+        """
+        Enhanced authentication detection using multiple signals.
+
+        Returns True if the user appears to be authenticated, False otherwise.
+        Uses multiple detection methods with priority ordering:
+        1. Checks for authentication error messages (explicit failure)
+        2. Checks for login forms (suggests not authenticated)
+        3. Checks for disconnect/logout links (suggests authenticated)
+        4. Checks for authenticated user indicators (profile links, account info)
+        5. Checks current URL patterns
+        """
+
+        # Priority 1: If we find authentication errors, definitely not logged in
         if self._soup.find(string=re.compile(CONNECT_ERROR_REGEX)) is not None:
             return False
-        # If we find a disconnect button on the page
-        return self._soup.find(string=re.compile(DISCONNECT_REGEX)) is not None
+
+        # Priority 2: If we find a login form, likely not logged in
+        # Check for forms with password fields
+        for form in self._soup.find_all("form"):
+            password_fields = form.find_all("input", attrs={"type": "password"})
+            if password_fields:
+                # This is likely a login form
+                # Check if it's not a password change form (which would have multiple password fields)
+                if len(password_fields) == 1:
+                    return False
+
+        # Priority 3: Check for logout/disconnect links (traditional method)
+        has_disconnect_link = self._soup.find(string=re.compile(DISCONNECT_REGEX)) is not None
+        if has_disconnect_link:
+            return True
+
+        # Priority 4: Check for authenticated user indicators in text
+        has_user_indicators = self._soup.find(string=re.compile(LOGGED_IN_INDICATORS_REGEX)) is not None
+        if has_user_indicators:
+            return True
+
+        # Priority 5: Check for links that suggest authenticated state
+        # Look for profile, account, settings links
+        for link_tag in self._soup.find_all("a", href=True):
+            href = link_tag.get("href", "").lower()
+            link_text = link_tag.get_text().lower().strip()
+
+            # Check for account/profile related links
+            if any(keyword in href for keyword in ['/profile', '/account', '/dashboard', '/settings']):
+                return True
+            if any(keyword in link_text for keyword in ['my account', 'my profile', 'account settings', 'profile']):
+                return True
+
+        # Priority 6: Check current URL - being on an auth page suggests not logged in
+        current_url = self._url.lower()
+        for pattern in AUTH_PAGE_URL_PATTERNS:
+            if re.search(pattern, current_url):
+                return False
+
+        # Default: If no clear indicators, assume not logged in (conservative approach)
+        return False
