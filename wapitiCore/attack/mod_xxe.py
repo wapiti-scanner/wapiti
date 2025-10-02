@@ -376,13 +376,21 @@ class ModuleXxe(Attack):
                             skip=self.options.get("skipped_parameters")
                         )
 
-                        mutated_request, __, __ = next(mutator.mutate(original_request, [used_payload]))
+                        mutation_result = next(mutator.mutate(original_request, [used_payload]), None)
+                        if mutation_result is None:
+                            # No mutation possible (e.g., parameter in skip list), skip this parameter
+                            continue
+                        mutated_request, __, __ = mutation_result
                     else:
                         mutator = XXEUploadMutator(
                             parameters=[parameter_name],
                             skip=self.options.get("skipped_parameters")
                         )
-                        mutated_request, __, __ = next(mutator.mutate(original_request, [used_payload]))
+                        mutation_result = next(mutator.mutate(original_request, [used_payload]), None)
+                        if mutation_result is None:
+                            # No mutation possible (e.g., all file params in skip list), skip this parameter
+                            continue
+                        mutated_request, __, __ = mutation_result
 
                     if request_size:
                         add_vuln_method = self.add_high
