@@ -58,7 +58,7 @@ def test_reports():
                 flatten_references(additional.references())
             )
 
-        if report_format == "html":
+        if report_format in ("html", "nuclei"):
             temp_obj = tempfile.TemporaryDirectory()
 
         else:
@@ -99,7 +99,7 @@ def test_reports():
 
         report_gen.generate_report(output)
 
-        if report_format == "html":
+        if report_format in ("html", "nuclei"):
             output = report_gen.final_path
 
         with open(output) as fd:
