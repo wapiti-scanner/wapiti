@@ -20,14 +20,20 @@ from typing import Generator, Any, Tuple
 
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
-from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
+from wapitiCore.net.csp_utils import (
+    csp_header_to_dict,
+    CSP_CHECK_LISTS,
+    check_policy_values,
+    get_invalid_directives,
+)
 from wapitiCore.definitions.csp import CspFinding
 from wapitiCore.main.log import log_red
-from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL
+from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL, HIGH_LEVEL
 
 MSG_NO_CSP = "CSP is not set for URL: {0}"
 MSG_CSP_MISSING = "CSP attribute \"{0}\" is missing for URL: {1}"
 MSG_CSP_UNSAFE = "CSP \"{0}\" value is not safe for URL: {1}"
+MSG_CSP_INVALID_DIRECTIVE = "CSP contains invalid directive \"{0}\" for URL: {1}"
 
 
 class ModuleCsp:
@@ -66,6 +72,23 @@ class ModuleCsp:
         else:
             csp_dict = csp_header_to_dict(csp_header_value)
 
+            # Check for invalid/misspelled directives
+            invalid_directives = get_invalid_directives(csp_dict)
+            for invalid_directive in invalid_directives:
+                identifier = (request.netloc, invalid_directive, "Invalid")
+                if identifier not in self._reported_csp_issues:
+                    self._reported_csp_issues.add(identifier)
+                    info = MSG_CSP_INVALID_DIRECTIVE.format(invalid_directive, request.url)
+                    log_red(info)
+                    yield VulnerabilityInstance(
+                        finding_class=CspFinding,
+                        request=request,
+                        response=response,
+                        info=info,
+                        severity=MEDIUM_LEVEL,
+                    )
+
+            # Check each directive in CSP_CHECK_LISTS
             for policy_name in CSP_CHECK_LISTS:
                 result = check_policy_values(policy_name, csp_dict)
 
@@ -74,12 +97,26 @@ class ModuleCsp:
 
                 if result == -1:  # Policy is missing
                     info = MSG_CSP_MISSING.format(policy_name, request.url)
-                    if policy_name in ["script-src", "object-src", "base-uri", "frame-ancestors"]:
+                    # Enhanced severity scoring based on Google CSP Evaluator standards
+                    if policy_name == "frame-ancestors":
+                        # High severity - clickjacking protection missing
+                        severity = HIGH_LEVEL
+                    elif policy_name in ["script-src", "object-src", "base-uri", "form-action"]:
+                        # Medium severity - important security directives
                         severity = MEDIUM_LEVEL
-                elif result == 0:
+                    else:
+                        severity = LOW_LEVEL
+                elif result == 0:  # Policy is unsafe
                     info = MSG_CSP_UNSAFE.format(policy_name, request.url)
-                    if policy_name in ["script-src", "object-src"]:
+                    # Enhanced severity scoring for unsafe values
+                    if policy_name == "frame-ancestors":
+                        # High severity - clickjacking risk
+                        severity = HIGH_LEVEL
+                    elif policy_name in ["script-src", "object-src"]:
+                        # Medium severity - XSS/injection risks
                         severity = MEDIUM_LEVEL
+                    else:
+                        severity = LOW_LEVEL
 
                 if info:
                     identifier = (request.netloc, policy_name, "Unsafe" if result == 0 else "Missing")
