@@ -19,10 +19,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import List
 
-from wapitiCore.definitions.base import FindingBase
+from wapitiCore.definitions.base import Vulnerability
 
 
-class XssFinding(FindingBase):
+class XssFinding(Vulnerability):
     @classmethod
     def name(cls) -> str:
         return "Reflected Cross Site Scripting"
@@ -75,10 +75,6 @@ class XssFinding(FindingBase):
     @classmethod
     def short_name(cls) -> str:
         return "XSS"
-
-    @classmethod
-    def type(cls) -> str:
-        return "vulnerability"
 
     @classmethod
     def wstg_code(cls) -> List[str]:
