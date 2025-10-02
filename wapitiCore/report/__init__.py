@@ -23,13 +23,15 @@ from .htmlreportgenerator import HTMLReportGenerator
 from .jsonreportgenerator import JSONReportGenerator
 from .txtreportgenerator import TXTReportGenerator
 from .xmlreportgenerator import XMLReportGenerator
+from .nucleireportgenerator import NucleiReportGenerator
 
 GENERATORS = {
     "csv": CSVReportGenerator,
     "html": HTMLReportGenerator,
     "json": JSONReportGenerator,
     "txt": TXTReportGenerator,
-    "xml": XMLReportGenerator
+    "xml": XMLReportGenerator,
+    "nuclei": NucleiReportGenerator
 }
 
 
