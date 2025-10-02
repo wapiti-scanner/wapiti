@@ -245,3 +245,24 @@ def test_logged_in_failed_explicit():
     with open("tests/data/logged_in_failed_explicit.html") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert not page.is_logged_in()
+
+
+def test_logged_in_with_profile():
+    """Test detection when page contains user profile information"""
+    with open("tests/data/logged_in_with_profile.html") as data_body:
+        page = Html(data_body.read(), "http://perdu.com/dashboard.php")
+        assert page.is_logged_in()
+
+
+def test_logged_in_with_account_link():
+    """Test detection when page contains account-related links"""
+    with open("tests/data/logged_in_with_account.html") as data_body:
+        page = Html(data_body.read(), "http://perdu.com/account.php")
+        assert page.is_logged_in()
+
+
+def test_not_logged_in_with_login_form():
+    """Test detection when page contains a login form"""
+    with open("tests/data/not_logged_in_with_form.html") as data_body:
+        page = Html(data_body.read(), "http://perdu.com/login.php")
+        assert not page.is_logged_in()
