@@ -168,3 +168,121 @@ async def test_getcookie_basic_auth():
 
         assert "Authorization" in respx.calls.last.request.headers
         assert respx.calls.last.request.headers["Authorization"] == "Basic am9objpkb2U="
+
+
+@pytest.mark.asyncio
+@respx.mock
+@patch("builtins.input", side_effect=["0", "wapiti@wapiti.com", "P@ssw0rd!#$"])
+async def test_getcookie_special_characters_in_credentials(_):
+    """Test for issue #668: wapiti-getcookie should handle special characters like @ in username/password.
+
+    This test verifies that usernames containing @ (like email addresses) and passwords with
+    special characters are correctly handled by the interactive form filling mechanism.
+    """
+    with NamedTemporaryFile("w") as json_fd:
+        url = "https://testapp.example.com/login"
+        respx.get(url).mock(
+            return_value=httpx.Response(
+                200,
+                headers=[
+                    ("set-cookie", "session=initial; Path=/"),
+                ],
+                content=(
+                    "<html><body>"
+                    "<form method='POST' action='/authenticate'>"
+                    "<input type='email' name='email' />"
+                    "<input type='password' name='password' />"
+                    "</form>"
+                )
+            )
+        )
+
+        # Verify the special characters are sent as-is (no escaping needed)
+        respx.post(
+            "https://testapp.example.com/authenticate",
+            data={"email": "wapiti@wapiti.com", "password": "P@ssw0rd!#$"}
+        ).mock(
+            return_value=httpx.Response(
+                200,
+                headers=[
+                    ("set-cookie", "auth_token=authenticated; Path=/")
+                ],
+                content="Login successful"
+            )
+        )
+
+        await getcookie_main(["-u", url, "-c", json_fd.name])
+
+        data = json.load(open(json_fd.name))
+        # Verify cookies were saved correctly
+        assert '.testapp.example.com' in data
+        assert data['.testapp.example.com']['/']['auth_token']['value'] == 'authenticated'
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_getcookie_special_characters_raw_data():
+    """Test special characters in raw form data for issue #668.
+
+    Verify that JSON-encoded credentials with special characters work correctly
+    when using --form-data parameter.
+    """
+    with NamedTemporaryFile("w") as json_fd:
+        url = "https://api.example.com/login"
+        respx.get(url).mock(return_value=httpx.Response(200))
+
+        # Test with @ in username and special chars in password
+        respx.post(
+            url,
+            json={"username": "test@example.com", "password": "p@ss&word=123"},
+            headers={"Content-Type": "application/json"},
+        ).mock(
+            return_value=httpx.Response(
+                200,
+                headers=[
+                    ("set-cookie", "token=valid; Path=/")
+                ],
+                content="Authentication successful"
+            )
+        )
+
+        await getcookie_main(
+            [
+                "-u", url,
+                "-c", json_fd.name,
+                "--form-data", '{"username": "test@example.com", "password": "p@ss&word=123"}',
+                "--form-enctype", "application/json"
+            ]
+        )
+
+        data = json.load(open(json_fd.name))
+        assert '.api.example.com' in data
+        assert data['.api.example.com']['/']['token']['value'] == 'valid'
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_getcookie_special_characters_http_auth():
+    """Test special characters in HTTP authentication for issue #668.
+
+    Verify that usernames and passwords with special characters work correctly
+    in HTTP Basic/Digest authentication.
+    """
+    with NamedTemporaryFile("w") as json_fd:
+        url = "https://secure.example.com/protected"
+        respx.get(url).mock(return_value=httpx.Response(200))
+
+        # Test with @ in username (common for email-based auth)
+        await getcookie_main([
+            "-u", url,
+            "-c", json_fd.name,
+            "--auth-user", "admin@company.com",
+            "--auth-password", "C0mpl3x!P@ss"
+        ])
+
+        # Verify Authorization header is correctly base64-encoded
+        assert "Authorization" in respx.calls.last.request.headers
+        # The header should contain base64-encoded "admin@company.com:C0mpl3x!P@ss"
+        import base64
+        expected_auth = base64.b64encode(b"admin@company.com:C0mpl3x!P@ss").decode()
+        assert respx.calls.last.request.headers["Authorization"] == f"Basic {expected_auth}"
