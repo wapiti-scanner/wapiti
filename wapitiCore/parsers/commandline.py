@@ -106,7 +106,7 @@ def parse_args() -> argparse.Namespace:
         "--headless",
         dest="headless",
         default="no",
-        help="Use a Firefox headless crawler for browsing (slower)",
+        help="Use a headless Firefox browser during crawling to capture XHR/Ajax requests. Discovers more attack surface but slower. Recommended for modern web apps",
         choices=["no", "hidden", "visible"]
     )
 
