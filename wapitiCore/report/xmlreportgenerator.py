@@ -165,8 +165,11 @@ class XMLReportGenerator(JSONReportGenerator):
                     wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
                     wstg_node.appendChild(wstg_code_node)
                 entry_node.appendChild(wstg_node)
+                # Only add detail section if detailed_report_level is enabled and detail exists
                 if self._infos["detailed_report_level"]:
-                    entry_node.appendChild(self._create_detail_section(flaw))
+                    detail_section = self._create_detail_section(flaw)
+                    if detail_section:
+                        entry_node.appendChild(detail_section)
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
             container.appendChild(flaw_type_node)
@@ -181,8 +184,14 @@ class XMLReportGenerator(JSONReportGenerator):
         """
         Create a section composed of the detail of the request & its response
         """
+        # Check if detail key exists (only present when detailed_report_level == 2)
+        if "detail" not in flaw:
+            return None
+
         detail_section = self._xml_doc.createElement("detail")
-        detail_response_section = self._create_detail_response(flaw["detail"]["response"])
+        # Safely access nested response key
+        response = flaw.get("detail", {}).get("response")
+        detail_response_section = self._create_detail_response(response)
         if detail_response_section:
             detail_section.appendChild(detail_response_section)
         return detail_section
@@ -289,8 +298,10 @@ class XMLReportGenerator(JSONReportGenerator):
 
         for crawled_page in crawled_pages:
             entry_section = self._xml_doc.createElement("entry")
-            detail_response = self._create_detail_response(crawled_page["response"])
-            if detail_response:
-                entry_section.appendChild(detail_response)
+            # Only access 'response' key if it exists (detailed_report_level 2 has response, level 1 doesn't)
+            if "response" in crawled_page:
+                detail_response = self._create_detail_response(crawled_page["response"])
+                if detail_response:
+                    entry_section.appendChild(detail_response)
             crawled_pages_node.appendChild(entry_section)
         return crawled_pages_node
