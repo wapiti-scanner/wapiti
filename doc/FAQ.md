@@ -108,6 +108,38 @@ For pentests I usually do a scan with Wapiti then exploit SQLi vulnerabilities w
 Yes, it can find a lot. But Wapiti doesn't act like a MITM proxy so it may not find scripts where Ajax (XHR) is involved.  
 Don't hesitate to move to OWASP Zed Attack Proxy for in-depth pentesting.
 
+### What is headless mode and when should I use it? ###
+
+Headless mode (`--headless hidden` or `--headless visible`) uses a Firefox headless browser with mitmproxy during the **crawling phase** to capture dynamic requests like XHR/Ajax calls.
+This discovers more URLs and attack surfaces than regular HTTP crawling, which can lead to more vulnerability findings.
+
+**When to use headless mode:**
+- Modern web applications that heavily use JavaScript, Ajax, or XHR requests
+- Single Page Applications (SPAs) built with React, Vue, Angular, etc.
+- Modules that benefit from more attack surface: `exec`, `xss`, `sql`, `file`, `ssrf`, etc.
+- When you want to detect JavaScript frameworks (the `wapp` module leverages headless for better detection)
+
+**When NOT to use headless mode:**
+- The `ssl` module: It performs direct SSL/TLS checks and doesn't benefit from browser-captured requests
+- Simple static websites with minimal JavaScript
+- When scan speed is critical (headless mode is slower)
+- Initial reconnaissance scans where you want quick results
+
+**Performance tradeoff:**
+Headless mode is significantly slower but discovers more attack surface. For comprehensive testing, use headless mode. For quick scans or CI/CD integration, use standard mode.
+
+**Example usage:**
+```bash
+# Standard scan (faster, may miss XHR-based vulnerabilities)
+wapiti -u https://example.com -m exec,xss,sql
+
+# Headless scan (slower, more comprehensive)
+wapiti -u https://example.com -m exec,xss,sql --headless hidden
+
+# SSL module should run without headless
+wapiti -u https://example.com -m ssl
+```
+
 ### What about endpoints ? Can I set my own ? ###
 
 An HTTP endpoint is used for some modules in order to see if the target is vulnerable.  
