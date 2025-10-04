@@ -29,6 +29,7 @@ from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import SsrfFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
 
@@ -149,5 +150,5 @@ class ModuleSsrf(Attack):
                                 parameter
                             )
                             log_red(Messages.MSG_EVIL_REQUEST)
-                            log_red(mutated_request.http_repr())
+                            log_red(http_repr(mutated_request))
                             log_red("---")

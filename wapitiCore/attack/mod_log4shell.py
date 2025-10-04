@@ -30,6 +30,7 @@ from wapitiCore.definitions.log4shell import Log4ShellFinding
 from wapitiCore.main.log import log_red, logging, log_verbose
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
+from wapitiCore.net.web import http_repr
 
 
 class ModuleLog4Shell(Attack):
@@ -242,7 +243,7 @@ class ModuleLog4Shell(Attack):
         log_red("---")
         log_red(
             f"URL {request.url} seems vulnerable to Log4Shell attack by using the {element_type} {param_name}")
-        log_red(request.http_repr())
+        log_red(http_repr(request))
         log_red("---")
 
     async def _verify_headers_vulnerability(
@@ -278,7 +279,7 @@ class ModuleLog4Shell(Attack):
             log_red(
                 f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}"
             )
-            log_red(modified_request.http_repr())
+            log_red(http_repr(modified_request))
             log_red("---")
 
     async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID, response: Response):
@@ -295,7 +296,7 @@ class ModuleLog4Shell(Attack):
 
         log_red("---")
         log_red(f"URL {request.url} seems vulnerable to Log4Shell attack")
-        log_red(request.http_repr())
+        log_red(http_repr(request))
         log_red("---")
 
     async def _verify_dns(self, header_uuid: str) -> bool:

@@ -27,6 +27,7 @@ from httpx import ReadTimeout, RequestError, InvalidURL
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack, Parameter
 from wapitiCore.model import PayloadInfo
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.file import PathTraversalFinding
@@ -172,7 +173,7 @@ class ModuleFile(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(mutated_request.http_repr())
+                log_orange(http_repr(mutated_request))
                 log_orange("---")
 
                 if parameter.is_qs_injection:
@@ -258,7 +259,7 @@ class ModuleFile(Attack):
                         log_red(constraint_message)
 
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
 
                     if inclusion_succeed:
@@ -284,5 +285,5 @@ class ModuleFile(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
+                    log_orange(http_repr(mutated_request))
                     log_orange("---")

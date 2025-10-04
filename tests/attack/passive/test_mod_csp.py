@@ -84,8 +84,8 @@ def create_mock_objects(
         method=method,
         get_params=get_params,
         post_params=post_params,
+        headers=request_headers,
     )
-    request.set_headers(httpx.Headers(request_headers))
 
     response_obj = httpx.Response(
         status_code=response_status,

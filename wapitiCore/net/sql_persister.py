@@ -208,13 +208,15 @@ class SqlPersister:
         async with self._engine.begin() as conn:
             response_ids = [await self.save_response(response) for _, response in paths_list]
 
-            for (http_resource, _), response_id in zip(paths_list, response_ids):
+            for (http_resource, response), response_id in zip(paths_list, response_ids):
+                headers_to_save = http_resource.sent_headers or http_resource.headers
+
                 if http_resource.path_id:
                     # Request was already saved but not fetched, just update to set HTTP code and headers
                     statement = self.paths.update().where(
                         self.paths.c.path_id == http_resource.path_id
                     ).values(
-                        headers=http_resource.headers,
+                        headers=headers_to_save,
                         response_id=response_id
                     )
                     await conn.execute(statement)
@@ -244,7 +246,7 @@ class SqlPersister:
                         "enctype": http_resource.enctype,
                         "depth": http_resource.link_depth,
                         "encoding": http_resource.encoding,
-                        "headers": http_resource.headers,
+                        "headers": headers_to_save,
                         "referer": http_resource.referer,
                         "response_id": response_id,
                         "evil": False
@@ -332,21 +334,20 @@ class SqlPersister:
             return result.inserted_primary_key[0]
 
     async def save_request(self, http_resource: Request, response: Response = None):
+        headers_to_save = http_resource.sent_headers or http_resource.headers
+        response_id = await self.save_response(response)
+
         async with self._engine.begin() as conn:
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
                 statement = self.paths.update().where(
                     self.paths.c.path_id == http_resource.path_id
                 ).values(
-                    headers=http_resource.headers
+                    headers=headers_to_save,
+                    response_id=response_id
                 )
                 await conn.execute(statement)
                 return
-
-            # We should never have a situation where we overwrite an existing response ID because a request can only be
-            # saved once without response (from the to_browse list) and once when crawled. After, the request should be
-            # removed as a duplicate by the Explorer class.
-            response_id = await self.save_response(response)
 
             # as we have a unique request let's do insertion the classic way
             statement = self.paths.insert().values(
@@ -355,7 +356,7 @@ class SqlPersister:
                 enctype=http_resource.enctype,
                 depth=http_resource.link_depth,
                 encoding=http_resource.encoding,
-                headers=http_resource.headers,
+                headers=headers_to_save,
                 referer=http_resource.referer,
                 response_id=response_id,
                 evil=False
@@ -442,7 +443,9 @@ class SqlPersister:
         if crawled:
             # Bellow is sqlalchemy syntax, do not replace the comparison
             # pylint: disable=singleton-comparison
-            conditions.append(self.paths.c.headers != None)
+            conditions.append(self.paths.c.response_id.is_not(None))
+        else:
+            conditions.append(self.paths.c.response_id.is_(None))
 
         async with self._engine.begin() as conn:
             result = await conn.execute(select(self.paths).where(and_(True, *conditions)).order_by(self.paths.c.path))
@@ -502,11 +505,9 @@ class SqlPersister:
                     referer=row[7],
                     get_params=get_params,
                     post_params=post_params,
-                    file_params=file_params
+                    file_params=file_params,
+                    headers=row[6]
                 )
-
-                if row[6]:
-                    request.set_headers(row[6])
 
                 request.link_depth = row[4]
                 request.path_id = path_id
@@ -585,10 +586,10 @@ class SqlPersister:
             return result.fetchone()[0]
 
     async def has_scan_finished(self) -> bool:
-        # If we have a path without headers set then the scan is not finished
+        # If we have a path without a response id set then the scan is not finished
         # Bellow is sqlalchemy syntax, do not replace the comparison
         # pylint: disable=singleton-comparison
-        statement = select(self.paths.c.path_id).where(self.paths.c.headers == None).limit(1)
+        statement = select(self.paths.c.path_id).where(self.paths.c.response_id.is_(None)).limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
             if result.fetchone():
@@ -630,6 +631,7 @@ class SqlPersister:
 
         response_id = await self.save_response(response)
 
+        headers_to_save = request.sent_headers or request.headers
         # Save the request along with its parameters
         statement = self.paths.insert().values(
             path=request.path,
@@ -637,7 +639,7 @@ class SqlPersister:
             enctype=request.enctype,
             depth=request.link_depth,
             encoding=request.encoding,
-            headers=request.headers,
+            headers=headers_to_save,
             referer=request.referer,
             response_id=response_id,
             evil=True,
@@ -802,11 +804,9 @@ class SqlPersister:
                 referer=row[7],
                 get_params=get_params,
                 post_params=post_params,
-                file_params=file_params
+                file_params=file_params,
+                headers=row[6]
             )
-
-            if row[6]:
-                request.set_headers(row[6])
 
             request.link_depth = row[4]
             request.path_id = path_id

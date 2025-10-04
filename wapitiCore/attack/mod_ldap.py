@@ -32,6 +32,7 @@ from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ldapi import LdapInjectionFinding
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
@@ -241,13 +242,13 @@ class ModuleLdap(Attack):
                     parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
-                log_red(vuln_request.http_repr())
+                log_red(http_repr(vuln_request))
                 log_red("---")
 
-                # LDAP injection succeed for the current context, it is unlikely it will work for another, stop here
+                # LDAP injection succeeded for the current context, it is unlikely it will work for another, stop here
                 return True
 
-        # None of the injection context worked but let's warn if we saw something shady.
+        # None of the injection context worked, but let's warn if we saw something shady.
         # Don't flood: 1 warning per parameter
         if warn_request:
             vuln_info = "Potential LDAP injection"
@@ -272,7 +273,7 @@ class ModuleLdap(Attack):
                 parameter.display_name
             )
             log_red(Messages.MSG_EVIL_REQUEST)
-            log_red(warn_request.http_repr())
+            log_red(http_repr(warn_request))
             log_red("---")
         elif http500_request:
             if parameter.is_qs_injection:
@@ -291,7 +292,7 @@ class ModuleLdap(Attack):
             log_orange("---")
             log_orange(Messages.MSG_500, original_request.path)
             log_orange(Messages.MSG_EVIL_REQUEST)
-            log_orange(http500_request.http_repr())
+            log_orange(http_repr(http500_request))
             log_orange("---")
 
         return False

@@ -74,8 +74,8 @@ def create_mock_objects(
         method=method,
         get_params=get_params,
         post_params=post_params,
+        headers=request_headers,
     )
-    request.set_headers(httpx.Headers(request_headers))
 
     if redirection_url:
         response_headers["Location"] = redirection_url
@@ -125,7 +125,6 @@ def test_non_sensitive_http_redirect_to_https(module):
     vuln = next(module.analyze(request, response), None)
 
     assert vuln is None
-
 
 def test_sensitive_http_get_params_no_redirect(module):
     """

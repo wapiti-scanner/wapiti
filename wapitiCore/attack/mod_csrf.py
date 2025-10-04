@@ -27,6 +27,7 @@ from wapitiCore.definitions.csrf import CsrfFinding
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import Response
 from wapitiCore.main.log import log_red
+from wapitiCore.net.web import http_repr
 
 
 class ModuleCsrf(Attack):
@@ -204,7 +205,7 @@ class ModuleCsrf(Attack):
 
         log_red("---")
         log_red(vuln_message)
-        log_red(request.http_repr())
+        log_red(http_repr(request))
         log_red("---")
 
         await self.add_medium(

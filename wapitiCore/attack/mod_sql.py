@@ -33,6 +33,7 @@ from wapitiCore.definitions.sql import SqlInjectionFinding
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.html_parser import Html
 
 
@@ -400,7 +401,7 @@ class ModuleSql(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
 
                     # We reached maximum exploitation for this parameter, don't send more payloads
@@ -425,7 +426,8 @@ class ModuleSql(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
+                    log_orange(http_repr(mutated_request))
+                    log_orange("---")
                     log_orange("---")
 
         return vulnerable_parameters
@@ -497,7 +499,7 @@ class ModuleSql(Attack):
                         current_parameter.name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(last_mutated_request.http_repr())
+                    log_red(http_repr(last_mutated_request))
                     log_red("---")
 
                 # Don't forget to reset session and results

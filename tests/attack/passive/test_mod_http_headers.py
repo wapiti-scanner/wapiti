@@ -42,7 +42,6 @@ def create_mock_objects(url: str, headers: dict | None = None):
         headers = {}
 
     req = Request(path=url, method="GET")
-    req.set_headers(httpx.Headers({}))
     resp_obj = httpx.Response(
         status_code=200, headers=headers, content=b"<html></html>"
     )

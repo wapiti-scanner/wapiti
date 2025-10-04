@@ -55,9 +55,9 @@ async def test_persister_basic():
 
         for req in stored_requests:
             if req == simple_get:
-                await crawler.async_send(req)
+                response = await crawler.async_send(req)
                 # Add the sent request
-                await persister.save_request(req)
+                await persister.save_request(req, response)
                 assert req.path_id == 1
                 assert await persister.get_path_by_id(1) == req
                 break
@@ -144,8 +144,8 @@ async def test_persister_upload():
     crawler_configuration = CrawlerConfiguration(Request("http://httpbin.org/"))
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         for req in stored_requests:
-            await crawler.async_send(req)
-            await persister.save_request(req)
+            response = await crawler.async_send(req)
+            await persister.save_request(req, response)
 
             if req == simple_upload:
                 assert req.file_params == simple_upload.file_params

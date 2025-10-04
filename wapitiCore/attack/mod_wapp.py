@@ -259,7 +259,6 @@ class ModuleWapp(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
-        request_to_root = Request(request.url)
         categories_file_path = os.path.join(self.user_config_dir, self.WAPP_CATEGORIES)
         groups_file_path = os.path.join(self.user_config_dir, self.WAPP_GROUPS)
         technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
@@ -279,7 +278,7 @@ class ModuleWapp(Attack):
             logging.error(exception)
             return
 
-        detected_applications, response = await self._detect_applications(request.url, application_data)
+        detected_applications, sent_request, response = await self._detect_applications(request.url, application_data)
 
         if detected_applications:
             log_blue("---")
@@ -300,7 +299,7 @@ class ModuleWapp(Attack):
             log_blue("")
             await self.add_info(
                 finding_class=SoftwareNameDisclosureFinding,
-                request=request_to_root,
+                request=sent_request,
                 info=json.dumps(detected_applications[application_name]),
                 response=response
             )
@@ -309,14 +308,14 @@ class ModuleWapp(Attack):
                 if "Web servers" in categories:
                     await self.add_info(
                         finding_class=WebServerVersionDisclosureFinding,
-                        request=request_to_root,
+                        request=sent_request,
                         info=json.dumps(detected_applications[application_name]),
                         response=response
                     )
                 else:
                     await self.add_info(
                         finding_class=SoftwareVersionDisclosureFinding,
-                        request=request_to_root,
+                        request=sent_request,
                         info=json.dumps(detected_applications[application_name]),
                         response=response
                     )
@@ -335,7 +334,7 @@ class ModuleWapp(Attack):
                                 finding_class=VulnerableSoftwareFinding,
                                 level=severity,
                                 info=message,
-                                request=request_to_root,
+                                request=sent_request,
                                 response=response
                             )
 
@@ -359,7 +358,7 @@ class ModuleWapp(Attack):
             self,
             url: str,
             application_data: ApplicationData
-    ) -> Tuple[Dict, Optional[Response]]:
+    ) -> Tuple[Dict, Request, Optional[Response]]:
         detected_applications = {}
         response = None
 
@@ -381,7 +380,7 @@ class ModuleWapp(Attack):
             wappalyzer = Wappalyzer(application_data, response, headless_results)
             detected_applications.update(wappalyzer.detect())
 
-        return detected_applications, response
+        return detected_applications, request, response
 
     async def _dump_url_content_to_file(self, url: str, file_path: str):
         request = Request(url)

@@ -28,6 +28,7 @@ from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.redirect import RedirectFinding
 from wapitiCore.model import str_to_payloadinfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.html_parser import Html
 
 
@@ -83,5 +84,5 @@ class ModuleRedirect(Attack):
                     parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
-                log_red(mutated_request.http_repr())
+                log_red(http_repr(mutated_request))
                 log_red("---")

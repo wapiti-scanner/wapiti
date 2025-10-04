@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import httpx
 import pytest
@@ -278,13 +278,11 @@ async def test_wp_version():
 
             mock_detect_plugin.assert_called_once()
             mock_detect_theme.assert_called_once()
-            assert persister.add_payload.call_count == 2
+            assert persister.add_payload.call_count == 1
             assert persister.add_payload.call_args_list[0][1]["info"] == (
                 '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
             )
-            assert persister.add_payload.call_args_list[1][1]["info"] == (
-                '{"name": "WordPress", "versions": ["5.8.2"], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
-            )
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
 
 
 @pytest.mark.asyncio
@@ -320,3 +318,46 @@ async def test_wp_version_no_file():
             mock_detect_plugin.assert_called_once()
             mock_detect_theme.assert_called_once()
             assert persister.add_payload.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_detect_version_network_error():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><body>Wordpress</body></html>"
+        )
+    )
+
+    # Mock the calls to RSS feeds to raise a network error
+    respx.get(url__regex=r"http://perdu.com/.*?feed.*?").mock(
+        side_effect=httpx.RequestError("mocked error", request=httpx.Request("GET", "http://perdu.com/feed/"))
+    )
+
+    respx.get(url__regex=r"http://perdu.com/wp-content/.*").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com")
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+        module = ModuleWpEnum(crawler, persister, options, crawler_configuration)
+
+        with patch.object(ModuleWpEnum, "detect_plugin", AsyncMock()), \
+                patch.object(ModuleWpEnum, "detect_theme", AsyncMock()), \
+                patch.object(ModuleWpEnum, "check_wordpress", MagicMock()) as mock_check_wordpress:
+
+            mock_check_wordpress.return_value = True
+            await module.attack(request)
+
+            # The module should have tried all 4 rss_urls
+            assert module.network_errors == 4
+
+            # It should still report that Wordpress was found (check_wordpress returns True), but without version
+            assert persister.add_payload.call_count == 1
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}'
+            )

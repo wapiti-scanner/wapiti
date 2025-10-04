@@ -50,9 +50,9 @@ class ModuleBuster(Attack):
         self.network_errors = 0
 
     async def check_path(self, url):
-        page = Request(url)
+        request = Request(url)
         try:
-            response = await self.crawler.async_send(page)
+            response = await self.crawler.async_send(request)
         except RequestError:
             self.network_errors += 1
             return False
@@ -63,17 +63,17 @@ class ModuleBuster(Attack):
             self.new_resources.append(loc)
             await self.add_info(
                 finding_class=BusterFinding,
-                request=page,
+                request=request,
                 info=f"Found webpage {loc} on {url}",
             )
         elif (response.redirection_url and not response.is_directory_redirection) \
                 or response.status not in [403, 404, 429]:
-            log_red(f"Found webpage {page.path}")
-            self.new_resources.append(page.path)
+            log_red(f"Found webpage {request.path}")
+            self.new_resources.append(request.path)
             await self.add_info(
                 finding_class=BusterFinding,
-                request=page,
-                info=f"Found webpage {page.path} on {url}",
+                request=request,
+                info=f"Found webpage {request.path} on {url}",
             )
             return True
 

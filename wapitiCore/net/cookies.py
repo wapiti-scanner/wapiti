@@ -79,7 +79,9 @@ def mitm_jar_to_cookiejar(cookies: dict) -> CookieJar:
                 domain_initial_dot=False,
                 path=path,
                 path_specified=True,
-                secure=True,
+                # we force `secure` to false because httpx handles cookies differently than firefox headless
+                # and we want to have them no matter what
+                secure=False,
                 expires=None,
                 discard=True,
                 comment=None,

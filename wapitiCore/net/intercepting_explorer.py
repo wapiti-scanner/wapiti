@@ -116,15 +116,16 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Optional[Request]:
 
         post_params = mitm_request.text
 
-    request = Request(
+    request_headers = httpx.Headers(decode_key_value_dict(mitm_request.headers))
+
+    return Request(
         path=mitm_request.url,
         method=mitm_request.method,
         referer=mitm_request.headers.get("Referer", ""),
         post_params=post_params or None,
-        enctype=enctype
+        enctype=enctype,
+        headers=request_headers
     )
-    request.set_headers(httpx.Headers(decode_key_value_dict(mitm_request.headers)))
-    return request
 
 
 class MitmFlowToWapitiRequests:
@@ -329,7 +330,6 @@ async def launch_headless_explorer(
             while to_explore and not stop_event.is_set():
                 request = to_explore.popleft()
                 excluded_requests.append(request)
-                request.set_cookies(crawler.cookie_jar)
 
                 if request.method == "GET":
                     try:

@@ -22,6 +22,7 @@ import codecs
 from httpx import Response
 
 from wapitiCore.net.response import detail_response
+from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 NB_COLUMNS = 80
@@ -90,9 +91,9 @@ class TXTReportGenerator(ReportGenerator):
                             txt_report_file.write("\n")
                             # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
                             txt_report_file.write("Evil request:\n")
-                            txt_report_file.write(vuln["request"].http_repr())
+                            txt_report_file.write(http_repr(vuln["request"]))
                             txt_report_file.write("\n")
-                            txt_report_file.write(f"cURL command PoC : \"{vuln['request'].curl_repr}\"")
+                            txt_report_file.write(f"cURL command PoC : \"{curl_repr(vuln['request'])}\"")
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
                         txt_report_file.write(separator)
@@ -114,7 +115,7 @@ class TXTReportGenerator(ReportGenerator):
                             txt_report_file.write(f"WSTG code: {anom['wstg']}")
                             txt_report_file.write("\n")
                             txt_report_file.write("Evil request:\n")
-                            txt_report_file.write(anom["request"].http_repr())
+                            txt_report_file.write(http_repr(anom["request"]))
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
                         txt_report_file.write(separator)

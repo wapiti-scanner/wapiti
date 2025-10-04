@@ -30,6 +30,7 @@ from wapitiCore.definitions.sql import SqlInjectionFinding
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
@@ -105,7 +106,7 @@ class ModuleTimesql(Attack):
                     parameter.display_name
                 )
                 log_red(Messages.MSG_EVIL_REQUEST)
-                log_red(mutated_request.http_repr())
+                log_red(http_repr(mutated_request))
                 log_red("---")
 
                 # We reached maximum exploitation for this parameter, don't send more payloads
@@ -133,5 +134,5 @@ class ModuleTimesql(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
+                    log_orange(http_repr(mutated_request))
                     log_orange("---")

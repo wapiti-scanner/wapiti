@@ -77,11 +77,11 @@ async def test_csrf_cases():
     )
 
     request = Request(
-        "http://127.0.0.1:65086/", 
+        "http://127.0.0.1:65086/",
         method="POST",
-        post_params=[["name", "Obiwan"]]
+        post_params=[["name", "Obiwan"]],
+        headers={"x-csrf-token": "testestestest"}
     )
-    request.set_headers({"x-csrf-token": "testestestest"})
     request.path_id = 6
     all_requests.append((request, response))
 

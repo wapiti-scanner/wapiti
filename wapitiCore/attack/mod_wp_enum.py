@@ -3,6 +3,7 @@
 #
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
 # Copyright (C) 2021-2024 Cyberwatch
+# Copyright (C) 2025 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,19 +83,26 @@ class ModuleWpEnum(Attack):
 
     async def detect_version(self, url: str):
         rss_urls = ["feed/", "comments/feed/", "feed/rss/", "feed/rss2/"]
-        detected_version = None
+        info_content = {"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}
+
+        request = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_urls[0]}", "GET")
 
         for rss_url in rss_urls:
             request = Request(f"{url}{'' if url.endswith('/') else '/'}{rss_url}", "GET")
-            response: Response = await self.crawler.async_send(request, follow_redirects=True)
+            try:
+                response: Response = await self.crawler.async_send(request, follow_redirects=True)
+            except RequestError:
+                self.network_errors += 1
+                continue
 
             if not response.content or response.is_error or "content-type" not in response.headers:
                 continue
+
             if "xml" not in response.headers["content-type"]:
                 log_orange(f"Response content-type for {rss_url} is not XML")
                 continue
-            root = ET.fromstring(response.content)
 
+            root = ET.fromstring(response.content)
             if root is None:
                 continue
 
@@ -111,21 +119,24 @@ class ModuleWpEnum(Attack):
                 continue
 
             detected_version = version.group(1)
-            break
+            if detected_version:
+                log_blue(
+                    MSG_WP_VERSION,
+                    detected_version
+                )
+                info_content["versions"].append(detected_version)
+                await self.add_info(
+                    finding_class=SoftwareVersionDisclosureFinding,
+                    request=request,
+                    info=json.dumps(info_content)
+                )
+                # It would be redundant to have both SoftwareVersionDisclosureFinding and SoftwareNameDisclosureFinding
+                return
 
         log_blue(
             MSG_WP_VERSION,
-            detected_version or "N/A"
+            "N/A"
         )
-        info_content = {"name": "WordPress", "versions": [], "categories": ["CMS", "Blogs"], "groups": ["Content"]}
-
-        if detected_version:
-            info_content["versions"].append(detected_version)
-            await self.add_info(
-                finding_class=SoftwareVersionDisclosureFinding,
-                request=request,
-                info=json.dumps(info_content)
-            )
 
         await self.add_info(
             finding_class=SoftwareNameDisclosureFinding,
@@ -266,10 +277,10 @@ class ModuleWpEnum(Attack):
             await self.detect_version(request_to_root.url)
             await self.check_false_positive(request_to_root.url)
             log_blue("----")
-            log_blue("Enumeration of WordPress Plugins :")
+            log_blue("Enumeration of WordPress Plugins:")
             await self.detect_plugin(request_to_root.url)
             log_blue("----")
-            log_blue("Enumeration of WordPress Themes :")
+            log_blue("Enumeration of WordPress Themes:")
             await self.detect_theme(request_to_root.url)
         else:
             log_blue(MSG_NO_WP)
