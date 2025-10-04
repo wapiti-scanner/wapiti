@@ -25,6 +25,7 @@ from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.spring4shell import Spring4ShellFinding
 from wapitiCore.main.log import log_red, logging
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 
 
 class ModuleSpring4Shell(Attack):
@@ -93,7 +94,7 @@ class ModuleSpring4Shell(Attack):
 
         log_red("---")
         log_red("URL {0} seems vulnerable to Spring4Shell attack", request.url)
-        log_red(request.http_repr())
+        log_red(http_repr(request))
         log_red("---")
 
     @staticmethod

@@ -19,7 +19,6 @@ URL_HTTPS = "https://example.com/form"
 def create_mock_objects(url: str, html_content: str):
     """Helper to create Request and Response objects with given HTML content."""
     req = Request(path=url, method="GET")
-    req.set_headers(httpx.Headers({}))
     resp_obj = httpx.Response(
         status_code=200,
         content=html_content.encode("utf-8"),

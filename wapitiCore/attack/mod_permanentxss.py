@@ -31,6 +31,7 @@ from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.parsers.html_parser import Html
@@ -156,10 +157,10 @@ class ModulePermanentxss(Attack):
                             log_red("Warning: Content-Security-Policy is present!")
 
                         log_red(Messages.MSG_EVIL_REQUEST)
-                        log_red(evil_request.http_repr())
+                        log_red(http_repr(evil_request))
                         log_red("---")
 
-                # Here mod_xss did inject the tainted value but as it was not reflected in the same webpage it didn't
+                # Here mod_xss did inject the tainted value, but as it was not reflected in the same webpage it didn't
                 # go further. It is now our job to send the payloads to webpage A and check the output in webpage B
                 else:
                     payloads = generate_payloads(response.content, taint, self.PAYLOADS_FILE, self.external_endpoint)
@@ -207,7 +208,7 @@ class ModulePermanentxss(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(evil_request.http_repr())
+                log_orange(http_repr(evil_request))
                 log_orange("---")
 
                 if xss_param.is_qs_injection:
@@ -247,7 +248,6 @@ class ModulePermanentxss(Attack):
                             taint
                         )
                 ):
-
                     finding = StoredXssFinding if payload_info.injection_type == "javascript" else StoredHtmlFinding
                     if page == output_request.path:
                         description = (
@@ -289,7 +289,7 @@ class ModulePermanentxss(Attack):
                         log_red("Warning: Content-Security-Policy is present!")
 
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(evil_request.http_repr())
+                    log_red(http_repr(evil_request))
                     log_red("---")
 
                     # stop trying payloads and jump to the next parameter
@@ -312,6 +312,6 @@ class ModulePermanentxss(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(evil_request.http_repr())
+                    log_orange(http_repr(evil_request))
                     log_orange("---")
                     saw_internal_error = True

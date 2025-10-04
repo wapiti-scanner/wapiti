@@ -33,6 +33,7 @@ from wapitiCore.definitions.resource_consumption import ResourceConsumptionFindi
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
@@ -138,7 +139,7 @@ class ModuleXxe(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(mutated_request.http_repr())
+                log_orange(http_repr(mutated_request))
                 log_orange("---")
 
                 if parameter.is_qs_injection:
@@ -181,7 +182,7 @@ class ModuleXxe(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
 
                     # We reached maximum exploitation for this parameter, don't send more payloads
@@ -206,7 +207,7 @@ class ModuleXxe(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
+                    log_orange(http_repr(mutated_request))
                     log_orange("---")
 
     async def attack_body(self, original_request):
@@ -241,7 +242,7 @@ class ModuleXxe(Attack):
                         original_request.url
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
                     self.vulnerables.add(original_request.path_id)
                     break
@@ -285,7 +286,7 @@ class ModuleXxe(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
                     vulnerable_parameter = True
                     self.vulnerables.add(original_request.path_id)
@@ -401,5 +402,5 @@ class ModuleXxe(Attack):
                     log_method("---")
                     log_method(vuln_message)
                     log_method(Messages.MSG_EVIL_REQUEST)
-                    log_method(mutated_request.http_repr())
+                    log_method(http_repr(mutated_request))
                     log_method("---")

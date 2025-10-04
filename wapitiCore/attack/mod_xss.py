@@ -30,6 +30,7 @@ from wapitiCore.definitions.html_injection import HtmlInjectionFinding
 from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo
+from wapitiCore.net.web import http_repr
 from wapitiCore.net.xss_utils import generate_payloads, valid_xss_content_type, check_payload
 from wapitiCore.net.csp_utils import has_strong_csp
 from wapitiCore.net import Request, Response
@@ -149,7 +150,7 @@ class ModuleXss(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(evil_request.http_repr())
+                log_orange(http_repr(evil_request))
                 log_orange("---")
 
                 if xss_param.is_qs_injection:
@@ -212,7 +213,7 @@ class ModuleXss(Attack):
                         log_red("Warning: Content-Security-Policy is present!")
 
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(evil_request.http_repr())
+                    log_red(http_repr(evil_request))
                     log_red("---")
 
                     # stop trying payloads and jump to the next parameter
@@ -235,6 +236,6 @@ class ModuleXss(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(evil_request.http_repr())
+                    log_orange(http_repr(evil_request))
                     log_orange("---")
                     saw_internal_error = True

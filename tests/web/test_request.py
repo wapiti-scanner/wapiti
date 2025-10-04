@@ -10,7 +10,8 @@ import pytest
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
-from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.crawler import AsyncCrawler, Response as WapitiResponse
+from wapitiCore.net.web import http_repr, curl_repr
 
 
 @pytest.fixture(autouse=True)
@@ -135,31 +136,6 @@ async def test_request_object():
     assert res11 in [res6, res11]
     assert res11 not in [None, res6]
 
-    print("Tests were successful, now launching representations")
-    print("=== Basic representation follows ===")
-    print(res1)
-    print("=== cURL representation follows ===")
-    print(res1.curl_repr)
-    print("=== HTTP representation follows ===")
-    print(res1.http_repr())
-    print("=== POST parameters as an array ===")
-    print(res1.post_params)
-    print("=== POST keys encoded as string ===")
-    print(res1.encoded_post_keys)
-    print("=== Upload HTTP representation  ===")
-    print(res12.http_repr())
-    print("=== Upload basic representation ===")
-    print(res12)
-    print("=== Upload cURL representation  ===")
-    print(res12.curl_repr)
-    print("===   HTTP GET keys as a tuple  ===")
-    print(res1.get_keys)
-    print("===  HTTP POST keys as a tuple  ===")
-    print(res1.post_keys)
-    print("=== HTTP files keys as a tuple  ===")
-    print(res12.file_keys)
-    print('')
-
     json_req = Request(
         "http://127.0.0.1:65084/httpbin.php?a=b",
         post_params=json.dumps({"z": 1, "a": 2}),
@@ -204,3 +180,140 @@ async def test_redirect():
         response = await crawler.async_send(Request(slyfx), follow_redirects=True)
         assert response.url == disney
         assert response.history[0].url == slyfx
+
+
+def test_request_headers():
+    req = Request("http://perdu.com/")
+    assert req.headers == httpx.Headers()
+
+    # Test add_header
+    req.add_header("User-Agent", "Wapiti/3.x")
+    assert req.headers["User-Agent"] == "Wapiti/3.x"
+
+    # Test update_headers with a dict
+    req.update_headers({"Accept-Language": "en-US", "Accept-Encoding": "gzip, deflate"})
+    assert req.headers["User-Agent"] == "Wapiti/3.x"
+    assert req.headers["Accept-Language"] == "en-US"
+    assert req.headers["Accept-Encoding"] == "gzip, deflate"
+
+    # Test update_headers with a list of tuples
+    req.update_headers([("Connection", "keep-alive"), ("Accept", "text/html")])
+    assert req.headers["Connection"] == "keep-alive"
+    assert req.headers["Accept"] == "text/html"
+
+    # Test updating an existing header with add_header
+    req.add_header("User-Agent", "Mozilla/5.0")
+    assert req.headers["User-Agent"] == "Mozilla/5.0"
+
+    # Test case-insensitivity of headers
+    assert req.headers["user-agent"] == "Mozilla/5.0"
+
+
+@pytest.mark.parametrize(
+    "request_, expected_output, sent_headers_to_set",
+    [
+        (
+            Request("http://perdu.com/index.php?a=1"),
+            '''GET /index.php?a=1 HTTP/1.1''',
+            None
+        ),
+        (
+            Request("http://perdu.com/", method="POST", post_params=[["foo", "bar"]]),
+            '''POST / HTTP/1.1
+    Content-Type: application/x-www-form-urlencoded
+
+    foo=bar''',
+            None
+        ),
+        (
+            Request(
+                "http://perdu.com/",
+                method="POST",
+                post_params=[['post1', 'c']],
+                file_params=[['file1', ('fname1', b'content')]]
+            ),
+            '''POST / HTTP/1.1
+    Content-Type: multipart/form-data; boundary=------------------------boundarystring
+
+    ------------------------boundarystring
+    Content-Disposition: form-data; name="post1"
+
+    c
+    ------------------------boundarystring
+    Content-Disposition: form-data; name="file1"; filename="fname1"
+
+    content
+    ------------------------boundarystring--''',
+            None
+        ),
+        (
+            Request(
+                "http://perdu.com/",
+                method="POST",
+                post_params=json.dumps({"a": 1}),
+                enctype="application/json"
+            ),
+            '''POST / HTTP/1.1
+    Content-Type: application/json
+
+    {"a": 1}''',
+            None
+        ),
+        (
+            Request("http://perdu.com/", headers={"User-Agent": "Wapiti"}),
+            '''GET / HTTP/1.1
+    user-agent: Wapiti''',
+            None
+        ),
+        (
+            Request("http://perdu.com/", headers={"User-Agent": "Wapiti"}),
+            '''GET / HTTP/1.1
+    user-agent: Custom''',
+            httpx.Headers({"User-Agent": "Custom"})
+        ),
+    ]
+)
+def test_http_repr(request_, expected_output, sent_headers_to_set):
+    if sent_headers_to_set:
+        request_.set_sent_headers(sent_headers_to_set)
+    output = http_repr(request_).strip()
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+    "request_, expected_output",
+    [
+        (
+            Request("http://perdu.com/index.php?a=1"),
+            'curl "http://perdu.com/index.php?a=1"'
+        ),
+        (
+            Request("http://perdu.com/", referer="http://google.com/"),
+            'curl "http://perdu.com/" -e "http://google.com/"'
+        ),
+        (
+            Request("http://perdu.com/", method="POST", post_params=[["foo", "bar"]]),
+            'curl "http://perdu.com/" -d "foo=bar"'
+        ),
+        (
+            Request(
+                "http://perdu.com/",
+                method="POST",
+                post_params=[["foo", "bar"]],
+                file_params=[["file", ("test.txt", b"content")]]
+            ),
+            'curl "http://perdu.com/" -F "foo=bar" -F "file=@your_local_file;filename=test.txt"'
+        ),
+        (
+            Request(
+                "http://perdu.com/",
+                method="POST",
+                post_params=json.dumps({"a": 1}),
+                enctype="application/json"
+            ),
+            'curl "http://perdu.com/" -H "Content-Type: application/json" -d @payload_file'
+        ),
+    ]
+)
+def test_curl_repr(request_, expected_output):
+    assert curl_repr(request_) == expected_output

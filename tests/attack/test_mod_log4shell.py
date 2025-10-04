@@ -124,7 +124,7 @@ async def test_verify_headers_vuln_found():
         return True
 
     # When a vuln has been found
-    with patch.object(Request, "http_repr", autospec=True) as mock_http_repr:
+    with patch("wapitiCore.attack.mod_log4shell.http_repr", autospec=True) as mock_http_repr:
         persister = AsyncMock()
         home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
         base_dir = os.path.join(home_dir, ".wapiti")
@@ -148,7 +148,7 @@ async def test_verify_headers_vuln_found():
             page = Response(HttpxResponse(200, request=modified_request))
 
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
-            mock_http_repr.assert_called_once()
+            mock_http_repr.assert_called_once_with(modified_request)
             persister.add_payload.assert_called_once_with(
                 payload_type="vulnerability",
                 module="log4shell",
@@ -170,7 +170,7 @@ async def test_verify_headers_vuln_not_found():
         return False
 
     #  When no vuln have been found
-    with patch.object(Request, "http_repr", autospec=True) as mock_http_repr:
+    with patch("wapitiCore.attack.mod_log4shell.http_repr", autospec=True) as mock_http_repr:
 
         persister = AsyncMock()
         home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"

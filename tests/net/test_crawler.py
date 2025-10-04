@@ -358,8 +358,8 @@ async def test_async_send():
 
         assert response.status == 200
         assert response.headers.get("abc") == "123"
-        assert "user-agent" in request.headers
-        assert request.headers.get("foo") == "bar"
+        assert "user-agent" in request.sent_headers
+        assert request.sent_headers.get("foo") == "bar"
 
 
 @respx.mock
@@ -406,3 +406,32 @@ async def test_async_put_missing_enctype():
         caught_request = route.calls[0].request
         assert caught_request.headers["Content-Type"] == "application/x-www-form-urlencoded"
         assert caught_request.content == b"a=b"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cookie_priority():
+    set_cookie_url = "http://httpbin.org/set-cookie"
+    read_cookie_url = "http://httpbin.org/cookies"
+
+    # This route will set the "fresh" cookie
+    respx.get(set_cookie_url).mock(
+        return_value=httpx.Response(200, headers={"Set-Cookie": "session=fresh"})
+    )
+    # This is the route we will check for the sent cookie
+    read_cookie_route = respx.get(read_cookie_url).mock(return_value=httpx.Response(200))
+
+    config = CrawlerConfiguration(Request(read_cookie_url))
+    # Crawler starts with an empty cookie jar
+
+    async with AsyncCrawler.with_configuration(config) as crawler:
+        # 1. First, visit the page that sets the fresh cookie
+        await crawler.async_send(Request(set_cookie_url))
+
+        # 2. Then, try to send a request with a stale cookie in its headers
+        stale_req = Request(read_cookie_url, headers={"Cookie": "session=stale"})
+        await crawler.async_send(stale_req)
+
+    assert read_cookie_route.called
+    sent_headers = read_cookie_route.calls[0].request.headers
+    assert sent_headers["cookie"] == "session=fresh"

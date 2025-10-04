@@ -1,5 +1,5 @@
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2020-2023 Nicolas Surribas
+# Copyright (C) 2020-2025 Nicolas Surribas
 # Copyright (C) 2020-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -22,13 +22,14 @@
 from os.path import join as path_join
 from itertools import product
 import asyncio
-from typing import Optional
+from typing import Optional, Tuple
 
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.credentials import CredentialsFinding
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
@@ -88,7 +89,7 @@ class ModuleBruteLoginForm(Attack):
             password_index: int,
             username: str,
             password: str,
-    ) -> Response:
+    ) -> Tuple[Request, Response]:
         post_params = login_form.post_params
         get_params = login_form.get_params
 
@@ -113,7 +114,7 @@ class ModuleBruteLoginForm(Attack):
             follow_redirects=True
         )
 
-        return login_response
+        return login_request, login_response
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         # We leverage the fact that the crawler will fill password entries with a known placeholder
@@ -130,6 +131,7 @@ class ModuleBruteLoginForm(Attack):
         return True
 
     async def attack(self, request: Request, response: Optional[Response] = None):
+        # First, we get the referer URL of the login request, we should find the login form there
         try:
             response = await self.crawler.async_send(Request(request.referer, "GET"), follow_redirects=True)
         except RequestError:
@@ -142,7 +144,7 @@ class ModuleBruteLoginForm(Attack):
             return
 
         try:
-            failure_response = await self.send_credentials(
+            __, failure_response = await self.send_credentials(
                 login_form,
                 username_field_idx, password_field_idx,
                 "invalid", "invalid"
@@ -196,28 +198,8 @@ class ModuleBruteLoginForm(Attack):
                 else:
                     if result:
                         found = True
-                        username, password, response = result
+                        username, password, evil_request, response = result
                         vuln_message = f"Credentials found for URL {request.referer} : {username} / {password}"
-
-                        # Recreate the request that succeed in order to print and store it
-                        post_params = login_form.post_params
-                        get_params = login_form.get_params
-
-                        if login_form.method == "POST":
-                            post_params[username_field_idx][1] = username
-                            post_params[password_field_idx][1] = password
-                        else:
-                            get_params[username_field_idx][1] = username
-                            get_params[password_field_idx][1] = password
-
-                        evil_request = Request(
-                            path=login_form.url,
-                            method=login_form.method,
-                            post_params=post_params,
-                            get_params=get_params,
-                            referer=login_form.referer,
-                            link_depth=login_form.link_depth
-                        )
 
                         await self.add_low(
                             finding_class=CredentialsFinding,
@@ -229,13 +211,13 @@ class ModuleBruteLoginForm(Attack):
                         log_red("---")
                         log_red(vuln_message)
                         log_red(Messages.MSG_EVIL_REQUEST)
-                        log_red(evil_request.http_repr())
+                        log_red(http_repr(evil_request))
                         log_red("---")
 
                 tasks.remove(task)
 
             if found:
-                # If we found valid credentials we need to stop pending tasks as they may generate false positives
+                # If we found valid credentials, we need to stop pending tasks as they may generate false positives
                 # because the session is opened on the website and next attempts may appear as logged in
                 for task in pending_tasks:
                     task.cancel()
@@ -243,13 +225,13 @@ class ModuleBruteLoginForm(Attack):
 
     # pylint: disable=too-many-positional-arguments
     async def test_credentials(self, login_form, username_idx, password_idx, username, password, failure_text):
-        response = await self.send_credentials(
+        request, response = await self.send_credentials(
                 login_form,
                 username_idx, password_idx,
                 username, password
         )
 
         if self.check_success_auth(response.content) and failure_text != response.content:
-            return username, password, response
+            return username, password, request, response
 
         return None

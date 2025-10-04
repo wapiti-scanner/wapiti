@@ -31,6 +31,7 @@ from wapitiCore.net.response import Response
 from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
 from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.net import Request
+from wapitiCore.net.web import http_repr
 from wapitiCore.parsers.ini_payload_parser import IniPayloadReader, replace_tags
 
 
@@ -125,7 +126,7 @@ class ModuleExec(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
                     vulnerable_parameter = True
                     continue
@@ -139,7 +140,7 @@ class ModuleExec(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(mutated_request.http_repr())
+                log_orange(http_repr(mutated_request))
                 log_orange("---")
 
                 if parameter.is_qs_injection:
@@ -197,7 +198,7 @@ class ModuleExec(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")
                 elif response.is_server_error and not saw_internal_error:
                     saw_internal_error = True
@@ -216,5 +217,5 @@ class ModuleExec(Attack):
                     log_orange("---")
                     log_orange(Messages.MSG_500, page)
                     log_orange(Messages.MSG_EVIL_REQUEST)
-                    log_orange(mutated_request.http_repr())
+                    log_orange(http_repr(mutated_request))
                     log_orange("---")

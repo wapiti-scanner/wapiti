@@ -24,6 +24,7 @@ import json
 from httpx import Response
 
 from wapitiCore.net.response import detail_response
+from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
 
 
@@ -105,8 +106,8 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
+            "http_request": http_repr(request, left_margin=""),
+            "curl_command": curl_repr(request),
             "wstg": wstg,
         }
         if self._infos["detailed_report_level"] == 2:
@@ -150,8 +151,8 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
+            "http_request": http_repr(request, left_margin=""),
+            "curl_command": curl_repr(request),
             "wstg": wstg
         }
         if self._infos["detailed_report_level"] == 2:
@@ -194,8 +195,8 @@ class JSONReportGenerator(ReportGenerator):
             "parameter": parameter,
             "referer": request.referer,
             "module": module,
-            "http_request": request.http_repr(left_margin=""),
-            "curl_command": request.curl_repr,
+            "http_request": http_repr(request, left_margin=""),
+            "curl_command": curl_repr(request),
             "wstg": wstg
         }
 

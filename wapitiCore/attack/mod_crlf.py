@@ -28,6 +28,7 @@ from wapitiCore.definitions.resource_consumption import ResourceConsumptionFindi
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.main.log import logging, log_verbose, log_orange, log_red
+from wapitiCore.net.web import http_repr
 
 
 class ModuleCrlf(Attack):
@@ -67,7 +68,7 @@ class ModuleCrlf(Attack):
                 log_orange("---")
                 log_orange(Messages.MSG_TIMEOUT, page)
                 log_orange(Messages.MSG_EVIL_REQUEST)
-                log_orange(mutated_request.http_repr())
+                log_orange(http_repr(mutated_request))
                 log_orange("---")
             except HTTPStatusError:
                 self.network_errors += 1
@@ -97,5 +98,5 @@ class ModuleCrlf(Attack):
                         parameter.display_name
                     )
                     log_red(Messages.MSG_EVIL_REQUEST)
-                    log_red(mutated_request.http_repr())
+                    log_red(http_repr(mutated_request))
                     log_red("---")

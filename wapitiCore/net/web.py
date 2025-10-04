@@ -21,12 +21,15 @@ from copy import deepcopy
 import posixpath
 import sys
 from urllib.parse import urlparse, urlunparse, unquote, quote, urljoin
-from typing import Optional, List, Tuple, Union
+from typing import Optional, List, Tuple, Union, TYPE_CHECKING
 import re
 
 import httpx
 
 from wapitiCore.main.log import logging
+
+if TYPE_CHECKING:
+    from wapitiCore.net.response import Response
 
 Parameters = Optional[Union[List[List[str]], str]]
 
@@ -258,6 +261,7 @@ class Request:
             get_params: Parameters = None,
             post_params: Parameters = None,
             file_params: list = None,
+            headers: Union[httpx.Headers, dict, list] = None,
             encoding: str = "UTF-8",
             enctype: str = "",
             referer: str = "",
@@ -306,7 +310,6 @@ class Request:
 
         self._cached_hash_params = None
         self._status = None
-        self._cookies = None
 
         if not method:
             # For lazy
@@ -384,7 +387,8 @@ class Request:
             self._port = port
         elif url_parts.scheme == "https":
             self._port = 443
-        self._headers = None
+        self._headers = httpx.Headers(headers or {})
+        self.sent_headers: Optional[httpx.Headers] = None
         self._response_content = None
         self._start_time = None
         self._size = 0
@@ -492,70 +496,21 @@ class Request:
 
         return buff
 
-    def http_repr(self, left_margin: str = "    ") -> str:
-        rel_url = self.url.split('/', 3)[3]
-        http_string = f"{left_margin}{self._method} /{rel_url} HTTP/1.1\n"
-
-        if self._headers:
-            for header_name, header_value in self._headers.items():
-                http_string += f"{left_margin}{header_name}: {header_value}\n"
-
-        if self.is_multipart:
-            boundary = "------------------------boundarystring"
-            http_string += f"{left_margin}Content-Type: multipart/form-data; boundary={boundary}\n\n"
-            for field_name, field_value in self._post_params:
-                http_string += (
-                    f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
-                    f"name=\"{field_name}\"\n\n{left_margin}{field_value}\n"
-                )
-            for field_name, field_value in self._file_params:
-                http_string += (
-                    f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
-                    f"name=\"{field_name}\"; filename=\"{field_value[0]}\"\n\n{left_margin}" +
-                    (field_value[1].decode(errors="replace").replace("\n", "\n" + left_margin).strip()) +
-                    "\n"
-                )
-            http_string += f"{left_margin}{boundary}--\n"
-        elif self._post_params:
-            if "urlencoded" in self.enctype:
-                http_string += f"{left_margin}Content-Type: application/x-www-form-urlencoded\n"
-                http_string += f"\n{left_margin}{self.encoded_data}"
-            else:
-                http_string += f"{left_margin}Content-Type: {self.enctype}\n"
-                http_string += "\n" + left_margin + self.encoded_data.replace("\n", "\n" + left_margin).strip()
-
-        return http_string.rstrip()
-
-    @property
-    def curl_repr(self) -> str:
-        curl_string = f"curl \"{shell_escape(self.url)}\""
-        if self._referer:
-            curl_string += f" -e \"{shell_escape(self._referer)}\""
-
-        if self.is_multipart:
-            # POST with multipart
-            for field_name, field_value in self._post_params:
-                curl_string += f" -F \"{shell_escape(f'{field_name}={field_value}')}\""
-            for field_name, field_value in self._file_params:
-                curl_upload_kv = f"{field_name}=@your_local_file;filename={field_value[0]}"
-                curl_string += f" -F \"{shell_escape(curl_upload_kv)}\""
-        elif self._post_params:
-            # POST either urlencoded
-            if "urlencoded" in self._enctype:
-                curl_string += f" -d \"{shell_escape(self.encoded_data)}\""
-            else:
-                # Or raw blob
-                curl_string += f" -H \"Content-Type: {self._enctype}\" -d @payload_file"
-
-        return curl_string
-
     @property
     def headers(self) -> httpx.Headers:
         return self._headers
 
-    def set_headers(self, sent_headers: httpx.Headers):
+    def add_header(self, key: str, value: str):
+        """Adds or updates a header."""
+        self._headers[key] = value
+
+    def update_headers(self, new_headers: Union[dict, list]):
+        """Updates headers from a dictionary or a list of tuples."""
+        self._headers.update(new_headers)
+
+    def set_sent_headers(self, headers: httpx.Headers):
         """Set the sent HTTP headers while requesting the resource"""
-        self._headers = sent_headers
+        self.sent_headers = headers
 
     @property
     def response_content(self) -> str:
@@ -563,13 +518,6 @@ class Request:
 
     def set_response_content(self, content: str):
         self._response_content = content
-
-    @property
-    def cookies(self):
-        return self._cookies
-
-    def set_cookies(self, cookies):
-        self._cookies = cookies
 
     @property
     def size(self) -> int:
@@ -808,3 +756,63 @@ def is_valid_url(url: str):
 
     logging.error(f"Error: {url} is not a valid URL")
     return False
+
+
+def http_repr(request: Request, left_margin: str = "    ") -> str:
+    rel_url = request.url.split('/', 3)[3]
+    http_string = f"{left_margin}{request.method} /{rel_url} HTTP/1.1\n"
+
+    headers_to_display = request.sent_headers if request.sent_headers is not None else request.headers
+
+    if headers_to_display:
+        for header_name, header_value in headers_to_display.items():
+            http_string += f"{left_margin}{header_name}: {header_value}\n"
+
+    if request.is_multipart:
+        boundary = "------------------------boundarystring"
+        http_string += f"{left_margin}Content-Type: multipart/form-data; boundary={boundary}\n\n"
+        for field_name, field_value in request.post_params:
+            http_string += (
+                f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
+                f'name="{field_name}"\n\n{left_margin}{field_value}\n'
+            )
+        for field_name, field_value in request.file_params:
+            http_string += (
+                f"{left_margin}{boundary}\n{left_margin}Content-Disposition: form-data; "
+                f'name="{field_name}"; filename="{field_value[0]}"\n\n{left_margin}' +
+                (field_value[1].decode(errors="replace").replace("\n", "\n" + left_margin).strip()) +
+                "\n"
+            )
+        http_string += f"{left_margin}{boundary}--\n"
+    elif request.post_params:
+        if "urlencoded" in request.enctype:
+            http_string += f"{left_margin}Content-Type: application/x-www-form-urlencoded\n"
+            http_string += f"\n{left_margin}{request.encoded_data}"
+        else:
+            http_string += f"{left_margin}Content-Type: {request.enctype}\n"
+            http_string += "\n" + left_margin + request.encoded_data.replace("\n", "\n" + left_margin).strip()
+
+    return http_string.rstrip()
+
+
+def curl_repr(request: Request) -> str:
+    curl_string = f'curl "{shell_escape(request.url)}"'
+    if request.referer:
+        curl_string += f' -e "{shell_escape(request.referer)}"'
+
+    if request.is_multipart:
+        # POST with multipart
+        for field_name, field_value in request.post_params:
+            curl_string += f' -F "{shell_escape(f'{field_name}={field_value}')}"'
+        for field_name, field_value in request.file_params:
+            curl_upload_kv = f"{field_name}=@your_local_file;filename={field_value[0]}"
+            curl_string += f' -F "{shell_escape(curl_upload_kv)}"'
+    elif request.post_params:
+        # POST either urlencoded
+        if "urlencoded" in request.enctype:
+            curl_string += f' -d "{shell_escape(request.encoded_data)}"'
+        else:
+            # Or raw blob
+            curl_string += f' -H "Content-Type: {request.enctype}" -d @payload_file'
+
+    return curl_string

@@ -31,6 +31,7 @@ from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.definitions.dangerous_resource import DangerousResourceFinding
 from wapitiCore.net import Request, Response
+from wapitiCore.net.web import http_repr
 
 
 # Nikto databases are csv files with the following fields (in order) :
@@ -333,7 +334,7 @@ def _log_request(request, method):
     if method == "GET":
         log_verbose(f"[¨] {request.url}")
     else:
-        log_verbose(f"[¨] {request.http_repr()}")
+        log_verbose(f"[¨] {http_repr(request)}")
 
 
 def _evaluate_match_conditions(line, code, raw):
