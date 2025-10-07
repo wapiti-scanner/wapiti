@@ -20,7 +20,11 @@ def create_mock_objects(url: str, html_content: str):
     """Helper to create Request and Response objects with given HTML content."""
     req = Request(path=url, method="GET")
     req.set_headers(httpx.Headers({}))
-    resp_obj = httpx.Response(status_code=200, content=html_content.encode("utf-8"))
+    resp_obj = httpx.Response(
+        status_code=200,
+        content=html_content.encode("utf-8"),
+        headers={"Content-Type": "text/html"}
+    )
     resp = Response(url=url, response=resp_obj)
     return req, resp
 
