@@ -84,7 +84,6 @@ class ParameterSituation(Flag):
 class Parameter:
     name: str
     situation: ParameterSituation
-    reversed_parameter: bool = False
 
     @property
     def is_qs_injection(self) -> bool:
@@ -379,7 +378,6 @@ class Attack(AttackProtocol):
             methods=methods,
             qs_inject=self.must_attack_query_string,
             skip=self.options.get("skipped_parameters"),
-            module=self.name,
         )
 
     async def does_timeout(self, request, timeout: float = None):
@@ -401,7 +399,6 @@ class Mutator:
         max_queries_per_pattern: int = 1000,
         parameters=None,  # Restrict attack to a whitelist of parameters
         skip=None,  # Must not attack those parameters (blacklist)
-        module=None,
     ):
         self._mutate_get = "G" in methods.upper()
         self._mutate_file = "F" in methods.upper()
@@ -414,7 +411,6 @@ class Mutator:
         self._attack_hashes = set()
         self._json_attack_hashes = set()
         self._skip_list.update(COMMON_ANNOYING_PARAMETERS)
-        self._module = module
 
     def _mutate_urlencoded_multipart(
         self, request: Request, payloads: PayloadSource
@@ -479,7 +475,6 @@ class Mutator:
                     parameter = Parameter(
                         name=param_name, situation=parameter_situation
                     )
-                    reverse_parameter = None
                     iterator = (
                         payloads
                         if isinstance(payloads, list)
@@ -561,39 +556,6 @@ class Mutator:
                         )
                         payload_info.payload = raw_payload
                         yield evil_req, parameter, payload_info
-
-                        if self._module == "exec":
-                            reverse_parameter = Parameter(
-                                name=payload_info.payload,
-                                situation=parameter_situation,
-                                reversed_parameter=True,
-                            )
-                            reverse_payload_info = payload_info
-                            reverse_payload_info.payload = param_name
-
-                            reverse_evil_req = Request(
-                                request.path,
-                                method=request.method,
-                                get_params=get_params
-                                + [
-                                    [
-                                        reverse_parameter.name,
-                                        reverse_payload_info.payload,
-                                    ]
-                                ],
-                                post_params=post_params
-                                + [
-                                    [
-                                        reverse_parameter.name,
-                                        reverse_payload_info.payload,
-                                    ]
-                                ],
-                                file_params=file_params,
-                                referer=referer,
-                                link_depth=request.link_depth,
-                                enctype=request.enctype,
-                            )
-                            yield reverse_evil_req, reverse_parameter, reverse_payload_info
 
                 params_list[i][1] = saved_value
 

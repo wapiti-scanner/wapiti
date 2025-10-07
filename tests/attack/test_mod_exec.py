@@ -108,13 +108,10 @@ async def test_detection():
         for request in all_requests:
             await module.attack(request)
 
-        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["module"] == "exec"
         assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
         assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", ";env;"]]
-        assert persister.add_payload.call_args_list[1][1]["module"] == "exec"
-        assert persister.add_payload.call_args_list[1][1]["category"] == "Command execution"
-        assert persister.add_payload.call_args_list[1][1]["request"].post_params == [["foo", 'env'],["env", "foo"]]
 
 
 @pytest.mark.asyncio
@@ -147,7 +144,7 @@ async def test_blind_detection():
         ):
             if "sleep" in payload_info.payload:
                 break
-            payloads_until_sleep += 2 # paylaod + reversed_payload
+            payloads_until_sleep += 1
 
         await module.attack(request)
 
