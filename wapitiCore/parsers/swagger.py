@@ -188,6 +188,7 @@ class Swagger:
                 post_params=json_body or post_params,
                 file_params=file_params,
                 enctype="multipart/form-data" if file_params else content_type,
+                headers=headers
             )
             results.append(request)
 
