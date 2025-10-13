@@ -1,3 +1,8 @@
+13/10/2025
+    Wapiti 3.2.7
+    Core: improve headers management
+    Core: upgrade dependencies
+
 07/10/2025
     Wapiti 3.2.6
     Modules: fix bugs in mod_unsecure_password and mod_exec
