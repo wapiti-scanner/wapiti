@@ -214,11 +214,14 @@ async def test_openapi_yaml_file():
         crawler_configuration=crawler_configuration
     )
 
+    requests = await swagger.get_requests()
     assert {
                "https://fake.openapi.fr/",
                "https://fake.openapi.fr/eval?s=default",
                "https://fake.openapi.fr/help"
-           } == {x.url for x in await swagger.get_requests()}
+           } == {x.url for x in requests}
+
+    assert dict(requests[1].headers) == {"x-auth-token": "default"}
 
 
 @pytest.mark.asyncio
