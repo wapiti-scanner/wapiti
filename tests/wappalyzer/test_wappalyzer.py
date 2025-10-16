@@ -27,6 +27,13 @@ async def test_applicationdata():
     }"""
 
     categories_text = """{
+        "12": {
+            "groups": [
+                9
+            ],
+            "name": "JavaScript frameworks",
+            "priority": 8
+        },
         "27": {
             "groups": [
                 9
@@ -84,7 +91,7 @@ async def test_applicationdata():
         },
          "A-Frame": {
             "cats": [
-            25
+                25
             ],
             "html": "<a-scene[^<>]*>",
             "icon": "A-Frame.svg",
@@ -94,6 +101,41 @@ async def test_applicationdata():
             },
             \"scripts\": \"/?([\\\\d.]+)?/aframe(?:\\\\.min)?\\\\.js\\\\;version:\\\\1\",
             "website": "https://aframe.io"
+        },
+        "Angular": {
+            "cats": [
+                12
+            ],
+            "cpe": "cpe:2.3:a:angularjs:angular:*:*:*:*:*:*:*:*:*",
+            "description": "Angular is a TypeScript-based open-source web application framework led by the Angular Team at Google.",
+            "dom": {
+                "[ng-version]": {
+                    "attributes": {
+                        "ng-version": "^([\\\\d\\\\.]+)\\\\;version:\\\\1"
+                    }
+                }
+            },
+            "excludes": [
+                "AngularDart",
+                "AngularJS"
+            ],
+            "icon": "Angular.svg",
+            "implies": "TypeScript",
+            "js": {
+                "ng.coreTokens": "",
+                "ng.probe": ""
+            },
+            "oss": true,
+            "website": "https://angular.io"
+        },
+        "TypeScript": {
+            "cats": [
+                27
+            ],
+            "description": "TypeScript is an open-source language which builds on JavaScript by adding static type definitions.",
+            "icon": "TypeScript.svg",
+            "oss": true,
+            "website": "https://www.typescriptlang.org"
         }
     }"""
 
@@ -116,8 +158,8 @@ async def test_applicationdata():
         application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
 
     assert application_data is not None
-    assert len(application_data.get_applications()) == 3
-    assert len(application_data.get_categories()) == 3
+    assert len(application_data.get_applications()) == 5
+    assert len(application_data.get_categories()) == 4
     assert len(application_data.get_groups()) == 2
 
     target_url = "http://perdu.com/"
@@ -125,9 +167,9 @@ async def test_applicationdata():
     respx.get(target_url).mock(
         return_value=httpx.Response(
             200,
-            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><adev-root ng-version=\"20.3.4\" _nghost-ng-c1178817259=\"\" ng-server-context=\"ssg\"><h1>Perdu sur l'Internet ?</h1> \
             <h2>Pas de panique, on va vous aider</h2> \
-            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>",
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></adev-root></body></html>",
             headers=[
                 ('server', 'nginx/1.19.0'),
                 ('content-type', 'text/html; charset=UTF-8'),
@@ -144,7 +186,7 @@ async def test_applicationdata():
     result = wappalyzer.detect()
 
     # Value based detection result
-    assert len(result) == 2
+    assert len(result) == 4
     assert result.get("PHP") is not None
     assert len(result.get("PHP").get("categories")) == 1
     assert result.get("PHP").get("categories")[0] == "Programming languages"
@@ -158,4 +200,16 @@ async def test_applicationdata():
     assert len(result.get("Akamai").get("groups")) == 1
     assert result.get("Akamai").get("groups")[0] == "Servers"
 
+    assert result.get("Angular") is not None
+    assert len(result.get("Angular").get("categories")) == 1
+    assert result.get("Angular").get("categories")[0] == "JavaScript frameworks"
+    assert len(result.get("Angular").get("groups")) == 1
+    assert result.get("Angular").get("groups")[0] == "Web development"
+
+    assert result.get("TypeScript") is not None
+    assert len(result.get("TypeScript").get("categories")) == 1
+    assert result.get("TypeScript").get("categories")[0] == "Programming languages"
+    assert len(result.get("TypeScript").get("groups")) == 1
+    assert result.get("TypeScript").get("groups")[0] == "Web development"
+    
     assert result.get("A-Frame") is None

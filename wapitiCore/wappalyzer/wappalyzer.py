@@ -442,7 +442,7 @@ class Wappalyzer:
                 match_html_text = match_html.getText()
                 if match_html_text and re.search(regex["regex"], str(match_html_text)):
                     versions.add("__detected__")
-                    versions.update(extract_version(regex, str(match)))
+                    versions.update(extract_version(regex, str(match_html_text)))
 
     @staticmethod
     def check_dom_attribute_others(match, versions: set, data):
@@ -462,7 +462,7 @@ class Wappalyzer:
                         match_html_text = match_html.get(attribute)
                     if match_html_text and re.search(regex["regex"], str(match_html_text)):
                         versions.add("__detected__")
-                        versions.update(extract_version(regex, str(match)))
+                        versions.update(extract_version(regex, str(match_html_text)))
 
     def get_rec_implied_applications(self, detected_applications: Set[str]) -> set:
         """
