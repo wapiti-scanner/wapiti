@@ -18,6 +18,9 @@ async def test_applicationdata():
     technologies_file_path = "technologies.txt"
 
     groups_text = """{
+        "3": {
+            "name": "Content"
+        },
         "9": {
             "name": "Web development"
         },
@@ -27,6 +30,13 @@ async def test_applicationdata():
     }"""
 
     categories_text = """{
+        "1": {
+            "groups": [
+                3
+            ],
+            "name": "CMS",
+            "priority": 1
+        },    
         "12": {
             "groups": [
                 9
@@ -89,7 +99,7 @@ async def test_applicationdata():
             "saas": true,
             "website": "http://akamai.com"
         },
-         "A-Frame": {
+        "A-Frame": {
             "cats": [
                 25
             ],
@@ -136,6 +146,15 @@ async def test_applicationdata():
             "icon": "TypeScript.svg",
             "oss": true,
             "website": "https://www.typescriptlang.org"
+        },
+        "Umbraco": {
+            "cats": [
+                1
+            ],
+            "cookies": {
+                "merchello": "\\\\;version:7"
+            },
+            "description": "Umbraco is an open-source Microsoft ASP.NET based content management system."
         }
     }"""
 
@@ -158,9 +177,9 @@ async def test_applicationdata():
         application_data = ApplicationData(categories_file_path, groups_file_path, technologies_file_path)
 
     assert application_data is not None
-    assert len(application_data.get_applications()) == 5
-    assert len(application_data.get_categories()) == 4
-    assert len(application_data.get_groups()) == 2
+    assert len(application_data.get_applications()) == 6
+    assert len(application_data.get_categories()) == 5
+    assert len(application_data.get_groups()) == 3
 
     target_url = "http://perdu.com/"
 
@@ -178,20 +197,21 @@ async def test_applicationdata():
             ]
         )
     )
-
-    resp = httpx.get(target_url, follow_redirects=False)
+    client = httpx.Client(cookies= {"merchello":"RANDOM"})
+    resp = client.get(target_url, follow_redirects=False)
     page = Response(resp)
 
     wappalyzer = Wappalyzer(application_data, page, {})
     result = wappalyzer.detect()
 
     # Value based detection result
-    assert len(result) == 4
+    assert len(result) == 5
     assert result.get("PHP") is not None
     assert len(result.get("PHP").get("categories")) == 1
     assert result.get("PHP").get("categories")[0] == "Programming languages"
     assert len(result.get("PHP").get("groups")) == 1
     assert result.get("PHP").get("groups")[0] == "Web development"
+    assert result.get("PHP").get("versions")[0] == "5.6.40"
 
     # Key based detection result
     assert result.get("Akamai") is not None
@@ -200,16 +220,27 @@ async def test_applicationdata():
     assert len(result.get("Akamai").get("groups")) == 1
     assert result.get("Akamai").get("groups")[0] == "Servers"
 
+    # Dom attributes detection result
     assert result.get("Angular") is not None
     assert len(result.get("Angular").get("categories")) == 1
     assert result.get("Angular").get("categories")[0] == "JavaScript frameworks"
     assert len(result.get("Angular").get("groups")) == 1
     assert result.get("Angular").get("groups")[0] == "Web development"
+    assert result.get("Angular").get("versions")[0] == "20.3.4"
 
+    # Implies detection result
     assert result.get("TypeScript") is not None
     assert len(result.get("TypeScript").get("categories")) == 1
     assert result.get("TypeScript").get("categories")[0] == "Programming languages"
     assert len(result.get("TypeScript").get("groups")) == 1
     assert result.get("TypeScript").get("groups")[0] == "Web development"
-    
+
+    # Client cookies detection result
+    assert result.get("Umbraco") is not None
+    assert len(result.get("Umbraco").get("categories")) == 1
+    assert result.get("Umbraco").get("categories")[0] == "CMS"
+    assert len(result.get("Umbraco").get("groups")) == 1
+    assert result.get("Umbraco").get("groups")[0] == "Content"
+    assert result.get("Umbraco").get("versions")[0] == "7"
+
     assert result.get("A-Frame") is None
