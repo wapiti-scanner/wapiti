@@ -50,6 +50,14 @@ async def test_qs_limit():
 
 @pytest.mark.asyncio
 async def test_explorer_filtering():
+    """
+    Added an empty yolo.js file to keep this test stable on PHP ≥8.4.
+
+    Since PHP 8.4, the built-in server returns index.html (HTTP 200) for
+    missing static files like /yolo.js instead of 404. That caused the
+    crawler to follow extra links from index.html. The dummy JS file
+    restores the previous behavior.
+    """
     crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
     scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
     explorer = Explorer(crawler_configuration, scope, Event())
@@ -59,6 +67,27 @@ async def test_explorer_filtering():
     # We should have current URL and JS URL but without query string.
     # CSS URL should be excluded
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
+
+
+@pytest.mark.asyncio
+async def test_explorer_for_non_existing_files():
+    """
+    PHP built-in server (PHP ≥8.4) falls back to index.html for missing paths.
+    Requesting /non_existent.html (nonexistent) therefore serves index.html, from
+    which the crawler discovers huge_form.html, then its form action target.php.
+    This test asserts that discovery chain.
+    """
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65080/"))
+    scope = Scope(Request("http://127.0.0.1:65080/"), "folder")
+    explorer = Explorer(crawler_configuration, scope, Event())
+    start_urls = deque([Request("http://127.0.0.1:65080/non_existent.html")])
+    excluded_urls = []
+    results = {resource.url async for resource, response in explorer.async_explore(start_urls, excluded_urls)}
+
+    assert results == {"http://127.0.0.1:65080/non_existent.html",
+                       "http://127.0.0.1:65080/huge_form.html",
+                       "http://127.0.0.1:65080/target.php"
+                       }
 
 
 @pytest.mark.asyncio
