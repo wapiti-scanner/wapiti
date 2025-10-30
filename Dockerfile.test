@@ -3,7 +3,7 @@ FROM python:3.14.0-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update \
-  && apt install ca-certificates python3 python3-pip python3-venv python3-setuptools php8.3-cli php8.3-xml sslscan libgtk-3-0 xvfb curl bzip2 -y \
+  && apt install ca-certificates python3 python3-pip python3-venv python3-setuptools php8.4-cli php8.4-xml sslscan libgtk-3-0 xvfb curl bzip2 -y \
   --no-install-recommends --no-install-suggests \
   && apt clean -yq \
   && apt autoremove -yq \

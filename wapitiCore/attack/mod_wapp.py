@@ -53,25 +53,36 @@ MSG_CPE = "  -> CPE: {0}"
 BULK_SIZE = 50
 VERSION_REGEX = re.compile(r"^\d[\w.-]*$")
 
-SCRIPT = (
-    "(wapiti_tests) => {\n"
-    "  let wapiti_results = {};\n"
-    "  for (var js_tech in wapiti_tests) {\n"
-    "    let js_tech_results = [];\n"
-    "    for (let i = 0; i < wapiti_tests[js_tech].length; i++) {\n"
-    "      try {\n"
-    "        js_tech_results.push([String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]);\n"
-    "      } catch(wapiti_error) {\n"
-    "        continue;\n"
-    "      }\n"
-    "    }\n"
-    "    if (js_tech_results.length) {\n"
-    "      wapiti_results[js_tech] = js_tech_results;\n"
-    "    }\n"
-    "  }\n"
-    "  return wapiti_results;\n"
-    "}"
-)
+SCRIPT = """
+(wapiti_tests) => {
+    function resolvePath(path) {
+        try {
+            return path.split('.').reduce((acc, key) => {
+                if (acc === undefined || acc === null) return undefined;
+                return acc[key];
+            }, window);
+        } catch(e) {
+            return undefined;
+        }
+    }
+
+    var wapiti_results = {};
+    for (var js_tech in wapiti_tests) {
+        var js_tech_results = [];
+        for (var i in wapiti_tests[js_tech]) {
+            var path = wapiti_tests[js_tech][i];
+            var value = resolvePath(path);
+            if (value !== undefined) {
+                js_tech_results.push([String(value), path]);
+            }
+        }
+        if (js_tech_results.length) {
+            wapiti_results[js_tech] = js_tech_results;
+        }
+    }
+    return wapiti_results;
+}
+"""
 
 
 def _is_valid_json(response):
