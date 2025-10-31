@@ -66,7 +66,6 @@ Browsing features
 + Can exclude some URLs of the scan and attacks (eg: logout URL).
 + Import cookies from your Chrome or Firefox browser or using the `wapiti-getcookie` tool.
 + Can activate / deactivate SSL certificates verification.
-+ Extract URLs from Flash SWF files.
 + Try to extract URLs from javascript (very basic JS interpreter).
 + HTML5 aware (understand recent HTML tags).
 + Several options to control the crawler behavior and limits.

@@ -669,7 +669,6 @@ about.htm
 download.html
 https.php
 order.cgi
-player.swf
 products.html
 smarty.php
 top.php
@@ -828,7 +827,6 @@ scriptresource.axd
 switch.php
 vbseo.php
 wp-load.php
-.swf
 2.html
 401.htm
 UPGRADE.readme
@@ -1210,7 +1208,6 @@ verify.php
 2.php
 AddToCart.aspx
 WS_FTP.LOG
-banner.swf
 checkout.htm
 checkout_cart.php
 claim.html
@@ -1391,7 +1388,6 @@ dmca.php
 druckansicht.php
 events.html
 fav.php
-flvplayer.swf
 form.asp
 function.main
 history.html
@@ -1426,7 +1422,6 @@ dashboard.php
 default2.asp
 emailtofriend.php
 error404.htm
-expressInstall.swf
 forgot_pass.php
 head.php
 index1.htm
@@ -1627,7 +1622,6 @@ ip.php
 ips.php
 link.htm
 m7_edit_item.html
-main.swf
 modify.cgi
 mt-comments.cgi
 newattatchment.php
@@ -1729,7 +1723,6 @@ email.cgi
 function.
 get_strings.php
 index.rdf
-index.swf
 info.htm
 itrader.php
 jump.cgi
@@ -1786,7 +1779,6 @@ gdform.asp
 go.cgi
 groups.php
 index_old.php
-intro.swf
 language_check.php
 logon.asp
 m8_invoice.html
@@ -2145,7 +2137,6 @@ getCountry.php
 globals.php
 guestbook.htm
 hack.php
-home.swf
 imprimir.php
 ipinfo.php
 katalog.php
@@ -2380,7 +2371,6 @@ manutenzione.php
 map.aspx
 media_content.php
 member_login.php
-menu.swf
 min_order.php
 my_account.php
 news_print.php
@@ -2477,7 +2467,6 @@ enter.html
 error404.asp
 faqs.htm
 feedback_ajax.php
-flash.swf
 form2.php
 fphoverx.class
 gallery.aspx
@@ -2502,7 +2491,6 @@ m14.html
 m5_signature.html
 mail.htm
 maillist_proc.php
-mediaplayer.swf
 merkzettel.php
 network.php
 newsletter.aspx
@@ -2763,7 +2751,6 @@ german.php
 get_rated.php
 glossary.php
 gm_price_offer.php
-header.swf
 holdsession.php
 iclear.php
 index-new.php
@@ -2981,7 +2968,6 @@ loc.php
 log-in.html
 login.phtml
 login2.php
-logo.swf
 mailform.html
 makepdf.php
 memberlist.html
@@ -3114,7 +3100,6 @@ CatalogueSearch.ice
 ComAgentInstall.exe
 Digg.asp
 Email.aspx
-Flv.swf
 Gg.asp
 Impressum.aspx
 Info.aspx
@@ -3223,7 +3208,6 @@ friend_accept.php
 fs_cont.html
 fvideos.php
 g.php
-gallery.swf
 games.html
 gbuk-myoffice.html
 generic.aspx
@@ -3297,7 +3281,6 @@ mymail.php
 nav.htm
 nav.html
 nlnl-myoffice.html
-nvplayer.swf
 oldindex.html
 order1.php
 order_form.html
@@ -3654,7 +3637,6 @@ popup1.html
 popup_ask.php
 post.aspx
 pp.php
-preloader.swf
 preview.asp
 price.asp
 pricematch.php
@@ -3726,7 +3708,6 @@ survey.htm
 system.php
 t.html
 tabs.css
-tagcloud.swf
 tellafriend.html
 temp.htm
 term_of_use.html
@@ -4013,7 +3994,6 @@ pop_promo.asp
 post.htm
 pravila.html
 premium.php
-preview.swf
 pricing.asp
 pridej_polozku.php
 print_page.php
@@ -4102,16 +4082,13 @@ thumbs.php
 timeline2.php
 tip.html
 tips.php
-top.swf
 ultraped.php
-uppod.swf
 user_contact.php
 users.htm
 v.php
 vB.Sponsors
 video.htm
 viewImage.php
-viewer.swf
 vieworder.cfm
 viewprofile.php
 warranty.php
@@ -4845,7 +4822,6 @@ examples.html
 exchange.php
 exit.html
 exitsplash.php
-expressinstall.swf
 extract.asp
 extsearch.htm
 faq.cfm
@@ -5539,7 +5515,6 @@ httpd.parse.errors
 id.php
 idmelden2.php
 image_upload.php
-imagerotator.swf
 inc.asp
 index-5.html
 index-new.html
@@ -5826,7 +5801,6 @@ site-policies.html
 site.js
 sitemap1.xml
 sitemapproducts.xml
-slideshow.swf
 social.php
 source.php
 sponsorpop.aspx
@@ -5937,7 +5911,6 @@ zoom_pageinfo.zdat
 .wm
 .xhtml
 1.asp
-1.swf
 10.php
 10_Logon.asp
 11.htm
@@ -6029,7 +6002,6 @@ ChangeUsername.aspx
 ChartAxd.axd
 CheckCookie.asp
 ClearCache.aspx
-Clear_Skin_1.swf
 Comments.aspx
 ContactUs.asp
 Contactus.htm
@@ -6121,7 +6093,6 @@ TestEmail.aspx
 Thank-You.aspx
 ThankYou.htm
 TheFlexBelt.html
-Uploader.swf
 UserInfo.asp
 UserList.asp
 Video.aspx
@@ -6250,7 +6221,6 @@ carousel.xml
 cart-thankyou.asp
 cart_retrieve.php
 cart_view.php
-cartina.swf
 cartjs.cgi
 cat_add.php
 catalog.nsf
@@ -6291,7 +6261,6 @@ confirmed.html
 connexion.html
 construction.htm
 contact.phtml
-contact.swf
 contact_send.php
 contact_us.cfm
 contactenos.html
@@ -6576,7 +6545,6 @@ lista.php
 listing.html
 livechat.asp
 livechat.php
-loader.swf
 local-antispam.txt
 localhome.htm
 loggedin.php
@@ -6590,7 +6558,6 @@ lssi.html
 lu.cfm
 lview.php
 lxwm.html
-lyy.swf
 m12_edit_item.html
 m13_edit_item.html
 m14_edit_item.html
@@ -6731,7 +6698,6 @@ places-all.php
 play.html
 play1.htm
 play2.htm
-player-viral.swf
 pmlite.php
 policies.php
 politica.php
@@ -7005,7 +6971,6 @@ tp.php
 trace.log
 tracker.html
 traderratings.php
-tube_player.swf
 tutorial.html
 uc.html
 uk.html
@@ -7087,7 +7052,6 @@ zz-error.php
 188.html
 189.html
 1checkout.aspx
-2.swf
 2000.html
 2006.html
 2009.html
@@ -7487,7 +7451,6 @@ bugreport.php
 bulk.php
 buscar.html
 busq.cfm
-button1.swf
 buy.htm
 buynow.html
 c.htm
@@ -7501,7 +7464,6 @@ calwin.asp
 canada.html
 cancelled.php
 captcha.ashx
-carousel.swf
 carrello.php
 cart-wcm-bak.php
 cart_add.php
@@ -8076,7 +8038,6 @@ most_read.jsp
 most_read_daily.jsp
 motore.php
 movie.asp
-movie.swf
 movies.html
 mp.htm
 msn.html
@@ -8096,7 +8057,6 @@ mylinks.html
 myprofile.asp
 myshop.php
 mytest.php
-nav.swf
 navbar.php
 navigator.php
 network.html
@@ -8388,7 +8348,6 @@ search-2.html
 search-advanced.asp
 search-engine.php
 search.css
-search.swf
 search.txt
 search2.htm
 search_suggest.php
@@ -8852,7 +8811,6 @@ zoominfo.aspx
 490.html
 492.html
 496.html
-5.swf
 501.html
 505.html
 51.htm
@@ -8930,7 +8888,6 @@ Category.ashx
 Cesta.aspx
 Chat.aspx
 ChkOutPayment.aspx
-Clear_Skin_3.swf
 Closed.aspx
 CompareItems.cfm
 Contact-Us.aspx
@@ -9003,7 +8960,6 @@ Greska.aspx
 Guest.aspx
 GuestHandler.c
 Guestbook.asp
-Halo_Skin_3.swf
 History.html
 HorrorStories.x
 Hotel.asp
@@ -9459,7 +9415,6 @@ build.html
 build.php
 bulkupload.php
 busy.html
-button2.swf
 buttons.htm
 buy_r.php
 buygoods.aspx
@@ -9676,7 +9631,6 @@ csshover3.htc
 ct.ashx
 ct.asp
 ct_mail.php
-cu3er.swf
 currency.cfm
 current.htm
 current.html
@@ -9728,7 +9682,6 @@ details.txt
 developers.html
 development.html
 devis.php
-dewplayer.swf
 diag.mvc
 diff.php
 dining.aspx
@@ -10372,7 +10325,6 @@ minus.gif
 mirror.php
 misc.htm
 missingpage.htm
-mju.swf
 mkstats2.3
 mlsdetails.asp
 mlsgrid.asp
@@ -10393,7 +10345,6 @@ morelinks.php
 moresmiles.php
 moved.htm
 msg.asp
-music.swf
 my-account.html
 my.aspx
 my500.asp
@@ -10527,7 +10478,6 @@ outback.php
 outlink.php
 overload.html
 owner.html
-p.swf
 p1.php
 p3p.xml
 pDiscnts.asp
@@ -11419,7 +11369,6 @@ zoom8.gif
 zoom9.gif
 zoom_minus.gif
 zoom_plus.gif
-zoomifyViewer.swf
 zoomon.gif
 zsa2.cfm
 cgi-bin

@@ -39,7 +39,6 @@ from wapitiCore.parsers.javascript import extract_js_redirections
 from wapitiCore.main.log import logging, log_verbose
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.parsers import swf
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.scope import Scope, wildcard_translate
 
@@ -54,10 +53,10 @@ COMMON_PAGE_EXTENSIONS = {
 }
 
 EXCLUDED_MEDIA_EXTENSIONS = (
-    # File extensions we don't want to deal with. Js and SWF files won't be in this list.
+    # File extensions we don't want to deal with. Js files won't be in this list.
     '.7z', '.aac', '.aiff', '.au', '.avi', '.bin', '.bmp', '.cab', '.dll', '.dmp', '.ear', '.exe', '.flv', '.gif',
     '.gz', '.ico', '.image', '.iso', '.jar', '.jpeg', '.jpg', '.mkv', '.mov', '.mp3', '.mp4', '.mpeg', '.mpg', '.pdf',
-    '.png', '.ps', '.rar', '.scm', '.so', '.tar', '.tif', '.war', '.wav', '.wmv', '.zip'
+    '.png', '.ps', '.rar', '.scm', '.so', '.swf', '.tar', '.tif', '.war', '.wav', '.wmv', '.zip'
 )
 
 
@@ -189,7 +188,6 @@ class Explorer:
         return False
 
     def extract_links(self, response: Response, request) -> List:
-        swf_links = []
         js_links = []
         allowed_links = []
 
@@ -198,12 +196,7 @@ class Explorer:
         if response.is_redirect and self._scope.check(response.redirection_url):
             allowed_links.append(response.redirection_url)
 
-        if "application/x-shockwave-flash" in response.type or request.file_ext == "swf":
-            try:
-                swf_links = swf.extract_links_from_swf(response.bytes)
-            except Exception:  # pylint: disable=broad-except
-                pass
-        elif "/x-javascript" in response.type or "/x-js" in response.type or "/javascript" in response.type:
+        if "/x-javascript" in response.type or "/x-js" in response.type or "/javascript" in response.type:
             js_links = extract_js_redirections(response.content)
             js_links += jsparser_angular.JsParserAngular(response.url, response.content).get_links()
 
@@ -237,7 +230,7 @@ class Explorer:
 
                         new_requests.append(form_request)
 
-        for url in swf_links + js_links:
+        for url in js_links:
             if url:
                 url = make_absolute(response.url, url)
                 if url and self._scope.check(url):
