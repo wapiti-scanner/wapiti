@@ -54,7 +54,6 @@ dependencies = [
     "tld>=0.13,<0.14",
     "typing-extensions>=4.13.2,<5.0",
     "urwid>=2.6.15,<3.0",
-    "yaswfp>=0.9,<1.0",
     "wapiti-swagger>=0.1.9,<0.2.0",
 ]
 
