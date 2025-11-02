@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2023 Nicolas SURRIBAS
+# Copyright (C) 2023-2025 Nicolas SURRIBAS
 # Copyright (C) 2023-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 import os
-import shutil
 import sys
 from collections import deque
 from dataclasses import replace
@@ -29,6 +28,7 @@ from typing import List, Deque
 from urllib.parse import urlparse
 
 import browser_cookie3
+from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.attack.active_scanner import ActiveScanner
@@ -357,12 +357,25 @@ class Wapiti:
                     "--proxy", f"The proxy protocol '{parts.scheme}' is not supported by mitmproxy"
                 )
 
-    def set_headless(self, headless_mode: str):
+    async def set_headless(self, headless_mode: str):
         """Set the headless mode used for browsing"""
-        if headless_mode != "no" and not shutil.which("geckodriver"):
-            logging.error("Headless mode won't be activated because geckodriver is missing on the system")
-        else:
-            self._headless_mode = headless_mode
+        if headless_mode != "no":
+            async with async_playwright() as p:
+                try:
+                    if not os.path.exists(p.firefox.executable_path):
+                        logging.error(
+                            "Firefox is not installed. "
+                            "Please run `playwright install firefox`"
+                        )
+                        self._headless_mode = "no"
+                    else:
+                        self._headless_mode = headless_mode
+                except PlaywrightError:
+                    logging.error(
+                        "Could not find browser installation. "
+                        "Please run `playwright install --with-deps firefox`"
+                    )
+                    self._headless_mode = "no"
 
     @property
     def headless_mode(self) -> str:

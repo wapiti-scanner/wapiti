@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2023 Nicolas SURRIBAS
+# Copyright (C) 2023-2025 Nicolas SURRIBAS
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@ import json
 from http.cookiejar import CookieJar
 from typing import Tuple, List, Dict, Optional
 import asyncio
-from urllib.parse import urlparse
+from urllib.parse import urljoin
 import importlib.util
 
 from httpx import RequestError
-from wapiti_arsenic import get_session, browsers, services, errors, constants
+# pylint: disable=protected-access
+from playwright._impl._errors import TargetClosedError
+from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
@@ -87,41 +89,40 @@ async def async_fetch_login_page(
     if headless_mode != "no":
         proxy_settings = None
         if crawler_configuration.proxy:
-            proxy = urlparse(crawler_configuration.proxy).netloc
-            proxy_settings = {
-                "proxyType": 'manual',
-                "httpProxy": proxy,
-                "sslProxy": proxy
-            }
+            proxy_settings = {"server": crawler_configuration.proxy}
 
-        service = services.Geckodriver()
-        browser = browsers.Firefox(
-            proxy=proxy_settings,
-            acceptInsecureCerts=True,
-            **{
-                "moz:firefoxOptions": {
-                    "prefs": {
+        try:
+            async with async_playwright() as p:
+                browser = await p.firefox.launch(
+                    headless=headless_mode == "hidden",
+                    proxy=proxy_settings,
+                    firefox_user_prefs={
                         "network.proxy.allow_hijacking_localhost": True,
                         "devtools.jsonview.enabled": False,
-                        # "security.cert_pinning.enforcement_level": 0,
-                    },
-                    "args": ["-headless"] if headless_mode == "hidden" else []
-                }
-            }
-        )
-        try:
-            async with get_session(service, browser) as headless_client:
-                await headless_client.get(
-                    url,
-                    timeout=crawler_configuration.timeout
+                    }
                 )
-                await asyncio.sleep(.1)
-                page_source = await headless_client.get_page_source()
-                crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
-                return page_source
-        except (errors.ArsenicError, asyncio.TimeoutError) as exception:
-            logging.error(f"[!] {exception.__class__.__name__} with URL {url}")
-            return
+                context = await browser.new_context(ignore_https_errors=True)
+                page = await context.new_page()
+
+                try:
+                    await page.goto(
+                        url,
+                        timeout=crawler_configuration.timeout * 1000,
+                        wait_until="domcontentloaded"
+                    )
+                    await page.wait_for_timeout(100)
+                    page_source = await page.content()
+                    crawler_configuration.cookies = headless_cookies_to_cookiejar(await context.cookies())
+                    return page_source
+                finally:
+                    await browser.close()
+
+        except (PlaywrightError, asyncio.TimeoutError) as exception:
+            if isinstance(exception, TargetClosedError):
+                return None
+
+            logging.error(f"[!] {type(exception).__name__} with URL {url}")
+            return None
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             try:
@@ -134,12 +135,12 @@ async def async_fetch_login_page(
                 return page_source
             except ConnectionError:
                 logging.error("[!] Connection error with URL", url)
-                return
+                return None
             except RequestError as exception:
                 logging.error(
-                    f"[!] {exception.__class__.__name__} with URL {url}"
+                    f"[!] {type(exception).__name__} with URL {url}"
                 )
-                return
+                return None
 
 
 async def async_submit_login_form(
@@ -240,6 +241,15 @@ async def load_form_script(
     except TypeError as exception:
         raise RuntimeError("The provided auth script seems to have some syntax issues") from exception
 
+def _get_selector(target: str) -> str:
+    if target.startswith("id="):
+        return f"#{target.split('=', 1)[1]}"
+    if target.startswith("css="):
+        return target.split('=', 1)[1]
+    if target.startswith("xpath="):
+        return target.split('=', 1)[1]
+    return target
+
 
 async def authenticate_with_side_file(
         crawler_configuration: CrawlerConfiguration,
@@ -261,85 +271,49 @@ async def authenticate_with_side_file(
 
     proxy_settings = None
     if crawler_configuration.proxy:
-        proxy = urlparse(crawler_configuration.proxy).netloc
-        proxy_settings = {
-            "proxyType": 'manual',
-            "httpProxy": proxy,
-            "sslProxy": proxy
-        }
-
-    service = services.Geckodriver()
-    browser = browsers.Firefox(
-        proxy=proxy_settings,
-        acceptInsecureCerts=True,
-        **{
-            "moz:firefoxOptions": {
-                "prefs": {
-                    "network.proxy.allow_hijacking_localhost": True,
-                    "devtools.jsonview.enabled": False,
-                },
-                "args": ["-headless"] if headless_value in ["hidden", "no"] else [],
-            }
-        }
-    )
+        proxy_settings = {"server": crawler_configuration.proxy}
 
     try:
-        async with get_session(service, browser) as headless_client:
-            for command in login_test['commands']:
-                await asyncio.sleep(3)
-                cmd = command['command']
-                target = command['target']
-                value = command.get('value', '')
+        async with async_playwright() as p:
+            browser = await p.firefox.launch(
+                headless=headless_value in ["hidden", "no"],
+                proxy=proxy_settings,
+                firefox_user_prefs={
+                    "network.proxy.allow_hijacking_localhost": True,
+                    "devtools.jsonview.enabled": False,
+                }
+            )
+            context = await browser.new_context(ignore_https_errors=True)
+            page = await context.new_page()
 
-                if cmd == "open":
-                    await headless_client.get(url + target)
+            try:
+                for command in login_test['commands']:
+                    await asyncio.sleep(3)
+                    cmd = command['command']
+                    target = command['target']
+                    value = command.get('value', '')
 
-                elif cmd == "type":
-                    if target.startswith("id="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            f"#{selector_value}", constants.SelectorType.css_selector
-                        )
-                    elif target.startswith("css="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            selector_value, constants.SelectorType.css_selector
-                        )
-                    elif target.startswith("xpath="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            selector_value, constants.SelectorType.xpath
-                        )
-                    else:
-                        raise ValueError(f"Unknown selector type: {target}")
+                    if cmd == "open":
+                        await page.goto(urljoin(url, target))
 
-                    await element.send_keys(value)
+                    elif cmd == "type":
+                        selector = _get_selector(target)
+                        await page.fill(selector, value)
 
-                elif cmd == "click":
-                    if target.startswith("id="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            f"#{selector_value}", constants.SelectorType.css_selector
-                        )
-                    elif target.startswith("css="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            selector_value, constants.SelectorType.css_selector
-                        )
-                    elif target.startswith("xpath="):
-                        selector_value = target.split("=", 1)[1]
-                        element = await headless_client.get_element(
-                            selector_value, constants.SelectorType.xpath
-                        )
-                    else:
-                        raise ValueError(f"Unknown selector type: {target}")
-                    await element.click()
+                    elif cmd == "click":
+                        selector = _get_selector(target)
+                        await page.click(selector)
 
-            await asyncio.sleep(.1)
-            crawler_configuration.cookies = headless_cookies_to_cookiejar(await headless_client.get_all_cookies())
+                await page.wait_for_timeout(100)
+                crawler_configuration.cookies = headless_cookies_to_cookiejar(await context.cookies())
 
-            return crawler_configuration.cookies
+                return crawler_configuration.cookies
+            finally:
+                await browser.close()
 
+    except (PlaywrightError, asyncio.TimeoutError) as exception:
+        if isinstance(exception, TargetClosedError):
+            return None
 
-    except (errors.ArsenicError, asyncio.TimeoutError) as exception:
-        logging.error(f"[!] {exception.__class__.__name__} with URL {url}")
+        logging.error(f"[!] {type(exception).__name__} with URL {url}")
+        return None

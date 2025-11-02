@@ -1,0 +1,178 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [],
+        "Fingerprint web server": [
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Cherokee\", \"versions\": [\"1.3.4\"], \"cpe\": \"cpe:2.3:a:cherokee-project:cherokee:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            }
+        ],
+        "Vulnerable software": [
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "nginx CVE-2023-44487: The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": []
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Adobe Experience Manager\", \"versions\": [], \"cpe\": \"cpe:2.3:a:adobe:experience_manager:*:*:*:*:*:*:*:*\", \"categories\": [\"CMS\"], \"groups\": [\"Content\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Amazon Pay\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"Payment processors\"], \"groups\": [\"Sales\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Amazon S3\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Amazon Web Services\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"PaaS\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Apache JSPWiki\", \"versions\": [], \"cpe\": \"cpe:2.3:a:apache:jspwiki:*:*:*:*:*:*:*:*\", \"categories\": [\"Wikis\"], \"groups\": [\"Content\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Apache Tomcat\", \"versions\": [], \"cpe\": \"cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"CacheFly\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Caddy\", \"versions\": [], \"cpe\": \"cpe:2.3:a:caddyserver:caddy:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"CakePHP\", \"versions\": [], \"cpe\": \"cpe:2.3:a:cakephp:cakephp:*:*:*:*:*:*:*:*\", \"categories\": [\"Web frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Cherokee\", \"versions\": [\"1.3.4\"], \"cpe\": \"cpe:2.3:a:cherokee-project:cherokee:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Java\", \"versions\": [], \"cpe\": \"cpe:2.3:a:oracle:jre:*:*:*:*:*:*:*:*\", \"categories\": [\"Programming languages\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"Open Journal Systems\", \"versions\": [], \"cpe\": \"cpe:2.3:a:public_knowledge_project:open_journal_systems:*:*:*:*:*:*:*:*\", \"categories\": [\"DMS\"], \"groups\": [\"Content\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/other_mock/index.wiki.jsp.html",
+                "info": "{\"name\": \"PHP\", \"versions\": [], \"cpe\": \"cpe:2.3:a:php:php:*:*:*:*:*:*:*:*\", \"categories\": [\"Programming languages\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /other_mock/index.wiki.jsp.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncookie: ci_csrf_session=4.1; cakephp=646584; OJSSID=8200",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            }
+        ]
+    }
+}

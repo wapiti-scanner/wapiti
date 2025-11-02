@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  # Nginx container for the wapp module
+  wapp_headless:
+    image: nginx${NGINX_HASH}
+    volumes:
+      - ./test_mod_wapp_headless/websites/:/usr/share/nginx/html/
+      - ./test_mod_wapp_headless/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - test-network
+    healthcheck:
+      test: ${DEFAULT_WEB_HEALTHCHECK_COMMAND}other_mock/index.wiki.jsp.html
+      interval: ${DEFAULT_HEALTHCHECKS_INTERVAL}
+      timeout: ${DEFAULT_HEALTHCHECKS_TIMEOUT}
+      start_period: ${DEFAULT_HEALTHCHECKS_START_PERIOD}
+      retries: ${DEFAULT_HEALTHCHECKS_RETRIES}
+
+  # Wapiti container 
+  # requires all the targets containers to work perfectly
+  wapiti:
+    build:
+      context: "../../"
+      dockerfile: "./tests/integration/wapiti/Dockerfile.integration"
+      no_cache: true
+    container_name: wapiti
+    volumes:
+      - ./.test:/home/
+    networks:
+      - test-network
+    command: "${TESTS}"
+    depends_on:
+      wapp_headless:
+        condition: service_healthy
+
+networks:
+  test-network:
