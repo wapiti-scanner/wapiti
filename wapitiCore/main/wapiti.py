@@ -152,7 +152,7 @@ def create_base_request(url, args):
     return Request(url)
 
 
-def configure_wapiti_basic_settings(wap, args):
+async def configure_wapiti_basic_settings(wap, args):
     """Configure Wapiti's base settings."""
     if args.log:
         wap.set_logfile(args.log)
@@ -163,7 +163,7 @@ def configure_wapiti_basic_settings(wap, args):
     if args.tor:
         wap.set_proxy("socks5://127.0.0.1:9050/")
 
-    wap.set_headless(args.headless)
+    await wap.set_headless(args.headless)
     wap.set_wait_time(args.wait_time)
     wap.set_max_depth(args.depth)
     wap.set_max_files_per_dir(args.max_files_per_dir)
@@ -277,7 +277,7 @@ async def wapiti_main():
 
     wap = Wapiti(base_request, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
-    configure_wapiti_basic_settings(wap, args)
+    await configure_wapiti_basic_settings(wap, args)
     attack_options = build_attack_options_from_args(args)
 
     if args.update:

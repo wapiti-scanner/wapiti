@@ -1,0 +1,68 @@
+{
+    "test_mod_wapp_headless": {
+        "modules": "wapp",
+        "supplementary_argument": "--headless hidden -v2",
+        "report_filter_tree": {
+            "vulnerabilities": {
+                "Fingerprint web application framework": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ],
+                "Fingerprint web server": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ],
+                "Vulnerable software": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            },
+            "additionals": {
+                "Fingerprint web technology": [
+                    {
+                        "method": "",
+                        "path": "",
+                        "info": "",
+                        "http_request": "",
+                        "wstg": []
+                    }
+                ]
+            }
+        },
+        "targets": [
+            {
+                "name": "http://wapp_headless/backbonejs/index.html"
+            },
+            {
+                "name": "http://wapp_headless/bootstrap/index.html"
+            },
+            {
+                "name": "http://wapp_headless/jquery/index.html"
+            },
+            {
+                "name": "http://wapp_headless/other_mock/index.wiki.jsp.html"
+            },
+            {
+                "name": "http://wapp_headless/react/index.html"
+            },
+            {
+                "name": "http://wapp_headless/vuejs/index.html"
+            }
+        ]
+    }
+}

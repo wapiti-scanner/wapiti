@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js Boilerplate</title>
+
+</head>
+
+<body>
+    <!-- Vue.js CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+
+    <div id="app">
+        <h1>{{ message }}</h1>
+        <p>This is a basic Vue.js boilerplate.</p>
+    </div>
+
+
+    <!-- Your Vue.js app -->
+    <script>
+        const { createApp } = Vue
+        createApp({
+            data() {
+                return {
+                    message: 'Hello Vue!',
+                }
+            }
+        }).mount('#app')
+
+    </script>
+
+</body>
+
+</html>

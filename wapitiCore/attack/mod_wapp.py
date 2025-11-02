@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2020-2023 Nicolas Surribas
+# Copyright (C) 2020-2025 Nicolas Surribas
 # Copyright (C) 2020-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -23,13 +23,13 @@ import shutil
 import string
 from typing import Dict, Tuple, Optional, List, AsyncIterator
 import re
-from urllib.parse import urlparse, quote_plus
+from urllib.parse import quote_plus
 
 from aiocache import cached
 from httpx import RequestError
-
-from wapiti_arsenic import get_session, browsers, services
-from wapiti_arsenic.errors import JavascriptError, UnknownError, ArsenicError
+# pylint: disable=protected-access
+from playwright._impl._errors import TargetClosedError
+from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.attack.cve.checker import (
     CVEChecker, cvss_score_to_wapiti_level, CVE_DIRECTORY, SUPPORTED_SOFTWARES, is_cve_supported_software
@@ -55,21 +55,23 @@ BULK_SIZE = 50
 VERSION_REGEX = re.compile(r"^\d[\w.-]*$")
 
 SCRIPT = (
-    "wapiti_results = {};\n"
-    "for (var js_tech in wapiti_tests) {\n"
-    "  js_tech_results = [];\n"
-    "  for (var i in wapiti_tests[js_tech]) {\n"
-    "    try {\n"
-    "      js_tech_results.push([String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]);\n"
-    "    } catch(wapiti_error) {\n"
-    "      continue;\n"
+    "(wapiti_tests) => {\n"
+    "  let wapiti_results = {};\n"
+    "  for (var js_tech in wapiti_tests) {\n"
+    "    let js_tech_results = [];\n"
+    "    for (let i = 0; i < wapiti_tests[js_tech].length; i++) {\n"
+    "      try {\n"
+    "        js_tech_results.push([String(eval(wapiti_tests[js_tech][i])), wapiti_tests[js_tech][i]]);\n"
+    "      } catch(wapiti_error) {\n"
+    "        continue;\n"
+    "      }\n"
+    "    }\n"
+    "    if (js_tech_results.length) {\n"
+    "      wapiti_results[js_tech] = js_tech_results;\n"
     "    }\n"
     "  }\n"
-    "  if (js_tech_results.length) {\n"
-    "    wapiti_results[js_tech] = js_tech_results;\n"
-    "  }\n"
-    "}\n"
-    "return wapiti_results;\n"
+    "  return wapiti_results;\n"
+    "}"
 )
 
 
@@ -468,45 +470,46 @@ class ModuleWapp(Attack):
     async def _detect_applications_headless(self, url: str) -> dict:
         proxy_settings = None
         if self.crawler_configuration.proxy:
-            proxy = urlparse(self.crawler_configuration.proxy).netloc
-            proxy_settings = {
-                "proxyType": 'manual',
-                "httpProxy": proxy,
-                "sslProxy": proxy
-            }
-
-        service = services.Geckodriver(log_file=os.devnull)
-        browser = browsers.Firefox(
-            proxy=proxy_settings,
-            acceptInsecureCerts=True,
-            **{
-                "moz:firefoxOptions": {
-                    "prefs": {
-                        "network.proxy.allow_hijacking_localhost": True,
-                        "devtools.jsonview.enabled": False,
-                    },
-                    "args": ["-headless"]
-                }
-            }
-        )
+            proxy_settings = {"server": self.crawler_configuration.proxy}
 
         technologies_file_path = os.path.join(self.user_config_dir, self.WAPP_TECHNOLOGIES)
         final_results = {}
 
-        with open(technologies_file_path, encoding="utf-8") as fd:
-            data = json.load(fd)
-            try:
-                async with get_session(service, browser) as headless_client:
-                    await headless_client.get(url, timeout=self.crawler_configuration.timeout)
-                    await asyncio.sleep(5)
+        try:
+            with open(technologies_file_path, encoding="utf-8") as fd:
+                data = json.load(fd)
+        except FileNotFoundError:
+            return {}
+
+        try:
+            async with async_playwright() as p:
+                browser = await p.firefox.launch(
+                    headless=True,
+                    proxy=proxy_settings,
+                    firefox_user_prefs={
+                        "network.proxy.allow_hijacking_localhost": True,
+                        "devtools.jsonview.enabled": False,
+                    }
+                )
+                context = await browser.new_context(ignore_https_errors=True)
+                page = await context.new_page()
+
+                try:
+                    await page.goto(
+                        url,
+                        timeout=self.crawler_configuration.timeout * 1000,
+                        wait_until="domcontentloaded"
+                    )
+                    await page.wait_for_timeout(5000)
                     for tests in get_tests(data):
-                        script = f"wapiti_tests = {json.dumps(tests)};\n" + SCRIPT
                         try:
-                            results = await headless_client.execute_script(script)
+                            results = await page.evaluate(SCRIPT, tests)
                             for software, version_and_js in results.items():
                                 waiting_version = []
                                 validated = False
                                 for version, js in version_and_js:
+                                    if js is None:
+                                        continue
                                     expected_format = data[software]["js"][js]
                                     if version == "undefined":
                                         continue
@@ -528,15 +531,26 @@ class ModuleWapp(Attack):
                                             final_results[software] = [version]
                                             break
                                     # Other cases seems to be some kind of false positives
-                                if validated and waiting_version and not final_results[software]:
+                                if validated and waiting_version and not final_results.get(software):
                                     final_results[software] = waiting_version
-                        except (JavascriptError, UnknownError) as exception:
+                        except PlaywrightError as exception:
+                            if isinstance(exception, TargetClosedError):
+                                break
                             logging.exception(exception)
                             continue
+                finally:
+                    await browser.close()
 
-            except (ArsenicError, FileNotFoundError, asyncio.TimeoutError):
-                # Geckodriver may be missing, etc
-                pass
+        except (PlaywrightError, FileNotFoundError, asyncio.TimeoutError) as exception:
+            if isinstance(exception, TargetClosedError):
+                return {}
+
+            # Playwright browser may be missing, etc
+            logging.warning(
+                "Could not run headless browser. "
+                "Make sure playwright is installed (`pip install playwright`) "
+                "and browsers are installed (`playwright install`)."
+            )
 
         return final_results
 

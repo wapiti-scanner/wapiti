@@ -26,6 +26,7 @@ test_mod_ssrf \
 test_mod_sql \
 test_mod_timesql \
 test_mod_wapp \
+test_mod_wapp_headless \
 test_mod_wp_enum \
 test_mod_xss \
 test_mod_xxe"

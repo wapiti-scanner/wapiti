@@ -17,6 +17,8 @@ COPY . .
 
 RUN pip3 install . --break-system-packages
 
+RUN playwright install firefox
+
 FROM python:3.13-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -32,7 +34,10 @@ RUN apt-get -y update &&\
   truncate -s 0 /var/log/*log
 
 COPY --from=build /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
-COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/
+COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/playwright /usr/local/bin/
+COPY --from=build /root/.cache/ms-playwright/ /root/.cache/ms-playwright/
+
+RUN playwright install-deps firefox
 
 # Create the Wapiti config directory
 RUN mkdir -p /root/.wapiti/config/cves

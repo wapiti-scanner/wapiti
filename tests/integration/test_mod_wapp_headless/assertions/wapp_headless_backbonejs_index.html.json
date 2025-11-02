@@ -1,0 +1,109 @@
+{
+    "vulnerabilities": {
+        "Fingerprint web application framework": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Tailwind CSS\", \"versions\": [\"2.2.16\"], \"cpe\": \"\", \"categories\": [\"UI frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-08"
+                ]
+            }
+        ],
+        "Fingerprint web server": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02"
+                ]
+            }
+        ],
+        "Vulnerable software": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "nginx CVE-2023-44487: The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": []
+            }
+        ]
+    },
+    "additionals": {
+        "Fingerprint web technology": [
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Backbone.js\", \"versions\": [], \"cpe\": \"cpe:2.3:a:backbone_project:backbone:*:*:*:*:*:*:*:*\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Cloudflare\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Nginx\", \"versions\": [\"1.24.0\"], \"cpe\": \"cpe:2.3:a:f5:nginx:*:*:*:*:*:*:*:*\", \"categories\": [\"Web servers\", \"Reverse proxies\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Tailwind CSS\", \"versions\": [\"2.2.16\"], \"cpe\": \"\", \"categories\": [\"UI frameworks\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"Underscore.js\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"JavaScript libraries\"], \"groups\": [\"Web development\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"cdnjs\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/backbonejs/index.html",
+                "info": "{\"name\": \"jsDelivr\", \"versions\": [], \"cpe\": \"\", \"categories\": [\"CDN\"], \"groups\": [\"Servers\"]}",
+                "http_request": "GET /backbonejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "WSTG-INFO-02",
+                    "WSTG-INFO-08"
+                ]
+            }
+        ]
+    }
+}

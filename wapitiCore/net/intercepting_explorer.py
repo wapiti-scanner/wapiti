@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2023 Nicolas SURRIBAS
+# Copyright (C) 2023-2025 Nicolas SURRIBAS
 # Copyright (C) 2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@ from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
 from urllib.parse import urlparse
 import inspect
-import os
 import json
 
 from mitmproxy import addons
@@ -34,10 +33,9 @@ from mitmproxy.master import Master
 from mitmproxy.options import Options
 from mitmproxy.http import Request as MitmRequest
 import httpx
-from wapiti_arsenic import get_session, browsers, services
-from wapiti_arsenic.constants import SelectorType
-from wapiti_arsenic.errors import ArsenicError, ElementNotInteractable, UnknownArsenicError, NoSuchElement
-import structlog
+# pylint: disable=protected-access
+from playwright._impl._errors import TargetClosedError
+from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.net import Request
 from wapitiCore.net.cookies import mitm_jar_to_cookiejar
@@ -66,19 +64,13 @@ def is_interpreted_type(mime_type: str) -> bool:
     return False
 
 
-def set_arsenic_log_level(level: int = WARNING):
+def set_playwright_log_level(level: int = WARNING):
     # Create logger
-    logger = getLogger('wapiti_arsenic')
-
-    # We need factory, to return application-wide logger
-    def logger_factory():
-        return logger
-
-    structlog.configure(logger_factory=logger_factory)
+    logger = getLogger('playwright')
     logger.setLevel(level)
 
 
-set_arsenic_log_level(CRITICAL)
+set_playwright_log_level(CRITICAL)
 
 
 def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
@@ -256,29 +248,27 @@ def extract_requests(html: Html, request: Request):
             yield form_request
 
 
-async def click_in_webpage(headless_client, request: Request, wait_time: float, timeout: float):
+async def click_in_webpage(page, request: Request, wait_time: float, timeout: float):
     # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
     for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
-        button_index = 1
-        while True:
+        try:
+            buttons = await page.query_selector_all(xpath_selector)
+        except PlaywrightError:
+            continue
+
+        for button in buttons:
             try:
-                element = await headless_client.get_element(
-                    f"({xpath_selector})[{button_index}]",
-                    selector_type=SelectorType.xpath,
-                )
-                await element.click()
-            except (ElementNotInteractable, UnknownArsenicError):
-                button_index += 1
+                await button.click(timeout=timeout * 1000)
+            except PlaywrightError:
                 continue
-            except NoSuchElement:
-                # No more buttons
-                break
             else:
-                button_index += 1
-                await asyncio.sleep(wait_time)
-                current_url = await headless_client.get_url()
-                if current_url != request.url_with_fragment:
-                    await headless_client.get(request.url_with_fragment, timeout=timeout)
+                await page.wait_for_timeout(wait_time * 1000)
+                if page.url != request.url_with_fragment:
+                    await page.goto(
+                        request.url_with_fragment,
+                        timeout=timeout * 1000,
+                        wait_until="domcontentloaded"
+                    )
 
 
 # pylint: disable=too-many-positional-arguments
@@ -298,83 +288,87 @@ async def launch_headless_explorer(
     # The intercepting will be in charge of generating Request objects.
     # This is the only way as a headless browser can't provide us response headers.
     proxy_settings = {
-        "proxyType": "manual",
-        "httpProxy": f"127.0.0.1:{proxy_port}",
-        "sslProxy": f"127.0.0.1:{proxy_port}"
+        "server": f"http://127.0.0.1:{proxy_port}"
     }
-    browser = browsers.Firefox(
-        proxy=proxy_settings,
-        acceptInsecureCerts=True,
-        **{
-            "moz:firefoxOptions": {
-                "prefs": {
-                    "network.proxy.allow_hijacking_localhost": True,
-                    "devtools.jsonview.enabled": False,
-                    # "security.cert_pinning.enforcement_level": 0,
-                    # "browser.download.panel.shown": False,  # Unfortunately doesn't seem to work
-                    # "browser.download.folderList": 2,
-                    # "browser.download.manager.showWhenStarting": False,
-                    # "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream",
-                },
-                "args": ["-headless"] if visibility == "hidden" else []
-            }
-        }
-    )
 
     # We need to make a copy of this list otherwise requests won't make their way into async_explore (because list is
     # shared). Also, we want our own list here because we will see URLs with anchors that the proxy can't catch.
     excluded_requests = list(excluded_requests)
 
     try:
-        async with get_session(services.Geckodriver(log_file=os.devnull), browser) as headless_client:
-            while to_explore and not stop_event.is_set():
-                request = to_explore.popleft()
-                excluded_requests.append(request)
+        async with async_playwright() as p:
+            browser = await p.firefox.launch(
+                headless=visibility == "hidden",
+                proxy=proxy_settings,
+                firefox_user_prefs={
+                    "network.proxy.allow_hijacking_localhost": True,
+                    "devtools.jsonview.enabled": False,
+                }
+            )
+            context = await browser.new_context(ignore_https_errors=True)
+            page = await context.new_page()
 
-                if request.method == "GET":
-                    try:
-                        await headless_client.get(request.url_with_fragment, timeout=crawler.timeout.connect)
-                        await asyncio.sleep(wait_time)
-                        # We may be redirected outside our target so let's check the URL first
-                        if not scope.check(await headless_client.get_url()):
+            try:
+                while to_explore and not stop_event.is_set():
+                    request = to_explore.popleft()
+                    excluded_requests.append(request)
+
+                    if request.method == "GET":
+                        try:
+                            await page.goto(
+                                request.url_with_fragment,
+                                timeout=crawler.timeout.connect * 1000,
+                                wait_until="domcontentloaded"
+                            )
+                            await page.wait_for_timeout(wait_time * 1000)
+                            # We may be redirected outside our target so let's check the URL first
+                            if not scope.check(page.url):
+                                continue
+
+                            page_source = await page.content()
+                            await click_in_webpage(page, request, wait_time, timeout=crawler.timeout.connect)
+                        except (PlaywrightError, asyncio.TimeoutError) as exception:
+                            if isinstance(exception, TargetClosedError):
+                                break
+
+                            logging.error(f"{request} generated an exception: {type(exception).__name__}")
+                            continue
+                    else:
+                        try:
+                            response = await crawler.async_send(request, timeout=crawler.timeout.connect)
+                        except httpx.RequestError as exception:
+                            logging.error(f"{request} generated an exception: {type(exception).__name__}")
                             continue
 
-                        page_source = await headless_client.get_page_source()
-                        await click_in_webpage(headless_client, request, wait_time, timeout=crawler.timeout.connect)
-                    except (ArsenicError, asyncio.TimeoutError) as exception:
-                        logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
-                        continue
-                else:
-                    try:
-                        response = await crawler.async_send(request, timeout=crawler.timeout.connect)
-                    except httpx.RequestError as exception:
-                        logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
+                        page_source = response.content
+
+                    if request.link_depth == max_depth:
                         continue
 
-                    page_source = response.content
+                    html = Html(page_source, request.url, allow_fragments=True)
 
-                if request.link_depth == max_depth:
-                    continue
+                    for next_request in extract_requests(html, request):
+                        if not scope.check(next_request):
+                            continue
 
-                html = Html(page_source, request.url, allow_fragments=True)
+                        if any(regex.match(next_request.url) for regex in exclusion_regexes):
+                            continue
 
-                for next_request in extract_requests(html, request):
-                    if not scope.check(next_request):
-                        continue
-
-                    if any(regex.match(next_request.url) for regex in exclusion_regexes):
-                        continue
-
-                    if next_request not in to_explore and next_request not in excluded_requests:
-                        to_explore.append(next_request)
+                        if next_request not in to_explore and next_request not in excluded_requests:
+                            to_explore.append(next_request)
+            finally:
+                await browser.close()
 
     except Exception as exception:  # pylint: disable=broad-except
+        if isinstance(exception, TargetClosedError):
+            return
+
         exception_traceback = sys.exc_info()[2]
         print_tb(exception_traceback)
         frm = inspect.trace()[-1]
         mod = inspect.getmodule(frm[0])
         logging.error(
-            f"Headless browser stopped prematurely due to exception: {mod.__name__}.{exception.__class__.__name__}"
+            f"Headless browser stopped prematurely due to exception: {mod.__name__}.{type(exception).__name__}"
         )
 
     await asyncio.sleep(1)
@@ -413,38 +407,38 @@ class InterceptingExplorer(Explorer):
             try:
                 request, response = self._queue.get_nowait()
             except asyncio.QueueEmpty:
+                if self._stopped.is_set():
+                    break
                 await asyncio.sleep(.1)
+                continue
             except KeyboardInterrupt:
                 break
-            else:
-                self._queue.task_done()
 
-                # Scope check and deduplication are made here
-                if not self._scope.check(request) or request in self._processed_requests:
-                    continue
+            self._queue.task_done()
 
-                # Check for exclusion here because we don't have full control over the headless browser
-                if request in excluded_requests or any(regex.match(request.url) for regex in exclusion_regexes):
-                    continue
+            # Scope check and deduplication are made here
+            if not self._scope.check(request) or request in self._processed_requests:
+                continue
 
-                dir_name = request.dir_name
-                if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
-                    continue
+            # Check for exclusion here because we don't have full control over the headless browser
+            if request in excluded_requests or any(regex.match(request.url) for regex in exclusion_regexes):
+                continue
 
-                self._file_counts[dir_name] += 1
+            dir_name = request.dir_name
+            if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
+                continue
 
-                if self.has_too_many_parameters(request):
-                    continue
+            self._file_counts[dir_name] += 1
 
-                if self._qs_limit and request.parameters_count:
-                    self._pattern_counts[request.pattern] += 1
+            if self.has_too_many_parameters(request):
+                continue
 
-                yield request, response
-                self._processed_requests.append(request)
-                log_verbose(f"[+] {request}")
+            if self._qs_limit and request.parameters_count:
+                self._pattern_counts[request.pattern] += 1
 
-            if self._stopped.is_set():
-                break
+            yield request, response
+            self._processed_requests.append(request)
+            log_verbose(f"[+] {request}")
 
     async def async_explore(
             self,

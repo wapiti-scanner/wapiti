@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backbone.js with Tailwind CSS</title>
+
+    <!-- Backbone.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css">
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-4">Backbone.js with Tailwind CSS</h1>
+
+        <div id="app" class="mb-8">
+            <input type="text" id="messageInput" placeholder="Enter a message"
+                class="border border-gray-300 rounded px-4 py-2">
+            <button id="submitButton" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2">Submit</button>
+            <div id="messageContainer" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // Backbone.js code (same as before)
+        const MessageModel = Backbone.Model.extend({
+            defaults: {
+                message: ""
+            }
+        });
+
+        const MessageView = Backbone.View.extend({
+            el: '#app',
+
+            events: {
+                'click #submitButton': 'addMessage'
+            },
+
+            initialize: function () {
+                this.collection = new Backbone.Collection();
+            },
+
+            addMessage: function () {
+                const message = this.$('#messageInput').val();
+                if (message) {
+                    this.collection.add(new MessageModel({ message }));
+                    this.render();
+                    this.$('#messageInput').val('');
+                }
+            },
+
+            render: function () {
+                const $messageContainer = this.$('#messageContainer');
+                $messageContainer.empty();
+
+                this.collection.each(function (messageModel) {
+                    const message = messageModel.get('message');
+                    $messageContainer.append(`<p class="mb-2">${message}</p>`);
+                });
+            }
+        });
+
+        const messageView = new MessageView();
+    </script>
+</body>
+
+</html>
