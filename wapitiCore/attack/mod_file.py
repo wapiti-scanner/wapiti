@@ -192,7 +192,7 @@ class ModuleFile(Attack):
                 self.network_errors += 1
                 continue
             except InvalidURL:
-                logging.warning(f"Invalid URL: {mutated_request.url} potentially vulnerable to open redirect")
+                logging.warning("Invalid URL: %s potentially vulnerable to open redirect", mutated_request.url)
                 continue
             else:
                 file_warning = None

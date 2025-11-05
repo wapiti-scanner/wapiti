@@ -68,12 +68,12 @@ def is_valid_endpoint(url_type, url: str):
         return False
 
     if parts.params or parts.query or parts.fragment:
-        logging.error(f"Error: {url_type} must not contain params, query or fragment!")
+        logging.error("Error: %s must not contain params, query or fragment!", url_type)
         return False
     if parts.scheme in ("http", "https") and parts.netloc:
         return True
 
-    logging.error(f"Error: {url_type} must contain scheme and host")
+    logging.error("Error: %s must contain scheme and host", url_type)
     return False
 
 
@@ -96,7 +96,7 @@ def validate_cms_choices(cms_value):
     cms_list = cms_value.split(',')
     for cms in cms_list:
         if cms not in allowed_cms:
-            logging.error(f"Invalid CMS choice: {cms_value}. Choose from {', '.join(allowed_cms)}")
+            logging.error("Invalid CMS choice: %s. Choose from %s", cms_value, {', '.join(allowed_cms)})
             return False
     return True
 
@@ -130,7 +130,7 @@ def handle_special_commands(args: Namespace):
 
 
 def validate_basic_args(args: Namespace):
-    """Validate base arguments and exit in case of problem."""
+    """Validate base arguments and exit in case of problems."""
     if args.tasks < 1:
         logging.error("Number of concurrent tasks must be 1 or above!")
         sys.exit(2)
@@ -291,7 +291,7 @@ async def wapiti_main():
             logging.error(invalid_option)
             raise
         except ValueError as e:
-            logging.error(f"Value error: {e}")
+            logging.error("Value error: %s", e)
             raise
 
     if args.swagger_uri:
@@ -307,7 +307,7 @@ async def wapiti_main():
             raise InvalidOptionValue("--swagger", f"Could not parse swagger file: {exception}") from exception
 
         if nb_out > 0:
-            logging.warning(f"[!] {nb_out} out of scope requests from the Swagger file are not added.")
+            logging.warning("[!] %s out of scope requests from the Swagger file are not added.", nb_out)
 
     try:
         for start_url in args.starting_urls:
@@ -491,10 +491,12 @@ async def wapiti_main():
         if args.max_parameters:
             count = await wap.persister.remove_big_requests(args.max_parameters)
             logging.info(
-                f"[*] {count} URLs and forms having more than {args.max_parameters} parameters were removed."
+                "[*] %s URLs and forms having more than %s parameters were removed.",
+                count,
+                args.max_parameters
             )
 
-        logging.info(f"[*] Wapiti found {await wap.count_resources()} URLs and forms during the scan")
+        logging.info("[*] Wapiti found %s URLs and forms during the scan", await wap.count_resources())
 
         await wap.init_report()
         if await wap.active_scanner.attack():

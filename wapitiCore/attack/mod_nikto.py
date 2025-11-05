@@ -300,7 +300,7 @@ class ModuleNikto(Attack):
             self.network_errors += 1
             return None, None, None, None
         except Exception as exception:  # pylint: disable=broad-except
-            logging.warning(f"{exception} occurred with URL {request.url}")
+            logging.warning("%s occurred with URL %s", exception, request.url)
             return None, None, None, None
 
     async def _report_vulnerability(self, request, vuln_desc, osv_id, response):

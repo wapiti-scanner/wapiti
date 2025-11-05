@@ -167,9 +167,9 @@ class ModuleWapp(Attack):
         This function copies wapp DB files specified as arguments to the config directory.
         """
         for source_file in files_to_copy:
-            # Check if file exists before attempting to copy
+            # Check if a file exists before attempting to copy
             if not os.path.isfile(source_file):
-                logging.error(f"Warning: File {source_file} does not exist, skipping.")
+                logging.error("Warning: File %s does not exist, skipping.", source_file)
                 continue
 
             # Construct the destination file path using the filename
@@ -177,9 +177,9 @@ class ModuleWapp(Attack):
 
             try:
                 shutil.copy(source_file, destination_file)
-                logging.info(f"Copied {source_file} to {destination_file}")
+                logging.info("Copied %s to %s", source_file, destination_file)
             except shutil.Error as err:
-                logging.error(f"Error copying {source_file}: {err}")
+                logging.error("Error copying %s: %s", source_file, err)
 
     async def update(self):
         await self.update_nvd()
@@ -242,12 +242,12 @@ class ModuleWapp(Attack):
                     wapp_groups_url
                 )
             except RequestError as e:
-                logging.error(f"RequestError occurred: {e}")
+                logging.error("RequestError occurred: %s", e)
                 raise
             except IOError:
                 logging.error("Error downloading wapp database.")
             except ValueError as e:
-                logging.error(f"Value error: {e}")
+                logging.error("Value error: %s", e)
                 raise
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
@@ -393,7 +393,7 @@ class ModuleWapp(Attack):
             raise
 
         if response.status != 200:
-            logging.error(f"Error: Non-200 status code for {url}")
+            logging.error("Error: Non-200 status code for %s", url)
             return
 
         if not _is_valid_json(response):
@@ -443,10 +443,10 @@ class ModuleWapp(Attack):
                 self._dump_url_content_to_file(groups_url, groups_file_path)
             )
         except RequestError as req_error:
-            logging.error(f"Caught a RequestError: {req_error}")
+            logging.error("Caught a RequestError: %s", req_error)
             raise
         except ValueError as value_error:
-            logging.error(f"Caught a ValueError: {value_error}")
+            logging.error("Caught a ValueError: %s", value_error)
             raise
 
     async def _verify_wapp_database(
@@ -580,13 +580,13 @@ class ModuleWapp(Attack):
             # The response is cached as we don't want to repeat the same query for each received software name
             latest_release = await self.get_nvd_release_data()
         except RequestError as exception:
-            logging.error(f"Could not fetch wapiti-scanner/nvd-web-cves CVE index for {software_name}: {exception}")
+            logging.error("Could not fetch wapiti-scanner/nvd-web-cves CVE index for %s: %s", software_name, exception)
             return False
 
         # Find the asset related to the software_name
         asset = next((a for a in latest_release.get("assets", []) if file_name in a["name"]), None)
         if asset is None:
-            logging.error(f"No CVE data found for {software_name} on wapiti-scanner/nvd-web-cves")
+            logging.error("No CVE data found for %s on wapiti-scanner/nvd-web-cves", software_name)
             return False
 
         # Download the asset

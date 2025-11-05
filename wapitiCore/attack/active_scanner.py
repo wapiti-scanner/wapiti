@@ -72,16 +72,15 @@ class ActiveScanner:
                 try:
                     mod = import_module("wapitiCore.attack." + module_file.stem)
                 except ImportError as error:
-                    logging.error(f"[!] Unable to import module {module_file.stem}: {error}")
+                    logging.error("[!] Unable to import module %s: %s", module_file.stem, error)
                     continue
 
                 class_name = module_to_class_name(module_file.stem)
                 class_ = getattr(mod, class_name)
                 modules[module_file.stem] = class_
-            except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                logging.error(f"[!] Module {module_file.stem} seems broken and will be skipped")
-                logging.exception(exception.__class__.__name__, exception)
+            except Exception:  # pylint: disable=broad-except
+                # Catch every possible exception and print it
+                logging.exception("[!] Module %s seems broken and will be skipped", module_file.stem)
                 continue
 
         return modules
@@ -112,10 +111,9 @@ class ActiveScanner:
                     self.attack_options,
                     self.crawler_configuration,
                 )
-            except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
-                logging.exception(exception.__class__.__name__, exception)
+            except Exception:  # pylint: disable=broad-except
+                # Catch every possible exception and print it
+                logging.exception("[!] Module %s seems broken and will be skipped", mod_name)
                 continue
 
             for method in ("GET", "POST"):
@@ -141,7 +139,7 @@ class ActiveScanner:
                         self.crawler_configuration,
                     )
                     if hasattr(class_instance, "update"):
-                        logging.info(f"Updating module {mod_name}")
+                        logging.info("Updating module %s", mod_name)
                         try:
                             await class_instance.update()
                             log_green("Update done.")
@@ -152,8 +150,8 @@ class ActiveScanner:
                 except ImportError:
                     continue
                 except Exception:  # pylint: disable=broad-except
-                    # Catch every possible exceptions and print it
-                    logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
+                    # Catch every possible exception and print it
+                    logging.exception("[!] Module %s seems broken and will be skipped", mod_name)
                     continue
 
     async def load_resources_for_module(self, module: Attack) -> AsyncIterator[Tuple[Request, Response]]:
@@ -186,7 +184,7 @@ class ActiveScanner:
         async for original_request, original_response in self.load_resources_for_module(attack_module):
             try:
                 if await attack_module.must_attack(original_request, original_response):
-                    logging.info(f"[+] {original_request}")
+                    logging.info("[+] %s", original_request)
 
                     await attack_module.attack(original_request, original_response)
 
@@ -195,9 +193,9 @@ class ActiveScanner:
                 await asyncio.sleep(1)
                 continue
             except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
+                # Catch every possible exception and print it
                 exception_traceback = sys.exc_info()[2]
-                logging.exception(exception.__class__.__name__, exception)
+                logging.exception("An exception occurred in module %s", attack_module.name)
 
                 if self._bug_report:
                     await self.send_bug_report(
@@ -250,7 +248,7 @@ class ActiveScanner:
             )
         except asyncio.TimeoutError:
             logging.info(
-                f"Max attack time was reached for module {attack_module.name}, stopping."
+                "Max attack time was reached for module %s, stopping.", attack_module.name
             )
         finally:
             # In ALL cases we want to persist the IDs of requests that have been attacked so far
@@ -263,7 +261,7 @@ class ActiveScanner:
                 await attack_module.finish()
 
             if attack_module.network_errors:
-                logging.warning(f"{attack_module.network_errors} requests were skipped due to network issues")
+                logging.warning("%s requests were skipped due to network issues", attack_module.network_errors)
 
     async def attack(self) -> bool:
         """Launch the attacks based on the preferences set by the command line"""
@@ -286,8 +284,8 @@ class ActiveScanner:
                     ]
 
                     if attack_module.require != attack_name_list:
-                        logging.error(f"[!] Missing dependencies for module {attack_module.name}:")
-                        logging.error("  {0}", ",".join(
+                        logging.error("[!] Missing dependencies for module %s:", attack_module.name)
+                        logging.error("  %s", ",".join(
                             [attack for attack in attack_module.require if attack not in attack_name_list]
                         ))
                         continue
@@ -331,7 +329,7 @@ class ActiveScanner:
                 print_tb(traceback_, file=traceback_fd)
                 print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
                 print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)
-                logging.info(f"Wapiti {WAPITI_VERSION}. httpx {httpx.__version__}. OS {sys.platform}")
+                logging.info("Wapiti %s. httpx %s. OS %s", WAPITI_VERSION, httpx.__version__, sys.platform)
 
             try:
                 with open(traceback_file, "rb") as traceback_byte_fd:

@@ -748,13 +748,13 @@ def is_valid_url(url: str):
         parts = urlparse(url)
         _ = parts.port
     except ValueError:
-        logging.error(f"Invalid port number given in URL {url}")
+        logging.error("Invalid port number given in URL %s", url)
         return False
 
     if parts.scheme in ("http", "https") and parts.netloc:
         return True
 
-    logging.error(f"Error: {url} is not a valid URL")
+    logging.error("Error: %s is not a valid URL", url)
     return False
 
 

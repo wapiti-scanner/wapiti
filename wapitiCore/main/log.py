@@ -133,7 +133,7 @@ def log_orange(message, *args, **kwargs):
 
 
 def log_yellow(message, *args, **kwargs):
-    """Logs a low finding (INFO level, YELLOW color)."""
+    """Logs a low-finding (INFO level, YELLOW color)."""
     if args or kwargs:
         message = message.format(*args, **kwargs)
     logging.info(message, extra={'color_name': 'YELLOW'})
