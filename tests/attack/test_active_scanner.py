@@ -166,10 +166,10 @@ def test_load_attack_modules_broken_module(
     assert len(scanner._modules) == 0
 
     # Make sure error log was called
-    mock_log_err.assert_any_call(
-        "[!] Module mod_broken seems broken and will be skipped"
+    mock_log_err.assert_not_called()
+    mock_log_exc.assert_called_with(
+        "[!] Module %s seems broken and will be skipped", "mod_broken"
     )
-    mock_log_exc.assert_called()
 
 
 @pytest.mark.asyncio
@@ -189,7 +189,7 @@ async def test_update_raises_error_from_module(mock_log_error, mock_import_modul
     )
 
     await scanner.update("foo")
-    mock_log_error.assert_called_with("[!] Module foo seems broken and will be skipped")
+    mock_log_error.assert_called_with("[!] Module %s seems broken and will be skipped", "foo", exc_info=True)
 
 
 @pytest.mark.asyncio
@@ -404,10 +404,10 @@ async def test_init_attack_modules_handles_broken_module(mock_log_exc, mock_log_
     modules = await scanner.init_attack_modules(crawler)
 
     assert modules == []
-    mock_log_err.assert_called_with(
-        "[!] Module mod_broken seems broken and will be skipped"
+    mock_log_err.assert_not_called()
+    mock_log_exc.assert_called_with(
+        "[!] Module %s seems broken and will be skipped", "mod_broken"
     )
-    mock_log_exc.assert_called()
 
 
 @pytest.mark.asyncio
