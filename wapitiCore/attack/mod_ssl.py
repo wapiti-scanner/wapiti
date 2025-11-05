@@ -21,7 +21,7 @@ import os
 import socket
 import ssl
 import subprocess
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone, UTC, timedelta
 import asyncio
 from os.path import exists
 from typing import List, Tuple, Optional, AsyncIterator
@@ -32,7 +32,6 @@ import tempfile
 import shutil
 
 from httpx import RequestError
-import humanize
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography import x509
@@ -42,6 +41,43 @@ from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
 from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
 from wapitiCore.definitions.ssl import SslInformationFinding, SslVulnerabilityFinding
+
+
+def simple_precisedelta(delta: timedelta) -> str:
+    """
+    Return a human-readable string for a timedelta, in English.
+    Keeps up to minutes precision (e.g. 'in about 3 days and 2 hours').
+    """
+
+    total_seconds = int(delta.total_seconds())
+    if total_seconds < 0:
+        total_seconds = abs(total_seconds)
+        past = True
+    else:
+        past = False
+
+    days, remainder = divmod(total_seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    parts = []
+    if days > 0:
+        parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours > 0:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes > 0 or not parts:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+
+    if len(parts) > 1:
+        text = ", ".join(parts[:-1]) + f" and {parts[-1]}"
+    else:
+        text = parts[0]
+
+    prefix = "about "
+    if past:
+        return prefix + text + " ago"
+    else:
+        return "in " + prefix + text
 
 
 def sslscan_level_to_color(security_level: str) -> str:
@@ -165,7 +201,7 @@ async def process_cert_info(xml_file: str) -> AsyncIterator[Tuple[int, str]]:
         not_valid_after = sslscan_date_to_utc(cert.find("not-valid-after").text)
         utcnow = datetime.now(UTC).replace(tzinfo=timezone.utc)
         if not_valid_after > utcnow:
-            message = "Certificate expires in " + humanize.precisedelta(not_valid_after - utcnow)
+            message = "Certificate expires " + simple_precisedelta(not_valid_after - utcnow)
             log_green(message)
             yield INFO_LEVEL, message
         else:

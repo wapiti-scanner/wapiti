@@ -16,7 +16,6 @@ from wapitiCore.net.response import Response
 from wapitiCore.net.scope import Scope
 
 
-@pytest.mark.asyncio
 class TestInterceptingExplorer:
     @pytest.fixture
     def mitm_request(self):
@@ -90,6 +89,7 @@ class TestInterceptingExplorer:
         flow.request = mitm_request
         return flow
 
+    @pytest.mark.asyncio
     async def test_mitm_flow_addon_request(self, flow):
         queue = asyncio.Queue()
         headers = httpx.Headers({"User-Agent": "Wapiti/3.2.8"})
@@ -99,6 +99,7 @@ class TestInterceptingExplorer:
         await addon.request(flow)
         assert flow.request.headers["User-Agent"] == "Wapiti/3.2.8"
 
+    @pytest.mark.asyncio
     async def test_mitm_flow_addon_response(self, flow):
         queue = asyncio.Queue()
         headers = httpx.Headers()
@@ -114,6 +115,7 @@ class TestInterceptingExplorer:
         assert response.content == "Hello"
 
     @patch("wapitiCore.net.intercepting_explorer.async_playwright")
+    @pytest.mark.asyncio
     async def test_launch_headless_explorer(self, mock_async_playwright):
         stop_event = asyncio.Event()
         to_explore = deque()
@@ -162,6 +164,7 @@ class TestInterceptingExplorer:
 
     @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
     @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
     async def test_intercepting_explorer_explore(self, mock_launch_headless, mock_launch_proxy):
         stop_event = asyncio.Event()
         crawler_config = CrawlerConfiguration(Request("http://example.com"))
