@@ -1,7 +1,7 @@
 import types
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from pathlib import Path
 
 from wapitiCore.attack.passive_scanner import PassiveScanner
@@ -21,7 +21,7 @@ def test_import_error_is_handled(mock_log_error, _, mock_persister):
 
     assert len(scanner._modules) == 0
     mock_log_error.assert_called_with(
-        "[!] Unable to import module mod_broken: No module named 'wapitiCore.attack.modules.passive.mod_broken'"
+        "[!] Unable to import module %s: %s", "mod_broken", ANY
     )
 
 
@@ -47,7 +47,7 @@ def test_broken_module_is_skipped(
     assert scanner._modules == {}
 
     # Logs should have been called
-    mock_log_err.assert_called_with(
-        "[!] Module mod_broken seems broken and will be skipped"
+    mock_log_err.assert_not_called()
+    mock_log_exc.assert_called_with(
+        "[!] Module %s seems broken and will be skipped", "mod_broken"
     )
-    mock_log_exc.assert_called()
