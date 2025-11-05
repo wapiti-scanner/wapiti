@@ -76,8 +76,8 @@ def simple_precisedelta(delta: timedelta) -> str:
     prefix = "about "
     if past:
         return prefix + text + " ago"
-    else:
-        return "in " + prefix + text
+
+    return "in " + prefix + text
 
 
 def sslscan_level_to_color(security_level: str) -> str:
