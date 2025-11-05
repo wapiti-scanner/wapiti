@@ -21,7 +21,8 @@ from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, INFO_L
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssl import (
     ModuleSsl, extract_altnames,
-    match_address, check_ocsp_must_staple, check_ev_certificate, process_vulnerabilities, process_bad_protocols
+    match_address, check_ocsp_must_staple, check_ev_certificate, process_vulnerabilities, process_bad_protocols,
+    simple_precisedelta
 )
 
 
@@ -225,3 +226,21 @@ async def test_process_bad_protocols():
     assert [
        (4, 'The following protocols are deprecated and/or insecure and should be deactivated: SSLv2, TLSv1.0')
     ] == results
+
+
+@pytest.mark.parametrize("delta, expected", [
+    (timedelta(minutes=1), "in about 1 minute"),
+    (timedelta(minutes=5), "in about 5 minutes"),
+    (timedelta(hours=1), "in about 1 hour"),
+    (timedelta(hours=2, minutes=30), "in about 2 hours and 30 minutes"),
+    (timedelta(days=1), "in about 1 day"),
+    (timedelta(days=2, hours=3), "in about 2 days and 3 hours"),
+    (-timedelta(minutes=1), "about 1 minute ago"),
+    (-timedelta(hours=2, minutes=5), "about 2 hours and 5 minutes ago"),
+    (-timedelta(days=1, hours=2), "about 1 day and 2 hours ago"),
+    (timedelta(hours=1, minutes=5, seconds=42), "in about 1 hour and 5 minutes"),
+    (timedelta(seconds=42), "in about 0 minutes"),
+])
+def test_simple_precisedelta(delta, expected):
+    result = simple_precisedelta(delta)
+    assert result == expected
