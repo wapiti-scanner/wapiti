@@ -15,7 +15,7 @@ from httpx import RequestError
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.controller.exceptions import InvalidOptionValue
-from wapitiCore.main.log import logging, log_green, log_blue
+from wapitiCore.main.log import logging, log_green, log_blue, log_yellow
 from wapitiCore.attack.attack import Attack, AttackProtocol
 from wapitiCore.attack.modules.core import all_modules, ModuleActivationSettings
 from wapitiCore.net import Request, Response
@@ -230,7 +230,7 @@ class ActiveScanner:
 
     async def run_attack_module(self, attack_module):
         """Run a single attack module, handling persistence and timeouts."""
-        log_green(f"[*] Launching module {attack_module.name}")
+        log_yellow(f"[*] Launching module {attack_module.name}")
 
         already_attacked = await self.persister.count_attacked(attack_module.name)
         if already_attacked:
