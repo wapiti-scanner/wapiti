@@ -15,7 +15,7 @@ from httpx import RequestError
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.controller.exceptions import InvalidOptionValue
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import logging, log_green, log_blue
 from wapitiCore.attack.attack import Attack, AttackProtocol
 from wapitiCore.attack.modules.core import all_modules, ModuleActivationSettings
 from wapitiCore.net import Request, Response
@@ -144,7 +144,7 @@ class ActiveScanner:
                         logging.info(f"Updating module {mod_name}")
                         try:
                             await class_instance.update()
-                            logging.success("Update done.")
+                            log_green("Update done.")
                         except (RequestError, InvalidOptionValue, ValueError) as exception:
                             logging.error(exception)
                             raise
@@ -232,11 +232,11 @@ class ActiveScanner:
 
     async def run_attack_module(self, attack_module):
         """Run a single attack module, handling persistence and timeouts."""
-        logging.log("GREEN", "[*] Launching module {0}", attack_module.name)
+        log_green(f"[*] Launching module {attack_module.name}")
 
         already_attacked = await self.persister.count_attacked(attack_module.name)
         if already_attacked:
-            logging.success(
+            log_blue(
                 "[*] {0} pages were previously attacked and will be skipped",
                 already_attacked
             )
@@ -342,7 +342,7 @@ class ActiveScanner:
                         ]
                     )
                 page = await crawler.async_send(upload_request)
-                logging.success(f"Sending crash report {traceback_file} ... {page.content}")
+                log_blue(f"Sending crash report {traceback_file} ... {page.content}")
             except RequestError:
                 logging.error("Error sending crash report")
             os.unlink(traceback_file)

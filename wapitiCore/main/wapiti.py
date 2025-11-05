@@ -38,7 +38,7 @@ from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner
 from wapitiCore.net.web import is_valid_url
 from wapitiCore.parsers.commandline import parse_args
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import logging, log_green
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
 from wapitiCore.net.auth import (async_try_form_login, load_form_script, check_http_auth, login_with_raw_data,
                                  authenticate_with_side_file)
@@ -282,7 +282,7 @@ async def wapiti_main():
 
     if args.update:
         await wap.init_persister()
-        logging.log("GREEN", "[*] Updating modules")
+        log_green("[*] Updating modules")
         wap.active_scanner.set_attack_options(attack_options)
         try:
             await wap.active_scanner.update(args.modules)

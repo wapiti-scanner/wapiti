@@ -39,7 +39,7 @@ from cryptography import x509
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, INFO_LEVEL
-from wapitiCore.main.log import log_red, log_blue, log_green, log_orange, logging
+from wapitiCore.main.log import log_red, log_blue, log_green, log_orange
 from wapitiCore.definitions.ssl import SslInformationFinding, SslVulnerabilityFinding
 
 
@@ -78,15 +78,6 @@ def simple_precisedelta(delta: timedelta) -> str:
         return prefix + text + " ago"
 
     return "in " + prefix + text
-
-
-def sslscan_level_to_color(security_level: str) -> str:
-    if security_level == "weak":
-        return "RED"
-    if security_level == "acceptable":
-        return "ORANGE"
-    # Secure / Recommended / Unknown
-    return "GREEN"
 
 
 def sslscan_level_to_wapiti_level(security_level: str) -> int:
@@ -225,12 +216,16 @@ async def process_cipher_suites2(xml_file: str) -> AsyncIterator[Tuple[int, str]
         group_by_severity = defaultdict(list)
         for cipher in root.findall(f".//cipher[@sslversion='{protocol}']"):
             name = cipher.get("cipher")
-            group_by_severity[cipher.get("strength")].append(name)
+            strength = cipher.get("strength")
+            group_by_severity[strength].append(name)
 
-            logging.log(
-                sslscan_level_to_color(cipher.get("strength")),
-                f"* {name} {cipher.get('strength')}"
-            )
+            message = f"* {name} {strength}"
+            if strength == "weak":
+                log_red(message)
+            elif strength == "acceptable":
+                log_orange(message)
+            else:
+                log_green(message)
 
         for security_level, ciphers in group_by_severity.items():
             # We are using sslscan level in the report to be consistent with output from the tool
