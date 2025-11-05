@@ -42,7 +42,7 @@ from wapitiCore.net.intercepting_explorer import InterceptingExplorer
 from wapitiCore.net.scope import Scope
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.report import get_report_generator_instance
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import logging, configure, log_green, log_red
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
@@ -120,8 +120,6 @@ class Wapiti:
 
     def refresh_logging(self):
         message_format = "{message}"
-        if self.color_enabled:
-            message_format = "<lvl>" + message_format + "</lvl>"
 
         verbosity_levels = {
             0: "BLUE",
@@ -139,7 +137,7 @@ class Wapiti:
         ]
         if self._logfile:
             handlers.append({"sink": self._logfile, "level": "DEBUG"})
-        logging.configure(handlers=handlers)
+        configure(handlers=handlers)
 
     def set_logfile(self, filename: str):
         self._logfile = filename
@@ -205,7 +203,7 @@ class Wapiti:
         await self.persister.set_root_url(self.base_request.url)
 
     async def save_scan_state(self):
-        logging.log("GREEN", "[*] Saving scan state, please wait...")
+        log_green("[*] Saving scan state, please wait...")
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
@@ -320,11 +318,11 @@ class Wapiti:
                 )
 
         print('')
-        logging.log("GREEN", "[*] Generating report...")
+        log_green("[*] Generating report...")
         self.report_gen.generate_report(self.output_file)
-        logging.success(f"A report has been generated in the file {self.output_file}")
+        log_green(f"A report has been generated in the file {self.output_file}")
         if self.report_generator_type == "html":
-            logging.success(f"Open {self.report_gen.final_path} with a browser to see this report.")
+            log_green(f"Open {self.report_gen.final_path} with a browser to see this report.")
 
         await self.persister.close()
 
@@ -363,7 +361,7 @@ class Wapiti:
             async with async_playwright() as p:
                 try:
                     if not os.path.exists(p.firefox.executable_path):
-                        logging.error(
+                        log_red(
                             "Firefox is not installed. "
                             "Please run `playwright install firefox`"
                         )
@@ -371,7 +369,7 @@ class Wapiti:
                     else:
                         self._headless_mode = headless_mode
                 except PlaywrightError:
-                    logging.error(
+                    log_red(
                         "Could not find browser installation. "
                         "Please run `playwright install --with-deps firefox`"
                     )

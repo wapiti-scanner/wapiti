@@ -31,7 +31,6 @@ classifiers = [
         "Topic :: Software Development :: Testing"
 ]
 dependencies = [
-    "aiocache>=0.12.3,<1.0",
     "aiosqlite>=0.19,<1.0",
     "playwright>=1.42,<2.0",
     "beautifulsoup4>=4.12,<5.0",
@@ -40,7 +39,6 @@ dependencies = [
     "httpcore>=1.0,<2.0",
     "httpx[brotli,socks]>=0.27,<1.0",
     "httpx-ntlm>=1.4,<2.0",
-    "loguru>=0.7,<1.0",
     "mako>=1.2,<2.0",
     "mitmproxy>=12.0,<13.0",
     "packaging>=23.0,<26.0",
@@ -56,6 +54,7 @@ repository = "https://github.com/wapiti-scanner/wapiti"
 [project.scripts]
 wapiti = "wapitiCore.main.wapiti:wapiti_asyncio_wrapper"
 wapiti-getcookie = "wapitiCore.main.getcookie:getcookie_asyncio_wrapper"
+wapiti-install-headless-browser = "wapitiCore.main.headless:install_browser"
 
 [project.optional-dependencies]
 test = [
@@ -63,7 +62,6 @@ test = [
   "pytest-cov>=4.1,<5.0",
   "pytest-asyncio>=0.23,<1.0",
   "respx>=0.22,<1.0",
-  "humanize>=4.5,<5.0",
 ]
 
 dev = [

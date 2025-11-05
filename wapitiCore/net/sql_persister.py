@@ -22,7 +22,6 @@ import os
 from collections import namedtuple
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple
 
-from aiocache import cached
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_,
@@ -178,12 +177,16 @@ class SqlPersister:
             ))
         self.root_url = root_url
 
-    @cached()
     async def get_root_url(self) -> str:
+        if self.root_url:
+            return self.root_url
+
         statement = select(self.scan_infos).where(self.scan_infos.c.key == "root_url").limit(1)
         async with self._engine.begin() as conn:
             result = await conn.execute(statement)
-            return result.fetchone().value
+            value = result.fetchone().value
+            self.root_url = value
+            return value
 
     async def set_to_browse(self, to_browse: Sequence[Request]):
         await self.save_requests([(request, None) for request in to_browse])

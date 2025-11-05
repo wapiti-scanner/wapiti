@@ -25,7 +25,6 @@ from typing import Dict, Tuple, Optional, List, AsyncIterator
 import re
 from urllib.parse import quote_plus
 
-from aiocache import cached
 from httpx import RequestError
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
@@ -161,6 +160,7 @@ class ModuleWapp(Attack):
             os.makedirs(self.user_config_dir)
 
         self._cve_checker = CVEChecker(self.user_config_dir)
+        self._nvd_release_data: Optional[dict] = None
 
     async def copy_files_to_conf(self, files_to_copy: List[str]):
         """
@@ -554,14 +554,17 @@ class ModuleWapp(Attack):
 
         return final_results
 
-    @cached()
-    async def get_nvd_release_data(self):
+    async def get_nvd_release_data(self) -> dict:
+        if self._nvd_release_data is not None:
+            return self._nvd_release_data
+
         release_url = "https://api.github.com/repos/wapiti-scanner/nvd-web-cves/releases/latest"
 
         # Create and send the request to get the latest release
         release_request = Request(release_url)
         release_response = await self.crawler.async_send(release_request)
-        return release_response.json
+        self._nvd_release_data = release_response.json
+        return self._nvd_release_data
 
     async def download_latest_release_asset(self, software_name: str, dest_folder: str) -> bool:
         # Ensure the destination folder exists

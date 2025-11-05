@@ -31,7 +31,7 @@ from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import logging, log_green, log_orange
 from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
@@ -173,10 +173,10 @@ async def async_submit_login_form(
             # ensure logged in
             is_logged_in = html.is_logged_in()
             if is_logged_in:
-                logging.success("[*] Login success")
+                log_green("[*] Login success")
                 disconnect_urls = html.extract_disconnect_urls()
             else:
-                logging.warning("[!] Login failed : Credentials might be invalid")
+                log_orange("[!] Login failed : Credentials might be invalid")
 
             # In every case keep the cookies
             crawler_configuration.cookies = crawler.cookie_jar
