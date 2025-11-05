@@ -207,7 +207,7 @@ class Wapiti:
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
-        logging.info(f"This scan has been saved in the file {self.persister.output_file}")
+        logging.info("This scan has been saved in the file %s", self.persister.output_file)
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 

@@ -331,13 +331,13 @@ async def launch_headless_explorer(
                             if isinstance(exception, TargetClosedError):
                                 break
 
-                            logging.error(f"{request} generated an exception: {type(exception).__name__}")
+                            logging.error("%s generated an exception: %s", request, type(exception).__name__)
                             continue
                     else:
                         try:
                             response = await crawler.async_send(request, timeout=crawler.timeout.connect)
                         except httpx.RequestError as exception:
-                            logging.error(f"{request} generated an exception: {type(exception).__name__}")
+                            logging.error("%s generated an exception: %s", request, type(exception).__name__)
                             continue
 
                         page_source = response.content
@@ -368,7 +368,7 @@ async def launch_headless_explorer(
         frm = inspect.trace()[-1]
         mod = inspect.getmodule(frm[0])
         logging.error(
-            f"Headless browser stopped prematurely due to exception: {mod.__name__}.{type(exception).__name__}"
+            "Headless browser stopped prematurely due to exception: %s.%s", mod.__name__, type(exception).__name__
         )
 
     await asyncio.sleep(1)

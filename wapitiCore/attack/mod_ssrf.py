@@ -82,7 +82,7 @@ class ModuleSsrf(Attack):
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
-        logging.info(f"[*] Asking endpoint URL {endpoint_url} for results, please wait...")
+        logging.info("[*] Asking endpoint URL %s for results, please wait...", endpoint_url)
         await sleep(2)
         # When attacks are down we ask the endpoint for receive requests
         endpoint_request = Request(endpoint_url)
@@ -90,7 +90,7 @@ class ModuleSsrf(Attack):
             response = await self.crawler.async_send(endpoint_request)
         except RequestError:
             self.network_errors += 1
-            logging.error(f"[!] Unable to request endpoint URL '{self.internal_endpoint}'")
+            logging.error("[!] Unable to request endpoint URL '%s'", self.internal_endpoint)
         else:
             data = response.json
             if isinstance(data, dict):

@@ -301,10 +301,10 @@ class Explorer:
             try:
                 response: Response = await self._crawler.async_send(request, stream=True)
             except (TypeError, UnicodeDecodeError) as exception:
-                logging.debug(f"{exception} with url {resource_url}")  # debug
+                logging.debug("%s with URL %s", exception, resource_url)  # debug
                 return False, [], None
             except (ConnectionError, httpx.RequestError) as error:
-                logging.error(f"[!] {error.__class__.__name__} with URL {resource_url}")
+                logging.error("[!] %s with URL %s", error.__class__.__name__, resource_url)
                 return False, [], None
 
             if self._max_files_per_dir:
@@ -315,14 +315,14 @@ class Explorer:
                 async with self._shared_lock:
                     self._pattern_counts[request.pattern] += 1
 
-            # Above this line we need the content of the page. As we are in stream mode we must force reading the body.
+            # Above this line we need the content of the page. As we are in stream mode, we must force reading the body.
             try:
                 await response.read()
             finally:
                 await response.close()
 
             if request.link_depth == self._max_depth:
-                # We are at the edge of the depth so next links will have depth + 1 so to need to parse the page.
+                # We are at the edge of the depth, so next links will have depth + 1 so to need to parse the page.
                 return True, [], response
 
             # Sur les ressources statiques le content-length est généralement indiqué
@@ -363,7 +363,7 @@ class Explorer:
         task_to_request = {}
         while True:
             while to_explore:
-                # Concurrent tasks are limited through the use of the semaphore BUT we don't want the to_explore
+                # Concurrent tasks are limited through the use of the semaphore, BUT we don't want the to_explore
                 # queue to be empty everytime (as we may need to extract remaining URLs) and overload the event loop
                 # with pending tasks.
                 if len(task_to_request) > self._max_tasks:
@@ -412,7 +412,7 @@ class Explorer:
                     response: Response
                     success, resources, response = await task
                 except Exception as exception:    # pylint: disable=broad-except
-                    logging.error(f"{request} generated an exception: {exception.__class__.__name__}")
+                    logging.error("%s generated an exception: %s", request, exception.__class__.__name__)
                 else:
                     if success:
                         yield request, response

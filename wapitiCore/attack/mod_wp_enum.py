@@ -56,7 +56,7 @@ class ModuleWpEnum(Attack):
                 self.network_errors += 1
             else:
                 if response.status == 403 or response.is_success:
-                    logging.warning(f"False positive detected for {wp_type} due to status code {response.status}")
+                    logging.warning("False positive detected for %s due to status code %s", wp_type, response.status)
                     self.false_positive[wp_type] = response.status
 
     def get_plugin(self):
@@ -155,7 +155,7 @@ class ModuleWpEnum(Attack):
                 if response.is_success:
                     version = re.search(r'tag:\s*([\d.]+)', response.content)
 
-                    # This check was added to detect invalid format of "Readme.txt" which can cause a crash
+                    # This check was added to detect an invalid format of "Readme.txt" which can cause a crash
                     if version:
                         version = version.group(1)
                     else:

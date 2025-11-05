@@ -156,7 +156,7 @@ async def _check_github_availability(username: str) -> bool:
             response = await client.head(f"https://github.com/{username}", timeout=10.)
             return response.is_client_error
     except httpx.RequestError:
-        logging.warning(f"HTTP request to https://github.com/{username} failed")
+        logging.warning("HTTP request to https://github.com/%s failed", username)
         return False
 
 
@@ -194,7 +194,7 @@ async def _check_unregistered_domain(domain: str) -> bool:
     try:
         root_domain = get_root_domain(domain)
     except (TldDomainNotFound, TldBadUrl):
-        logging.warning(f"Pointed domain {domain} is not a valid domain name")
+        logging.warning("Pointed domain %s is not a valid domain name", domain)
         return False
 
     try:
@@ -203,7 +203,7 @@ async def _check_unregistered_domain(domain: str) -> bool:
     except dns.resolver.NXDOMAIN:
         return True
     except BaseException as exception:  # pylint: disable=broad-exception-caught
-        logging.warning(f"ANY request for {root_domain}: {exception}")
+        logging.warning("ANY request for %s: %s", root_domain, exception)
         return False
 
 
@@ -231,7 +231,7 @@ async def resolve_dns_record(domain: str, record_type: str, resolvers: Iterator[
         dns.name.EmptyLabel,
         dns.resolver.NoNameservers,
     ) as exception:
-        logging.debug(f"DNS request for {domain} ({record_type}): {exception}")
+        logging.debug("DNS request for %s (%s): %s", domain, record_type, exception)
         return []
 
 
@@ -313,7 +313,7 @@ class ModuleTakeover(Attack):
                             # If it is an internal CNAME (like www.target.tld to target.tld) just ignore
                             continue
                     except (TldDomainNotFound, TldBadUrl):
-                        logging.warning(f"{cname} is not a valid domain name")
+                        logging.warning("%s is not a valid domain name", cname)
                         continue
 
                     if await self.takeover.check(domain, cname):
@@ -351,7 +351,7 @@ class ModuleTakeover(Attack):
             try:
                 ns_etld_plus_1 = get_root_domain(ns_record)
             except (TldDomainNotFound, TldBadUrl):
-                logging.warning(f"NS domain {ns_record} is not a valid domain name")
+                logging.warning("NS domain %s is not a valid domain name", ns_record)
                 continue
 
             if ns_etld_plus_1 == target_domain:

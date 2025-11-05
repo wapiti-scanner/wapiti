@@ -254,7 +254,7 @@ class ModuleXxe(Attack):
 
         for mutated_request, parameter, payload_info in mutator.mutate(original_request, self.get_payloads):
             if current_parameter != parameter:
-                # Forget what we know about current parameter
+                # Forget what we know about the current parameter
                 current_parameter = parameter
                 vulnerable_parameter = False
             elif vulnerable_parameter:
@@ -293,14 +293,14 @@ class ModuleXxe(Attack):
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_xxe.php?session_id={self._session_id}"
-        logging.info(f"[*] Asking endpoint URL {endpoint_url} for results, please wait...")
+        logging.info("[*] Asking endpoint URL %s for results, please wait...", endpoint_url)
         await sleep(2)
-        # When attacks are done we ask the endpoint for received requests
+        # When attacks are done, we ask the endpoint for received requests
         try:
             response = await self.crawler.async_send(Request(endpoint_url))
         except RequestError:
             self.network_errors += 1
-            logging.error(f"[!] Unable to request endpoint URL '{self.internal_endpoint}'")
+            logging.error("[!] Unable to request endpoint URL '%s'", self.internal_endpoint)
             return
 
         data = response.json

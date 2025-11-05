@@ -27,16 +27,15 @@ class PassiveScanner:
                 try:
                     mod = import_module("wapitiCore.attack.modules.passive." + mod_name)
                 except ImportError as error:
-                    logging.error(f"[!] Unable to import module {mod_name}: {error}")
+                    logging.error("[!] Unable to import module %s: %s", mod_name, error)
                     continue
 
                 class_name = module_to_class_name(mod_name)
                 class_instance = getattr(mod, class_name)(
                 )
-            except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exceptions and print it
-                logging.error(f"[!] Module {mod_name} seems broken and will be skipped")
-                logging.exception(exception.__class__.__name__, exception)
+            except Exception:  # pylint: disable=broad-except
+                # Catch every possible exception and print it
+                logging.exception("[!] Module %s seems broken and will be skipped", mod_name)
                 continue
 
             self._modules[class_instance.name] = class_instance

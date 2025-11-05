@@ -56,7 +56,7 @@ class ModuleLog4Shell(Attack):
         try:
             self._dns_host = socket.gethostbyname(dns_endpoint)
         except (OSError, TypeError):
-            logging.error(f"Error: {dns_endpoint} is not a valid domain name")
+            logging.error("Error: %s is not a valid domain name", dns_endpoint)
             self.finished = True
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
@@ -307,11 +307,11 @@ class ModuleLog4Shell(Attack):
 
             return answer[0].strings[0].decode("utf-8") == "true"
         except dns.resolver.LifetimeTimeout:
-            logging.error(f"Error: DNS server {self._dns_host} is not responding (timeout)")
+            logging.error("Error: DNS server %s is not responding (timeout)", self._dns_host)
             self.finished = True
             return False
         except dns.resolver.NoNameservers:
-            logging.error(f"Error: DNS server {self._dns_host} is unreachable")
+            logging.error("Error: DNS server %s is unreachable", self._dns_host)
             self.finished = True
             return False
 
@@ -320,7 +320,7 @@ class ModuleLog4Shell(Attack):
         headers_uuid_record = {}
         batch_size = 10
 
-        # Creates batch of batch_size elements
+        # Creates a batch of batch_size elements
         headers_batch = [headers[i:i + batch_size]
                          for i in range(0, len(headers), batch_size)]
 

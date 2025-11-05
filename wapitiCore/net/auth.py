@@ -121,7 +121,7 @@ async def async_fetch_login_page(
             if isinstance(exception, TargetClosedError):
                 return None
 
-            logging.error(f"[!] {type(exception).__name__} with URL {url}")
+            logging.error("[!] %s with URL %s", type(exception).__name__, url)
             return None
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
@@ -134,11 +134,11 @@ async def async_fetch_login_page(
                 page_source = response.content
                 return page_source
             except ConnectionError:
-                logging.error("[!] Connection error with URL", url)
+                logging.error("[!] Connection error with URL %s", url)
                 return None
             except RequestError as exception:
                 logging.error(
-                    f"[!] {type(exception).__name__} with URL {url}"
+                    "[!] %s with URL %s", type(exception).__name__, url
                 )
                 return None
 
@@ -228,11 +228,11 @@ async def load_form_script(
     try:
         module = importlib.util.module_from_spec(spec)
     except (FileNotFoundError, AttributeError):
-        logging.error(f"Unable to load auth script '{filepath}'. Check path, access rights or syntax.")
+        logging.error("Unable to load auth script '%s'. Check path, access rights or syntax.", filepath)
         sys.exit(1)
 
     spec.loader.exec_module(module)
-    # We expect the auth script to set cookies on the crawler_configuration object but everything can be done here
+    # We expect the auth script to set cookies on the crawler_configuration object, but everything can be done here
     try:
         await module.run(crawler_configuration, form_credential, headless)
     except AttributeError:
@@ -315,5 +315,5 @@ async def authenticate_with_side_file(
         if isinstance(exception, TargetClosedError):
             return None
 
-        logging.error(f"[!] {type(exception).__name__} with URL {url}")
+        logging.error("[!] %s with URL %s", type(exception).__name__, url)
         return None
