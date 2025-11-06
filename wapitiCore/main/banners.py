@@ -20,6 +20,7 @@ from datetime import datetime
 from random import choice
 
 from wapitiCore import WAPITI_VERSION
+from wapitiCore.main.log import log_yellow, log_blue
 from wapitiCore.moon import phase
 
 
@@ -49,24 +50,26 @@ def print_banner():
     ]
 
     print(choice(banners))
-    print(f"Wapiti {WAPITI_VERSION} (wapiti-scanner.github.io)")
+
+def print_easter_eggs():
+    log_yellow(f"Wapiti {WAPITI_VERSION} (wapiti-scanner.github.io)")
     moon_phase = phase()
     if moon_phase == "full":
-        print("[*] You are lucky! Full moon tonight.")
+        log_blue("[*] You are lucky! Full moon tonight.")
     elif moon_phase == "new":
-        print("[*] Be careful! New moon tonight.")
+        log_blue("[*] Be careful! New moon tonight.")
 
     if datetime.now().weekday() == 4:
         if datetime.now().day == 13:
-            print("[*] Watch out! Bad things can happen on Friday the 13th.")
+            log_blue("[*] Watch out! Bad things can happen on Friday the 13th.")
         elif datetime.now().month == 8 and datetime.now().day < 8:
-            print("[*] Today is International Beer Day!")
+            log_blue("[*] Today is International Beer Day!")
 
     if datetime.now().month == 5 and datetime.now().day == 4:
-        print("[*] May the force be with you!")
+        log_blue("[*] May the force be with you!")
     elif datetime.now().month == datetime.now().day == 1:
-        print("[*] Happy new year!")
+        log_blue("[*] Happy new year!")
     elif datetime.now().month == 12 and datetime.now().day == 25:
-        print("[*] Merry christmas!")
+        log_blue("[*] Merry christmas!")
     elif datetime.now().month == 3 and datetime.now().day == 31:
-        print("[*] Today is world backup day! Is your data safe?")
+        log_blue("[*] Today is world backup day! Is your data safe?")

@@ -23,7 +23,7 @@ from typing import Optional
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.spring4shell import Spring4ShellFinding
-from wapitiCore.main.log import log_red, logging
+from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.net import Request, Response
 from wapitiCore.net.web import http_repr
 
@@ -70,7 +70,7 @@ class ModuleSpring4Shell(Attack):
             post_params=params if method == "POST" else None,
         )
 
-        logging.info(malicious_request)
+        log_verbose(malicious_request)
         try:
             default_response = await self._default_request(request.url, method)
             response = await self.crawler.async_send(malicious_request, follow_redirects=False)
