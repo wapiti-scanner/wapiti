@@ -35,10 +35,10 @@ from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.modules.core import all_modules, common_modules, resolve_module_settings
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.controller.wapiti import Wapiti
-from wapitiCore.main.banners import print_banner
+from wapitiCore.main.banners import print_banner, print_easter_eggs
 from wapitiCore.net.web import is_valid_url
 from wapitiCore.parsers.commandline import parse_args
-from wapitiCore.main.log import logging, log_green
+from wapitiCore.main.log import logging, log_blue
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential
 from wapitiCore.net.auth import (async_try_form_login, load_form_script, check_http_auth, login_with_raw_data,
                                  authenticate_with_side_file)
@@ -278,11 +278,13 @@ async def wapiti_main():
     wap = Wapiti(base_request, scope=args.scope, session_dir=args.store_session, config_dir=args.store_config)
 
     await configure_wapiti_basic_settings(wap, args)
+    print_easter_eggs()
+
     attack_options = build_attack_options_from_args(args)
 
     if args.update:
         await wap.init_persister()
-        log_green("[*] Updating modules")
+        log_blue("[*] Updating modules")
         wap.active_scanner.set_attack_options(attack_options)
         try:
             await wap.active_scanner.update(args.modules)

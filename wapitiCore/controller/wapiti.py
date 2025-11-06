@@ -42,7 +42,7 @@ from wapitiCore.net.intercepting_explorer import InterceptingExplorer
 from wapitiCore.net.scope import Scope
 from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.report import get_report_generator_instance
-from wapitiCore.main.log import logging, configure, log_green, log_red
+from wapitiCore.main.log import logging, configure, log_green, log_red, log_blue
 
 SCAN_FORCE_VALUES = {
     "paranoid": 1,
@@ -203,11 +203,11 @@ class Wapiti:
         await self.persister.set_root_url(self.base_request.url)
 
     async def save_scan_state(self):
-        log_green("[*] Saving scan state, please wait...")
+        log_blue("[*] Saving scan state, please wait...")
         # Not yet scanned URLs are all saved in one single time (bulk insert + final commit)
         await self.persister.set_to_browse(self._start_urls)
 
-        logging.info("This scan has been saved in the file %s", self.persister.output_file)
+        log_green("This scan has been saved in the file {0}", self.persister.output_file)
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
@@ -318,11 +318,11 @@ class Wapiti:
                 )
 
         print('')
-        log_green("[*] Generating report...")
+        log_blue("[*] Generating report...")
         self.report_gen.generate_report(self.output_file)
         log_green(f"A report has been generated in the file {self.output_file}")
         if self.report_generator_type == "html":
-            log_green(f"Open {self.report_gen.final_path} with a browser to see this report.")
+            log_blue(f"Open {self.report_gen.final_path} with a browser to see this report.")
 
         await self.persister.close()
 
