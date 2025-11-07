@@ -4,7 +4,7 @@
             {
                 "method": "GET",
                 "path": "/vuejs/index.html",
-                "info": "{\"name\": \"Vue.js\", \"versions\": [\"3.5.23\"], \"cpe\": \"\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
+                "info": "{\"name\": \"Vue.js\", \"versions\": [\"3.5.24\"], \"cpe\": \"\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
                 "http_request": "GET /vuejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-08"
@@ -57,7 +57,7 @@
             {
                 "method": "GET",
                 "path": "/vuejs/index.html",
-                "info": "{\"name\": \"Vue.js\", \"versions\": [\"3.5.23\"], \"cpe\": \"\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
+                "info": "{\"name\": \"Vue.js\", \"versions\": [\"3.5.24\"], \"cpe\": \"\", \"categories\": [\"JavaScript frameworks\"], \"groups\": [\"Web development\"]}",
                 "http_request": "GET /vuejs/index.html HTTP/1.1\nhost: wapp_headless\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-02",

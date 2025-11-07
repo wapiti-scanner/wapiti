@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2021-2023 Nicolas Surribas
-# Copyright (C) 2021-2024 Cyberwatch
+# Copyright (C) 2025 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +20,7 @@ from .reportgenerator import ReportGenerator
 from .csvreportgenerator import CSVReportGenerator
 from .htmlreportgenerator import HTMLReportGenerator
 from .jsonreportgenerator import JSONReportGenerator
+from .markdownreportgenerator import MarkdownReportGenerator
 from .txtreportgenerator import TXTReportGenerator
 from .xmlreportgenerator import XMLReportGenerator
 
@@ -28,6 +28,7 @@ GENERATORS = {
     "csv": CSVReportGenerator,
     "html": HTMLReportGenerator,
     "json": JSONReportGenerator,
+    "md": MarkdownReportGenerator,
     "txt": TXTReportGenerator,
     "xml": XMLReportGenerator
 }

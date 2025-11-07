@@ -1,0 +1,4 @@
+"category","level","description","method","parameter","url","body","referer","wstg","auth","module"
+"Reflected Cross Site Scripting",1,"This is dope","GET","foo","http://perdu.com/riri?foo=bar","","","","","xss"
+"Internal Server Error",2,"This is the way","GET","","http://perdu.com/fifi","","","","","xss"
+"Fingerprint web technology",3,"loulou","GET","foo","http://perdu.com/?foo=bar","","","","","wapp"

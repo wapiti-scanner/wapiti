@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+from typing import Optional
 from xml.dom.minidom import Document, Element
 
 from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
@@ -32,7 +33,7 @@ class XMLReportGenerator(JSONReportGenerator):
     """
     This class generates a report with the method printToFile(fileName) which contains
     the information of all the vulnerabilities notified to this object through the
-    method add_vulnerability(vulnerabilityTypeName,level,url,parameter,info).
+    method add_vulnerability(vulnerabilityTypeName, level, url, parameter, info).
     The format of the file is XML and it has the following structure:
     <report type="security">
         <generatedBy id="Wapiti X.X.X"/>
@@ -65,15 +66,15 @@ class XMLReportGenerator(JSONReportGenerator):
     # pylint: disable=too-many-locals
     def generate_report(self, output_path):
         """
-        Create a xml file with a report of the vulnerabilities which have been logged with
-        the method add_vulnerability(vulnerabilityTypeName,level,url,parameter,info)
+        Create an XML file with a report of the vulnerabilities which have been logged with
+        the method add_vulnerability(vulnerabilityTypeName, level, url, parameter, info)
         """
 
         report = self._xml_doc.createElement("report")
         report.setAttribute("type", "security")
         self._xml_doc.appendChild(report)
 
-        # Add report infos
+        # Add report info
         report_infos = self._create_info_section()
         report.appendChild(report_infos)
 
@@ -141,9 +142,10 @@ class XMLReportGenerator(JSONReportGenerator):
                 level_node = self._xml_doc.createElement("level")
                 level_node.appendChild(self._xml_doc.createTextNode(str(flaw["level"])))
                 entry_node.appendChild(level_node)
-                parameter_node = self._xml_doc.createElement("parameter")
-                parameter_node.appendChild(self._xml_doc.createTextNode(flaw["parameter"]))
-                entry_node.appendChild(parameter_node)
+                if flaw.get("parameter") is not None:
+                    parameter_node = self._xml_doc.createElement("parameter")
+                    parameter_node.appendChild(self._xml_doc.createTextNode(flaw["parameter"]))
+                    entry_node.appendChild(parameter_node)
                 info_node = self._xml_doc.createElement("info")
                 info_node.appendChild(self._xml_doc.createTextNode(flaw["info"]))
                 entry_node.appendChild(info_node)
@@ -165,7 +167,7 @@ class XMLReportGenerator(JSONReportGenerator):
                     wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
                     wstg_node.appendChild(wstg_code_node)
                 entry_node.appendChild(wstg_node)
-                if self._infos["detailed_report_level"]:
+                if self._infos["detailed_report_level"] >= 1:
                     entry_node.appendChild(self._create_detail_section(flaw))
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
@@ -182,17 +184,20 @@ class XMLReportGenerator(JSONReportGenerator):
         Create a section composed of the detail of the request & its response
         """
         detail_section = self._xml_doc.createElement("detail")
-        detail_response_section = self._create_detail_response(flaw["detail"]["response"])
-        if detail_response_section:
-            detail_section.appendChild(detail_response_section)
+        response = flaw.get("detail", {}).get("response")
+        if response:
+            detail_response_section = self._create_detail_response(response)
+            if detail_response_section:
+                detail_section.appendChild(detail_response_section)
         return detail_section
 
-    def _create_detail_response(self, response: dict) -> Element:
+    def _create_detail_response(self, response: dict) -> Optional[Element]:
         """
         Create a section focused on the exploit http request's response
         """
         if not response:
             return None
+
         response_section: Element = self._xml_doc.createElement("response")
         status_code_node = self._xml_doc.createElement("status_code")
         status_code_node.appendChild(self._xml_doc.createTextNode(str(response["status_code"])))
@@ -277,7 +282,7 @@ class XMLReportGenerator(JSONReportGenerator):
         else:
             auth_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
         report_infos.appendChild(auth_node)
-        if self._infos["detailed_report_level"]:
+        if self._infos["detailed_report_level"] == 2:
             report_infos.appendChild(self._create_crawled_pages_section(self._infos["crawled_pages"]))
         return report_infos
 
@@ -289,8 +294,12 @@ class XMLReportGenerator(JSONReportGenerator):
 
         for crawled_page in crawled_pages:
             entry_section = self._xml_doc.createElement("entry")
-            detail_response = self._create_detail_response(crawled_page["response"])
-            if detail_response:
-                entry_section.appendChild(detail_response)
+            response = crawled_page.get("response")
+
+            if response:
+                detail_response = self._create_detail_response(response)
+                if detail_response:
+                    entry_section.appendChild(detail_response)
+
             crawled_pages_node.appendChild(entry_section)
         return crawled_pages_node

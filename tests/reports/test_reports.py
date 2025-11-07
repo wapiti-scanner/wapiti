@@ -1,297 +1,234 @@
+import json
+import os
+import os.path
+import shutil
 from time import gmtime
 import tempfile
 
 import httpx
-import json
+import pytest
 
 from wapitiCore.report import GENERATORS
-from wapitiCore.net.sql_persister import Response
 from wapitiCore.net import Request
 from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
-from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
+from wapitiCore.net.sql_persister import Response
+
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+
+# Set this to True to regenerate fixture files
+REGENERATE_FIXTURES = False
 
 
-def test_reports():
-    for report_format, report_class in GENERATORS.items():
-        report_gen = report_class()
-
-        report_gen.set_report_info(
-            "http://perdu.com",
-            "folder",
-            gmtime(),
-            "WAPITI_VERSION",
-            {
-                "method": "post",
-                "url": "http://testphp.vulnweb.com/login.php",
-                "logged_in": True,
-                "form": {
-                    "login_field": "uname",
-                    "password_field": "pass"
-                }
-            },
-            None,
-            123456,
-            0
-        )
-
-        for vul in vulnerabilities:
-            report_gen.add_vulnerability_type(
-                vul.name(),
-                vul.description(),
-                vul.solution(),
-                flatten_references(vul.references())
-            )
-
-        for anomaly in anomalies:
-            report_gen.add_anomaly_type(
-                anomaly.name(),
-                anomaly.description(),
-                anomaly.solution(),
-                flatten_references(anomaly.references())
-            )
-
-        for additional in additionals:
-            report_gen.add_additional_type(
-                additional.name(),
-                additional.description(),
-                additional.solution(),
-                flatten_references(additional.references())
-            )
-
-        if report_format == "html":
-            temp_obj = tempfile.TemporaryDirectory()
-
-        else:
-            temp_obj = tempfile.NamedTemporaryFile(delete=False)
-
-        output = temp_obj.name
-
-        print("Using report type '{}'".format(report_format))
-        request = Request("http://perdu.com/riri?foo=bar")
-        report_gen.add_vulnerability(
-            category="Reflected Cross Site Scripting",
-            level=1,
-            request=request,
-            parameter="foo",
-            info="This is dope",
-            module="xss"
-        )
-
-        request = Request("http://perdu.com/fifi?foo=bar")
-        report_gen.add_anomaly(
-            category="Internal Server Error",
-            level=2,
-            request=request,
-            parameter="foo",
-            info="This is the way",
-            module="xss"
-        )
-
-        request = Request("http://perdu.com/?foo=bar")
-        report_gen.add_additional(
-            category="Fingerprint web technology",
-            level=3,
-            request=request,
-            parameter="foo",
-            info="loulou",
-            module="wapp"
-        )
-
-        report_gen.generate_report(output)
-
-        if report_format == "html":
-            output = report_gen.final_path
-
-        with open(output) as fd:
-            report = fd.read()
-            assert "riri" in report
-            assert "fifi" in report
-            assert "loulou" in report
-            assert "http://testphp.vulnweb.com/login.php" in report
-            assert "uname" in report
-            assert "pass" in report
-
-            # the csv report only contains vulnerabilities without the info section
-            if report_format != "csv":
-                assert "123456" in report
-
-
-def test_json_detail_report_full():
-    report_gen = JSONReportGenerator()
+@pytest.mark.parametrize("report_format", GENERATORS.keys())
+def test_reports(report_format):
+    report_gen = GENERATORS[report_format]()
 
     report_gen.set_report_info(
         "http://perdu.com",
         "folder",
-        gmtime(),
+        gmtime(0),
         "WAPITI_VERSION",
-        {
-            "method": "post",
-            "url": "http://testphp.vulnweb.com/login.php",
-            "logged_in": True,
-            "form": {
-                "login_field": "uname",
-                "password_field": "pass"
-            }
-        },
-        [
-            "foo",
-            "bar"
-        ],
-        1,
-        2
-    )
-
-    request = Request("http://perdu.com/", "GET", [["foo", "bar"]])
-    response = Response(
-        httpx.Response(
-            status_code=200,
-            headers=httpx.Headers([["abc", "123"]]),
-            content=b"OK"
-        ),
-        url="http://perdu.com/"
-    )
-
-    report_gen.add_vulnerability("foobar", "category", request=request, response=response)
-
-    temp_obj = tempfile.NamedTemporaryFile(delete=False)
-
-    output = temp_obj.name
-
-    report_gen.generate_report(output)
-
-    with open(output) as fd:
-        report_obj = json.loads(fd.read())
-        assert report_obj
-
-        assert report_obj["infos"]["detailed_report_level"] == 2
-        assert report_obj["infos"]["crawled_pages"] == ["foo", "bar"]
-        assert report_obj["infos"]["crawled_pages_nbr"] == 1
-
-        assert len(report_obj["vulnerabilities"]["category"]) == 1
-        assert report_obj["vulnerabilities"]["category"][0]
-        vuln = report_obj["vulnerabilities"]["category"][0]
-
-        assert vuln["method"] == "GET"
-        assert vuln["module"] == "foobar"
-        assert vuln["detail"]["response"]["status_code"] == 200
-        assert ["abc", "123"] in vuln["detail"]["response"]["headers"]
-
-
-def test_json_detail_report_light():
-    report_gen = JSONReportGenerator()
-
-    report_gen.set_report_info(
-        "http://perdu.com",
-        "folder",
-        gmtime(),
-        "WAPITI_VERSION",
-        {
-            "method": "post",
-            "url": "http://testphp.vulnweb.com/login.php",
-            "logged_in": True,
-            "form": {
-                "login_field": "uname",
-                "password_field": "pass"
-            }
-        },
-        [
-            "foo",
-            "bar"
-        ],
-        1,
-        1
-    )
-
-    request = Request("http://perdu.com/", "GET", [["foo", "bar"]])
-    response = Response(
-        httpx.Response(
-            status_code=200,
-            headers=httpx.Headers([["abc", "123"]]),
-            content=b"OK"
-        ),
-        url="http://perdu.com/"
-    )
-
-    report_gen.add_vulnerability("foobar", "category", request=request, response=response)
-
-    temp_obj = tempfile.NamedTemporaryFile(delete=False)
-
-    output = temp_obj.name
-
-    report_gen.generate_report(output)
-
-    with open(output) as fd:
-        report_obj = json.loads(fd.read())
-        assert report_obj
-
-        assert report_obj["infos"]["detailed_report_level"] == 1
-        assert report_obj["infos"]["crawled_pages"] == ["foo", "bar"]
-        assert report_obj["infos"]["crawled_pages_nbr"] == 1
-        for page in report_obj["infos"]["crawled_pages"]:
-            assert "response" not in page
-
-        assert len(report_obj["vulnerabilities"]["category"]) == 1
-        assert report_obj["vulnerabilities"]["category"][0]
-        vuln = report_obj["vulnerabilities"]["category"][0]
-
-        assert vuln["method"] == "GET"
-        assert vuln["module"] == "foobar"
-
-
-def test_json_detail_report_none():
-    report_gen = JSONReportGenerator()
-
-    report_gen.set_report_info(
-        "http://perdu.com",
-        "folder",
-        gmtime(),
-        "WAPITI_VERSION",
-        {
-            "method": "post",
-            "url": "http://testphp.vulnweb.com/login.php",
-            "logged_in": True,
-            "form": {
-                "login_field": "uname",
-                "password_field": "pass"
-            }
-        },
-        [
-            "foo",
-            "bar"
-        ],
-        1,
+        None,
+        None,
+        123456,
         0
     )
 
-    request = Request("http://perdu.com/", "GET", [["foo", "bar"]])
-    response = Response(
-        httpx.Response(
-            status_code=200,
-            headers=httpx.Headers([["abc", "123"]]),
-            content=b"OK"
-        ),
-        url="http://perdu.com/"
+    for vul in vulnerabilities:
+        report_gen.add_vulnerability_type(
+            vul.name(),
+            vul.description(),
+            vul.solution(),
+            flatten_references(vul.references())
+        )
+
+    for anomaly in anomalies:
+        report_gen.add_anomaly_type(
+            anomaly.name(),
+            anomaly.description(),
+            anomaly.solution(),
+            flatten_references(anomaly.references())
+        )
+
+    for additional in additionals:
+        report_gen.add_additional_type(
+            additional.name(),
+            additional.description(),
+            additional.solution(),
+            flatten_references(additional.references())
+        )
+
+    request = Request("http://perdu.com/riri?foo=bar")
+    report_gen.add_vulnerability(
+        category="Reflected Cross Site Scripting",
+        level=1,
+        request=request,
+        parameter="foo",
+        info="This is dope",
+        module="xss"
     )
 
-    report_gen.add_vulnerability("foobar", "category", request=request, response=response)
+    request = Request("http://perdu.com/fifi")
+    report_gen.add_anomaly(
+        category="Internal Server Error",
+        level=2,
+        request=request,
+        parameter=None,
+        info="This is the way",
+        module="xss"
+    )
 
-    temp_obj = tempfile.NamedTemporaryFile(delete=False)
+    request = Request("http://perdu.com/?foo=bar")
+    report_gen.add_additional(
+        category="Fingerprint web technology",
+        level=3,
+        request=request,
+        parameter="foo",
+        info="loulou",
+        module="wapp"
+    )
 
-    output = temp_obj.name
+    if REGENERATE_FIXTURES:
+        fixture_path = os.path.join(DATA_DIR, f"report.{report_format}")
+        if report_format == "html":
+            with tempfile.TemporaryDirectory() as temp_dir:
+                report_gen.generate_report(temp_dir)
+                shutil.copy(report_gen.final_path, fixture_path)
+        else:
+            report_gen.generate_report(fixture_path)
+        pytest.skip(f"Generated fixture for {report_format}")
+
+    if report_format == "html":
+        temp_obj = tempfile.TemporaryDirectory()
+        output = temp_obj.name
+    else:
+        # Use a temporary file that is not deleted on close
+        temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8')
+        output = temp_file.name
+        temp_file.close()
 
     report_gen.generate_report(output)
 
-    with open(output) as fd:
-        report_obj = json.loads(fd.read())
-        assert report_obj
+    if report_format == "html":
+        generated_path = report_gen.final_path
+    else:
+        generated_path = output
 
-        assert report_obj["infos"]["detailed_report_level"] == 0
-        assert report_obj["infos"]["crawled_pages_nbr"] == 1
-        assert "crawled_pages" not in report_obj["infos"]
+    fixture_path = os.path.join(DATA_DIR, f"report.{report_format}")
+    with (
+        open(fixture_path, "r", encoding="utf-8") as expected_fd,
+        open(generated_path, "r", encoding="utf-8") as generated_fd
+    ):
+        if report_format == "json":
+            expected = json.load(expected_fd)
+            generated = json.load(generated_fd)
+            assert expected == generated
+        else:
+            assert expected_fd.read() == generated_fd.read()
 
-        assert len(report_obj["vulnerabilities"]["category"]) == 1
-        assert report_obj["vulnerabilities"]["category"][0]
-        vuln = report_obj["vulnerabilities"]["category"][0]
+    if report_format != "html":
+        os.remove(output)
 
-        assert vuln["method"] == "GET"
-        assert vuln["module"] == "foobar"
+
+@pytest.mark.parametrize("level", [1, 2])
+@pytest.mark.parametrize("report_format", GENERATORS.keys())
+def test_detailed_reports(report_format, level):
+    report_gen = GENERATORS[report_format]()
+
+    crawled_pages = [
+        {
+            "request": {
+                "url": "http://perdu.com/",
+                "method": "GET",
+                "headers": [],
+                "referer": None,
+                "enctype": "application/x-www-form-urlencoded",
+                "encoding": "utf-8",
+                "depth": 0,
+            },
+            "response": {
+                "status_code": 200,
+                "body": "Hello from crawled page",
+                "headers": [["Content-Type", "text/html"]],
+            },
+        }
+    ]
+
+    report_gen.set_report_info(
+        "http://perdu.com",
+        "folder",
+        gmtime(0),
+        "WAPITI_VERSION",
+        None,
+        crawled_pages,
+        1,
+        level
+    )
+
+    for vul in vulnerabilities:
+        report_gen.add_vulnerability_type(
+            vul.name(),
+            vul.description(),
+            vul.solution(),
+            flatten_references(vul.references())
+        )
+
+    request = Request("http://perdu.com/riri?foo=bar")
+    response = Response(
+        httpx.Response(
+            status_code=200,
+            headers=httpx.Headers([["Content-Type", "text/html"]]),
+            text="<html><body>riri</body></html>"
+        ),
+        url="http://perdu.com/riri?foo=bar"
+    )
+    report_gen.add_vulnerability(
+        category="Reflected Cross Site Scripting",
+        level=1,
+        request=request,
+        response=response,
+        parameter="foo",
+        info="This is dope",
+        module="xss"
+    )
+
+    if REGENERATE_FIXTURES:
+        fixture_path = os.path.join(DATA_DIR, f"report_level{level}.{report_format}")
+        if report_format == "html":
+            with tempfile.TemporaryDirectory() as temp_dir:
+                report_gen.generate_report(temp_dir)
+                shutil.copy(report_gen.final_path, fixture_path)
+        else:
+            report_gen.generate_report(fixture_path)
+        pytest.skip(f"Generated fixture for {report_format} level {level}")
+
+    if report_format == "html":
+        temp_obj = tempfile.TemporaryDirectory()
+        output = temp_obj.name
+    else:
+        # Use a temporary file that is not deleted on close
+        temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8')
+        output = temp_file.name
+        temp_file.close()
+
+    report_gen.generate_report(output)
+
+    if report_format == "html":
+        generated_path = report_gen.final_path
+    else:
+        generated_path = output
+
+    fixture_path = os.path.join(DATA_DIR, f"report_level{level}.{report_format}")
+    with (
+        open(fixture_path, "r", encoding="utf-8") as expected_fd,
+        open(generated_path, "r", encoding="utf-8") as generated_fd
+    ):
+        if report_format == "json":
+            expected = json.load(expected_fd)
+            generated = json.load(generated_fd)
+            assert expected == generated
+        else:
+            assert expected_fd.read() == generated_fd.read()
+
+    if report_format != "html":
+        os.remove(output)

@@ -92,12 +92,12 @@ class TestInterceptingExplorer:
     @pytest.mark.asyncio
     async def test_mitm_flow_addon_request(self, flow):
         queue = asyncio.Queue()
-        headers = httpx.Headers({"User-Agent": "Wapiti/3.2.8"})
+        headers = httpx.Headers({"User-Agent": "Wapiti/yolo"})
         scope = Scope(Request("http://example.com"), "folder")
         addon = MitmFlowToWapitiRequests(queue, headers, scope)
 
         await addon.request(flow)
-        assert flow.request.headers["User-Agent"] == "Wapiti/3.2.8"
+        assert flow.request.headers["User-Agent"] == "Wapiti/yolo"
 
     @pytest.mark.asyncio
     async def test_mitm_flow_addon_response(self, flow):

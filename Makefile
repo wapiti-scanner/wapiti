@@ -23,3 +23,6 @@ style:
 
 release: clean
 	python -m build --sdist --wheel
+
+doc:
+	cd doc && ronn wapiti.ronn
