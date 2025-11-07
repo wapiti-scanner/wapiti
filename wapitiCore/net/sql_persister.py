@@ -553,7 +553,7 @@ class SqlPersister:
                 },
                 "response": {
                     "status_code": row.status_code,
-                    "body": row.body,
+                    "body": row.body.decode("utf-8", errors="replace"),
                     "headers": [[key, value] for key, value in (row.response_headers or {}).items()]
                 },
             } for row in result.fetchall()]
