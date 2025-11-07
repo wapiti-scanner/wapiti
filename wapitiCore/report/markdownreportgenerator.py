@@ -18,9 +18,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import codecs
 
-from httpx import Response
-
-from wapitiCore.net.response import detail_response
 from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
 
@@ -29,13 +26,6 @@ class MarkdownReportGenerator(ReportGenerator):
     """
     This class generates a Wapiti report in Markdown format.
     """
-
-    def __init__(self):
-        super().__init__()
-        self._flaw_types = {}
-        self._vulns = {}
-        self._anomalies = {}
-        self._additionals = {}
 
     def generate_report(self, output_path):
         """
@@ -70,7 +60,7 @@ class MarkdownReportGenerator(ReportGenerator):
                             md_report_file.write(f"**Involved parameter**: {vuln['parameter']}\n")
                         md_report_file.write("\n**Evil request**:\n\n")
                         md_report_file.write(f"```http\n{http_repr(vuln['request'])}\n```\n")
-                        md_report_file.write(f"\n**cURL command PoC**:\n\n")
+                        md_report_file.write("\n**cURL command PoC**:\n\n")
                         md_report_file.write(f"```bash\n{curl_repr(vuln['request'])}\n```\n\n")
                         md_report_file.write("---\n\n")
             md_report_file.write("\n")
@@ -92,7 +82,7 @@ class MarkdownReportGenerator(ReportGenerator):
                             md_report_file.write(f"**Involved parameter**: {anom['parameter']}\n")
                         md_report_file.write("\n**Evil request**:\n\n")
                         md_report_file.write(f"```http\n{http_repr(anom['request'])}\n```\n")
-                        md_report_file.write(f"\n**cURL command PoC**:\n\n")
+                        md_report_file.write("\n**cURL command PoC**:\n\n")
                         md_report_file.write(f"```bash\n{curl_repr(anom['request'])}\n```\n\n")
                         md_report_file.write("---\n\n")
             md_report_file.write("\n")
@@ -114,161 +104,6 @@ class MarkdownReportGenerator(ReportGenerator):
                             md_report_file.write(f"**Involved parameter**: {additional['parameter']}\n")
                         md_report_file.write("---\n\n")
             md_report_file.write("\n")
-
-    # Vulnerabilities
-    def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
-        """
-        This method adds a vulnerability type, it can be invoked to include in the
-        report the type.
-        The types are not stored previously, they are added when the method
-        add_vulnerability(category, level, url, parameter, info) is invoked
-        and if there is no vulnerability of a type, this type will not be presented
-        in the report
-        """
-
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._vulns:
-            self._vulns[name] = []
-
-    # pylint: disable=too-many-positional-arguments
-    def add_vulnerability(
-        self,
-        module: str,
-        category=None,
-        level=0,
-        request=None,
-        parameter="",
-        info="",
-        wstg=None,
-        response: Response = None
-    ):
-        """
-        Store the information about the vulnerability to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        vulnerabilities notified through the current method.
-        """
-
-        vuln_dict = {
-            "level": level,
-            "request": request,
-            "parameter": parameter,
-            "info": info,
-            "module": module,
-            "wstg": wstg
-        }
-        if self._infos["detailed_report_level"]:
-            vuln_dict["detail"] = {
-                "response": detail_response(response)
-            }
-        if category not in self._vulns:
-            self._vulns[category] = []
-        self._vulns[category].append(vuln_dict)
-
-    # Anomalies
-    def add_anomaly_type(self, name, description="", solution="", references=None, wstg=None):
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._anomalies:
-            self._anomalies[name] = []
-
-    # pylint: disable=too-many-positional-arguments
-    def add_anomaly(
-        self,
-        module: str,
-        category=None,
-        level=0,
-        request=None,
-        parameter="",
-        info="",
-        wstg=None,
-        response: Response = None
-    ):
-        """
-        Store the information about the vulnerability to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        vulnerabilities notified through the current method.
-        """
-
-        anom_dict = {
-            "request": request,
-            "info": info,
-            "level": level,
-            "parameter": parameter,
-            "module": module,
-            "wstg": wstg
-        }
-        if self._infos["detailed_report_level"]:
-            anom_dict["detail"] = {
-                "response": detail_response(response)
-            }
-        if category not in self._anomalies:
-            self._anomalies[category] = []
-        self._anomalies[category].append(anom_dict)
-
-    # Additionals
-    def add_additional_type(self, name, description="", solution="", references=None, wstg=None):
-        """
-        This method adds an "additional" type, it can be invoked to include in the
-        report the type.
-        The types are not stored previously, they are added when the method
-        add_addtional(category, level, url, parameter, info) is invoked,
-        and if there is no additional of a type, this type will not be presented
-        in the report
-        """
-        if name not in self._flaw_types:
-            self._flaw_types[name] = {
-                "desc": description,
-                "sol": solution,
-                "ref": references,
-                "wstg": wstg
-            }
-        if name not in self._additionals:
-            self._additionals[name] = []
-
-    # pylint: disable=too-many-positional-arguments
-    def add_additional(
-        self,
-        module: str,
-        category=None,
-        level=0,
-        request=None,
-        parameter="",
-        info="",
-        wstg=None,
-        response: Response = None
-    ):
-        """
-        Store the information about the additional to be printed later.
-        The method printToFile(fileName) can be used to save in a file the
-        additionals notified through the current method.
-        """
-
-        addition_dict = {
-            "request": request,
-            "info": info,
-            "level": level,
-            "parameter": parameter,
-            "module": module,
-            "wstg": wstg
-        }
-        if self._infos["detailed_report_level"]:
-            addition_dict["detail"] = {
-                "response": detail_response(response)
-            }
-        if category not in self._additionals:
-            self._additionals[category] = []
-        self._additionals[category].append(addition_dict)
 
     def _write_auth_info(self, md_report_file: codecs.StreamReaderWriter):
         """
