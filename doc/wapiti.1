@@ -1,6 +1,6 @@
-.\" generated with Ronn-NG/v0.10.1
-.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
-.TH "WAPITI" "1" "October 2024" ""
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "WAPITI" "1" "November 2025" ""
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
 .SH "SYNOPSIS"
@@ -17,177 +17,177 @@ Wapiti is useful only to discover vulnerabilities: it is not an exploitation too
 Here is a summary of options\. It is essentially what you will get when you launch Wapiti without any argument\. More detail on each option can be found in the following sections\.
 .P
 TARGET SPECIFICATION:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-u\fR, \fB\-\-url\fR \fIURL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-data\fR \fIURL_ENCODED_DATA\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-scope\fR {url,page,folder,subdomain,domain,punk}
 .IP "" 0
 .P
 ATTACK SPECIFICATION:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-m\fR \fIMODULES_LIST\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-list\-modules\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-l\fR, \fB\-\-level\fR \fILEVEL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-cms\fR {drupal,joomla,prestashop,spip,wp}
 .IP "" 0
 .P
 PROXY AND AUTHENTICATION OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-p\fR, \fB\-\-proxy\fR \fIPROXY_URL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-tor\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-mitm\-port\fR \fIPORT\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-a\fR, \fB\-\-auth\-cred\fR \fICREDENTIALS\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-user\fR \fIUSERNAME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-password\fR \fIPASSWORD\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-method\fR {basic,digest,ntlm}
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-cred\fR \fICREDENTIALS\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-user\fR \fIUSERNAME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-password\fR \fIPASSWORD\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-url\fR \fIURL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-data\fR \fIDATA\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-enctype\fR \fIENCTYPE\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-script\fR \fIFILENAME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-sf\fR, \fB\-\-side\-file\fR \fIFILENAME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-C\fR, \fB\-\-cookie\-value\fR \fICOOKIE_VALUE\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-drop\-set\-cookie\fR
 .IP "" 0
 .P
 SESSION OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-skip\-crawl\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-resume\-crawl\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-flush\-attacks\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-flush\-session\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-store\-session\fR \fIPATH\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-store\-config\fR \fIPATH\fR
 .IP "" 0
 .P
 CRAWLING:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-s\fR, \fB\-\-start\fR \fIURL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-x\fR, \fB\-\-exclude\fR \fIURL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-r\fR, \fB\-\-remove\fR \fIPARAMETER\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-skip\fR \fIPARAMETER\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-d\fR, \fB\-\-depth\fR \fIDEPTH\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-links\-per\-page\fR \fIMAX_LINKS_PER_PAGE\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-files\-per\-dir\fR \fIMAX_FILES_PER_DIR\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-scan\-time\fR \fIMAX_SCAN_TIME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-attack\-time\fR \fIMAX_ATTACK_TIME\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-parameters\fR \fIMAX\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-swagger\fR \fIURL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-headless\fR {no,hidden,visible}
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-wait\fR \fITIME\fR
 .IP "" 0
 .P
 PERFORMANCE:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-S\fR, \fB\-\-scan\-force\fR {paranoid,sneaky,polite,normal,aggressive,insane}
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-tasks\fR \fITASKS\fR
 .IP "" 0
 .P
 ENDPOINT OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-external\-endpoint\fR \fIEXTERNAL_ENDPOINT_URL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-internal\-endpoint\fR \fIINTERNAL_ENDPOINT_URL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-endpoint\fR \fIENDPOINT_URL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-dns\-endpoint\fR \fIDNS_ENDPOINT_DOMAIN\fR
 .IP "" 0
 .P
 HTTP AND NETWORK OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-H\fR, \fB\-\-header\fR \fIHEADER\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-A\fR, \fB\-\-user\-agent\fR \fIAGENT\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-verify\-ssl\fR {0,1}
 .IP "" 0
 .P
 OUTPUT OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-color\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-v\fR, \fB\-\-verbose\fR \fILEVEL\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-log\fR \fIOUTPUT_PATH\fR
 .IP "" 0
 .P
 REPORT OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-f\fR, \fB\-\-format\fR {json,html,txt,xml}
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-o\fR, \fB\-\-output\fR \fIOUTPUT_PATH\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-dr\fR, \fB\-\-detailed\-report\fR \fILEVEL\fR
 .IP "" 0
 .P
 OTHER OPTIONS:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-no\-bugreport\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-version\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-update\fR [\fB\-\-wapp\-url\fR \fIWAPP_DB_URL\fR, \fB\-\-wapp\-dir\fR \fIWAPP_DB_PATH\fR]
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-h\fR
 .IP "" 0
 .SH "TARGET SPECIFICATION"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-u\fR, \fB\-\-url\fR \fIURL\fR
 .br
 The URL that will be used as the base for the scan\. Every URL found during the scan will be checked against the base URL and the corresponding scan scope (see \fB\-\-scope\fR for details)\.
 .br
 This is the only required argument\. The scheme part of the URL must be either http or https\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-data\fR \fIURL_ENCODED_DATA\fR
 .br
 If you need to attack only a specific POST request you can give this option a url\-encoded string\. It will be used as POST parameters for the URL specified by the \fB\-u\fR option\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-scope\fR \fISCOPE\fR
 .br
 Define the scope of the scan and attacks\. Valid choices are :
@@ -203,7 +203,7 @@ Define the scope of the scan and attacks\. Valid choices are :
 
 .IP "" 0
 .SH "ATTACKS SPECIFICATION"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-m\fR, \fB\-\-module\fR \fIMODULE_LIST\fR
 .br
 Set the list of attack modules (modules names separated with commas) to launch against the target\.
@@ -219,11 +219,11 @@ Activating all modules can be done with the "all" keyword (not recommended thoug
 To launch a scan without launching any attack, just give an empty value (\-m "")\.
 .br
 You can filter on http methods too (only get or post)\. For example \fB\-m "xss:get,exec:post"\fR\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-list\-modules\fR
 .br
 Print the list of available Wapiti modules along with a short description then exit\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-l\fR, \fB\-\-level\fR \fILEVEL\fR
 .br
 In previous versions Wapiti used to inject attack payloads in query strings even if no parameter was present in the original URL\.
@@ -235,7 +235,7 @@ This behavior is now hidden behind this option and can be reactivated by setting
 It may be useful on CGIs when developers have to parse the query\-string themselves\.
 .br
 Default value for this option is 1\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-cms\fR \fICMS_LIST\fR
 .br
 This option can only be used when the module cms is selected\.
@@ -245,83 +245,83 @@ It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spi
 Multiple choices are allowed, all the CMS will be scanned if this option is not set\.
 .IP "" 0
 .SH "PROXY AND AUTHENTICATION"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-p\fR, \fB\-\-proxy\fR \fIPROXY_URL\fR
 .br
 The given URL will be used as a proxy for HTTP and HTTPS requests\. This URL can have one of the following scheme : http, https, socks\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-tor\fR
 .br
 Make Wapiti use a Tor listener (same as \fB\-\-proxy socks://127\.0\.0\.1:9050/\fR)
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-mitm\-port\fR \fIPORT\fR
 .br
 If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target\.
 .br
 Configure your browser to use the intercepting proxy then explore the target manually\. Ctrl+C in the console when you are done\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-a\fR, \fB\-\-auth\-cred\fR \fICREDENTIALS\fR
 .br
 (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow)\.
 .br
 Given value should be in the form login%password (% is used as a separator)
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-user\fR \fIUSERNAME\fR
 .br
 Set username to use for HTTP authentication on the target (see available methods bellow)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-password\fR \fIPASSWORD\fR
 .br
 Set password to use for HTTP authentication on the target (see available methods bellow)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-auth\-method\fR \fITYPE\fR
 .br
 Set the authentication mechanism to use\. Valid choices are basic, digest and ntlm\.
 .br
 NTLM authentication may require you to install an additional Python module\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-cred\fR \fICREDENTIALS\fR
 .br
 (DEPRECATED) Set credentials to use for web form authentication on the target\.
 .br
 Given value should be in the form login%password (% is used as a separator)
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-user\fR \fIUSERNAME\fR
 .br
 Set username to use for web form authentication on the target\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-password\fR \fIPASSWORD\fR
 .br
 Set password to use for web form authentication on the target\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-url\fR \fIURL\fR
 .br
 If \fB\-\-form\-data\fR is not set, Wapiti will extract the login form at the given URL and fill it with the provided credentials\.
 .br
 Otherwise raw credentials are sent directly to the given URL\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-data\fR \fIDATA\fR
 .br
 Raw body to send to the form URL specified with \fB\-\-form\-url\fR\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-enctype\fR \fIENCTYPE\fR
 .br
 Send data specified with \fB\-\-form\-data\fR using the given content\-type (default is "application/x\-www\-form\-urlencoded")
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-form\-script\fR \fIFILENAME\fR
 .br
 Use a custom Python authentication plugin
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-sf\fR, \fB\-\-side\-file\fR \fIFILENAME\fR
 .br
 Use a \.side file generated using Selenium IDE to perform an authenticated scan\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-c\fR, \fB\-\-cookie\fR \fICOOKIE_FILE_OR_BROWSER_NAME\fR
 .br
 Load cookies from a Wapiti JSON cookie file\. See wapiti\-getcookie(1) for more information\.
 .br
 You can also import cookies from your browser by passing "chrome" or "firefox" as value (MS Edge is not supported)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-C\fR, \fB\-\-cookie\-value\fR \fICOOKIE_VALUE\fR
 .br
 Set cookies from a valid user cookies\.
@@ -331,7 +331,7 @@ You can import all the session cookies by copying the value of the cookies sent 
 For example:
 .br
 \fB\-\-cookie\-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"\fR
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-drop\-set\-cookie\fR
 .br
 Ignore cookies given in HTTP responses\. Cookies that have been loaded using \fB\-c\fR will be kept\.
@@ -342,39 +342,39 @@ Since Wapiti 3\.0\.0, scanned URLs, discovered vulnerabilities and attacks statu
 Default behavior when a previous scan session exists for the given base URL and scope is to resume the scan and attack status\.
 .br
 Following options allows you to bypass this behavior:
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-skip\-crawl\fR
 .br
 If a previous scan was performed but wasn't finished, don't resume the scan\.
 .br
 Attack will be made on currently known URLs without scanning more\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-resume\-crawl\fR
 .br
 If the crawl was previously stopped and attacks started, default behavior is to skip crawling if the session is restored\.
 .br
 Use this option in order to continue the scan process while keeping vulnerabilities and attacks in the session\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-flush\-attacks\fR
 .br
 Forget everything about discovered vulnerabilities and which URL was attacked by which module\.
 .br
 Only the scan (crawling) information will be kept\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-flush\-session\fR
 .br
 Forget everything about the target for the given scope\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-store\-session\fR \fIPATH\fR
 .br
 Specify an alternative path for storing session (\.db and \.pkl) files\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-store\-config\fR \fIPATH\fR
 .br
 Specify an alternative path for storing particular module (\fBapps\.json\fR and \fBnikto_db\fR) files\.
 .IP "" 0
 .SH "CRAWLING"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-s\fR, \fB\-\-start\fR \fIURL\fR
 .br
 If for some reasons, Wapiti doesn't find any (or enough) URLs from the base URL you can still add URLs to start the scan with\.
@@ -384,25 +384,25 @@ Those URLs will be given a depth of 0, just like the base URL\.
 This option can be called several times\.
 .br
 You can also give it a filename and Wapiti will read URLs from the given file (must be UTF\-8 encoded), one URL per line\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-x\fR, \fB\-\-exclude\fR \fIURL\fR
 .br
 Prevent the given URL from being scanned\. Common use is to exclude the logout URL to prevent the destruction of session cookies (if you specified a cookie file with \-\-cookie)\.
 .br
 This option can be applied several times\. Excluded URL given as a parameter can contain wildcards for basic pattern matching\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-r\fR, \fB\-\-remove\fR \fIPARAMETER\fR
 .br
 If the given parameter is found in scanned URL it will be automatically removed (URLs are edited)\.
 .br
 This option can be used several times\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-skip\fR \fIPARAMETER\fR
 .br
 Given parameter will be kept in URLs and forms but won't be attacked\.
 .br
 Useful if you already know non\-vulnerable parameters\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-d\fR, \fB\-\-depth\fR \fIDEPTH\fR
 .br
 When Wapiti crawls a website it gives each found URL a depth value\.
@@ -416,7 +416,7 @@ Default maximum depth is 40 and is very large\.
 This limit make sure the scan will stop at some time\.
 .br
 For a fast scan a depth inferior to 5 is recommended\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-links\-per\-page\fR \fIMAX\fR
 .br
 This is another option to be able to reduce the number of URLs discovered by the crawler\.
@@ -426,7 +426,7 @@ Only the first MAX links of each webpage will be extracted\.
 This option is not really effective as the same link may appear on different webpages\.
 .br
 It should be useful is rare conditions, for example when there is a lot a webpages without query string\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-files\-per\-dir\fR \fIMAX\fR
 .br
 Limit the number of URLs to crawl under each folder found on the webserver\.
@@ -434,29 +434,29 @@ Limit the number of URLs to crawl under each folder found on the webserver\.
 Note that a URL with a trailing slash in the path is not necessarily a folder with Wapiti will treat it as its is\.
 .br
 Like the previous option it should be useful only in certain situations\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-scan\-time\fR \fISECONDS\fR
 .br
 Stop the scan after \fBSECONDS\fR seconds if it is still running\.
 .br
 Should be useful to automatise scanning from another process (continuous testing)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-attack\-time\fR \fISECONDS\fR
 .br
 Each attack module will stop after \fBSECONDS\fR seconds if it is still running\.
 .br
 Should be useful to automatise scanning from another process (continuous testing)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-max\-parameters\fR \fIMAX\fR
 .br
 URLs and forms having more than MAX input parameters will be discarded before launching attack modules\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-swagger\fR \fIURL\fR
 .br
 Extract API requests from the specified Swagger file\.
 .br
 Extracted requests are added to the crawler\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-headless\fR \fIMODE\fR
 .br
 Choose to use the Firefox headless browser for crawling or not (default)\.
@@ -472,13 +472,13 @@ Possible values are:
 .fi
 .IP "" 0
 
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-wait\fR \fITIME\fR
 .br
 Wait the specified amount of seconds before analyzing a webpage (headless mode only)
 .IP "" 0
 .SH "PERFORMANCE"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-S\fR, \fB\-\-scan\-force\fR \fIFORCE\fR
 .br
 The more input parameters a URL or form have, the more requests Wapiti will send\.
@@ -496,7 +496,7 @@ Default value is normal (147 URLs for 1 parameter, 30 for 5, 5 for 10, 1 for 14 
 Insane mode just remove the calculation of those limits, every URL will be attacked\.
 .br
 Paranoid mode will attack 30 URLs with 1 parameter, 5 for 2, and just 1 for 3 and more)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-tasks\fR \fITASKS\fR
 .br
 Set how many concurrent tasks Wapiti should use\.
@@ -511,7 +511,7 @@ For example the SSRF module inject the endpoint URL into webpage arguments to ch
 Default HTTP endpoint is http://wapiti3\.ovh/\. Keep in mind that the target and your computer must be able to join that endpoint for the module to work\.
 .br
 On internal pentests this endpoint may not be accessible to the target hence you may prefer to set up your own endpoint\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-internal\-endpoint\fR \fIURL\fR
 .br
 You may want to specify an internal endpoint different from the external one\.
@@ -519,17 +519,17 @@ You may want to specify an internal endpoint different from the external one\.
 The internal endpoint is used by Wapiti to fetch results of attacks\.
 .br
 If you are behind a NAT it may be a URL for a local server (for example http://192\.168\.0\.1/)
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-external\-endpoint\fR \fIURL\fR
 .br
 Set the endpoint URL (the one that the target will fetch in case of vulnerability)\.
 .br
 Using your own endpoint may reduce risk of being caught by NIDS or WAF\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-endpoint\fR \fIURL\fR
 .br
 This option will set both internal and external endpoint URL to the same value\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-dns\-endpoint\fR \fIDNS\fR
 .br
 This options specify the DNS endpoint to use for the log4shell attack module\.
@@ -537,38 +537,38 @@ This options specify the DNS endpoint to use for the log4shell attack module\.
 The default value is dns\.wapiti3\.ovh
 .IP "" 0
 .SH "HTTP AND NETWORK OPTIONS"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-t\fR, \fB\-\-timeout\fR \fISECONDS\fR
 .br
 Time to wait (in seconds) for a HTTP response before considering failure\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-H\fR, \fB\-\-header\fR \fIHEADER\fR
 .br
 Set a custom HTTM header to inject in every request sent by Wapiti\. This option can be used several times\.
 .br
 Value should be a standard HTTP header line (parameter and value separated with a : sign)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-A\fR, \fB\-\-user\-agent\fR \fIAGENT\fR
 .br
 Default behavior of Wapiti is to use the same User\-Agent as the TorBrowser, making it discreet when crawling standard website or \.onion ones\.
 .br
 But you may have to change it to bypass some restrictions so this option is here\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-verify\-ssl\fR \fIVALUE\fR
 .br
 Wapiti doesn't care of certificates validation by default\. That behavior can be changed by passing 1 as a value to that option\.
 .IP "" 0
 .SH "OUTPUT OPTIONS"
 Wapiti prints its status to standard output\. The two following options allow to tune the output\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-color\fR
 .br
 Output will be colorized based on the severity of the information (red is critical, orange for warnings, green for information)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-v\fR, \fB\-\-verbose\fR \fILEVEL\fR
 .br
 Set the level of verbosity for the output\. Possible values are quiet (O), normal (1, default behavior) and verbose (2)\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-log\fR \fIOUTPUT_PATH\fR
 .br
 In addition to getting information from the console you can also log the output to a local file\.
@@ -577,41 +577,41 @@ Debug information will also be stored in that file so this option should be main
 .IP "" 0
 .SH "REPORT OPTIONS"
 Wapiti will generate a report at the end of the attack process\. Several formats of reports are available\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-f\fR, \fB\-\-format\fR \fIFORMAT\fR
 .br
 Set the format of the report\. Valid choices are json, html, txt and xml\.
 .br
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-o\fR, \fB\-\-output\fR \fIOUTPUT_PATH\fR
 .br
-Set the path were the report will be generated\.
-.IP "\(bu" 4
+Set the path where the report will be generated\.
+.IP "\[ci]" 4
 \fB\-dr\fR, \fB\-\-detailed\-report\fR \fILEVEL\fR
 .br
 Set the level of detailed report for the output\.
 .br
-Possible values are (1) : includes HTTP requests in the report, (2) : includes HTTP responses (headers and bodies) in the report\.
+Possible values are (1) : adds HTTP responses obtained for successful attacks in the report, (2) : also adds HTTP requests and responses for all crawled pages in the report\.
 .IP "" 0
 .SH "OTHER OPTIONS"
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-version\fR
 .br
 Print Wapiti version then exit\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-no\-bugreport\fR
 .br
 If a Wapiti attack module crashes of a non\-caught exception a bug report is generated and sent for analysis in order to improve Wapiti reliability\. Note that only the content of the report is kept\.
 .br
 You can still prevent reports from being sent using that option\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-\-update\fR
 .br
 Update particular Wapiti modules (download a fresh version of the \fBapps\.json\fR and \fBnikto_db\fR files) then exit\. You can combine it with \fB\-\-store\-config\fR to specify where to store downloaded files\.
 .br
 You can also combine it with \fB\-\-wapp\-url\fR to update the Wappalyzer DB from a custom git repository, or with \fB\-\-wapp\-dir\fR to update it from a local Wappalyzer DB directory\.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB\-h\fR, \fB\-\-help\fR
 .br
 Show detailed options description\. More details are available in this manpage though\.

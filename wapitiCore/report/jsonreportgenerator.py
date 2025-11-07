@@ -36,8 +36,8 @@ class BytesDump(json.JSONEncoder):
 
 
 class JSONReportGenerator(ReportGenerator):
-    """This class allow generating reports in JSON format.
-    The root dictionary contains 5 dictionaries :
+    """This class allows generating reports in JSON format.
+    The root dictionary contains 5 dictionaries:
     - classifications : contains the description and references of a vulnerability type.
     - vulnerabilities : each key is matching a vulnerability class. Value is a list of found vulnerabilities.
     - anomalies : same as vulnerabilities but used only for error messages and timeouts (items of less importance).
@@ -110,7 +110,7 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": curl_repr(request),
             "wstg": wstg,
         }
-        if self._infos["detailed_report_level"] == 2:
+        if self._infos["detailed_report_level"] >= 1:
             vuln_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -155,7 +155,7 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": curl_repr(request),
             "wstg": wstg
         }
-        if self._infos["detailed_report_level"] == 2:
+        if self._infos["detailed_report_level"] >= 1:
             anom_dict["detail"] = {
                 "response": detail_response(response)
             }
@@ -200,7 +200,7 @@ class JSONReportGenerator(ReportGenerator):
             "wstg": wstg
         }
 
-        if self._infos["detailed_report_level"] == 2:
+        if self._infos["detailed_report_level"] >= 1:
             addition_dict["detail"] = {
                 "response": detail_response(response)
             }

@@ -154,15 +154,14 @@ class Wapiti:
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
         self.report_gen.set_report_info(
-            self.base_request.url,
-            self.target_scope.name,
-            gmtime(),
-            f"Wapiti {WAPITI_VERSION}",
-            self._auth_state,
-            await self.persister.get_necessary_paths() if self.detailed_report_level == 1 \
-            else await self.persister.get_all_paths() if self.detailed_report_level == 2 else None,
-            await self.count_resources(),
-            self.detailed_report_level
+            target=self.base_request.url,
+            scope=self.target_scope.name,
+            date=gmtime(),
+            version=f"Wapiti {WAPITI_VERSION}",
+            auth=self._auth_state,
+            crawled_pages=await self.persister.get_crawled_paths() if self.detailed_report_level == 2 else [],
+            crawled_pages_nbr=await self.count_resources(),
+            detailed_report_level=self.detailed_report_level
         )
 
         for vul in vulnerabilities:

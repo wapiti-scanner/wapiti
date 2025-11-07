@@ -1,3 +1,10 @@
+07/11/2029
+    Wapiti 3.2.9
+    Core: use playwright for headless browsing capabilities
+    Core: reduce dependencies
+    Core: improve terminal coloring
+    Report: fix several issues with reports, add support for Markdown output
+
 31/10/2025
     Core: remove yaswfp dependency
 

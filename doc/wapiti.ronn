@@ -403,11 +403,11 @@ Wapiti will generate a report at the end of the attack process. Several formats 
     Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.
     
   * `-o`, `--output` <OUTPUT_PATH>  
-    Set the path were the report will be generated.
+    Set the path where the report will be generated.
 
   * `-dr`, `--detailed-report` <LEVEL>  
     Set the level of detailed report for the output.  
-    Possible values are (1) : includes HTTP requests in the report, (2) : includes HTTP responses (headers and bodies) in the report.
+    Possible values are (1) : adds HTTP responses obtained for successful attacks in the report, (2) : also adds HTTP requests and responses for all crawled pages in the report.
 
 ## OTHER OPTIONS
 

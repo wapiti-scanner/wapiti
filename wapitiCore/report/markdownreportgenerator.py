@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2008-2023 Nicolas Surribas
-# Copyright (C) 2020-2024 Cyberwatch
+# Copyright (C) 2025 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,28 +24,10 @@ from wapitiCore.net.response import detail_response
 from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
 
-NB_COLUMNS = 80
 
-# TODO: should use more the python format mini-language
-# http://docs.python.org/2/library/string.html#format-specification-mini-language
-
-
-def center(row: str) -> str:
-    if len(row) >= NB_COLUMNS:
-        return row
-    return row.rjust(len(row) + int((NB_COLUMNS - len(row)) / 2.0))
-
-
-def title(row: str) -> str:
-    return f"{row}\n{'-' * len(row.strip())}\n"
-
-
-separator = ("*" * NB_COLUMNS) + "\n"
-
-
-class TXTReportGenerator(ReportGenerator):
+class MarkdownReportGenerator(ReportGenerator):
     """
-    This class generates a Wapiti report in TXT format.
+    This class generates a Wapiti report in Markdown format.
     """
 
     def __init__(self):
@@ -58,87 +39,81 @@ class TXTReportGenerator(ReportGenerator):
 
     def generate_report(self, output_path):
         """
-        Create a TXT file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
+        Create a Markdown file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
         the methods add_vulnerability and add_anomaly.
         """
-        with codecs.open(output_path, mode="w", encoding="UTF-8") as txt_report_file:
-            try:
-                txt_report_file.write(separator)
-                txt_report_file.write(center(f"{self._infos['version']} - wapiti-scanner.github.io\n"))
-                txt_report_file.write(center(f"Report for {self._infos['target']}\n"))
-                txt_report_file.write(center(f"Date of the scan : {self._infos['date']}\n"))
-                txt_report_file.write(center(f"Crawled pages : {self._infos['crawled_pages_nbr']}\n"))
-                if "scope" in self._infos:
-                    txt_report_file.write(center(f"Scope of the scan : {self._infos['scope']}\n"))
-                txt_report_file.write(separator)
-                txt_report_file.write("\n")
+        with codecs.open(output_path, mode="w", encoding="UTF-8") as md_report_file:
+            md_report_file.write(f"# {self._infos['version']} - wapiti-scanner.github.io\n\n")
+            md_report_file.write(f"## Report for {self._infos['target']}\n")
+            md_report_file.write(f"* Date of the scan : {self._infos['date']}\n")
+            md_report_file.write(f"* Crawled pages : {self._infos['crawled_pages_nbr']}\n")
+            if "scope" in self._infos:
+                md_report_file.write(f"* Scope of the scan : {self._infos['scope']}\n")
+            md_report_file.write("\n---\n\n")
 
-                self._write_auth_info(txt_report_file)
+            self._write_auth_info(md_report_file)
 
-                txt_report_file.write(title("Summary of vulnerabilities :"))
-                for category, vulnerabilities in self._vulns.items():
-                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}\n".rjust(NB_COLUMNS))
-                txt_report_file.write(separator)
+            md_report_file.write("## Summary of vulnerabilities\n\n")
+            md_report_file.write("| Category | Count |\n")
+            md_report_file.write("|---|---|\n")
+            for category, vulnerabilities in self._vulns.items():
+                md_report_file.write(f"| {category} | {len(vulnerabilities)} |\n")
+            md_report_file.write("\n---\n\n")
 
-                for category, vulnerabilities in self._vulns.items():
-                    if vulnerabilities:
-                        txt_report_file.write("\n")
-                        txt_report_file.write(title(category))
-                        for vuln in vulnerabilities:
-                            txt_report_file.write(vuln["info"])
-                            txt_report_file.write("\n")
-                            txt_report_file.write(f"WSTG code: {vuln['wstg']}")
-                            txt_report_file.write("\n")
-                            # f.write("Involved parameter : {0}\n".format(vuln["parameter"]))
-                            txt_report_file.write("Evil request:\n")
-                            txt_report_file.write(http_repr(vuln["request"]))
-                            txt_report_file.write("\n")
-                            txt_report_file.write(f"cURL command PoC : \"{curl_repr(vuln['request'])}\"")
-                            txt_report_file.write("\n\n")
-                            txt_report_file.write(center("*   *   *\n\n"))
-                        txt_report_file.write(separator)
+            for category, vulnerabilities in self._vulns.items():
+                if vulnerabilities:
+                    md_report_file.write(f"### {category}\n")
+                    for vuln in vulnerabilities:
+                        md_report_file.write(f"**Info**: {vuln['info']}\n")
+                        md_report_file.write(f"**WSTG code**: {vuln['wstg']}\n")
+                        if vuln["parameter"] is not None:
+                            md_report_file.write(f"**Involved parameter**: {vuln['parameter']}\n")
+                        md_report_file.write("\n**Evil request**:\n\n")
+                        md_report_file.write(f"```http\n{http_repr(vuln['request'])}\n```\n")
+                        md_report_file.write(f"\n**cURL command PoC**:\n\n")
+                        md_report_file.write(f"```bash\n{curl_repr(vuln['request'])}\n```\n\n")
+                        md_report_file.write("---\n\n")
+            md_report_file.write("\n")
 
-                txt_report_file.write("\n")
+            md_report_file.write("## Summary of anomalies\n\n")
+            md_report_file.write("| Category | Count |\n")
+            md_report_file.write("|---|---|\n")
+            for category, vulnerabilities in self._anomalies.items():
+                md_report_file.write(f"| {category} | {len(vulnerabilities)} |\n")
+            md_report_file.write("\n---\n\n")
 
-                txt_report_file.write(title("Summary of anomalies :"))
-                for category, vulnerabilities in self._anomalies.items():
-                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}\n".rjust(NB_COLUMNS))
-                txt_report_file.write(separator)
+            for category, anomalies in self._anomalies.items():
+                if anomalies:
+                    md_report_file.write(f"### {category}\n")
+                    for anom in anomalies:
+                        md_report_file.write(f"**Info**: {anom['info']}\n")
+                        md_report_file.write(f"**WSTG code**: {anom['wstg']}\n")
+                        if anom["parameter"] is not None:
+                            md_report_file.write(f"**Involved parameter**: {anom['parameter']}\n")
+                        md_report_file.write("\n**Evil request**:\n\n")
+                        md_report_file.write(f"```http\n{http_repr(anom['request'])}\n```\n")
+                        md_report_file.write(f"\n**cURL command PoC**:\n\n")
+                        md_report_file.write(f"```bash\n{curl_repr(anom['request'])}\n```\n\n")
+                        md_report_file.write("---\n\n")
+            md_report_file.write("\n")
 
-                for category, anomalies in self._anomalies.items():
-                    if anomalies:
-                        txt_report_file.write("\n")
-                        txt_report_file.write(title(category))
-                        for anom in anomalies:
-                            txt_report_file.write(anom["info"])
-                            txt_report_file.write("\n")
-                            txt_report_file.write(f"WSTG code: {anom['wstg']}")
-                            txt_report_file.write("\n")
-                            txt_report_file.write("Evil request:\n")
-                            txt_report_file.write(http_repr(anom["request"]))
-                            txt_report_file.write("\n\n")
-                            txt_report_file.write(center("*   *   *\n\n"))
-                        txt_report_file.write(separator)
+            md_report_file.write("## Summary of additionals\n\n")
+            md_report_file.write("| Category | Count |\n")
+            md_report_file.write("|---|---|\n")
+            for category, additionnals in self._additionals.items():
+                md_report_file.write(f"| {category} | {len(additionnals)} |\n")
+            md_report_file.write("\n---\n\n")
 
-                txt_report_file.write(title("Summary of additionals :"))
-                for category, additionnals in self._additionals.items():
-                    txt_report_file.write(f"{category} : {len(additionnals):>3}\n".rjust(NB_COLUMNS))
-                txt_report_file.write(separator)
-
-                for category, additionnals in self._additionals.items():
-                    if additionnals:
-                        txt_report_file.write("\n")
-                        txt_report_file.write(title(category))
-                        for additional in additionnals:
-                            txt_report_file.write(additional["info"])
-                            txt_report_file.write("\n")
-                            txt_report_file.write(f"WSTG: {additional['wstg']}")
-                            txt_report_file.write("\n\n")
-                            txt_report_file.write(center("*   *   *\n\n"))
-                        txt_report_file.write(separator)
-
-            finally:
-                txt_report_file.close()
+            for category, additionnals in self._additionals.items():
+                if additionnals:
+                    md_report_file.write(f"### {category}\n")
+                    for additional in additionnals:
+                        md_report_file.write(f"**Info**: {additional['info']}\n")
+                        md_report_file.write(f"**WSTG**: {additional['wstg']}\n")
+                        if additional["parameter"] is not None:
+                            md_report_file.write(f"**Involved parameter**: {additional['parameter']}\n")
+                        md_report_file.write("---\n\n")
+            md_report_file.write("\n")
 
     # Vulnerabilities
     def add_vulnerability_type(self, name, description="", solution="", references=None, wstg=None):
@@ -295,7 +270,7 @@ class TXTReportGenerator(ReportGenerator):
             self._additionals[category] = []
         self._additionals[category].append(addition_dict)
 
-    def _write_auth_info(self, txt_report_file: codecs.StreamReaderWriter):
+    def _write_auth_info(self, md_report_file: codecs.StreamReaderWriter):
         """
         Write the authentication section explaining what method, fields, url were used and also if it has been
         successful
@@ -303,14 +278,13 @@ class TXTReportGenerator(ReportGenerator):
         if self._infos.get("auth") is None:
             return
         auth_dict = self._infos["auth"]
-        txt_report_file.write(title("Authentication :"))
-        txt_report_file.write(f"Url: {auth_dict['url']}\n")
-        txt_report_file.write(f"Logged in: {auth_dict['logged_in']}\n")
+        md_report_file.write("## Authentication :\n")
+        md_report_file.write(f"* Url: {auth_dict['url']}\n")
+        md_report_file.write(f"* Logged in: {auth_dict['logged_in']}\n")
 
         auth_form_dict = auth_dict.get("form")
         if auth_form_dict is None or len(auth_form_dict) == 0:
             return
-        txt_report_file.write(f"Login field: {auth_form_dict['login_field']}\n")
-        txt_report_file.write(f"Password field: {auth_form_dict['password_field']}\n")
-        txt_report_file.write("\n")
-        txt_report_file.write(separator)
+        md_report_file.write(f"* Login field: {auth_form_dict['login_field']}\n")
+        md_report_file.write(f"* Password field: {auth_form_dict['password_field']}\n")
+        md_report_file.write("\n---\n\n")

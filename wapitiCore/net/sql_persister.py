@@ -20,7 +20,7 @@
 import json
 import os
 from collections import namedtuple
-from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple
+from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dict, Any
 
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
@@ -526,7 +526,7 @@ class SqlPersister:
         async for request, response in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
             yield request, response
 
-    async def get_all_paths(self) -> List:
+    async def get_crawled_paths(self) -> List[Dict[str, Any]]:
         statement = select(
             self.paths,
             self.responses.c.status_code,
@@ -557,14 +557,6 @@ class SqlPersister:
                     "headers": [[key, value] for key, value in (row.response_headers or {}).items()]
                 },
             } for row in result.fetchall()]
-
-    async def get_necessary_paths(self) -> List:
-        requests = []
-        async for request, response in self._get_paths(crawled=False):
-            requests.append({"request": {"url": request.url, "method": request.method,
-                                         "post_params": request.post_params,
-                                         "status_code": response.status if response else None}})
-        return requests
 
     async def count_paths(self) -> int:
         statement = select(sql_count(self.paths.c.path_id)).where(~self.paths.c.evil)

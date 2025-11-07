@@ -27,7 +27,7 @@ from wapitiCore.report.reportgenerator import ReportGenerator
 
 
 class CSVReportGenerator(ReportGenerator):
-    """This class allow generating reports in CSV format.
+    """This class allows generating reports in CSV format.
     """
 
     def __init__(self):
