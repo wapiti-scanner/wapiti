@@ -9,8 +9,10 @@ import httpx
 import pytest
 
 from wapitiCore.report import GENERATORS
+from wapitiCore.report.htmlreportgenerator import level_to_css_class
 from wapitiCore.net import Request
 from wapitiCore.definitions import additionals, anomalies, vulnerabilities, flatten_references
+from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 from wapitiCore.net.sql_persister import Response
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -232,3 +234,12 @@ def test_detailed_reports(report_format, level):
 
     if report_format != "html":
         os.remove(output)
+
+
+def test_level_to_css_class():
+    assert level_to_css_class(CRITICAL_LEVEL) == "severity-critical"
+    assert level_to_css_class(HIGH_LEVEL) == "severity-high"
+    assert level_to_css_class(MEDIUM_LEVEL) == "severity-medium"
+    assert level_to_css_class(LOW_LEVEL) == "severity-low"
+    assert level_to_css_class(INFO_LEVEL) == "severity-info"
+    assert level_to_css_class(999) == ""
