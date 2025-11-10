@@ -32,17 +32,17 @@ from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 
 
-def level_to_emoji(level: int) -> str:
+def level_to_css_class(level: int) -> str:
     if level == CRITICAL_LEVEL:
-        return "🔥"
+        return "severity-critical"
     if level == HIGH_LEVEL:
-        return "🔴"
+        return "severity-high"
     if level == MEDIUM_LEVEL:
-        return "🟠"
+        return "severity-medium"
     if level == LOW_LEVEL:
-        return "🟡"
+        return "severity-low"
     if level == INFO_LEVEL:
-        return "🕵️"
+        return "severity-info"
     return ""
 
 
@@ -61,7 +61,7 @@ class HTMLReportGenerator(JSONReportGenerator):
         """
         Copy the report structure in the specified 'output_path' directory.
         If this directory already exists, overwrite the template files and add the HTML report.
-        (This way we keep previous generated HTML files).
+        (This way we keep previously generated HTML files).
         """
         if os.path.isdir(output_path):
             for subdir in ("css", "js"):
@@ -106,7 +106,7 @@ class HTMLReportGenerator(JSONReportGenerator):
                     anomalies=self._anomalies,
                     additionals=self._additionals,
                     flaws=self._flaw_types,
-                    level_to_emoji=level_to_emoji,
+                    level_to_css_class=level_to_css_class,
                     detailed_report_level=self._infos["detailed_report_level"]
                 )
             )
