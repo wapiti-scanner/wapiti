@@ -102,7 +102,7 @@ def test_reports(report_format):
         temp_obj = tempfile.TemporaryDirectory()
         output = temp_obj.name
     else:
-        # Use a temporary file that is not deleted on close
+        # Use a temporary file not deleted on close
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8')
         output = temp_file.name
         temp_file.close()
@@ -206,7 +206,7 @@ def test_detailed_reports(report_format, level):
         temp_obj = tempfile.TemporaryDirectory()
         output = temp_obj.name
     else:
-        # Use a temporary file that is not deleted on close
+        # Use a temporary file not deleted on close
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8')
         output = temp_file.name
         temp_file.close()
