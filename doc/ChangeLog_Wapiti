@@ -1,4 +1,9 @@
-07/11/2029
+13/11/2025
+    Wapiti 3.2.10
+    Core: Use parallelism for several attack modules
+    CLI: fix `-v 0` option
+
+07/11/2025
     Wapiti 3.2.9
     Core: use playwright for headless browsing capabilities
     Core: reduce dependencies
