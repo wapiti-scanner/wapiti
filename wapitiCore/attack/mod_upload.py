@@ -106,6 +106,7 @@ class UploadMutator:
 class ModuleUpload(Attack):
     """Detect unrestricted file upload vulnerabilities."""
     name = "upload"
+    parallelize_attacks = True
 
     def is_excluded(self, url: str):
         for exclusion in self.options["excluded_urls"]:

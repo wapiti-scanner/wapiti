@@ -191,7 +191,7 @@ class ModuleCsrf(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         csrf_value = self.is_csrf_present(request, response)
 
-        # check if token is present
+        # check if a token is present
         if not csrf_value:
             vuln_message = "Lack of anti CSRF token"
         elif not await self.is_csrf_verified(request, response):

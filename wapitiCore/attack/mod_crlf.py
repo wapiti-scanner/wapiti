@@ -40,6 +40,7 @@ class ModuleCrlf(Attack):
     do_get = True
     do_post = True
     payloads = [PayloadInfo(payload="http://www.google.fr\r\nwapiti: 3.2.9 version")]
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         super().__init__(crawler, persister, attack_options, crawler_configuration)

@@ -44,7 +44,7 @@ def activate_method_module(module: AttackProtocol, method: str, status: bool):
 
 
 class ActiveScanner:
-    def __init__(self, persister, crawler_configuration):
+    def __init__(self, persister, crawler_configuration, verbosity: int = 1):
         """
         Initialize the ActiveScanner object
 
@@ -52,10 +52,13 @@ class ActiveScanner:
         :type persister: wapitiCore.persister.Persister
         :param crawler_configuration: The crawler configuration
         :type crawler_configuration: wapitiCore.crawler.CrawlerConfiguration
+        :param verbosity: The verbosity level
+        :type verbosity: int
         """
         self.persister = persister
         self.attack_options = {}
         self.crawler_configuration = crawler_configuration
+        self.verbosity = verbosity
         self._activated_modules: ModuleActivationSettings = {}
         self._current_attack_task: Optional[asyncio.Task] = None
         self._bug_report = True
@@ -97,6 +100,9 @@ class ActiveScanner:
 
     def set_bug_reporting(self, value: bool):
         self._bug_report = value
+
+    def set_verbosity(self, verbosity: int):
+        self.verbosity = verbosity
 
     async def init_attack_modules(self, crawler: AsyncCrawler) -> List[Attack]:
         modules = []
@@ -177,36 +183,82 @@ class ActiveScanner:
             async for request, response in self.persister.get_forms(attack_module=module.name):
                 yield request, response
 
-
-    async def load_and_attack(self, attack_module: Attack, attacked_ids: Set[int]) -> None:
-        original_request: Request
-        original_response: Response
-        async for original_request, original_response in self.load_resources_for_module(attack_module):
+    async def _attack_wrapper(
+        self,
+        attack_module: Attack,
+        request: Request,
+        response: Response,
+        attacked_ids: Set[int],
+        semaphore: asyncio.Semaphore
+    ):
+        async with semaphore:
             try:
-                if await attack_module.must_attack(original_request, original_response):
-                    logging.info("[+] %s", original_request)
-
-                    await attack_module.attack(original_request, original_response)
-
+                if await attack_module.must_attack(request, response):
+                    if self.verbosity > 0:
+                        logging.info("[+] %s", request)
+                    await attack_module.attack(request, response)
             except RequestError:
-                # Hmm, it should be caught inside the module
                 await asyncio.sleep(1)
-                continue
             except Exception as exception:  # pylint: disable=broad-except
-                # Catch every possible exception and print it
                 exception_traceback = sys.exc_info()[2]
                 logging.exception("An exception occurred in module %s", attack_module.name)
-
                 if self._bug_report:
                     await self.send_bug_report(
                         exception,
                         exception_traceback,
                         attack_module.name,
-                        original_request
+                        request
                     )
             else:
-                if original_request.path_id is not None:
-                    attacked_ids.add(original_request.path_id)
+                if request.path_id is not None:
+                    attacked_ids.add(request.path_id)
+
+    async def load_and_attack(self, attack_module: Attack, attacked_ids: Set[int]) -> None:
+        parallel_tasks_count = self.attack_options.get("tasks", 10)
+        if attack_module.parallelize_attacks and parallel_tasks_count > 1:
+            tasks = []
+            semaphore = asyncio.Semaphore(parallel_tasks_count)
+            async for original_request, original_response in self.load_resources_for_module(attack_module):
+                tasks.append(
+                    self._attack_wrapper(
+                        attack_module,
+                        original_request,
+                        original_response,
+                        attacked_ids,
+                        semaphore
+                    )
+                )
+            await asyncio.gather(*tasks)
+        else:
+            original_request: Request
+            original_response: Response
+            async for original_request, original_response in self.load_resources_for_module(attack_module):
+                try:
+                    if await attack_module.must_attack(original_request, original_response):
+                        if self.verbosity > 0:
+                            logging.info("[+] %s", original_request)
+
+                        await attack_module.attack(original_request, original_response)
+
+                except RequestError:
+                    # Hmm, it should be caught inside the module
+                    await asyncio.sleep(1)
+                    continue
+                except Exception as exception:  # pylint: disable=broad-except
+                    # Catch every possible exception and print it
+                    exception_traceback = sys.exc_info()[2]
+                    logging.exception("An exception occurred in module %s", attack_module.name)
+
+                    if self._bug_report:
+                        await self.send_bug_report(
+                            exception,
+                            exception_traceback,
+                            attack_module.name,
+                            original_request
+                        )
+                else:
+                    if original_request.path_id is not None:
+                        attacked_ids.add(original_request.path_id)
 
     def handle_user_interruption(self, _, __) -> None:
         """
@@ -311,7 +363,7 @@ class ActiveScanner:
                     # Clean up the signal handler for the next loop
                     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-                # As the handler directly continue or cancel the current_attack_task module, we don't have
+                # As the handler directly continues or cancels the current_attack_task module, we don't have
                 # cases where we have to call `continue`. Just check for the two other options
                 if self._user_choice in (UserChoice.REPORT, UserChoice.QUIT):
                     break

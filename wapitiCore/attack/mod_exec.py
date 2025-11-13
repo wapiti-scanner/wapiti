@@ -40,6 +40,7 @@ class ModuleExec(Attack):
     Detect scripts vulnerable to command and/or code execution.
     """
     name = "exec"
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         super().__init__(crawler, persister, attack_options, crawler_configuration)

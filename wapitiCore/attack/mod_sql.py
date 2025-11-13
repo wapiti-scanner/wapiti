@@ -331,6 +331,7 @@ class ModuleSql(Attack):
     name = "sql"
     payloads = ["[VALUE]\xBF'\"("]
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         super().__init__(crawler, persister, attack_options, crawler_configuration)

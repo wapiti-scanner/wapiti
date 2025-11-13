@@ -50,6 +50,7 @@ class ModuleXxe(Attack):
     name = "xxe"
     do_get = True
     do_post = True
+    parallelize_attacks = True
 
     MSG_VULN = "XXE vulnerability"
 
