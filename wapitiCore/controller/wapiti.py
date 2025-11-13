@@ -115,14 +115,16 @@ class Wapiti:
             os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
         self.persister = SqlPersister(self._history_file)
-        self._active_scanner = ActiveScanner(persister=self.persister, crawler_configuration=self.crawler_configuration)
+        self._active_scanner = ActiveScanner(
+            persister=self.persister,
+            crawler_configuration=self.crawler_configuration,
+            verbosity=self.verbose
+        )
         self._passive_scanner = PassiveScanner(persister=self.persister)
 
     def refresh_logging(self):
-        message_format = "{message}"
-
         verbosity_levels = {
-            0: "BLUE",
+            0: "INFO",
             1: "INFO",
             2: "VERBOSE"
         }
@@ -131,7 +133,6 @@ class Wapiti:
             {
                 "sink": sys.stdout,
                 "colorize": self.color_enabled,
-                "format": message_format,
                 "level": verbosity_levels[self.verbose]
             }
         ]
@@ -270,7 +271,7 @@ class Wapiti:
 
         # Let's save explorer values (limits)
         explorer.save_state(self.persister.output_file[:-2] + "pkl")
-        # Overwrite cookies for next (attack) step
+        # Overwrite cookies for the next (attack) step
         self.crawler_configuration.cookies = explorer.cookie_jar
 
     async def write_report(self):
@@ -326,7 +327,7 @@ class Wapiti:
         await self.persister.close()
 
     def set_timeout(self, timeout: float = 10.0):
-        """Set the timeout for the time waiting for a HTTP response"""
+        """Set the timeout for the time waiting for an HTTP response"""
         self.crawler_configuration.timeout = timeout
 
     def set_verify_ssl(self, verify: bool = False):
@@ -459,13 +460,14 @@ class Wapiti:
     def verbosity(self, verbose: int):
         """Define the level of verbosity of the output."""
         self.verbose = verbose
+        self._active_scanner.set_verbosity(verbose)
         self.refresh_logging()
         # 0 => quiet / level="SUCCESS"
         # 1 => normal / level="INFO"
         # 2 => verbose / level="VERBOSE"
 
     def set_report_generator_type(self, report_type: str = "xml"):
-        """Set the format of the generated report. Can be html, json, txt or xml"""
+        """Set the format of the generated report. Can be HTML, JSON, TXT, MD or XML"""
         self.report_generator_type = report_type
 
     def set_output_file(self, output_file: str):

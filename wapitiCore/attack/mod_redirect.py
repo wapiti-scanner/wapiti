@@ -40,6 +40,7 @@ class ModuleRedirect(Attack):
     MSG_VULN = "Open Redirect"
     do_get = True
     do_post = False
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         super().__init__(crawler, persister, attack_options, crawler_configuration)

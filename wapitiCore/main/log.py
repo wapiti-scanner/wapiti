@@ -87,11 +87,9 @@ def configure(handlers):
         "DEBUG": std_logging.DEBUG,
         "INFO": std_logging.INFO,
         "VERBOSE": VERBOSE_LEVEL,
-        "SUCCESS": std_logging.INFO,
         "WARNING": std_logging.WARNING,
         "ERROR": std_logging.ERROR,
         "CRITICAL": std_logging.CRITICAL,
-        "BLUE": std_logging.INFO,
     }
 
     for handler_conf in handlers:

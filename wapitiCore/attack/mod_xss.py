@@ -45,6 +45,7 @@ class ModuleXss(Attack):
     """Detects stored (aka permanent) Cross-Site Scripting vulnerabilities on the web server."""
 
     name = "xss"
+    parallelize_attacks = True
 
     # two dict exported for permanent XSS scanning
     # GET_XSS structure :

@@ -38,7 +38,7 @@ def format_statuses(statuses: Dict[str, int]) -> str:
 
 
 def is_interesting(method: str, response: Response) -> bool:
-    # This is basic config like default Nginx or CloudFlare protected websites
+    # This is a basic config like default Nginx or CloudFlare protected websites
     if response.status in (403, 405):
         return False
 
@@ -94,7 +94,7 @@ class ModuleMethods(Attack):
         # then we test each of those and we compare the status code and content to the response
         # given to a GET request (that will be sent in every case).
         # If OPTIONS isn't implemented we send a request for each HTTP method from a hardcoded list
-        # To filter most common cases we call the function called `is_interesting` above.
+        # To filter the most common cases we call the function called `is_interesting` above.
         # The behavior of this module is a bit different from https://svn.nmap.org/nmap/scripts/http-methods.nse
         page = request.path
         self.excluded_path.add(page)

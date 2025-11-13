@@ -140,6 +140,7 @@ class Attack(AttackProtocol):
 
     do_get = True
     do_post = True
+    parallelize_attacks = False
 
     # List of modules (strings) that must be launched before the current module
     # Must be defined in the code of the module

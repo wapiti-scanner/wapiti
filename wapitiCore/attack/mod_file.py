@@ -104,6 +104,7 @@ def find_warning_message(data, payload):
 class ModuleFile(Attack):
     """Detect file-related vulnerabilities such as directory traversal and include() vulnerabilities."""
     name = "file"
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
