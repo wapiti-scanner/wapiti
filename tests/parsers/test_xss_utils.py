@@ -1,3 +1,5 @@
+import sys
+
 import respx
 import httpx
 import pytest
@@ -9,6 +11,12 @@ from wapitiCore.net.csp_utils import has_csp_header, has_csp_meta
 from wapitiCore.net.crawler import Response
 
 
+# textarea, title are RCDATA tags
+# they won't render any child tags, but they will decode HTML entities to display text properly (&amp; -> &)
+
+# script, style and noscript (when JS is ON) are RAWTEXT tags
+# they won't render any child tags and won't decode HTML entities (JS code is taken as is)
+
 def test_title_context():
     html = """<html>
     <head><title><strong>injection</strong></title>
@@ -16,8 +24,9 @@ def test_title_context():
     </body>
     </html>"""
 
+    # With HTML5, everything under "title" will be seen as plaintext
     assert get_context_list(html, "injection") == [
-        {"non_exec_parent": "title", "parent": "strong", "type": "text"}
+        {"non_exec_parent": "title", "parent": "title", "type": "text"}
     ]
 
 
@@ -33,15 +42,12 @@ def test_noscript_context():
     </body>
     </html>"""
 
+    # With HTML5, noscript still exists and everything under textarea is plaintext
     assert get_context_list(html, "injection") == [
         {
             "non_exec_parent": "noscript",
-            "tag": "a",
-            "name": "href",
-            "type": "attrval",
-            "separator": "\"",
-            "events": set(),
-            "special_attributes": {"href"}
+            "parent": "textarea",
+            "type": "text",
         }
     ]
 
@@ -70,20 +76,24 @@ def test_comment_in_noscript_context():
     <head><title>Hello there</title>
     <body>
     <noscript>
-    <textarea>
+    <div>
     <!--
     <a href="injection">General Kenobi</a>
     -->
-    <textarea>
+    </div>
     </noscript>
     </body>
     </html>"""
 
     assert get_context_list(html, "injection") == [
-        {"non_exec_parent": "noscript", "parent": "textarea", "type": "comment"}
+        {"non_exec_parent": "noscript", "parent": "div", "type": "comment"}
     ]
 
 
+@pytest.mark.skipif(
+    sys.version_info[:3] == (3, 12, 12),
+    reason="HTMLParser legacy behavior in Python 3.12.12"
+)
 def test_attrname_context():
     html = """<html>
     <head><title>Hello there</title>
@@ -94,14 +104,12 @@ def test_attrname_context():
     </body>
     </html>"""
 
+    # noembed is completely ignored in HTML5, no rendering at all
     assert get_context_list(html, "injection") == [
         {
             "non_exec_parent": "noembed",
-            "tag": "input",
-            "type": "attrname",
-            "name": "injection",
-            "events": set(),
-            "special_attributes": {"type=checkbox"}
+            "parent": "noembed",
+            "type": "text",
         }
     ]
 
