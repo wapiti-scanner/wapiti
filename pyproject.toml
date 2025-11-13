@@ -7,7 +7,7 @@ name = "wapiti3"
 version = "3.2.10"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
-requires-python = ">=3.12,<3.14"
+requires-python = ">=3.12,<3.15"
 authors = [
         {name="Nicolas Surribas", email="nicolas.surribas@gmail.com"},
 ]
