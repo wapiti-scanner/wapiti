@@ -24,7 +24,7 @@ import re
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
-from arsenic import get_session, browsers, services
+from wapiti_arsenic import get_session, browsers, services
 from bs4 import BeautifulSoup
 from httpx import RequestError
 
