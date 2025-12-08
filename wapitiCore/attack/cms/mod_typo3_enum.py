@@ -25,7 +25,7 @@ from typing import Optional, List, Set, Dict
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from httpx import RequestError
-from arsenic import get_session, browsers, services
+from wapiti_arsenic import get_session, browsers, services
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
