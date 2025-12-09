@@ -371,6 +371,14 @@ class Wappalyzer:
         # Cookies can't have multiple values but we must keep a dict->list format
         self._cookies = {key: [value] for key, value in web_content.cookies.items()}
 
+        sent_cookie_header = web_content.sent_headers.get("cookie")
+        if sent_cookie_header:
+            for part in sent_cookie_header.split(";"):
+                part = part.strip()
+                if "=" in part:
+                    key, value = part.split("=", 1)
+                    self._cookies.setdefault(key, []).append(value)
+
     def detect_application_versions(self, application: dict) -> Set[str]:
         """
         Determine whether the web content matches the application regex.
