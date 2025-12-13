@@ -1,5 +1,5 @@
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2020-2023 Nicolas Surribas
+# Copyright (C) 2020-2025 Nicolas Surribas
 # Copyright (C) 2021-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import dataclasses
 from configparser import ConfigParser
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Any
 from html.parser import attrfind_tolerant
 from urllib.parse import urlparse
 from os.path import join as path_join
@@ -55,7 +55,7 @@ NONEXEC_PARENTS = {
 }
 
 
-def find_non_exec_parent(tag):
+def find_non_exec_parent(tag: element.PageElement) -> str:
     """Return the tag name of the most upper parent preventing JS execution"""
     no_exec_parent = ""
     for parent in tag.parents:
@@ -65,17 +65,21 @@ def find_non_exec_parent(tag):
     return no_exec_parent
 
 
-def is_context_executable(node):
-    """Returns whether the current tag doesn't follows a tag that stop JS execution (such as frameset)."""
+def is_context_executable(node: element.PageElement) -> bool:
+    """Returns whether the current tag doesn't follow a tag that stop JS execution (such as frameset)."""
     # Search for any frameset sat that appeared before in the DOM but weren't parent
     if set(node.find_all_previous("frameset")) - set(node.find_parents("frameset")):
         return False
     return True
 
 
-def get_special_attributes(node):
+def get_special_attributes(node: element.PageElement) -> set[str]:
+    """
+    Extracts special attributes from a BeautifulSoup tag element.
+    Special attributes are those that can influence the behavior of XSS payloads.
+    """
     specials = set()
-    # We don't care about the value of the following attributes but we need to know if they are present
+    # We don't care about the value of the following attributes, but we need to know if they are present
     for attribute in ("href", "src", "style"):
         if attribute in node.attrs:
             specials.add(attribute)
@@ -88,7 +92,11 @@ def get_special_attributes(node):
     return specials
 
 
-def get_similar_case_replacement(original_keyword, new_keyword) -> str:
+def get_similar_case_replacement(original_keyword: str, new_keyword: str) -> str:
+    """
+    Replaces a keyword with another, preserving the case of each character from the original keyword.
+    For example, "FoO" with "bAr" would become "BaR".
+    """
     assert len(original_keyword) == len(new_keyword)
     result = ""
     for old_char, new_char in zip(original_keyword, new_keyword):
@@ -100,6 +108,10 @@ def get_similar_case_replacement(original_keyword, new_keyword) -> str:
 
 
 def replace_with_unique_values(text: str, keyword: str) -> Tuple[str, List[str]]:
+    """
+    Replaces all occurrences of a keyword in a string with unique, randomly generated strings of the same length.
+    This is used to distinguish between multiple reflections of the same parameter in the page.
+    """
     new_text = text
     lower_text = text.lower()
     start = 0
@@ -120,13 +132,20 @@ def replace_with_unique_values(text: str, keyword: str) -> Tuple[str, List[str]]
     return new_text, taints
 
 
-def put_back_code_in_context(context, tainted_code, original_code):
+def put_back_code_in_context(context: Dict[str, Any], tainted_code: str, original_code: str):
+    """
+    Replaces the tainted (unique) string with the original reflected code in the context dictionary's values.
+    """
     for key, value in context.items():
         if isinstance(value, str):
             context[key] = value.replace(tainted_code, original_code)
 
 
-def find_separator(html_code, tainted_attr_value, tag_name):
+def find_separator(html_code: str, tainted_attr_value: str, tag_name: str) -> str:
+    """
+    Finds the separator (quote character) used for an attribute value in the HTML code.
+    It can be a single quote, a double quote, or nothing.
+    """
     lower_code = html_code.lower()
     code_index = lower_code.index(tainted_attr_value)
     tag_index = lower_code.rindex("<" + tag_name, 0, code_index)
@@ -139,8 +158,11 @@ def find_separator(html_code, tainted_attr_value, tag_name):
     return ""
 
 
-# type/name/tag ex: attrval/img/src
 def get_context_list(html_code: str, original_keyword: str) -> List[Dict[str, str]]:
+    """
+    Analyzes an HTML string to find all the different contexts where a keyword is reflected.
+    Contexts can be tag names, attribute names, attribute values, text, or comments.
+    """
     tainted_code, taints = replace_with_unique_values(html_code, original_keyword)
     root_node = BeautifulSoup(tainted_code, "html.parser")
     context_list = []
@@ -238,7 +260,11 @@ def get_context_list(html_code: str, original_keyword: str) -> List[Dict[str, st
     return context_list
 
 
-def load_payloads_from_ini(filename, external_endpoint) -> List[Dict[str, str]]:
+def load_payloads_from_ini(filename: str, external_endpoint: str) -> List[Dict[str, str]]:
+    """
+    Loads and parses XSS payloads from a specified INI file.
+    It replaces placeholders like [EXTERNAL_ENDPOINT] with actual values.
+    """
     config_reader = ConfigParser(interpolation=None)
     payloads = []
 
@@ -280,11 +306,16 @@ def load_payloads_from_ini(filename, external_endpoint) -> List[Dict[str, str]]:
     return payloads
 
 
-def meet_requirements(payload_requirements, special_attributes):
+def meet_requirements(payload_requirements: List[str], special_attributes: List[str]) -> str:
+    """
+    Checks if a payload's requirements are met by the current context.
+    If not, it tries to generate a prefix for the payload to meet them.
+    Raises RuntimeError if requirements conflict with the context.
+    """
     # payload_requirements is a set of attr_name or attr_name=value strings
     payload_prefix = ""
     for requirement in payload_requirements:
-        if "!" not in requirement and requirement not in special_attributes:  # Condition not met but we may fix it
+        if "!" not in requirement and requirement not in special_attributes:  # Condition isn't met but we may fix it
             if "=" in requirement:
                 # Hardest case: Make sure there isn't an attribute with the same name but different value (conflict)
                 expected_attribute, expected_value = requirement.split("=")
@@ -304,8 +335,10 @@ def meet_requirements(payload_requirements, special_attributes):
 
 
 def apply_attrval_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
-    # Our string is in the value of a tag attribute
-    # ex: <a href="our_string"></a>
+    """
+    Generates XSS payloads for a context where the injection is within an attribute's value.
+    Example: <a href="our_string"></a>
+    """
     result = []
 
     for payload_infos in payloads:
@@ -381,8 +414,10 @@ def apply_attrval_context(context: Dict[str, str], payloads: List[Dict[str, str]
 
 
 def apply_attrname_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
-    # we control an attribute name
-    # ex: <a our_string="/index.html">
+    """
+    Generates XSS payloads for a context where the injection is within an attribute's name.
+    Example: <a our_string="/index.html">
+    """
     result = []
 
     if code == context["name"]:
@@ -409,8 +444,10 @@ def apply_attrname_context(context: Dict[str, str], payloads: List[Dict[str, str
 
 
 def apply_tagname_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
-    # we control the tag name
-    # ex: <our_string name="column" />
+    """
+    Generates XSS payloads for a context where the injection is within a tag's name.
+    Example: <our_string name="column" />
+    """
     result = []
 
     if context["value"].startswith(code):
@@ -456,8 +493,10 @@ def apply_tagname_context(context: Dict[str, str], payloads: List[Dict[str, str]
 
 
 def apply_text_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
-    # we control the text of the tag
-    # ex: <textarea>our_string</textarea>
+    """
+    Generates XSS payloads for a context where the injection is within a text node.
+    Example: <textarea>our_string</textarea>
+    """
     result = []
     prefix = ""
 
@@ -488,8 +527,10 @@ def apply_text_context(context: Dict[str, str], payloads: List[Dict[str, str]], 
 
 
 def apply_comment_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
-    # Injection occurred in a comment tag
-    # ex: <!-- <div> whatever our_string blablah </div> -->
+    """
+    Generates XSS payloads for a context where the injection is within an HTML comment.
+    Example: <!-- <div> whatever our_string blablah </div> -->
+    """
     result = []
 
     prefix = "-->"
@@ -520,6 +561,9 @@ def apply_comment_context(context: Dict[str, str], payloads: List[Dict[str, str]
 
 
 def apply_context(context: Dict[str, str], payloads: List[Dict[str, str]], code: str) -> List[PayloadInfo]:
+    """
+    Dispatcher function that calls the appropriate 'apply_*_context' function based on the context type.
+    """
     func = {
         "attrval": apply_attrval_context,
         "attrname": apply_attrname_context,
@@ -531,10 +575,12 @@ def apply_context(context: Dict[str, str], payloads: List[Dict[str, str]], code:
     return func(context, payloads, code)
 
 
-# generate a list of payloads based on where in the webpage the js-code will be injected
 def generate_payloads(
         html_code: str, code: str, payload_file: str, external_endpoint: str = "http://wapiti3.ovh/"
 ) -> List[PayloadInfo]:
+    """
+    Generate a list of potential XSS payloads based on where the provided code is reflected in the HTML.
+    """
     # We must keep the original source code because bs gives us something that may differ...
     context_list = get_context_list(html_code, code)
     payload_list = load_payloads_from_ini(payload_file, external_endpoint)
@@ -551,7 +597,7 @@ def generate_payloads(
 
 
 def valid_xss_content_type(response: Response) -> bool:
-    """Check whether the returned content-type header allow javascript evaluation."""
+    """Check whether the returned content-type header allows javascript evaluation."""
     # When no content-type is returned, browsers try to display the HTML
     if "content-type" not in response.headers:
         return True
@@ -585,6 +631,10 @@ def check_payload(
         payload: PayloadInfo,
         taint: str
 ) -> bool:
+    """
+    Checks if an XSS payload was successful by parsing the resulting HTML page
+    and looking for the expected changes.
+    """
     config_reader = ConfigParser(interpolation=None)
     with open(path_join(data_dir, payloads_file), encoding='utf-8') as payload_file:
         config_reader.read_file(payload_file)
