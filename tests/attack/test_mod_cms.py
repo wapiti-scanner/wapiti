@@ -662,6 +662,104 @@ async def test_spip_version_not_detected():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "SPIP", "versions": [], "categories": ["CMS SPIP"], "groups": ["Content"]}'
         )
+@pytest.mark.asyncio
+@respx.mock
+async def test_spip_plugins():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
+    spip_edited = "CHANGELOG_edited.txt"
+
+    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+        data = spip.read()
+
+    # Response to tell that SPIP is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use SPIP, your_spip_attribute = ''",
+            headers={"composed-by": "SPIP"})
+    )
+
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+    # Responses for plugin folders
+    respx.get("http://perdu.com/plugins/oembed/").mock(return_value=httpx.Response(403))
+    respx.get("http://perdu.com/plugins-dist/nuage/").mock(return_value=httpx.Response(403))
+
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 3
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "spip"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 3
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "SPIP", "versions": [], "categories": ["CMS SPIP"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "nuage", "versions": [], "categories": ["SPIP Plugin"], "groups": ["Add-ons"]}'
+        )
+        assert persister.add_payload.call_args_list[2][1]["info"] == (
+            '{"name": "oembed", "versions": [], "categories": ["SPIP Plugin"], "groups": ["Add-ons"]}'
+        )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_spip_no_plugins_403():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
+    spip_edited = "CHANGELOG_edited.txt"
+
+    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+        data = spip.read()
+
+    # Response to tell that SPIP is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use SPIP, your_spip_attribute = ''",
+            headers={"composed-by": "SPIP"})
+    )
+
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+    # Responses for plugin folders
+    respx.get("http://perdu.com/plugins/oembed/").mock(return_value=httpx.Response(403))
+    respx.get("http://perdu.com/plugins-dist/nuage/").mock(return_value=httpx.Response(403))
+
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(403))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 3
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "spip"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "SPIP", "versions": [], "categories": ["CMS SPIP"], "groups": ["Content"]}'
+        )
+
 
 @pytest.mark.asyncio
 @respx.mock
