@@ -363,7 +363,7 @@ class Wapiti:
                     if not os.path.exists(p.firefox.executable_path):
                         log_red(
                             "Firefox is not installed. "
-                            "Please run `playwright install firefox`"
+                            "Please run `wapiti-install-headless-browser`"
                         )
                         self._headless_mode = "no"
                     else:
@@ -371,7 +371,7 @@ class Wapiti:
                 except PlaywrightError:
                     log_red(
                         "Could not find browser installation. "
-                        "Please run `playwright install --with-deps firefox`"
+                        "Please run `wapiti-install-headless-browser`"
                     )
                     self._headless_mode = "no"
 
