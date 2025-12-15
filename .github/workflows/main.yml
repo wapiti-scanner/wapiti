@@ -34,7 +34,7 @@ jobs:
           install: true
       - name: Build
         run: |
-          docker build .
+          docker build -f Dockerfile .
 
   build:
     runs-on: ubuntu-24.04
