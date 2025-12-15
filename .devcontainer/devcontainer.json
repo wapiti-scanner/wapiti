@@ -1,0 +1,39 @@
+{
+	"name": "Wapiti Development",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"features": {},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.debugpy",
+				"ms-python.black-formatter",
+				"charliermarsh.ruff"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true,
+				"python.formatting.provider": "black",
+				"python.testing.pytestEnabled": true,
+				"python.testing.unittestEnabled": false,
+				"editor.formatOnSave": true,
+				"files.eol": "\n"
+			}
+		}
+	},
+	"forwardPorts": [],
+	"postCreateCommand": "pip install -e '.[dev]' && playwright install --with-deps",
+	"remoteUser": "root",
+	"workspaceFolder": "/workspace",
+	"mounts": [
+		"source=${localWorkspaceFolder},target=/workspace,type=bind"
+	]
+}
+
+
+
