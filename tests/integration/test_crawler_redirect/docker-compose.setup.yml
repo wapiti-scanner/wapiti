@@ -1,5 +1,3 @@
-version: '3.9'
-
 x-default_php_setup:
   &default_php_setup
   image: php${PHP_HASH}

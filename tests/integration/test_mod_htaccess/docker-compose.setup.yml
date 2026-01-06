@@ -1,5 +1,3 @@
-version: '3.9'
-
 x-healthcheck_web:
   &healthcheck_web
   healthcheck:
