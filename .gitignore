@@ -49,5 +49,7 @@ pip-delete-this-directory.txt
 coverage.xml
 
 ### integration test system ###
-tests/integrations/.dump_diff_file.txt
-tests/integrations/.test/
+tests/integration/.dump_diff_file.txt
+tests/integration/.docker-compose.final.yml
+tests/integration/.test/
+tests/integration/wapiti/behavior.json
