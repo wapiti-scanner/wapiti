@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import re
 from os.path import join as path_join
 from typing import Optional, Iterator
 
@@ -70,6 +71,38 @@ class ModuleExec(Attack):
                 return vuln_info
         return ""
 
+    @staticmethod
+    def _is_valid_content_type(response: Response) -> bool:
+        """
+        Check if the Content-Type header of the response is acceptable for executing code.
+        Acceptable types typically include text-based responses (HTML, plain text, etc.)
+        """
+        valid_content_types = ["text/html", "text/plain", "application/json", "application/javascript"]
+        content_type = response.headers.get('Content-Type', '').split(';')[0].strip()
+        return content_type in valid_content_types
+
+    @staticmethod
+    def _has_valid_file_extension(url: str) -> bool:
+        """
+        Check if the URL points to a valid file extension.
+        Typically, we want to avoid static resources like images, CSS, etc.
+        """
+        invalid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.css', '.js', '.woff', '.woff2', '.svg', '.ico']
+        return not any(url.lower().endswith(ext) for ext in invalid_extensions)
+
+    @staticmethod
+    def _match_rule(rule, content):
+        """
+        Match the rule against the response content.
+        If the rule starts with 'regex:', use regular expression matching.
+        Otherwise, treat it as a simple substring search.
+        """
+        if rule.startswith("regex:"):
+            pattern = rule[len("regex:"):]
+            return re.search(pattern, content) is not None  # Regex match
+
+        return rule in content  # Simple substring match
+
     async def attack(self, request: Request, response: Optional[Response] = None):
         warned = False
         timeouted = False
@@ -97,10 +130,19 @@ class ModuleExec(Attack):
 
             try:
                 response: Response = await self.crawler.async_send(mutated_request)
+
+                # Check Content-Type header before further analysis
+                if not self._is_valid_content_type(response):
+                    log_verbose(f"Skipping due to invalid content-type: {response.headers.get('Content-Type', '')}")
+                    continue
+
+                # Check file extension before further analysis
+                if not self._has_valid_file_extension(request.url):
+                    log_verbose(f"Skipping due to invalid file extension: {request.url}")
+                    continue
+
             except ReadTimeout:
-                # Is the webpage expected to timeout?
                 if payload_info.type == "time":
-                    # Check for false-positive by asking the original request
                     if await self.does_timeout(request):
                         self.network_errors += 1
                         self.false_positive_timeouts.add(request.path_id)
@@ -165,7 +207,7 @@ class ModuleExec(Attack):
                 vuln_info = None
 
                 # No timeout raised, check for patterns in response
-                if any(rule.replace("[SPACE]", " ") in response.content for rule in payload_info.rules):
+                if any(self._match_rule(rule, response.content) for rule in payload_info.rules):
                     vuln_info = payload_info.description
                     # We reached maximum exploitation for this parameter, don't send more payloads
                     vulnerable_parameter = True
