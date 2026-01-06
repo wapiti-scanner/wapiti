@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # Apache container for the log4shell module
   log4shell:

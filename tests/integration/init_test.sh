@@ -1,8 +1,6 @@
 #!/bin/bash
 
 TEMPLATE_DOCKER_COMPOSE_FILE='
-version: '\''3.9'\''
-
 # Use the shortcuts you need and remove unused ones
 x-default_php_setup:
   &default_php_setup

@@ -1,5 +1,3 @@
-version: '3.9'
-
 x-default_mysql_setup:
   &default_mysql_setup
   image: mysql${MYSQL_HASH}

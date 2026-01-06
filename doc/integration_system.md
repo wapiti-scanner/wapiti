@@ -94,7 +94,6 @@ To create your own scenario:
 
     Here is a typical [docker-compose.setup.yml](./docker-compose.dummy.yml), you can safely start off by copying and pasting the following yaml (and remove extensions you don't need after) : 
     ```yml
-    version: '3.9'
     x-default_php_setup:
         &default_php_setup
         image: php${PHP_HASH}

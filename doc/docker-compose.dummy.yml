@@ -1,4 +1,3 @@
-version: '3.9'
 # Following the DRY philosophy
 x-default_php_setup:
   &default_php_setup
