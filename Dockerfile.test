@@ -1,13 +1,35 @@
 FROM ubuntu:24.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+  LANG=en_US.UTF-8 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PATH=$PATH:/opt/firefox \
+  OPENSSL_CONF='/etc/wapiti/openssl_conf'
+
+ARG firefox_ver=134.0
+ARG geckodriver_ver=0.35.0
 
 RUN apt update \
- && apt install ca-certificates python3 python3-venv python3-pip php8.3-cli php8.3-xml sslscan -y --no-install-recommends \
- && apt clean -yq \
- && apt autoremove -yq \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
- && truncate -s 0 /var/log/*log
+  && apt install ca-certificates python3 python3-pip python3-setuptools php8.3-cli php8.3-xml sslscan libgtk-3-0 xvfb curl bzip2 -y \
+  --no-install-recommends --no-install-suggests \
+  && apt-get install -y --no-install-recommends --no-install-suggests \
+    `apt-cache depends firefox-esr | awk '/Depends:/{print$2}'` \
+     # additional 'firefox-esl' dependencies which is not in 'depends' list
+     libasound2 libxt6 libxtst6 \
+  && curl -fL -o /tmp/firefox.tar.bz2 \
+     https://ftp.mozilla.org/pub/firefox/releases/${firefox_ver}/linux-x86_64/en-GB/firefox-${firefox_ver}.tar.bz2 \
+  && tar -xjf /tmp/firefox.tar.bz2 -C /tmp/ \
+  && mv /tmp/firefox /opt/firefox \
+  # Download and install geckodriver
+  && curl -fL -o /tmp/geckodriver.tar.gz \
+     https://github.com/mozilla/geckodriver/releases/download/v${geckodriver_ver}/geckodriver-v${geckodriver_ver}-linux64.tar.gz \
+  && tar -xzf /tmp/geckodriver.tar.gz -C /tmp/ \
+  && chmod +x /tmp/geckodriver \
+  && mv /tmp/geckodriver /usr/local/bin/ \
+  && apt clean -yq \
+  && apt autoremove -yq \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
 
 RUN update-ca-certificates
 RUN python3 -c "import sys; print(sys.version)"

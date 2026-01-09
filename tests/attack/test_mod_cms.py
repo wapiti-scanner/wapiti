@@ -1,7 +1,7 @@
 import os
 import sys
 from os.path import join as path_join
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import respx
@@ -11,6 +11,8 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_cms import ModuleCms
+from wapitiCore.attack.cms.mod_magento_enum import fetch_source_files as fetch_source_files_magento, get_root_url
+from wapitiCore.attack.cms.mod_typo3_enum import fetch_source_files as fetch_source_files_typo3
 
 
 # Test no Drupal detected
@@ -478,6 +480,308 @@ async def test_no_prestashop():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_no_magento():
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text="<html><head><title>Vous Etes Perdu ?</title></head><body><h1>Perdu sur l'Internet ?</h1> \
+            <h2>Pas de panique, on va vous aider</h2> \
+            <strong><pre>    * <----- vous &ecirc;tes ici</pre></strong></body></html>"
+        )
+    )
+
+    # Response to check that we have no more false positives
+    respx.get("http://perdu.com/test/file.js").mock(return_value=httpx.Response(200))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert not persister.add_payload.call_count
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_magento_version_not_detected():
+
+    # Response to tell that Magento is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Etes Perdu ?</title></head><body> \
+                        <link href='http://perdu.com/skin/frontend/test/default/test.css'> \
+                        <h1>Perdu sur l'Internet ?</h1></body></html>")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Magento", "versions": [], "categories": ["CMS Magento"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_magento_via_script_src():
+    # Response to tell that Magento is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="<html><head><title>Vous Etes Perdu ?</title></head><body> \
+                    <script src='http//perdu.com/resource/Magento_Theme/test.js'></script> \
+                    <h1>Perdu sur l'Internet ?</h1></body></html>")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Magento", "versions": [], "categories": ["CMS Magento"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_magento_via_cookies():
+    # Response to tell that PrestaShop is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website uses Magento",
+            headers={"Set-Cookie": "X-Magento=testcookie; Path=/; HttpOnly}"})
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "Magento", "versions": [], "categories": ["CMS Magento"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_magento_multi_version_detected():
+    # Sample mocked content from the page
+    mocked_content = (
+        '<html><head><link rel="stylesheet" type="text/css" '
+        'href="http://perdu.com/app/code/Magento/Swatches/view/frontend/web/css/swatches.css">'
+        '</head><body>This website uses Magento magento_opensource = []</body></html>'
+    )
+
+    # Mock async HTTP responses
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(200, content=mocked_content)
+    )
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/magento/")
+    swatches_file = "swatches.css"
+
+    with open(os.path.join(test_directory, swatches_file), errors="ignore") as swatches:
+        data = swatches.read()
+
+    respx.get("http://perdu.com/app/code/Magento/Swatches/view/frontend/web/css/swatches.css").mock(
+        return_value=httpx.Response(200, text=data)
+    )
+
+    # Mocking browser behavior - mock get_session to return a mock session
+    mock_session = AsyncMock()
+    mock_session.get = AsyncMock(return_value=None)
+    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
+    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_session.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 2
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+            )
+            assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
+            assert persister.add_payload.call_args_list[1][1]["info"] == (
+                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+            )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_magento_version_detected():
+    # Mocked content for the test
+    mocked_content = (
+        '<html><head><link href="http://perdu.com/skin/frontend/test/default/test.css">'
+        '<link rel="stylesheet" type="text/css" '
+        'href="http://perdu.com/app/code/Magento/Swatches/view/frontend/web/css/swatches.css">'
+        '</head><body>This website uses Magento magento_opensource = []</body></html>'
+    )
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/magento/")
+    swatches_file = "swatches2.css"
+
+    with open(path_join(test_directory, swatches_file), errors="ignore") as swatches:
+        data = swatches.read()
+
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(200, content=mocked_content)
+    )
+    respx.get("http://perdu.com/app/code/Magento/Swatches/view/frontend/web/css/swatches.css").mock(
+        return_value=httpx.Response(200, text=data)
+    )
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    # Mocking browser behavior - mock get_session to return a mock session
+    mock_session = AsyncMock()
+    mock_session.get = AsyncMock(return_value=None)
+    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
+    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_session.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "magento"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            assert persister.add_payload.call_count == 2
+            assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "Magento", "versions": ["2.2.8"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+            )
+            assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
+            assert persister.add_payload.call_args_list[1][1]["info"] == (
+                '{"name": "Magento", "versions": ["2.2.8"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+            )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_fetch_source_files():
+    test_url = "http://perdu.com/"
+
+    # Sample HTML content with JS and CSS links
+    mocked_content = '''
+    <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="http://perdu.com/static/styles.css">
+            <script src="http://perdu.com/static/script.js"></script>
+        </head>
+        <body>Hello World</body>
+    </html>
+    '''
+
+    # Mock HTTP response for the requested page
+    respx.get(test_url).mock(return_value=httpx.Response(200, content=mocked_content))
+
+    # Mocking browser behavior - mock get_session to return a mock session
+    mock_session = AsyncMock()
+    mock_session.get = AsyncMock(return_value=None)
+    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
+    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_session.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+        # Run the function
+        result = await fetch_source_files_magento(test_url)
+
+        # Expected extracted files
+        expected_files = {
+            "http://perdu.com/static/styles.css",
+            "http://perdu.com/static/script.js"
+        }
+
+        # Assertions
+        assert result == expected_files
+
+
+@pytest.mark.asyncio
+async def test_get_root_url():
+    url = "http://perdu.com/some/path"
+    expected_root = "http://perdu.com/"
+
+    result = get_root_url(url)
+
+    assert result == expected_root
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_prestashop_version_detected():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
@@ -850,6 +1154,481 @@ async def test_spip_no_plugins_403():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "SPIP", "versions": [], "categories": ["CMS SPIP"], "groups": ["Content"]}'
         )
+
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_spip_no_plugins_403():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
+    spip_edited = "CHANGELOG_edited.txt"
+
+    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+        data = spip.read()
+
+    # Response to tell that SPIP is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use SPIP, your_spip_attribute = ''",
+            headers={"composed-by": "SPIP"})
+    )
+
+    # Response for edited changelog.txt
+    respx.get("http://perdu.com/CHANGELOG.txt").mock(return_value=httpx.Response(200, text=data))
+    # Responses for plugin folders
+    respx.get("http://perdu.com/plugins/oembed/").mock(return_value=httpx.Response(403))
+    respx.get("http://perdu.com/plugins-dist/nuage/").mock(return_value=httpx.Response(403))
+
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(403))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 3
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "spip"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "SPIP", "versions": [], "categories": ["CMS SPIP"], "groups": ["Content"]}'
+        )
+
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_version_not_detected():
+    mocked_content = (
+        '<html><head><link rel="stylesheet" type="text/css" '
+        'This website use TYPO3, <img src=typo3conf />">'
+        '</head><body>This website uses Typo3</body></html>'
+    )
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, <img src=typo3conf />")
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, Login page <img src=typo3conf />")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    # Mocking browser behavior
+    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
+            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
+        # Mocked browser behavior
+        mock_get.return_value = None  # Simulate visiting the URL
+        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 1
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "TYPO3", "versions": [], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_via_script_tag():
+    mocked_content = (
+        '<html><head><script src="/typo3conf/ext/some-extension/script.js"></script>'
+        '</head><body>This website uses Typo3<script src="typo3temp/assets/js/main.js"></script></body></html>'
+    )
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='This website use TYPO3, <script src="typo3temp/assets/js/main.js"></script>')
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content='This website use TYPO3, Login page <script src="typo3temp/assets/js/main.js"></script>')
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    # Mocking browser behavior
+    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
+            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
+        # Mocked browser behavior
+        mock_get.return_value = None  # Simulate visiting the URL
+        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 1
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "TYPO3", "versions": [], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            )
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_via_image_svg():
+    mocked_content = (
+        '<html><head><script src="/typo3conf/ext/some-extension/script.js"></script>'
+        '</head><body>This website uses Typo3<script src="typo3temp/assets/js/main.js"></script></body></html>'
+    )
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='Hello World')
+    )
+
+    respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/Images/typo3_orange.svg").mock(
+        return_value=httpx.Response(
+            200,
+            content='image svg typo3')
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    # Mocking browser behavior
+    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
+            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
+        # Mocked browser behavior
+        mock_get.return_value = None  # Simulate visiting the URL
+        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 1
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "TYPO3", "versions": [], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            )
+
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_version_detected():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/typo3/")
+    typo_shims_file = "es-module-shims.js"
+
+    with open(path_join(test_directory, typo_shims_file), errors="ignore") as typo:
+        data = typo.read()
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, <img src=typo3conf />")
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, Login page <img src=typo3conf />")
+    )
+
+    # Response for es-module-shims.js
+    respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/JavaScript/Contrib/es-module-shims.js").mock(return_value=httpx.Response(200, text=data))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "TYPO3", "versions": ["v12.4.0"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[1][1]["module"] == "cms"
+        assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "TYPO3", "versions": ["v12.4.0"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_multi_versions_detected():
+
+    base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
+    test_directory = os.path.join(base_dir, "..", "tests/data/typo3/")
+    require_file = "require.js"
+
+    with open(path_join(test_directory, require_file), errors="ignore") as requirejs:
+        data = requirejs.read()
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, <img src=typo3conf />")
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, Login page <img src=typo3conf />")
+    )
+
+    # Response for require.js
+    respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/JavaScript/Contrib/require.js")\
+        .mock(return_value=httpx.Response(200, text=data))
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 2
+        assert persister.add_payload.call_args_list[0][1]["info"] == (
+            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+        )
+        assert persister.add_payload.call_args_list[1][1]["info"] == (
+            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_extension():
+    mocked_content = (
+        '<html><head><link rel="stylesheet" type="text/css" '
+        'This website use TYPO3, <img src=typo3conf />">'
+        '</head><body>This website uses Typo3</body></html>'
+    )
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, <img src=typo3conf />")
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content="This website use TYPO3, Login page <img src=typo3conf />")
+    )
+
+    respx.get("http://perdu.com/typo3conf/ext/blog/").mock(
+        return_value=httpx.Response(
+            403,
+            content="Forbidden")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
+
+    # Mocking browser behavior
+    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
+            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
+        # Mocked browser behavior
+        mock_get.return_value = None  # Simulate visiting the URL
+        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 2
+            assert persister.add_payload.call_args_list[0][1]["info"] == (
+                '{"name": "TYPO3", "versions": [], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            )
+            assert persister.add_payload.call_args_list[1][1]["info"] == (
+                '{"name": "blog", "versions": [], "categories": ["TYPO3 extension"], "groups": ["Add-ons"]}'
+            )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_typo3_no_extension_403():
+    mocked_content = (
+        '<html><head><meta name="generator" content="TYPO3 CMS 11.5.2">'
+        '<link rel="stylesheet" type="text/css" This website use TYPO3, <img src=typo3conf />">'
+        '</head><body>Hello World</body></html>'
+    )
+
+    # Response to tell that TYPO3 is used
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><meta name="generator" content="TYPO3 CMS 11.5.2"></head><body>hello</body></html>')
+    )
+
+    respx.get("http://perdu.com/typo3/").mock(
+        return_value=httpx.Response(
+            200,
+            content='<html><head><meta name="generator" content="TYPO3 CMS 11.5.2"></head><body>hello</body></html>')
+    )
+
+    respx.get("http://perdu.com/typo3conf/ext/blog/").mock(
+        return_value=httpx.Response(
+            403,
+            content="Forbidden")
+    )
+
+    respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(403))
+
+    # Mocking browser behavior
+    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
+            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
+        # Mocked browser behavior
+        mock_get.return_value = None  # Simulate visiting the URL
+        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+
+        # Mock the persister
+        persister = AsyncMock()
+        persister.get_root_url.return_value = "http://perdu.com/"
+
+        # Setup request and crawler configuration
+        request = Request("http://perdu.com/")
+        request.path_id = 1
+
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+        async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+            options = {"timeout": 10, "level": 2, "tasks": 20, "cms": "typo3"}
+            module = ModuleCms(crawler, persister, options, crawler_configuration)
+
+            # Run the attack
+            await module.attack(request)
+
+            # Assertions for added payloads
+            assert persister.add_payload.call_count == 1
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_fetch_source_files_typo3():
+    base_url = "http://perdu.com/"
+
+    # Mocked HTML content with JS and CSS files
+    mocked_content = '''
+    <html>
+        <head>
+            <script src="/static/js/script1.js"></script>
+            <script src="http://perdu.com/static/js/script2.js"></script>
+            <link rel="stylesheet" href="/static/css/style1.css">
+            <link rel="stylesheet" href="http://perdu.com/static/css/style2.css">
+        </head>
+        <body>Test page</body>
+    </html>
+    '''
+
+    # Mock browser session behavior - mock get_session to return a mock session
+    mock_session = AsyncMock()
+    mock_session.get = AsyncMock(return_value=None)
+    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
+    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_session.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.get_session", return_value=mock_session):
+        # Run the function
+        result = await fetch_source_files_typo3(base_url)
+
+        # Expected extracted files
+        expected_files = {
+            "/static/js/script1.js",
+            "http://perdu.com/static/js/script2.js",
+            "/static/css/style1.css",
+            "http://perdu.com/static/css/style2.css",
+        }
+
+        # Validate output
+        assert result == expected_files
 
 
 @pytest.mark.asyncio
