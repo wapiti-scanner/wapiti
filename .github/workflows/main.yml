@@ -52,7 +52,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install php8.3-cli php8.3-xml sslscan -y --no-install-recommends
+        sudo apt-get install php-cli php-xml sslscan -y --no-install-recommends
         python -m pip install --upgrade pip
         pip install -U setuptools
         pip3 install .[test]
