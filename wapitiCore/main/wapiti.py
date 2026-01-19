@@ -237,7 +237,7 @@ def build_attack_options_from_args(args: Namespace) -> dict:
         attack_options["cms"] = args.cms
 
     if args.modules and "cms" in args.modules and not args.cms:
-        attack_options["cms"] = "drupal,joomla,prestashop,spip,wp"
+        attack_options["cms"] = "drupal,magento,joomla,prestashop,spip,typo3,wp"
 
     if args.wapp_url:
         if not is_mod_wapp_or_update_set(args):

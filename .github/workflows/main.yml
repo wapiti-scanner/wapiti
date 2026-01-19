@@ -58,7 +58,7 @@ jobs:
         sudo apt-get install php8.4-cli php8.4-xml sslscan -y --no-install-recommends
         python -m pip install --upgrade pip
         pip install -U setuptools
-        pip3 install .[test]
+        pip3 install .[test] && playwright install firefox --with-deps
     - name: Test project
       run: |
         pytest

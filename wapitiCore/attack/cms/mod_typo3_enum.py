@@ -25,14 +25,16 @@ from typing import Optional, List, Set, Dict
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from httpx import RequestError
-from wapiti_arsenic import get_session, browsers, services
+from asyncio import TimeoutError
+from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
+from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint_webapp import SoftwareVersionDisclosureFinding
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
-from wapitiCore.main.log import log_blue
+from wapitiCore.main.log import logging, log_blue
 
 MSG_NO_TYPO3 = "No TYPO3 Detected"
 
@@ -61,22 +63,50 @@ async def get_common_versions(json_data: Dict, list_hashes: List[str]) -> list[s
     return list(common_versions)
 
 
-async def fetch_source_files(url):
+async def playwright_get_content(url: str, page: Page, browser: Browser, crawler_configuration: CrawlerConfiguration) -> str:
+    html = ""
+    try:
+        await page.goto(
+            url,
+            timeout = crawler_configuration.timeout * 1000,
+            wait_until="load"
+        )
+
+        html = await page.content()
+    except PlaywrightError as exception:
+        print("error")
+        logging.exception(exception)
+    finally:
+        await browser.close()
+        return html
+
+
+async def fetch_source_files(url: str, crawler_configuration: CrawlerConfiguration) -> set:
     my_files_list = set()
     url =  urljoin(url, "typo3/")
-    browser = browsers.Firefox(**{
-        'moz:firefoxOptions': {
-            'args': ['-headless', '-log', 'error', '-devtools']
-        }
-    })
+    proxy_settings = None
+    if crawler_configuration.proxy:
+        proxy_settings = {"server": crawler_configuration.proxy}
 
     try:
         # Initialize a headless browser session to extract source files
-        async with get_session(services.Geckodriver(log_file=os.devnull), browser) as headless_client:
-            await headless_client.get(url)
-            content = await headless_client.get_page_source()  # Fetch the fully rendered page content
+        async with async_playwright() as pw:
+            browser = await pw.firefox.launch(
+                headless=True,
+                proxy=proxy_settings,
+                firefox_user_prefs={
+                    "network.proxy.allow_hijacking_localhost": True,
+                    "devtools.jsonview.enabled": False,
+                }
+            )
+            context = await browser.new_context(
+                ignore_https_errors=True, 
+                user_agent=crawler_configuration.user_agent
+            )
+            page = await context.new_page()
 
-            soup = BeautifulSoup(content, "html.parser")
+            html = await playwright_get_content(url, page, browser, crawler_configuration)
+            soup = BeautifulSoup(html, "html.parser")
 
             # Collect JS and CSS file links
             js_files = {script.get('src') for script in soup.find_all('script') if script.get('src')}
@@ -84,6 +114,15 @@ async def fetch_source_files(url):
 
             my_files_list.update(js_files)
             my_files_list.update(css_files)
+
+    except (PlaywrightError, FileNotFoundError, TimeoutError) as exception:
+            # Playwright browser may be missing, etc
+            logging.exception(exception)
+            logging.warning(
+                "Could not run headless browser. "
+                "Make sure playwright is installed (`pip install playwright`) "
+                "and browsers are installed (`playwright install`)."
+            )
 
     except Exception as e:
         print(f"An error occurred while fetching JS files: {e}")
@@ -141,6 +180,7 @@ class ModuleTYPO3Enum(CommonCMS):
 
         return installed_extensions
 
+
     async def check_typo3(self, url):
 
         request = Request(f'{url}', 'GET')
@@ -190,7 +230,7 @@ class ModuleTYPO3Enum(CommonCMS):
 
             if not self.versions:
                 list_hashes = []
-                list_paths = await fetch_source_files(request.url)
+                list_paths = await fetch_source_files(request.url, self.crawler_configuration)
                 for path in list_paths:
                     hash_val, path = await self.get_url_hash(request.url, path)
                     list_hashes.append(hash_val)
