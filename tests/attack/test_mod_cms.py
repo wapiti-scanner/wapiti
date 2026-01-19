@@ -636,14 +636,8 @@ async def test_magento_multi_version_detected():
         return_value=httpx.Response(200, text=data)
     )
 
-    # Mocking browser behavior - mock get_session to return a mock session
-    mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=None)
-    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
-    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-    mock_session.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_magento_enum.playwright_get_content", return_value=mocked_content):
         # Mock the persister
         persister = AsyncMock()
         persister.get_root_url.return_value = "http://perdu.com/"
@@ -671,6 +665,7 @@ async def test_magento_multi_version_detected():
                 '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups": ["Content"]}'
             )
 
+
 @pytest.mark.asyncio
 @respx.mock
 async def test_magento_version_detected():
@@ -696,14 +691,8 @@ async def test_magento_version_detected():
     )
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    # Mocking browser behavior - mock get_session to return a mock session
-    mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=None)
-    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
-    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-    mock_session.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_magento_enum.playwright_get_content", return_value=mocked_content):
         # Mock the persister
         persister = AsyncMock()
         persister.get_root_url.return_value = "http://perdu.com/"
@@ -750,16 +739,11 @@ async def test_fetch_source_files():
     # Mock HTTP response for the requested page
     respx.get(test_url).mock(return_value=httpx.Response(200, content=mocked_content))
 
-    # Mocking browser behavior - mock get_session to return a mock session
-    mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=None)
-    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
-    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-    mock_session.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("wapitiCore.attack.cms.mod_magento_enum.get_session", return_value=mock_session):
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_magento_enum.playwright_get_content", return_value=mocked_content):
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         # Run the function
-        result = await fetch_source_files_magento(test_url)
+        result = await fetch_source_files_magento(test_url, crawler_configuration)
 
         # Expected extracted files
         expected_files = {
@@ -779,6 +763,7 @@ async def test_get_root_url():
     result = get_root_url(url)
 
     assert result == expected_root
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -1229,12 +1214,8 @@ async def test_typo3_version_not_detected():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    # Mocking browser behavior
-    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
-            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
-        # Mocked browser behavior
-        mock_get.return_value = None  # Simulate visiting the URL
-        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
 
         # Mock the persister
         persister = AsyncMock()
@@ -1281,12 +1262,8 @@ async def test_typo3_via_script_tag():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    # Mocking browser behavior
-    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
-            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
-        # Mocked browser behavior
-        mock_get.return_value = None  # Simulate visiting the URL
-        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
 
         # Mock the persister
         persister = AsyncMock()
@@ -1333,12 +1310,8 @@ async def test_typo3_via_image_svg():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    # Mocking browser behavior
-    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
-            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
-        # Mocked browser behavior
-        mock_get.return_value = None  # Simulate visiting the URL
-        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
 
         # Mock the persister
         persister = AsyncMock()
@@ -1501,12 +1474,8 @@ async def test_typo3_extension():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
-    # Mocking browser behavior
-    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
-            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
-        # Mocked browser behavior
-        mock_get.return_value = None  # Simulate visiting the URL
-        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
 
         # Mock the persister
         persister = AsyncMock()
@@ -1564,12 +1533,8 @@ async def test_typo3_no_extension_403():
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(403))
 
-    # Mocking browser behavior
-    with patch("wapiti_arsenic.session.Session.get", new_callable=AsyncMock) as mock_get, \
-            patch("wapiti_arsenic.session.Session.get_page_source", new_callable=AsyncMock) as mock_get_page_source:
-        # Mocked browser behavior
-        mock_get.return_value = None  # Simulate visiting the URL
-        mock_get_page_source.return_value = mocked_content  # HTML content returned by `get_page_source`
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
 
         # Mock the persister
         persister = AsyncMock()
@@ -1608,16 +1573,11 @@ async def test_fetch_source_files_typo3():
     </html>
     '''
 
-    # Mock browser session behavior - mock get_session to return a mock session
-    mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=None)
-    mock_session.get_page_source = AsyncMock(return_value=mocked_content)
-    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-    mock_session.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("wapitiCore.attack.cms.mod_typo3_enum.get_session", return_value=mock_session):
+    # Mocking browser behavior - mock playwright_get_content to return a mock page content
+    with patch("wapitiCore.attack.cms.mod_typo3_enum.playwright_get_content", return_value=mocked_content):
+        crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
         # Run the function
-        result = await fetch_source_files_typo3(base_url)
+        result = await fetch_source_files_typo3(base_url, crawler_configuration)
 
         # Expected extracted files
         expected_files = {
