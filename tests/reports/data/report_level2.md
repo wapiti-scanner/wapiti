@@ -17,6 +17,7 @@
 | CRLF Injection | 0 |
 | Content Security Policy Configuration | 0 |
 | Cross Site Request Forgery | 0 |
+| CVE-2024-55591 | 0 |
 | Potentially dangerous file | 0 |
 | Command execution | 0 |
 | Path Traversal | 0 |
@@ -52,7 +53,7 @@
 
 ### Reflected Cross Site Scripting
 **Info**: This is dope
-**WSTG code**: None
+**WSTG code**: ['WSTG-INPV-01']
 **Involved parameter**: foo
 
 **Evil request**:
@@ -74,6 +75,8 @@ curl "http://perdu.com/riri?foo=bar"
 
 | Category | Count |
 |---|---|
+| Internal Server Error | 0 |
+| Resource consumption | 0 |
 
 ---
 
@@ -82,6 +85,10 @@ curl "http://perdu.com/riri?foo=bar"
 
 | Category | Count |
 |---|---|
+| Review Webserver Metafiles for Information Leakage | 0 |
+| Fingerprint web technology | 0 |
+| HTTP Methods | 0 |
+| TLS/SSL misconfigurations | 0 |
 
 ---
 

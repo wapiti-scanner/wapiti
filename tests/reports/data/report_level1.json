@@ -7,7 +7,9 @@
         "OWASP: Review Old Backup and Unreferenced Files for Sensitive Information": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information.html",
         "CWE-530: Exposure of Backup File to an Unauthorized Control Sphere": "https://cwe.mitre.org/data/definitions/530.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-04"
+      ]
     },
     "Cleartext Submission of Password": {
       "desc": "A password was submitted to the application using an unencrypted HTTP connection. This makes the password vulnerable to eavesdropping by attackers on the network, potentially leading to account compromise or further attacks.",
@@ -17,7 +19,9 @@
         "OWASP: Transport Layer Protection": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/01-Testing_for_Credentials_Transported_over_an_Encrypted_Channel",
         "CWE-319: Cleartext Transmission of Sensitive Information": "https://cwe.mitre.org/data/definitions/319.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-07"
+      ]
     },
     "Weak credentials": {
       "desc": "The web application is using either default credentials or weak passwords that can be found in well-known passwords lists.",
@@ -27,7 +31,9 @@
         "CWE-521: Weak Password Requirements": "https://cwe.mitre.org/data/definitions/521.html",
         "OWASP: Testing for Weak Password Policy": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/07-Testing_for_Weak_Password_Policy"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-ATHN-07"
+      ]
     },
     "CRLF Injection": {
       "desc": "The term CRLF refers to Carriage Return (ASCII 13, \\r) Line Feed (ASCII 10, \\n). A CRLF Injection attack occurs when a user manages to submit a CRLF into an application. This is most commonly done by modifying an HTTP parameter or URL.",
@@ -38,7 +44,9 @@
         "CWE-93: Improper Neutralization of CRLF Sequences ('CRLF Injection')": "https://cwe.mitre.org/data/definitions/93.html",
         "OWASP: Testing for HTTP Splitting Smuggling": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/15-Testing_for_HTTP_Splitting_Smuggling"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-15"
+      ]
     },
     "Content Security Policy Configuration": {
       "desc": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks.",
@@ -49,7 +57,10 @@
         "OWASP: How to do Content Security Policy (PDF)": "https://owasp.org/www-pdf-archive/2019-02-22_-_How_do_I_Content_Security_Policy_-_Print.pdf",
         "OWASP: Content Security Policy": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/12-Test_for_Content_Security_Policy"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-12",
+        "OSHP-Content-Security-Policy"
+      ]
     },
     "Cross Site Request Forgery": {
       "desc": "Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web application in which they're currently authenticated.",
@@ -59,7 +70,20 @@
         "OWASP: Cross-Site Request Forgery Prevention Cheat Sheet": "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html",
         "CWE-352: Cross-Site Request Forgery (CSRF)": "https://cwe.mitre.org/data/definitions/352.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-SESS-05"
+      ]
+    },
+    "CVE-2024-55591": {
+      "desc": "An Authentication Bypass Using an Alternate Path or Channel vulnerability [CWE-288] affecting FortiOS version 7.0.0 through 7.0.16 and FortiProxy version 7.0.0 through 7.0.19 and 7.2.0 through 7.2.12 . The vulnerability allows a remote attacker to gain super-admin privileges via crafted requests to Node.js websocket module.",
+      "sol": "Upgrade FortiOS 7.0 to 7.0.17 or above . Upgrade FortiProxy 7.0 to 7.0.20 or above. Upgrade FortiProxy 7.2 to 7.2.13 or above",
+      "ref": {
+        "CWE-288: Authentication Bypass Using an Alternate Path or Channel": "https://cwe.mitre.org/data/definitions/288.html"
+      },
+      "wstg": [
+        "WSTG-ATHN-04",
+        "WSTG-INPV-12"
+      ]
     },
     "Potentially dangerous file": {
       "desc": "A file with potential vulnerabilities has been found on the website.",
@@ -68,7 +92,10 @@
         "Mitre: Search details of a CVE": "https://cve.mitre.org/cve/search_cve_list.html",
         "OWASP: Test Network Infrastructure Configuration": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/01-Test_Network_Infrastructure_Configuration"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-04",
+        "WSTG-CONF-01"
+      ]
     },
     "Command execution": {
       "desc": "This attack consists in executing system commands on the server. The attacker tries to inject this commands in the request parameters.",
@@ -77,7 +104,9 @@
         "OWASP: Command Injection": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/12-Testing_for_Command_Injection",
         "CWE-78: Improper Neutralization of Special Elements used in an OS Command (OS Command Injection)": "https://cwe.mitre.org/data/definitions/78.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-12"
+      ]
     },
     "Path Traversal": {
       "desc": "This attack is known as Path or Directory Traversal. Its aim is the access to files and directories that are stored outside the web root folder. The attacker tries to explore the directories stored in the web server. The attacker uses some techniques, for instance, the manipulation of variables that reference files with 'dot-dot-slash (../)' sequences and its variations to move up to root directory to navigate through the file system.",
@@ -87,7 +116,9 @@
         "Acunetix: What is a Directory Traversal attack?": "https://www.acunetix.com/websitesecurity/directory-traversal/",
         "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')": "https://cwe.mitre.org/data/definitions/22.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-ATHZ-01"
+      ]
     },
     "Fingerprint web application framework": {
       "desc": "The version of a web application framework can be identified due to the presence of its specific fingerprints.",
@@ -95,7 +126,9 @@
       "ref": {
         "OWASP: Fingerprint Web Application Framework": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INFO-08"
+      ]
     },
     "Fingerprint web server": {
       "desc": "The version of a web server can be identified due to the presence of its specific fingerprints.",
@@ -103,7 +136,9 @@
       "ref": {
         "OWASP: Fingerprint Web Server": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INFO-02"
+      ]
     },
     "Htaccess Bypass": {
       "desc": "Htaccess files are used to restrict access to some files or HTTP method. In some case it may be possible to bypass this restriction and access the files.",
@@ -113,7 +148,9 @@
         "CWE-538: Insertion of Sensitive Information into Externally-Accessible File or Directory": "https://cwe.mitre.org/data/definitions/538.html",
         "OWASP: HTTP Methods": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-06"
+      ]
     },
     "HTML Injection": {
       "desc": "HTML injection is a type of injection vulnerability that occurs when a user is able to control an input point and is able to inject arbitrary HTML code into a vulnerable web page. This vulnerability can allow the attacker to modify the page content seen by the victims.",
@@ -123,7 +160,9 @@
         "IMPERVA: HTML Injection": "https://www.imperva.com/learn/application-security/html-injection/",
         "HackTricks: Dangling Markup - HTML scriptless injection": "https://book.hacktricks.xyz/pentesting-web/dangling-markup-html-scriptless-injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CLNT-03"
+      ]
     },
     "Clickjacking Protection": {
       "desc": "Clickjacking is a technique that tricks a user into clicking something different from what the user perceives, potentially revealing confidential information or taking control of their computer.",
@@ -132,7 +171,9 @@
         "OWASP: Clickjacking": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/09-Testing_for_Clickjacking",
         "KeyCDN: Preventing Clickjacking": "https://www.keycdn.com/support/prevent-clickjacking"
       },
-      "wstg": null
+      "wstg": [
+        "OSHP-X-Frame-Options"
+      ]
     },
     "HTTP Strict Transport Security (HSTS)": {
       "desc": "HSTS is a web security policy mechanism that helps to protect websites against man-in-the-middle attacks such as protocol downgrade attacks and cookie hijacking.",
@@ -141,7 +182,10 @@
         "OWASP: HTTP Strict Transport Security": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/07-Test_HTTP_Strict_Transport_Security",
         "KeyCDN: Enabling HSTS": "https://www.keycdn.com/support/hsts"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-07",
+        "OSHP-HTTP-Strict-Transport-Security"
+      ]
     },
     "MIME Type Confusion": {
       "desc": "MIME type confusion can occur when a browser interprets files as a different type than intended, which could lead to security vulnerabilities like cross-site scripting (XSS).",
@@ -150,7 +194,9 @@
         "OWASP: MIME Sniffing": "https://owasp.org/www-community/attacks/MIME_sniffing",
         "KeyCDN: Preventing MIME Type Sniffing": "https://www.keycdn.com/support/preventing-mime-type-sniffing"
       },
-      "wstg": null
+      "wstg": [
+        "OSHP-X-Content-Type-Options"
+      ]
     },
     "HttpOnly Flag cookie": {
       "desc": "HttpOnly is an additional flag included in a Set-Cookie HTTP response header. Using the HttpOnly flag when generating a cookie helps mitigate the risk of client side script accessing the protected cookie (if the browser supports it).",
@@ -159,7 +205,9 @@
         "OWASP: Testing for Cookies Attributes": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes.html",
         "OWASP: HttpOnly": "https://owasp.org/www-community/HttpOnly"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-SESS-02"
+      ]
     },
     "Unencrypted Channels": {
       "desc": "Sensitive data must be protected when it is transmitted through the network.",
@@ -168,7 +216,9 @@
         "Testing for Sensitive Information Sent via Unencrypted Channels": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/03-Testing_for_Sensitive_Information_Sent_via_Unencrypted_Channels",
         "Testing for Weak Transport Layer Security": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/01-Testing_for_Weak_Transport_Layer_Security"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CRYP-03"
+      ]
     },
     "Inconsistent Redirection": {
       "desc": "An HTTP 3xx redirection response should typically contain only minimal content (or none), as clients are expected to follow the Location header. However, this response also contains HTML content (such as links or forms). This may confuse clients, expose unintended information, or allow attackers to craft malicious redirections.",
@@ -178,7 +228,9 @@
         "MDN: HTTP Redirections": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections",
         "WSTG: Review Webpage Content for Information Leakage": "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/05-Review_Webpage_Content_for_Information_Leakage"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INFO-05"
+      ]
     },
     "Information Disclosure - Full Path": {
       "desc": "The application response discloses full system paths. This information can help attackers understand the server environment, directory structure, and operating system, which can facilitate further attacks.",
@@ -188,7 +240,9 @@
         "CWE-209: Generation of Error Message Containing Sensitive Information": "https://cwe.mitre.org/data/definitions/209.html",
         "WASC-13: Information Leakage": "http://projects.webappsec.org/w/page/13246936/Information%20Leakage"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-ERRH-01"
+      ]
     },
     "LDAP Injection": {
       "desc": "LDAP Injection is an attack used to exploit web based applications that construct LDAP statements based on user input. When an application fails to properly sanitize user input, it\u2019s possible to modify LDAP statements using a local proxy. This could result in the execution of arbitrary commands such as granting permissions to unauthorized queries.",
@@ -198,7 +252,9 @@
         "LDAP Injection Prevention Cheat Sheet": "https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html",
         "CWE-90: Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')": "https://cwe.mitre.org/data/definitions/90.html"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-06"
+      ]
     },
     "Log4Shell": {
       "desc": "Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled.",
@@ -208,7 +264,9 @@
         "NITRE: CVE-2021-44228": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228",
         "OWASP: Code Injection": "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11-Testing_for_Code_Injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-11"
+      ]
     },
     "NS takeover": {
       "desc": "A DNS NS record points to a non existing domain that an attacker can take control of, allowing them to hijack the entire DNS zone.",
@@ -218,7 +276,9 @@
         "A Guide to DNS Takeovers: The Misunderstood Cousin of Subdomain Takeovers": "https://projectdiscovery.io/blog/guide-to-dns-takeovers",
         "MasterCard DNS Error Went Unnoticed for Years": "https://krebsonsecurity.com/2025/01/mastercard-dns-error-went-unnoticed-for-years/"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-10"
+      ]
     },
     "Open Redirect": {
       "desc": "Unvalidated redirects and forwards are possible when a web application accepts untrusted input that could cause the web application to redirect the request to a URL contained within untrusted input. By modifying untrusted URL input to a malicious site, an attacker may successfully launch a phishing scam and steal user credentials.",
@@ -229,7 +289,9 @@
         "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')": "https://cwe.mitre.org/data/definitions/601.html",
         "OWASP: Client-side URL Redirect": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/04-Testing_for_Client-side_URL_Redirect"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CLNT-04"
+      ]
     },
     "Reflected Cross Site Scripting": {
       "desc": "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications which allow code injection by malicious web users into the web pages viewed by other users. Examples of such code include HTML code and client-side scripts.",
@@ -240,7 +302,9 @@
         "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')": "https://cwe.mitre.org/data/definitions/79.html",
         "OWASP: Reflected Cross Site Scripting": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/01-Testing_for_Reflected_Cross_Site_Scripting"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-01"
+      ]
     },
     "Secure Flag cookie": {
       "desc": "The secure flag is an option that can be set by the application server when sending a new cookie to the user within an HTTP Response. The purpose of the secure flag is to prevent cookies from being observed by unauthorized parties due to the transmission of a the cookie in clear text.",
@@ -249,7 +313,9 @@
         "OWASP: Testing for Cookies Attributes": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes.html",
         "OWASP: Secure Cookie Attribute": "https://owasp.org/www-community/controls/SecureCookieAttribute"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-SESS-02"
+      ]
     },
     "Spring4Shell": {
       "desc": "A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding. The specific exploit requires the application to run on Tomcat as a WAR deployment.If the application is deployed as a Spring Boot executable jar, i.e. the default,it is not vulnerable to the exploit. However, the nature of the vulnerability is more general,and there may be other ways to exploit it.",
@@ -260,7 +326,9 @@
         "MITRE: CVE-2022-22965": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22965",
         "OWASP: Code Injection": "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11-Testing_for_Code_Injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-11"
+      ]
     },
     "SQL Injection": {
       "desc": "SQL injection vulnerabilities allow an attacker to alter the queries executed on the backend database. An attacker may then be able to extract or modify information stored in the database or even escalate his privileges on the system. Blind SQL injection is a technique that exploits a vulnerability occurring in the database of an application. This kind of vulnerability is harder to detect than basic SQL injections because no error message will be displayed on the webpage.",
@@ -271,7 +339,9 @@
         "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')": "https://cwe.mitre.org/data/definitions/89.html",
         "OWASP: Blind SQL Injection": "https://owasp.org/www-community/attacks/Blind_SQL_Injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-05"
+      ]
     },
     "TLS/SSL misconfigurations": {
       "desc": "The TLS protocol aims primarily to provide privacy and data integrity between two or more communicating computer applications. Over the years numerous vulnerabilities have been discovered in some SSL/TLS version or specific ciphers making the integrity of the communications at risk (eavesdropping, alteration...)",
@@ -284,7 +354,9 @@
         "Trail of Bits: What Application Developers Need To Know About TLS Early Data (0RTT)": "https://blog.trailofbits.com/2019/03/25/what-application-developers-need-to-know-about-tls-early-data-0rtt/",
         "OWASP: Weak SSL TLS Ciphers Insufficient Transport Layer Protection": "https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/01-Testing_for_Weak_SSL_TLS_Ciphers_Insufficient_Transport_Layer_Protection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CRYP-01"
+      ]
     },
     "Server Side Request Forgery": {
       "desc": "The target application may have functionality for importing data from a URL, publishing data to a URL or otherwise reading data from a URL that can be tampered with.",
@@ -296,7 +368,9 @@
         "CWE-918: Server-Side Request Forgery (SSRF)": "https://cwe.mitre.org/data/definitions/918.html",
         "OWASP: Server-Side Request Forgery": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/19-Testing_for_Server-Side_Request_Forgery"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-19"
+      ]
     },
     "Stored HTML Injection": {
       "desc": "HTML injection is a type of injection vulnerability that occurs when a user is able to control an input point and is able to inject arbitrary HTML code into a vulnerable web page. This vulnerability can allow the attacker to modify the page content seen by the victims.",
@@ -306,7 +380,9 @@
         "IMPERVA: HTML Injection": "https://www.imperva.com/learn/application-security/html-injection/",
         "HackTricks: Dangling Markup - HTML scriptless injection": "https://book.hacktricks.xyz/pentesting-web/dangling-markup-html-scriptless-injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CLNT-03"
+      ]
     },
     "Stored Cross Site Scripting": {
       "desc": "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications which allow code injection by malicious web users into the web pages viewed by other users. Examples of such code include HTML code and client-side scripts.",
@@ -317,7 +393,9 @@
         "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')": "https://cwe.mitre.org/data/definitions/79.html",
         "OWASP: Stored Cross Site Scripting": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/02-Testing_for_Stored_Cross_Site_Scripting"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-02"
+      ]
     },
     "Subdomain takeover": {
       "desc": "A DNS CNAME record points to a non existing domain or to a content that an attacker can take control of.",
@@ -327,7 +405,9 @@
         "Can I take over XYZ? \u2014 a list of services and how to claim (sub)domains with dangling DNS records.": "https://github.com/EdOverflow/can-i-take-over-xyz",
         "OWASP: Subdomain Takeover": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/10-Test_for_Subdomain_Takeover"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-CONF-10"
+      ]
     },
     "Blind SQL Injection": {
       "desc": "Blind SQL injection is a technique that exploits a vulnerability occurring in the database of an application. This kind of vulnerability is harder to detect than basic SQL injections because no error message will be displayed on the webpage.",
@@ -338,7 +418,9 @@
         "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')": "https://cwe.mitre.org/data/definitions/89.html",
         "OWASP: SQL Injection": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-INPV-05"
+      ]
     },
     "Unrestricted File Upload": {
       "desc": "File upload vulnerabilities are when a web server allows users to upload files to its filesystem without sufficiently validating things like their name, type, contents, or size. Failing to properly enforce restrictions on these could allow an attacker to upload potentially dangerous files. This could even include server-side script files that enable remote code execution.",
@@ -349,13 +431,70 @@
         "CWE-434: Unrestricted Upload of File with Dangerous Type": "https://cwe.mitre.org/data/definitions/434.html",
         "OWASP: Test Upload of Unexpected File Types": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/10-Business_Logic_Testing/08-Test_Upload_of_Unexpected_File_Types"
       },
-      "wstg": null
+      "wstg": [
+        "WSTG-BUSL-08"
+      ]
     },
     "Vulnerable software": {
       "desc": "The detected software in its installed version is known to be vulnerable to one or more vulnerabilities.",
       "sol": "Update the software to its latest version or applied security patches.",
       "ref": {},
-      "wstg": null
+      "wstg": []
+    },
+    "Internal Server Error": {
+      "desc": "An error occurred on the server's side, preventing it to process the request. It may be the sign of a vulnerability.",
+      "sol": "More information about the error should be found in the server logs.",
+      "ref": {
+        "Wikipedia: List of 5xx HTTP status codes": "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error",
+        "OWASP: Improper Error Handling": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling"
+      },
+      "wstg": [
+        "WSTG-ERRH-01"
+      ]
+    },
+    "Resource consumption": {
+      "desc": "It took an abnormal time to the server to respond to a query. An attacker might leverage this kind of weakness to overload the server.",
+      "sol": "The involved script is maybe using the server resources (CPU, memory, network, file access...) in a non-efficient way.",
+      "ref": {
+        "CWE-405: Asymmetric Resource Consumption (Amplification)": "https://cwe.mitre.org/data/definitions/405.html",
+        "CWE-400: Uncontrolled Resource Consumption": "https://cwe.mitre.org/data/definitions/400.html",
+        "OWASP: Improper Error Handling": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling"
+      },
+      "wstg": [
+        "WSTG-ERRH-01"
+      ]
+    },
+    "Review Webserver Metafiles for Information Leakage": {
+      "desc": "Test various metadata files for information leakage of the web application\u2019s path(s), or functionality",
+      "sol": "This is only for informational purposes.",
+      "ref": {
+        "OWASP: Review Webserver Metafiles for Information Leakage": "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/03-Review_Webserver_Metafiles_for_Information_Leakage"
+      },
+      "wstg": [
+        "WSTG-INFO-03"
+      ]
+    },
+    "Fingerprint web technology": {
+      "desc": "The use of a web technology can be deducted due to the presence of its specific fingerprints.",
+      "sol": "This is only for informational purposes.",
+      "ref": {
+        "OWASP: Fingerprint Web Server": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server.html",
+        "OWASP: Fingerprint Web Application Framework": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework.html"
+      },
+      "wstg": [
+        "WSTG-INFO-02",
+        "WSTG-INFO-08"
+      ]
+    },
+    "HTTP Methods": {
+      "desc": "While GET and POST are by far the most common methods that are used to access information provided by a web server, HTTP allows several other (and somewhat less known) methods. Some of these can be used for nefarious purposes if the web server is misconfigured.",
+      "sol": "This is only for informational purposes.",
+      "ref": {
+        "OWASP: HTTP Methods": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"
+      },
+      "wstg": [
+        "WSTG-CONF-06"
+      ]
     }
   },
   "vulnerabilities": {
@@ -365,6 +504,7 @@
     "CRLF Injection": [],
     "Content Security Policy Configuration": [],
     "Cross Site Request Forgery": [],
+    "CVE-2024-55591": [],
     "Potentially dangerous file": [],
     "Command execution": [],
     "Path Traversal": [],
@@ -394,7 +534,9 @@
         "module": "xss",
         "http_request": "GET /riri?foo=bar HTTP/1.1",
         "curl_command": "curl \"http://perdu.com/riri?foo=bar\"",
-        "wstg": null,
+        "wstg": [
+          "WSTG-INPV-01"
+        ],
         "detail": {
           "response": {
             "status_code": 200,
@@ -425,8 +567,16 @@
     "Unrestricted File Upload": [],
     "Vulnerable software": []
   },
-  "anomalies": {},
-  "additionals": {},
+  "anomalies": {
+    "Internal Server Error": [],
+    "Resource consumption": []
+  },
+  "additionals": {
+    "Review Webserver Metafiles for Information Leakage": [],
+    "Fingerprint web technology": [],
+    "HTTP Methods": [],
+    "TLS/SSL misconfigurations": []
+  },
   "infos": {
     "target": "http://perdu.com",
     "date": "Thu, 01 Jan 1970 00:00:00 +0000",

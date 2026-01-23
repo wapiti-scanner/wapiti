@@ -1,2 +1,2 @@
 "category","level","description","method","parameter","url","body","referer","wstg","auth","module"
-"Reflected Cross Site Scripting",1,"This is dope","GET","foo","http://perdu.com/riri?foo=bar","","","","","xss"
+"Reflected Cross Site Scripting",1,"This is dope","GET","foo","http://perdu.com/riri?foo=bar","","","['WSTG-INPV-01']","","xss"
