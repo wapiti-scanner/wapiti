@@ -62,6 +62,12 @@
                     </tr>
                     <tr>
                         <td class="small">
+                            CVE-2024-55591
+                        </td>
+                        <td class="small text-centered">0</td>
+                    </tr>
+                    <tr>
+                        <td class="small">
                             Potentially dangerous file
                         </td>
                         <td class="small text-centered">0</td>
@@ -170,7 +176,7 @@
                     </tr>
                     <tr>
                         <td class="small">
-                            <a href="#vuln_type_24">Reflected Cross Site Scripting</a>
+                            <a href="#vuln_type_25">Reflected Cross Site Scripting</a>
                         </td>
                         <td class="small text-centered">1</td>
                     </tr>
@@ -280,7 +286,7 @@
         </table>
         <hr />
         <div id="details">
-                <h3 id="vuln_type_24">Reflected Cross Site Scripting</h3>
+                <h3 id="vuln_type_25">Reflected Cross Site Scripting</h3>
                 <dl>
                     <dt>Description</dt>
                     <dd>Cross-site scripting (XSS) is a type of computer security vulnerability typically found in web applications which allow code injection by malicious web users into the web pages viewed by other users. Examples of such code include HTML code and client-side scripts.</dd>
@@ -289,25 +295,25 @@
                     <div class="tab-container">
                         <h4><span class="severity severity-low"></span> Vulnerability found in /riri</h4>
                         <nav class="tab-nav">
-                            <a href="#tab-vuln-24-0-1" class="tab-link active">Description</a>
-                            <a href="#tab-vuln-24-0-2" class="tab-link">HTTP Request</a>
-                            <a href="#tab-vuln-24-0-4" class="tab-link">cURL command line</a>
-                            <a href="#tab-vuln-24-0-5" class="tab-link">WSTG Code</a>
+                            <a href="#tab-vuln-25-0-1" class="tab-link active">Description</a>
+                            <a href="#tab-vuln-25-0-2" class="tab-link">HTTP Request</a>
+                            <a href="#tab-vuln-25-0-4" class="tab-link">cURL command line</a>
+                            <a href="#tab-vuln-25-0-5" class="tab-link">WSTG Code</a>
                         </nav>
-                        <section id="tab-vuln-24-0-1" class="tab-content" style="min-height: 124px;">
+                        <section id="tab-vuln-25-0-1" class="tab-content" style="min-height: 124px;">
                             <pre>This is dope</pre>
                         </section>
-                        <section id="tab-vuln-24-0-2" class="tab-content" style="min-height: 124px; display: none;">
+                        <section id="tab-vuln-25-0-2" class="tab-content" style="min-height: 124px; display: none;">
                             <pre style="white-space: normal;">
                                     GET /riri?foo=bar HTTP/1.1
                                     <br>
                             </pre>
                         </section>
-                        <section id="tab-vuln-24-0-4" class="tab-content" style="min-height: 124px; display: none;">
+                        <section id="tab-vuln-25-0-4" class="tab-content" style="min-height: 124px; display: none;">
                             <pre>curl &#34;http://perdu.com/riri?foo=bar&#34;</pre>
                         </section>
-                        <section id="tab-vuln-24-0-5" class="tab-content" style="min-height: 124px; display: none;">
-                            <pre>None</pre>
+                        <section id="tab-vuln-25-0-5" class="tab-content" style="min-height: 124px; display: none;">
+                            <pre>[&#39;WSTG-INPV-01&#39;]</pre>
                         </section>
                     </div>
 
@@ -348,7 +354,7 @@
                             <pre>curl &#34;http://perdu.com/fifi&#34;</pre>
                         </section>
                         <section id="tab-anom-0-0-5" class="tab-content" style="min-height: 124px; display: none;">
-                            <pre>None</pre>
+                            <pre>[&#39;WSTG-ERRH-01&#39;]</pre>
                         </section>
                     </div>
 
@@ -387,7 +393,7 @@
                             <pre>curl &#34;http://perdu.com/?foo=bar&#34;</pre>
                         </section>
                         <section id="tab-addition-1-0-5" class="tab-content" style="min-height: 124px; display: none;">
-                            <pre>None</pre>
+                            <pre>[&#39;WSTG-INFO-02&#39;, &#39;WSTG-INFO-08&#39;]</pre>
                         </section>
                     </div>
                 <dl><dt>Solutions</dt><dd>This is only for informational purposes.</dd></dl>

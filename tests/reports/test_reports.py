@@ -70,7 +70,8 @@ def test_reports(report_format):
         request=request,
         parameter="foo",
         info="This is dope",
-        module="xss"
+        module="xss",
+        wstg=["WSTG-INPV-01"]
     )
 
     request = Request("http://perdu.com/fifi")
@@ -80,7 +81,8 @@ def test_reports(report_format):
         request=request,
         parameter=None,
         info="This is the way",
-        module="xss"
+        module="xss",
+        wstg=["WSTG-ERRH-01"]
     )
 
     request = Request("http://perdu.com/?foo=bar")
@@ -90,7 +92,8 @@ def test_reports(report_format):
         request=request,
         parameter="foo",
         info="loulou",
-        module="wapp"
+        module="wapp",
+        wstg=["WSTG-INFO-02", "WSTG-INFO-08"]
     )
 
     if REGENERATE_FIXTURES:
@@ -179,6 +182,24 @@ def test_detailed_reports(report_format, level):
             vul.wstg_code()
         )
 
+    for anomaly in anomalies:
+        report_gen.add_anomaly_type(
+            anomaly.name(),
+            anomaly.description(),
+            anomaly.solution(),
+            flatten_references(anomaly.references()),
+            anomaly.wstg_code()
+        )
+
+    for additional in additionals:
+        report_gen.add_additional_type(
+            additional.name(),
+            additional.description(),
+            additional.solution(),
+            flatten_references(additional.references()),
+            additional.wstg_code()
+        )
+
     request = Request("http://perdu.com/riri?foo=bar")
     response = Response(
         httpx.Response(
@@ -195,7 +216,8 @@ def test_detailed_reports(report_format, level):
         response=response,
         parameter="foo",
         info="This is dope",
-        module="xss"
+        module="xss",
+        wstg=["WSTG-INPV-01"]
     )
 
     if REGENERATE_FIXTURES:

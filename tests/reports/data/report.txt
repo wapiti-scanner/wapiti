@@ -14,6 +14,7 @@ Summary of vulnerabilities :
                                                            CRLF Injection :   0
                                     Content Security Policy Configuration :   0
                                                Cross Site Request Forgery :   0
+                                                           CVE-2024-55591 :   0
                                                Potentially dangerous file :   0
                                                         Command execution :   0
                                                            Path Traversal :   0
@@ -49,7 +50,7 @@ Summary of vulnerabilities :
 Reflected Cross Site Scripting
 ------------------------------
 This is dope
-WSTG code: None
+WSTG code: ['WSTG-INPV-01']
 Evil request:
     GET /riri?foo=bar HTTP/1.1
 cURL command PoC : "curl "http://perdu.com/riri?foo=bar""
@@ -67,7 +68,7 @@ Summary of anomalies :
 Internal Server Error
 ---------------------
 This is the way
-WSTG code: None
+WSTG code: ['WSTG-ERRH-01']
 Evil request:
     GET /fifi HTTP/1.1
 
@@ -85,7 +86,7 @@ Summary of additionals :
 Fingerprint web technology
 --------------------------
 loulou
-WSTG: None
+WSTG: ['WSTG-INFO-02', 'WSTG-INFO-08']
 
                                   *   *   *
 

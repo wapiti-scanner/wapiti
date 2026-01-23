@@ -1,4 +1,4 @@
 "category","level","description","method","parameter","url","body","referer","wstg","auth","module"
-"Reflected Cross Site Scripting",1,"This is dope","GET","foo","http://perdu.com/riri?foo=bar","","","","","xss"
-"Internal Server Error",2,"This is the way","GET","","http://perdu.com/fifi","","","","","xss"
-"Fingerprint web technology",3,"loulou","GET","foo","http://perdu.com/?foo=bar","","","","","wapp"
+"Reflected Cross Site Scripting",1,"This is dope","GET","foo","http://perdu.com/riri?foo=bar","","","['WSTG-INPV-01']","","xss"
+"Internal Server Error",2,"This is the way","GET","","http://perdu.com/fifi","","","['WSTG-ERRH-01']","","xss"
+"Fingerprint web technology",3,"loulou","GET","foo","http://perdu.com/?foo=bar","","","['WSTG-INFO-02', 'WSTG-INFO-08']","","wapp"
