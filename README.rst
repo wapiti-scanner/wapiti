@@ -215,7 +215,7 @@ Created by Nicolas SURRIBAS.
 Sponsors
 ========
 
-Cyberwatch https://cyberwatch.fr/
+Cyberwatch https://cyberwatch.com/
 
 Security For Everyone https://securityforeveryone.com/
 
