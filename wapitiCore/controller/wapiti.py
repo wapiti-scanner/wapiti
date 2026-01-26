@@ -160,7 +160,7 @@ class Wapiti:
             date=gmtime(),
             version=f"Wapiti {WAPITI_VERSION}",
             auth=self._auth_state,
-            crawled_pages=await self.persister.get_crawled_paths() if self.detailed_report_level == 2 else [],
+            crawled_pages=await self.persister.get_crawled_paths() if self.detailed_report_level in (1, 2) else [],
             crawled_pages_nbr=await self.count_resources(),
             detailed_report_level=self.detailed_report_level
         )
