@@ -121,11 +121,21 @@ def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Optional[Request]:
 
 
 class MitmFlowToWapitiRequests:
-    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, scope: Scope, drop_cookies: bool = False):
+    # pylint: disable=too-many-arguments
+    def __init__(
+            self,
+            data_queue: asyncio.Queue,
+            headers: httpx.Headers,
+            scope: Scope,
+            drop_cookies: bool = False,
+            include_http_codes: Optional[list[int]] = None
+    ):
         self._queue = data_queue
         self._headers = headers
         self._drop_cookies = drop_cookies
         self._scope = scope
+        self._include_http_codes = include_http_codes if include_http_codes is not None \
+                                   else []
 
     async def request(self, flow):
         for key, value in self._headers.items():
@@ -138,8 +148,8 @@ class MitmFlowToWapitiRequests:
 
         if 400 <= flow.response.status_code < 500:
             # Those are certainly broken links, and we don't want to deal with that
-            return
-
+            if flow.response.status_code not in self._include_http_codes:
+                return
         if self._drop_cookies:
             if "set-cookie" in flow.response.headers:
                 del flow.response.headers["set-cookie"]
@@ -185,7 +195,7 @@ class MitmFlowToWapitiRequests:
                 (request, response)
             )
 
-
+# pylint: disable=too-many-arguments
 async def launch_proxy(
         port: int,
         data_queue: asyncio.Queue,
@@ -194,6 +204,7 @@ async def launch_proxy(
         scope: Scope,
         proxy: Optional[str] = None,
         drop_cookies: bool = False,
+        include_http_codes: Optional[list[int]] = None,
 ):
     log_blue(
         f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done."
@@ -215,7 +226,7 @@ async def launch_proxy(
     # This mitmproxy module will do that and also load init cookies in the internal jar
     master.addons.add(AsyncStickyCookie(cookies))
     # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
-    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, scope, drop_cookies))
+    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, scope, drop_cookies, include_http_codes))
     try:
         await master.run()
     except asyncio.CancelledError:
@@ -271,7 +282,7 @@ async def click_in_webpage(page, request: Request, wait_time: float, timeout: fl
                     )
 
 
-# pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-arguments
 async def launch_headless_explorer(
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
@@ -376,7 +387,7 @@ async def launch_headless_explorer(
 
 
 class InterceptingExplorer(Explorer):
-    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
             self,
             crawler_configuration: CrawlerConfiguration,
@@ -388,7 +399,10 @@ class InterceptingExplorer(Explorer):
             drop_cookies: bool = False,
             headless: str = "no",
             cookies: Optional[CookieJar] = None,
-            wait_time: float = 2.
+            wait_time: float = 2.,
+            # By default, 400s error code are excluded.
+            # This force the inclusion of specified error codes
+            include_http_codes: Optional[list[int]] = None
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         self._mitm_port = mitm_port
@@ -401,6 +415,7 @@ class InterceptingExplorer(Explorer):
         self._headless_task = None
         self._mitm_task = None
         self._queue = None
+        self._include_http_codes = include_http_codes or []
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
@@ -467,6 +482,7 @@ class InterceptingExplorer(Explorer):
                 self._scope,
                 proxy=self._proxy,
                 drop_cookies=self._drop_cookies,
+                include_http_codes=self._include_http_codes
             )
         )
 

@@ -82,6 +82,7 @@ class Wapiti:
         self.verbose = 0
         self._start_urls: Deque[Request] = deque([self.base_request])
         self._excluded_urls = []
+        self._include_http_codes = []
         self._bad_params = set()
         self._max_depth = 40
         self._max_links_per_page = 0
@@ -242,6 +243,7 @@ class Wapiti:
                 headless=self._headless_mode,
                 cookies=self.crawler_configuration.cookies,
                 wait_time=self._wait_time,
+                include_http_codes=self._include_http_codes
             )
         else:
             explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
@@ -390,6 +392,9 @@ class Wapiti:
     def add_excluded_url(self, url_or_pattern: str):
         """Specify a URL to exclude from the scan. Can be called several times."""
         self._excluded_urls.append(url_or_pattern)
+
+    def set_include_http_codes(self, http_codes: list[int]):
+        self._include_http_codes = http_codes
 
     @property
     def excluded_urls(self) -> List[str]:
