@@ -25,19 +25,18 @@ from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
 from httpx import RequestError
 
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 
 MSG_NO_PALO_ALTO = "No Palo Alto Product Detected"
-MSG_PALO_ALTO_GLOBALPROTECT_DETECTED = "Palo Alto GlobalProtect Portal Detected !"
 
-class ModulePaloAlto(Attack):
+class ModulePaloAlto(NetworkDeviceCommon):
     """Detect Palo Alto Devices."""
     version = []
-    device_name = "Palo Alto"
+    device_name = "Palo Alto GlobalProtect Portal"
 
 
 #La détection de version panOS est grandement inspiré de cette application https://github.com/noperator/panos-scanner
@@ -104,6 +103,9 @@ class ModulePaloAlto(Attack):
                     shortenEtag = fullEtag.split('-', 1)[0]
                 else:
                     shortenEtag = fullEtag[-8:]
+                # https://developer.mozilla.org/fr/docs/Web/HTTP/Reference/Headers/ETag
+                if shortenEtag.startswith("W/\""):
+                    shortenEtag = shortenEtag[3:]
                 date = datetime.fromtimestamp(int(shortenEtag,16),timezone.utc).date()
                 self.version = self.check_date(version_table,date)
                 return True
@@ -115,30 +117,20 @@ class ModulePaloAlto(Attack):
         request_to_root = Request(request.url)
         try:
             if await self.check_palo_alto_global_protect_portal(request_to_root.url):
-                palo_alto_detected = {
-                    "name": "Palo Alto GlobalProtect Portal",
-                    "categories": ["Network Equipment"],
-                    "groups": ["Content"]
-                }
-                log_blue(
-                    MSG_PALO_ALTO_GLOBALPROTECT_DETECTED
-                )
+                await self.detect_panos_version(request_to_root.url)
 
-                await self.add_info(
-                    finding_class=SoftwareNameDisclosureFinding,
-                    request=request_to_root,
-                    info=json.dumps(palo_alto_detected),
-                )
-            if await self.detect_panos_version(request_to_root.url):
                 palo_alto_detected = {
-                    "name": "Palo Alto GlobalProtect Portal",
+                    "name": self.device_name,
                     "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
+
                 log_blue(
-                    MSG_PALO_ALTO_GLOBALPROTECT_DETECTED
-                )
+                    MSG_TECHNO_VERSIONED,
+                    self.device_name,
+                    self.version
+                )                
 
                 await self.add_info(
                     finding_class=SoftwareNameDisclosureFinding,

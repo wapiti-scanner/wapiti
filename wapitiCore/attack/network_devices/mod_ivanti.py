@@ -40,6 +40,7 @@ MSG_NO_IVANTI_USER_PORTAL = "No Ivanti User Portal"
 class ModuleIvanti(NetworkDeviceCommon):
     """Detect Ivanti."""
     version = []
+    device_name = ""
 
     async def check_ivanti_connect_secure(self, url):
         check_list = ['dana-na/auth/url_default/welcome.cgi','']
@@ -118,53 +119,36 @@ class ModuleIvanti(NetworkDeviceCommon):
 
         try:
             if await self.check_ivanti_connect_secure(request_to_root.url):
-                ivanti_detected = {
-                    "name": "Ivanti Connect Secure",
-                    "categories": ["Network Equipment"],
-                    "groups": ["Content"]
-                }
-                log_blue(
-                    MSG_IVANTI_CONNECT,
-                )
-                await self.add_info(
-                    finding_class=SoftwareNameDisclosureFinding,
-                    request=request_to_root,
-                    info=json.dumps(ivanti_detected),
-                )
+                self.device_name = "Ivanti Connect Secure"
+                log_blue(MSG_IVANTI_CONNECT)
             else:
                 log_blue(MSG_NO_IVANTI_CONNECT)
+
             if await self.check_ivanti_service_manager(request_to_root.url):
-                ivanti_detected = {
-                    "name": "Ivanti Service Manager",
-                    "categories": ["Network Equipment"],
-                    "groups": ["Content"]
-                }
-                log_blue(
-                    MSG_IVANTI_SERVICE_MANAGER,
-                )
-                await self.add_info(
-                    finding_class=SoftwareNameDisclosureFinding,
-                    request=request_to_root,
-                    info=json.dumps(ivanti_detected),
-                )
+                self.device_name = "Ivanti Service Manager"
+                log_blue(MSG_IVANTI_SERVICE_MANAGER)
             else:
                 log_blue(MSG_NO_IVANTI_SERVICE_MANAGER)
+
             if await self.check_ivanti_user_portal(request_to_root.url):
+                self.device_name = "Ivanti User Portal"
+                log_blue(MSG_IVANTI_USER_PORTAL)
+            else:
+                log_blue(MSG_NO_IVANTI_USER_PORTAL)
+
+            if self.device_name:
                 ivanti_detected = {
-                    "name": "Ivanti User Portal",
+                    "name": self.device_name,
+                    "versions": self.version,
                     "categories": ["Network Equipment"],
                     "groups": ["Content"]
                 }
-                log_blue(
-                    MSG_IVANTI_USER_PORTAL,
-                )
                 await self.add_info(
                     finding_class=SoftwareNameDisclosureFinding,
                     request=request_to_root,
                     info=json.dumps(ivanti_detected),
                 )
-            else:
-                log_blue(MSG_NO_IVANTI_USER_PORTAL)
+
         except RequestError as req_error:
             self.network_errors += 1
             logging.error(f"Request Error occurred: {req_error}")
