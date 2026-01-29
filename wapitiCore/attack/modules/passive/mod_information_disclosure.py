@@ -14,7 +14,7 @@ PATH_PATTERN = re.compile(
     # Unix-like absolute paths, allowing extra leading segments (e.g. /hj/var/...)
     # and explicitly forbidding schemes like "http://", "https://", etc. right after the slash.
     r"/(?![^ \t\r\n<>'\"]*://)"
-    r"(?:[^ \t\r\n<>'\"]*/)*"
+    r"(?:[^ \t\r\n<>'\"/]*/)*"
     r"(?:bin|usr|mnt|proc|sbin|dev|lib|tmp|opt|home|var|root|etc|Applications|Volumes|System|Users|Developer|Library)"
     r"/[\w./~-]*"
     r"|"
