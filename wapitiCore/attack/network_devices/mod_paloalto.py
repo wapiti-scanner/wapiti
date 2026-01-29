@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
-import re
+from os.path import join as path_join
 from typing import Optional
 from urllib.parse import urljoin
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from httpx import RequestError
 
@@ -37,6 +37,7 @@ class ModulePaloAlto(NetworkDeviceCommon):
     """Detect Palo Alto Devices."""
     version = []
     device_name = "Palo Alto GlobalProtect Portal"
+    etag_file = "version-table-Etag-palo-alto.txt"
 
 
 #La détection de version panOS est grandement inspiré de cette application https://github.com/noperator/panos-scanner
@@ -48,7 +49,7 @@ class ModulePaloAlto(NetworkDeviceCommon):
 
 
     def load_version_table(self) -> dict:
-        with open("wapitiCore/data/attacks/version-table-Etag-palo-alto.txt", "r") as versionTableFile:
+        with open(path_join(self.DATA_DIR, self.etag_file), encoding="utf-8") as versionTableFile:
             entries = [line.strip().split() for line in versionTableFile.readlines()]
         return {
             e[0]: datetime.strptime(" ".join(e[1:]), "%b %d %Y").date()
