@@ -16,22 +16,23 @@ FROM python:3.13-slim
 ENV DEBIAN_FRONTEND=noninteractive \
   LANG=en_US.UTF-8 \
   PYTHONDONTWRITEBYTECODE=1 \
-  OPENSSL_CONF='/etc/wapiti/openssl_conf'
-
-RUN apt update \
-  && apt-get install -y --no-install-recommends --no-install-suggests \
-     libasound2 libxt6 libxtst6 xz-utils curl bzip2 \
-  && apt clean -yq \
-  && apt autoremove -yq \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && truncate -s 0 /var/log/*log
+  OPENSSL_CONF='/etc/wapiti/openssl_conf' \
+  PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright
 
 COPY --from=build /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 COPY --from=build /usr/local/bin/wapiti /usr/local/bin/wapiti-getcookie /usr/local/bin/playwright /usr/local/bin/
-COPY --from=build /root/.cache/ms-playwright/ /root/.cache/ms-playwright/
-COPY --chmod=644 openssl_conf /etc/wapiti/
+COPY --from=build --chmod=755 /root/.cache/ms-playwright/ /opt/ms-playwright/
+COPY --chmod=755 openssl_conf /etc/wapiti/
 
-RUN playwright install-deps firefox
+RUN apt update \
+  && apt-get install -y --no-install-recommends --no-install-suggests \
+     xz-utils curl bzip2 \
+  && playwright install-deps firefox  \
+  && apt clean -yq \
+  && apt autoremove -yq \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log \
+  && echo "PLAYWRIGHT_BROWSERS_PATH=$PLAYWRIGHT_BROWSERS_PATH" >> /etc/environment
 
 ENTRYPOINT ["wapiti"]
 
