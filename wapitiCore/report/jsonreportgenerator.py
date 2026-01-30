@@ -110,9 +110,10 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": curl_repr(request),
             "wstg": wstg,
         }
-        if self._infos["detailed_report_level"] >= 1:
+        report_level = self._infos["detailed_report_level"]
+        if  report_level >= 1:
             vuln_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
         if category not in self._vulns:
             self._vulns[category] = []
@@ -155,9 +156,10 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": curl_repr(request),
             "wstg": wstg
         }
-        if self._infos["detailed_report_level"] >= 1:
+        report_level = self._infos["detailed_report_level"]
+        if report_level >= 1:
             anom_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
         if category not in self._anomalies:
             self._anomalies[category] = []
@@ -199,10 +201,10 @@ class JSONReportGenerator(ReportGenerator):
             "curl_command": curl_repr(request),
             "wstg": wstg
         }
-
-        if self._infos["detailed_report_level"] >= 1:
+        report_level = self._infos["detailed_report_level"]
+        if report_level >= 1:
             addition_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
 
         if category not in self._additionals:

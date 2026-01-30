@@ -115,9 +115,10 @@ class ReportGenerator:
             "module": module,
             "wstg": wstg
         }
-        if self._infos.get("detailed_report_level"):
+        report_level = self._infos.get("detailed_report_level")
+        if report_level:
             vuln_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
         if category not in self._vulns:
             self._vulns[category] = []
@@ -168,9 +169,10 @@ class ReportGenerator:
             "module": module,
             "wstg": wstg
         }
-        if self._infos.get("detailed_report_level"):
+        report_level = self._infos.get("detailed_report_level")
+        if report_level:
             anom_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
         if category not in self._anomalies:
             self._anomalies[category] = []
@@ -221,9 +223,10 @@ class ReportGenerator:
             "module": module,
             "wstg": wstg
         }
-        if self._infos.get("detailed_report_level"):
+        report_level = self._infos.get("detailed_report_level")
+        if report_level:
             addition_dict["detail"] = {
-                "response": detail_response(response)
+                "response": detail_response(response, report_level)
             }
         if category not in self._additionals:
             self._additionals[category] = []

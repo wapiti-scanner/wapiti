@@ -143,7 +143,24 @@ def test_reports(report_format):
 def test_detailed_reports(report_format, level):
     report_gen = GENERATORS[report_format]()
 
-    crawled_pages = [
+    crawled_pages_level_1 = [
+        {
+            "request": {
+                "url": "http://perdu.com/",
+                "method": "GET",
+                "headers": [],
+                "referer": None,
+                "enctype": "application/x-www-form-urlencoded",
+                "encoding": "utf-8",
+                "depth": 0,
+            },
+            "response": {
+                "status_code": 200
+            },
+        }
+    ]
+
+    crawled_pages_level_2 = [
         {
             "request": {
                 "url": "http://perdu.com/",
@@ -168,7 +185,7 @@ def test_detailed_reports(report_format, level):
         gmtime(0),
         "WAPITI_VERSION",
         None,
-        crawled_pages,
+        crawled_pages_level_1 if level == 1 else crawled_pages_level_2,
         1,
         level
     )

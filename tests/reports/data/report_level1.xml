@@ -692,11 +692,6 @@
                <detail>
                   <response>
                      <status_code>200</status_code>
-                     <body><![CDATA[<html><body>riri</body></html>]]></body>
-                     <headers>
-                        <header name="content-type">text/html</header>
-                        <header name="content-length">30</header>
-                     </headers>
                   </response>
                </detail>
             </entry>

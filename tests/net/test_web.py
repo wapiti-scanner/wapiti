@@ -21,6 +21,11 @@ def test_detail_response():
     assert detailed_response["body"] == "body"
     assert ("foo", "bar") in detailed_response["headers"]  # Content-Length is present too
 
+    detailed_response_1 = detail_response(response, 1)
+    assert detailed_response_1["status_code"] == 200
+    assert "body" not in detailed_response_1
+    assert "headers" not in detailed_response_1
+
 
 @pytest.mark.parametrize("url,expected", [
     # URLs valides
