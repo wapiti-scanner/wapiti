@@ -173,6 +173,7 @@ async def configure_wapiti_basic_settings(wap, args):
     wap.active_scanner.set_max_attack_time(args.max_attack_time)
     wap.verbosity(args.verbosity)
     wap.set_timeout(args.timeout)
+    wap.set_include_http_codes(args.include_http_codes)
 
     if args.detailed_report_level:
         wap.set_detail_report(args.detailed_report_level)

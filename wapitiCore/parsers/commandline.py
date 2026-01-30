@@ -111,6 +111,18 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--include-http-code",
+        action="append",
+        default=[],
+        dest="include_http_codes",
+        help=(
+            "(Headless scans only) By default, 400s HTTP response status codes are excluded from the research results. "
+            "This parameter force the inclusions of specified code"
+        ),
+        type=int
+    )
+
+    parser.add_argument(
         "--wait",
         dest="wait_time",
         default=2.,

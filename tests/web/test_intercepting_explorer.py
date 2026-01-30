@@ -187,3 +187,74 @@ class TestInterceptingExplorer:
         assert len(requests) == 1
         assert requests[0].url == "http://example.com/test"
         mock_launch_headless.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_mitm_flow_addon_response_with_include_http_codes_403(flow):
+        """Test that 403 responses are included when in include_http_codes"""
+        queue = asyncio.Queue()
+        headers = httpx.Headers()
+        scope = Scope(Request("http://example.com"), "folder")
+        addon = MitmFlowToWapitiRequests(queue, headers, scope, include_http_codes=[403])
+
+        flow.response = MitmResponse.make(403, b"Forbidden", {"Content-Type": "text/html"})
+        await addon.response(flow)
+
+        assert not queue.empty()
+        request, response = await queue.get()
+        assert isinstance(request, Request)
+        assert isinstance(response, Response)
+        assert response.status_code == 403
+
+
+    @pytest.mark.asyncio
+    async def test_mitm_flow_addon_response_with_include_http_codes_404_excluded(flow):
+        """Test that 404 responses are excluded when not in include_http_codes"""
+        queue = asyncio.Queue()
+        headers = httpx.Headers()
+        scope = Scope(Request("http://example.com"), "folder")
+        addon = MitmFlowToWapitiRequests(queue, headers, scope, include_http_codes=[403])
+
+        flow.response = MitmResponse.make(404, b"Not Found", {"Content-Type": "text/html"})
+        await addon.response(flow)
+
+        assert queue.empty()
+
+
+    @pytest.mark.asyncio
+    async def test_mitm_flow_addon_response_with_include_http_codes_multiple(flow):
+        """Test that multiple HTTP codes can be included"""
+        queue = asyncio.Queue()
+        headers = httpx.Headers()
+        scope = Scope(Request("http://example.com"), "folder")
+        addon = MitmFlowToWapitiRequests(queue, headers, scope, include_http_codes=[401, 403, 418])
+
+        flow.response = MitmResponse.make(401, b"Unauthorized", {"Content-Type": "text/html"})
+        await addon.response(flow)
+        request, response = await queue.get()
+        assert response.status_code == 401
+
+        flow.response = MitmResponse.make(403, b"Forbidden", {"Content-Type": "text/html"})
+        await addon.response(flow)
+        request, response = await queue.get()
+        assert response.status_code == 403
+
+        flow.response = MitmResponse.make(418, b"I'm a teapot", {"Content-Type": "text/html"})
+        await addon.response(flow)
+        request, response = await queue.get()
+        assert response.status_code == 418
+
+
+    @pytest.mark.asyncio
+    async def test_mitm_flow_addon_response_with_empty_include_http_codes(flow):
+        """Test that empty include_http_codes excludes all 4xx codes"""
+        queue = asyncio.Queue()
+        headers = httpx.Headers()
+        scope = Scope(Request("http://example.com"), "folder")
+        addon = MitmFlowToWapitiRequests(queue, headers, scope, include_http_codes=[])
+
+        for i in range(400, 500):
+          flow.response = MitmResponse.make(i, str(i), {"Content-Type": "text/html"})
+          await addon.response(flow)
+
+        assert queue.empty()
+
