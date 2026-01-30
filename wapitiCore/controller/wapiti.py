@@ -154,13 +154,16 @@ class Wapiti:
     async def init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
+        crawled_pages = await self.persister.get_crawled_paths(self.detailed_report_level) \
+          if self.detailed_report_level in (1, 2) else []
+
         self.report_gen.set_report_info(
             target=self.base_request.url,
             scope=self.target_scope.name,
             date=gmtime(),
             version=f"Wapiti {WAPITI_VERSION}",
             auth=self._auth_state,
-            crawled_pages=await self.persister.get_crawled_paths() if self.detailed_report_level in (1, 2) else [],
+            crawled_pages=crawled_pages,
             crawled_pages_nbr=await self.count_resources(),
             detailed_report_level=self.detailed_report_level
         )

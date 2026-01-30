@@ -167,8 +167,9 @@ class XMLReportGenerator(JSONReportGenerator):
                     wstg_code_node.appendChild(self._xml_doc.createTextNode(wstg_code))
                     wstg_node.appendChild(wstg_code_node)
                 entry_node.appendChild(wstg_node)
-                if self._infos["detailed_report_level"] >= 1:
-                    entry_node.appendChild(self._create_detail_section(flaw))
+                report_level = self._infos["detailed_report_level"]
+                if report_level >= 1:
+                    entry_node.appendChild(self._create_detail_section(flaw, report_level))
                 entries_node.appendChild(entry_node)
             flaw_type_node.appendChild(entries_node)
             container.appendChild(flaw_type_node)
@@ -179,19 +180,19 @@ class XMLReportGenerator(JSONReportGenerator):
         with open(output_path, "w", errors="ignore", encoding='utf-8') as xml_report_file:
             self._xml_doc.writexml(xml_report_file, addindent="   ", newl="\n")
 
-    def _create_detail_section(self, flaw: dict) -> Element:
+    def _create_detail_section(self, flaw: dict, level: int = 2) -> Element:
         """
         Create a section composed of the detail of the request & its response
         """
         detail_section = self._xml_doc.createElement("detail")
         response = flaw.get("detail", {}).get("response")
         if response:
-            detail_response_section = self._create_detail_response(response)
+            detail_response_section = self._create_detail_response(response, level)
             if detail_response_section:
                 detail_section.appendChild(detail_response_section)
         return detail_section
 
-    def _create_detail_response(self, response: dict) -> Optional[Element]:
+    def _create_detail_response(self, response: dict, level: int = 2) -> Optional[Element]:
         """
         Create a section focused on the exploit http request's response
         """
@@ -203,17 +204,19 @@ class XMLReportGenerator(JSONReportGenerator):
         status_code_node.appendChild(self._xml_doc.createTextNode(str(response["status_code"])))
         response_section.appendChild(status_code_node)
 
-        body_node = self._xml_doc.createElement("body")
-        body_node.appendChild(self._xml_doc.createCDATASection(response["body"]))
-        response_section.appendChild(body_node)
+        if level == 2:
+            body_node = self._xml_doc.createElement("body")
+            body_node.appendChild(self._xml_doc.createCDATASection(response["body"]))
+            response_section.appendChild(body_node)
 
-        headers_node = self._xml_doc.createElement("headers")
-        for header in response.get("headers") or []:
-            header_node = self._xml_doc.createElement("header")
-            header_node.setAttribute("name", header[0])
-            header_node.appendChild(self._xml_doc.createTextNode(header[1]))
-            headers_node.appendChild(header_node)
-        response_section.appendChild(headers_node)
+            headers_node = self._xml_doc.createElement("headers")
+            for header in response.get("headers") or []:
+                header_node = self._xml_doc.createElement("header")
+                header_node.setAttribute("name", header[0])
+                header_node.appendChild(self._xml_doc.createTextNode(header[1]))
+                headers_node.appendChild(header_node)
+            response_section.appendChild(headers_node)
+
         return response_section
 
     def _create_info_section(self) -> Element:
@@ -286,7 +289,7 @@ class XMLReportGenerator(JSONReportGenerator):
             report_infos.appendChild(self._create_crawled_pages_section(self._infos["crawled_pages"]))
         return report_infos
 
-    def _create_crawled_pages_section(self, crawled_pages: dict) -> Element:
+    def _create_crawled_pages_section(self, crawled_pages: dict, level: int = 2) -> Element:
         """
         Create a new section containing all the crawled pages with all the details of the requests and the responses
         """
@@ -297,7 +300,7 @@ class XMLReportGenerator(JSONReportGenerator):
             response = crawled_page.get("response")
 
             if response:
-                detail_response = self._create_detail_response(response)
+                detail_response = self._create_detail_response(response, level)
                 if detail_response:
                     entry_section.appendChild(detail_response)
 

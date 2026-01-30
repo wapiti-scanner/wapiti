@@ -265,7 +265,7 @@ class Response:
         self._response.encoding = new_encoding
 
 
-def detail_response(response: Response) -> Optional[dict]:
+def detail_response(response: Response, level: int = 2) -> Optional[dict]:
     if not response:
         return None
 
@@ -273,4 +273,4 @@ def detail_response(response: Response) -> Optional[dict]:
         "status_code": response.status,
         "body": response.content,
         "headers": response.headers.multi_items()
-    }
+    } if level == 2 else {"status_code": response.status}

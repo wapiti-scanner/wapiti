@@ -526,7 +526,35 @@ class SqlPersister:
         async for request, response in self._get_paths(path=path, method="POST", crawled=True, module=attack_module):
             yield request, response
 
-    async def get_crawled_paths(self) -> List[Dict[str, Any]]:
+    async def get_crawled_paths_level_1(self) -> List[Dict[str, Any]]:
+        statement = select(
+            self.paths,
+            self.responses.c.status_code
+        ).select_from(
+            self.paths.join(
+                self.responses,
+                self.paths.c.response_id == self.responses.c.response_id,
+            )
+        )
+
+        async with self._engine.begin() as conn:
+            result = await conn.execute(statement)
+            return [{
+                "request": {
+                    "url": row.path,
+                    "method": row.method,
+                    "headers": [[key, value] for key, value in (row.headers or {}).items()],
+                    "referer": row.referer,
+                    "enctype": row.enctype,
+                    "encoding": row.encoding,
+                    "depth": row.depth,
+                },
+                "response": {
+                    "status_code": row.status_code,
+                },
+            } for row in result.fetchall()]
+
+    async def get_crawled_paths_level_2(self) -> List[Dict[str, Any]]:
         statement = select(
             self.paths,
             self.responses.c.status_code,
@@ -557,6 +585,9 @@ class SqlPersister:
                     "headers": [[key, value] for key, value in (row.response_headers or {}).items()]
                 },
             } for row in result.fetchall()]
+
+    async def get_crawled_paths(self, report_level: int = 2) -> List[Dict[str, Any]]:
+        return await self.get_crawled_paths_level_1() if report_level == 1 else await self.get_crawled_paths_level_2()
 
     async def count_paths(self) -> int:
         statement = select(sql_count(self.paths.c.path_id)).where(~self.paths.c.evil)
