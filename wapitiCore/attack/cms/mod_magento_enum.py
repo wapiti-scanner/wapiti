@@ -50,12 +50,13 @@ async def playwright_get_content(url: str, page: Page, browser: Browser, crawler
         )
 
         html = await page.content()
+        return html
     except PlaywrightError as exception:
-        print("error")
         logging.exception(exception)
+        return ""
     finally:
         await browser.close()
-        return html
+        
 
 async def fetch_source_files(url: str, crawler_configuration: CrawlerConfiguration) -> set:
     my_files_list = set()

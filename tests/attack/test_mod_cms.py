@@ -1305,6 +1305,7 @@ async def test_typo3_via_image_svg():
     respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/Images/typo3_orange.svg").mock(
         return_value=httpx.Response(
             200,
+            headers={"Content-Type": "image/svg+xml"},
             content='image svg typo3')
     )
 

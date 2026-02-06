@@ -73,12 +73,13 @@ async def playwright_get_content(url: str, page: Page, browser: Browser, crawler
         )
 
         html = await page.content()
+        return html
     except PlaywrightError as exception:
-        print("error")
         logging.exception(exception)
+        return ""
     finally:
         await browser.close()
-        return html
+        
 
 
 async def fetch_source_files(url: str, crawler_configuration: CrawlerConfiguration) -> set:
@@ -213,7 +214,7 @@ class ModuleTYPO3Enum(CommonCMS):
             typo3_probe_url = url.rstrip('/') + "/typo3/sysext/core/Resources/Public/Images/typo3_orange.svg"
             request_typo3 = Request(f'{typo3_probe_url}', 'GET')
             probe_response : Response = await self.crawler.async_send(request_typo3, follow_redirects=False)
-            if probe_response.status == 200:
+            if probe_response.status == 200 and "svg" in probe_response.headers.get("content-type", ""):
                 return True
         return False
 
