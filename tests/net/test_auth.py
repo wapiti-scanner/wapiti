@@ -127,12 +127,36 @@ class TestAuth:
         mock_page.content.return_value = LOGIN_PAGE_HTML
         mock_context = AsyncMock()
         mock_context.new_page.return_value = mock_page
-        mock_context.cookies.return_value = []
+        mock_context.cookies.return_value = [{
+            "name": "sessionid",
+            "value": "123",
+            "domain": "wapiti.test",
+            "path": "/",
+            "secure": False,
+            "httpOnly": False
+        }]
         mock_browser = AsyncMock()
         mock_browser.new_context.return_value = mock_context
         mock_playwright = AsyncMock()
         mock_playwright.firefox.launch.return_value = mock_browser
+        # Fix: Mock chromium launch as well since default might be chromium
+        mock_playwright.chromium.launch.return_value = mock_browser
         mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
+
+        # Fix: page.locator is synchronous, so we must override it on the AsyncMock page
+        from unittest.mock import MagicMock
+        mock_locator = MagicMock()
+        mock_page.locator = MagicMock(return_value=mock_locator)
+        # locator.first is a property returning another locator (which has async methods like count/click)
+        mock_element = AsyncMock()
+        mock_locator.first = mock_element
+        mock_element.count.return_value = 1
+
+        mock_page.url = login_url
+
+        # Mock the content update after login
+        # First content call returns login page, second returns logged in page
+        mock_page.content.side_effect = [LOGIN_PAGE_HTML, LOGGED_IN_HTML]
 
         respx.post("http://wapiti.test/login").mock(
             return_value=httpx.Response(200, text=LOGGED_IN_HTML, headers={"Set-Cookie": "sessionid=123"})
@@ -148,6 +172,69 @@ class TestAuth:
         assert form == {'login_field': 'username', 'password_field': 'password'}
         assert any("/logout" in url for url in disconnect_urls)
         assert any(c.name == "sessionid" for c in crawler_configuration.cookies)
+
+    @respx.mock
+    @patch("wapitiCore.net.auth.async_playwright")
+    async def test_form_login_success_headless_screenshot(self, mock_async_playwright, crawler_configuration, tmp_path):
+        """Test successful form-based login with headless mode and screenshot enabled."""
+        login_url = "http://wapiti.test/login"
+        form_creds = FormCredential(
+            url=login_url,
+            username="admin",
+            password="password"
+        )
+        crawler_configuration.auth_screenshot = True
+
+        mock_page = AsyncMock()
+        mock_page.content.return_value = LOGIN_PAGE_HTML
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_context.cookies.return_value = []
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright = AsyncMock()
+        mock_playwright.firefox.launch.return_value = mock_browser
+        # Mock chromium launch as well since default might be chromium
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
+
+        # Fix: page.locator is synchronous, so we must override it on the AsyncMock page
+        from unittest.mock import MagicMock
+        mock_locator = MagicMock()
+        mock_page.locator = MagicMock(return_value=mock_locator)
+        # locator.first is a property returning another locator (which has async methods like count/click)
+        mock_element = AsyncMock()
+        mock_locator.first = mock_element
+        mock_element.count.return_value = 1
+
+        mock_page.url = login_url
+
+        respx.post("http://wapiti.test/login").mock(
+            return_value=httpx.Response(200, text=LOGGED_IN_HTML, headers={"Set-Cookie": "sessionid=123"})
+        )
+
+        # Mock the content update after login
+        # First content call returns login page, second returns logged in page
+        mock_page.content.side_effect = [LOGIN_PAGE_HTML, LOGGED_IN_HTML]
+        
+        # We need to mock SqlPersister.CRAWLER_DATA_DIR so screenshot goes to tmp_path
+        with patch("wapitiCore.net.sql_persister.SqlPersister.CRAWLER_DATA_DIR", str(tmp_path)):
+            is_logged_in, form, disconnect_urls = await async_try_form_login(
+                crawler_configuration,
+                form_creds,
+                headless_mode="hidden"
+            )
+
+        assert is_logged_in is True
+        assert form == {'login_field': 'username', 'password_field': 'password'}
+        assert any("/logout" in url for url in disconnect_urls)
+        
+        # Verify screenshot was called
+        assert mock_page.screenshot.called
+        call_args = mock_page.screenshot.call_args
+        assert "path" in call_args.kwargs
+        assert str(tmp_path) in call_args.kwargs["path"]
+        assert call_args.kwargs["path"].endswith(".png")
 
     @respx.mock
     async def test_login_with_raw_data(self, crawler_configuration):

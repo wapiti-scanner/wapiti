@@ -187,6 +187,7 @@ async def configure_wapiti_basic_settings(wap, args):
 
     wap.set_report_generator_type(args.format)
     wap.set_verify_ssl(bool(args.check_ssl))
+    wap.crawler_configuration.auth_screenshot = args.auth_screenshot
 
 
 def build_attack_options_from_args(args: Namespace) -> dict:
