@@ -92,7 +92,7 @@ class ModuleForti(NetworkDeviceCommon):
             sign_in_header_div = soup.find('div', class_='sign-in-header')
 
             for device_name in ["FortiManager", "FortiAnalyzer"]:
-                if title_tag:
+                if title_tag and title_tag.string:
                     if device_name in title_tag.string:
                         self.device_name = device_name
                         return True
@@ -137,7 +137,7 @@ class ModuleForti(NetworkDeviceCommon):
 
         # Get the title of the webpage
         title_tag = soup.title
-        if title_tag:
+        if title_tag and title_tag.string:
             title = title_tag.string
 
             # Search for the pattern in the title
