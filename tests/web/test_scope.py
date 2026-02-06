@@ -92,6 +92,47 @@ async def test_scopes():
     assert scope.filter(links) == links
 
 
+@pytest.mark.asyncio
+async def test_case_insensitive_hostname():
+    """Test that hostname comparison is case-insensitive for domain scopes"""
+    links = {
+        "http://SUBDOMAIN.perdu.com/",
+        "http://subdomain.PERDU.com/page.html",
+        "http://SUBDOMAIN.PERDU.COM/subdir/page.html",
+        "http://subdomain.perdu.com/other.html",
+        "http://OTHER.perdu.com/page.html",
+        "http://perdu.com/",
+    }
+
+    # Test subdomain scope with uppercase in base URL
+    scope = Scope(Request("http://SUBDOMAIN.perdu.com/"), "subdomain")
+    assert scope.filter(links) == {
+        "http://SUBDOMAIN.perdu.com/",
+        "http://subdomain.PERDU.com/page.html",
+        "http://SUBDOMAIN.PERDU.COM/subdir/page.html",
+        "http://subdomain.perdu.com/other.html",
+    }
+
+    # Test subdomain scope with lowercase in base URL
+    scope = Scope(Request("http://subdomain.perdu.com/"), "subdomain")
+    assert scope.filter(links) == {
+        "http://SUBDOMAIN.perdu.com/",
+        "http://subdomain.PERDU.com/page.html",
+        "http://SUBDOMAIN.PERDU.COM/subdir/page.html",
+        "http://subdomain.perdu.com/other.html",
+    }
+
+    # Test domain scope with mixed case
+    scope = Scope(Request("http://PERDU.com/"), "domain")
+    filtered = scope.filter(links)
+    assert "http://SUBDOMAIN.perdu.com/" in filtered
+    assert "http://subdomain.PERDU.com/page.html" in filtered
+    assert "http://SUBDOMAIN.PERDU.COM/subdir/page.html" in filtered
+    assert "http://subdomain.perdu.com/other.html" in filtered
+    assert "http://OTHER.perdu.com/page.html" in filtered
+    assert "http://perdu.com/" in filtered
+
+
 @pytest.mark.parametrize(
     "wildcard_expression, texts, results",
     [

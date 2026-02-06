@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
 from typing import Iterable, Union, Set
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
@@ -27,14 +27,46 @@ from tld.exceptions import TldDomainNotFound
 from wapitiCore.net import Request
 
 
+def _lower_hostname(hostname: str) -> str:
+    return hostname.lower() if hostname else hostname
+
+
+def _lower_hostname_in_url(url: str) -> str:
+    """Normalise scheme et hostname en minuscules (RFC 3986 : insensibles à la casse)."""
+    url_parts = urlparse(url)
+    if not url_parts.hostname:
+        return url
+
+    netloc = ""
+    if url_parts.username:
+        netloc += url_parts.username
+        if url_parts.password:
+            netloc += f":{url_parts.password}"
+        netloc += "@"
+
+    netloc += _lower_hostname(url_parts.hostname)
+    if url_parts.port:
+        netloc += f":{url_parts.port}"
+
+    scheme = (url_parts.scheme or "").lower()
+    return urlunparse((
+        scheme,
+        netloc,
+        url_parts.path,
+        url_parts.params,
+        url_parts.query,
+        url_parts.fragment
+    ))
+
+
 def is_same_domain(url: str, request: Request) -> bool:
     url_parts = urlparse(url)
     try:
-        return get_fld(url) == get_fld(request.url)
+        return _lower_hostname(get_fld(url)) == _lower_hostname(get_fld(request.url))
     except TldDomainNotFound:
         # Internal domain of IP
         # Check hostname instead of netloc to allow other ports
-        return url_parts.hostname == request.hostname
+        return _lower_hostname(url_parts.hostname) == _lower_hostname(request.hostname)
 
 
 class Scope:
@@ -66,17 +98,17 @@ class Scope:
             checked = is_same_domain(url, self._base_request)
 
         elif self._scope == "subdomain":
-            checked = urlparse(url).hostname == self._base_request.hostname
+            checked = _lower_hostname(urlparse(url).hostname) == _lower_hostname(self._base_request.hostname)
 
         elif self._scope == "folder":
-            checked = url.startswith(self._base_request.path)
+            checked = _lower_hostname_in_url(url).startswith(_lower_hostname_in_url(self._base_request.path))
 
         elif self._scope == "page":
-            checked = url.split("?")[0] == self._base_request.path
+            checked = _lower_hostname_in_url(url.split("?")[0]) == _lower_hostname_in_url(self._base_request.path)
 
         # URL
         if checked is None:
-            checked = url == self._base_request.url
+            checked = _lower_hostname_in_url(url) == _lower_hostname_in_url(self._base_request.url)
         return checked
 
     def filter(self, resources: Iterable[Union[Request, str]]) -> Set[Union[Request, str]]:
