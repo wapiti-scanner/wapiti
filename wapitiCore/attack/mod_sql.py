@@ -246,7 +246,33 @@ DBMS_ERROR_PATTERNS = {
     "Cache": [
         re.compile(r"encountered after end of query"),
         re.compile(r"A comparison operator is required here"),
-    ]
+    ],
+    "CockroachDB": [
+        re.compile(r"ERROR: at or near.*?SQLSTATE: 42601"),
+        re.compile(r"node is not ready"),
+        re.compile(r"cockroach.*?error"),
+    ],
+    "ClickHouse": [
+        re.compile(r"DB::Exception:"),
+        re.compile(r"Code: \d+\. DB::Exception"),
+        re.compile(r"ClickHouse exception"),
+        re.compile(r"Syntax error: failed at position"),
+    ],
+    "Cassandra": [
+        re.compile(r"SyntaxException.*?line \d+:\d+"),
+        re.compile(r"com\.datastax\.driver"),
+        re.compile(r"InvalidQueryException"),
+        re.compile(r"no viable alternative at input"),
+    ],
+    "TiDB": [
+        re.compile(r"TiDB server"),
+        re.compile(r"ERROR \d+ \(HY000\).*?TiDB"),
+    ],
+    "Redshift": [
+        re.compile(r"com\.amazon\.redshift\.jdbc"),
+        re.compile(r"ERROR:.*?Redshift"),
+        re.compile(r"Amazon Invalid operation:"),
+    ],
 }
 
 
