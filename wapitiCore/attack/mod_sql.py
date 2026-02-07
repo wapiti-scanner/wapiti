@@ -277,18 +277,31 @@ DBMS_ERROR_PATTERNS = {
 
 
 def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
-    # payloads = []
     for use_parenthesis in (False, True):
-        for separator in ("", "'", "\""):
-            yield from generate_boolean_test_values(separator, use_parenthesis)
-    # return payloads
+        # Added backtick separator for MySQL column/table name contexts
+        for separator in ("", "'", "\"", "`"):
+            yield from generate_boolean_test_values(separator, use_parenthesis, "AND", " ")
+            # OR-based variants to cover different WHERE clause structures
+            yield from generate_boolean_test_values(separator, use_parenthesis, "OR", " ")
+            # Comment-based space bypass (WAF evasion)
+            yield from generate_boolean_test_values(separator, use_parenthesis, "AND", "/**/")
 
 
-def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[PayloadInfo]:
+def generate_boolean_test_values(
+    separator: str,
+    parenthesis: bool,
+    operator: str = "AND",
+    space: str = " ",
+) -> Iterator[PayloadInfo]:
+    s = space  # shorthand for the space/comment separator
     fmt_string = (
-        "[VALUE]{sep} AND {left_value}={right_value} AND {sep}{padding_value}{sep}={sep}{padding_value}",
-        "[VALUE]{sep}) AND {left_value}={right_value} AND ({sep}{padding_value}{sep}={sep}{padding_value}"
+        f"[VALUE]{{sep}}{s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
+        f"{{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}",
+        f"[VALUE]{{sep}}){s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
+        f"({{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}"
     )[parenthesis]
+
+    platform_tag = f"{'p' if parenthesis else ''}_{separator}_{operator}_{space}"
 
     for __ in range(2):
         value1 = randint(10, 99)
@@ -304,7 +317,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
                 sep=separator
             ),
             section=False,
-            platform=f"{'p' if parenthesis else ''}_{separator}",
+            platform=platform_tag,
         )
 
     for __ in range(2):
@@ -320,7 +333,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
                 sep=separator,
             ),
             section=True,
-            platform=f"{'p' if parenthesis else ''}_{separator}",
+            platform=platform_tag,
         )
 
 
