@@ -281,6 +281,7 @@ def load_payloads_from_ini(filename: str, external_endpoint: str) -> List[Dict[s
         clean_payload = payload.strip(" \n")
         clean_payload = clean_payload.replace("[TAB]", "\t")
         clean_payload = clean_payload.replace("[LF]", "\n")
+        clean_payload = clean_payload.replace("[FF]", "\x0c")
         clean_payload = clean_payload.replace("[EXTERNAL_ENDPOINT]", external_endpoint)
         clean_payload = clean_payload.replace("[PROTO_ENDPOINT]", proto_endpoint)
 
