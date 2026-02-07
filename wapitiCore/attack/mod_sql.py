@@ -277,31 +277,34 @@ DBMS_ERROR_PATTERNS = {
 
 
 def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
-    for use_parenthesis in (False, True):
+    # nesting_level: 0 = no parenthesis, 1 = single ), 2 = double ))
+    # Covers subqueries nested up to 2 levels deep (common in CMS/frameworks)
+    for nesting_level in range(3):
         # Added backtick separator for MySQL column/table name contexts
         for separator in ("", "'", "\"", "`"):
-            yield from generate_boolean_test_values(separator, use_parenthesis, "AND", " ")
+            yield from generate_boolean_test_values(separator, nesting_level, "AND", " ")
             # OR-based variants to cover different WHERE clause structures
-            yield from generate_boolean_test_values(separator, use_parenthesis, "OR", " ")
+            yield from generate_boolean_test_values(separator, nesting_level, "OR", " ")
             # Comment-based space bypass (WAF evasion)
-            yield from generate_boolean_test_values(separator, use_parenthesis, "AND", "/**/")
+            yield from generate_boolean_test_values(separator, nesting_level, "AND", "/**/")
 
 
 def generate_boolean_test_values(
     separator: str,
-    parenthesis: bool,
+    nesting_level: int = 0,
     operator: str = "AND",
     space: str = " ",
 ) -> Iterator[PayloadInfo]:
     s = space  # shorthand for the space/comment separator
-    fmt_string = (
-        f"[VALUE]{{sep}}{s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
-        f"{{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}",
-        f"[VALUE]{{sep}}){s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
-        f"({{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}"
-    )[parenthesis]
+    closing = ")" * nesting_level
+    opening = "(" * nesting_level
 
-    platform_tag = f"{'p' if parenthesis else ''}_{separator}_{operator}_{space}"
+    fmt_string = (
+        f"[VALUE]{{sep}}{closing}{s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
+        f"{opening}{{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}"
+    )
+
+    platform_tag = f"n{nesting_level}_{separator}_{operator}_{space}"
 
     for __ in range(2):
         value1 = randint(10, 99)
