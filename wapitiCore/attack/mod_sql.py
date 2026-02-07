@@ -519,9 +519,9 @@ class ModuleSql(Attack):
             good_response = await self.crawler.async_send(request)
             good_status = good_response.status
             good_redirect = good_response.redirection_url
-            # good_title = response.title
             html = Html(good_response.content, request.url)
             good_hash = html.text_only_md5
+            good_length = len(good_response.content)
         except ReadTimeout:
             self.network_errors += 1
             return
@@ -610,11 +610,19 @@ class ModuleSql(Attack):
                 test_results.append(False)
                 continue
 
-            Html(response.content, url=mutated_request.url)
+            resp_html = Html(response.content, url=mutated_request.url)
+            resp_length = len(response.content)
+            # Use content length similarity (±5%) as secondary heuristic
+            # to reduce false negatives when dynamic content changes the hash
+            length_ratio = abs(resp_length - good_length) / max(good_length, 1)
+            length_similar = length_ratio < 0.05
+
             comparison = (
                     response.status == good_status and
-                    response.redirection_url == good_redirect and
-                    Html(response.content, url=mutated_request.url).text_only_md5 == good_hash
+                    response.redirection_url == good_redirect and (
+                        resp_html.text_only_md5 == good_hash or
+                        length_similar
+                    )
             )
 
             test_results.append(comparison == (payload_info.section is True))
