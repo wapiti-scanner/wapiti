@@ -67,7 +67,7 @@ class ModuleShellshock(Attack):
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         url = request.path
-        self.attacked_get.append(url)
+        self.attacked_get.add(url)
 
         # We can't see anything by printing requests because payload is in headers so let's print nothing :)
         evil_req = Request(url)

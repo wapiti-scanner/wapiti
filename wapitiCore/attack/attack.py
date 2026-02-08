@@ -209,9 +209,9 @@ class Attack(AttackProtocol):
         self.crawler_configuration = crawler_configuration
         self.start = 0
 
-        # List of attack urls already launched in the current module
-        self.attacked_get = []
-        self.attacked_post = []
+        # Set of attack urls already launched in the current module
+        self.attacked_get = set()
+        self.attacked_post = set()
         self.network_errors = 0
 
         self.finished = False

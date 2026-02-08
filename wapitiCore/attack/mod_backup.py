@@ -121,7 +121,7 @@ class ModuleBackup(Attack):
 
             log_verbose(f"[¨] {url}")
 
-            self.attacked_get.append(page)
+            self.attacked_get.add(page)
             evil_req = Request(url)
 
             try:
