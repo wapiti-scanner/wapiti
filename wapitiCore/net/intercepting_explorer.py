@@ -248,21 +248,36 @@ def extract_requests(html: Html, request: Request):
             yield form_request
 
 
+MAX_BUTTONS_PER_PAGE = 5
+
+
 async def click_in_webpage(page, request: Request, wait_time: float, timeout: float):
     # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
+    total_clicked = 0
     for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
+        if total_clicked >= MAX_BUTTONS_PER_PAGE:
+            break
+
         try:
             buttons = await page.query_selector_all(xpath_selector)
         except PlaywrightError:
             continue
 
         for button in buttons:
+            if total_clicked >= MAX_BUTTONS_PER_PAGE:
+                break
+
             try:
                 await button.click(timeout=timeout * 1000)
             except PlaywrightError:
                 continue
             else:
-                await page.wait_for_timeout(wait_time * 1000)
+                total_clicked += 1
+                # Use networkidle with a short timeout instead of a fixed delay
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=wait_time * 1000)
+                except PlaywrightError:
+                    pass
                 if page.url != request.url_with_fragment:
                     await page.goto(
                         request.url_with_fragment,
@@ -324,7 +339,17 @@ async def launch_headless_explorer(
                                 timeout=crawler.timeout.connect * 1000,
                                 wait_until="domcontentloaded"
                             )
-                            await page.wait_for_timeout(wait_time * 1000)
+                            # Wait for network idle with a short timeout instead of a fixed delay.
+                            # This adapts to the actual page load speed: fast pages proceed quickly,
+                            # heavy pages wait only as long as needed.
+                            try:
+                                await page.wait_for_load_state(
+                                    "networkidle",
+                                    timeout=wait_time * 1000
+                                )
+                            except PlaywrightError:
+                                # Timeout reached, proceed anyway — we've waited long enough
+                                pass
                             # We may be redirected outside our target so let's check the URL first
                             if not scope.check(page.url):
                                 continue
@@ -409,12 +434,12 @@ class InterceptingExplorer(Explorer):
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
+            if self._stopped.is_set() and self._queue.empty():
+                break
+
             try:
-                request, response = self._queue.get_nowait()
-            except asyncio.QueueEmpty:
-                if self._stopped.is_set():
-                    break
-                await asyncio.sleep(.1)
+                request, response = await asyncio.wait_for(self._queue.get(), timeout=0.5)
+            except asyncio.TimeoutError:
                 continue
             except KeyboardInterrupt:
                 break
