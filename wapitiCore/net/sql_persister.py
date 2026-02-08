@@ -25,7 +25,7 @@ from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dic
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_,
-                        literal_column, select)
+                        event, literal_column, select)
 from sqlalchemy.sql.functions import max as sql_max
 from sqlalchemy.sql.functions import count as sql_count
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -94,6 +94,16 @@ class SqlPersister:
 
         self._must_create = not os.path.exists(self.output_file)
         self._engine = create_async_engine(f'sqlite+aiosqlite:///{self.output_file}')
+
+        @event.listens_for(self._engine.sync_engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, _connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA cache_size=-64000")  # 64 MB
+            cursor.execute("PRAGMA temp_store=MEMORY")
+            cursor.close()
+
         self.register_database_model(table_prefix)
         # May be of interest: https://charlesleifer.com/blog/going-fast-with-sqlite-and-python/
 
