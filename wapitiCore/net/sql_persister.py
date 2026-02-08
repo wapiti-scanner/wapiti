@@ -267,7 +267,7 @@ class SqlPersister:
                     }
                 )
 
-                for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
+                for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params_ref):
                     all_param_values.append(
                         {
                             "path_id": bigest_id,
@@ -280,9 +280,9 @@ class SqlPersister:
                         }
                     )
 
-                post_params = http_resource.post_params
+                post_params = http_resource.post_params_ref
                 if isinstance(post_params, list):
-                    for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
+                    for i, (post_param_key, post_param_value) in enumerate(post_params):
                         all_param_values.append(
                             {
                                 "path_id": bigest_id,
@@ -307,7 +307,7 @@ class SqlPersister:
                         }
                     )
 
-                for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
+                for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params_ref):
                     # file_param_value will be something like ['pix.gif', 'GIF89a', 'image/gif']
                     # just keep the file name
                     if len(file_param_value) == 3:
@@ -384,7 +384,7 @@ class SqlPersister:
 
             path_id = result.inserted_primary_key[0]
             all_values = []
-            for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
+            for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params_ref):
                 all_values.append(
                     {
                         "path_id": path_id,
@@ -397,9 +397,9 @@ class SqlPersister:
                     }
                 )
 
-            post_params = http_resource.post_params
+            post_params = http_resource.post_params_ref
             if isinstance(post_params, list):
-                for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
+                for i, (post_param_key, post_param_value) in enumerate(post_params):
                     all_values.append(
                         {
                             "path_id": path_id,
@@ -424,7 +424,7 @@ class SqlPersister:
                     }
                 )
 
-            for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
+            for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params_ref):
                 # file_param_value will be something like ['pix.gif', 'GIF89a', 'image/gif']
                 # just keep the file name
                 if len(file_param_value) == 3:
@@ -728,7 +728,7 @@ class SqlPersister:
             path_id = result.inserted_primary_key[0]
 
             all_values = []
-            for i, (get_param_key, get_param_value) in enumerate(request.get_params):
+            for i, (get_param_key, get_param_value) in enumerate(request.get_params_ref):
                 all_values.append(
                     {
                         "path_id": path_id,
@@ -741,8 +741,9 @@ class SqlPersister:
                     }
                 )
 
-            if isinstance(request.post_params, list):
-                for i, (post_param_key, post_param_value) in enumerate(request.post_params):
+            post_params = request.post_params_ref
+            if isinstance(post_params, list):
+                for i, (post_param_key, post_param_value) in enumerate(post_params):
                     all_values.append(
                         {
                             "path_id": path_id,
@@ -754,20 +755,20 @@ class SqlPersister:
                             "meta": None
                         }
                     )
-            elif request.post_params:
+            elif post_params:
                 all_values.append(
                     {
                         "path_id": path_id,
                         "type": "POST",
                         "position": 0,
                         "name": "__RAW__",
-                        "value1": request.post_params,
+                        "value1": post_params,
                         "value2": None,
                         "meta": None
                     }
                 )
 
-            for i, (file_param_key, file_param_value) in enumerate(request.file_params):
+            for i, (file_param_key, file_param_value) in enumerate(request.file_params_ref):
                 if len(file_param_value) == 3:
                     meta = file_param_value[2]
                 else:
