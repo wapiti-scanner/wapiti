@@ -65,26 +65,34 @@ class TakeoverChecker:
     def __init__(self):
         with open(os.path.join(Attack.DATA_DIR, FINGERPRINTS_FILENAME), errors="ignore", encoding='utf-8') as fd:
             data = json.load(fd)
-            self.ignore = []
-            for ignore_regex in data["ignore"]:
-                self.ignore.append(re.compile(r"(" + ignore_regex + r")"))
+            self.ignore = [re.compile(r"(" + ignore_regex + r")") for ignore_regex in data["ignore"]]
             self.services = data["services"]
+        self._http_client: Optional[httpx.AsyncClient] = None
 
-    @staticmethod
-    async def check_content(subdomain: str, fingerprints: List[str]) -> bool:
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._http_client is None:
+            self._http_client = httpx.AsyncClient(timeout=10., verify=False)
+        return self._http_client
+
+    async def close(self):
+        if self._http_client is not None:
+            await self._http_client.aclose()
+            self._http_client = None
+
+    async def check_content(self, subdomain: str, fingerprints: List[str]) -> bool:
         if fingerprints:
-            async with httpx.AsyncClient() as client:
-                results = await asyncio.gather(
-                    client.get(f"http://{subdomain}/", timeout=10),
-                    client.get(f"https://{subdomain}/", timeout=10),
-                    return_exceptions=True
-                )
-                for result in results:
-                    if isinstance(result, BaseException):
-                        continue
-                    for pattern in fingerprints:
-                        if pattern in result.text:
-                            return True
+            client = await self._get_client()
+            results = await asyncio.gather(
+                client.get(f"http://{subdomain}/", timeout=10),
+                client.get(f"https://{subdomain}/", timeout=10),
+                return_exceptions=True
+            )
+            for result in results:
+                if isinstance(result, BaseException):
+                    continue
+                for pattern in fingerprints:
+                    if pattern in result.text:
+                        return True
 
         return False
 
@@ -120,16 +128,17 @@ class TakeoverChecker:
                 # Check the content on the website if necessary
                 content_match = await self.check_content(origin, service_entry["fingerprint"])
                 if content_match:
+                    client = await self._get_client()
                     # Handle GitHub.io case
                     github_match = GITHUB_IO_REGEX.search(domain)
                     if github_match:
-                        is_vulnerable = await _check_github_availability(github_match.group(1))
+                        is_vulnerable = await _check_github_availability(github_match.group(1), client)
                         break
 
                     # Handle Shopify case
                     shopify_match = MY_SHOPIFY_REGEX.search(domain)
                     if shopify_match:
-                        is_vulnerable = await _check_shopify_availability(shopify_match.group(1))
+                        is_vulnerable = await _check_shopify_availability(shopify_match.group(1), client)
                         break
 
                     # If not a special case and content matches, it's vulnerable
@@ -149,30 +158,28 @@ class TakeoverChecker:
         return is_vulnerable
 
 
-async def _check_github_availability(username: str) -> bool:
+async def _check_github_availability(username: str, client: httpx.AsyncClient) -> bool:
     """Check if a GitHub username/organization is available."""
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.head(f"https://github.com/{username}", timeout=10.)
-            return response.is_client_error
+        response = await client.head(f"https://github.com/{username}", timeout=10.)
+        return response.is_client_error
     except httpx.RequestError:
         logging.warning("HTTP request to https://github.com/%s failed", username)
         return False
 
 
-async def _check_shopify_availability(shop_name: str) -> bool:
+async def _check_shopify_availability(shop_name: str, client: httpx.AsyncClient) -> bool:
     """Check if a Shopify shop name is available."""
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                (
-                    "https://app.shopify.com/services/signup/check_availability.json?"
-                    f"shop_name={shop_name}&email=test@example.com"
-                ),
-                timeout=10.
-            )
-            data = response.json()
-            return data["status"] == "available"
+        response = await client.get(
+            (
+                "https://app.shopify.com/services/signup/check_availability.json?"
+                f"shop_name={shop_name}&email=test@example.com"
+            ),
+            timeout=10.
+        )
+        data = response.json()
+        return data["status"] == "available"
     except httpx.RequestError:
         logging.warning("HTTP request to Shopify API failed")
         return False
@@ -326,6 +333,10 @@ class ModuleTakeover(Attack):
                             info=f"CNAME {domain} to {cname} seems vulnerable to takeover",
                             request=Request(f"https://{domain}/"),
                         )
+
+    async def finish(self):
+        """Cleanup shared HTTP client when the module is done."""
+        await self.takeover.close()
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         tasks = []
