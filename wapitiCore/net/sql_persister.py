@@ -220,7 +220,7 @@ class SqlPersister:
         all_param_values = []
 
         async with self._engine.begin() as conn:
-            response_ids = [await self.save_response(response) for _, response in paths_list]
+            response_ids = [await self.save_response(response, conn=conn) for _, response in paths_list]
 
             for (http_resource, response), response_id in zip(paths_list, response_ids):
                 headers_to_save = http_resource.sent_headers or http_resource.headers
@@ -333,7 +333,7 @@ class SqlPersister:
                 if all_param_values:
                     await conn.execute(self.params.insert(), all_param_values)
 
-    async def save_response(self, response: Response) -> Optional[int]:
+    async def save_response(self, response: Response, conn=None) -> Optional[int]:
         if not response:
             return None
 
@@ -343,15 +343,19 @@ class SqlPersister:
             body=response.bytes,
             headers=response.headers
         )
-        async with self._engine.begin() as conn:
+        if conn is not None:
             result = await conn.execute(statement)
+            return result.inserted_primary_key[0]
+
+        async with self._engine.begin() as new_conn:
+            result = await new_conn.execute(statement)
             return result.inserted_primary_key[0]
 
     async def save_request(self, http_resource: Request, response: Response = None):
         headers_to_save = http_resource.sent_headers or http_resource.headers
-        response_id = await self.save_response(response)
 
         async with self._engine.begin() as conn:
+            response_id = await self.save_response(response, conn=conn)
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
                 statement = self.paths.update().where(
@@ -704,103 +708,99 @@ class SqlPersister:
             wstg: Optional[List[str]] = None,
             response: Response = None
     ):
-
-        response_id = await self.save_response(response)
-
         headers_to_save = request.sent_headers or request.headers
-        # Save the request along with its parameters
-        statement = self.paths.insert().values(
-            path=request.path,
-            method=request.method,
-            enctype=request.enctype,
-            depth=request.link_depth,
-            encoding=request.encoding,
-            headers=headers_to_save,
-            referer=request.referer,
-            response_id=response_id,
-            evil=True,
-        )
+
         async with self._engine.begin() as conn:
-            result = await conn.execute(statement)
-        # path_id is the ID of the evil path
-        path_id = result.inserted_primary_key[0]
+            response_id = await self.save_response(response, conn=conn)
 
-        all_values = []
-        for i, (get_param_key, get_param_value) in enumerate(request.get_params):
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "GET",
-                    "position": i,
-                    "name": get_param_key,
-                    "value1": get_param_value,
-                    "value2": None,
-                    "meta": None
-                }
-            )
+            # Save the request along with its parameters
+            result = await conn.execute(self.paths.insert().values(
+                path=request.path,
+                method=request.method,
+                enctype=request.enctype,
+                depth=request.link_depth,
+                encoding=request.encoding,
+                headers=headers_to_save,
+                referer=request.referer,
+                response_id=response_id,
+                evil=True,
+            ))
+            # path_id is the ID of the evil path
+            path_id = result.inserted_primary_key[0]
 
-        if isinstance(request.post_params, list):
-            for i, (post_param_key, post_param_value) in enumerate(request.post_params):
+            all_values = []
+            for i, (get_param_key, get_param_value) in enumerate(request.get_params):
                 all_values.append(
                     {
                         "path_id": path_id,
-                        "type": "POST",
+                        "type": "GET",
                         "position": i,
-                        "name": post_param_key,
-                        "value1": post_param_value,
+                        "name": get_param_key,
+                        "value1": get_param_value,
                         "value2": None,
                         "meta": None
                     }
                 )
-        elif request.post_params:
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "POST",
-                    "position": 0,
-                    "name": "__RAW__",
-                    "value1": request.post_params,
-                    "value2": None,
-                    "meta": None
-                }
-            )
 
-        for i, (file_param_key, file_param_value) in enumerate(request.file_params):
-            if len(file_param_value) == 3:
-                meta = file_param_value[2]
-            else:
-                meta = None
+            if isinstance(request.post_params, list):
+                for i, (post_param_key, post_param_value) in enumerate(request.post_params):
+                    all_values.append(
+                        {
+                            "path_id": path_id,
+                            "type": "POST",
+                            "position": i,
+                            "name": post_param_key,
+                            "value1": post_param_value,
+                            "value2": None,
+                            "meta": None
+                        }
+                    )
+            elif request.post_params:
+                all_values.append(
+                    {
+                        "path_id": path_id,
+                        "type": "POST",
+                        "position": 0,
+                        "name": "__RAW__",
+                        "value1": request.post_params,
+                        "value2": None,
+                        "meta": None
+                    }
+                )
 
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "FILE",
-                    "position": i,
-                    "name": file_param_key,
-                    "value1": file_param_value[0],
-                    "value2": file_param_value[1],
-                    "meta": meta
-                }
-            )
+            for i, (file_param_key, file_param_value) in enumerate(request.file_params):
+                if len(file_param_value) == 3:
+                    meta = file_param_value[2]
+                else:
+                    meta = None
 
-        if all_values:
-            async with self._engine.begin() as conn:
+                all_values.append(
+                    {
+                        "path_id": path_id,
+                        "type": "FILE",
+                        "position": i,
+                        "name": file_param_key,
+                        "value1": file_param_value[0],
+                        "value2": file_param_value[1],
+                        "meta": meta
+                    }
+                )
+
+            if all_values:
                 await conn.execute(self.params.insert(), all_values)
 
-        # request_id is the ID of the original (legit) request
-        statement = self.payloads.insert().values(
-            evil_path_id=path_id,
-            module=module,
-            category=category,
-            level=level,
-            parameter=parameter,
-            info=info,
-            type=payload_type,
-            wstg=json.dumps(wstg or []),
-            response_id=response_id
-        )
-        async with self._engine.begin() as conn:
-            await conn.execute(statement)
+            # request_id is the ID of the original (legit) request
+            await conn.execute(self.payloads.insert().values(
+                evil_path_id=path_id,
+                module=module,
+                category=category,
+                level=level,
+                parameter=parameter,
+                info=info,
+                type=payload_type,
+                wstg=json.dumps(wstg or []),
+                response_id=response_id
+            ))
 
     async def get_response_by_id(self, response_id: str) -> Optional[Response]:
         if not response_id:
