@@ -8,7 +8,7 @@ from wapitiCore.attack.attack import ParameterSituation
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_ssrf import ModuleSsrf
+from wapitiCore.attack.mod_ssrf import ModuleSsrf, SSRF_INBAND_PAYLOADS
 
 
 @pytest.mark.asyncio
@@ -177,3 +177,46 @@ async def test_query_string_injection():
         assert parameter.name == ""
         assert parameter.situation == ParameterSituation.QUERY_STRING
         assert payload_info.payload == "http://wapiti3.ovh/ssrf/yolo/1/51554552595f535452494e47/"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_inband_payloads_generated():
+    # Test that get_payloads yields OOB + in-band payloads with correct rules
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=something")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+        module._session_id = "test42"
+
+        payloads = list(module.mutator.mutate(request, module.get_payloads))
+
+        # We expect 1 OOB + N in-band payloads for the "url" parameter
+        expected_total = 1 + len(SSRF_INBAND_PAYLOADS)
+        assert len(payloads) == expected_total
+
+        # First payload is the OOB one (no rules)
+        _, _, first_payload_info = payloads[0]
+        assert "ssrf/test42/" in first_payload_info.payload
+        assert first_payload_info.rules == []
+
+        # Subsequent payloads are in-band with detection rules
+        _, _, second_payload_info = payloads[1]
+        assert second_payload_info.payload == "file:///etc/passwd"
+        assert "root:x:0:0" in second_payload_info.rules
+
+        # AWS metadata payload should be present
+        aws_found = False
+        for _, _, payload_info in payloads:
+            if "169.254.169.254" in payload_info.payload and "meta-data" in payload_info.payload:
+                assert "ami-id" in payload_info.rules
+                aws_found = True
+        assert aws_found, "AWS metadata payload not found"

