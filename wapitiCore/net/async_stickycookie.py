@@ -1,5 +1,4 @@
 # Based on the original mitmproxy stickycookie addon
-import asyncio
 import collections
 from http import cookiejar
 from typing import List, Tuple, Dict
@@ -42,7 +41,6 @@ class AsyncStickyCookie:
             self.jar[(domain, port, cookie.path)][cookie.name] = cookie.value
 
     async def response(self, flow: http.HTTPFlow):
-        await asyncio.sleep(.1)
         for name, (value, attrs) in flow.response.cookies.items(multi=True):
             # valid RFC 822/1123 datetime specifications for expiry. Sigh.
             dom_port_path = ckey(attrs, flow)
@@ -60,7 +58,6 @@ class AsyncStickyCookie:
                     self.jar[dom_port_path][name] = value
 
     async def request(self, flow: http.HTTPFlow):
-        await asyncio.sleep(.1)
         cookie_list: List[Tuple[str, str]] = []
         for (domain, port, path), c in self.jar.items():
             match = [
