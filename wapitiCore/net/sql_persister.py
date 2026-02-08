@@ -889,24 +889,109 @@ class SqlPersister:
             return request
 
     async def get_payloads(self) -> AsyncIterator[Payload]:
+        # JOIN payloads with paths and responses to avoid N+1 queries
+        statement = select(
+            self.payloads,
+            self.paths.c.path.label("evil_path"),
+            self.paths.c.method.label("evil_method"),
+            self.paths.c.enctype.label("evil_enctype"),
+            self.paths.c.depth.label("evil_depth"),
+            self.paths.c.encoding.label("evil_encoding"),
+            self.paths.c.headers.label("evil_headers"),
+            self.paths.c.referer.label("evil_referer"),
+            self.responses.c.url.label("resp_url"),
+            self.responses.c.status_code.label("resp_status_code"),
+            self.responses.c.headers.label("resp_headers"),
+            self.responses.c.body.label("resp_body"),
+        ).select_from(
+            self.payloads.join(
+                self.paths, self.payloads.c.evil_path_id == self.paths.c.path_id
+            ).outerjoin(
+                self.responses, self.payloads.c.response_id == self.responses.c.response_id
+            )
+        )
+
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(self.payloads))
+            result = await conn.execute(statement)
 
-        for row in result.fetchall():
-            evil_id, module, category, level, parameter, info, payload_type, wstg, response_id = row
+        payload_rows = result.fetchall()
+        if not payload_rows:
+            return
 
-            evil_request = await self.get_path_by_id(evil_id)
-            response = await self.get_response_by_id(response_id)
+        # Pre-fetch all params for the evil path_ids in one query
+        evil_path_ids = [row.evil_path_id for row in payload_rows]
+        params_by_path = {}
+        async with self._engine.begin() as conn:
+            params_result = await conn.execute(
+                select(
+                    self.params.c.path_id,
+                    self.params.c.type, self.params.c.name,
+                    self.params.c.value1, self.params.c.value2, self.params.c.meta
+                ).where(
+                    self.params.c.path_id.in_(evil_path_ids)
+                ).order_by(self.params.c.path_id, self.params.c.type, self.params.c.position)
+            )
+        for param_row in params_result.fetchall():
+            params_by_path.setdefault(param_row[0], []).append(param_row[1:])
+
+        for row in payload_rows:
+            get_params = []
+            post_params = []
+            file_params = []
+
+            for param_type, name, value1, value2, meta in params_by_path.get(row.evil_path_id, []):
+                if param_type == "GET":
+                    get_params.append([name, value1])
+                elif param_type == "POST":
+                    if name == "__RAW__" and not post_params:
+                        post_params = value1
+                    elif isinstance(post_params, list):
+                        post_params.append([name, value1])
+                elif param_type == "FILE":
+                    if meta:
+                        file_params.append([name, (value1, value2, meta)])
+                    else:
+                        file_params.append([name, (value1, value2)])
+                else:
+                    raise ValueError(f"Unknown param type {param_type}")
+
+            evil_request = Request(
+                row.evil_path,
+                method=row.evil_method,
+                encoding=row.evil_encoding,
+                enctype=row.evil_enctype,
+                referer=row.evil_referer,
+                get_params=get_params,
+                post_params=post_params,
+                file_params=file_params,
+                headers=row.evil_headers
+            )
+            evil_request.link_depth = row.evil_depth
+            evil_request.path_id = row.evil_path_id
+
+            response = None
+            if row.response_id and row.resp_url is not None:
+                resp_headers = row.resp_headers
+                if resp_headers and "content-encoding" in resp_headers:
+                    del resp_headers["content-encoding"]
+                response = Response(
+                    httpx.Response(
+                        row.resp_status_code,
+                        headers=resp_headers,
+                        content=row.resp_body
+                    ),
+                    row.resp_url,
+                )
 
             yield Payload(
                 evil_request,
-                category,
-                level,
-                parameter,
-                info,
-                payload_type,
-                json.loads(wstg),
-                module,
+                row.category,
+                row.level,
+                row.parameter,
+                row.info,
+                row.type,
+                json.loads(row.wstg),
+                row.module,
                 response
             )
 
