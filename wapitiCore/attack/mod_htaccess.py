@@ -85,4 +85,4 @@ class ModuleHtaccess(Attack):
             log_verbose(unblocked_content)
             log_red("---")
 
-        self.attacked_get.append(url)
+        self.attacked_get.add(url)
