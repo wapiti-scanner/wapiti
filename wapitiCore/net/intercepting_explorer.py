@@ -278,7 +278,7 @@ async def launch_headless_explorer(
         to_explore: Deque[Request],
         scope: Scope,
         proxy_port: int,
-        excluded_requests: List[Request],
+        excluded_requests: set,
         exclusion_regexes: List[re.Pattern],
         visibility: str = "hidden",
         wait_time: float = 2.,
@@ -291,9 +291,9 @@ async def launch_headless_explorer(
         "server": f"http://127.0.0.1:{proxy_port}"
     }
 
-    # We need to make a copy of this list otherwise requests won't make their way into async_explore (because list is
-    # shared). Also, we want our own list here because we will see URLs with anchors that the proxy can't catch.
-    excluded_requests = list(excluded_requests)
+    # We need to make a copy of this set otherwise requests won't make their way into async_explore (because set is
+    # shared). Also, we want our own set here because we will see URLs with anchors that the proxy can't catch.
+    excluded_requests = set(excluded_requests)
 
     try:
         async with async_playwright() as p:
@@ -308,10 +308,14 @@ async def launch_headless_explorer(
             context = await browser.new_context(ignore_https_errors=True)
             page = await context.new_page()
 
+            # Shadow set for O(1) lookups on to_explore deque
+            to_explore_set = set(to_explore)
+
             try:
                 while to_explore and not stop_event.is_set():
                     request = to_explore.popleft()
-                    excluded_requests.append(request)
+                    to_explore_set.discard(request)
+                    excluded_requests.add(request)
 
                     if request.method == "GET":
                         try:
@@ -354,8 +358,9 @@ async def launch_headless_explorer(
                         if any(regex.match(next_request.url) for regex in exclusion_regexes):
                             continue
 
-                        if next_request not in to_explore and next_request not in excluded_requests:
+                        if next_request not in to_explore_set and next_request not in excluded_requests:
                             to_explore.append(next_request)
+                            to_explore_set.add(next_request)
             finally:
                 await browser.close()
 
@@ -437,7 +442,7 @@ class InterceptingExplorer(Explorer):
                 self._pattern_counts[request.pattern] += 1
 
             yield request, response
-            self._processed_requests.append(request)
+            self._processed_requests.add(request)
             log_verbose(f"[+] {request}")
 
     async def async_explore(
@@ -448,14 +453,14 @@ class InterceptingExplorer(Explorer):
         self._queue = asyncio.Queue()
 
         exclusion_regexes = []
-        excluded_requests = []
+        excluded_requests = set()
 
         if isinstance(excluded_urls, list):
             for bad_request in excluded_urls:
                 if isinstance(bad_request, str):
                     exclusion_regexes.append(wildcard_translate(bad_request))
                 elif isinstance(bad_request, Request):
-                    excluded_requests.append(bad_request)
+                    excluded_requests.add(bad_request)
 
         # Launch proxy as asyncio task
         self._mitm_task = asyncio.create_task(
