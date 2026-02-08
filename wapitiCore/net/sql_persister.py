@@ -23,7 +23,7 @@ from collections import namedtuple
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dict, Any
 
 import httpx
-from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
+from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_,
                         literal_column, select)
 from sqlalchemy.sql.functions import max as sql_max
@@ -102,7 +102,7 @@ class SqlPersister:
 
         self.scan_infos = Table(
             f"{table_prefix}scan_infos", self.metadata,
-            Column("key", String(255), nullable=False),
+            Column("key", String(255), nullable=False, index=True),
             Column("value", Text, nullable=False)  # We keep the root URL here. With URL scope it may be big
         )
 
@@ -116,14 +116,14 @@ class SqlPersister:
             Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
             Column("headers", PickleType),  # Pickled sent HTTP headers, can be huge
             Column("referer", Text),  # Another URL so potentially huge
-            Column("evil", Boolean, nullable=False),
-            Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True),
+            Column("evil", Boolean, nullable=False, index=True),
+            Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True, index=True),
         )
 
         self.params = Table(
             f"{table_prefix}params", self.metadata,
             Column("param_id", Integer, primary_key=True),
-            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id")),
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), index=True),
             Column("type", String(length=16), nullable=False),  # HTTP method or "FILE" for multipart
             Column("position", Integer, nullable=False),
             Column("name", Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
@@ -134,7 +134,7 @@ class SqlPersister:
 
         self.payloads = Table(
             f"{table_prefix}payloads", self.metadata,
-            Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False, index=True),
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
             Column("level", Integer, nullable=False),
@@ -149,7 +149,8 @@ class SqlPersister:
         self.attack_logs = Table(
             f"{table_prefix}attack_logs", self.metadata,
             Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
-            Column("module", String(255), nullable=False)
+            Column("module", String(255), nullable=False, index=True),
+            Index(f"ix_{table_prefix}attack_logs_path_id_module", "path_id", "module"),
         )
 
         self.responses = Table(
