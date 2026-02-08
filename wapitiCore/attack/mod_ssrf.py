@@ -21,12 +21,14 @@ from asyncio import sleep
 from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
-from httpx import RequestError
+from httpx import ReadTimeout, RequestError
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import SsrfFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.net.web import http_repr
@@ -75,6 +77,14 @@ def _make_payload_info(payload: str, rules: Optional[list] = None) -> PayloadInf
     return info
 
 
+def _search_patterns(content: str, patterns: list) -> str:
+    """Return the first pattern found in content, or empty string."""
+    for pattern in patterns:
+        if pattern in content:
+            return pattern
+    return ""
+
+
 class ModuleSsrf(Attack):
     """
     Detect Server-Side Request Forgery vulnerabilities.
@@ -113,17 +123,115 @@ class ModuleSsrf(Attack):
         for entry in SSRF_INBAND_PAYLOADS:
             yield _make_payload_info(entry["payload"], rules=entry["rules"])
 
+    async def _check_false_positive(self, request: Request, pattern: str) -> bool:
+        """Send the original request without payload to check if the pattern already exists."""
+        try:
+            response = await self.crawler.async_send(request)
+        except RequestError:
+            self.network_errors += 1
+            return False
+        return pattern in response.content
+
     async def attack(self, request: Request, response: Optional[Response] = None):
-        # Let's just send payloads, we don't care of the response as what we want to know is if the target
-        # contacted the endpoint.
-        for mutated_request, _parameter, _payload in self.mutator.mutate(request, self.get_payloads):
+        timeouted = False
+        page = request.path
+        saw_internal_error = False
+        current_parameter = None
+        vulnerable_parameter = False
+
+        for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
+            if current_parameter != parameter:
+                # New parameter: reset vulnerability tracking
+                current_parameter = parameter
+                vulnerable_parameter = False
+            elif vulnerable_parameter:
+                # Already found a vuln for this parameter, skip to the next one
+                continue
+
             log_verbose(f"[¨] {mutated_request}")
 
             try:
-                await self.crawler.async_send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
+            except ReadTimeout:
+                self.network_errors += 1
+                if timeouted:
+                    continue
+
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(http_repr(mutated_request))
+                log_orange("---")
+
+                if parameter.is_qs_injection:
+                    anom_msg = Messages.MSG_QS_TIMEOUT
+                else:
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
+
+                await self.add_medium(
+                    finding_class=ResourceConsumptionFinding,
+                    request=mutated_request,
+                    info=anom_msg,
+                    parameter=parameter.display_name,
+                )
+                timeouted = True
             except RequestError:
                 self.network_errors += 1
                 continue
+            else:
+                # In-band detection: check response content for matching patterns
+                if payload_info.rules:
+                    pattern = _search_patterns(response.content, payload_info.rules)
+                    if pattern and not await self._check_false_positive(request, pattern):
+                        if parameter.is_qs_injection:
+                            vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                        else:
+                            vuln_message = (
+                                f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
+                            )
+
+                        await self.add_high(
+                            finding_class=SsrfFinding,
+                            request=mutated_request,
+                            info=vuln_message,
+                            parameter=parameter.display_name,
+                            response=response
+                        )
+
+                        log_red("---")
+                        log_red(
+                            Messages.MSG_QS_INJECT if parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
+                            self.MSG_VULN,
+                            page,
+                            parameter.display_name
+                        )
+                        log_red(Messages.MSG_EVIL_REQUEST)
+                        log_red(http_repr(mutated_request))
+                        log_red("---")
+
+                        vulnerable_parameter = True
+                        continue
+
+                if response.is_server_error and not saw_internal_error:
+                    saw_internal_error = True
+                    if parameter.is_qs_injection:
+                        anom_msg = Messages.MSG_QS_500
+                    else:
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
+
+                    await self.add_high(
+                        finding_class=InternalErrorFinding,
+                        request=mutated_request,
+                        info=anom_msg,
+                        parameter=parameter.display_name,
+                        response=response
+                    )
+
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(http_repr(mutated_request))
+                    log_orange("---")
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
