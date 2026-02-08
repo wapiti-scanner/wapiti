@@ -81,7 +81,7 @@ class Explorer:
         self._qs_limit = 0
         self._hostnames = set()
         self._regexes = []
-        self._processed_requests = []
+        self._processed_requests = set()
         self._cookiejar = CookieJar()
 
         # Locking required for writing to the following structures
@@ -276,7 +276,7 @@ class Explorer:
 
     async def _async_analyze(self, request) -> Tuple[bool, List, Optional[Response]]:
         async with self._sem:
-            self._processed_requests.append(request)  # thread safe
+            self._processed_requests.add(request)  # thread safe
 
             log_verbose(f"[+] {request}")
 
@@ -355,12 +355,15 @@ class Explorer:
                 if isinstance(bad_request, str):
                     self._regexes.append(wildcard_translate(bad_request))
                 elif isinstance(bad_request, web.Request):
-                    self._processed_requests.append(bad_request)
+                    self._processed_requests.add(bad_request)
 
         if self._max_depth < 0:
             return
 
         task_to_request = {}
+        # Shadow set for O(1) lookups on to_explore deque
+        to_explore_set = set(to_explore)
+
         while True:
             while to_explore:
                 # Concurrent tasks are limited through the use of the semaphore, BUT we don't want the to_explore
@@ -373,6 +376,8 @@ class Explorer:
                     break
 
                 request = to_explore.popleft()
+                to_explore_set.discard(request)
+
                 if request in self._processed_requests:
                     continue
 
@@ -429,8 +434,12 @@ class Explorer:
                         if unfiltered_request.hostname not in self._hostnames:
                             unfiltered_request.link_depth = 0
 
-                        if unfiltered_request not in self._processed_requests and unfiltered_request not in to_explore:
+                        if (
+                            unfiltered_request not in self._processed_requests
+                            and unfiltered_request not in to_explore_set
+                        ):
                             to_explore.append(unfiltered_request)
+                            to_explore_set.add(unfiltered_request)
                             accepted_urls += 1
 
                 # remove the now completed task
