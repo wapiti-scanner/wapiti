@@ -87,6 +87,71 @@ async def test_whole_stuff():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_finish_with_missing_request_id():
+    # Test that finish() handles missing request IDs gracefully (no crash)
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 2
+
+    # get_path_by_id returns None for the unknown request_id "999"
+    # but returns the real request for "2"
+    def get_path_by_id(request_id):
+        if int(request_id) == 2:
+            return request
+        return None
+
+    persister.get_path_by_id.side_effect = get_path_by_id
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+        module.do_post = True
+
+        respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    # request_id "999" does not exist in persister
+                    "999": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/999/666f6f/31337-0-10.0.0.1.txt",
+                                "ip": "10.0.0.1",
+                                "method": "GET"
+                            }
+                        ]
+                    },
+                    # request_id "2" exists and should be reported
+                    "2": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:53:00+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/2/666f6f/31337-0-10.0.0.2.txt",
+                                "ip": "10.0.0.2",
+                                "method": "GET"
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
+        # finish() should NOT raise ValueError, it should skip the missing ID and process the valid one
+        await module.finish()
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Server Side Request Forgery"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_query_string_injection():
     # Test attacking raw query string (hex-encoded value of QUERY_STRING should appear in payload)
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))

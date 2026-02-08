@@ -23,7 +23,7 @@ from binascii import hexlify, unhexlify
 
 from httpx import RequestError
 
-from wapitiCore.main.log import logging, log_red, log_verbose
+from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import SsrfFinding
@@ -98,7 +98,11 @@ class ModuleSsrf(Attack):
                 for request_id in data:
                     original_request = await self.persister.get_path_by_id(request_id)
                     if original_request is None:
-                        raise ValueError("Could not find the original request with that ID")
+                        logging.warning(
+                            "[!] Could not find original request with ID %s, skipping",
+                            request_id
+                        )
+                        continue
 
                     page = original_request.path
                     for hex_param in data[request_id]:
