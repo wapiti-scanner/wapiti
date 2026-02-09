@@ -230,52 +230,82 @@ class Wapiti:
         """Extract hyperlinks and forms from the webpages found on the website"""
         stop_event.clear()
 
-        if self._mitm_proxy_port or self._headless_mode != "no":
-            modified_configuration = replace(self.crawler_configuration)
-            modified_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port or 8080}/"
+        async def run_explorer(explorer: Explorer) -> bool:
+            explorer.max_depth = self._max_depth
+            explorer.max_files_per_dir = self._max_files_per_dir
+            explorer.max_requests_per_depth = self._max_links_per_page
+            explorer.forbidden_parameters = self._bad_params
+            explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
+            explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
 
-            explorer = InterceptingExplorer(
-                modified_configuration,
-                self.target_scope,
-                stop_event,
-                parallelism=parallelism,
-                mitm_port=self._mitm_proxy_port or 8080,
-                proxy=self._proxy,
-                drop_cookies=self.crawler_configuration.drop_cookies,
-                headless=self._headless_mode,
-                cookies=self.crawler_configuration.cookies,
-                wait_time=self._wait_time,
-            )
-        else:
+            self._buffer = []
+
+            try:
+                if self._max_scan_time is None:
+                    await self.explore_and_save_requests(explorer)
+                else:
+                    await asyncio.wait_for(self.explore_and_save_requests(explorer), self._max_scan_time)
+            except asyncio.TimeoutError:
+                logging.info("Max scan time was reached, stopping.")
+                if not stop_event.is_set():
+                    stop_event.set()
+            finally:
+                await explorer.clean()
+
+            await self.persister.save_requests(self._buffer)
+
+            # Let's save explorer values (limits)
+            explorer.save_state(self.persister.output_file[:-2] + "pkl")
+            # Overwrite cookies for the next (attack) step
+            self.crawler_configuration.cookies = explorer.cookie_jar
+            return not stop_event.is_set()
+
+        if self._headless_mode == "both":
+            original_start_urls = deque(self._start_urls)
             explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
+            logging.info("Start standard crawler.")
+            await run_explorer(explorer)
 
-        explorer.max_depth = self._max_depth
-        explorer.max_files_per_dir = self._max_files_per_dir
-        explorer.max_requests_per_depth = self._max_links_per_page
-        explorer.forbidden_parameters = self._bad_params
-        explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
-        explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
-
-        self._buffer = []
-
-        try:
-            await asyncio.wait_for(
-               self.explore_and_save_requests(explorer),
-               self._max_scan_time
-            )
-        except asyncio.TimeoutError:
-            logging.info("Max scan time was reached, stopping.")
             if not stop_event.is_set():
-                stop_event.set()
-        finally:
-            await explorer.clean()
+                self._start_urls = deque(original_start_urls)
+                modified_configuration = replace(self.crawler_configuration)
+                modified_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port or 8080}/"
 
-        await self.persister.save_requests(self._buffer)
+                intercepting_explorer = InterceptingExplorer(
+                    modified_configuration,
+                    self.target_scope,
+                    stop_event,
+                    parallelism=parallelism,
+                    mitm_port=self._mitm_proxy_port or 8080,
+                    proxy=self._proxy,
+                    drop_cookies=self.crawler_configuration.drop_cookies,
+                    headless="hidden",
+                    cookies=self.crawler_configuration.cookies,
+                    wait_time=self._wait_time,
+                )
+                logging.info("Start headless crawler.")
+                await run_explorer(intercepting_explorer)
+        else:
+            if self._mitm_proxy_port or self._headless_mode != "no":
+                modified_configuration = replace(self.crawler_configuration)
+                modified_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port or 8080}/"
 
-        # Let's save explorer values (limits)
-        explorer.save_state(self.persister.output_file[:-2] + "pkl")
-        # Overwrite cookies for the next (attack) step
-        self.crawler_configuration.cookies = explorer.cookie_jar
+                explorer = InterceptingExplorer(
+                    modified_configuration,
+                    self.target_scope,
+                    stop_event,
+                    parallelism=parallelism,
+                    mitm_port=self._mitm_proxy_port or 8080,
+                    proxy=self._proxy,
+                    drop_cookies=self.crawler_configuration.drop_cookies,
+                    headless=self._headless_mode,
+                    cookies=self.crawler_configuration.cookies,
+                    wait_time=self._wait_time,
+                )
+            else:
+                explorer = Explorer(self.crawler_configuration, self.target_scope, stop_event, parallelism=parallelism)
+
+            await run_explorer(explorer)
 
     async def write_report(self):
         if not self.output_file:
