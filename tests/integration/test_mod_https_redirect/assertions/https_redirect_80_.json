@@ -6,7 +6,7 @@
                 "path": "/",
                 "info": "No HTTPS redirection for this host. All HTTP requests are served in clear text.",
                 "parameter": null,
-                "http_request": "GET / HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET / HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
                 ],
@@ -47,7 +47,7 @@
                 "path": "/admin/",
                 "info": "Sensitive data (cookie in the response) was sent over an unencrypted HTTP connection to http://https_redirect/admin/. The server redirected, but not to an HTTPS URL, leaving the initial data and the redirection exposed.",
                 "parameter": null,
-                "http_request": "GET /admin/ HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /admin/ HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
                 ],
@@ -92,7 +92,7 @@
                 "path": "/http_redirect.php",
                 "info": "Sensitive data (GET parameters) was sent over an unencrypted HTTP connection to http://https_redirect/http_redirect.php?key=value. The server redirected, but not to an HTTPS URL, leaving the initial data and the redirection exposed.",
                 "parameter": null,
-                "http_request": "GET /http_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /http_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
                 ],
@@ -133,7 +133,7 @@
                 "path": "/https_redirect.php",
                 "info": "Sensitive data (GET parameters) was sent over an unencrypted HTTP connection to http://https_redirect/https_redirect.php?key=value. The server redirected to an HTTPS URL, but the initial data and the redirection were exposed.",
                 "parameter": null,
-                "http_request": "GET /https_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /https_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
                 ],
@@ -174,7 +174,7 @@
                 "path": "/no_redirect.php",
                 "info": "Sensitive data (GET parameters) was sent over an unencrypted HTTP connection to http://https_redirect/no_redirect.php?key=value. The server did not enforce HTTPS.",
                 "parameter": null,
-                "http_request": "GET /no_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /no_redirect.php?key=value HTTP/1.1\nhost: https_redirect\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-CRYP-03"
                 ],
@@ -243,7 +243,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -309,7 +309,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -375,7 +375,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -433,7 +433,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -491,7 +491,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -557,7 +557,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -623,7 +623,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -685,7 +685,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -747,7 +747,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -809,7 +809,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -871,7 +871,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -933,7 +933,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -995,7 +995,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -1061,7 +1061,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -1127,7 +1127,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -1193,7 +1193,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },

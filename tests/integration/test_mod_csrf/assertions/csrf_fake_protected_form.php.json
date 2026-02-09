@@ -7,7 +7,7 @@
                 "info": "CSRF token 'csrf_token' might be easy to predict",
                 "parameter": null,
                 "module": "csrf",
-                "http_request": "POST /fake_protected_form.php HTTP/1.1\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://csrf/fake_protected_form.php\ncookie: PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932\ncontent-length: 39\nContent-Type: application/x-www-form-urlencoded\n\ncsrf_token=AAAAAAAAAAAAAAA&name=default",
+                "http_request": "POST /fake_protected_form.php HTTP/1.1\nhost: csrf\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/x-www-form-urlencoded\nreferer: http://csrf/fake_protected_form.php\ncookie: PHPSESSID=1335df1b1b4a2149e8690c7ce5fc3932\ncontent-length: 39\nContent-Type: application/x-www-form-urlencoded\n\ncsrf_token=AAAAAAAAAAAAAAA&name=default",
                 "wstg": [
                     "WSTG-SESS-05"
                 ]
@@ -44,7 +44,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -142,7 +142,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
