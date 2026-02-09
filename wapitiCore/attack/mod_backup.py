@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import asyncio
 from difflib import SequenceMatcher
 from os.path import splitext, join as path_join
 from urllib.parse import urljoin
@@ -104,6 +105,16 @@ class ModuleBackup(Attack):
     async def attack(self, request: Request, response: Optional[Response] = None):
         page = request.path
 
+        try:
+            original_response = await self.crawler.async_send(request)
+        except RequestError:
+            self.network_errors += 1
+            return
+        requests = []
+        evil_reqs = []
+        urls = []
+        if self.get_payloads():
+            self.attacked_get.add(page)
         for payload_info in self.get_payloads():
             raw_payload = payload_info.payload
 
@@ -121,17 +132,17 @@ class ModuleBackup(Attack):
 
             log_verbose(f"[¨] {url}")
 
-            self.attacked_get.add(page)
             evil_req = Request(url)
-
-            try:
-                original_response = await self.crawler.async_send(request)
-                response = await self.crawler.async_send(evil_req)
-            except RequestError:
+            evil_reqs.append(evil_req)
+            requests.append(self.crawler.async_send(evil_req))
+            urls.append(url)
+        responses = await asyncio.gather(*requests, return_exceptions=True)
+        for resp, url, evil_req in zip(responses, urls, evil_reqs):
+            if isinstance(resp, RequestError):
                 self.network_errors += 1
                 continue
-            if response and response.is_success:
-                if compare_responses(response.content or "", original_response.content or ""):
+            if resp and resp.is_success:
+                if compare_responses(resp.content or "", original_response.content or ""):
                     log_orange(f"Skipping {evil_req.url} because it's too similar to the response from {request.url}")
                     continue
                 log_red(f"Found backup file {evil_req.url}")
@@ -140,5 +151,5 @@ class ModuleBackup(Attack):
                     finding_class=BackupFinding,
                     request=evil_req,
                     info=f"Backup file {url} found for {page}",
-                    response=response
+                    response=resp
                 )
