@@ -29,7 +29,7 @@
                 "info": "XXE vulnerability leading to file disclosure",
                 "parameter": "raw body",
                 "module": "xxe",
-                "http_request": "POST /xml_vuln_maker.php?filterword=passwd HTTP/1.1\nhost: xxe\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: text/xml\ncontent-length: 134\nContent-Type: text/xml\n\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+                "http_request": "POST /xml_vuln_maker.php?filterword=passwd HTTP/1.1\nhost: xxe\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: text/xml\ncontent-length: 134\nContent-Type: text/xml\n\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><!DOCTYPE foo[<!ELEMENT foo ANY><!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
                 "wstg": [
                     "WSTG-INPV-07"
                 ]
@@ -66,7 +66,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -132,7 +132,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -198,7 +198,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -264,7 +264,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -330,7 +330,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },

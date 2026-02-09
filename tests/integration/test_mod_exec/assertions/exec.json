@@ -7,7 +7,7 @@
                 "info": "Command execution via injection in the parameter args",
                 "parameter": "args",
                 "module": "exec",
-                "http_request": "GET /argument_inject.php/?args=%3Benv%3B HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /argument_inject.php/?args=%3Benv%3B HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INPV-12"
                 ]
@@ -18,7 +18,7 @@
                 "info": "Command execution via injection in the parameter cmd",
                 "parameter": "cmd",
                 "module": "exec",
-                "http_request": "GET /direct_exec.php/?cmd=id HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /direct_exec.php/?cmd=id HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INPV-12"
                 ]
@@ -29,7 +29,7 @@
                 "info": "Command execution via injection in the parameter abc",
                 "parameter": "abc",
                 "module": "exec",
-                "http_request": "GET /last_payload.php/?abc=%26set%26 HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /last_payload.php/?abc=%26set%26 HTTP/1.1\nhost: exec\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INPV-12"
                 ]
@@ -66,7 +66,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -132,7 +132,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -198,7 +198,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -264,7 +264,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -330,7 +330,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -396,7 +396,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },
@@ -462,7 +462,7 @@
                         ],
                         [
                             "user-agent",
-                            "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
                         ]
                     ]
                 },

@@ -11,7 +11,7 @@
                 "level": 0,
                 "parameter": null,
                 "module": "wp_enum",
-                "http_request": "GET //wp-content/plugins/akismet/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET //wp-content/plugins/akismet/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-02",
                     "WSTG-INFO-08"
@@ -47,7 +47,7 @@
                 "level": 0,
                 "parameter": null,
                 "module": "wp_enum",
-                "http_request": "GET //wp-content/plugins/contact-form-7/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET //wp-content/plugins/contact-form-7/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-02",
                     "WSTG-INFO-08"
@@ -91,7 +91,7 @@
                 "level": 0,
                 "parameter": null,
                 "module": "wp_enum",
-                "http_request": "GET //wp-content/themes/twentytwentyone/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET //wp-content/themes/twentytwentyone/readme.txt HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-02",
                     "WSTG-INFO-08"
@@ -135,7 +135,7 @@
                 "level": 0,
                 "parameter": null,
                 "module": "wp_enum",
-                "http_request": "GET /feed/rss2/ HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "http_request": "GET /feed/rss2/ HTTP/1.1\nhost: wordpress\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                 "wstg": [
                     "WSTG-INFO-02",
                     "WSTG-INFO-08"
