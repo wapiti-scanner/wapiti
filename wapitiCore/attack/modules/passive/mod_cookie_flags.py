@@ -15,9 +15,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Generator, Any, List, Tuple
-from urllib.parse import urlparse
 
 from wapitiCore.model.vulnerability import VulnerabilityInstance
+from wapitiCore.net.web import urlparse
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.secure_cookie import SecureCookieFinding
 from wapitiCore.definitions.http_only import HttpOnlyFinding

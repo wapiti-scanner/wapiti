@@ -22,7 +22,6 @@ from collections import defaultdict
 import pickle
 import math
 from typing import Tuple, List, Optional, AsyncIterator, Deque
-from urllib.parse import urlparse
 import re
 from http.cookiejar import CookieJar
 
@@ -41,6 +40,7 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net import jsparser_angular
 from wapitiCore.net.scope import Scope, wildcard_translate
+from wapitiCore.net.web import urlparse
 
 MIME_TEXT_TYPES = ('text/', 'application/xml')
 # Limit page size to 2MB

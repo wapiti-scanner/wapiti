@@ -20,7 +20,7 @@
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from urllib.parse import urlparse, urlunparse, urlencode
+from urllib.parse import urlunparse, urlencode
 from typing import Dict, Any
 from uuid import uuid4
 
@@ -28,6 +28,7 @@ from wapiti_swagger.models import Parameter
 from wapiti_swagger.parser import parse, generate_request_body_from_schema
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 

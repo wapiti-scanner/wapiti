@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlunparse
 import argparse
 import sys
 
@@ -29,6 +29,7 @@ from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential, RawCred
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 from wapitiCore.net.auth import login_with_raw_data, async_fetch_login_page
+from wapitiCore.net.web import urlparse
 
 
 

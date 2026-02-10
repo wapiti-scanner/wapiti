@@ -25,12 +25,11 @@ from dataclasses import replace
 from hashlib import sha256
 from time import gmtime, strftime
 from typing import List, Deque
-from urllib.parse import urlparse
-
 import browser_cookie3
 from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore import WAPITI_VERSION
+from wapitiCore.net.web import urlparse
 from wapitiCore.attack.active_scanner import ActiveScanner
 from wapitiCore.attack.passive_scanner import PassiveScanner
 from wapitiCore.controller.exceptions import InvalidOptionValue

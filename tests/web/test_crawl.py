@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs
 from tempfile import TemporaryDirectory
 from shutil import rmtree
 from asyncio import Event
@@ -8,6 +8,7 @@ import httpx
 import pytest
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 from wapitiCore.controller.wapiti import Wapiti
 
 
