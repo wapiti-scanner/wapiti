@@ -20,7 +20,7 @@
 from copy import deepcopy
 import posixpath
 import sys
-from urllib.parse import urlparse, urlunparse, unquote, quote, urljoin
+from urllib.parse import urlparse as _urlparse, urlunparse, unquote, quote, urljoin
 from typing import Optional, List, Tuple, Union, TYPE_CHECKING
 import re
 
@@ -32,6 +32,27 @@ if TYPE_CHECKING:
     from wapitiCore.net.response import Response
 
 Parameters = Optional[Union[List[List[str]], str]]
+
+
+def urlparse(url: str) -> str:
+    url_parts = _urlparse(url)
+
+    netloc = ""
+    if url_parts.username is not None:
+        netloc += url_parts.username
+
+        if url_parts.password is not None:
+            netloc += f":{url_parts.password}"
+
+        netloc += "@"
+
+    if url_parts.hostname is not None:
+        netloc += url_parts.hostname
+
+    if url_parts.port is not None:
+        netloc += f":{url_parts.port}"
+
+    return url_parts._replace(netloc=netloc)
 
 
 def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote) -> str:

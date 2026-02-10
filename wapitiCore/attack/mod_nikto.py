@@ -23,10 +23,10 @@ import os
 import random
 import re
 from typing import List, Optional
-from urllib.parse import urlparse
 
 from httpx import RequestError
 
+from wapitiCore.net.web import urlparse
 from wapitiCore.main.log import logging, log_verbose, log_red
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.definitions.dangerous_resource import DangerousResourceFinding

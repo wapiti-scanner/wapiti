@@ -19,13 +19,13 @@ import dataclasses
 from configparser import ConfigParser
 from typing import Tuple, List, Dict, Any
 from html.parser import attrfind_tolerant
-from urllib.parse import urlparse
 from os.path import join as path_join
 
 from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, random_string
 from wapitiCore.net import Response
+from wapitiCore.net.web import urlparse
 
 
 # Everything under those tags will be treated as text

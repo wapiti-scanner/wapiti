@@ -23,11 +23,11 @@
 import os
 from importlib.resources import files
 from shutil import copytree, rmtree, copy
-from urllib.parse import urlparse
 import time
 
 from mako.template import Template
 
+from wapitiCore.net.web import urlparse
 from wapitiCore.report.jsonreportgenerator import JSONReportGenerator
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL, INFO_LEVEL
 

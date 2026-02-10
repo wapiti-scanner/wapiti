@@ -24,7 +24,6 @@ from traceback import print_tb
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
-from urllib.parse import urlparse
 import inspect
 import json
 
@@ -38,6 +37,7 @@ from playwright._impl._errors import TargetClosedError
 from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 from wapitiCore.net.cookies import mitm_jar_to_cookiejar
 from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler

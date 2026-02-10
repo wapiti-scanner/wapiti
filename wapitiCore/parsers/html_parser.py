@@ -22,7 +22,7 @@ import re
 from functools import lru_cache
 from hashlib import md5
 from posixpath import normpath
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlunparse
 from typing import Iterator, List, Optional, Dict, Set, Tuple, Union, Any
 
 from bs4 import BeautifulSoup
@@ -33,6 +33,7 @@ from tld.exceptions import TldBadUrl, TldDomainNotFound
 # Internal libraries
 from wapitiCore import parser_name
 from wapitiCore.net import Request, make_absolute
+from wapitiCore.net.web import urlparse
 from wapitiCore.parsers.javascript import extract_js_redirections
 
 DISCONNECT_REGEX = r'(?i)((log|sign)\s?(out|off)|disconnect|déconnexion)'
