@@ -7,7 +7,7 @@ from httpx import Response as HttpxResponse
 
 import pytest
 import respx
-from dns.resolver import Resolver
+from dns.asyncresolver import Resolver
 
 from tests import get_mock_open
 from wapitiCore.attack.mod_log4shell import ModuleLog4Shell
@@ -109,10 +109,10 @@ async def test_verify_dns():
 
         module = ModuleLog4Shell(crawler, persister, options, crawler_configuration)
 
-        with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(True),)):
+        with mock.patch.object(Resolver, "resolve", new=AsyncMock(return_value=(MockAnswer(True),))):
             assert await module._verify_dns("foobar") is True
 
-        with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(False),)):
+        with mock.patch.object(Resolver, "resolve", new=AsyncMock(return_value=(MockAnswer(False),))):
             assert await module._verify_dns("foobar") is False
 
 
