@@ -191,7 +191,8 @@
       "desc": "MIME type confusion can occur when a browser interprets files as a different type than intended, which could lead to security vulnerabilities like cross-site scripting (XSS).",
       "sol": "Implement X-Content-Type-Options to prevent MIME type sniffing.",
       "ref": {
-        "OWASP: MIME Sniffing": "https://owasp.org/www-community/attacks/MIME_sniffing",
+        "OWASP: MIME Sniffing": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html#x-content-type-options",
+        "Mozilla: MIME Sniffing": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types#mime_sniffing",
         "KeyCDN: Preventing MIME Type Sniffing": "https://www.keycdn.com/support/preventing-mime-type-sniffing"
       },
       "wstg": [
