@@ -24,7 +24,7 @@ from collections import deque
 from dataclasses import replace
 from hashlib import sha256
 from time import gmtime, strftime
-from typing import List, Deque
+from typing import List, Deque, Set
 from urllib.parse import urlparse
 
 import browser_cookie3
@@ -214,17 +214,44 @@ class Wapiti:
         # if stopped and self._start_urls:
         #     print(_("The scan will be resumed next time unless you pass the --skip-crawl option."))
 
-    async def explore_and_save_requests(self, explorer):
+    @staticmethod
+    def _consume_passive_scan_results(done_tasks: Set[asyncio.Task]):
+        for task in done_tasks:
+            try:
+                task.result()
+            except Exception:  # pylint: disable=broad-except
+                logging.exception("Passive scan task failed")
+
+    async def explore_and_save_requests(self, explorer, passive_workers: int = 4):
         self._buffer = []
+        pending_passive_tasks: Set[asyncio.Task] = set()
+        max_pending_tasks = max(1, passive_workers) * 4
+
         # Browse URLs are saved them once we have enough in our buffer
-        async for request, response in explorer.async_explore(self._start_urls, self._excluded_urls):
-            self._buffer.append((request, response))
+        try:
+            async for request, response in explorer.async_explore(self._start_urls, self._excluded_urls):
+                self._buffer.append((request, response))
+                pending_passive_tasks.add(asyncio.create_task(self._passive_scanner.scan(request, response)))
 
-            await self._passive_scanner.scan(request, response)
+                if len(pending_passive_tasks) >= max_pending_tasks:
+                    done, pending_passive_tasks = await asyncio.wait(
+                        pending_passive_tasks,
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+                    self._consume_passive_scan_results(done)
 
-            if len(self._buffer) > 100:
-                await self.persister.save_requests(self._buffer)
-                self._buffer = []
+                if len(self._buffer) > 100:
+                    await self.persister.save_requests(self._buffer)
+                    self._buffer = []
+
+            if pending_passive_tasks:
+                done, __ = await asyncio.wait(pending_passive_tasks)
+                self._consume_passive_scan_results(done)
+        finally:
+            for task in pending_passive_tasks:
+                task.cancel()
+            if pending_passive_tasks:
+                await asyncio.gather(*pending_passive_tasks, return_exceptions=True)
 
     async def browse(self, stop_event: asyncio.Event, parallelism: int = 8):
         """Extract hyperlinks and forms from the webpages found on the website"""
@@ -259,8 +286,9 @@ class Wapiti:
         self._buffer = []
 
         try:
+            passive_workers = max(2, min(8, parallelism))
             await asyncio.wait_for(
-               self.explore_and_save_requests(explorer),
+               self.explore_and_save_requests(explorer, passive_workers=passive_workers),
                self._max_scan_time
             )
         except asyncio.TimeoutError:
