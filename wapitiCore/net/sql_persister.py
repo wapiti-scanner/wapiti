@@ -337,6 +337,69 @@ class SqlPersister:
             result = await conn.execute(statement)
             return result.inserted_primary_key[0]
 
+    @staticmethod
+    def _build_params_values(path_id: int, request: Request) -> List[Dict[str, Any]]:
+        all_values: List[Dict[str, Any]] = []
+
+        for i, (get_param_key, get_param_value) in enumerate(request.get_params):
+            all_values.append(
+                {
+                    "path_id": path_id,
+                    "type": "GET",
+                    "position": i,
+                    "name": get_param_key,
+                    "value1": get_param_value,
+                    "value2": None,
+                    "meta": None
+                }
+            )
+
+        if isinstance(request.post_params, list):
+            for i, (post_param_key, post_param_value) in enumerate(request.post_params):
+                all_values.append(
+                    {
+                        "path_id": path_id,
+                        "type": "POST",
+                        "position": i,
+                        "name": post_param_key,
+                        "value1": post_param_value,
+                        "value2": None,
+                        "meta": None
+                    }
+                )
+        elif request.post_params:
+            all_values.append(
+                {
+                    "path_id": path_id,
+                    "type": "POST",
+                    "position": 0,
+                    "name": "__RAW__",
+                    "value1": request.post_params,
+                    "value2": None,
+                    "meta": None
+                }
+            )
+
+        for i, (file_param_key, file_param_value) in enumerate(request.file_params):
+            if len(file_param_value) == 3:
+                meta = file_param_value[2]
+            else:
+                meta = None
+
+            all_values.append(
+                {
+                    "path_id": path_id,
+                    "type": "FILE",
+                    "position": i,
+                    "name": file_param_key,
+                    "value1": file_param_value[0],
+                    "value2": file_param_value[1],
+                    "meta": meta
+                }
+            )
+
+        return all_values
+
     async def save_request(self, http_resource: Request, response: Response = None):
         headers_to_save = http_resource.sent_headers or http_resource.headers
         response_id = await self.save_response(response)
@@ -676,63 +739,7 @@ class SqlPersister:
         # path_id is the ID of the evil path
         path_id = result.inserted_primary_key[0]
 
-        all_values = []
-        for i, (get_param_key, get_param_value) in enumerate(request.get_params):
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "GET",
-                    "position": i,
-                    "name": get_param_key,
-                    "value1": get_param_value,
-                    "value2": None,
-                    "meta": None
-                }
-            )
-
-        if isinstance(request.post_params, list):
-            for i, (post_param_key, post_param_value) in enumerate(request.post_params):
-                all_values.append(
-                    {
-                        "path_id": path_id,
-                        "type": "POST",
-                        "position": i,
-                        "name": post_param_key,
-                        "value1": post_param_value,
-                        "value2": None,
-                        "meta": None
-                    }
-                )
-        elif request.post_params:
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "POST",
-                    "position": 0,
-                    "name": "__RAW__",
-                    "value1": request.post_params,
-                    "value2": None,
-                    "meta": None
-                }
-            )
-
-        for i, (file_param_key, file_param_value) in enumerate(request.file_params):
-            if len(file_param_value) == 3:
-                meta = file_param_value[2]
-            else:
-                meta = None
-
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "FILE",
-                    "position": i,
-                    "name": file_param_key,
-                    "value1": file_param_value[0],
-                    "value2": file_param_value[1],
-                    "meta": meta
-                }
-            )
+        all_values = self._build_params_values(path_id, request)
 
         if all_values:
             async with self._engine.begin() as conn:
