@@ -41,11 +41,14 @@ class ModuleCsp:
         # Keep some identified cases here for each netloc
         self._reported_csp_issues: set[Tuple[str, str, str]] = set()
 
-    def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
+    def analyze(self, request: Request, response: Response, context=None) -> Generator[VulnerabilityInstance, Any, None]:
         """
         Analyzes an HTTP response for Content Security Policy (CSP) headers.
         """
-        if "text/html" not in response.type:
+        if context:
+            if not context.is_html():
+                return
+        elif "text/html" not in response.type:
             return
 
         csp_header_value = response.headers.get("Content-Security-Policy")

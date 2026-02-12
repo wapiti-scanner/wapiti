@@ -21,18 +21,24 @@ class ModuleInconsistentRedirection:
         # Keep track of already-reported responses, by response MD5
         self._reported_hashes = set()
 
-    def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
+    def analyze(self, request: Request, response: Response, context=None) -> Generator[VulnerabilityInstance, Any, None]:
         if not response.is_redirect:
             return
 
-        if "text/html" not in response.type:
+        if context:
+            if not context.is_html():
+                return
+        elif "text/html" not in response.type:
             return
 
         if not response.content:
             return
 
         # Use Html parser to check if the body contains at least one link or form
-        page = Html(response.content, request.url)
+        page = context.get_html() if context else Html(response.content, request.url)
+        if not page:
+            return
+
         if not page.links and not list(page.iter_forms()):
             return
 

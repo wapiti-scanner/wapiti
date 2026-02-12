@@ -72,7 +72,7 @@ class ModuleHttpsRedirect:
 
         return ""
 
-    def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
+    def analyze(self, request: Request, response: Response, context=None) -> Generator[VulnerabilityInstance, Any, None]:
         """
         Analyze an HTTP request/response for HTTPS redirection issues.
         """
@@ -113,7 +113,10 @@ class ModuleHttpsRedirect:
                     info=full_info,
                     severity=severity,
                 )
-        elif "html" in response.headers.get("content-type", "html").lower():
+        elif (
+            context.is_document_like() if context else
+            ("html" in response.headers.get("content-type", "html").lower())
+        ):
             # Non-sensitive case, check for general lack of HTTPS redirection
             if host not in self._reported_info_non_sensitive:
                 self._reported_info_non_sensitive.add(host)

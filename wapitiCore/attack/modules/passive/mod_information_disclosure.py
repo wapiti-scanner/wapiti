@@ -38,13 +38,18 @@ class ModuleInformationDisclosure:
         self._reported_paths = set()
 
     def analyze(
-        self, request: Request, response: Response
+        self, request: Request, response: Response, context=None
     ) -> Generator[VulnerabilityInstance, Any, None]:
-        if not response.content:
+        if context:
+            if not context.has_content:
+                return
+            if not context.is_document_like():
+                return
+        elif not response.content:
             return
 
-        if not any(
-            t in response.type for t in ("text/html", "text/plain", "application/json")
+        if not context and not any(
+            t in response.type for t in ("text/html", "text/plain", "application/json", "application/xml", "text/xml")
         ):
             return
 

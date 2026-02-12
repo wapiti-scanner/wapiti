@@ -18,11 +18,17 @@ class ModuleUnsecurePassword:
     def __init__(self):
         self._known_vulnerable_forms = set()
 
-    def analyze(self, request: Request, response: Response) ->  Generator[VulnerabilityInstance, Any, None]:
-        if "text/html" not in response.type:
+    def analyze(self, request: Request, response: Response, context=None) ->  Generator[VulnerabilityInstance, Any, None]:
+        if context:
+            if not context.is_html():
+                return
+        elif "text/html" not in response.type:
             return
 
-        page = Html(response.content, request.url)
+        page = context.get_html() if context else Html(response.content, request.url)
+        if not page:
+            return
+
         for form in page.iter_forms():
             if form.url.startswith("http://"):
                 for field in form.fields:
