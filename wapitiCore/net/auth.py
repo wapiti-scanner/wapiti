@@ -18,16 +18,19 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import sys
 import json
+import time
+import os
 from http.cookiejar import CookieJar
 from typing import Tuple, List, Dict, Optional
 import asyncio
 from urllib.parse import urljoin
 import importlib.util
 
-from httpx import RequestError
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
-from playwright.async_api import async_playwright, Error as PlaywrightError
+from httpx import RequestError
+from wapitiCore.net.sql_persister import SqlPersister
 
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
@@ -195,10 +198,126 @@ async def async_try_form_login(
     Try to authenticate with the provided url and credentials.
     Returns if the authentication has been successful, the used form variables and the disconnect urls.
     """
+    if headless_mode != "no":
+        return await async_playwright_login(crawler_configuration, form_credential, headless_mode)
+
     page_source = await async_fetch_login_page(crawler_configuration, form_credential.url, headless_mode)
     if not page_source:
         return False, {}, []
     return await async_submit_login_form(page_source, crawler_configuration, form_credential)
+
+async def async_playwright_login(
+        crawler_configuration: CrawlerConfiguration,
+        form_credential: FormCredential,
+        headless_mode: str = "hidden",
+) -> Tuple[bool, dict, List[str]]:
+    """
+    Try to authenticate with the provided url and credentials using Playwright.
+    Returns if the authentication has been successful, the used form variables and the disconnect urls.
+    """
+    is_logged_in = False
+    disconnect_urls = []
+    form = {}
+
+    try:
+        async with async_playwright() as p:
+            # Launch browser
+            headless = headless_mode == "hidden"
+            browser = await p.chromium.launch(headless=headless)
+            context = await browser.new_context()
+
+            # Create page
+            page = await context.new_page()
+
+            try:
+                # Navigate to login page
+                await page.goto(form_credential.url)
+
+                # Analyze page to find form fields using existing HTML parser logic
+                # We get the page content from Playwright
+                content = await page.content()
+                html_parser = Html(content, form_credential.url)
+
+                login_form, username_field_idx, password_field_idx = html_parser.find_login_form()
+
+                if login_form:
+                    # Determine field names
+                    # Logic from _create_login_request adapted for Playwright
+                    if login_form.method == "POST":
+                        username_field = login_form.post_params[username_field_idx][0]
+                        password_field = login_form.post_params[password_field_idx][0]
+                    else:
+                        username_field = login_form.get_params[username_field_idx][0]
+                        password_field = login_form.get_params[password_field_idx][0]
+
+                    form["login_field"] = username_field
+                    form["password_field"] = password_field
+
+                    # Fill fields
+                    # We accept multiple selector strategies if simple name fails, but name is standard
+                    await page.fill(f'[name="{username_field}"]', form_credential.username)
+                    await page.fill(f'[name="{password_field}"]', form_credential.password)
+
+                    # Submit form - assuming a submit button exists or pressing Enter works
+                    # Finding a submit button can be tricky, let's try pressing Enter on the password field first
+                    # or locating an input[type=submit] or button[type=submit] inside the form.
+
+                    # Let's try locating the submit button
+                    submit_locator = page.locator('input[type="submit"], button[type="submit"]').first
+                    if await submit_locator.count() > 0:
+                        await submit_locator.click()
+                    else:
+                        await page.press(f'[name="{password_field}"]', 'Enter')
+
+                    # Wait for navigation or load state
+                    await page.wait_for_load_state('networkidle', timeout=crawler_configuration.timeout * 1000)
+
+                    # Check if logged in
+                    new_content = await page.content()
+                    html_parser_after = Html(new_content, page.url)
+
+                    if html_parser_after.is_logged_in():
+                        is_logged_in = True
+                        log_green("[*] Playwright Login success")
+                        disconnect_urls = html_parser_after.extract_disconnect_urls()
+
+                        # Take Screenshot
+                        if crawler_configuration.auth_screenshot:
+                            screenshot_dir = SqlPersister.CRAWLER_DATA_DIR
+                            if not os.path.isdir(screenshot_dir):
+                                screenshot_dir = "."
+
+                            screenshot_path = os.path.join(screenshot_dir, f"login_success_{int(time.time())}.png")
+                            await page.screenshot(path=screenshot_path)
+                            logging.info("[*] Screenshot saved to %s", screenshot_path)
+
+                        # Extract cookies
+                        cookies = await context.cookies()
+                        # Convert Playwright cookies to CookieJar (or whatever crawler_configuration expects)
+                        # crawler_configuration.cookies expects a CookieJar or similar iterable
+                        # headless_cookies_to_cookiejar seems to handle a dictionary or list of dicts
+                        # checking headless_cookies_to_cookiejar signature/implementation would be good
+                        # but for now assuming list of dicts works as arsenic cookies are list of dicts.
+                        # Playwright cookies are also list of dicts.
+                        crawler_configuration.cookies = headless_cookies_to_cookiejar(cookies)
+
+                    else:
+                        logging.warning("[!] Playwright Login failed : Credentials might be invalid")
+
+                else:
+                    logging.warning("[!] Playwright Login failed : No login form detected")
+
+            except PlaywrightTimeoutError:
+                logging.error("[!] Timeout with URL %s", form_credential.url)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logging.error("[!] Error during Playwright login: %s", e)
+            finally:
+                await browser.close()
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logging.error("[!] Failed to launch Playwright: %s", e)
+
+    return is_logged_in, form, disconnect_urls
 
 
 async def login_with_raw_data(crawler_configuration: CrawlerConfiguration, raw_credential: RawCredential):

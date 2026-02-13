@@ -61,3 +61,4 @@ class CrawlerConfiguration:
     stream: bool = False
     headers: Optional[dict] = None
     drop_cookies: bool = False
+    auth_screenshot: bool = False

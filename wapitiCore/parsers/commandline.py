@@ -217,6 +217,12 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--auth-screenshot",
+        action="store_true",
+        help="Take a screenshot upon successful authentication (headless mode only)"
+    )
+
+    parser.add_argument(
         "-c", "--cookie",
         help=(
             "Set a JSON cookie file to use. "
