@@ -219,7 +219,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--auth-screenshot",
         action="store_true",
-        help="Take a screenshot upon successful authentication (headless mode only)"
+        help="Take a screenshot after authentication attempt, on success or failure (headless mode only)"
     )
 
     parser.add_argument(

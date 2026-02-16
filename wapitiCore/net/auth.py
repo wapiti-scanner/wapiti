@@ -16,28 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import sys
-import json
-import time
-import os
-from http.cookiejar import CookieJar
-from typing import Tuple, List, Dict, Optional
 import asyncio
-from urllib.parse import urljoin
 import importlib.util
+import json
+import os
+import sys
+import time
+from typing import Tuple, List, Dict, Optional
+from urllib.parse import urljoin
 
+from http.cookiejar import CookieJar
+from httpx import RequestError
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
-from httpx import RequestError
-from wapitiCore.net.sql_persister import SqlPersister
 
-from wapitiCore.net import Request, Response
-from wapitiCore.parsers.html_parser import Html
 from wapitiCore.main.log import logging, log_green, log_orange
+from wapitiCore.net import Request, Response
 from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
+from wapitiCore.net.sql_persister import SqlPersister
+from wapitiCore.parsers.html_parser import Html
 
 
 async def check_http_auth(crawler_configuration: CrawlerConfiguration) -> bool:
@@ -206,6 +206,18 @@ async def async_try_form_login(
         return False, {}, []
     return await async_submit_login_form(page_source, crawler_configuration, form_credential)
 
+async def _take_auth_screenshot(page, crawler_configuration: CrawlerConfiguration, prefix: str) -> None:
+    """Take a screenshot and save it to the crawler data dir if auth_screenshot is enabled."""
+    if not crawler_configuration.auth_screenshot:
+        return
+    screenshot_dir = SqlPersister.CRAWLER_DATA_DIR
+    if not os.path.isdir(screenshot_dir):
+        screenshot_dir = "."
+    screenshot_path = os.path.join(screenshot_dir, f"{prefix}_{int(time.time())}.png")
+    await page.screenshot(path=screenshot_path)
+    logging.info("[*] Screenshot saved to %s", screenshot_path)
+
+
 async def async_playwright_login(
         crawler_configuration: CrawlerConfiguration,
         form_credential: FormCredential,
@@ -240,74 +252,51 @@ async def async_playwright_login(
 
                 login_form, username_field_idx, password_field_idx = html_parser.find_login_form()
 
-                if login_form:
-                    # Determine field names
-                    # Logic from _create_login_request adapted for Playwright
-                    if login_form.method == "POST":
-                        username_field = login_form.post_params[username_field_idx][0]
-                        password_field = login_form.post_params[password_field_idx][0]
-                    else:
-                        username_field = login_form.get_params[username_field_idx][0]
-                        password_field = login_form.get_params[password_field_idx][0]
-
-                    form["login_field"] = username_field
-                    form["password_field"] = password_field
-
-                    # Fill fields
-                    # We accept multiple selector strategies if simple name fails, but name is standard
-                    await page.fill(f'[name="{username_field}"]', form_credential.username)
-                    await page.fill(f'[name="{password_field}"]', form_credential.password)
-
-                    # Submit form - assuming a submit button exists or pressing Enter works
-                    # Finding a submit button can be tricky, let's try pressing Enter on the password field first
-                    # or locating an input[type=submit] or button[type=submit] inside the form.
-
-                    # Let's try locating the submit button
-                    submit_locator = page.locator('input[type="submit"], button[type="submit"]').first
-                    if await submit_locator.count() > 0:
-                        await submit_locator.click()
-                    else:
-                        await page.press(f'[name="{password_field}"]', 'Enter')
-
-                    # Wait for navigation or load state
-                    await page.wait_for_load_state('networkidle', timeout=crawler_configuration.timeout * 1000)
-
-                    # Check if logged in
-                    new_content = await page.content()
-                    html_parser_after = Html(new_content, page.url)
-
-                    if not html_parser_after.is_logged_in():
-                        logging.warning("[!] Playwright Login failed : Credentials might be invalid")
-                        ...
-                        is_logged_in = True
-                        log_green("[*] Playwright Login success")
-                        disconnect_urls = html_parser_after.extract_disconnect_urls()
-
-                        # Take Screenshot
-                        if crawler_configuration.auth_screenshot:
-                            screenshot_dir = SqlPersister.CRAWLER_DATA_DIR
-                            if not os.path.isdir(screenshot_dir):
-                                screenshot_dir = "."
-
-                            screenshot_path = os.path.join(screenshot_dir, f"login_success_{int(time.time())}.png")
-                            await page.screenshot(path=screenshot_path)
-                            logging.info("[*] Screenshot saved to %s", screenshot_path)
-
-                        # Extract cookies
-                        cookies = await context.cookies()
-                        # Convert Playwright cookies to CookieJar (or whatever crawler_configuration expects)
-                        # crawler_configuration.cookies expects a CookieJar or similar iterable
-                        # headless_cookies_to_cookiejar seems to handle a dictionary or list of dicts
-                        # checking headless_cookies_to_cookiejar signature/implementation would be good
-                        # but for now assuming list of dicts works as arsenic cookies are list of dicts.
-                        # Playwright cookies are also list of dicts.
-                        crawler_configuration.cookies = headless_cookies_to_cookiejar(cookies)
-
-                    else:
-                        logging.warning("[!] Playwright Login failed : Credentials might be invalid")
-
-                else:
+                if not login_form:
                     logging.warning("[!] Playwright Login failed : No login form detected")
+                    return is_logged_in, form, disconnect_urls
+
+                # Determine field names
+                # Logic from _create_login_request adapted for Playwright
+                if login_form.method == "POST":
+                    username_field = login_form.post_params[username_field_idx][0]
+                    password_field = login_form.post_params[password_field_idx][0]
+                else:
+                    username_field = login_form.get_params[username_field_idx][0]
+                    password_field = login_form.get_params[password_field_idx][0]
+
+                form["login_field"] = username_field
+                form["password_field"] = password_field
+
+                # Fill fields
+                await page.fill(f'[name="{username_field}"]', form_credential.username)
+                await page.fill(f'[name="{password_field}"]', form_credential.password)
+
+                # Submit form
+                submit_locator = page.locator('input[type="submit"], button[type="submit"]').first
+                if await submit_locator.count() > 0:
+                    await submit_locator.click()
+                else:
+                    await page.press(f'[name="{password_field}"]', 'Enter')
+
+                await page.wait_for_load_state('networkidle', timeout=crawler_configuration.timeout * 1000)
+
+                new_content = await page.content()
+                html_parser_after = Html(new_content, page.url)
+
+                if not html_parser_after.is_logged_in():
+                    logging.warning("[!] Playwright Login failed : Credentials might be invalid")
+                    await _take_auth_screenshot(page, crawler_configuration, "login_failure")
+                    return is_logged_in, form, disconnect_urls
+
+                is_logged_in = True
+                log_green("[*] Playwright Login success")
+                disconnect_urls = html_parser_after.extract_disconnect_urls()
+
+                await _take_auth_screenshot(page, crawler_configuration, "login_success")
+
+                cookies = await context.cookies()
+                crawler_configuration.cookies = headless_cookies_to_cookiejar(cookies)
 
             except PlaywrightTimeoutError:
                 logging.error("[!] Timeout with URL %s", form_credential.url)
