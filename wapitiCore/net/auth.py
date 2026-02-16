@@ -276,7 +276,9 @@ async def async_playwright_login(
                     new_content = await page.content()
                     html_parser_after = Html(new_content, page.url)
 
-                    if html_parser_after.is_logged_in():
+                    if not html_parser_after.is_logged_in():
+                        logging.warning("[!] Playwright Login failed : Credentials might be invalid")
+                        ...
                         is_logged_in = True
                         log_green("[*] Playwright Login success")
                         disconnect_urls = html_parser_after.extract_disconnect_urls()
