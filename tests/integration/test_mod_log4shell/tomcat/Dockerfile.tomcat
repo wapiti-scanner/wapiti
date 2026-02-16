@@ -1,4 +1,4 @@
-ARG TOMCAT_HASH_TAG=':8.0.36-jre8'
+ARG TOMCAT_HASH_TAG=:8.0.36-jre8
 FROM tomcat${TOMCAT_HASH_TAG}
 
 # Need to add nc for healthcheck, 
