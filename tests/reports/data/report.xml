@@ -410,7 +410,14 @@
          <references>
             <reference>
                <title>OWASP: MIME Sniffing</title>
-               <url>https://owasp.org/www-community/attacks/MIME_sniffing</url>
+               <url>https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html#x-content-type-options</url>
+               <wstg>
+                  <code>OSHP-X-Content-Type-Options</code>
+               </wstg>
+            </reference>
+            <reference>
+               <title>Mozilla: MIME Sniffing</title>
+               <url>https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types#mime_sniffing</url>
                <wstg>
                   <code>OSHP-X-Content-Type-Options</code>
                </wstg>

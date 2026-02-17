@@ -85,7 +85,14 @@ class MimeTypeConfusionFinding(FindingBase):
         return [
             {
                 "title": "OWASP: MIME Sniffing",
-                "url": "https://owasp.org/www-community/attacks/MIME_sniffing"
+                "url": (
+                    "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html"
+                    "#x-content-type-options"
+                )
+            },
+            {
+                "title": "Mozilla: MIME Sniffing",
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types#mime_sniffing"
             },
             {
                 "title": "KeyCDN: Preventing MIME Type Sniffing",
