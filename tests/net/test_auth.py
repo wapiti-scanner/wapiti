@@ -433,3 +433,42 @@ async def run(crawler_configuration, form_credential, headless):
         assert str(tmp_path) in call_args.kwargs["path"]
         assert "login_failure" in call_args.kwargs["path"]
         assert call_args.kwargs["path"].endswith(".png")
+
+    @respx.mock
+    @patch("wapitiCore.net.auth.async_playwright")
+    async def test_form_login_no_form_headless(self, mock_async_playwright, crawler_configuration):
+        """Test headless login when no login form is present."""
+        login_url = "http://wapiti.test/login"
+        form_creds = FormCredential(
+            url=login_url,
+            username="admin",
+            password="password"
+        )
+        crawler_configuration.auth_screenshot = True
+
+        mock_page = AsyncMock()
+        # Page with no form
+        NO_FORM_HTML = "<html><body><h1>Just text</h1></body></html>"
+        mock_page.content.return_value = NO_FORM_HTML
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright = AsyncMock()
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
+
+        mock_page.url = login_url
+        
+        is_logged_in, form, disconnect_urls = await async_try_form_login(
+            crawler_configuration,
+            form_creds,
+            headless_mode="hidden"
+        )
+
+        assert is_logged_in is False
+        assert form == {}
+        assert disconnect_urls == []
+        
+        # Verify NO screenshot was taken (as per current implementation)
+        assert not mock_page.screenshot.called
