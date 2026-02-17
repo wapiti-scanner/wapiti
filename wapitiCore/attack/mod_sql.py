@@ -246,7 +246,33 @@ DBMS_ERROR_PATTERNS = {
     "Cache": [
         re.compile(r"encountered after end of query"),
         re.compile(r"A comparison operator is required here"),
-    ]
+    ],
+    "CockroachDB": [
+        re.compile(r"ERROR: at or near.*?SQLSTATE: 42601"),
+        re.compile(r"node is not ready"),
+        re.compile(r"cockroach.*?error"),
+    ],
+    "ClickHouse": [
+        re.compile(r"DB::Exception:"),
+        re.compile(r"Code: \d+\. DB::Exception"),
+        re.compile(r"ClickHouse exception"),
+        re.compile(r"Syntax error: failed at position"),
+    ],
+    "Cassandra": [
+        re.compile(r"SyntaxException.*?line \d+:\d+"),
+        re.compile(r"com\.datastax\.driver"),
+        re.compile(r"InvalidQueryException"),
+        re.compile(r"no viable alternative at input"),
+    ],
+    "TiDB": [
+        re.compile(r"TiDB server"),
+        re.compile(r"ERROR \d+ \(HY000\).*?TiDB"),
+    ],
+    "Redshift": [
+        re.compile(r"com\.amazon\.redshift\.jdbc"),
+        re.compile(r"ERROR:.*?Redshift"),
+        re.compile(r"Amazon Invalid operation:"),
+    ],
 }
 
 
@@ -307,11 +333,27 @@ def find_pattern_in_response(data):
 
     # Define a mapping of patterns to their corresponding injection types
     pattern_to_injection = {
+        # .NET / Java
         "Unclosed quotation mark after the character string": ".NET SQL Injection",
         "StatementCallback; bad SQL grammar": "Spring JDBC Injection",
+        # XPath
         "XPathException": "XPath Injection",
         "Warning: SimpleXMLElement::xpath():": "XPath Injection",
-        "Error parsing XPath": "XPath Injection"
+        "Error parsing XPath": "XPath Injection",
+        # Python frameworks
+        "sqlalchemy.exc.": "Python SQLAlchemy SQL Injection",
+        "django.db.utils.": "Django ORM SQL Injection",
+        # Ruby frameworks
+        "ActiveRecord::StatementInvalid": "Ruby on Rails SQL Injection",
+        "Sequel::DatabaseError": "Ruby Sequel SQL Injection",
+        # PHP frameworks
+        "PDOException": "PHP PDO SQL Injection",
+        "Doctrine\\DBAL\\Exception": "Doctrine DBAL SQL Injection",
+        # Node.js ORMs
+        "PrismaClientKnownRequestError": "Prisma SQL Injection",
+        "knex: error": "Knex.js SQL Injection",
+        "SequelizeDatabaseError": "Sequelize SQL Injection",
+        "TypeORMError": "TypeORM SQL Injection",
     }
 
     # Check for each pattern

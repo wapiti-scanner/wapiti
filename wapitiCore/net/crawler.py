@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Standard libraries
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlunparse
 import warnings
 import functools
 from typing import Optional
@@ -34,6 +34,7 @@ from httpx_ntlm import HttpNtlmAuth
 # Internal libraries
 from wapitiCore.net import web
 from wapitiCore.net.classes import CrawlerConfiguration
+from wapitiCore.net.web import urlparse
 
 from wapitiCore.net.response import Response
 

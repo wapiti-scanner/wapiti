@@ -24,7 +24,6 @@ from traceback import print_tb
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
-from urllib.parse import urlparse
 import inspect
 import json
 
@@ -38,6 +37,7 @@ from playwright._impl._errors import TargetClosedError
 from playwright.async_api import async_playwright, Error as PlaywrightError
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 from wapitiCore.net.cookies import mitm_jar_to_cookiejar
 from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
@@ -248,21 +248,36 @@ def extract_requests(html: Html, request: Request):
             yield form_request
 
 
+MAX_BUTTONS_PER_PAGE = 10
+
+
 async def click_in_webpage(page, request: Request, wait_time: float, timeout: float):
     # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
+    total_clicked = 0
     for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
+        if total_clicked >= MAX_BUTTONS_PER_PAGE:
+            break
+
         try:
             buttons = await page.query_selector_all(xpath_selector)
         except PlaywrightError:
             continue
 
         for button in buttons:
+            if total_clicked >= MAX_BUTTONS_PER_PAGE:
+                break
+
             try:
                 await button.click(timeout=timeout * 1000)
             except PlaywrightError:
                 continue
             else:
-                await page.wait_for_timeout(wait_time * 1000)
+                total_clicked += 1
+                # Use networkidle with a short timeout instead of a fixed delay
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=wait_time * 1000)
+                except PlaywrightError:
+                    pass
                 if page.url != request.url_with_fragment:
                     await page.goto(
                         request.url_with_fragment,
@@ -278,7 +293,7 @@ async def launch_headless_explorer(
         to_explore: Deque[Request],
         scope: Scope,
         proxy_port: int,
-        excluded_requests: List[Request],
+        excluded_requests: set,
         exclusion_regexes: List[re.Pattern],
         visibility: str = "hidden",
         wait_time: float = 2.,
@@ -291,9 +306,9 @@ async def launch_headless_explorer(
         "server": f"http://127.0.0.1:{proxy_port}"
     }
 
-    # We need to make a copy of this list otherwise requests won't make their way into async_explore (because list is
-    # shared). Also, we want our own list here because we will see URLs with anchors that the proxy can't catch.
-    excluded_requests = list(excluded_requests)
+    # We need to make a copy of this set otherwise requests won't make their way into async_explore (because set is
+    # shared). Also, we want our own set here because we will see URLs with anchors that the proxy can't catch.
+    excluded_requests = set(excluded_requests)
 
     try:
         async with async_playwright() as p:
@@ -308,10 +323,14 @@ async def launch_headless_explorer(
             context = await browser.new_context(ignore_https_errors=True)
             page = await context.new_page()
 
+            # Shadow set for O(1) lookups on to_explore deque
+            to_explore_set = set(to_explore)
+
             try:
                 while to_explore and not stop_event.is_set():
                     request = to_explore.popleft()
-                    excluded_requests.append(request)
+                    to_explore_set.discard(request)
+                    excluded_requests.add(request)
 
                     if request.method == "GET":
                         try:
@@ -320,7 +339,17 @@ async def launch_headless_explorer(
                                 timeout=crawler.timeout.connect * 1000,
                                 wait_until="domcontentloaded"
                             )
-                            await page.wait_for_timeout(wait_time * 1000)
+                            # Wait for network idle with a short timeout instead of a fixed delay.
+                            # This adapts to the actual page load speed: fast pages proceed quickly,
+                            # heavy pages wait only as long as needed.
+                            try:
+                                await page.wait_for_load_state(
+                                    "networkidle",
+                                    timeout=wait_time * 1000
+                                )
+                            except PlaywrightError:
+                                # Timeout reached, proceed anyway — we've waited long enough
+                                pass
                             # We may be redirected outside our target so let's check the URL first
                             if not scope.check(page.url):
                                 continue
@@ -354,8 +383,9 @@ async def launch_headless_explorer(
                         if any(regex.match(next_request.url) for regex in exclusion_regexes):
                             continue
 
-                        if next_request not in to_explore and next_request not in excluded_requests:
+                        if next_request not in to_explore_set and next_request not in excluded_requests:
                             to_explore.append(next_request)
+                            to_explore_set.add(next_request)
             finally:
                 await browser.close()
 
@@ -404,12 +434,12 @@ class InterceptingExplorer(Explorer):
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
+            if self._stopped.is_set() and self._queue.empty():
+                break
+
             try:
-                request, response = self._queue.get_nowait()
-            except asyncio.QueueEmpty:
-                if self._stopped.is_set():
-                    break
-                await asyncio.sleep(.1)
+                request, response = await asyncio.wait_for(self._queue.get(), timeout=0.5)
+            except asyncio.TimeoutError:
                 continue
             except KeyboardInterrupt:
                 break
@@ -437,7 +467,7 @@ class InterceptingExplorer(Explorer):
                 self._pattern_counts[request.pattern] += 1
 
             yield request, response
-            self._processed_requests.append(request)
+            self._processed_requests.add(request)
             log_verbose(f"[+] {request}")
 
     async def async_explore(
@@ -448,14 +478,14 @@ class InterceptingExplorer(Explorer):
         self._queue = asyncio.Queue()
 
         exclusion_regexes = []
-        excluded_requests = []
+        excluded_requests = set()
 
         if isinstance(excluded_urls, list):
             for bad_request in excluded_urls:
                 if isinstance(bad_request, str):
                     exclusion_regexes.append(wildcard_translate(bad_request))
                 elif isinstance(bad_request, Request):
-                    excluded_requests.append(bad_request)
+                    excluded_requests.add(bad_request)
 
         # Launch proxy as asyncio task
         self._mitm_task = asyncio.create_task(

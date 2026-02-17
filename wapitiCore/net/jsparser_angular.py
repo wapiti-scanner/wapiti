@@ -1,7 +1,8 @@
 import re
-from urllib.parse import urlparse
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
+
+from wapitiCore.net.web import urlparse
 
 
 class JsParserAngular:

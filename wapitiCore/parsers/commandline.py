@@ -106,8 +106,8 @@ def parse_args() -> argparse.Namespace:
         "--headless",
         dest="headless",
         default="no",
-        help="Use a Firefox headless crawler for browsing (slower)",
-        choices=["no", "hidden", "visible"]
+        help="Use a Firefox headless crawler for browsing (slower). Use 'both' to run standard then headless.",
+        choices=["no", "hidden", "visible", "both"]
     )
 
     parser.add_argument(

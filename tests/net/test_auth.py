@@ -1,6 +1,6 @@
 import pytest
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 import httpx
 import respx
 from http.cookiejar import CookieJar
@@ -392,15 +392,11 @@ async def run(crawler_configuration, form_credential, headless):
         mock_browser.new_context.return_value = mock_context
         mock_playwright = AsyncMock()
         mock_playwright.firefox.launch.return_value = mock_browser
-        # Mock chromium launch as well since default might be chromium
         mock_playwright.chromium.launch.return_value = mock_browser
         mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
 
-        # Fix: page.locator is synchronous, so we must override it on the AsyncMock page
-        from unittest.mock import MagicMock
         mock_locator = MagicMock()
         mock_page.locator = MagicMock(return_value=mock_locator)
-        # locator.first is a property returning another locator (which has async methods like count/click)
         mock_element = AsyncMock()
         mock_locator.first = mock_element
         mock_element.count.return_value = 1

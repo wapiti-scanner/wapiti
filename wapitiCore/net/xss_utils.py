@@ -19,13 +19,13 @@ import dataclasses
 from configparser import ConfigParser
 from typing import Tuple, List, Dict, Any
 from html.parser import attrfind_tolerant
-from urllib.parse import urlparse
 from os.path import join as path_join
 
 from bs4 import BeautifulSoup, element
 
 from wapitiCore.attack.attack import PayloadType, random_string
 from wapitiCore.net import Response
+from wapitiCore.net.web import urlparse
 
 
 # Everything under those tags will be treated as text
@@ -281,6 +281,7 @@ def load_payloads_from_ini(filename: str, external_endpoint: str) -> List[Dict[s
         clean_payload = payload.strip(" \n")
         clean_payload = clean_payload.replace("[TAB]", "\t")
         clean_payload = clean_payload.replace("[LF]", "\n")
+        clean_payload = clean_payload.replace("[FF]", "\x0c")
         clean_payload = clean_payload.replace("[EXTERNAL_ENDPOINT]", external_endpoint)
         clean_payload = clean_payload.replace("[PROTO_ENDPOINT]", proto_endpoint)
 
@@ -602,9 +603,11 @@ def valid_xss_content_type(response: Response) -> bool:
     if "content-type" not in response.headers:
         return True
 
-    # else only text/html will allow javascript (maybe text/plain will work for IE...)
-    if "text/html" in response.headers["content-type"]:
-        return True
+    content_type = response.headers["content-type"]
+    # text/html, application/xhtml+xml, text/xml and application/xml can all execute JavaScript
+    for mime_type in ("text/html", "application/xhtml+xml", "text/xml", "application/xml"):
+        if mime_type in content_type:
+            return True
     return False
 
 

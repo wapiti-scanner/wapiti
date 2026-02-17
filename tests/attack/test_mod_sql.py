@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
 from unittest.mock import AsyncMock
@@ -10,6 +10,7 @@ import pytest
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.web import urlparse
 from wapitiCore.attack.mod_sql import ModuleSql
 
 

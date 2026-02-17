@@ -487,7 +487,7 @@ def test_scripts_page():
     resp = httpx.get(target_url_3, follow_redirects=False)
     page = Html(Response(resp).content, target_url_3)
     assert len(page.scripts) == 1
-    assert page.scripts[0] == "https://user:pass@NetLoc:80/awesome-script.js"
+    assert page.scripts[0] == "https://user:pass@netloc:80/awesome-script.js"
 
     # without scheme but with netloc
     resp = httpx.get(target_url_4, follow_redirects=False)

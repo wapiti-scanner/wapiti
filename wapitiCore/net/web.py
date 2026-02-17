@@ -20,7 +20,7 @@
 from copy import deepcopy
 import posixpath
 import sys
-from urllib.parse import urlparse, urlunparse, unquote, quote, urljoin
+from urllib.parse import urlparse as _urlparse, urlunparse, unquote, quote, urljoin
 from typing import Optional, List, Tuple, Union, TYPE_CHECKING
 import re
 
@@ -32,6 +32,27 @@ if TYPE_CHECKING:
     from wapitiCore.net.response import Response
 
 Parameters = Optional[Union[List[List[str]], str]]
+
+
+def urlparse(url: str) -> str:
+    url_parts = _urlparse(url)
+
+    netloc = ""
+    if url_parts.username is not None:
+        netloc += url_parts.username
+
+        if url_parts.password is not None:
+            netloc += f":{url_parts.password}"
+
+        netloc += "@"
+
+    if url_parts.hostname is not None:
+        netloc += url_parts.hostname
+
+    if url_parts.port is not None:
+        netloc += f":{url_parts.port}"
+
+    return url_parts._replace(netloc=netloc)
 
 
 def urlencode(query, safe='', encoding=None, errors=None, quote_via=quote) -> str:
@@ -651,6 +672,23 @@ class Request:
     @property
     def file_params(self):
         return deepcopy(self._file_params)
+
+    # Read-only access to internal params without deepcopy overhead.
+    # WARNING: callers MUST NOT modify the returned data structures.
+    @property
+    def get_params_ref(self):
+        """Return get params without copying. Do NOT modify the returned data."""
+        return self._get_params
+
+    @property
+    def post_params_ref(self):
+        """Return post params without copying. Do NOT modify the returned data."""
+        return self._post_params
+
+    @property
+    def file_params_ref(self):
+        """Return file params without copying. Do NOT modify the returned data."""
+        return self._file_params
 
     @property
     def get_keys(self):

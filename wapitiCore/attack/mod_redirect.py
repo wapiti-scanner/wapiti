@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Optional
-from urllib.parse import urlparse
 
 from httpx import RequestError
 
+from wapitiCore.net.web import urlparse
 from wapitiCore.main.log import log_red, log_verbose
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages

@@ -23,9 +23,9 @@ from collections import namedtuple
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dict, Any
 
 import httpx
-from sqlalchemy import (Boolean, Column, ForeignKey, Integer, MetaData,
+from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer, MetaData,
                         PickleType, String, Table, Text, LargeBinary, and_,
-                        literal_column, select)
+                        event, literal_column, select)
 from sqlalchemy.sql.functions import max as sql_max
 from sqlalchemy.sql.functions import count as sql_count
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -33,7 +33,7 @@ from wapitiCore.net import Request, Response
 
 Payload = namedtuple("Payload", "evil_request,category,level,parameter,info,type,wstg,module,response")
 
-
+# pylint: disable=too-many-lines
 class SqlPersister:
     """This class makes the persistence tasks for persisting the crawler parameters
     in other to can continue the process in the future.
@@ -94,6 +94,16 @@ class SqlPersister:
 
         self._must_create = not os.path.exists(self.output_file)
         self._engine = create_async_engine(f'sqlite+aiosqlite:///{self.output_file}')
+
+        @event.listens_for(self._engine.sync_engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, _connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA cache_size=-64000")  # 64 MB
+            cursor.execute("PRAGMA temp_store=MEMORY")
+            cursor.close()
+
         self.register_database_model(table_prefix)
         # May be of interest: https://charlesleifer.com/blog/going-fast-with-sqlite-and-python/
 
@@ -102,7 +112,7 @@ class SqlPersister:
 
         self.scan_infos = Table(
             f"{table_prefix}scan_infos", self.metadata,
-            Column("key", String(255), nullable=False),
+            Column("key", String(255), nullable=False, index=True),
             Column("value", Text, nullable=False)  # We keep the root URL here. With URL scope it may be big
         )
 
@@ -116,14 +126,14 @@ class SqlPersister:
             Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
             Column("headers", PickleType),  # Pickled sent HTTP headers, can be huge
             Column("referer", Text),  # Another URL so potentially huge
-            Column("evil", Boolean, nullable=False),
-            Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True),
+            Column("evil", Boolean, nullable=False, index=True),
+            Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True, index=True),
         )
 
         self.params = Table(
             f"{table_prefix}params", self.metadata,
             Column("param_id", Integer, primary_key=True),
-            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id")),
+            Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), index=True),
             Column("type", String(length=16), nullable=False),  # HTTP method or "FILE" for multipart
             Column("position", Integer, nullable=False),
             Column("name", Text, nullable=False),  # Name of the parameter. Encountered some above 1000 characters
@@ -134,7 +144,7 @@ class SqlPersister:
 
         self.payloads = Table(
             f"{table_prefix}payloads", self.metadata,
-            Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
+            Column("evil_path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False, index=True),
             Column("module", String(255), nullable=False),
             Column("category", String(255), nullable=False),  # Vulnerability category, should not be that long
             Column("level", Integer, nullable=False),
@@ -149,7 +159,8 @@ class SqlPersister:
         self.attack_logs = Table(
             f"{table_prefix}attack_logs", self.metadata,
             Column("path_id", None, ForeignKey(f"{table_prefix}paths.path_id"), nullable=False),
-            Column("module", String(255), nullable=False)
+            Column("module", String(255), nullable=False, index=True),
+            Index(f"ix_{table_prefix}attack_logs_path_id_module", "path_id", "module"),
         )
 
         self.responses = Table(
@@ -209,7 +220,7 @@ class SqlPersister:
         all_param_values = []
 
         async with self._engine.begin() as conn:
-            response_ids = [await self.save_response(response) for _, response in paths_list]
+            response_ids = [await self.save_response(response, conn=conn) for _, response in paths_list]
 
             for (http_resource, response), response_id in zip(paths_list, response_ids):
                 headers_to_save = http_resource.sent_headers or http_resource.headers
@@ -256,7 +267,7 @@ class SqlPersister:
                     }
                 )
 
-                for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
+                for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params_ref):
                     all_param_values.append(
                         {
                             "path_id": bigest_id,
@@ -269,9 +280,9 @@ class SqlPersister:
                         }
                     )
 
-                post_params = http_resource.post_params
+                post_params = http_resource.post_params_ref
                 if isinstance(post_params, list):
-                    for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
+                    for i, (post_param_key, post_param_value) in enumerate(post_params):
                         all_param_values.append(
                             {
                                 "path_id": bigest_id,
@@ -296,7 +307,7 @@ class SqlPersister:
                         }
                     )
 
-                for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
+                for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params_ref):
                     # file_param_value will be something like ['pix.gif', 'GIF89a', 'image/gif']
                     # just keep the file name
                     if len(file_param_value) == 3:
@@ -322,7 +333,7 @@ class SqlPersister:
                 if all_param_values:
                     await conn.execute(self.params.insert(), all_param_values)
 
-    async def save_response(self, response: Response) -> Optional[int]:
+    async def save_response(self, response: Response, conn=None) -> Optional[int]:
         if not response:
             return None
 
@@ -332,15 +343,19 @@ class SqlPersister:
             body=response.bytes,
             headers=response.headers
         )
-        async with self._engine.begin() as conn:
+        if conn is not None:
             result = await conn.execute(statement)
+            return result.inserted_primary_key[0]
+
+        async with self._engine.begin() as new_conn:
+            result = await new_conn.execute(statement)
             return result.inserted_primary_key[0]
 
     async def save_request(self, http_resource: Request, response: Response = None):
         headers_to_save = http_resource.sent_headers or http_resource.headers
-        response_id = await self.save_response(response)
 
         async with self._engine.begin() as conn:
+            response_id = await self.save_response(response, conn=conn)
             if http_resource.path_id:
                 # Request was already saved but not fetched, just update to set HTTP code and headers
                 statement = self.paths.update().where(
@@ -369,7 +384,7 @@ class SqlPersister:
 
             path_id = result.inserted_primary_key[0]
             all_values = []
-            for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params):
+            for i, (get_param_key, get_param_value) in enumerate(http_resource.get_params_ref):
                 all_values.append(
                     {
                         "path_id": path_id,
@@ -382,9 +397,9 @@ class SqlPersister:
                     }
                 )
 
-            post_params = http_resource.post_params
+            post_params = http_resource.post_params_ref
             if isinstance(post_params, list):
-                for i, (post_param_key, post_param_value) in enumerate(http_resource.post_params):
+                for i, (post_param_key, post_param_value) in enumerate(post_params):
                     all_values.append(
                         {
                             "path_id": path_id,
@@ -409,7 +424,7 @@ class SqlPersister:
                     }
                 )
 
-            for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params):
+            for i, (file_param_key, file_param_value) in enumerate(http_resource.file_params_ref):
                 # file_param_value will be something like ['pix.gif', 'GIF89a', 'image/gif']
                 # just keep the file name
                 if len(file_param_value) == 3:
@@ -432,6 +447,7 @@ class SqlPersister:
             if all_values:
                 await conn.execute(self.params.insert(), all_values)
 
+    # pylint: disable=too-many-locals
     async def _get_paths(
             self, path=None, method=None, crawled: bool = True, module: str = "", evil: bool = False
     ) -> AsyncIterator[Tuple[Request, Response]]:
@@ -450,73 +466,111 @@ class SqlPersister:
         else:
             conditions.append(self.paths.c.response_id.is_(None))
 
+        # Fetch paths with LEFT JOIN on responses to avoid N+1 on response lookups
+        statement = select(
+            self.paths,
+            self.responses.c.url.label("resp_url"),
+            self.responses.c.status_code.label("resp_status_code"),
+            self.responses.c.headers.label("resp_headers"),
+            self.responses.c.body.label("resp_body"),
+        ).select_from(
+            self.paths.outerjoin(self.responses, self.paths.c.response_id == self.responses.c.response_id)
+        ).where(and_(True, *conditions)).order_by(self.paths.c.path)
+
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(self.paths).where(and_(True, *conditions)).order_by(self.paths.c.path))
+            result = await conn.execute(statement)
 
-        for row in result.fetchall():
-            path_id = row[0]
-            response_id = row[9]
+        rows = result.fetchall()
+        if not rows:
+            return
 
-            if module:
-                # Exclude requests matching the attack module, we want requests that aren't attacked yet
-                statement = select(self.attack_logs).where(
-                    self.attack_logs.c.path_id == path_id,
-                    self.attack_logs.c.module == module
-                ).limit(1)
-                async with self._engine.begin() as conn:
-                    result = await conn.execute(statement)
+        path_ids = [row.path_id for row in rows]
 
-                if result.fetchone():
-                    continue
+        # Pre-fetch attacked path_ids in one query to avoid N+1 on attack_logs
+        attacked_path_ids = set()
+        if module:
+            async with self._engine.begin() as conn:
+                attack_result = await conn.execute(
+                    select(self.attack_logs.c.path_id).where(
+                        self.attack_logs.c.path_id.in_(path_ids),
+                        self.attack_logs.c.module == module
+                    )
+                )
+            attacked_path_ids = {r[0] for r in attack_result.fetchall()}
+
+        # Pre-fetch all params grouped by path_id in one query to avoid N+1 on params
+        params_by_path = {}
+        async with self._engine.begin() as conn:
+            params_result = await conn.execute(
+                select(
+                    self.params.c.path_id,
+                    self.params.c.type, self.params.c.name,
+                    self.params.c.value1, self.params.c.value2, self.params.c.meta
+                ).where(
+                    self.params.c.path_id.in_(path_ids)
+                ).order_by(self.params.c.path_id, self.params.c.type, self.params.c.position)
+            )
+        for param_row in params_result.fetchall():
+            params_by_path.setdefault(param_row[0], []).append(param_row[1:])
+
+        for row in rows:
+            path_id = row.path_id
+
+            if module and path_id in attacked_path_ids:
+                continue
 
             get_params = []
             post_params = []
             file_params = []
 
-            statement = select(
-                self.params.c.type, self.params.c.name, self.params.c.value1, self.params.c.value2, self.params.c.meta
-            ).where(self.params.c.path_id == path_id).order_by(self.params.c.type, self.params.c.position)
-
-            async with self._engine.begin() as conn:
-                async_result = await conn.stream(statement)
-
-                async for param_row in async_result:
-                    name = param_row[1]
-                    value1 = param_row[2]
-
-                    if param_row[0] == "GET":
-                        get_params.append([name, value1])
-                    elif param_row[0] == "POST":
-                        if name == "__RAW__" and not post_params:
-                            # First POST parameter is __RAW__, it should mean that we have raw content
-                            post_params = value1
-                        elif isinstance(post_params, list):
-                            post_params.append([name, value1])
-                    elif param_row[0] == "FILE":
-                        if param_row[4]:
-                            file_params.append([name, (value1, param_row[3], param_row[4])])
-                        else:
-                            file_params.append([name, (value1, param_row[3])])
+            for param_type, name, value1, value2, meta in params_by_path.get(path_id, []):
+                if param_type == "GET":
+                    get_params.append([name, value1])
+                elif param_type == "POST":
+                    if name == "__RAW__" and not post_params:
+                        # First POST parameter is __RAW__, it should mean that we have raw content
+                        post_params = value1
+                    elif isinstance(post_params, list):
+                        post_params.append([name, value1])
+                elif param_type == "FILE":
+                    if meta:
+                        file_params.append([name, (value1, value2, meta)])
                     else:
-                        raise ValueError(f"Unknown param type {param_row[0]}")
+                        file_params.append([name, (value1, value2)])
+                else:
+                    raise ValueError(f"Unknown param type {param_type}")
 
-                request = Request(
-                    row[1],
-                    method=row[2],
-                    encoding=row[5],
-                    enctype=row[3],
-                    referer=row[7],
-                    get_params=get_params,
-                    post_params=post_params,
-                    file_params=file_params,
-                    headers=row[6]
+            request = Request(
+                row.path,
+                method=row.method,
+                encoding=row.encoding,
+                enctype=row.enctype,
+                referer=row.referer,
+                get_params=get_params,
+                post_params=post_params,
+                file_params=file_params,
+                headers=row.headers
+            )
+
+            request.link_depth = row.depth
+            request.path_id = path_id
+
+            # Build response from pre-fetched JOIN data instead of a separate query
+            response = None
+            if row.resp_url is not None and row.resp_status_code is not None:
+                # Defensive copy: avoid mutating the underlying pickled dict returned by SQLAlchemy.
+                resp_headers = dict(row.resp_headers) if row.resp_headers else {}
+                resp_headers.pop("content-encoding", None)
+                response = Response(
+                    httpx.Response(
+                        row.resp_status_code,
+                        headers=resp_headers,
+                        content=row.resp_body or b""
+                    ),
+                    row.resp_url,
                 )
 
-                request.link_depth = row[4]
-                request.path_id = path_id
-                response = await self.get_response_by_id(response_id)
-
-                yield request, response
+            yield request, response
 
     async def get_links(self, path=None, attack_module: str = "") -> AsyncIterator[Tuple[Request, Response]]:
         async for request, response in self._get_paths(path=path, method="GET", crawled=True, module=attack_module):
@@ -654,103 +708,100 @@ class SqlPersister:
             wstg: Optional[List[str]] = None,
             response: Response = None
     ):
-
-        response_id = await self.save_response(response)
-
         headers_to_save = request.sent_headers or request.headers
-        # Save the request along with its parameters
-        statement = self.paths.insert().values(
-            path=request.path,
-            method=request.method,
-            enctype=request.enctype,
-            depth=request.link_depth,
-            encoding=request.encoding,
-            headers=headers_to_save,
-            referer=request.referer,
-            response_id=response_id,
-            evil=True,
-        )
+
         async with self._engine.begin() as conn:
-            result = await conn.execute(statement)
-        # path_id is the ID of the evil path
-        path_id = result.inserted_primary_key[0]
+            response_id = await self.save_response(response, conn=conn)
 
-        all_values = []
-        for i, (get_param_key, get_param_value) in enumerate(request.get_params):
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "GET",
-                    "position": i,
-                    "name": get_param_key,
-                    "value1": get_param_value,
-                    "value2": None,
-                    "meta": None
-                }
-            )
+            # Save the request along with its parameters
+            result = await conn.execute(self.paths.insert().values(
+                path=request.path,
+                method=request.method,
+                enctype=request.enctype,
+                depth=request.link_depth,
+                encoding=request.encoding,
+                headers=headers_to_save,
+                referer=request.referer,
+                response_id=response_id,
+                evil=True,
+            ))
+            # path_id is the ID of the evil path
+            path_id = result.inserted_primary_key[0]
 
-        if isinstance(request.post_params, list):
-            for i, (post_param_key, post_param_value) in enumerate(request.post_params):
+            all_values = []
+            for i, (get_param_key, get_param_value) in enumerate(request.get_params_ref):
                 all_values.append(
                     {
                         "path_id": path_id,
-                        "type": "POST",
+                        "type": "GET",
                         "position": i,
-                        "name": post_param_key,
-                        "value1": post_param_value,
+                        "name": get_param_key,
+                        "value1": get_param_value,
                         "value2": None,
                         "meta": None
                     }
                 )
-        elif request.post_params:
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "POST",
-                    "position": 0,
-                    "name": "__RAW__",
-                    "value1": request.post_params,
-                    "value2": None,
-                    "meta": None
-                }
-            )
 
-        for i, (file_param_key, file_param_value) in enumerate(request.file_params):
-            if len(file_param_value) == 3:
-                meta = file_param_value[2]
-            else:
-                meta = None
+            post_params = request.post_params_ref
+            if isinstance(post_params, list):
+                for i, (post_param_key, post_param_value) in enumerate(post_params):
+                    all_values.append(
+                        {
+                            "path_id": path_id,
+                            "type": "POST",
+                            "position": i,
+                            "name": post_param_key,
+                            "value1": post_param_value,
+                            "value2": None,
+                            "meta": None
+                        }
+                    )
+            elif post_params:
+                all_values.append(
+                    {
+                        "path_id": path_id,
+                        "type": "POST",
+                        "position": 0,
+                        "name": "__RAW__",
+                        "value1": post_params,
+                        "value2": None,
+                        "meta": None
+                    }
+                )
 
-            all_values.append(
-                {
-                    "path_id": path_id,
-                    "type": "FILE",
-                    "position": i,
-                    "name": file_param_key,
-                    "value1": file_param_value[0],
-                    "value2": file_param_value[1],
-                    "meta": meta
-                }
-            )
+            for i, (file_param_key, file_param_value) in enumerate(request.file_params_ref):
+                if len(file_param_value) == 3:
+                    meta = file_param_value[2]
+                else:
+                    meta = None
 
-        if all_values:
-            async with self._engine.begin() as conn:
+                all_values.append(
+                    {
+                        "path_id": path_id,
+                        "type": "FILE",
+                        "position": i,
+                        "name": file_param_key,
+                        "value1": file_param_value[0],
+                        "value2": file_param_value[1],
+                        "meta": meta
+                    }
+                )
+
+            if all_values:
                 await conn.execute(self.params.insert(), all_values)
 
-        # request_id is the ID of the original (legit) request
-        statement = self.payloads.insert().values(
-            evil_path_id=path_id,
-            module=module,
-            category=category,
-            level=level,
-            parameter=parameter,
-            info=info,
-            type=payload_type,
-            wstg=json.dumps(wstg or []),
-            response_id=response_id
-        )
-        async with self._engine.begin() as conn:
-            await conn.execute(statement)
+            # request_id is the ID of the original (legit) request
+            await conn.execute(self.payloads.insert().values(
+                evil_path_id=path_id,
+                module=module,
+                category=category,
+                level=level,
+                parameter=parameter,
+                info=info,
+                type=payload_type,
+                wstg=json.dumps(wstg or []),
+                response_id=response_id
+            ))
 
     async def get_response_by_id(self, response_id: str) -> Optional[Response]:
         if not response_id:
@@ -840,24 +891,109 @@ class SqlPersister:
             return request
 
     async def get_payloads(self) -> AsyncIterator[Payload]:
+        # JOIN payloads with paths and responses to avoid N+1 queries
+        statement = select(
+            self.payloads,
+            self.paths.c.path.label("evil_path"),
+            self.paths.c.method.label("evil_method"),
+            self.paths.c.enctype.label("evil_enctype"),
+            self.paths.c.depth.label("evil_depth"),
+            self.paths.c.encoding.label("evil_encoding"),
+            self.paths.c.headers.label("evil_headers"),
+            self.paths.c.referer.label("evil_referer"),
+            self.responses.c.url.label("resp_url"),
+            self.responses.c.status_code.label("resp_status_code"),
+            self.responses.c.headers.label("resp_headers"),
+            self.responses.c.body.label("resp_body"),
+        ).select_from(
+            self.payloads.join(
+                self.paths, self.payloads.c.evil_path_id == self.paths.c.path_id
+            ).outerjoin(
+                self.responses, self.payloads.c.response_id == self.responses.c.response_id
+            )
+        )
+
         async with self._engine.begin() as conn:
-            result = await conn.execute(select(self.payloads))
+            result = await conn.execute(statement)
 
-        for row in result.fetchall():
-            evil_id, module, category, level, parameter, info, payload_type, wstg, response_id = row
+        payload_rows = result.fetchall()
+        if not payload_rows:
+            return
 
-            evil_request = await self.get_path_by_id(evil_id)
-            response = await self.get_response_by_id(response_id)
+        # Pre-fetch all params for the evil path_ids in one query
+        evil_path_ids = [row.evil_path_id for row in payload_rows]
+        params_by_path = {}
+        async with self._engine.begin() as conn:
+            params_result = await conn.execute(
+                select(
+                    self.params.c.path_id,
+                    self.params.c.type, self.params.c.name,
+                    self.params.c.value1, self.params.c.value2, self.params.c.meta
+                ).where(
+                    self.params.c.path_id.in_(evil_path_ids)
+                ).order_by(self.params.c.path_id, self.params.c.type, self.params.c.position)
+            )
+        for param_row in params_result.fetchall():
+            params_by_path.setdefault(param_row[0], []).append(param_row[1:])
+
+        for row in payload_rows:
+            get_params = []
+            post_params = []
+            file_params = []
+
+            for param_type, name, value1, value2, meta in params_by_path.get(row.evil_path_id, []):
+                if param_type == "GET":
+                    get_params.append([name, value1])
+                elif param_type == "POST":
+                    if name == "__RAW__" and not post_params:
+                        post_params = value1
+                    elif isinstance(post_params, list):
+                        post_params.append([name, value1])
+                elif param_type == "FILE":
+                    if meta:
+                        file_params.append([name, (value1, value2, meta)])
+                    else:
+                        file_params.append([name, (value1, value2)])
+                else:
+                    raise ValueError(f"Unknown param type {param_type}")
+
+            evil_request = Request(
+                row.evil_path,
+                method=row.evil_method,
+                encoding=row.evil_encoding,
+                enctype=row.evil_enctype,
+                referer=row.evil_referer,
+                get_params=get_params,
+                post_params=post_params,
+                file_params=file_params,
+                headers=row.evil_headers
+            )
+            evil_request.link_depth = row.evil_depth
+            evil_request.path_id = row.evil_path_id
+
+            response = None
+            if row.response_id and row.resp_url is not None:
+                resp_headers = row.resp_headers
+                if resp_headers and "content-encoding" in resp_headers:
+                    del resp_headers["content-encoding"]
+                response = Response(
+                    httpx.Response(
+                        row.resp_status_code,
+                        headers=resp_headers,
+                        content=row.resp_body
+                    ),
+                    row.resp_url,
+                )
 
             yield Payload(
                 evil_request,
-                category,
-                level,
-                parameter,
-                info,
-                payload_type,
-                json.loads(wstg),
-                module,
+                row.category,
+                row.level,
+                row.parameter,
+                row.info,
+                row.type,
+                json.loads(row.wstg),
+                row.module,
                 response
             )
 

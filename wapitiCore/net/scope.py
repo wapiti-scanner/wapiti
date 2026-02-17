@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import re
 from typing import Iterable, Union, Set
-from urllib.parse import urlparse
 
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 
 
 def is_same_domain(url: str, request: Request) -> bool:

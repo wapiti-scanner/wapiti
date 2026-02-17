@@ -26,7 +26,6 @@ from argparse import Namespace
 from importlib import import_module
 from inspect import getdoc
 from sqlite3 import OperationalError
-from urllib.parse import urlparse
 
 import httpx
 from httpx import RequestError
@@ -36,7 +35,7 @@ from wapitiCore.attack.modules.core import all_modules, common_modules, resolve_
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner, print_easter_eggs
-from wapitiCore.net.web import is_valid_url
+from wapitiCore.net.web import is_valid_url, urlparse
 from wapitiCore.parsers.commandline import parse_args
 from wapitiCore.main.log import logging, log_blue
 from wapitiCore.net.classes import HttpCredential, FormCredential, RawCredential

@@ -20,7 +20,7 @@
 import dataclasses
 import os
 from os.path import splitext
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 from collections import defaultdict
 from enum import Enum, Flag, auto
 import random
@@ -42,6 +42,7 @@ from importlib.resources import files
 from httpx import ReadTimeout, RequestError
 
 from wapitiCore.definitions import FindingBase
+from wapitiCore.net.web import urlparse
 from wapitiCore.model import PayloadInfo
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -209,9 +210,9 @@ class Attack(AttackProtocol):
         self.crawler_configuration = crawler_configuration
         self.start = 0
 
-        # List of attack urls already launched in the current module
-        self.attacked_get = []
-        self.attacked_post = []
+        # Set of attack urls already launched in the current module
+        self.attacked_get = set()
+        self.attacked_post = set()
         self.network_errors = 0
 
         self.finished = False

@@ -22,7 +22,6 @@ import json
 import os
 import re
 from typing import Optional, Tuple
-from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from httpx import RequestError
@@ -30,6 +29,7 @@ from asyncio import TimeoutError
 from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 
 from wapitiCore.net import Request
+from wapitiCore.net.web import urlparse
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED, calculate_git_hash
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.response import Response
@@ -50,12 +50,13 @@ async def playwright_get_content(url: str, page: Page, browser: Browser, crawler
         )
 
         html = await page.content()
+        return html
     except PlaywrightError as exception:
-        print("error")
         logging.exception(exception)
+        return ""
     finally:
         await browser.close()
-        return html
+        
 
 async def fetch_source_files(url: str, crawler_configuration: CrawlerConfiguration) -> set:
     my_files_list = set()

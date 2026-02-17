@@ -68,3 +68,92 @@ async def test_false_positive():
         module = ModuleBackup(crawler, persister, options, crawler_configuration)
         module.do_get = True
         assert not await module.must_attack(request, response)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_attack_request_error_on_original_fetch():
+    """When the initial fetch of the page raises RequestError, network_errors is incremented and we return."""
+    respx.get("http://perdu.com/config.php").mock(side_effect=httpx.RequestError("error"))
+    respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com/config.php")
+    request.path_id = 1
+    response = Response(
+        httpx.Response(
+            status_code=200,
+            headers={"content-type": "text/html"},
+        ),
+        url="http://perdu.com/config.php"
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+        module = ModuleBackup(crawler, persister, options, crawler_configuration)
+        module.do_get = True
+        await module.attack(request, response)
+
+    assert module.network_errors == 1
+    persister.add_payload.assert_not_called()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_attack_request_error_in_gathered_responses():
+    """When one of the backup URL requests raises RequestError, network_errors is incremented and we continue."""
+    respx.get("http://perdu.com/config.php").mock(return_value=httpx.Response(200, text="Hello there"))
+    respx.get("http://perdu.com/config.php.bak").mock(side_effect=httpx.RequestError("error"))
+    respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com/config.php")
+    request.path_id = 1
+    response = Response(
+        httpx.Response(
+            status_code=200,
+            headers={"content-type": "text/html"},
+        ),
+        url="http://perdu.com/config.php"
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+        module = ModuleBackup(crawler, persister, options, crawler_configuration)
+        module.do_get = True
+        await module.attack(request, response)
+
+    assert module.network_errors == 1
+    persister.add_payload.assert_not_called()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_attack_skip_when_response_too_similar():
+    """When a backup URL returns content too similar to the original page, we skip it."""
+    same_content = "Same content"
+    respx.get("http://perdu.com/config.php").mock(return_value=httpx.Response(200, text=same_content))
+    respx.get("http://perdu.com/config.php.bak").mock(return_value=httpx.Response(200, text=same_content))
+    respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com/config.php")
+    request.path_id = 1
+    response = Response(
+        httpx.Response(
+            status_code=200,
+            headers={"content-type": "text/html"},
+        ),
+        url="http://perdu.com/config.php"
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+        module = ModuleBackup(crawler, persister, options, crawler_configuration)
+        module.do_get = True
+        await module.attack(request, response)
+
+    persister.add_payload.assert_not_called()
