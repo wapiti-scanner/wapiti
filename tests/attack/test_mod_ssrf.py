@@ -8,7 +8,9 @@ from wapitiCore.attack.attack import ParameterSituation
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.attack.mod_ssrf import ModuleSsrf
+from wapitiCore.attack.mod_ssrf import ModuleSsrf, SSRF_INBAND_PAYLOADS
+
+PASSWD_CONTENT = "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin"
 
 
 @pytest.mark.asyncio
@@ -87,6 +89,71 @@ async def test_whole_stuff():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_finish_with_missing_request_id():
+    # Test that finish() handles missing request IDs gracefully (no crash)
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 2
+
+    # get_path_by_id returns None for the unknown request_id "999"
+    # but returns the real request for "2"
+    def get_path_by_id(request_id):
+        if int(request_id) == 2:
+            return request
+        return None
+
+    persister.get_path_by_id.side_effect = get_path_by_id
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+        module.do_post = True
+
+        respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    # request_id "999" does not exist in persister
+                    "999": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/999/666f6f/31337-0-10.0.0.1.txt",
+                                "ip": "10.0.0.1",
+                                "method": "GET"
+                            }
+                        ]
+                    },
+                    # request_id "2" exists and should be reported
+                    "2": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:53:00+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/2/666f6f/31337-0-10.0.0.2.txt",
+                                "ip": "10.0.0.2",
+                                "method": "GET"
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
+        # finish() should NOT raise ValueError, it should skip the missing ID and process the valid one
+        await module.finish()
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Server Side Request Forgery"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_query_string_injection():
     # Test attacking raw query string (hex-encoded value of QUERY_STRING should appear in payload)
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
@@ -112,3 +179,229 @@ async def test_query_string_injection():
         assert parameter.name == ""
         assert parameter.situation == ParameterSituation.QUERY_STRING
         assert payload_info.payload == "http://wapiti3.ovh/ssrf/yolo/1/51554552595f535452494e47/"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_inband_payloads_generated():
+    # Test that get_payloads yields OOB + in-band payloads with correct rules
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=something")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+        module._session_id = "test42"
+
+        payloads = list(module.mutator.mutate(request, module.get_payloads))
+
+        # We expect 1 OOB + N in-band payloads for the "url" parameter
+        expected_total = 1 + len(SSRF_INBAND_PAYLOADS)
+        assert len(payloads) == expected_total
+
+        # First payload is the OOB one (no rules)
+        _, _, first_payload_info = payloads[0]
+        assert "ssrf/test42/" in first_payload_info.payload
+        assert first_payload_info.rules == []
+
+        # Subsequent payloads are in-band with detection rules
+        _, _, second_payload_info = payloads[1]
+        assert second_payload_info.payload == "file:///etc/passwd"
+        assert "root:x:0:0" in second_payload_info.rules
+
+        # AWS metadata payload should be present
+        aws_found = False
+        for _, _, payload_info in payloads:
+            if "169.254.169.254" in payload_info.payload and "meta-data" in payload_info.payload:
+                assert "ami-id" in payload_info.rules
+                aws_found = True
+        assert aws_found, "AWS metadata payload not found"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_inband_ssrf_detection():
+    # When the target reflects fetched file content, in-band SSRF should be detected during attack()
+
+    def response_callback(request):
+        # If the payload injected file:///etc/passwd, simulate the server reflecting its content
+        if "file" in str(request.url) and "passwd" in str(request.url):
+            return httpx.Response(200, text=PASSWD_CONTENT)
+        return httpx.Response(200, text="Hello there")
+
+    respx.route(host="perdu.com").mock(side_effect=response_callback)
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # In-band SSRF should have been detected via the file:///etc/passwd payload
+        assert persister.add_payload.call_count >= 1
+        vuln_found = False
+        for call in persister.add_payload.call_args_list:
+            kwargs = call[1]
+            if kwargs["category"] == "Server Side Request Forgery" and kwargs["parameter"] == "url":
+                vuln_found = True
+                break
+        assert vuln_found, "In-band SSRF vulnerability should have been detected"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_inband_false_positive_filtering():
+    # If the pattern is already present in the original response (no injection), it's a false positive
+
+    # Always return passwd content, even without payload injection
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(200, text=PASSWD_CONTENT)
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # No SSRF vulnerability should be reported (pattern is a false positive)
+        ssrf_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Server Side Request Forgery"
+        ]
+        assert len(ssrf_findings) == 0, "False positive should have been filtered out"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_timeout_handling():
+    # When a request times out, a ResourceConsumption finding should be reported
+
+    call_count = 0
+
+    def response_callback(request):
+        nonlocal call_count
+        call_count += 1
+        # First call succeeds (OOB payload), second call times out (first in-band payload)
+        if call_count <= 1:
+            return httpx.Response(200, text="Hello there")
+        raise httpx.ReadTimeout("Connection timed out")
+
+    respx.route(host="perdu.com").mock(side_effect=response_callback)
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # A resource consumption finding should have been reported for the timeout
+        timeout_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Resource consumption"
+        ]
+        assert len(timeout_findings) == 1, "Timeout should be reported as resource consumption"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_server_error_detection():
+    # When the server returns 500, an InternalError finding should be reported
+
+    respx.route(host="perdu.com").mock(
+        return_value=httpx.Response(500, text="Internal Server Error")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # An internal error finding should have been reported
+        error_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Internal Server Error"
+        ]
+        assert len(error_findings) == 1, "Server 500 error should be reported once"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_early_exit_on_vulnerable_parameter():
+    # Once a parameter is found vulnerable, remaining payloads for that parameter should be skipped
+
+    request_count = 0
+
+    def response_callback(request):
+        nonlocal request_count
+        request_count += 1
+        # Always reflect passwd content to trigger in-band detection for all in-band payloads
+        if "file" in str(request.url) and "passwd" in str(request.url):
+            return httpx.Response(200, text=PASSWD_CONTENT)
+        return httpx.Response(200, text="Hello there")
+
+    respx.route(host="perdu.com").mock(side_effect=response_callback)
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # Only one SSRF finding should be reported per parameter (early exit)
+        ssrf_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Server Side Request Forgery"
+        ]
+        assert len(ssrf_findings) == 1, (
+            f"Early exit should limit to 1 SSRF finding per parameter, got {len(ssrf_findings)}"
+        )
+
+        # The number of HTTP requests should be less than the total payloads
+        # (1 OOB + file:///etc/passwd detected + false_positive check = 3 requests, then early exit)
+        total_payloads = 1 + len(SSRF_INBAND_PAYLOADS)
+        assert request_count < total_payloads, (
+            f"Early exit should reduce requests: sent {request_count}, total payloads {total_payloads}"
+        )

