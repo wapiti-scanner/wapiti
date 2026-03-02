@@ -291,3 +291,58 @@ async def test_direct_upload():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "calendar"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_upload_with_all_params_skipped():
+    """Test that no RuntimeError occurs when all file params are skipped (issue #483)"""
+    respx.route(host="127.0.0.1").pass_through()
+    persister = AsyncMock()
+    request = Request(
+        "http://127.0.0.1:65084/xxe/outofband/upload.php",
+        file_params=[
+            ["calendar", ("calendar.xml", b"<xml>test</xml>", "application/xml")]
+        ]
+    )
+    request.path_id = 10
+    persister.get_path_by_id.return_value = request
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65084/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {
+            "timeout": 10,
+            "level": 1,
+            "external_endpoint": "http://wapiti3.ovh/",
+            "internal_endpoint": "http://wapiti3.ovh/",
+            "skipped_parameters": {"calendar"}  # Skip the only file param
+        }
+
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        # Mock endpoint response indicating vulnerability found for the skipped parameter
+        respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    "10": {
+                        "63616c656e646172": [  # hex for "calendar"
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/xxe_data/yolo/10/63616c656e646172/31337-0-192.168.2.1.txt",
+                                "ip": "192.168.2.1",
+                                "size": 999,
+                                "payload": "linux2"
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
+        # Should NOT raise RuntimeError even though mutator yields nothing
+        await module.finish()
+
+        # Should NOT add vulnerability since the parameter was skipped
+        assert not persister.add_payload.call_count
