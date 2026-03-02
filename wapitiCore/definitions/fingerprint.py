@@ -20,10 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import List
 
-from wapitiCore.definitions.base import FindingBase
+from wapitiCore.definitions.base import Additional
 
 
-class SoftwareNameDisclosureFinding(FindingBase):
+class SoftwareNameDisclosureFinding(Additional):
     @classmethod
     def name(cls) -> str:
         return "Fingerprint web technology"
@@ -60,9 +60,6 @@ class SoftwareNameDisclosureFinding(FindingBase):
     def short_name(cls) -> str:
         return cls.name()
 
-    @classmethod
-    def type(cls) -> str:
-        return "additional"
 
     @classmethod
     def wstg_code(cls) -> List[str]:
