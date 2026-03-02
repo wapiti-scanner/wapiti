@@ -127,3 +127,45 @@ def test_wildcard_translate(wildcard_expression, texts, results):
     regex = wildcard_translate(wildcard_expression)
     for text, result in zip(texts, results):
         assert bool(regex.match(text)) is result
+
+
+def test_wildcard_translate_url_patterns():
+    """Regression test for issue #668: wildcard_translate should handle URL patterns with special characters.
+
+    In version 3.0.4, the regex flags were placed incorrectly (pattern + '\\Z(?ms)') which caused
+    "global flags not at the start of the expression" error when using -x parameter with URLs.
+    The fix places flags at the beginning: '(?ms)' + pattern + '\\Z'
+    """
+    # Test exact URL match (no wildcards)
+    regex = wildcard_translate("http://localhost/logout")
+    assert regex.match("http://localhost/logout")
+    assert not regex.match("http://localhost/login")
+    assert not regex.match("http://localhost/logout/page")
+
+    # Test URL with wildcards
+    regex = wildcard_translate("http://localhost/*")
+    assert regex.match("http://localhost/")
+    assert regex.match("http://localhost/logout")
+    assert regex.match("http://localhost/admin/panel")
+    assert not regex.match("http://example.com/")
+
+    # Test URL path exclusion with wildcards
+    regex = wildcard_translate("http://example.com/admin/*")
+    assert regex.match("http://example.com/admin/")
+    assert regex.match("http://example.com/admin/users")
+    assert not regex.match("http://example.com/public/page")
+
+    # Test HTTPS URL
+    regex = wildcard_translate("https://secure.example.com/api/v1/logout")
+    assert regex.match("https://secure.example.com/api/v1/logout")
+    assert not regex.match("https://secure.example.com/api/v1/login")
+
+    # Test URL with query parameters (special characters: ?, =, &)
+    regex = wildcard_translate("http://example.com/page?action=logout")
+    assert regex.match("http://example.com/page?action=logout")
+    assert not regex.match("http://example.com/page?action=login")
+
+    # Test URL with port number
+    regex = wildcard_translate("http://localhost:8080/admin")
+    assert regex.match("http://localhost:8080/admin")
+    assert not regex.match("http://localhost:8081/admin")
