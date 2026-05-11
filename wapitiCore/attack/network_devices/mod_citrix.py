@@ -83,7 +83,7 @@ class ModuleCitrix(Attack):
 
                 if "NetScaler" in title:
                     # Search the product name in the content
-                    matches = soup.find_all(
+                    matches = page.soup.find_all(
                         "span",
                         string=re.compile(r"^(NetScaler ADC|Citrix NetScaler|NetScaler|NetScaler AWS)$")
                     )

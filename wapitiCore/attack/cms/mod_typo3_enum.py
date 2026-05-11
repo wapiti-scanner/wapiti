@@ -107,11 +107,11 @@ async def fetch_source_files(url: str, crawler_configuration: CrawlerConfigurati
             page = await context.new_page()
 
             html = await playwright_get_content(url, page, browser, crawler_configuration)
-            soup = BeautifulSoup(html, "html.parser")
+            parsed = Html(html, url)
 
             # Collect JS and CSS file links
-            js_files = {script.get('src') for script in soup.find_all('script') if script.get('src')}
-            css_files = {link.get('href') for link in soup.find_all('link', rel="stylesheet") if link.get('href')}
+            js_files = {script['src'] for script in parsed.soup.find_all('script', src=True)}
+            css_files = {link['href'] for link in parsed.soup.find_all('link', rel="stylesheet", href=True)}
 
             my_files_list.update(js_files)
             my_files_list.update(css_files)
