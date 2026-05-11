@@ -137,8 +137,8 @@ class ModuleExec(Attack):
                     continue
 
                 # Check file extension before further analysis
-                if not self._has_valid_file_extension(request.url):
-                    log_verbose(f"Skipping due to invalid file extension: {request.url}")
+                if not self._has_valid_file_extension(request.path):
+                    log_verbose(f"Skipping due to invalid file extension: {request.path}")
                     continue
 
             except ReadTimeout:
