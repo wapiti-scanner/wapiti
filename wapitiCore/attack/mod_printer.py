@@ -23,13 +23,13 @@ from typing import Optional
 from urllib.parse import urljoin
 import xml.etree.ElementTree as ET
 
-from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
 from wapitiCore.main.log import log_blue, logging
 from wapitiCore.net import Request, Response
+from wapitiCore.parsers.html_parser import Html
 
 
 MSG_PRINTER_VERSIONED = "{0} {1} detected"
