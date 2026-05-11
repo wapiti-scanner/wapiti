@@ -153,7 +153,7 @@ class ModulePrinter(Attack):
             root = ET.fromstring(xml_content)
             revision = root.find('.//prdcfgdyn:ProductInformation/dd:Version/dd:Revision', ns)
 
-            if revision.text:
+            if revision is not None and revision.text:
                 return revision.text.strip()
         except ET.ParseError:
             logging.error("Failed to parse XML (HP).")
