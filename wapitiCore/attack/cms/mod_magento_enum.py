@@ -176,7 +176,7 @@ class ModuleMagentoEnum(CommonCMS):
                 versions[content_hash] = detection_db[content_hash]
 
         if versions:
-            self.versions = set.intersection(*[set(versions) for versions in versions.values()])
+            self.versions = set.intersection(*[set(version_list) for version_list in versions.values()])
 
     async def get_url_hashes(self, url: str) -> Optional[Tuple[str, str]]:
         if get_root_url(url) == await self.persister.get_root_url():
