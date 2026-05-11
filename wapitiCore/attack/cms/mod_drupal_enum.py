@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import asyncio
 import json
 
 from typing import Optional
@@ -41,45 +42,42 @@ class ModuleDrupalEnum(CommonCMS):
     versions = []
     plugins_list = []
 
-    async def check_drupal_plugins(self, url, plugins_file):
+    async def _check_plugin(self, url: str, plugin: str, semaphore: asyncio.Semaphore) -> Optional[str]:
+        async with semaphore:
+            plugin_url = urljoin(url, f"modules/contrib/{plugin}/")
+            request = Request(plugin_url, 'GET')
+            try:
+                response: Response = await self.crawler.async_send(request, follow_redirects=True)
+            except RequestError:
+                self.network_errors += 1
+                return None
+            return plugin if response.status == 403 else None
+
+    async def check_drupal_plugins(self, url):
         """
         Check if specific Drupal Plugins are installed on the given URL.
         """
-        installed_plugins = []
-        # Sending a request to a non-existing plugin
         no_plugin_url = urljoin(url, "modules/contrib/non_existing_plugin/")
-        no_plugin_request = Request(f'{no_plugin_url}', 'GET')
+        no_plugin_request = Request(no_plugin_url, 'GET')
         try:
             no_plugin_response: Response = await self.crawler.async_send(no_plugin_request, follow_redirects=True)
             if no_plugin_response.status == 403:
-                # If the no_plugin_response returns 403, assume all folder requests return 403
                 return []
         except RequestError:
             self.network_errors += 1
             return []
-        try :
-            with open(
-            path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS),
-            errors = "ignore",
-            encoding = 'utf-8') as plugins_list:
-                for plugin in plugins_list:
-                    plugin = plugin.strip()
-                    plugin_url = urljoin(url, f"modules/contrib/{plugin}/")
-                    request = Request(f'{plugin_url}', 'GET')
-                    try:
-                        response: Response = await self.crawler.async_send(request, follow_redirects=True)
-                    except RequestError:
-                        self.network_errors += 1
-                        continue
 
-                    if response.status == 403:
-                        installed_plugins.append(plugin)
-
+        plugins_path = path_join(self.DATA_DIR, self.PAYLOADS_FILE_PLUGINS)
+        try:
+            with open(plugins_path, errors="ignore", encoding="utf-8") as plugins_file:
+                plugins = [line.strip() for line in plugins_file if line.strip()]
         except FileNotFoundError:
-            print(f"Error: File '{plugins_file}' not found.")
+            logging.error("Drupal plugins file not found: %s", plugins_path)
             return []
 
-        return installed_plugins
+        semaphore = asyncio.Semaphore(self.options.get("tasks", 10))
+        results = await asyncio.gather(*[self._check_plugin(url, plugin, semaphore) for plugin in plugins])
+        return [p for p in results if p is not None]
 
     async def check_drupal(self, url):
         check_list = ['core/misc/drupal.js', 'misc/drupal.js']
@@ -108,7 +106,7 @@ class ModuleDrupalEnum(CommonCMS):
         if await self.check_drupal(request_to_root.url):
             await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)  # Call the method on the instance
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
-            self.plugins_list = await self.check_drupal_plugins(request_to_root.url, self.PAYLOADS_FILE_PLUGINS)
+            self.plugins_list = await self.check_drupal_plugins(request_to_root.url)
 
             drupal_detected = {
                 "name": "Drupal",
