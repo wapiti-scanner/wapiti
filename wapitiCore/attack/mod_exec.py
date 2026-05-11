@@ -72,16 +72,6 @@ class ModuleExec(Attack):
         return ""
 
     @staticmethod
-    def _is_valid_content_type(response: Response) -> bool:
-        """
-        Check if the Content-Type header of the response is acceptable for executing code.
-        Acceptable types typically include text-based responses (HTML, plain text, etc.)
-        """
-        valid_content_types = ["text/html", "text/plain", "application/json", "application/javascript"]
-        content_type = response.headers.get('Content-Type', '').split(';')[0].strip()
-        return content_type in valid_content_types
-
-    @staticmethod
     def _has_valid_file_extension(url: str) -> bool:
         """
         Check if the URL points to a valid file extension.
@@ -130,11 +120,6 @@ class ModuleExec(Attack):
 
             try:
                 response: Response = await self.crawler.async_send(mutated_request)
-
-                # Check Content-Type header before further analysis
-                if not self._is_valid_content_type(response):
-                    log_verbose(f"Skipping due to invalid content-type: {response.headers.get('Content-Type', '')}")
-                    continue
 
                 # Check file extension before further analysis
                 if not self._has_valid_file_extension(request.path):
