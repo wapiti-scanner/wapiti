@@ -22,11 +22,11 @@ import json
 import re
 from typing import Optional, Tuple
 
-from bs4 import BeautifulSoup
 from httpx import RequestError
 from asyncio import TimeoutError
 from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 from wapitiCore.net.web import urlparse
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED, calculate_git_hash
@@ -81,11 +81,11 @@ async def fetch_source_files(url: str, crawler_configuration: CrawlerConfigurati
             page = await context.new_page()
 
             html = await playwright_get_content(url, page, browser, crawler_configuration)
-            soup = BeautifulSoup(html, "html.parser")
+            parsed = Html(html, url)
 
             # Collect JS and CSS file links
-            js_files = {script.get('src') for script in soup.find_all('script') if script.get('src')}
-            css_files = {link.get('href') for link in soup.find_all('link', rel="stylesheet") if link.get('href')}
+            js_files = {script['src'] for script in parsed.soup.find_all('script', src=True)}
+            css_files = {link['href'] for link in parsed.soup.find_all('link', rel="stylesheet", href=True)}
 
             my_files_list.update(js_files)
             my_files_list.update(css_files)
@@ -137,9 +137,8 @@ class ModuleMagentoEnum(CommonCMS):
         except RequestError:
             self.network_errors += 1
             return None
-        soup = BeautifulSoup(response.content, 'html.parser')
+        page = Html(response.content, url)
         pattern = re.compile(r'skin/frontend/.*/default/.*')
-        script_tags = soup.find_all('script')
 
         keywords = [
             "magento_opensource", "x-magento-init", "Magento_Ui",
@@ -154,15 +153,13 @@ class ModuleMagentoEnum(CommonCMS):
         ):
             return await self.fetch_source_list(url)
 
-        for script in script_tags:
-            if 'src' in script.attrs and "Magento_Theme" in script['src']:
+        for script in page.soup.find_all('script', src=True):
+            if "Magento_Theme" in script['src']:
                 return await self.fetch_source_list(url)
 
-        for link in soup.find_all('link'):
-            if 'href' in link.attrs:
-                src = link['href']
-                if pattern.search(src):
-                    return await self.fetch_source_list(url)
+        for link in page.soup.find_all('link', href=True):
+            if pattern.search(link['href']):
+                return await self.fetch_source_list(url)
 
         for cookie in response.cookies:
             if cookie.startswith(('frontend', 'X-Magento', 'mage-')):
@@ -181,7 +178,7 @@ class ModuleMagentoEnum(CommonCMS):
         if versions:
             self.versions = set.intersection(*[set(versions) for versions in versions.values()])
 
-    async def get_url_hashes(self, url: str) -> Tuple[str, str]:
+    async def get_url_hashes(self, url: str) -> Optional[Tuple[str, str]]:
         if get_root_url(url) == await self.persister.get_root_url():
             request = Request(f"{url}", "GET")
             try:
