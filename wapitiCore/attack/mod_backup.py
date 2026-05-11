@@ -110,7 +110,6 @@ class ModuleBackup(Attack):
         except RequestError:
             self.network_errors += 1
             return
-        requests = []
         evil_reqs = []
         urls = []
         if self.get_payloads():
@@ -131,12 +130,19 @@ class ModuleBackup(Attack):
                 url = urljoin(request.path, raw_payload)
 
             log_verbose(f"[¨] {url}")
-
-            evil_req = Request(url)
-            evil_reqs.append(evil_req)
-            requests.append(self.crawler.async_send(evil_req))
+            evil_reqs.append(Request(url))
             urls.append(url)
-        responses = await asyncio.gather(*requests, return_exceptions=True)
+
+        semaphore = asyncio.Semaphore(self.options.get("tasks", 10))
+
+        async def bounded_send(req):
+            async with semaphore:
+                return await self.crawler.async_send(req)
+
+        responses = await asyncio.gather(
+            *[bounded_send(req) for req in evil_reqs],
+            return_exceptions=True,
+        )
         for resp, url, evil_req in zip(responses, urls, evil_reqs):
             if isinstance(resp, RequestError):
                 self.network_errors += 1
