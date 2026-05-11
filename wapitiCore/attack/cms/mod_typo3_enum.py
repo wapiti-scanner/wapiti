@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
 import re
-import os
 from typing import Optional, List, Set, Dict
 
 from urllib.parse import urljoin
@@ -126,7 +125,7 @@ async def fetch_source_files(url: str, crawler_configuration: CrawlerConfigurati
             )
 
     except Exception as e:
-        print(f"An error occurred while fetching JS files: {e}")
+        logging.error("An error occurred while fetching JS files: %s", e)
 
     return my_files_list
 
@@ -176,7 +175,7 @@ class ModuleTYPO3Enum(CommonCMS):
                         installed_extensions.append(extension)
 
         except FileNotFoundError:
-            print(f"Error: File '{extensions_file}' not found.")
+            logging.error("TYPO3 extensions file not found: %s", extensions_file)
             return []
 
         return installed_extensions
