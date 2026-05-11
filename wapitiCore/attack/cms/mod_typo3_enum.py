@@ -19,14 +19,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import json
 import re
+from os.path import join as path_join
 from typing import Optional, List, Set, Dict
 
 from urllib.parse import urljoin
-from bs4 import BeautifulSoup
 from httpx import RequestError
 from asyncio import TimeoutError
 from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 
+from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -137,34 +138,30 @@ class ModuleTYPO3Enum(CommonCMS):
     versions = []
     extensions_list = []
 
-    async def check_typo3_extensions(self, url, extensions_file):
+    async def check_typo3_extensions(self, url):
         """
         Check if specific TYPO3 extensions are installed on the given URL.
         """
         installed_extensions = []
 
-        # Create a check request with a known non-existent extension
         no_ext_url = urljoin(url, "typo3conf/ext/non_existing_ext/")
-        no_ext_request = Request(f'{no_ext_url}', 'GET')
+        no_ext_request = Request(no_ext_url, 'GET')
 
         try:
             no_ext_response: Response = await self.crawler.async_send(no_ext_request, follow_redirects=True)
             if no_ext_response.status == 403:
-                # If the no_ext_response returns 403, assume all folder requests return 403
                 return []
         except RequestError:
             self.network_errors += 1
             return []
 
-        try :
-            with open(
-            os.path.join(self.DATA_DIR, self.PAYLOADS_FILE_EXTENSIONS),
-            errors = "ignore",
-            encoding = 'utf-8') as ext_list:
+        extensions_path = path_join(self.DATA_DIR, self.PAYLOADS_FILE_EXTENSIONS)
+        try:
+            with open(extensions_path, errors="ignore", encoding="utf-8") as ext_list:
                 for extension in ext_list:
                     extension = extension.strip()
                     ext_url = urljoin(url, f"typo3conf/ext/{extension}/")
-                    request = Request(f'{ext_url}', 'GET')
+                    request = Request(ext_url, 'GET')
                     try:
                         response: Response = await self.crawler.async_send(request, follow_redirects=True)
                     except RequestError:
@@ -175,7 +172,7 @@ class ModuleTYPO3Enum(CommonCMS):
                         installed_extensions.append(extension)
 
         except FileNotFoundError:
-            logging.error("TYPO3 extensions file not found: %s", extensions_file)
+            logging.error("TYPO3 extensions file not found: %s", extensions_path)
             return []
 
         return installed_extensions
@@ -189,30 +186,34 @@ class ModuleTYPO3Enum(CommonCMS):
         except RequestError:
             self.network_errors += 1
         else:
-            soup = BeautifulSoup(response.content, 'html.parser')
+            page = Html(response.content, url)
 
             # Check meta tag for generator
-            meta_generator = soup.find('meta', attrs={'name': 'generator'})
+            meta_generator = page.soup.find('meta', attrs={'name': 'generator'})
             if meta_generator and re.search(r'TYPO3\s+(?:CMS\s+)?(?:[\d.]+)?(?:\s+CMS)?',
                                             meta_generator.get('content', ''), re.I):
                 return True
 
             # Check for TYPO3-specific links and images
             typo3_patterns = ['typo3conf', 'typo3temp']
-            for tag in soup.find_all(['link', 'img']):
+            for tag in page.soup.find_all(['link', 'img']):
                 for attr in ['href', 'src']:
                     if tag.has_attr(attr) and any(pattern in tag[attr] for pattern in typo3_patterns):
                         return True
 
             # Check script sources
-            for script in soup.find_all('script', src=True):
+            for script in page.soup.find_all('script', src=True):
                 if re.search(r'^/?typo3(?:conf|temp)/', script['src']):
                     return True
 
             # Check for a known TYPO3 image probe
             typo3_probe_url = url.rstrip('/') + "/typo3/sysext/core/Resources/Public/Images/typo3_orange.svg"
-            request_typo3 = Request(f'{typo3_probe_url}', 'GET')
-            probe_response : Response = await self.crawler.async_send(request_typo3, follow_redirects=False)
+            request_typo3 = Request(typo3_probe_url, 'GET')
+            try:
+                probe_response: Response = await self.crawler.async_send(request_typo3, follow_redirects=False)
+            except RequestError:
+                self.network_errors += 1
+                return False
             if probe_response.status == 200 and "svg" in probe_response.headers.get("content-type", ""):
                 return True
         return False
@@ -226,7 +227,7 @@ class ModuleTYPO3Enum(CommonCMS):
             await self.detect_version(self.PAYLOADS_HASH, request_to_root.url)
             self.versions = sorted(self.versions, key=lambda x: x.split('.')) if self.versions else []
 
-            self.extensions_list = await self.check_typo3_extensions(request_to_root.url, self.PAYLOADS_FILE_EXTENSIONS)
+            self.extensions_list = await self.check_typo3_extensions(request_to_root.url)
 
             if not self.versions:
                 list_hashes = []
