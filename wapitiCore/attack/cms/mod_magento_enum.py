@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import hashlib
 import json
-import os
 import re
 from typing import Optional, Tuple
 
@@ -100,7 +99,7 @@ async def fetch_source_files(url: str, crawler_configuration: CrawlerConfigurati
                 "and browsers are installed (`playwright install`)."
             )
     except Exception as e:
-        print(f"An error occurred while fetching JS files and CSS files: {e}")
+        logging.error("An error occurred while fetching JS files and CSS files: %s", e)
 
     return my_files_list
 
