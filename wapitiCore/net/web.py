@@ -20,7 +20,7 @@
 from copy import deepcopy
 import posixpath
 import sys
-from urllib.parse import urlparse as _urlparse, urlunparse, unquote, quote, urljoin
+from urllib.parse import urlparse as _urlparse, urlunparse, unquote, quote, urljoin, ParseResult
 from typing import Optional, List, Tuple, Union, TYPE_CHECKING
 import re
 
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 Parameters = Optional[Union[List[List[str]], str]]
 
 
-def urlparse(url: str) -> str:
+def urlparse(url: str) -> ParseResult:
     url_parts = _urlparse(url)
 
     netloc = ""
@@ -47,7 +47,10 @@ def urlparse(url: str) -> str:
         netloc += "@"
 
     if url_parts.hostname is not None:
-        netloc += url_parts.hostname
+        if ":" in url_parts.hostname:  # IPv6 address — restore brackets
+            netloc += f"[{url_parts.hostname}]"
+        else:
+            netloc += url_parts.hostname
 
     if url_parts.port is not None:
         netloc += f":{url_parts.port}"
