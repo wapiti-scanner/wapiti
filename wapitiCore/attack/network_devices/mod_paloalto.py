@@ -88,6 +88,7 @@ class ModulePaloAlto(NetworkDeviceCommon):
             'js/Pan.js',
             'global-protect/portal/images/bg.png'
         ]
+        version_table = self.load_version_table()
         for item in check_list:
             full_url = urljoin(url, item)
             request = Request(full_url, 'GET')
@@ -96,9 +97,8 @@ class ModulePaloAlto(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 continue
-            version_table= self.load_version_table()
-            fullEtag=response.headers.get("Etag")
-            if(fullEtag and len(fullEtag)>=8):
+            fullEtag = response.headers.get("Etag")
+            if fullEtag and len(fullEtag) >= 8:
                 if '-' in fullEtag:
                     shortenEtag = fullEtag.split('-', 1)[0]
                 else:
@@ -106,8 +106,12 @@ class ModulePaloAlto(NetworkDeviceCommon):
                 # https://developer.mozilla.org/fr/docs/Web/HTTP/Reference/Headers/ETag
                 if shortenEtag.startswith("W/\""):
                     shortenEtag = shortenEtag[3:]
-                date = datetime.fromtimestamp(int(shortenEtag,16),timezone.utc).date()
-                self.version = self.check_date(version_table,date)
+                try:
+                    date = datetime.fromtimestamp(int(shortenEtag, 16), timezone.utc).date()
+                except (ValueError, OverflowError, OSError):
+                    logging.warning(f"Could not parse ETag value as timestamp: {shortenEtag!r}")
+                    continue
+                self.version = self.check_date(version_table, date)
                 return True
         return False
 
