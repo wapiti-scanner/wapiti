@@ -224,7 +224,7 @@ OTHER OPTIONS:
     For example:  
         `--cookie-value "PHPSESSIONID=5f4dcc3b5aa765d61d8327deb882cf99;cookie_2=somevalue"`
 
-  * --jwt` <JWT>
+  * `--jwt` <JWT>
     Set JWT token from a valid user session.
     You can import the JWT token value to be sent with every request for an authenticated scan.
 
