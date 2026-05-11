@@ -22,7 +22,7 @@ import re
 from typing import Optional
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
@@ -54,13 +54,13 @@ class ModuleCitrix(Attack):
                 continue
 
             if response.is_success:
-                return await self.detect_citrix_product(response.content)
+                return await self.detect_citrix_product(response.content, full_url)
 
         return False
 
-    async def detect_citrix_product(self, response_content):
-        soup = BeautifulSoup(response_content, 'html.parser')
-        title_tag = soup.title
+    async def detect_citrix_product(self, response_content, url: str = ""):
+        page = Html(response_content, url)
+        title_tag = page.soup.title
         # If title tag exists and has a class attribute
         if title_tag:
             if 'class' in title_tag.attrs:

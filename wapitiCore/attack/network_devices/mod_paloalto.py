@@ -22,7 +22,7 @@ from os.path import join as path_join
 from typing import Optional
 from urllib.parse import urljoin
 from datetime import datetime, timezone
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
@@ -67,15 +67,14 @@ class ModulePaloAlto(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 continue
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            div_header = soup.find(id="heading")
+            page = Html(response.content, full_url)
+            div_header = page.soup.find(id="heading")
             if response.is_success:
-                if title_tag and "GlobalProtect Portal" in title_tag.text.strip():
+                if "GlobalProtect Portal" in page.title:
                     return True
                 elif div_header and "GlobalProtect Portal" in div_header.text.strip():
                     return True
-                elif soup.pan_form is not None:
+                elif page.soup.pan_form is not None:
                     return True
 
         return False

@@ -23,7 +23,7 @@ import re
 from typing import Optional
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
@@ -56,12 +56,11 @@ class ModuleCheckPoint(NetworkDeviceCommon):
                 continue
 
             if response.is_success:
-                soup = BeautifulSoup(response.content, 'html.parser')
-                scripts = soup.find_all('script')
-                for script in scripts:
-                    if script.has_attr('src') and script['src'].endswith('/login/login.js'):
-                        self.version = await self.detect_checkpoint_version(response.content)
-                        return True
+                page = Html(response.content, full_url)
+                if any(url.endswith('/login/login.js') for url in page.scripts):
+                    self.version = await self.detect_checkpoint_version(response.content, full_url)
+                    return True
+                for script in page.soup.find_all('script', src=False):
                     if script.string and "realmsArrJSON =" in script.string:
                         return True
                 if 'Check Point Software Technologies Ltd' in response.content:
@@ -69,10 +68,10 @@ class ModuleCheckPoint(NetworkDeviceCommon):
 
         return False
 
-    async def detect_checkpoint_version(self, response_content):
+    async def detect_checkpoint_version(self, response_content, url: str = ""):
         version = []
-        soup = BeautifulSoup(response_content, 'html.parser')
-        scripts = [script for script in soup.find_all('script') if not script.has_attr('src')]
+        page = Html(response_content, url)
+        scripts = page.soup.find_all('script', src=False)
         for script in scripts:
             if script.string:
                 # Define the pattern to match the version variable

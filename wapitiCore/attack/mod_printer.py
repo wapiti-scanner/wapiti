@@ -23,7 +23,7 @@ from typing import Optional
 from urllib.parse import urljoin
 import xml.etree.ElementTree as ET
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
@@ -115,13 +115,13 @@ class ModulePrinter(Attack):
             logging.error("Request Error occurred (Epson): %s", req_error)
             return MSG_NO_FIRMWARE
 
-        soup = BeautifulSoup(response.content, 'html.parser')
+        page = Html(response.content, endpoint_url)
         patterns = [
             r'Current\s*Version[:\s]*([A-Za-z0-9.\-]+)',
             r'Version\s*actuelle[:\s]*([A-Za-z0-9.\-]+)'
         ]
 
-        for p in soup.find_all('p'):
+        for p in page.soup.find_all('p'):
             text = p.get_text(separator=' ', strip=True)
             for pattern in patterns:
                 match = re.search(pattern, text, re.IGNORECASE)

@@ -24,7 +24,7 @@ from urllib.parse import urljoin
 from string import ascii_lowercase
 import random
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
@@ -68,8 +68,8 @@ class ModuleForti(NetworkDeviceCommon):
             self.network_errors += 1
             raise
         if response.is_success:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            for tag in soup.find_all(True):
+            page = Html(response.content, url_fortimail)
+            for tag in page.soup.find_all(True):
                 if tag.string:
                     match = self.fortinet_pattern.search(tag.text)
                     if match:
@@ -87,15 +87,13 @@ class ModuleForti(NetworkDeviceCommon):
             self.network_errors += 1
             raise
         if response.is_success:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            sign_in_header_div = soup.find('div', class_='sign-in-header')
+            page = Html(response.content, url_fortimanager)
+            sign_in_header_div = page.soup.find('div', class_='sign-in-header')
 
             for device_name in ["FortiManager", "FortiAnalyzer"]:
-                if title_tag and title_tag.string:
-                    if device_name in title_tag.string:
-                        self.device_name = device_name
-                        return True
+                if device_name in page.title:
+                    self.device_name = device_name
+                    return True
                 # if custom title without Forti*, we check for specific div
                 if sign_in_header_div and device_name in sign_in_header_div.text:
                     self.device_name = device_name
@@ -133,20 +131,12 @@ class ModuleForti(NetworkDeviceCommon):
         except RequestError:
             self.network_errors += 1
             raise
-        soup = BeautifulSoup(response.content, 'html.parser')
+        page = Html(response.content, url)
 
-        # Get the title of the webpage
-        title_tag = soup.title
-        if title_tag and title_tag.string:
-            title = title_tag.string
-
-            # Search for the pattern in the title
-            match = self.fortinet_pattern.search(title)
-
-            if match:
-                # Extract the matched product name
-                self.device_name = match.group()
-                return True
+        match = self.fortinet_pattern.search(page.title)
+        if match:
+            self.device_name = match.group()
+            return True
         if 'class="main-app"' in response.content:
             return True
 
