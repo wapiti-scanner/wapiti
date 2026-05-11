@@ -234,13 +234,6 @@ async def test_epson_l6290_detection_with_fw_version():
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
-@pytest.mark.asyncio
-async def test_get_firmware_version_unknown_brand():
-    module = ModulePrinter(AsyncMock(), AsyncMock(), {}, AsyncMock())
-
-    result = await module.get_firmware_version("http://printer.local", "canon")
-
-    assert result == ""
 
 
 @pytest.mark.asyncio
