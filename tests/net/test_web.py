@@ -2,7 +2,7 @@ import httpx
 import pytest
 
 from wapitiCore.net.response import Response, detail_response
-from wapitiCore.net.web import is_valid_url, shell_escape
+from wapitiCore.net.web import is_valid_url, shell_escape, urlparse
 
 
 def test_detail_response():
@@ -75,3 +75,48 @@ def test_shell_escape_various_cases():
     assert shell_escape('!!!!') == r'\!\!\!\!'
     assert shell_escape(r'!"$') == r'\!\"\$'
     assert shell_escape(r'`text`') == r'\`text\`'
+
+
+def test_urlparse_standard():
+    result = urlparse("http://example.com/path?q=1")
+    assert result.netloc == "example.com"
+    assert result.hostname == "example.com"
+    assert result.path == "/path"
+
+
+def test_urlparse_with_port():
+    result = urlparse("http://example.com:8080/path")
+    assert result.netloc == "example.com:8080"
+    assert result.port == 8080
+
+
+def test_urlparse_hostname_lowercased():
+    result = urlparse("http://EXAMPLE.COM/path")
+    assert result.netloc == "example.com"
+
+
+def test_urlparse_with_credentials():
+    result = urlparse("http://user:pass@example.com/path")
+    assert result.netloc == "user:pass@example.com"
+    assert result.username == "user"
+    assert result.password == "pass"
+
+
+def test_urlparse_ipv6_no_port():
+    result = urlparse("http://[::1]/path")
+    assert result.netloc == "[::1]"
+    assert result.hostname == "::1"
+
+
+def test_urlparse_ipv6_with_port():
+    result = urlparse("http://[::1]:8080/path")
+    assert result.netloc == "[::1]:8080"
+    assert result.hostname == "::1"
+    assert result.port == 8080
+
+
+def test_urlparse_ipv6_full_address():
+    result = urlparse("http://[2001:db8::1]:443/path")
+    assert result.netloc == "[2001:db8::1]:443"
+    assert result.hostname == "2001:db8::1"
+    assert result.port == 443
