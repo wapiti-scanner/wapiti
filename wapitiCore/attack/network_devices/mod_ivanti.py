@@ -36,6 +36,7 @@ MSG_IVANTI_SERVICE_MANAGER = "Ivanti Service Manager Detected"
 MSG_NO_IVANTI_SERVICE_MANAGER = "No Ivanti Service Manager Detected"
 MSG_IVANTI_USER_PORTAL = "Ivanti User Portal Detected"
 MSG_NO_IVANTI_USER_PORTAL = "No Ivanti User Portal"
+MSG_NO_IVANTI = "No Ivanti Product Detected"
 
 class ModuleIvanti(NetworkDeviceCommon):
     """Detect Ivanti."""
@@ -54,8 +55,9 @@ class ModuleIvanti(NetworkDeviceCommon):
                 raise
             page = Html(response.content, full_url)
             frmLogin = page.soup.find(name="frmLogin")
-            return response.is_success and "Ivanti Connect Secure" in page.title \
-                or frmLogin is not None
+            if response.is_success and ("Ivanti Connect Secure" in page.title or frmLogin is not None):
+                return True
+        return False
 
 
     async def check_ivanti_service_manager(self, url):
@@ -83,7 +85,7 @@ class ModuleIvanti(NetworkDeviceCommon):
                 return True
             if '/lib/RespondJs/respond.min.js' in response.content:
                 return True
-            return False
+        return False
 
     async def check_ivanti_user_portal(self, url):
         check_list = ['mifs/user/login.jsp','']
@@ -101,11 +103,9 @@ class ModuleIvanti(NetworkDeviceCommon):
                     "Ivanti Admin Portal"]:
                 return True
             h1_tag = page.soup.h1
-            if h1_tag:
-                if response.is_success and "MI_LOGIN_SCREEN" in h1_tag.text.strip():
-                    return True
-            else:
-                return False
+            if h1_tag and response.is_success and "MI_LOGIN_SCREEN" in h1_tag.text.strip():
+                return True
+        return False
 
     async def attack(self, request: Request, response: Optional[Response] = None):
         self.finished = True
@@ -115,20 +115,14 @@ class ModuleIvanti(NetworkDeviceCommon):
             if await self.check_ivanti_connect_secure(request_to_root.url):
                 self.device_name = "Ivanti Connect Secure"
                 log_blue(MSG_IVANTI_CONNECT)
-            else:
-                log_blue(MSG_NO_IVANTI_CONNECT)
-
-            if await self.check_ivanti_service_manager(request_to_root.url):
+            elif await self.check_ivanti_service_manager(request_to_root.url):
                 self.device_name = "Ivanti Service Manager"
                 log_blue(MSG_IVANTI_SERVICE_MANAGER)
-            else:
-                log_blue(MSG_NO_IVANTI_SERVICE_MANAGER)
-
-            if await self.check_ivanti_user_portal(request_to_root.url):
+            elif await self.check_ivanti_user_portal(request_to_root.url):
                 self.device_name = "Ivanti User Portal"
                 log_blue(MSG_IVANTI_USER_PORTAL)
             else:
-                log_blue(MSG_NO_IVANTI_USER_PORTAL)
+                log_blue(MSG_NO_IVANTI)
 
             if self.device_name:
                 ivanti_detected = {
