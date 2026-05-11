@@ -210,6 +210,72 @@ async def test_no_false_positive_content_type_based():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_detection_alpine_busybox_id():
+    # Alpine/busybox: `id` outputs uid=...gid=... without groups= field
+    respx.get(url__regex=r"http://perdu\.com/\?vuln=id").mock(
+        return_value=httpx.Response(200, text="uid=33(www-data) gid=33(www-data)")
+    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
+    )
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?vuln=hello")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleExec(crawler, persister, options, crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Command execution"
+        assert persister.add_payload.call_args_list[0][1]["request"].get_params == [["vuln", "id"]]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_no_false_positive_hostname_without_home():
+    # A page mentioning PATH=, PWD= and HOSTNAME= but not HOME= should not be flagged.
+    # The old rule (HOME|HOSTNAME) would have triggered; the new HOME-only rule should not.
+    respx.get(url__regex=r"http://perdu\.com/\?vuln=.*env.*").mock(
+        return_value=httpx.Response(
+            200,
+            text="PATH=/usr/bin:/bin\nPWD=/var/www/html\nHOSTNAME=myserver.example.com\n"
+        )
+    )
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
+    )
+    respx.post(url__regex=r"http://perdu\.com/.*").mock(
+        return_value=httpx.Response(200, text="Hello there")
+    )
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?vuln=hello")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleExec(crawler, persister, options, crawler_configuration)
+        module.do_post = False
+        await module.attack(request)
+
+        assert persister.add_payload.call_count == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_no_false_positive_file_extension_based():
     # In this test, the response is a javascript file that contains "uid=" which can provoke a false positive avoid with file extension check
 
