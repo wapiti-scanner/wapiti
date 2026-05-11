@@ -21,7 +21,7 @@ import json
 from typing import Optional
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon
@@ -52,10 +52,9 @@ class ModuleIvanti(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 raise
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            frmLogin = soup.find(name="frmLogin")
-            return response.is_success and (title_tag and "Ivanti Connect Secure" in title_tag.text.strip()) \
+            page = Html(response.content, full_url)
+            frmLogin = page.soup.find(name="frmLogin")
+            return response.is_success and "Ivanti Connect Secure" in page.title \
                 or frmLogin is not None
 
 
@@ -76,16 +75,13 @@ class ModuleIvanti(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 raise
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            h1_tag = soup.h1
-            if title_tag:
-                if response.is_success and "Ivanti Service Manager" in title_tag.text.strip():
-                    return True
-            if h1_tag:
-                if response.is_success and "Ivanti Service Manager" in h1_tag.text.strip():
-                    return True
-            if '/lib/RespondJs/respond.min.js' in str(soup):
+            page = Html(response.content, full_url)
+            if response.is_success and "Ivanti Service Manager" in page.title:
+                return True
+            h1_tag = page.soup.h1
+            if h1_tag and response.is_success and "Ivanti Service Manager" in h1_tag.text.strip():
+                return True
+            if '/lib/RespondJs/respond.min.js' in response.content:
                 return True
             return False
 
@@ -99,14 +95,12 @@ class ModuleIvanti(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 raise
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            h1_tag = soup.h1
-            if title_tag:
-                if response.is_success and title_tag.text.strip() in ["Ivanti User Portal",
+            page = Html(response.content, full_url)
+            if response.is_success and page.title in ["Ivanti User Portal",
                     "Ivanti Portail utilisateur",
                     "Ivanti Admin Portal"]:
-                    return True
+                return True
+            h1_tag = page.soup.h1
             if h1_tag:
                 if response.is_success and "MI_LOGIN_SCREEN" in h1_tag.text.strip():
                     return True

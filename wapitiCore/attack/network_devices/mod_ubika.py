@@ -21,7 +21,7 @@ import json
 from typing import Optional
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from wapitiCore.parsers.html_parser import Html
 from httpx import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
@@ -47,9 +47,8 @@ class ModuleUbika(NetworkDeviceCommon):
             except RequestError:
                 self.network_errors += 1
                 raise
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title_tag = soup.title
-            return response.is_success and title_tag and "UBIKA" in title_tag.text.strip()
+            page = Html(response.content, full_url)
+            return response.is_success and "UBIKA" in page.title
 
     async def get_ubika_version(self, url):
         versions = []
