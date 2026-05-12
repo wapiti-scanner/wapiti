@@ -246,7 +246,12 @@ class AsyncCrawler:
             final_headers.update(headers)
 
         timeout = self.timeout if timeout is None else httpx.Timeout(timeout)
-        final_httpx_request = self._client.build_request("GET", resource.url, headers=final_headers, timeout=timeout)
+        try:
+            final_httpx_request = self._client.build_request(
+                "GET", resource.url, headers=final_headers, timeout=timeout
+            )
+        except UnicodeEncodeError as exc:
+            raise httpx.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
         resource.set_sent_headers(final_httpx_request.headers)
 
         try:
@@ -258,6 +263,12 @@ class AsyncCrawler:
                 raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
 
             raise exception
+        except ssl.SSLError as exception:
+            raise httpx.ConnectError(str(exception), request=final_httpx_request) from exception
+        except httpx.RequestError:
+            raise
+        except Exception as exception:
+            raise httpx.ConnectError(repr(exception), request=final_httpx_request) from exception
 
         return Response(response)
 
@@ -315,16 +326,19 @@ class AsyncCrawler:
         else:
             post_params = None
 
-        final_httpx_request = self._client.build_request(
-            method,
-            form.path,
-            params=form.get_params,
-            data=post_params,  # httpx expects a dict, hope to see more types soon
-            content=content,
-            files=file_params,
-            headers=form_headers,
-            timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
-        )
+        try:
+            final_httpx_request = self._client.build_request(
+                method,
+                form.path,
+                params=form.get_params,
+                data=post_params,  # httpx expects a dict, hope to see more types soon
+                content=content,
+                files=file_params,
+                headers=form_headers,
+                timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
+            )
+        except UnicodeEncodeError as exc:
+            raise httpx.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
         form.set_sent_headers(final_httpx_request.headers)
 
         try:
@@ -336,6 +350,12 @@ class AsyncCrawler:
                 raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
 
             raise exception
+        except ssl.SSLError as exception:
+            raise httpx.ConnectError(str(exception), request=final_httpx_request) from exception
+        except httpx.RequestError:
+            raise
+        except Exception as exception:
+            raise httpx.ConnectError(repr(exception), request=final_httpx_request) from exception
 
         return Response(response)
 
