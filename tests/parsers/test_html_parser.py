@@ -245,3 +245,22 @@ def test_logged_in_failed_explicit():
     with open("tests/data/logged_in_failed_explicit.html") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert not page.is_logged_in()
+
+
+def test_binary_content_does_not_raise():
+    # BeautifulSoup raises ParserRejectedMarkup or ValueError on binary content (fonts, images…).
+    # Html should silently fall back to an empty soup instead of crashing.
+    binary_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01"
+    page = Html(binary_content, "https://perdu.com/logo.png")
+    assert page.links == []
+    assert page.title == ""
+
+    # Python 3.13 html.parser raises ValueError (not ParserRejectedMarkup) on some binary inputs
+    # e.g. a woff2/jpg file that triggers handle_charref with non-integer data
+    from unittest.mock import patch
+    from bs4 import BeautifulSoup as _BS
+    import wapitiCore.parsers.html_parser as _hp
+    empty_soup = _BS("", "html.parser")
+    with patch.object(_hp, "BeautifulSoup", side_effect=[ValueError("invalid literal for int()"), empty_soup]):
+        page2 = Html("<html></html>", "https://perdu.com/font.woff2")
+    assert page2.links == []

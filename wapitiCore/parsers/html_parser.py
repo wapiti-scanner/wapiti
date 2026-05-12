@@ -25,7 +25,7 @@ from posixpath import normpath
 from urllib.parse import urlunparse
 from typing import Iterator, List, Optional, Dict, Set, Tuple, Union, Any
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ParserRejectedMarkup
 from bs4.element import Comment, Doctype
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
@@ -284,7 +284,10 @@ class Html:
         self._content = text
         self._url = url
         self._base = None
-        self._soup = BeautifulSoup(self._content, parser_name)
+        try:
+            self._soup = BeautifulSoup(self._content, parser_name)
+        except (ParserRejectedMarkup, ValueError):
+            self._soup = BeautifulSoup("", parser_name)
         self._encoding = encoding
         self._allow_fragments = allow_fragments
 
