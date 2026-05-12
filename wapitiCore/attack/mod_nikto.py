@@ -151,16 +151,17 @@ class ModuleNikto(Attack):
 
         tasks = set()
         pending_count = 0
+        db_exhausted = False
 
         with open(os.path.join(self.user_config_dir, self.NIKTO_DB), encoding='utf-8') as nikto_db_file:
             reader = csv.reader(nikto_db_file)
             while True:
 
-                if pending_count < self.options["tasks"]:
+                if not db_exhausted and pending_count < self.options["tasks"]:
                     try:
                         line = next(reader)
                     except StopIteration:
-                        pass
+                        db_exhausted = True
                     else:
                         if line == [] or not line[0].isdigit():
                             continue
@@ -183,7 +184,9 @@ class ModuleNikto(Attack):
 
     async def process_line(self, line):
         # Extract data from line
-        osv_id, path, method, vuln_desc, post_data = line[1], line[3], line[4], line[10], line[11]
+        osv_id, path, method = line[1], line[3], line[4]
+        vuln_desc = line[10] if len(line) > 10 else ""
+        post_data = line[11] if len(line) > 11 else ""
 
         # Process path
         path = self._process_path(path)

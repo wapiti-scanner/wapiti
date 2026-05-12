@@ -114,3 +114,33 @@ async def test_false_positives():
         assert (
                    "This PHP-Nuke CGI allows attackers to read"
                ) in persister.add_payload.call_args_list[0][1]["info"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_short_nikto_db_line_does_not_crash():
+    # Lines with fewer than 12 fields (missing vuln_desc and/or post_data) should not raise IndexError.
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    base_dir = os.path.join(home_dir, ".wapiti")
+    persister.CONFIG_DIR = os.path.join(base_dir, "config")
+
+    temp_nikto_db = os.path.join(persister.CONFIG_DIR, "temp_nikto_db_short")
+    with open(temp_nikto_db, "w") as fd:
+        # 10 fields only (indices 0-9), missing vuln_desc[10] and post_data[11]
+        fd.write("003270,539,d,/catinfo,GET,200,,,,\n")
+
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        module = ModuleNikto(crawler, persister, options, crawler_configuration)
+        module.do_get = True
+        module.NIKTO_DB = "temp_nikto_db_short"
+        await module.attack(request)
+        os.unlink(temp_nikto_db)
