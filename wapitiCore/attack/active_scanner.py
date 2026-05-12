@@ -10,7 +10,7 @@ from traceback import print_tb
 from typing import List, Dict, Optional, Set, AsyncIterator, Tuple, Type
 from uuid import uuid1
 
-from httpx import RequestError, InvalidURL
+from httpx import RequestError, InvalidURL, __version__ as httpx_version
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.controller.exceptions import InvalidOptionValue
@@ -382,7 +382,7 @@ class ActiveScanner:
                 print_tb(traceback_, file=traceback_fd)
                 print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
                 print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)
-                logging.info("Wapiti %s. httpx %s. OS %s", WAPITI_VERSION, httpx.__version__, sys.platform)
+                logging.info("Wapiti %s. httpx %s. OS %s", WAPITI_VERSION, httpx_version, sys.platform)
 
             try:
                 with open(traceback_file, "rb") as traceback_byte_fd:
