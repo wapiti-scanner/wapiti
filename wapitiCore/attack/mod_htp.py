@@ -245,11 +245,24 @@ class ModuleHtp(Attack):
         request = Request(htp_database_url)
         response: Response = await self.crawler.async_send(request, follow_redirects=True)
 
+        if response.status != 200:
+            raise IOError(f"Failed to download htp database: HTTP {response.status}")
+
         with open(htp_database_path, 'wb') as file:
             file.write(response.bytes)
 
     async def _verify_htp_database(self, htp_database_path: str):
-        if os.path.exists(htp_database_path) is False:
+        needs_download = not os.path.exists(htp_database_path)
+
+        if not needs_download:
+            try:
+                db = sqlite3.connect(f"file:{htp_database_path}?mode=ro", uri=True)
+                db.execute("SELECT 1 FROM `Hash` LIMIT 1")
+                db.close()
+            except (sqlite3.OperationalError, sqlite3.DatabaseError):
+                needs_download = True
+
+        if needs_download:
             logging.warning("Problem with local htp database.")
             logging.info("Downloading from the web...")
             await self.update()

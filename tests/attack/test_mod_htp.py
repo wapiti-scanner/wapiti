@@ -1,6 +1,8 @@
 import asyncio
 import json
 import os
+import sqlite3
+import tempfile
 from unittest.mock import patch, PropertyMock, AsyncMock
 
 import httpx
@@ -406,3 +408,89 @@ async def test_attack():
 )
 def test_get_matching_technology_versions(known_versions, detected_versions, matching_versions):
     assert matching_versions == get_matching_versions(known_versions, detected_versions)
+
+
+def _make_module_htp():
+    persister = AsyncMock()
+    home_dir = os.getenv("HOME") or os.getenv("USERPROFILE") or "/home"
+    persister.CONFIG_DIR = os.path.join(home_dir, ".wapiti", "config")
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    return persister, crawler_configuration
+
+
+@pytest.mark.asyncio
+async def test_verify_htp_database_missing_file_triggers_download():
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with patch.object(module_htp, "update", new_callable=AsyncMock) as mock_update:
+            await module_htp._verify_htp_database("/nonexistent/path/hashtheplanet.db")
+            mock_update.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_verify_htp_database_corrupted_file_triggers_download():
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            f.write(b"this is not a sqlite database")
+            tmp_path = f.name
+        try:
+            with patch.object(module_htp, "update", new_callable=AsyncMock) as mock_update:
+                await module_htp._verify_htp_database(tmp_path)
+                mock_update.assert_called_once()
+        finally:
+            os.unlink(tmp_path)
+
+
+@pytest.mark.asyncio
+async def test_verify_htp_database_missing_table_triggers_download():
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            tmp_path = f.name
+        db = sqlite3.connect(tmp_path)
+        db.execute("CREATE TABLE Foo (id INTEGER PRIMARY KEY)")
+        db.close()
+        try:
+            with patch.object(module_htp, "update", new_callable=AsyncMock) as mock_update:
+                await module_htp._verify_htp_database(tmp_path)
+                mock_update.assert_called_once()
+        finally:
+            os.unlink(tmp_path)
+
+
+@pytest.mark.asyncio
+async def test_verify_htp_database_valid_db_no_download():
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            tmp_path = f.name
+        db = sqlite3.connect(tmp_path)
+        db.execute("CREATE TABLE Hash (hash TEXT, technology TEXT, versions TEXT)")
+        db.close()
+        try:
+            with patch.object(module_htp, "update", new_callable=AsyncMock) as mock_update:
+                await module_htp._verify_htp_database(tmp_path)
+                mock_update.assert_not_called()
+        finally:
+            os.unlink(tmp_path)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_download_htp_database_non_200_raises():
+    respx.get("https://example.com/hashtheplanet.db").mock(
+        return_value=httpx.Response(404, text="Not Found")
+    )
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with pytest.raises(IOError):
+            await module_htp._download_htp_database(
+                "https://example.com/hashtheplanet.db",
+                "/tmp/test_hashtheplanet.db"
+            )
