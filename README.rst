@@ -44,7 +44,7 @@ messages, special strings or abnormal behaviors.
 General features
 ================
 
-+ Generates vulnerability reports in various formats (HTML, XML, JSON, TXT, CSV).
++ Generates vulnerability reports in various formats (HTML, XML, JSON, TXT, CSV, Markdown).
 + Can suspend and resume a scan or an attack (session mechanism using sqlite3 databases).
 + Can give you colors in the terminal to highlight vulnerabilities.
 + Different levels of verbosity.
@@ -102,10 +102,10 @@ Supported attacks
 + Checking cookie security flags (secure and httponly flags)
 + Cross Site Request Forgery (CSRF) basic detection
 + Fingerprinting of web applications using the Wappalyzer database, gives related CVE information
-+ Enumeration of CMS modules for Wordpress, Drupal, Joomla, SPIP, etc
++ Enumeration of CMS modules for Wordpress, Drupal, Joomla, Magento, SPIP, Typo3, etc
 + Subdomain takeovers detection
 + Log4Shell (CVE-2021-44228) detection
-+ Spring4Shell (CVE-2020-5398) detection
++ Spring4Shell (CVE-2022-22965) detection
 + Check https redirections
 + Check for file upload vulnerabilities
 + Detection of network devices
@@ -133,7 +133,7 @@ The aforementioned attacks are tied to the following module names :
 + file (Path traversal, file inclusion, etc)
 + htaccess (Misconfigured htaccess restrictions)
 + htp (Identify web technologies used the HashThePlanet database)
-+ http_header (Check HTTP security headers)
++ http_headers (Check HTTP security headers)
 + https_redirect (Check https redirections)
 + ldap (Error-based and boolean-based LDAP injection detection)
 + log4shell (Detects websites vulnerable to CVE-2021-44228)
@@ -141,6 +141,7 @@ The aforementioned attacks are tied to the following module names :
 + network_device (Look for common files to detect network devices)
 + nikto (Look for known vulnerabilities by testing URL existence and checking responses)
 + permanentxss (Rescan the whole target after the xss module execution looking for previously tainted payloads)
++ printer (Detect network printers, retrieve model and firmware information)
 + redirect (Open Redirects)
 + shellshock (Test Shellshock attack, see `Wikipedia <https://en.wikipedia.org/wiki/Shellshock_%28software_bug%29>`__)
 + spring4shell (Detects websites vulnerable to CVE-2020-5398)
