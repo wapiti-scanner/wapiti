@@ -27,7 +27,7 @@ from os.path import splitext, join as path_join
 from urllib.parse import urljoin
 from typing import Optional, Iterator
 
-from httpx import RequestError
+from httpx import RequestError, InvalidURL
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange
 from wapitiCore.attack.attack import Attack, random_string, Parameter
@@ -77,6 +77,8 @@ class ModuleBackup(Attack):
                 self.network_errors += 1
                 # Do not put anything in false_positive_directories, another luck for next time
                 return False
+            except InvalidURL:
+                return False
 
             self.false_positive_directories[request.dir_name] = (response and response.is_success)
 
@@ -109,6 +111,8 @@ class ModuleBackup(Attack):
             original_response = await self.crawler.async_send(request)
         except RequestError:
             self.network_errors += 1
+            return
+        except InvalidURL:
             return
         evil_reqs = []
         urls = []
@@ -147,7 +151,11 @@ class ModuleBackup(Attack):
             if isinstance(resp, RequestError):
                 self.network_errors += 1
                 continue
-            if resp and resp.is_success:
+
+            if isinstance(resp, InvalidURL):
+                continue
+
+            if resp and not isinstance(resp, Exception) and resp.is_success:
                 if compare_responses(resp.content or "", original_response.content or ""):
                     log_orange(f"Skipping {evil_req.url} because it's too similar to the response from {request.url}")
                     continue
