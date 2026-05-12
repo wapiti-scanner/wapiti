@@ -24,7 +24,7 @@ from random import randint
 from typing import Optional, Iterator
 
 from bs4.builder import ParserRejectedMarkup
-from httpx import ReadTimeout, RequestError
+from httpx import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack, Mutator, Parameter
@@ -385,6 +385,8 @@ class ModuleSql(Attack):
             response = await self.crawler.async_send(request)
         except RequestError:
             self.network_errors += 1
+        except InvalidURL:
+            return False
         else:
             if find_pattern_in_response(response.content):
                 return True
@@ -419,6 +421,8 @@ class ModuleSql(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except RequestError:
                 self.network_errors += 1
+            except InvalidURL:
+                continue
             else:
                 vuln_info = find_pattern_in_response(response.content)
                 if vuln_info and not await self.is_false_positive(request):
@@ -568,6 +572,9 @@ class ModuleSql(Attack):
             except RequestError:
                 self.network_errors += 1
                 # We need all cases to make sure SQLi is there
+                test_results.append(False)
+                continue
+            except InvalidURL:
                 test_results.append(False)
                 continue
 
