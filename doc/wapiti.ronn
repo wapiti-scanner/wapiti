@@ -31,7 +31,7 @@ ATTACK SPECIFICATION:
   * `-m` <MODULES_LIST>
   * `--list-modules`
   * `-l`, `--level` <LEVEL>
-  * `--cms` {drupal,joomla,prestashop,spip,wp}
+  * `--cms` {drupal,joomla,magento,prestashop,spip,typo3,wp}
 
 PROXY AND AUTHENTICATION OPTIONS:
 
@@ -77,7 +77,7 @@ CRAWLING:
   * `--max-attack-time` <MAX_ATTACK_TIME>
   * `--max-parameters` <MAX>
   * `--swagger` <URL>
-  * `--headless` {no,hidden,visible}
+  * `--headless` {no,hidden,visible,both}
   * `--wait` <TIME>
 
 PERFORMANCE:
@@ -107,7 +107,7 @@ OUTPUT OPTIONS:
 
 REPORT OPTIONS:
 
-  * `-f`, `--format` {json,html,txt,xml}
+  * `-f`, `--format` {csv,html,json,md,txt,xml}
   * `-o`, `--output` <OUTPUT_PATH>
   * `-dr`, `--detailed-report` <LEVEL>
 
@@ -159,8 +159,8 @@ OTHER OPTIONS:
 
   * `--cms` <CMS_LIST>  
     This option can only be used when the module cms is selected.  
-    It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.  
-    Multiple choices are allowed, all the CMS will be scanned if this option is not set.
+    It allows to specify the CMS to scan from the list {drupal,joomla,magento,prestashop,spip,typo3,wp}.  
+    Multiple choices are allowed, all the CMS will be scanned if this option is not set.  
 
 ## PROXY AND AUTHENTICATION
 
@@ -318,10 +318,11 @@ Following options allows you to bypass this behavior:
     Using that option allows to catch XHR requests but makes the crawling slower.  
     
     Possible values are:
-    
+
         - no: legacy crawler is used
         - hidden: headless crawler is used but the Firefox window is hidden
         - visible: headless Firefox is used and visible (can be useful to interact with it if stuck)
+        - both: standard crawler runs first, then headless crawler
 
   * `--wait` <TIME>  
     Wait the specified amount of seconds before analyzing a webpage (headless mode only)
@@ -405,7 +406,7 @@ Wapiti prints its status to standard output. The two following options allow to 
 Wapiti will generate a report at the end of the attack process. Several formats of reports are available.
 
   * `-f`, `--format` <FORMAT>  
-    Set the format of the report. Valid choices are json, html, txt and xml.  
+    Set the format of the report. Valid choices are csv, html, json, md, txt and xml.  
     Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.
     
   * `-o`, `--output` <OUTPUT_PATH>  
