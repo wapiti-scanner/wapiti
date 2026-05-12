@@ -1,4 +1,6 @@
+import ssl
 from itertools import zip_longest
+from unittest.mock import patch
 
 import httpx
 import pytest
@@ -209,3 +211,50 @@ async def test_cookie_priority():
     assert read_cookie_route.called
     sent_headers = read_cookie_route.calls[0].request.headers
     assert sent_headers["cookie"] == "session=fresh"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_get_ssl_error_raises_connect_error():
+    target_url = "https://perdu.com/"
+    config = CrawlerConfiguration(Request(target_url))
+    async with AsyncCrawler.with_configuration(config) as crawler:
+        with patch.object(crawler._client, "send", side_effect=ssl.SSLZeroReturnError()):
+            with pytest.raises(httpx.ConnectError):
+                await crawler.async_get(Request(target_url))
+
+
+@pytest.mark.asyncio
+async def test_async_get_non_ascii_cookie_raises_invalid_url():
+    target_url = "https://perdu.com/"
+    config = CrawlerConfiguration(Request(target_url))
+    async with AsyncCrawler.with_configuration(config) as crawler:
+        with patch.object(crawler._client, "build_request", side_effect=UnicodeEncodeError("ascii", "\xbf", 0, 1, "ordinal not in range(128)")):
+            with pytest.raises(httpx.InvalidURL):
+                await crawler.async_get(Request(target_url))
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_request_ssl_error_raises_connect_error():
+    target_url = "https://perdu.com/"
+    config = CrawlerConfiguration(Request(target_url))
+    async with AsyncCrawler.with_configuration(config) as crawler:
+        with patch.object(crawler._client, "send", side_effect=ssl.SSLZeroReturnError()):
+            with pytest.raises(httpx.ConnectError):
+                await crawler.async_request("POST", Request(target_url))
+
+
+@pytest.mark.asyncio
+async def test_async_get_unexpected_transport_exception_raises_connect_error():
+    # Exceptions not in httpx's hierarchy (e.g. anyio.EndOfStream, trio.ClosedResourceError)
+    # that bubble up from the async backend should be wrapped as ConnectError.
+    class FakeEndOfStream(Exception):
+        pass
+
+    target_url = "https://perdu.com/"
+    config = CrawlerConfiguration(Request(target_url))
+    async with AsyncCrawler.with_configuration(config) as crawler:
+        with patch.object(crawler._client, "send", side_effect=FakeEndOfStream()):
+            with pytest.raises(httpx.ConnectError):
+                await crawler.async_get(Request(target_url))
