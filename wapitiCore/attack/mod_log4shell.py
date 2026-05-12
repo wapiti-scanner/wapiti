@@ -314,6 +314,8 @@ class ModuleLog4Shell(Attack):
             logging.error("Error: DNS server %s is unreachable", self._dns_host)
             self.finished = True
             return False
+        except dns.resolver.NXDOMAIN:
+            return False
 
     def _get_batch_malicious_headers(self, headers: List[str]) -> Tuple[Dict, Dict]:
         batch_malicious_headers: List[Dict[str, str]] = []

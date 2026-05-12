@@ -5,6 +5,7 @@ from unittest import mock
 from unittest.mock import patch, AsyncMock
 from httpx import Response as HttpxResponse
 
+import dns.resolver
 import pytest
 import respx
 from dns.resolver import Resolver
@@ -113,6 +114,9 @@ async def test_verify_dns():
             assert await module._verify_dns("foobar") is True
 
         with mock.patch.object(Resolver, "resolve", return_value=(MockAnswer(False),)):
+            assert await module._verify_dns("foobar") is False
+
+        with mock.patch.object(Resolver, "resolve", side_effect=dns.resolver.NXDOMAIN()):
             assert await module._verify_dns("foobar") is False
 
 
