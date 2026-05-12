@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Optional
 
-from httpx import RequestError
+from httpx import RequestError, InvalidURL
 
 from wapitiCore.net.web import urlparse
 from wapitiCore.main.log import log_red, log_verbose
@@ -59,6 +59,8 @@ class ModuleRedirect(Attack):
                 response = await self.crawler.async_send(mutated_request)
             except RequestError:
                 self.network_errors += 1
+                continue
+            except InvalidURL:
                 continue
 
             html = Html(response.content, mutated_request.url)

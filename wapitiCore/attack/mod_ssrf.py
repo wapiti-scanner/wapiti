@@ -21,7 +21,7 @@ from asyncio import sleep
 from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
-from httpx import RequestError
+from httpx import RequestError, InvalidURL
 
 from wapitiCore.main.log import logging, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
@@ -80,6 +80,8 @@ class ModuleSsrf(Attack):
             except RequestError:
                 self.network_errors += 1
                 continue
+            except InvalidURL:
+                continue
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
@@ -92,6 +94,8 @@ class ModuleSsrf(Attack):
         except RequestError:
             self.network_errors += 1
             logging.error("[!] Unable to request endpoint URL '%s'", self.internal_endpoint)
+        except InvalidURL:
+            logging.error("[!] Invalid endpoint URL '%s'", self.internal_endpoint)
         else:
             data = response.json
             if isinstance(data, dict):

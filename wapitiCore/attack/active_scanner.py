@@ -10,8 +10,7 @@ from traceback import print_tb
 from typing import List, Dict, Optional, Set, AsyncIterator, Tuple, Type
 from uuid import uuid1
 
-import httpx
-from httpx import RequestError
+from httpx import RequestError, InvalidURL
 
 from wapitiCore import WAPITI_VERSION
 from wapitiCore.controller.exceptions import InvalidOptionValue
@@ -199,6 +198,8 @@ class ActiveScanner:
                     await attack_module.attack(request, response)
             except RequestError:
                 await asyncio.sleep(1)
+            except InvalidURL:
+                pass
             except Exception as exception:  # pylint: disable=broad-except
                 exception_traceback = sys.exc_info()[2]
                 logging.exception("An exception occurred in module %s", attack_module.name)

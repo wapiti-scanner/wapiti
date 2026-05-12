@@ -20,7 +20,7 @@
 from os.path import join as path_join
 from typing import Optional, Iterator, List, Tuple, Dict
 
-from httpx import ReadTimeout, RequestError
+from httpx import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_orange, log_red, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, ParameterSituation, random_string, Parameter
@@ -93,6 +93,8 @@ class ModuleXss(Attack):
             except RequestError:
                 self.network_errors += 1
                 # We just inserted harmless characters, if we get a timeout here, it's not interesting
+                continue
+            except InvalidURL:
                 continue
             else:
                 # We keep a history of taint values we sent because in case of stored value, the taint code
@@ -168,6 +170,8 @@ class ModuleXss(Attack):
                 timeouted = True
             except RequestError:
                 self.network_errors += 1
+            except InvalidURL:
+                continue
             else:
                 html = Html(response.content, evil_request.url)
                 if (
