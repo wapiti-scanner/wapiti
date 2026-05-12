@@ -53,14 +53,33 @@ class ApplicationData:
         default_groups_file_path = os.path.join(base_dir, "wappalyzer", "data/groups.json")
         default_technologies_file_path = os.path.join(base_dir, "wappalyzer", "data/technologies.json")
 
-        with open(categories_file_path or default_categories_file_path, 'r', encoding='utf-8') as categories_file:
-            self.categories = json.load(categories_file)
+        try:
+            with open(categories_file_path or default_categories_file_path, 'r', encoding='utf-8') as categories_file:
+                self.categories = json.load(categories_file)
+        except json.JSONDecodeError as exc:
+            raise ApplicationDataException(f"categories file is not valid JSON: {exc}") from exc
 
-        with open(groups_file_path or default_groups_file_path, 'r', encoding='utf-8') as groups_file:
-            self.groups = json.load(groups_file)
+        if not isinstance(self.categories, dict):
+            raise ApplicationDataException("categories file does not contain a JSON object")
 
-        with open(technologies_file_path or default_technologies_file_path, 'r', encoding='utf-8') as technologies_file:
-            self.applications = json.load(technologies_file)
+        try:
+            with open(groups_file_path or default_groups_file_path, 'r', encoding='utf-8') as groups_file:
+                self.groups = json.load(groups_file)
+        except json.JSONDecodeError as exc:
+            raise ApplicationDataException(f"groups file is not valid JSON: {exc}") from exc
+
+        if not isinstance(self.groups, dict):
+            raise ApplicationDataException("groups file does not contain a JSON object")
+
+        try:
+            technologies_path = technologies_file_path or default_technologies_file_path
+            with open(technologies_path, 'r', encoding='utf-8') as technologies_file:
+                self.applications = json.load(technologies_file)
+        except json.JSONDecodeError as exc:
+            raise ApplicationDataException(f"technologies file is not valid JSON: {exc}") from exc
+
+        if not isinstance(self.applications, dict):
+            raise ApplicationDataException("technologies file does not contain a JSON object")
 
         self.normalize_applications()
 

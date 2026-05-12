@@ -6,7 +6,7 @@ import respx
 import httpx
 import pytest
 
-from wapitiCore.wappalyzer.wappalyzer import ApplicationData, Wappalyzer
+from wapitiCore.wappalyzer.wappalyzer import ApplicationData, ApplicationDataException, Wappalyzer
 from wapitiCore.net.response import Response
 
 
@@ -244,3 +244,45 @@ async def test_applicationdata():
     assert result.get("Umbraco").get("versions")[0] == "7"
 
     assert result.get("A-Frame") is None
+
+
+def _make_mock_open(files: Dict[str, str]):
+    def open_mock(filename, *args, **kwargs):
+        for expected_filename, content in files.items():
+            if filename == expected_filename:
+                return mock_open(read_data=content).return_value
+        raise FileNotFoundError(f'(mock) Unable to open {filename}')
+    return MagicMock(side_effect=open_mock)
+
+
+def test_applicationdata_null_technologies_raises():
+    files = {
+        "categories.txt": '{"1": {"groups": [3], "name": "CMS", "priority": 1}}',
+        "groups.txt": '{"3": {"name": "Content"}}',
+        "technologies.txt": "null",
+    }
+    with mock.patch("builtins.open", _make_mock_open(files)):
+        with pytest.raises(ApplicationDataException):
+            ApplicationData("categories.txt", "groups.txt", "technologies.txt")
+
+
+def test_applicationdata_invalid_json_technologies_raises():
+    files = {
+        "categories.txt": '{"1": {"groups": [3], "name": "CMS", "priority": 1}}',
+        "groups.txt": '{"3": {"name": "Content"}}',
+        "technologies.txt": "{not valid json",
+    }
+    with mock.patch("builtins.open", _make_mock_open(files)):
+        with pytest.raises(ApplicationDataException):
+            ApplicationData("categories.txt", "groups.txt", "technologies.txt")
+
+
+def test_applicationdata_null_categories_raises():
+    files = {
+        "categories.txt": "null",
+        "groups.txt": '{"3": {"name": "Content"}}',
+        "technologies.txt": '{}',
+    }
+    with mock.patch("builtins.open", _make_mock_open(files)):
+        with pytest.raises(ApplicationDataException):
+            ApplicationData("categories.txt", "groups.txt", "technologies.txt")
