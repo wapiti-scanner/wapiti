@@ -14,35 +14,52 @@ Those cookies can be loaded by Wapiti using the same -c option.
    
 ## OPTIONS
 
+  * `-u`, `--url` <URL>  
+    First page to fetch for cookies.
+    
+  * `-c`, `--cookie` <COOKIE_FILE>  
+    Cookie file in Wapiti JSON format where cookies will be stored.
+    
   * `-p`, `--proxy` <PROXY_URL>  
     The given URL will be used as a proxy for HTTP and HTTPS requests.  
-    This URL can have one of the following scheme : http, https, socks.  
-    To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/
+    This URL can have one of the following scheme : http, https, socks, socks5.
 
   * `--tor`  
     Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    Set credentials to use for HTTP authentication on the target.  
-    Given value should be in the form login%password (% is used as a separator)
+    (DEPRECATED) Set credentials to use for HTTP authentication on the target.  
+    Given value should be in the form login%password (% is used as a separator).
+
+  * `--auth-user` <USERNAME>
+    Set HTTP authentication username.
+
+  * `--auth-password` <PASSWORD>
+    Set HTTP authentication password.
     
   * `--auth-method` <TYPE>
-    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.  
+    Set the authentication mechanism to use. Valid choices are basic, digest and ntlm (default is basic).  
     NTLM authentication may require you to install an additional Python module.
 
+  * `--form-data` <DATA>  
+    wapiti-getcookie will parse forms and ask your input for each field found.  
+    But you can also pass every parameter and value as a string directly through this option.  
+    Example: --form-data 'login=admin&password=letmein&submit=Login'
+
+  * `--form-enctype` <ENCTYPE>
+    Set enctype to use to POST form data to form URL (default is application/x-www-form-urlencoded).
+
+  * `--headless` <MODE>
+    Use a Firefox headless crawler for browsing (slower). Valid choices are no, hidden, visible (default is no).
+
   * `-H`, `--header` <HEADER>  
-    Set a custom HTTM header to inject in every request sent by Wapiti.
+    Set a custom HTTP header to inject in every request sent by Wapiti.
     This option can be used several times.  
     Value should be a standard HTTP header line (parameter and value separated with a : sign).
     
   * `-A`, `--user-agent` <AGENT>  
-    Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.  
-    But you may have to change it to bypass some restrictions so this option is here.
-    
-  * `-d`, `--data` <DATA>  
-    wapiti-getcookie will parse forms and ask your input for each field found.  
-    But you can also pass every parameter and value as a string directly through this option.  
-    Example: -d 'login=admin&password=letmein&submit=Login'
+    Default behavior of Wapiti is to use a modernized Firefox User-Agent.  
+    You can change it to bypass some restrictions or for better compatibility.
     
 ## LICENSE
 
@@ -51,7 +68,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2023 Nicolas Surribas.
+Copyright (c) 2006-2026 Nicolas Surribas.
 
 ## AUTHORS
 
