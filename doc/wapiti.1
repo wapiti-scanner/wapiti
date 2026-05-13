@@ -1,6 +1,6 @@
 .\" generated with Ronn-NG/v0.10.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.10.1
-.TH "WAPITI" "1" "January 2026" ""
+.TH "WAPITI" "1" "May 2026" ""
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
 .SH "SYNOPSIS"
@@ -33,7 +33,7 @@ ATTACK SPECIFICATION:
 .IP "\(bu" 4
 \fB\-l\fR, \fB\-\-level\fR \fILEVEL\fR
 .IP "\(bu" 4
-\fB\-\-cms\fR {drupal,joomla,prestashop,spip,wp}
+\fB\-\-cms\fR {drupal,joomla,magento,prestashop,spip,typo3,wp}
 .IP "" 0
 .P
 PROXY AND AUTHENTICATION OPTIONS:
@@ -116,7 +116,7 @@ CRAWLING:
 .IP "\(bu" 4
 \fB\-\-swagger\fR \fIURL\fR
 .IP "\(bu" 4
-\fB\-\-headless\fR {no,hidden,visible}
+\fB\-\-headless\fR {no,hidden,visible,both}
 .IP "\(bu" 4
 \fB\-\-wait\fR \fITIME\fR
 .IP "" 0
@@ -161,7 +161,7 @@ OUTPUT OPTIONS:
 .P
 REPORT OPTIONS:
 .IP "\(bu" 4
-\fB\-f\fR, \fB\-\-format\fR {json,html,txt,xml}
+\fB\-f\fR, \fB\-\-format\fR {csv,html,json,md,txt,xml}
 .IP "\(bu" 4
 \fB\-o\fR, \fB\-\-output\fR \fIOUTPUT_PATH\fR
 .IP "\(bu" 4
@@ -242,7 +242,7 @@ Default value for this option is 1\.
 .br
 This option can only be used when the module cms is selected\.
 .br
-It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}\.
+It allows to specify the CMS to scan from the list {drupal,joomla,magento,prestashop,spip,typo3,wp}\.
 .br
 Multiple choices are allowed, all the CMS will be scanned if this option is not set\.
 .IP "" 0
@@ -473,6 +473,7 @@ Possible values are:
 \- no: legacy crawler is used
 \- hidden: headless crawler is used but the Firefox window is hidden
 \- visible: headless Firefox is used and visible (can be useful to interact with it if stuck)
+\- both: standard crawler runs first, then headless crawler
 .fi
 .IP "" 0
 
@@ -584,7 +585,7 @@ Wapiti will generate a report at the end of the attack process\. Several formats
 .IP "\(bu" 4
 \fB\-f\fR, \fB\-\-format\fR \fIFORMAT\fR
 .br
-Set the format of the report\. Valid choices are json, html, txt and xml\.
+Set the format of the report\. Valid choices are csv, html, json, md, txt and xml\.
 .br
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities\.
 .IP "\(bu" 4
@@ -623,7 +624,7 @@ Show detailed options description\. More details are available in this manpage t
 .SH "LICENSE"
 Wapiti is covered by the GNU General Public License (GPL), version 2\. Please read the LICENSE file for more information\.
 .SH "COPYRIGHT"
-Copyright (c) 2006\-2024 Nicolas Surribas\.
+Copyright (c) 2006\-2026 Nicolas Surribas\.
 .SH "AUTHORS"
 Nicolas Surribas is the main author, but the whole list of contributors is found in the separate AUTHORS file\.
 .SH "WEBSITE"

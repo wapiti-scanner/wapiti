@@ -131,7 +131,7 @@ More detail on each option can be found in the following sections.</p>
 <code>-l</code>, <code>--level</code> <var>LEVEL</var>
 </li>
   <li>
-<code>--cms</code> {drupal,joomla,prestashop,spip,wp}</li>
+<code>--cms</code> {drupal,joomla,magento,prestashop,spip,typo3,wp}</li>
 </ul>
 
 <p>PROXY AND AUTHENTICATION OPTIONS:</p>
@@ -243,7 +243,7 @@ More detail on each option can be found in the following sections.</p>
 <code>--swagger</code> <var>URL</var>
 </li>
   <li>
-<code>--headless</code> {no,hidden,visible}</li>
+<code>--headless</code> {no,hidden,visible,both}</li>
   <li>
 <code>--wait</code> <var>TIME</var>
 </li>
@@ -308,7 +308,7 @@ More detail on each option can be found in the following sections.</p>
 
 <ul>
   <li>
-<code>-f</code>, <code>--format</code> {json,html,txt,xml}</li>
+<code>-f</code>, <code>--format</code> {csv,html,json,md,txt,xml}</li>
   <li>
 <code>-o</code>, <code>--output</code> <var>OUTPUT_PATH</var>
 </li>
@@ -380,7 +380,7 @@ Default value for this option is 1.</p>
   <li>
     <p><code>--cms</code> <var>CMS_LIST</var><br>
 This option can only be used when the module cms is selected.<br>
-It allows to specify the CMS to scan from the list {drupal,joomla,prestashop,spip,wp}.<br>
+It allows to specify the CMS to scan from the list {drupal,joomla,magento,prestashop,spip,typo3,wp}.<br>
 Multiple choices are allowed, all the CMS will be scanned if this option is not set.</p>
   </li>
 </ul>
@@ -588,6 +588,7 @@ Using that option allows to catch XHR requests but makes the crawling slower.</p
     <pre><code>- no: legacy crawler is used
 - hidden: headless crawler is used but the Firefox window is hidden
 - visible: headless Firefox is used and visible (can be useful to interact with it if stuck)
+- both: standard crawler runs first, then headless crawler
 </code></pre>
   </li>
   <li>
@@ -701,7 +702,7 @@ Debug information will also be stored in that file so this option should be main
 <ul>
   <li>
     <p><code>-f</code>, <code>--format</code> <var>FORMAT</var><br>
-Set the format of the report. Valid choices are json, html, txt and xml.<br>
+Set the format of the report. Valid choices are csv, html, json, md, txt and xml.<br>
 Although the HTML reports were rewritten to be more responsive, they still are impracticable when there is a lot of found vulnerabilities.</p>
   </li>
   <li>
@@ -746,7 +747,7 @@ Please read the LICENSE file for more information.</p>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
 
-<p>Copyright (c) 2006-2024 Nicolas Surribas.</p>
+<p>Copyright (c) 2006-2026 Nicolas Surribas.</p>
 
 <h2 id="AUTHORS">AUTHORS</h2>
 
@@ -766,7 +767,7 @@ Please read the LICENSE file for more information.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>January 2026</li>
+    <li class='tc'>May 2026</li>
     <li class='tr'>wapiti(1)</li>
   </ol>
 

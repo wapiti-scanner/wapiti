@@ -440,7 +440,7 @@ Please read the LICENSE file for more information.
 
 ## COPYRIGHT
 
-Copyright (c) 2006-2024 Nicolas Surribas.
+Copyright (c) 2006-2026 Nicolas Surribas.
 
 ## AUTHORS
 

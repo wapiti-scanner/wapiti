@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv='content-type' value='text/html;charset=utf8'>
-  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <meta http-equiv='content-type' content='text/html;charset=utf-8'>
+  <meta name='generator' content='Ronn-NG/v0.10.1 (http://github.com/apjanke/ronn-ng/tree/0.10.1)'>
   <title>wapiti-getcookie(1) - A Wapiti utility to fetch cookies from a webpage and store them in the Wapiti JSON format.</title>
   <style type='text/css' media='all'>
   /* style: man */
@@ -70,50 +70,87 @@
     <li class='tr'>wapiti-getcookie(1)</li>
   </ol>
 
-  <h2 id="NAME">NAME</h2>
+  
+
+<h2 id="NAME">NAME</h2>
 <p class="man-name">
   <code>wapiti-getcookie</code> - <span class="man-whatis">A Wapiti utility to fetch cookies from a webpage and store them in the Wapiti JSON format.</span>
 </p>
-
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
 <p><code>wapiti-getcookie</code> -u <var>URL</var> -c <var>COOKIE</var> <a href="#OPTIONS" title="OPTIONS" data-bare-link="true">options</a></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p>wapiti-getcookie is a user-friendly interactive console utility that can be used to fill a web-form or fetch a URL
-and extract the cookies sent by the remote server.<br />
-Cookie information are stored in the JSON cookie file you have to specify with the -c option.<br />
+<p>wapiti-getcookie is a user-friendly interactive console utility that can be used to fill a web-form or fetch a URL 
+and extract the cookies sent by the remote server.<br>
+Cookie information are stored in the JSON cookie file you have to specify with the -c option.<br>
 Those cookies can be loaded by Wapiti using the same -c option.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
 <ul>
-<li><p><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var><br />
-The given URL will be used as a proxy for HTTP and HTTPS requests.<br />
-This URL can have one of the following scheme : http, https, socks.<br />
-To make Wapiti use a Tor listener you can use --proxy socks://127.0.0.1:9050/</p></li>
-<li><p><code>--tor</code><br />
-Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p></li>
-<li><p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br />
-Set credentials to use for HTTP authentication on the target.<br />
-Given value should be in the form login%password (% is used as a separator)</p></li>
-<li><p><code>--auth-method</code> <var>TYPE</var>
-Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.<br />
-NTLM authentication may require you to install an additional Python module.</p></li>
-<li><p><code>-H</code>, <code>--header</code> <var>HEADER</var><br />
-Set a custom HTTM header to inject in every request sent by Wapiti.
-This option can be used several times.<br />
-Value should be a standard HTTP header line (parameter and value separated with a : sign).</p></li>
-<li><p><code>-A</code>, <code>--user-agent</code> <var>AGENT</var><br />
-Default behavior of Wapiti is to use the same User-Agent as the TorBrowser, making it discreet when crawling standard website or .onion ones.<br />
-But you may have to change it to bypass some restrictions so this option is here.</p></li>
-<li><p><code>-d</code>, <code>--data</code> <var>DATA</var><br />
-wapiti-getcookie will parse forms and ask your input for each field found.<br />
-But you can also pass every parameter and value as a string directly through this option.<br />
-Example: -d 'login=admin&amp;password=letmein&amp;submit=Login'</p></li>
+  <li>
+    <p><code>-u</code>, <code>--url</code> <var>URL</var><br>
+First page to fetch for cookies.</p>
+  </li>
+  <li>
+    <p><code>-c</code>, <code>--cookie</code> <var>COOKIE_FILE</var><br>
+Cookie file in Wapiti JSON format where cookies will be stored.</p>
+  </li>
+  <li>
+    <p><code>-p</code>, <code>--proxy</code> <var>PROXY_URL</var><br>
+The given URL will be used as a proxy for HTTP and HTTPS requests.<br>
+This URL can have one of the following scheme : http, https, socks, socks5.</p>
+  </li>
+  <li>
+    <p><code>--tor</code><br>
+Make Wapiti use a Tor listener (same as --proxy socks://127.0.0.1:9050/)</p>
+  </li>
+  <li>
+    <p><code>-a</code>, <code>--auth-cred</code> <var>CREDENTIALS</var><br>
+(DEPRECATED) Set credentials to use for HTTP authentication on the target.<br>
+Given value should be in the form login%password (% is used as a separator).</p>
+  </li>
+  <li>
+    <p><code>--auth-user</code> <var>USERNAME</var>
+Set HTTP authentication username.</p>
+  </li>
+  <li>
+    <p><code>--auth-password</code> <var>PASSWORD</var>
+Set HTTP authentication password.</p>
+  </li>
+  <li>
+    <p><code>--auth-method</code> <var>TYPE</var>
+Set the authentication mechanism to use. Valid choices are basic, digest and ntlm (default is basic).<br>
+NTLM authentication may require you to install an additional Python module.</p>
+  </li>
+  <li>
+    <p><code>--form-data</code> <var>DATA</var><br>
+wapiti-getcookie will parse forms and ask your input for each field found.<br>
+But you can also pass every parameter and value as a string directly through this option.<br>
+Example: --form-data 'login=admin&amp;password=letmein&amp;submit=Login'</p>
+  </li>
+  <li>
+    <p><code>--form-enctype</code> <var>ENCTYPE</var>
+Set enctype to use to POST form data to form URL (default is application/x-www-form-urlencoded).</p>
+  </li>
+  <li>
+    <p><code>--headless</code> <var>MODE</var>
+Use a Firefox headless crawler for browsing (slower). Valid choices are no, hidden, visible (default is no).</p>
+  </li>
+  <li>
+    <p><code>-H</code>, <code>--header</code> <var>HEADER</var><br>
+Set a custom HTTP header to inject in every request sent by Wapiti.
+This option can be used several times.<br>
+Value should be a standard HTTP header line (parameter and value separated with a : sign).</p>
+  </li>
+  <li>
+    <p><code>-A</code>, <code>--user-agent</code> <var>AGENT</var><br>
+Default behavior of Wapiti is to use a modernized Firefox User-Agent.<br>
+You can change it to bypass some restrictions or for better compatibility.</p>
+  </li>
 </ul>
-
 
 <h2 id="LICENSE">LICENSE</h2>
 
@@ -122,7 +159,7 @@ Please read the LICENSE file for more information.</p>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
 
-<p>Copyright (c) 2006-2023 Nicolas Surribas.</p>
+<p>Copyright (c) 2006-2026 Nicolas Surribas.</p>
 
 <h2 id="AUTHORS">AUTHORS</h2>
 
@@ -136,10 +173,9 @@ Please read the LICENSE file for more information.</p>
 
 <p>If you find a bug in Wapiti please report it to https://github.com/wapiti-scanner/wapiti/issues</p>
 
-
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>October 2022</li>
+    <li class='tc'>May 2026</li>
     <li class='tr'>wapiti-getcookie(1)</li>
   </ol>
 
