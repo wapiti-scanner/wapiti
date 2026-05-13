@@ -1,3 +1,26 @@
+13/05/2026
+    Wapiti 3.3.0
+    Modules: new mod_printer to detect HP and EPSON printers
+    Modules: new mod_ivanti and mod_paloalto for network devices detection
+    Modules: support for CVE-2024-55591 (Fortinet) in mod_network_device
+    Modules: added Magento, TYPO3, SPIP and Drupal plugins detection to mod_cms
+    Modules: update CMS hash files from HashThePlanet
+    Modules: improved mod_exec payloads and verification logic
+    Modules: enhanced XSS detection with modern HTML5 and SVG payloads
+    Modules: updated SQL detection patterns for modern SGBD and frameworks
+    Modules: deprecated mod_wp_enum (functionality merged into mod_cms)
+    Core: support for Python 3.14
+    Core: added --jwt option for header-based authentication
+    Core: performance optimizations in crawler and explorers (O(1) lookups)
+    Core: significant database performance improvements (SQLite optimizations, N+1 fixes)
+    Core: use parallelism in more attack modules (mod_backup, mod_drupal_enum)
+    Core: improved headless browser environment and installation
+    Core: better handling of various content-types and binary data
+    Core: modernized Firefox user-agent
+    Fixes: fixed numerous bugs in Angular detection, cookie auth and IPv6 support
+    Fixes: reduced false positives in mod_exec and XSS modules
+    Fixes: improved robustness against httpx and SSL related errors
+
 13/11/2025
     Wapiti 3.2.10
     Core: Use parallelism for several attack modules
