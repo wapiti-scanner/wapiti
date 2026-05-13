@@ -1,97 +1,71 @@
 Introduction
 ============
 
-All installation methods assume you already have a Python 3.12 or 3.13 on your system.
+All installation methods assume you already have Python 3.12, 3.13 or 3.14 on your system.
 
-Note that if you have all the requirements pre-installed on your system, it is not necessary to use the setup.py script
-to use Wapiti : just extract the archive and launch the "wapiti" command line in the "bin" folder :
+Wapiti is a command-line tool. You can install it from the Python Package Index (PyPI) or from the source code.
+Using a virtual environment is highly recommended to avoid conflicts with other Python packages on your system.
 
- ```sh
- ./bin/wapiti
- ``` 
- 
- or 
- 
- ```sh
- python bin/wapiti
- ```
+# Installing Wapiti using pip (Recommended)
 
-You may want to install Wapiti to the system just to make access easier.  
-If you haven't sufficient privileges are you are afraid of breaking some dependencies in your python packages then
-using a virtual environment is the way to go. Just refer to the related section.
-
-Otherwise, you will have to launch setup.py as a privileged user.
-
-Enjoy Wapiti.
-
-# Installing Wapiti using a virtual environment
-
-Let's create a virtual environment called 'wapiti3'.  
-In this example it will be created in the current working directory.
-
-```sh
-python -m venv wapiti3
-```
-
-Now let's activate it (make it our current working environment) :
- 
-```sh
-. wapiti3/bin/activate
-```
-
-Now you are in the virtual environment you can install Wapiti and its dependencies :
-
-```sh
-make install
-```
-
-or
-
-```sh
-pip install .
-```
-
-To leave the virtual environment just call the following command :
-
-`deactivate`
-
-Remember that you will need to reactivate the environment each time you want to use Wapiti. 
-
-# Installing Wapiti without virtual environment
-
-You can install wapiti the regular way :
-
-```sh
-make install
-```
-
-or
-
-```sh
-pip install .
-```
-
-# Installing Wapiti using pip
-
-There is a Pip package called wapiti3 :
+The easiest way to install the latest stable version of Wapiti is using pip:
 
 ```sh
 pip install wapiti3
 ```
 
-# Installing Wapiti from the Git repository
+# Installing from source
 
-You can pull latest dev version from Git :
+If you have downloaded the source archive or cloned the repository, you can install it using:
 
 ```sh
-git clone git@github.com:wapiti-scanner/wapiti.git
+pip install .
 ```
 
-Then use [make or pip](#installing-wapiti-without-virtual-environment) for installation. Remember that dev version may contain unknown bugs.
+If you are using the provided Makefile:
+
+```sh
+make install
+```
+
+# Installing Wapiti using a virtual environment
+
+To avoid breaking system dependencies, it is recommended to use a virtual environment:
+
+1. Create a virtual environment:
+   ```sh
+   python -m venv wapiti3_env
+   ```
+
+2. Activate it:
+   - On Linux/macOS:
+     ```sh
+     . wapiti3_env/bin/activate
+     ```
+   - On Windows:
+     ```sh
+     wapiti3_env\Scripts\activate
+     ```
+
+3. Install Wapiti:
+   ```sh
+   pip install wapiti3
+   ```
+
+# For Contributors
+
+If you are a developer and want to run Wapiti without installing it, you can use the scripts located in the `bin/` folder.
+Note that you must have all dependencies installed (see `pyproject.toml`).
+
+```sh
+python3 bin/wapiti -u http://example.com/
+```
 
 # Installation tutorials
 
-I made several YouTube videos to show Wapiti installation :
+You can find several YouTube videos showing Wapiti installation:
 
 * on OpenSUSE : https://www.youtube.com/watch?v=RmF2Sr2B3ZA
 * on Ubuntu : https://www.youtube.com/watch?v=TD5rehelHPY
+
+Enjoy Wapiti.
