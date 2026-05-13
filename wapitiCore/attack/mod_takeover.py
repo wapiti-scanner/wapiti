@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # This file is part of the Wapiti project (https://wapiti-scanner.github.io)
-# Copyright (C) 2021-2025 Nicolas Surribas
+# Copyright (C) 2021-2026 Nicolas Surribas
 # Copyright (C) 2021-2024 Cyberwatch
 #
 # This program is free software; you can redistribute it and/or modify
