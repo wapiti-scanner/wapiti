@@ -159,8 +159,10 @@ async def test_blind_detection():
             await module.attack(request)
 
             assert persister.add_payload.call_count
-            # One request for error-based, one to get normal response, four to test boolean-based attack
-            assert respx.calls.call_count == 6
+            # 16 requests for error-based payloads (none triggers an error pattern)
+            # 1 request to get the normal response
+            # 4 requests for boolean-based (2 false + 2 true on first matching session)
+            assert respx.calls.call_count == 21
 
 
 @pytest.mark.asyncio
@@ -182,10 +184,11 @@ async def test_negative_blind():
 
         assert not persister.add_payload.call_count
         # We have:
-        # - 1 request for error-based test
+        # - 16 requests for error-based payloads
         # - 1 request to get normal response
-        # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
-        assert respx.calls.call_count == 8
+        # - 36 requests for the first test of each boolean session
+        #   (3 nesting levels * 4 separators * 3 operator combos, each fails immediately)
+        assert respx.calls.call_count == 53
 
 
 @pytest.mark.asyncio
@@ -242,10 +245,8 @@ async def test_blind_detection_parenthesis():
 
             assert persister.add_payload.call_count
             # We have:
-            # - 1 request for error-based test
+            # - 16 requests for error-based payloads
             # - 1 request to get normal response
-            # - 2 requests for boolean False test without parenthesis
-            # - 1 request for boolean True test without parenthesis => this check fails
-            # - 2 requests for boolean False test WITH parenthesis
-            # - 2 requests for boolean True test WITH parenthesis
-            assert respx.calls.call_count == 9
+            # - 3 sessions with empty separator that fail (2 neg + 1 pos each) = 9 requests
+            # - 1 session with quote separator that succeeds (2 neg + 2 pos) = 4 requests
+            assert respx.calls.call_count == 30
