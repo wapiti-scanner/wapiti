@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import asyncio
 import copy
 import socket
 import uuid
 from os.path import join as path_join
 from typing import Dict, List, Tuple, Optional
 
-import dns.resolver
+import dns.asyncresolver
 from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import Log4ShellFinding
@@ -48,9 +49,14 @@ class ModuleLog4Shell(Attack):
     DRUID_URL = "druid/coordinator/v1/lookups/config/"
     SOLR_URL = "solr/admin/cores"
     UNIFI_URL = "api/login"
+    DNS_MAX_CONCURRENCY = 4
+    _dns_semaphore = asyncio.Semaphore(DNS_MAX_CONCURRENCY)
+    parallelize_attacks = True
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
+        self._dns_host = None
+        self._dns_resolver = None
 
         dns_endpoint = attack_options.get("dns_endpoint")
         try:
@@ -253,9 +259,27 @@ class ModuleLog4Shell(Attack):
         headers_uuid_record: dict,
         response: Response
     ):
+        header_uuids = [headers_uuid_record[header] for header in malicious_headers]
+        dns_results = await self._verify_dns_many(header_uuids)
+        url = modified_request.url
         for header, payload in malicious_headers.items():
             header_uuid = headers_uuid_record.get(header)
-            await self._verify_header_vulnerability(modified_request, header, payload, header_uuid, response)
+            is_vulnerable = dns_results.get(str(header_uuid), False)
+            if is_vulnerable:
+                await self.add_critical(
+                    finding_class=Log4ShellFinding,
+                    request=modified_request,
+                    info=f"URL {url} seems vulnerable to Log4Shell attack by using the header {header}",
+                    parameter=f"{header}: {payload}",
+                    response=response
+                )
+
+                log_red("---")
+                log_red(
+                    f"URL {url} seems vulnerable to Log4Shell attack by using the header {header}"
+                )
+                log_red(http_repr(modified_request))
+                log_red("---")
 
     # pylint: disable=too-many-positional-arguments
     async def _verify_header_vulnerability(
@@ -266,21 +290,12 @@ class ModuleLog4Shell(Attack):
         unique_id: uuid.UUID,
         response: Response
     ):
-        if await self._verify_dns(str(unique_id)) is True:
-            await self.add_critical(
-                finding_class=Log4ShellFinding,
-                request=modified_request,
-                info=f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}",
-                parameter=f"{header}: {payload}",
-                response=response
-            )
-
-            log_red("---")
-            log_red(
-                f"URL {modified_request.url} seems vulnerable to Log4Shell attack by using the header {header}"
-            )
-            log_red(http_repr(modified_request))
-            log_red("---")
+        await self._verify_headers_vulnerability(
+            modified_request=modified_request,
+            malicious_headers={header: payload},
+            headers_uuid_record={header: unique_id},
+            response=response
+        )
 
     async def _verify_url_vulnerability(self, request: Request, param_uuid: uuid.UUID, response: Response):
         if not await self._verify_dns(str(param_uuid)):
@@ -299,11 +314,19 @@ class ModuleLog4Shell(Attack):
         log_red(http_repr(request))
         log_red("---")
 
+    async def _verify_dns_many(self, header_uuids: List[uuid.UUID]) -> Dict[str, bool]:
+        unique_ids = list({str(header_uuid) for header_uuid in header_uuids})
+        checks = [self._verify_dns(header_uuid) for header_uuid in unique_ids]
+        results = await asyncio.gather(*checks)
+        return dict(zip(unique_ids, results))
+
     async def _verify_dns(self, header_uuid: str) -> bool:
         try:
-            resolver = dns.resolver.Resolver(configure=False)
-            resolver.nameservers = [self._dns_host]
-            answer = resolver.resolve(header_uuid + ".c", "TXT")
+            if self._dns_resolver is None:
+                self._dns_resolver = dns.asyncresolver.Resolver(configure=False)
+                self._dns_resolver.nameservers = [self._dns_host]
+            async with ModuleLog4Shell._dns_semaphore:
+                answer = await self._dns_resolver.resolve(header_uuid + ".c", "TXT")
 
             return answer[0].strings[0].decode("utf-8") == "true"
         except dns.resolver.LifetimeTimeout:
