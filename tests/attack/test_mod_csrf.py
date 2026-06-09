@@ -18,7 +18,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/csrf/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65086", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65086", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()

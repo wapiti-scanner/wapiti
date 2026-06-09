@@ -1,11 +1,13 @@
 import types
-
-import pytest
 from unittest.mock import MagicMock, patch, ANY
 from pathlib import Path
 
+import pytest
+
 from wapitiCore.attack.passive_scanner import PassiveScanner
 from wapitiCore.net.sql_persister import SqlPersister
+
+# pylint: disable=redefined-outer-name,protected-access
 
 
 @pytest.fixture
@@ -44,7 +46,7 @@ def test_broken_module_is_skipped(
     scanner = PassiveScanner(persister=mock_persister)
 
     # No modules should be loaded
-    assert scanner._modules == {}
+    assert not scanner._modules
 
     # Logs should have been called
     mock_log_err.assert_not_called()

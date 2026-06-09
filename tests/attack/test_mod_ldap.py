@@ -131,8 +131,7 @@ def web_ldap_mock(request):
         if fnmatch(user, username):
             if password is None:
                 return httpx.Response(200, text=f"Welcome {username}")
-            else:
-                return httpx.Response(200, text="Bad password")
+            return httpx.Response(200, text="Bad password")
 
     if password is not None and ")\0" in password:
         return httpx.Response(500, text="Internal Server Error")

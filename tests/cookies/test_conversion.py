@@ -18,7 +18,7 @@ def test_headless_cookies_to_cookiejar():
 
     jar = headless_cookies_to_cookiejar(headless_cookie)
     assert jar
-    cookie = [_ for _ in jar][0]
+    cookie = list(jar)[0]
     assert cookie.comment is None
     assert cookie.comment_url is None
     assert cookie.discard is True

@@ -26,7 +26,8 @@ async def test_getcookie_no_form():
 
         await getcookie_main(["-u", "https://www.amylandthesniffers.com/welcome/", "-c", json_fd.name])
 
-        data = json.load(open(json_fd.name))
+        with open(json_fd.name, encoding="utf-8") as f:
+            data = json.load(f)
         assert data == {
             '.www.amylandthesniffers.com': {
                 '/': {
@@ -88,7 +89,8 @@ async def test_getcookie_fill_one_form(_):
 
         await getcookie_main(["-u", "https://www.vboysstockholm.com/welcome/", "-c", json_fd.name])
 
-        data = json.load(open(json_fd.name))
+        with open(json_fd.name, encoding="utf-8") as f:
+            data = json.load(f)
         assert data == {
             '.www.vboysstockholm.com': {
                 '/': {
@@ -141,7 +143,8 @@ async def test_getcookie_raw_credentials():
             ]
         )
 
-        data = json.load(open(json_fd.name))
+        with open(json_fd.name, encoding="utf-8") as f:
+            data = json.load(f)
         assert data == {
             '.0xdf.gitlab.io': {
                 '/': {

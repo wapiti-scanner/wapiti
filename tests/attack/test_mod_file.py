@@ -20,7 +20,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65085", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65085", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()
@@ -97,7 +97,7 @@ async def test_image_with_parameter():
         )
     )
     # Response to tell that the image take a parameter
-    respx.get(f"http://perdu.com/image_with_par.jpg?f=test").mock(
+    respx.get("http://perdu.com/image_with_par.jpg?f=test").mock(
         return_value=httpx.Response(
             200,
             content="test"

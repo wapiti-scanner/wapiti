@@ -1,9 +1,8 @@
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import respx
 import pytest
-from unittest.mock import patch
 import dns
 import dns.message
 import dns.resolver
@@ -57,7 +56,7 @@ def make_ns_answer(qname, ns_name):
 async def test_ns_takeover():
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    async def resolve(qname, rdtype, **kwargs):
+    async def resolve(qname, rdtype, **kwargs):  # pylint: disable=unused-argument
         if rdtype == "CNAME":
             # No CNAMEs for this test, which is a common scenario
             return []
@@ -100,7 +99,7 @@ async def test_unregistered_cname():
     # Test attacking all kind of parameter without crashing
     respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
 
-    async def resolve(qname, rdtype, **kwargs):
+    async def resolve(qname, rdtype, **kwargs):  # pylint: disable=unused-argument
         if qname.startswith("supercalifragilisticexpialidocious."):
             # No wildcard responses
             return []
@@ -172,7 +171,7 @@ async def test_myshopify_false_positive():
 
     myshopify_api_url = (
         "https://app.shopify.com/services/signup/check_availability.json?"
-        f"shop_name=falsepositive&email=test@example.com"
+        "shop_name=falsepositive&email=test@example.com"
     )
     respx.get(myshopify_api_url).mock(
         return_value=httpx.Response(200, json={"status": "unavailable"})
@@ -191,7 +190,7 @@ async def test_myshopify_true_positive():
 
     myshopify_api_url = (
         "https://app.shopify.com/services/signup/check_availability.json?"
-        f"shop_name=falsepositive&email=test@example.com"
+        "shop_name=falsepositive&email=test@example.com"
     )
     respx.get(myshopify_api_url).mock(
         return_value=httpx.Response(200, json={"status": "available"})

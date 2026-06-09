@@ -68,7 +68,7 @@ async def test_jsoncookie():
     cookie_jar: CookieJar = json_cookie.cookiejar(cookie_domain_1)
 
     assert cookie_jar is not None
-    assert cookie_jar.__len__() == 1
+    assert len(cookie_jar) == 1
 
     new_cookie_jar = CookieJar()
     for domain in (cookie_domain_1, cookie_domain_2):
@@ -98,19 +98,19 @@ async def test_jsoncookie():
     cookie_jar = json_cookie.cookiejar(cookie_domain_1)
 
     assert cookie_jar is not None
-    assert cookie_jar.__len__() == 2
+    assert len(cookie_jar) == 2
 
     assert json_cookie.delete(cookie_domain_1) is True
 
     cookie_jar = json_cookie.cookiejar(cookie_domain_1)
 
     assert cookie_jar is not None
-    assert cookie_jar.__len__() == 0
+    assert len(cookie_jar) == 0
 
     cookie_jar = json_cookie.cookiejar(cookie_domain_2)
 
     assert cookie_jar is not None
-    assert cookie_jar.__len__() == 1
+    assert len(cookie_jar) == 1
 
     with mock.patch("builtins.open", get_mock_open(files)) as open_mock:
         try:

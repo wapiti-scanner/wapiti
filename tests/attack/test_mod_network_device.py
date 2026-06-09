@@ -13,6 +13,8 @@ from wapitiCore.attack.mod_network_device import ModuleNetworkDevice
 from wapitiCore.attack.network_devices.mod_forti import ModuleForti
 from wapitiCore.attack.network_devices.mod_harbor import ModuleHarbor
 
+# pylint: disable=too-many-lines
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -141,13 +143,14 @@ async def test_ubika_with_version():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_detect_fortimanager():
+async def test_detect_fortimanager_via_platform_span():
     respx.get("http://perdu.com/p/login/").mock(
         return_value=httpx.Response(
             200,
-            content='<html class="main-app"><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <div class="sign-in-header" style="visibility: hidden"><span class="platform">FortiManager-3000G</span>'
+            content='<html class="main-app"><head><title>Vous Perdu ?</title></head><body>'
+                    '<h1>Perdu sur Internet ?</h1>             <h2>Pas de panique, on va vous aider</h2> '
+                    '            <div class="sign-in-header" style="visibility: hidden">'
+                    '<span class="platform">FortiManager-3000G</span>'
                     '</body></html>'
         )
     )
@@ -385,9 +388,10 @@ async def test_detect_fortimail():
     respx.get("http://perdu.com/admin/").mock(
         return_value=httpx.Response(
             200,
-            content='<html class="main-app"><head><title>FortiMail</title><meta name="FortiMail" content="width=device-width, initial-scale=1">\
-            </head><body><h1>Perdu sur Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> '
+            content='<html class="main-app"><head><title>FortiMail</title>'
+                    '<meta name="FortiMail" content="width=device-width, initial-scale=1">'
+                    '            </head><body><h1>Perdu sur Internet ?</h1> '
+                    '            <h2>Pas de panique, on va vous aider</h2> '
         )
     )
     respx.get("http://perdu.com/").mock(
@@ -426,8 +430,9 @@ async def test_detect_fortimanager():
     respx.get("http://perdu.com/p/login/").mock(
         return_value=httpx.Response(
             200,
-            content='<html class="main-app"><head><title>FortiManager</title></head><body><h1>Perdu sur Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2></body></html>'
+            content='<html class="main-app"><head><title>FortiManager</title></head><body>'
+                    '<h1>Perdu sur Internet ?</h1>             <h2>Pas de panique, on va vous aider</h2>'
+                    '</body></html>'
         )
     )
     respx.get("http://perdu.com/").mock(
@@ -868,9 +873,9 @@ async def test_detect_citrix_from_class():
     respx.get("http://perdu.com/logon/LogonPoint/").mock(
         return_value=httpx.Response(
             200,
-            content='<html><head><title class="_ctxstxt_NetscalerGateway">Hello</title></head><body><h1>Perdu sur Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-                    </body></html>'
+            content='<html><head><title class="_ctxstxt_NetscalerGateway">Hello</title></head><body>'
+                    '<h1>Perdu sur Internet ?</h1>             <h2>Pas de panique, on va vous aider</h2> '
+                    '                    </body></html>'
         )
     )
     respx.get("http://perdu.com/").mock(
@@ -1055,7 +1060,8 @@ async def test_checkpoint_with_version():
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Check Point", "versions": ["R80.20"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Check Point", "versions": ["R80.20"], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "network_device"
 
@@ -1072,10 +1078,12 @@ async def test_detect_cve_forti():
     respx.get("http://perdu.com/login?redir=/ng").mock(
         return_value=httpx.Response(
             200,
-            content='<html class="main-app"><head><f-icon class="fa-warning></f-icon><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
-            <h2>Pas de panique, on va vous aider</h2> \
-            <div class="sign-in-header" style="visibility: hidden"><span class="platform">FortiManager-3000G</span> \
-            </body></html>',
+            content='<html class="main-app"><head><f-icon class="fa-warning></f-icon>'
+                    '<title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> '
+                    '            <h2>Pas de panique, on va vous aider</h2> '
+                    '            <div class="sign-in-header" style="visibility: hidden">'
+                    '<span class="platform">FortiManager-3000G</span> '
+                    '            </body></html>',
             headers={"APSCOOKIE_": "APSCOOKIE_"}
         )
     )
@@ -1087,7 +1095,9 @@ async def test_detect_cve_forti():
         )
     )
 
-    respx.get(url__regex=r"http://perdu.com/wapiti3-.*?").mock(return_value=httpx.Response(101, headers={"Connection": "Upgrade"}))
+    respx.get(url__regex=r"http://perdu.com/wapiti3-.*?").mock(
+        return_value=httpx.Response(101, headers={"Connection": "Upgrade"})
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
@@ -1153,7 +1163,8 @@ async def test_detect_ivanti_connect_in_title():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Ivanti Connect Secure", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Ivanti Connect Secure", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1194,7 +1205,8 @@ async def test_detect_ivanti_connect_in_frmLogin():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Ivanti Connect Secure", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Ivanti Connect Secure", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1235,7 +1247,8 @@ async def test_detect_ivanti_Service_Manager_in_Title():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1276,7 +1289,8 @@ async def test_detect_ivanti_Service_Manager_in_h1():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1317,7 +1331,8 @@ async def test_detect_ivanti_Service_Manager_in_file():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Ivanti Service Manager", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1476,7 +1491,8 @@ async def test_detect_palo_alto_in_Title():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1516,7 +1532,8 @@ async def test_detect_palo_alto_in_Div():
         print(module)
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1554,7 +1571,8 @@ async def test_detect_palo_alto_form():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": [], "categories": ["Network Equipment"], '
+            '"groups": ["Content"]}'
         )
 
 @pytest.mark.asyncio
@@ -1600,7 +1618,8 @@ async def test_detect_palo_alto_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", "11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", '
+            '"11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
 
 
@@ -1647,7 +1666,8 @@ async def test_detect_palo_alto_version_format2():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", "11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", '
+            '"11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
 
 
@@ -1668,7 +1688,7 @@ async def test_detect_palo_alto_version_format3():
             content='<html><head><title>GlobalProtect Portal</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>'
         )
-    )    
+    )
     respx.get("http://perdu.com/").mock(
         return_value=httpx.Response(
             200,
@@ -1694,7 +1714,8 @@ async def test_detect_palo_alto_version_format3():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", "11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
+            '{"name": "Palo Alto GlobalProtect Portal", "versions": ["10.2.9-h1", "11.0.4-h1", '
+            '"11.1.2-h3"], "categories": ["Network Equipment"], "groups": ["Content"]}'
         )
 
 

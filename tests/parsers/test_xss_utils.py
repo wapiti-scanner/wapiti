@@ -256,7 +256,7 @@ def test_non_executable_context():
     injection
     </html>"""
 
-    assert get_context_list(html, "injection") == []
+    assert not get_context_list(html, "injection")
 
     html = """<html>
     <frameset>

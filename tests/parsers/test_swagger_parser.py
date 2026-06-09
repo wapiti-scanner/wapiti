@@ -186,7 +186,10 @@ async def test_openapi_file():
         enctype="application/json"
     )
 
-    params = '{"alarmState": "default", "confirmingUserName": "default", "confirmingDateTime": "2023-03-03T20:35:34.32", "confirmingNote": "default"}'
+    params = (
+        '{"alarmState": "default", "confirmingUserName": "default", '
+        '"confirmingDateTime": "2023-03-03T20:35:34.32", "confirmingNote": "default"}'
+    )
     request_put2 = Request(
         "https://fake.openapi.fr/v1/Alarms/1",
         "PUT",

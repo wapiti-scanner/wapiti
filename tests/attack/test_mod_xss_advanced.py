@@ -18,7 +18,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/xss/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65081", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65081", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()
@@ -440,4 +440,3 @@ async def test_fallback_to_html_injection():
         )
         used_payload = persister.add_payload.call_args_list[0][1]["request"].get_params[0][1].lower()
         assert re.match(r'<div id="\w+">yolo</div>', used_payload)
-

@@ -1,13 +1,17 @@
+from unittest.mock import patch
+
 import respx
 import httpx
+from bs4 import BeautifulSoup
 
 from wapitiCore.net.crawler import Response
 from wapitiCore.parsers.html_parser import Html
+import wapitiCore.parsers.html_parser as html_parser_module
 
 
 @respx.mock
 def test_absolute_root():
-    with open("tests/data/absolute_root_links.html") as data_body:
+    with open("tests/data/absolute_root_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -19,7 +23,7 @@ def test_absolute_root():
 
 @respx.mock
 def test_relative_root():
-    with open("tests/data/relative_root_links.html") as data_body:
+    with open("tests/data/relative_root_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -32,7 +36,7 @@ def test_relative_root():
 
 @respx.mock
 def test_relative_links():
-    with open("tests/data/relative_links.html") as data_body:
+    with open("tests/data/relative_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -58,7 +62,7 @@ def test_relative_links():
 
 @respx.mock
 def test_other_links():
-    with open("tests/data/other_links.html") as data_body:
+    with open("tests/data/other_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
@@ -87,7 +91,7 @@ def test_other_links():
 
 @respx.mock
 def test_extra_links():
-    with open("tests/data/extra_links.html") as data_body:
+    with open("tests/data/extra_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -121,7 +125,7 @@ def test_extra_links():
 
 @respx.mock
 def test_meta():
-    with open("tests/data/meta.html") as data_body:
+    with open("tests/data/meta.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -140,7 +144,7 @@ def test_meta():
 
 @respx.mock
 def test_base_relative_links():
-    with open("tests/data/base_relative_links.html") as data_body:
+    with open("tests/data/base_relative_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -170,7 +174,7 @@ def test_base_relative_links():
 
 @respx.mock
 def test_base_extra_links():
-    with open("tests/data/base_extra_links.html") as data_body:
+    with open("tests/data/base_extra_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
@@ -203,7 +207,7 @@ def test_base_extra_links():
 
 @respx.mock
 def test_base_other_links():
-    with open("tests/data/base_other_links.html") as data_body:
+    with open("tests/data/base_other_links.html", encoding="utf-8") as data_body:
         url = "http://perdu.com/"
         respx.get(url).mock(
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
@@ -230,19 +234,19 @@ def test_base_other_links():
 
 
 def test_logged_in_success():
-    with open("tests/data/logged_in.html") as data_body:
+    with open("tests/data/logged_in.html", encoding="utf-8") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert page.is_logged_in()
 
 
 def test_logged_in_failed_implicit():
-    with open("tests/data/logged_in_failed_implicit.html") as data_body:
+    with open("tests/data/logged_in_failed_implicit.html", encoding="utf-8") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert not page.is_logged_in()
 
 
 def test_logged_in_failed_explicit():
-    with open("tests/data/logged_in_failed_explicit.html") as data_body:
+    with open("tests/data/logged_in_failed_explicit.html", encoding="utf-8") as data_body:
         page = Html(data_body.read(), "http://perdu.com/index.php")
         assert not page.is_logged_in()
 
@@ -252,15 +256,14 @@ def test_binary_content_does_not_raise():
     # Html should silently fall back to an empty soup instead of crashing.
     binary_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01"
     page = Html(binary_content, "https://perdu.com/logo.png")
-    assert page.links == []
+    assert not page.links
     assert page.title == ""
 
     # Python 3.13 html.parser raises ValueError (not ParserRejectedMarkup) on some binary inputs
     # e.g. a woff2/jpg file that triggers handle_charref with non-integer data
-    from unittest.mock import patch
-    from bs4 import BeautifulSoup as _BS
-    import wapitiCore.parsers.html_parser as _hp
-    empty_soup = _BS("", "html.parser")
-    with patch.object(_hp, "BeautifulSoup", side_effect=[ValueError("invalid literal for int()"), empty_soup]):
+    empty_soup = BeautifulSoup("", "html.parser")
+    with patch.object(
+        html_parser_module, "BeautifulSoup", side_effect=[ValueError("invalid literal for int()"), empty_soup]
+    ):
         page2 = Html("<html></html>", "https://perdu.com/font.woff2")
-    assert page2.links == []
+    assert not page2.links

@@ -82,7 +82,7 @@ async def test_false_positives():
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     temp_nikto_db = os.path.join(persister.CONFIG_DIR, "temp_nikto_db")
-    with open(temp_nikto_db, "w") as fd:
+    with open(temp_nikto_db, "w", encoding="utf-8") as fd:
         fd.writelines(
             [
                 "003270,539,d,/catinfo,GET,200,,,,,May be vulnerable to a buffer overflow. Request '/catinfo?',,\n",
@@ -128,7 +128,7 @@ async def test_short_nikto_db_line_does_not_crash():
     persister.CONFIG_DIR = os.path.join(base_dir, "config")
 
     temp_nikto_db = os.path.join(persister.CONFIG_DIR, "temp_nikto_db_short")
-    with open(temp_nikto_db, "w") as fd:
+    with open(temp_nikto_db, "w", encoding="utf-8") as fd:
         # 10 fields only (indices 0-9), missing vuln_desc[10] and post_data[11]
         fd.write("003270,539,d,/catinfo,GET,200,,,,\n")
 

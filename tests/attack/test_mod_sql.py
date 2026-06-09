@@ -124,24 +124,23 @@ async def test_blind_detection():
                 user_id = parse_qs(urlparse(str(http_request.url)).query)["user_id"][0]
             except (IndexError, KeyError):
                 return httpx.Response(200, text="Unknown user")
-            else:
-                conn = sqlite3.connect(database_fd.name)
-                cursor = conn.cursor()
-                try:
-                    # Will you spot the SQLi vulnerability? :D
-                    cursor.execute("SELECT username FROM users WHERE id = {}".format(user_id))
-                    row = cursor.fetchone()
-                except sqlite3.OperationalError:
-                    cursor.close()
-                    conn.close()
-                    return httpx.Response(200, text="Unknown user")
-                else:
-                    cursor.close()
-                    conn.close()
-                    if row:
-                        return httpx.Response(200, text="Welcome {}".format(row[0]))
-                    else:
-                        return httpx.Response(200, text="Unknown user")
+
+            conn = sqlite3.connect(database_fd.name)
+            cursor = conn.cursor()
+            try:
+                # Will you spot the SQLi vulnerability? :D
+                cursor.execute(f"SELECT username FROM users WHERE id = {user_id}")
+                row = cursor.fetchone()
+            except sqlite3.OperationalError:
+                cursor.close()
+                conn.close()
+                return httpx.Response(200, text="Unknown user")
+
+            cursor.close()
+            conn.close()
+            if row:
+                return httpx.Response(200, text=f"Welcome {row[0]}")
+            return httpx.Response(200, text="Unknown user")
 
         respx.get(url__regex=r"http://perdu\.com/\?user_id=.*").mock(side_effect=process)
 
@@ -206,24 +205,23 @@ async def test_blind_detection_parenthesis():
                 username = parse_qs(urlparse(str(http_request.url)).query)["username"][0]
             except (IndexError, KeyError):
                 return httpx.Response(200, text="Unknown user")
-            else:
-                conn = sqlite3.connect(database_fd.name)
-                cursor = conn.cursor()
-                try:
-                    # Will you spot the SQLi vulnerability? :D
-                    cursor.execute("SELECT id FROM users WHERE username = '{}'".format(username))
-                    row = cursor.fetchone()
-                except sqlite3.OperationalError:
-                    cursor.close()
-                    conn.close()
-                    return httpx.Response(200, text="Unknown user")
-                else:
-                    cursor.close()
-                    conn.close()
-                    if row:
-                        return httpx.Response(200, text="Welcome, your user ID is {}".format(row[0]))
-                    else:
-                        return httpx.Response(200, text="Unknown user")
+
+            conn = sqlite3.connect(database_fd.name)
+            cursor = conn.cursor()
+            try:
+                # Will you spot the SQLi vulnerability? :D
+                cursor.execute(f"SELECT id FROM users WHERE username = '{username}'")
+                row = cursor.fetchone()
+            except sqlite3.OperationalError:
+                cursor.close()
+                conn.close()
+                return httpx.Response(200, text="Unknown user")
+
+            cursor.close()
+            conn.close()
+            if row:
+                return httpx.Response(200, text=f"Welcome, your user ID is {row[0]}")
+            return httpx.Response(200, text="Unknown user")
 
         respx.get(url__regex=r"http://perdu\.com/\?username=.*").mock(side_effect=process)
 

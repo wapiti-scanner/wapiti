@@ -11,6 +11,8 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 
+# pylint: disable=protected-access
+
 payload = "class.module.classLoader[wapiti]=wapiti"
 
 @pytest.mark.asyncio
@@ -34,12 +36,12 @@ async def test_detect_spring4shell():
 
         module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
-        assert await module._check_spring4shell("GET", request, payload) == False
+        assert await module._check_spring4shell("GET", request, payload) is False
 
         future_url_vulnerability = asyncio.Future()
         future_url_vulnerability.set_result(None)
 
-        assert await module._attack_spring4shell_url(request) == None
+        assert await module._attack_spring4shell_url(request) is None
 
 
 
@@ -56,7 +58,9 @@ async def test_detect_spring4shell_get():
     request.path_id = 1
     options = {"timeout": 10, "level": 2}
 
-    respx.get("http://perdu.com/?class.module.classLoader[wapiti]=wapiti").mock(return_value=HttpxResponse(500, request=request))
+    respx.get("http://perdu.com/?class.module.classLoader[wapiti]=wapiti").mock(
+        return_value=HttpxResponse(500, request=request)
+    )
     respx.post("http://perdu.com/").mock(return_value=HttpxResponse(200, request=request))
     respx.get("http://perdu.com/").mock(return_value=HttpxResponse(200, request=request))
 
@@ -65,8 +69,8 @@ async def test_detect_spring4shell_get():
 
         module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
-        assert await module._check_spring4shell("GET", request, payload) == True
-        assert await module._check_spring4shell("POST", request, payload) == False
+        assert await module._check_spring4shell("GET", request, payload) is True
+        assert await module._check_spring4shell("POST", request, payload) is False
 
 @pytest.mark.asyncio
 @respx.mock
@@ -89,5 +93,5 @@ async def test_no_spring4shell():
 
         module = ModuleSpring4Shell(crawler, persister, options, crawler_configuration)
 
-        assert await module._check_spring4shell("GET", request, payload) == False
-        assert await module._check_spring4shell("POST", request, payload) == False
+        assert await module._check_spring4shell("GET", request, payload) is False
+        assert await module._check_spring4shell("POST", request, payload) is False

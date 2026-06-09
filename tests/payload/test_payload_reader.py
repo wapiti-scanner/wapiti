@@ -43,9 +43,8 @@ def test_ini_payload_reader():
         reader = IniPayloadReader("payloads.ini")
         reader.add_key_handler("payload", lambda x: x.upper())
         reader.add_key_handler("rules", lambda x: x.split())
-        payloads = [payload for payload in reader]
+        payloads = list(reader)
         assert payloads[0].payload == "1ST"
         assert payloads[0].rules == ["root", "sysadmin"]
         assert payloads[0].algorithm == "simple"
         assert payloads[1].algorithm == "advanced"
-

@@ -37,7 +37,8 @@ async def test_cookie_dump():
             json_cookie.addcookies(crawler.cookie_jar)
             json_cookie.dump()
 
-            data = json.load(open(json_fd.name))
+            with open(json_fd.name, encoding="utf-8") as f:
+                data = json.load(f)
             assert data == {
                 '.www.destroydestroyboys.com': {
                     '/': {
@@ -128,4 +129,5 @@ async def test_cookie_delete():
         json_cookie.delete("httpbin.org")
         json_cookie.dump()
 
-        assert open(json_fd.name).read() == '{}'
+        with open(json_fd.name, encoding="utf-8") as f:
+            assert f.read() == '{}'

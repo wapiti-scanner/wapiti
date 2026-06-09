@@ -10,7 +10,7 @@ import pytest
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
-from wapitiCore.net.crawler import AsyncCrawler, Response as WapitiResponse
+from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.web import http_repr, curl_repr
 
 
@@ -19,7 +19,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65084", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65084", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()

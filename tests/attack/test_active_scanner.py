@@ -18,6 +18,8 @@ from wapitiCore.net import Request, Response
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
 
+# pylint: disable=protected-access,redefined-outer-name
+
 
 class MockAttack(AttackProtocol):
     def __init__(self, name, priority=0):
@@ -94,7 +96,7 @@ def test_handle_user_interruption_invalid_then_valid():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_send_bug_report_success(tmp_path):
+async def test_send_bug_report_success():
     persister = MagicMock()
     crawler_configuration = CrawlerConfiguration(Request("http://example.com/"))
     scanner = ActiveScanner(persister, crawler_configuration)
@@ -119,7 +121,7 @@ async def test_send_bug_report_success(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_send_bug_report_request_error(tmp_path):
+async def test_send_bug_report_request_error():
     persister = MagicMock()
     crawler_configuration = CrawlerConfiguration(Request("http://example.com/"))
     scanner = ActiveScanner(persister, crawler_configuration)
@@ -339,7 +341,7 @@ async def test_init_attack_modules_adds_enabled_module():
         name = "foo"
         PRIORITY = 10
 
-        def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        def __init__(self, crawler, persister, attack_options, crawler_configuration):  # pylint: disable=unused-argument
             self.crawler = crawler
             self.persister = persister
 

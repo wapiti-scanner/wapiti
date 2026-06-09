@@ -127,7 +127,7 @@ class TestInterceptingExplorer:
         mock_page.url = "http://example.com/"
         mock_page.query_selector_all.return_value = []
 
-        async def goto_with_delay(*args, **kwargs):
+        async def goto_with_delay(*args, **kwargs):  # pylint: disable=unused-argument
             await asyncio.sleep(0.2)
 
         mock_page.goto.side_effect = goto_with_delay
@@ -171,7 +171,7 @@ class TestInterceptingExplorer:
         scope = Scope(Request("http://example.com"), "folder")
         explorer = InterceptingExplorer(crawler_config, scope, stop_event, headless="hidden")
 
-        async def mock_explore(*args, **kwargs):
+        async def mock_explore(*args, **kwargs):  # pylint: disable=unused-argument
             queue = args[1]
             request = Request("http://example.com/test")
             response = Response(httpx.Response(200, text="test"), url="http://example.com/test")

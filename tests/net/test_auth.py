@@ -1,9 +1,10 @@
-import pytest
 import json
 from unittest.mock import AsyncMock, patch
+from http.cookiejar import CookieJar
+
+import pytest
 import httpx
 import respx
-from http.cookiejar import CookieJar
 
 from wapitiCore.net.auth import (
     async_try_form_login,
@@ -12,7 +13,7 @@ from wapitiCore.net.auth import (
     load_form_script,
     check_http_auth
 )
-from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential, HttpCredential
+from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net import Request
 
 # Sample HTML for a login page
