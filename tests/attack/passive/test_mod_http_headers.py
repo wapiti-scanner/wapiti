@@ -1,6 +1,7 @@
+from unittest.mock import MagicMock
+
 import pytest
 import httpx
-from unittest.mock import MagicMock
 
 from wapitiCore.net import Request, Response
 from wapitiCore.attack.modules.passive.mod_http_headers import (
@@ -21,6 +22,7 @@ from wapitiCore.language.vulnerability import LOW_LEVEL
 
 from wapitiCore.attack.modules.passive import mod_http_headers
 
+# pylint: disable=redefined-outer-name
 
 URL_HTTP = "http://example.com"
 URL_HTTPS = "https://example.com"
@@ -107,7 +109,7 @@ def test_module_http_headers_all_ok(module):
         "Strict-Transport-Security": "max-age=63072000",
     }
     req, resp = create_mock_objects(URL_HTTPS, headers)
-    assert list(module.analyze(req, resp)) == []
+    assert not list(module.analyze(req, resp))
 
 
 def test_module_http_headers_hsts_ignored_on_http(module):
@@ -118,7 +120,7 @@ def test_module_http_headers_hsts_ignored_on_http(module):
         "Strict-Transport-Security": "no-max-age",  # Invalid, but should be ignored on HTTP
     }
     req, resp = create_mock_objects(URL_HTTP, headers)
-    assert list(module.analyze(req, resp)) == []
+    assert not list(module.analyze(req, resp))
 
 
 def test_module_http_headers_deduplication(module):
@@ -131,4 +133,4 @@ def test_module_http_headers_deduplication(module):
     # Second pass: same issues, same netloc -> no new findings
     req2, resp2 = create_mock_objects(URL_HTTPS, {})
     vulns2 = list(module.analyze(req2, resp2))
-    assert vulns2 == []
+    assert not vulns2

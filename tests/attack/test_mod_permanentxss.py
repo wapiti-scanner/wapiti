@@ -16,18 +16,15 @@ values = ["iamgroot"]
 
 
 def return_stored_values(_):
-    global values
     return httpx.Response(200, text="\n".join(values), headers={"Content-Type": "text/html"})
 
 
 def add_value(request):
-    global values
     values.append(request.url.params.get("message"))
     return httpx.Response(200, text="Comment saved")
 
 
 def store_and_return_stored_value(request):
-    global values
     values.append(request.url.params.get("message"))
     return httpx.Response(
         200,

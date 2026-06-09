@@ -1,7 +1,8 @@
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import respx
 import httpx
-from unittest.mock import AsyncMock, patch
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -42,7 +43,9 @@ async def test_must_attack():
     assert await module.must_attack(request_ko_referer, response_ok) is False
 
     # Case 4: Directory redirection response
-    request_dir_redir = Request("http://perdu.com/login", post_params=[["p", "Letm3in_"]], referer="http://perdu.com/login")
+    request_dir_redir = Request(
+        "http://perdu.com/login", post_params=[["p", "Letm3in_"]], referer="http://perdu.com/login"
+    )
     response_dir_redir = Response(
         httpx.Response(status_code=301, headers={"Location": "http://perdu.com/login/"}),
         url="http://perdu.com/login"

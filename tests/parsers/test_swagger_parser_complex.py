@@ -35,8 +35,15 @@ async def test_swagger_file_complex():
         'https://fakeSwagger.fr/api/v2.0/projects/1/robots?page=1&page_size=10&q=default&sort=default',
         'https://fakeSwagger.fr/api/v2.0/projects/default/preheat/policies/default',
         'https://fakeSwagger.fr/api/v2.0/projects/default/preheat/policies/default/executions/1',
-        'https://fakeSwagger.fr/api/v2.0/projects/default/repositories/default/artifacts?q=default&sort=default&page=1&page_size=10&with_tag=true&with_label=false&with_scan_overview=false&with_signature=false&with_immutable_status=false&with_accessory=false',
-        'https://fakeSwagger.fr/api/v2.0/projects?q=default&page=1&page_size=10&sort=default&name=default&public=true&owner=default&with_detail=true',
+        (
+            'https://fakeSwagger.fr/api/v2.0/projects/default/repositories/default/artifacts?'
+            'q=default&sort=default&page=1&page_size=10&with_tag=true&with_label=false&'
+            'with_scan_overview=false&with_signature=false&with_immutable_status=false&with_accessory=false'
+        ),
+        (
+            'https://fakeSwagger.fr/api/v2.0/projects?q=default&page=1&page_size=10&sort=default&'
+            'name=default&public=true&owner=default&with_detail=true'
+        ),
         'https://fakeSwagger.fr/api/v2.0/scanners?q=default&sort=default&page=1&page_size=10',
         'https://fakeSwagger.fr/api/v2.0/system/CVEAllowlist',
         'https://fakeSwagger.fr/api/v2.0/system/purgeaudit/schedule',

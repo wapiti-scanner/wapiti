@@ -10,6 +10,8 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_ssrf import ModuleSsrf
 
+# pylint: disable=protected-access
+
 
 @pytest.mark.asyncio
 @respx.mock

@@ -16,13 +16,15 @@ from wapitiCore.net.explorer import Explorer
 from wapitiCore.net import Request
 from wapitiCore.net.scope import Scope
 
+# pylint: disable=protected-access
+
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/explorer/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()
@@ -132,7 +134,7 @@ async def test_drop_cookies():
 
 def test_save_and_restore_state():
     # Create a temporary file
-    temp_file = NamedTemporaryFile(suffix=".pkl")
+    temp_file = NamedTemporaryFile(suffix=".pkl")  # pylint: disable=consider-using-with
     # Get its names
     filename = temp_file.name
     # Delete it

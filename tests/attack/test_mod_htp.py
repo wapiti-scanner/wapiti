@@ -14,6 +14,8 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 
+# pylint: disable=protected-access
+
 
 @pytest.mark.asyncio
 @respx.mock

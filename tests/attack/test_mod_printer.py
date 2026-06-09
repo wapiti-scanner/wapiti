@@ -75,7 +75,8 @@ async def test_hp_model_detection_from_html():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "HP LaserJet Pro MFP M428fdw", "versions": [""], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "HP LaserJet Pro MFP M428fdw", "versions": [""], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -106,7 +107,8 @@ async def test_hp_laserjet_detection():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "HP LaserJet 400 M401dne", "versions": [""], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "HP LaserJet 400 M401dne", "versions": [""], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -158,7 +160,8 @@ async def test_hp_laserjet_detection_with_firmware_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "HP LaserJet 400 M401dne", "versions": ["V2.12.0"], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "HP LaserJet 400 M401dne", "versions": ["V2.12.0"], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -189,7 +192,8 @@ async def test_epson_l6290_detection():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "EPSON L6290 Series", "versions": [""], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "EPSON L6290 Series", "versions": [""], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -230,7 +234,8 @@ async def test_epson_l6290_detection_with_fw_version():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "EPSON L6290 Series", "versions": ["05.13.XA22P1"], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "EPSON L6290 Series", "versions": ["05.13.XA22P1"], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -243,7 +248,10 @@ async def test_canon_printer_through_html():
         return_value=httpx.Response(
             200,
             headers={"Server": "Canon Web Server"},
-            content='<html><head><title></title><p id="deviceType"><span id="deviceName">MF750C Series</span></p></html>'
+            content=(
+                '<html><head><title></title><p id="deviceType">'
+                '<span id="deviceName">MF750C Series</span></p></html>'
+            )
         )
     )
 
@@ -264,7 +272,8 @@ async def test_canon_printer_through_html():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Canon MF750C Series", "versions": [""], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "Canon MF750C Series", "versions": [""], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 
@@ -296,7 +305,8 @@ async def test_canon_printer_via_headers():
 
         assert persister.add_payload.call_count == 1
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Canon MF633C Caster", "versions": [""], "categories": ["Network Equipment"], "groups": ["Printers"]}'
+            '{"name": "Canon MF633C Caster", "versions": [""], '
+            '"categories": ["Network Equipment"], "groups": ["Printers"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["module"] == "printer"
 

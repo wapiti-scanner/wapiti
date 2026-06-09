@@ -1,5 +1,6 @@
-import pytest
 from argparse import Namespace
+
+import pytest
 
 from wapitiCore.controller.exceptions import InvalidOptionValue
 from wapitiCore.main.wapiti import build_attack_options_from_args
@@ -153,4 +154,3 @@ def test_build_attack_options_with_internal_endpoint_not_accessible_raises():
         build_attack_options_from_args(args)
         assert "--internal-endpoint" in str(exc_info.value)
         assert "Invalid argument for option --internal-endpoint : http://192.0.2.1/private/" in str(exc_info.value)
-

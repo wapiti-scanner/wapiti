@@ -137,14 +137,14 @@ def generate_cert(include_organization_name: bool = True, include_ocsp_must_stap
 
     # Build the subject name
     subject_name = [
-        x509.NameAttribute(x509.NameOID.COUNTRY_NAME, u"US"),
-        x509.NameAttribute(x509.NameOID.STATE_OR_PROVINCE_NAME, u"California"),
-        x509.NameAttribute(x509.NameOID.LOCALITY_NAME, u"San Francisco"),
-        x509.NameAttribute(x509.NameOID.COMMON_NAME, u"mysite.com"),
+        x509.NameAttribute(x509.NameOID.COUNTRY_NAME, "US"),
+        x509.NameAttribute(x509.NameOID.STATE_OR_PROVINCE_NAME, "California"),
+        x509.NameAttribute(x509.NameOID.LOCALITY_NAME, "San Francisco"),
+        x509.NameAttribute(x509.NameOID.COMMON_NAME, "mysite.com"),
     ]
 
     if include_organization_name:
-        subject_name.append(x509.NameAttribute(x509.NameOID.ORGANIZATION_NAME, u"My Company"))
+        subject_name.append(x509.NameAttribute(x509.NameOID.ORGANIZATION_NAME, "My Company"))
 
     # Generate a certificate
     subject = issuer = x509.Name(subject_name)
@@ -162,7 +162,7 @@ def generate_cert(include_organization_name: bool = True, include_ocsp_must_stap
     ).not_valid_after(
         datetime.now(UTC) + timedelta(days=10)
     ).add_extension(
-        x509.SubjectAlternativeName([x509.DNSName(u"localhost")]),
+        x509.SubjectAlternativeName([x509.DNSName("localhost")]),
         critical=False,
     )
 

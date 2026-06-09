@@ -13,6 +13,10 @@ from wapitiCore.net import Request, Response
 from wapitiCore.main.wapiti import wapiti_main
 from wapitiCore.controller.wapiti import Wapiti, InvalidOptionValue
 
+# Mock persister/callback signatures impose arguments unused by the test bodies, and tests
+# deliberately reach into client internals (_client, _mounts, _pool...) to assert proxy wiring.
+# pylint: disable=unused-argument,protected-access
+
 
 @pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.write_report")
@@ -36,7 +40,7 @@ async def test_max_attack_time(_):
         async def set_attacked(self, path_ids, module_name):
             return
 
-        async def add_payload(self, request_id, payload_type, module,
+        async def add_payload(self, request_id, payload_type, module,  # pylint: disable=too-many-positional-arguments
             category = None, level = 0, request = None, parameter = "",
             info = "", wstg = None, response = None):
             return
@@ -78,7 +82,8 @@ async def test_max_attack_time(_):
         cli.active_scanner.set_modules("all")
         time = monotonic()
         await cli.active_scanner.attack()
-        max_run_duration = max_attack_time * (len(all_modules) + delta) # execution time for all modules + delta of uncertainty
+        # execution time for all modules + delta of uncertainty
+        max_run_duration = max_attack_time * (len(all_modules) + delta)
         assert monotonic() - time < max_run_duration
 
 
@@ -97,7 +102,7 @@ async def test_update_with_modules(mock_update):
 async def test_update_with_not_valid_url(mock_valid_url):
     testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "htp:/perdu"]
     with mock.patch.object(sys, 'argv', testargs):
-        with pytest.raises(SystemExit) as ve:
+        with pytest.raises(SystemExit):
             await wapiti_main()
             mock_valid_url.assert_called_once_with("htp:/perdu")
 
@@ -116,7 +121,10 @@ async def test_update_without_modules(mock_update):
 @mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.update")
 async def test_update_with_wapp_url(mock_update):
     """Ensure that no module should be updated when no module is requested."""
-    testargs = ["wapiti", "--update", "-m", "wapp", "--wapp-url", "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/"]
+    testargs = [
+        "wapiti", "--update", "-m", "wapp", "--wapp-url",
+        "https://raw.githubusercontent.com/wapiti-scanner/wappalyzerfork/main/"
+    ]
     with mock.patch.object(sys, 'argv', testargs):
         with pytest.raises(SystemExit):
             await wapiti_main()
@@ -156,7 +164,10 @@ async def test_update_with_proxy():
 @mock.patch("wapitiCore.main.wapiti.check_http_auth", return_value=True)
 async def test_use_http_creds(mock_check_http_auth, _ ):
     """Let's ensure that the proxy is used when updating modules resources."""
-    testargs = ["wapiti", "--auth-user", "test", "--auth-password", "test", "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"]
+    testargs = [
+        "wapiti", "--auth-user", "test", "--auth-password", "test",
+        "--url", "http://testphp.vulnweb.com/", "-m", "", "--scope", "url"
+    ]
 
     with mock.patch.object(sys, "argv", testargs):
         await wapiti_main()

@@ -1,6 +1,7 @@
+from unittest.mock import MagicMock
+
 import pytest
 import httpx
-from unittest.mock import MagicMock
 
 from wapitiCore.attack.modules.passive.mod_unsecure_password import ModuleUnsecurePassword
 from wapitiCore.definitions.cleartext_password_submission import CleartextPasswordSubmissionFinding
@@ -8,7 +9,9 @@ from wapitiCore.language.vulnerability import HIGH_LEVEL
 from wapitiCore.net import Request, Response
 
 # Patch log_red to avoid polluting test output
-import wapitiCore.attack.modules.passive.mod_unsecure_password as mod_unsecure_password
+from wapitiCore.attack.modules.passive import mod_unsecure_password
+
+# pylint: disable=redefined-outer-name
 
 mod_unsecure_password.log_red = MagicMock()
 

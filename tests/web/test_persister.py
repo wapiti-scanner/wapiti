@@ -44,7 +44,7 @@ async def test_persister_basic():
         assert not [__ async for __ in persister.get_forms()]
         assert not [__ async for __ in persister.get_payloads()]
 
-        stored_requests = set([__ async for __ in persister.get_to_browse()])
+        stored_requests = {__ async for __ in persister.get_to_browse()}
         assert simple_get in stored_requests
         assert simple_post in stored_requests
 
@@ -136,7 +136,7 @@ async def test_persister_upload():
     await persister.save_request(simple_upload)
     await persister.save_request(xml_upload)
     assert await persister.count_paths() == 2
-    stored_requests = set([__ async for __ in persister.get_to_browse()])
+    stored_requests = {__ async for __ in persister.get_to_browse()}
     assert simple_upload in stored_requests
     assert xml_upload in stored_requests
 
@@ -153,7 +153,9 @@ async def test_persister_upload():
                 assert req.file_params[1] == ["file2", ("fname2", b"content", "text/plain")]
             else:
                 assert req.file_params == xml_upload.file_params
-                assert req.file_params[0] == ["calendar", ("calendar.xml", b"<xml>Hello there</xml>", "application/xml")]
+                assert req.file_params[0] == [
+                    "calendar", ("calendar.xml", b"<xml>Hello there</xml>", "application/xml")
+                ]
 
         naughty_file = Request(
             "http://httpbin.org/post?qs1",

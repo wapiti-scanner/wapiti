@@ -1,6 +1,7 @@
-import pytest
 from unittest.mock import MagicMock
 from typing import Generator, Any
+
+import pytest
 
 from wapitiCore.attack.modules.passive.mod_information_disclosure import (
     ModuleInformationDisclosure,
@@ -9,6 +10,8 @@ from wapitiCore.definitions.information_disclosure import InformationDisclosureF
 from wapitiCore.language.vulnerability import LOW_LEVEL
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
+
+# pylint: disable=redefined-outer-name
 
 
 def create_mock_objects(content: str, content_type: str = "text/html"):

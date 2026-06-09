@@ -318,8 +318,6 @@ def test_json_mutator_query_string():
     )
 
     mutated_request: Request
-    parameter: Parameter
-    payload_info: PayloadInfo
 
     mutated_requests = []
     for mutated_request, _, _ in mutator.mutate(

@@ -14,6 +14,8 @@ from wapitiCore.language.vulnerability import MEDIUM_LEVEL, LOW_LEVEL
 from wapitiCore.net import Response, Request
 from wapitiCore.net.csp_utils import csp_header_to_dict, check_policy_values
 
+# pylint: disable=redefined-outer-name
+
 
 def test_csp_parsing():
     csp_dict = csp_header_to_dict(

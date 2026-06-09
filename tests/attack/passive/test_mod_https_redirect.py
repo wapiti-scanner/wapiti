@@ -1,7 +1,7 @@
-import pytest
 from typing import List, Tuple, Union
 from unittest.mock import MagicMock
 
+import pytest
 import httpx
 
 from wapitiCore.attack.modules.passive.mod_https_redirect import ModuleHttpsRedirect
@@ -9,6 +9,8 @@ from wapitiCore.net import Request
 from wapitiCore.net.response import Response
 from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL
 from wapitiCore.definitions.https_redirect import HstsFinding
+
+# pylint: disable=redefined-outer-name
 
 
 log_red = MagicMock()

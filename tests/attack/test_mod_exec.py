@@ -21,7 +21,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65083", "-a", "-t", test_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65083", "-a", "-t", test_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()
@@ -164,7 +164,8 @@ async def delayed_response():
 @pytest.mark.asyncio
 @respx.mock
 async def test_no_false_positive_content_type_based():
-    #In this test, the response is a javascript file that contains "uid=" which can provoke a false positive avoid with content-type check
+    # In this test, the response is a javascript file that contains "uid=" which can provoke
+    # a false positive avoid with content-type check
 
     respx.get("http://perdu.com/").mock(
         return_value=
@@ -175,7 +176,8 @@ async def test_no_false_positive_content_type_based():
         return_value=httpx.Response(
             200,
             content="/*! jQuery v3.7.1 | (c) OpenJS Foundation and other contributors | jquery.org/license */ "
-                 "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&(ce.fn[Symbol.iterator]=oe[Symbol.iterator])",
+                    "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&"
+                    "(ce.fn[Symbol.iterator]=oe[Symbol.iterator])",
             headers={"content-type": "text/javascript"})
     )
     respx.get(url__regex=r"http://perdu\.com/.*").mock(
@@ -243,7 +245,8 @@ async def test_detection_alpine_busybox_id():
 @pytest.mark.asyncio
 @respx.mock
 async def test_no_false_positive_file_extension_based():
-    # In this test, the response is a javascript file that contains "uid=" which can provoke a false positive avoid with file extension check
+    # In this test, the response is a javascript file that contains "uid=" which can provoke
+    # a false positive avoid with file extension check
 
     respx.get("http://perdu.com/").mock(
         return_value=
@@ -254,7 +257,8 @@ async def test_no_false_positive_file_extension_based():
         return_value=httpx.Response(
             200,
             content="/*! jQuery v3.7.1 | (c) OpenJS Foundation and other contributors | jquery.org/license */ "
-                    "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&(ce.fn[Symbol.iterator]=oe[Symbol.iterator])")
+                    "return g(a)},guid:1,support:le, uid=1}),\"function\"==typeof Symbol&&"
+                    "(ce.fn[Symbol.iterator]=oe[Symbol.iterator])")
     )
 
     respx.get(url__regex=r"http://perdu\.com/.*").mock(

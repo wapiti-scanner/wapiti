@@ -11,6 +11,8 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 
+# pylint: disable=protected-access
+
 
 def test_extract_disconnect_urls_one_url():
     target_url = "http://perdu.com/"
@@ -229,7 +231,11 @@ async def test_async_get_non_ascii_cookie_raises_invalid_url():
     target_url = "https://perdu.com/"
     config = CrawlerConfiguration(Request(target_url))
     async with AsyncCrawler.with_configuration(config) as crawler:
-        with patch.object(crawler._client, "build_request", side_effect=UnicodeEncodeError("ascii", "\xbf", 0, 1, "ordinal not in range(128)")):
+        with patch.object(
+            crawler._client,
+            "build_request",
+            side_effect=UnicodeEncodeError("ascii", "\xbf", 0, 1, "ordinal not in range(128)"),
+        ):
             with pytest.raises(httpx.InvalidURL):
                 await crawler.async_get(Request(target_url))
 

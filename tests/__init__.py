@@ -15,8 +15,8 @@ class AsyncIterator:
     async def __anext__(self):
         try:
             return next(self.iter)
-        except StopIteration:
-            raise StopAsyncIteration
+        except StopIteration as exc:
+            raise StopAsyncIteration from exc
 
 
 def get_mock_open(files: Dict[str, str]):

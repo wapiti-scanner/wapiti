@@ -16,6 +16,8 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
 
+# pylint: disable=too-many-lines,protected-access
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -188,14 +190,20 @@ async def test_dom_detection():
 
         assert persister.add_payload.call_count
         expected_result = [
-            '{"name": "Astra Widgets", "versions": ["1.5.4"], "cpe": "", "categories": ["WordPress plugins", "Widgets"], "groups": ["Add-ons", "Other"]}',
-            '{"name": "GLPI", "versions": [], "cpe": "cpe:2.3:a:glpi-project:glpi:*:*:*:*:*:*:*:* ", "categories": ["Web frameworks", "CRM"], '
+            '{"name": "Astra Widgets", "versions": ["1.5.4"], "cpe": "", "categories": ["WordPress plugins", '
+            '"Widgets"], "groups": ["Add-ons", "Other"]}',
+            '{"name": "GLPI", "versions": [], "cpe": "cpe:2.3:a:glpi-project:glpi:*:*:*:*:*:*:*:* ", '
+            '"categories": ["Web frameworks", "CRM"], '
             '"groups": ["Web development", "Marketing", "Business tools"]}',
             '{"name": "Sellacious", "versions": [], "cpe": "", "categories": ["Ecommerce"], "groups": ["Sales"]}',
-            '{"name": "SmugMug", "versions": [], "cpe": "", "categories": ["Photo galleries"], "groups": ["Content", "Media"]}',
-            '{"name": "Affiliate B", "versions": [], "cpe": "", "categories": ["Affiliate programs", "Advertising"], "groups": ["Marketing"]}',
-            '{"name": "Cart Functionality", "versions": [], "cpe": "", "categories": ["Ecommerce"], "groups": ["Sales"]}',
-            '{"name": "PHP", "versions": [], "cpe": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*", "categories": ["Programming languages"], "groups": ["Web development"]}'
+            '{"name": "SmugMug", "versions": [], "cpe": "", "categories": ["Photo galleries"], '
+            '"groups": ["Content", "Media"]}',
+            '{"name": "Affiliate B", "versions": [], "cpe": "", "categories": ["Affiliate programs", '
+            '"Advertising"], "groups": ["Marketing"]}',
+            '{"name": "Cart Functionality", "versions": [], "cpe": "", '
+            '"categories": ["Ecommerce"], "groups": ["Sales"]}',
+            '{"name": "PHP", "versions": [], "cpe": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*", '
+            '"categories": ["Programming languages"], "groups": ["Web development"]}'
 
         ]
         for arg in persister.add_payload.call_args_list:
@@ -311,7 +319,10 @@ async def test_cookies_whatever_value_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Open Journal Systems", "versions": [], "cpe": "cpe:2.3:a:public_knowledge_project:open_journal_systems:*:*:*:*:*:*:*:*", '
+            '{"name": "Open Journal Systems", "versions": [], "cpe": "cpe:2.3:a:public_knowledge_project:open_journal_s'
+            'ystems:*:*:*:*:*:*:*:*", '
+            ''
+            ''
             '"categories": ["DMS"], "groups": ["Content"]}'
         )
 
@@ -388,7 +399,8 @@ async def test_meta_detection():
 
         assert persister.add_payload.call_count
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Planet", "versions": ["1.6.2"], "cpe": "", "categories": ["Feed readers"], "groups": ["Content"]}'
+            '{"name": "Planet", "versions": ["1.6.2"], "cpe": "", "categories": ["Feed readers"], '
+            '"groups": ["Content"]}'
         )
 
 
@@ -529,7 +541,10 @@ async def test_multi_detection():
                 level=INFO_LEVEL,
                 request=request,
                 parameter=None,
-                info='{"name": "WordPress", "versions": ["5.6.1"], "cpe": "cpe:2.3:a:wordpress:wordpress:*:*:*:*:*:*:*:*", "categories": ["CMS", "Blogs"], "groups": ["Content"]}',
+                info='{"name": "WordPress", "versions": ["5.6.1"], "cpe": "cpe:2.3:a:wordpress:wordpress:*:*:*:*:*:*:*:'
+                     '*", '
+                     ''
+                     '"categories": ["CMS", "Blogs"], "groups": ["Content"]}',
                 wstg=["WSTG-INFO-08"],
                 response=ANY,
             )
@@ -541,7 +556,8 @@ async def test_multi_detection():
                 level=INFO_LEVEL,
                 request=request,
                 parameter=None,
-                info='{"name": "PHP", "versions": [], "cpe": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*", "categories": ["Programming languages"], "groups": ["Web development"]}',
+                info='{"name": "PHP", "versions": [], "cpe": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*", '
+                     '"categories": ["Programming languages"], "groups": ["Web development"]}',
                 wstg=['WSTG-INFO-02', 'WSTG-INFO-08'],
                 response=ANY,
             )
@@ -600,7 +616,8 @@ async def test_implies_detection():
 
         assert persister.add_payload.call_count == 3
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", "categories": ["CMS"], "groups": '
+            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", '
+            '"categories": ["CMS"], "groups": '
             '["Content"]}'
         )
         assert persister.add_payload.call_args_list[-1][1]["info"] == (
@@ -643,7 +660,8 @@ async def test_vulnerabilities():
         assert persister.add_payload.call_count == 5
         # FIrst one is an additional
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", "categories": ["CMS"], "groups": ["Content"]}'
+            '{"name": "Backdrop", "versions": ["4.5"], "cpe": "cpe:2.3:a:backdropcms:backdrop:*:*:*:*:*:*:*:*", '
+            '"categories": ["CMS"], "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web technology"
 
@@ -713,13 +731,19 @@ async def test_merge_with_and_without_redirection():
             ),
             (
                 'additional',
-                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_acce'
+                'ss:*:*:*:*:*:*:*:*", '
+                ''
+                ''
                 '"categories": ["Webmail"], "groups": ["Communication"]}',
                 "Fingerprint web technology"
             ),
             (
                 'vulnerability',
-                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                '{"name": "Outlook Web App", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_acce'
+                'ss:*:*:*:*:*:*:*:*", '
+                ''
+                ''
                 '"categories": ["Webmail"], "groups": ["Communication"]}',
                 "Fingerprint web application framework"
             ),
@@ -957,7 +981,10 @@ async def test_private_gitlab():
             "Outlook Web App from test": {
                 "cats": [30],
                 "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*",
-                "description": "Outlook on the web is an information manager web app. It includes a web-based email client, a calendar tool, a contact manager, and a task manager.",
+                "description": (
+                    "Outlook on the web is an information manager web app. It includes a web-based email "
+                    "client, a calendar tool, a contact manager, and a task manager."
+                ),
                 "headers": {"X-OWA-Version": "([\\d\\.]+)?\\;version:\\1"},
                 "html": "<link[^>]+/owa/auth/([\\d\\.]+)/themes/resources\\;version:\\1",
                 "icon": "Outlook.svg",
@@ -970,7 +997,10 @@ async def test_private_gitlab():
                 "cats": [18],
                 "cookies": {"ASP.NET_SessionId": "", "ASPSESSION": ""},
                 "cpe": "cpe:2.3:a:microsoft:asp.net:*:*:*:*:*:*:*:*",
-                "description": "ASP.NET is an open-source, server-side web-application framework designed for web development to produce dynamic web pages.",
+                "description": (
+                    "ASP.NET is an open-source, server-side web-application framework designed for web "
+                    "development to produce dynamic web pages."
+                ),
                 "headers": {
                     "X-AspNet-Version": "(.+)\\;version:\\1",
                     "X-Powered-By": "^ASP\\.NET",
@@ -1077,19 +1107,24 @@ async def test_private_gitlab():
             expected_results = [
                 (
                     'additional',
-                    '{"name": "Microsoft ASP.NET", "versions": [], "cpe": "cpe:2.3:a:microsoft:asp.net:*:*:*:*:*:*:*:*", '
+                    '{"name": "Microsoft ASP.NET", "versions": [], "cpe": "cpe:2.3:a:microsoft:asp.net:*:*:*:*:*:*:*:*"'
+                    ', '
+                    ''
+                    ''
                     '"categories": ["Web frameworks"], "groups": ["Web development"]}',
                     "Fingerprint web technology"
                 ),
                 (
                     'additional',
-                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], '
+                    '"cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
                     '"categories": ["Webmail"], "groups": ["Communication"]}',
                     "Fingerprint web technology"
                 ),
                 (
                     'vulnerability',
-                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], "cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
+                    '{"name": "Outlook Web App from test", "versions": ["15.0.1497.26"], '
+                    '"cpe": "cpe:2.3:a:microsoft:outlook_web_access:*:*:*:*:*:*:*:*", '
                     '"categories": ["Webmail"], "groups": ["Communication"]}',
                     "Fingerprint web application framework"
                 ),
@@ -1152,7 +1187,7 @@ async def test_wappalyzer_raise_on_not_valid_json_for_update():
 
     wapp_dir = "wapp/"
     # Mock os.path.isfile to simulate file existence
-    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+    with patch('os.path.isfile', side_effect=lambda x: x.endswith('.json')):
         # Mock os.listdir to simulate the directory structure
         with patch('os.listdir', return_value=['categories.json', 'groups.json', 'technologies']):
             # Mock builtins.open to provide content for the JSON files
@@ -1183,7 +1218,7 @@ async def test_wappalyzer_raise_on_not_valid_json_file_for_update():
 
     wapp_dir = "wapp/"
     # Mock os.path.isfile to simulate file existence
-    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+    with patch('os.path.isfile', side_effect=lambda x: x.endswith('.json')):
         # Mock os.listdir to simulate the directory structure
         with patch('os.listdir', return_value=['categories.json', 'groups.json', 'technologies']):
             # Mock builtins.open to provide content for the JSON files
@@ -1214,7 +1249,7 @@ async def test_wappalyzer_raise_on_file_does_not_exist_for_update():
 
     wapp_dir = "wapp/"
     # Mock os.path.isfile to simulate file existence
-    with patch('os.path.isfile', side_effect=lambda x: True if x.endswith('.json') else False):
+    with patch('os.path.isfile', side_effect=lambda x: x.endswith('.json')):
         # Mock os.listdir to simulate the directory structure
         with patch('os.listdir', return_value=['cat.json', 'gr.json', 'technologie']):
             # Mock builtins.open to provide content for the JSON files

@@ -20,7 +20,7 @@ def run_around_tests():
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     endpoint_directory = os.path.join(base_dir, "..", "endpoint")
 
-    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", endpoint_directory])
+    proc = Popen(["php", "-S", "127.0.0.1:65080", "-a", "-t", endpoint_directory])  # pylint: disable=consider-using-with
     sleep(.5)
     yield
     proc.terminate()

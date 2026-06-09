@@ -14,6 +14,8 @@ from wapitiCore.attack.mod_cms import ModuleCms
 from wapitiCore.attack.cms.mod_magento_enum import fetch_source_files as fetch_source_files_magento, get_root_url
 from wapitiCore.attack.cms.mod_typo3_enum import fetch_source_files as fetch_source_files_typo3
 
+# pylint: disable=too-many-lines
+
 
 # Test no Drupal detected
 @pytest.mark.asyncio
@@ -56,7 +58,7 @@ async def test_drupal_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
     changelog_file = "CHANGELOG.txt"
 
-    with open(path_join(test_directory, changelog_file), errors="ignore") as changelog:
+    with open(path_join(test_directory, changelog_file), errors="ignore", encoding="utf-8") as changelog:
         data = changelog.read()
 
     # Response to tell that Drupal is used
@@ -105,7 +107,7 @@ async def test_drupal_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
     maintainers_file = "MAINTAINERS.txt"
 
-    with open(path_join(test_directory, maintainers_file), errors="ignore") as maintainers:
+    with open(path_join(test_directory, maintainers_file), errors="ignore", encoding="utf-8") as maintainers:
         data = maintainers.read()
 
     # Response to tell that Drupal is used
@@ -136,10 +138,12 @@ async def test_drupal_multi_versions_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+            '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]'
+            ', "groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"], "groups": ["Content"]}'
+            '{"name": "Drupal", "versions": ["8.0.0-beta4", "8.0.0-beta5", "8.0.0-beta6"], "categories": ["CMS Drupal"]'
+            ', "groups": ["Content"]}'
         )
 
 
@@ -151,7 +155,7 @@ async def test_drupal_version_not_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
     changelog_edited = "CHANGELOG_EDITED.txt"
 
-    with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
+    with open(path_join(test_directory, changelog_edited), errors="ignore", encoding="utf-8") as changelog:
         data = changelog.read()
 
     # Response to tell that Drupal is used
@@ -193,7 +197,7 @@ async def test_drupal_plugin_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
     changelog_edited = "CHANGELOG_EDITED.txt"
 
-    with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
+    with open(path_join(test_directory, changelog_edited), errors="ignore", encoding="utf-8") as changelog:
         data = changelog.read()
 
     # Response to tell that Drupal is used
@@ -239,7 +243,7 @@ async def test_drupal_plugins_403():
     test_directory = os.path.join(base_dir, "..", "tests/data/drupal/")
     changelog_edited = "CHANGELOG_EDITED.txt"
 
-    with open(path_join(test_directory, changelog_edited), errors="ignore") as changelog:
+    with open(path_join(test_directory, changelog_edited), errors="ignore", encoding="utf-8") as changelog:
         data = changelog.read()
 
     # Response to tell that Drupal is used
@@ -274,7 +278,7 @@ async def test_drupal_plugins_403():
         assert persister.add_payload.call_args_list[0][1]["info"] == (
             '{"name": "Drupal", "versions": [], "categories": ["CMS Drupal"], "groups": ["Content"]}'
         )
-       
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -316,7 +320,7 @@ async def test_joomla_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/joomla/")
     joomla_file = "joomla.xml"
 
-    with open(path_join(test_directory, joomla_file), errors="ignore") as joomla:
+    with open(path_join(test_directory, joomla_file), errors="ignore", encoding="utf-8") as joomla:
         data = joomla.read()
 
     # Response to tell that Joomla is used
@@ -327,7 +331,9 @@ async def test_joomla_version_detected():
     )
 
     # Response for joomla.xml
-    respx.get("http://perdu.com/administrator/manifests/files/joomla.xml").mock(return_value=httpx.Response(200, text=data))
+    respx.get("http://perdu.com/administrator/manifests/files/joomla.xml").mock(
+        return_value=httpx.Response(200, text=data)
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
@@ -365,7 +371,7 @@ async def test_joomla_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/joomla/")
     helpsite_file = "helpsite.js"
 
-    with open(path_join(test_directory, helpsite_file), errors="ignore") as helpsite:
+    with open(path_join(test_directory, helpsite_file), errors="ignore", encoding="utf-8") as helpsite:
         data = helpsite.read()
 
     # Response to tell that Joomla is used
@@ -397,11 +403,13 @@ async def test_joomla_multi_versions_detected():
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], '
+            '"groups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], "groups": ["Content"]}'
+            '{"name": "Joomla!", "versions": ["3.3.4", "3.3.5", "3.3.6", "3.4.0-alpha"], "categories": ["CMS Joomla"], '
+            '"groups": ["Content"]}'
         )
 
 
@@ -413,7 +421,7 @@ async def test_joomla_version_not_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/joomla/")
     joomla_edited = "joomla_edited.xml"
 
-    with open(path_join(test_directory, joomla_edited), errors="ignore") as joomla:
+    with open(path_join(test_directory, joomla_edited), errors="ignore", encoding="utf-8") as joomla:
         data = joomla.read()
 
     # Response to tell that Joomla is used
@@ -424,7 +432,9 @@ async def test_joomla_version_not_detected():
     )
 
     # Response for edited changelog.txt
-    respx.get("http://perdu.com/administrator/manifests/files/joomla.xml").mock(return_value=httpx.Response(200, text=data))
+    respx.get("http://perdu.com/administrator/manifests/files/joomla.xml").mock(
+        return_value=httpx.Response(200, text=data)
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
@@ -629,7 +639,7 @@ async def test_magento_multi_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/magento/")
     swatches_file = "swatches.css"
 
-    with open(os.path.join(test_directory, swatches_file), errors="ignore") as swatches:
+    with open(os.path.join(test_directory, swatches_file), errors="ignore", encoding="utf-8") as swatches:
         data = swatches.read()
 
     respx.get("http://perdu.com/app/code/Magento/Swatches/view/frontend/web/css/swatches.css").mock(
@@ -658,11 +668,13 @@ async def test_magento_multi_version_detected():
             assert persister.add_payload.call_count == 2
             assert persister.add_payload.call_args_list[0][1]["category"] == "Fingerprint web application framework"
             assert persister.add_payload.call_args_list[0][1]["info"] == (
-                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups'
+                '": ["Content"]}'
             )
             assert persister.add_payload.call_args_list[1][1]["category"] == "Fingerprint web technology"
             assert persister.add_payload.call_args_list[1][1]["info"] == (
-                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups": ["Content"]}'
+                '{"name": "Magento", "versions": ["2.1.10", "2.1.11", "2.1.12"], "categories": ["CMS Magento"], "groups'
+                '": ["Content"]}'
             )
 
 
@@ -680,7 +692,7 @@ async def test_magento_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/magento/")
     swatches_file = "swatches2.css"
 
-    with open(path_join(test_directory, swatches_file), errors="ignore") as swatches:
+    with open(path_join(test_directory, swatches_file), errors="ignore", encoding="utf-8") as swatches:
         data = swatches.read()
 
     respx.get("http://perdu.com/").mock(
@@ -773,7 +785,7 @@ async def test_prestashop_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/prestashop/")
     prestashop_file = "admin.js"
 
-    with open(path_join(test_directory, prestashop_file), errors="ignore") as prestashop:
+    with open(path_join(test_directory, prestashop_file), errors="ignore", encoding="utf-8") as prestashop:
         data = prestashop.read()
 
     # Response to tell that PrestaShop is used
@@ -824,7 +836,7 @@ async def test_prestashop_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/prestashop/")
     helpsite_file = "theme.css"
 
-    with open(path_join(test_directory, helpsite_file), errors="ignore") as helpsite:
+    with open(path_join(test_directory, helpsite_file), errors="ignore", encoding="utf-8") as helpsite:
         data = helpsite.read()
 
     # Response to tell that PrestaShop is used
@@ -855,10 +867,12 @@ async def test_prestashop_multi_versions_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "PrestaShop", "versions": ["1.7.7.6", "1.7.7.7", "1.7.7.8"], "categories": ["CMS PrestaShop"], "groups": ["Content"]}'
+            '{"name": "PrestaShop", "versions": ["1.7.7.6", "1.7.7.7", "1.7.7.8"], "categories": ["CMS PrestaShop"], "g'
+            'roups": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "PrestaShop", "versions": ["1.7.7.6", "1.7.7.7", "1.7.7.8"], "categories": ["CMS PrestaShop"], "groups": ["Content"]}'
+            '{"name": "PrestaShop", "versions": ["1.7.7.6", "1.7.7.7", "1.7.7.8"], "categories": ["CMS PrestaShop"], "g'
+            'roups": ["Content"]}'
         )
 
 
@@ -870,7 +884,7 @@ async def test_prestashop_version_not_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/prestashop/")
     prestashop_edited = "theme_edited.css"
 
-    with open(path_join(test_directory, prestashop_edited), errors="ignore") as prestashop:
+    with open(path_join(test_directory, prestashop_edited), errors="ignore", encoding="utf-8") as prestashop:
         data = prestashop.read()
 
     # Response to tell that PrestaShop is used
@@ -912,7 +926,7 @@ async def test_spip_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     spip_file = "CHANGELOG.txt"
 
-    with open(path_join(test_directory, spip_file), errors="ignore") as spip:
+    with open(path_join(test_directory, spip_file), errors="ignore", encoding="utf-8") as spip:
         data = spip.read()
 
     # Response to tell that SPIP is used
@@ -962,7 +976,7 @@ async def test_spip_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     ajax_file = "ajaxCallback.js"
 
-    with open(path_join(test_directory, ajax_file), errors="ignore") as ajax:
+    with open(path_join(test_directory, ajax_file), errors="ignore", encoding="utf-8") as ajax:
         data = ajax.read()
 
     # Response to tell that SPIP is used
@@ -994,10 +1008,12 @@ async def test_spip_multi_versions_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "SPIP", "versions": ["v2.0.0", "v2.0.1", "v2.0.2", "v2.0.3"], "categories": ["CMS SPIP"], "groups": ["Content"]}'
+            '{"name": "SPIP", "versions": ["v2.0.0", "v2.0.1", "v2.0.2", "v2.0.3"], "categories": ["CMS SPIP"], "groups'
+            '": ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "SPIP", "versions": ["v2.0.0", "v2.0.1", "v2.0.2", "v2.0.3"], "categories": ["CMS SPIP"], "groups": ["Content"]}'
+            '{"name": "SPIP", "versions": ["v2.0.0", "v2.0.1", "v2.0.2", "v2.0.3"], "categories": ["CMS SPIP"], "groups'
+            '": ["Content"]}'
         )
 
 
@@ -1009,7 +1025,7 @@ async def test_spip_version_not_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     spip_edited = "CHANGELOG_edited.txt"
 
-    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+    with open(path_join(test_directory, spip_edited), errors="ignore", encoding="utf-8") as spip:
         data = spip.read()
 
     # Response to tell that SPIP is used
@@ -1050,7 +1066,7 @@ async def test_spip_plugins():
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     spip_edited = "CHANGELOG_edited.txt"
 
-    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+    with open(path_join(test_directory, spip_edited), errors="ignore", encoding="utf-8") as spip:
         data = spip.read()
 
     # Response to tell that SPIP is used
@@ -1096,13 +1112,13 @@ async def test_spip_plugins():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_spip_no_plugins_403():
+async def test_spip_no_plugins_403_composed_by_header():
 
     base_dir = os.path.dirname(sys.modules["wapitiCore"].__file__)
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     spip_edited = "CHANGELOG_edited.txt"
 
-    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+    with open(path_join(test_directory, spip_edited), errors="ignore", encoding="utf-8") as spip:
         data = spip.read()
 
     # Response to tell that SPIP is used
@@ -1150,7 +1166,7 @@ async def test_spip_no_plugins_403():
     test_directory = os.path.join(base_dir, "..", "tests/data/spip/")
     spip_edited = "CHANGELOG_edited.txt"
 
-    with open(path_join(test_directory, spip_edited), errors="ignore") as spip:
+    with open(path_join(test_directory, spip_edited), errors="ignore", encoding="utf-8") as spip:
         data = spip.read()
 
     # Response to tell that SPIP is used
@@ -1346,7 +1362,7 @@ async def test_typo3_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/typo3/")
     typo_shims_file = "es-module-shims.js"
 
-    with open(path_join(test_directory, typo_shims_file), errors="ignore") as typo:
+    with open(path_join(test_directory, typo_shims_file), errors="ignore", encoding="utf-8") as typo:
         data = typo.read()
 
     # Response to tell that TYPO3 is used
@@ -1363,7 +1379,9 @@ async def test_typo3_version_detected():
     )
 
     # Response for es-module-shims.js
-    respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/JavaScript/Contrib/es-module-shims.js").mock(return_value=httpx.Response(200, text=data))
+    respx.get("http://perdu.com/typo3/sysext/core/Resources/Public/JavaScript/Contrib/es-module-shims.js").mock(
+        return_value=httpx.Response(200, text=data)
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
@@ -1401,7 +1419,7 @@ async def test_typo3_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/typo3/")
     require_file = "require.js"
 
-    with open(path_join(test_directory, require_file), errors="ignore") as requirejs:
+    with open(path_join(test_directory, require_file), errors="ignore", encoding="utf-8") as requirejs:
         data = requirejs.read()
 
     # Response to tell that TYPO3 is used
@@ -1438,10 +1456,12 @@ async def test_typo3_multi_versions_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups":'
+            ' ["Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups": ["Content"]}'
+            '{"name": "TYPO3", "versions": ["v11.5.39", "v11.5.40", "v11.5.41"], "categories": ["CMS TYPO3"], "groups":'
+            ' ["Content"]}'
         )
 
 
@@ -1600,7 +1620,7 @@ async def test_wp_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/wp/")
     wp_file = "media-views-rtl.min.css"
 
-    with open(path_join(test_directory, wp_file), errors="ignore") as wp_style:
+    with open(path_join(test_directory, wp_file), errors="ignore", encoding="utf-8") as wp_style:
         data = wp_style.read()
 
     # Response to tell that WordPress is used
@@ -1613,7 +1633,9 @@ async def test_wp_version_detected():
     )
 
     # Response for media-views-rtl.min.css
-    respx.get("http://perdu.com/wp-includes/css/media-views-rtl.min.css").mock(return_value=httpx.Response(200, text=data))
+    respx.get("http://perdu.com/wp-includes/css/media-views-rtl.min.css").mock(
+        return_value=httpx.Response(200, text=data)
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 
@@ -1651,7 +1673,7 @@ async def test_wp_multi_versions_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/wp/")
     style_file = "style.min.css"
 
-    with open(path_join(test_directory, style_file), errors="ignore") as wp_style:
+    with open(path_join(test_directory, style_file), errors="ignore", encoding="utf-8") as wp_style:
         data = wp_style.read()
 
     # Response to tell that WordPress is used
@@ -1684,10 +1706,12 @@ async def test_wp_multi_versions_detected():
 
         assert persister.add_payload.call_count == 2
         assert persister.add_payload.call_args_list[0][1]["info"] == (
-            '{"name": "WordPress", "versions": ["5.0", "5.0.1", "5.0.2"], "categories": ["CMS WordPress"], "groups": ["Content"]}'
+            '{"name": "WordPress", "versions": ["5.0", "5.0.1", "5.0.2"], "categories": ["CMS WordPress"], "groups": ["'
+            'Content"]}'
         )
         assert persister.add_payload.call_args_list[1][1]["info"] == (
-            '{"name": "WordPress", "versions": ["5.0", "5.0.1", "5.0.2"], "categories": ["CMS WordPress"], "groups": ["Content"]}'
+            '{"name": "WordPress", "versions": ["5.0", "5.0.1", "5.0.2"], "categories": ["CMS WordPress"], "groups": ["'
+            'Content"]}'
         )
 
 
@@ -1699,7 +1723,7 @@ async def test_wp_no_version_detected():
     test_directory = os.path.join(base_dir, "..", "tests/data/wp/")
     wp_file = "edited_media-views-rtl.min.css"
 
-    with open(path_join(test_directory, wp_file), errors="ignore") as wp_style:
+    with open(path_join(test_directory, wp_file), errors="ignore", encoding="utf-8") as wp_style:
         data = wp_style.read()
 
     # Response to tell that WordPress is used
@@ -1712,7 +1736,9 @@ async def test_wp_no_version_detected():
     )
 
     # Response for media-views-rtl.min.css
-    respx.get("http://perdu.com/wp-includes/css/media-views-rtl.min.css").mock(return_value=httpx.Response(200, text=data))
+    respx.get("http://perdu.com/wp-includes/css/media-views-rtl.min.css").mock(
+        return_value=httpx.Response(200, text=data)
+    )
 
     respx.get(url__regex=r"http://perdu.com/.*?").mock(return_value=httpx.Response(404))
 

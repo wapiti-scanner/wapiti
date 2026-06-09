@@ -2,7 +2,7 @@ from wapitiCore.parsers.html_parser import Html, extract_js_redirections
 
 
 def test_js_parser():
-    with open("tests/data/js_links.html") as fd:
+    with open("tests/data/js_links.html", encoding="utf-8") as fd:
         url = "http://perdu.com/"
         page = Html(fd.read(), url)
 

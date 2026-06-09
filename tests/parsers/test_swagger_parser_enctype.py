@@ -26,7 +26,7 @@ async def test_swagger_urlencoded():
 
 
 @pytest.mark.asyncio
-async def test_swagger_urlencoded():
+async def test_swagger_multipart_file_upload():
     swagger_path = Path(__file__).parent / "data" / "swagger.json"
     crawler_configuration = CrawlerConfiguration(Request("https://petstore.swagger.io/"), timeout=1)
     swagger = Swagger(

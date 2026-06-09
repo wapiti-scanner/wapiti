@@ -94,4 +94,4 @@ async def test_extension_blacklist():
         assert persister.add_payload.call_args_list[0][1]["parameter"] == "fileToUpload"
         assert persister.add_payload.call_args_list[0][1]["request"].url == "http://perdu.com/upload.php"
         # Make sure we respected the exclusion list (but otherwise respx would have warned about not mocked request)
-        assert any(["logout" in str(call.request.url) for call in respx.calls]) is False
+        assert any("logout" in str(call.request.url) for call in respx.calls) is False
