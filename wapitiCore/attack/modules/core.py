@@ -129,6 +129,7 @@ all_modules = {
     "sql",
     "ssl",
     "ssrf",
+    "stacktrace_disclosure",
     "takeover",
     "timesql",
     "unsecure_password",
@@ -154,6 +155,7 @@ common_modules = {
     "sql",
     "ssl",
     "ssrf",
+    "stacktrace_disclosure",
     "unsecure_password",
     "upload",
     "xss"
@@ -167,6 +169,7 @@ passive_modules = {
     "https_redirect",
     "inconsistent_redirection",
     "information_disclosure",
+    "stacktrace_disclosure",
     "unsecure_password",
 }
 presets = {
