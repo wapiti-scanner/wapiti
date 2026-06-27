@@ -17,8 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import dataclasses
 from configparser import ConfigParser
+import re
 from typing import Tuple, List, Dict, Any
-from html.parser import attrfind_tolerant
 from os.path import join as path_join
 
 from bs4 import BeautifulSoup, element
@@ -141,7 +141,7 @@ def put_back_code_in_context(context: Dict[str, Any], tainted_code: str, origina
             context[key] = value.replace(tainted_code, original_code)
 
 
-def find_separator(html_code: str, tainted_attr_value: str, tag_name: str) -> str:
+def find_separator(html_code: str, tainted_attr_value: str, tag_name: str, attr_name: str = None) -> str:
     """
     Finds the separator (quote character) used for an attribute value in the HTML code.
     It can be a single quote, a double quote, or nothing.
@@ -150,11 +150,23 @@ def find_separator(html_code: str, tainted_attr_value: str, tag_name: str) -> st
     code_index = lower_code.index(tainted_attr_value)
     tag_index = lower_code.rindex("<" + tag_name, 0, code_index)
     tag_end = lower_code.index(">", code_index + len(tainted_attr_value))
-    attributes_string = lower_code[tag_index + len(tag_name) + 1:tag_end]
-    for __, __, attrvalue in attrfind_tolerant.findall(attributes_string):
-        if tainted_attr_value in attrvalue:
-            if attrvalue[:1] == '\'' == attrvalue[-1:] or attrvalue[:1] == '"' == attrvalue[-1:]:
-                return attrvalue[:1]
+    attributes_string = lower_code[tag_index + len(tag_name):tag_end]
+
+    if attr_name:
+        pattern = re.compile(rf"{re.escape(attr_name.lower())}\s*=\s*(?:(['\"])(.*?)\1|([^\s>]*))", re.IGNORECASE)
+        for match in pattern.finditer(attributes_string):
+            quote = match.group(1)
+            val = match.group(2) if quote else match.group(3)
+            if val and tainted_attr_value in val:
+                return quote if quote else ""
+
+    pattern = re.compile(r"([^\s>=]+)\s*=\s*(?:(['\"])(.*?)\2|([^\s>]*))", re.IGNORECASE)
+    for match in pattern.finditer(attributes_string):
+        quote = match.group(2)
+        val = match.group(3) if quote else match.group(4)
+        if val and tainted_attr_value in val:
+            return quote if quote else ""
+
     return ""
 
 
@@ -187,7 +199,7 @@ def get_context_list(html_code: str, original_keyword: str) -> List[Dict[str, st
                                 bad_parent = find_non_exec_parent(node)
 
                                 try:
-                                    separator = find_separator(tainted_code, keyword, node.name)
+                                    separator = find_separator(tainted_code, keyword, node.name, attr_name)
                                 except ValueError:
                                     separator = ""
 
