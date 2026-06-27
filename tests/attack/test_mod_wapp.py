@@ -1254,12 +1254,14 @@ async def test_wappalyzer_raise_on_file_does_not_exist_for_update():
         with patch('os.listdir', return_value=['cat.json', 'gr.json', 'technologie']):
             # Mock builtins.open to provide content for the JSON files
             with patch('builtins.open', new_callable=mock_open, read_data='{"{key "value"}'):
-                persister = AsyncMock()
-                crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
-                async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-                    options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
+                with patch('os.makedirs'):
+                    persister = AsyncMock()
+                    persister.CONFIG_DIR = "/tmp/fake_config_dir"
+                    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+                    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+                        options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
 
-                    module = ModuleWapp(crawler, persister, options, crawler_configuration)
+                        module = ModuleWapp(crawler, persister, options, crawler_configuration)
 
                     with pytest.raises(ValueError) as exc_info:
                         await module.update_wappalyzer()
