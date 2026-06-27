@@ -372,6 +372,19 @@
         "WSTG-INPV-19"
       ]
     },
+    "Stack Trace Disclosure": {
+      "desc": "The application response discloses a stack trace or an unhandled error message. Such output may reveal the technology stack, library versions, internal file paths, SQL queries or fragments of source code, helping an attacker to fingerprint the application and prepare further attacks.",
+      "sol": "Disable verbose error reporting and debug mode in production. Catch and handle exceptions so that stack traces are logged on the server side only and never returned to the client. Return generic error pages to end users.",
+      "ref": {
+        "OWASP: Improper Error Handling": "https://owasp.org/www-community/Improper_Error_Handling",
+        "OWASP WSTG: Testing for Stack Traces": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/02-Testing_for_Stack_Traces",
+        "CWE-209: Generation of Error Message Containing Sensitive Information": "https://cwe.mitre.org/data/definitions/209.html",
+        "CWE-550: Server-generated Error Message Containing Sensitive Information": "https://cwe.mitre.org/data/definitions/550.html"
+      },
+      "wstg": [
+        "WSTG-ERRH-02"
+      ]
+    },
     "Stored HTML Injection": {
       "desc": "HTML injection is a type of injection vulnerability that occurs when a user is able to control an input point and is able to inject arbitrary HTML code into a vulnerable web page. This vulnerability can allow the attacker to modify the page content seen by the victims.",
       "sol": "Avoid Raw HTML Rendering: Whenever possible, avoid directly rendering user-generated content as raw HTML. Instead, use built-in templating systems or libraries that automatically escape user input by default, such as Django's template engine or AngularJS's ng-bind directive. With PHP you can use the htmlspecialchars() function to convert special characters to their corresponding HTML entities.",
@@ -544,6 +557,7 @@
     "SQL Injection": [],
     "TLS/SSL misconfigurations": [],
     "Server Side Request Forgery": [],
+    "Stack Trace Disclosure": [],
     "Stored HTML Injection": [],
     "Stored Cross Site Scripting": [],
     "Subdomain takeover": [],
