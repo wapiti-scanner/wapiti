@@ -42,6 +42,7 @@
 | SQL Injection | 0 |
 | TLS/SSL misconfigurations | 0 |
 | Server Side Request Forgery | 0 |
+| Stack Trace Disclosure | 0 |
 | Stored HTML Injection | 0 |
 | Stored Cross Site Scripting | 0 |
 | Subdomain takeover | 0 |
