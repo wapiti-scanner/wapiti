@@ -372,8 +372,8 @@
                </wstg>
             </reference>
             <reference>
-               <title>KeyCDN: Preventing Clickjacking</title>
-               <url>https://www.keycdn.com/support/prevent-clickjacking</url>
+               <title>OWASP: Clickjacking Defense Cheat Sheet</title>
+               <url>https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html</url>
                <wstg>
                   <code>OSHP-X-Frame-Options</code>
                </wstg>
@@ -394,8 +394,8 @@
                </wstg>
             </reference>
             <reference>
-               <title>KeyCDN: Enabling HSTS</title>
-               <url>https://www.keycdn.com/support/hsts</url>
+               <title>OWASP: HTTP Strict Transport Security Cheat Sheet</title>
+               <url>https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html</url>
                <wstg>
                   <code>WSTG-CONF-07</code>
                   <code>OSHP-HTTP-Strict-Transport-Security</code>

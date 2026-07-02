@@ -46,8 +46,8 @@ class ClickjackingFinding(FindingBase):
                 )
             },
             {
-                "title": "KeyCDN: Preventing Clickjacking",
-                "url": "https://www.keycdn.com/support/prevent-clickjacking"
+                "title": "OWASP: Clickjacking Defense Cheat Sheet",
+                "url": "https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html"
             }
         ]
 
@@ -135,8 +135,8 @@ class HstsFinding(FindingBase):
                     )
             },
             {
-                "title": "KeyCDN: Enabling HSTS",
-                "url": "https://www.keycdn.com/support/hsts"
+                "title": "OWASP: HTTP Strict Transport Security Cheat Sheet",
+                "url": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html"
             }
         ]
 
