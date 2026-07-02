@@ -39,11 +39,29 @@ STACKTRACE_PATTERNS = [
     ),
     (
         ".NET",
-        # ASP.NET Yellow Screen of Death and CLR stack frames.
+        # Three independent signals of a genuine .NET error disclosure:
+        # (1) a CLR stack frame leaking a source path (and, as is standard, a
+        #     line number): "at Ns.Type.Method(args) in C:\src\File.cs:line 42"
+        #     (Exception.ToString()/ASP.NET Core form) or the classic Yellow
+        #     Screen of Death form without "at "/"line " ("…File.cs:42");
+        # (2) a fully-qualified exception type followed by its message
+        #     ("System.Data.SqlClient.SqlException: Invalid column name 'x'").
+        #     This is what actually leaks SQL, connection strings and schema,
+        #     and it survives release builds where the frames carry no source
+        #     path (e.g. Exception.ToString() echoed back by a custom handler);
+        # (3) the classic YSOD exception tag with its HRESULT
+        #     ("[SqlException (0x80131904): …]").
+        # The bare "Server Error in '…' Application" banner is deliberately NOT
+        # matched: a plain 404 page carries it with no exception disclosure.
+        # Signal (2) requires a namespaced type whose every segment is in
+        # PascalCase (upper-case initial), so a lowercase log key like
+        # "app.db.error:" and a Java type like "java.lang.RuntimeException:"
+        # (lower-case package) do not trigger it — the latter is caught by the
+        # dedicated Java pattern instead.
         re.compile(
-            r"Server Error in '.*?' Application"
-            r"|\[\w*(?:Exception|Error)(?::[^\]]*)?\]"
-            r"|^\s*at [\w.<>+]+\(.*?\) in .+?:line \d+",
+            r"^\s*(?:at )?[\w.<>+`\[\]]+\(.*?\) in .+?:(?:line )?\d+"
+            r"|\b[A-Z]\w*(?:\.[A-Z]\w*)+(?:Exception|Error)(?: \(0x[0-9A-Fa-f]+\))?:.*"
+            r"|\[\w*(?:Exception|Error) \(0x[0-9A-Fa-f]+\)(?::[^\]]*)?\]",
             re.MULTILINE,
         ),
     ),
@@ -51,9 +69,11 @@ STACKTRACE_PATTERNS = [
         "Node.js",
         # V8 frames: "    at Object.<anonymous> (/app/server.js:10:15)"
         # or the anonymous form "    at /app/server.js:10:15".
+        # The location must contain a letter or a path separator so an indented
+        # timestamp line ("    at 12:30:45") is not mistaken for a frame.
         re.compile(
             r"^\s+at (?:async )?(?:[\w.$<>\[\] ]+ )?\(?"
-            r"[^\s()]+:\d+:\d+\)?\s*$",
+            r"(?=[^\s()]*[A-Za-z\\/])[^\s()]+:\d+:\d+\)?\s*$",
             re.MULTILINE,
         ),
     ),
