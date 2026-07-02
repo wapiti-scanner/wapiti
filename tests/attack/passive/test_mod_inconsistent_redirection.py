@@ -38,6 +38,49 @@ def test_inconsistent_redirection_cases(status, content_type, body, expected_cou
     assert len(vulns) == expected_count
 
 
+def test_standard_object_moved_body_is_not_reported():
+    """The framework 'Object moved to <a href="target">here</a>' body whose
+    only link is the redirection target itself must not be flagged."""
+    module = ModuleInconsistentRedirection()
+    url = "https://example.com/PressReleasePage.aspx?PRID=2280153"
+    location = "/PressReleasePage.aspx?PRID=2280153&reg=48&lang=2"
+    body = (
+        b'<html><head><title>Object moved</title></head><body>\n'
+        b'<h2>Object moved to <a href="/PressReleasePage.aspx?PRID=2280153&amp;reg=48&amp;lang=2">here</a>.</h2>\n'
+        b'</body></html>'
+    )
+    response = Response(
+        response=httpx.Response(
+            status_code=302,
+            headers={"Content-Type": "text/html; charset=utf-8", "Location": location},
+            content=body,
+        ),
+        url=url,
+    )
+    assert len(list(module.analyze(Request(url), response))) == 0
+
+
+def test_redirect_body_with_extra_link_is_reported():
+    """A redirect body linking somewhere *other* than the target is the real
+    leak and must be reported."""
+    module = ModuleInconsistentRedirection()
+    url = "https://example.com/go"
+    location = "/target"
+    body = (
+        b'<html><body><a href="/target">here</a>'
+        b'<a href="/secret/panel">panel</a></body></html>'
+    )
+    response = Response(
+        response=httpx.Response(
+            status_code=302,
+            headers={"Content-Type": "text/html", "Location": location},
+            content=body,
+        ),
+        url=url,
+    )
+    assert len(list(module.analyze(Request(url), response))) == 1
+
+
 def test_inconsistent_redirection_deduplication():
     """Ensure same response md5 does not produce duplicate findings."""
     module = ModuleInconsistentRedirection()
