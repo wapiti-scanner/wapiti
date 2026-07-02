@@ -800,7 +800,10 @@ def is_valid_url(url: str):
 
 
 def http_repr(request: Request, left_margin: str = "    ") -> str:
-    rel_url = request.url.split('/', 3)[3]
+    # A bare root URL (e.g. "http://host") has no "/" after the netloc, so
+    # split('/', 3) yields only 3 parts: treat it the same as "http://host/".
+    url_parts = request.url.split('/', 3)
+    rel_url = url_parts[3] if len(url_parts) > 3 else ""
     http_string = f"{left_margin}{request.method} /{rel_url} HTTP/1.1\n"
 
     headers_to_display = request.sent_headers if request.sent_headers is not None else request.headers

@@ -218,6 +218,12 @@ def test_request_headers():
             None
         ),
         (
+            # Root URL with no trailing slash and no path must not crash (issue #774)
+            Request("http://perdu.com"),
+            '''GET / HTTP/1.1''',
+            None
+        ),
+        (
             Request("http://perdu.com/", method="POST", post_params=[["foo", "bar"]]),
             '''POST / HTTP/1.1
     Content-Type: application/x-www-form-urlencoded
