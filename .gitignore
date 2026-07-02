@@ -53,3 +53,6 @@ tests/integration/.dump_diff_file.txt
 tests/integration/.docker-compose.final.yml
 tests/integration/.test/
 tests/integration/wapiti/behavior.json
+
+### scratch notes (drafts, issue replies, local todo lists...) ###
+/notes/
