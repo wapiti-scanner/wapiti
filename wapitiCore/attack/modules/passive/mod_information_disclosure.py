@@ -24,6 +24,43 @@ PATH_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 
+# A real disclosed filesystem path is short; giant matches are base64 / tokens
+# (e.g. an ASP.NET __VIEWSTATE) that merely happen to contain a "/keyword/"
+# chunk. These bounds discard such noise without trying to base64-decode.
+MAX_PATH_LENGTH = 255
+# Path components are short and human-readable. base64/hash chunks between two
+# slashes are long, so a very long component is a strong noise signal.
+MAX_SEGMENT_LENGTH = 40
+# Below this length a component is too short to confidently call base64 noise.
+MIN_BASE64_SEGMENT_LENGTH = 24
+
+
+def _looks_like_base64_segment(segment: str) -> bool:
+    """A long component mixing upper-case, lower-case and digits looks like a
+    base64/token chunk rather than a directory or file name. A hex hash or a
+    UUID (lower-case + digits, no upper-case) is intentionally *not* flagged."""
+    if len(segment) < MIN_BASE64_SEGMENT_LENGTH:
+        return False
+    return (
+        any(c.isupper() for c in segment)
+        and any(c.islower() for c in segment)
+        and any(c.isdigit() for c in segment)
+    )
+
+
+def _is_realistic_path(candidate: str) -> bool:
+    """Heuristics to tell an actual system path from base64/token noise that
+    happens to match PATH_PATTERN. No decoding is attempted."""
+    if len(candidate) > MAX_PATH_LENGTH:
+        return False
+    # "=" is base64 padding and never appears in a normal filesystem path.
+    if "=" in candidate:
+        return False
+    return not any(
+        len(segment) > MAX_SEGMENT_LENGTH or _looks_like_base64_segment(segment)
+        for segment in re.split(r"[/\\]", candidate)
+    )
+
 
 class ModuleInformationDisclosure:
     """
@@ -50,6 +87,9 @@ class ModuleInformationDisclosure:
 
         for match in PATH_PATTERN.finditer(response.content):
             evidence = match.group()
+            if not _is_realistic_path(evidence):
+                continue
+
             if evidence.rstrip(".") in self._reported_paths:
                 continue
 

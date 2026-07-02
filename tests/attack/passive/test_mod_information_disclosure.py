@@ -91,6 +91,41 @@ def test_no_path_disclosure(module):
     assert len(vulns) == 0
 
 
+def test_base64_blob_is_not_reported_as_path(module):
+    """A long base64 token (e.g. ASP.NET __VIEWSTATE) that happens to contain a
+    '/var/'-like chunk must not be reported as a system path."""
+    blob = (
+        "/9bff8dyxROWIg1Q5FY3kO0652nWbIMB9GmY7D07y3W5YP70OQDBnleJ8Q9yyTqUtCtIPeT"
+        "4AfhEUw9mjxssNwcC5nUJVaNwPKwfTS9qR0iO0VZZxmjYJ/var/ZxKzLojXRU2ET2LqU3Wq"
+        "HvHt2kbkoTdtu6z8l6BaWDHeVjtApfTtBBgzev3GFSQ3t9VNucw2p0nGTH/cRD9vdzLC857"
+    )
+    content = f'<input type="hidden" name="__VIEWSTATE" value="{blob}" />'
+    request, response = create_mock_objects(content)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 0
+
+
+def test_short_base64_with_keyword_segment_is_not_reported(module):
+    """A short base64 chunk (< length cap) with a keyword segment is still
+    rejected thanks to the base64-looking components."""
+    content = (
+        '{"token":"/aB3xK9mQ2wZ7pL5nR8vT1cY4dF6gHkS/var/Zx9Kq2Mw7Pl5Nr8Vt1Cy4Df6jU/config"}'
+    )
+    request, response = create_mock_objects(content, content_type="application/json")
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 0
+
+
+def test_hex_and_uuid_path_components_still_reported(module):
+    """A genuine path with a hex-hash or UUID directory (lower-case + digits,
+    no upper-case) must still be reported."""
+    content = "cache miss at /opt/app/f47ac10b-58cc-4372-a567-0e02b2c3d479/data.log"
+    request, response = create_mock_objects(content)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 1
+    assert "f47ac10b-58cc-4372-a567-0e02b2c3d479" in vulns[0].info
+
+
 def test_no_path_disclosure_unsupported_content_type(module):
     """Test that no vulnerability is reported for unsupported content types."""
     content = "An error occurred in /var/www/html/index.php"

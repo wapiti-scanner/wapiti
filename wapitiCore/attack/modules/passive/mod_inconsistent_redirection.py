@@ -1,4 +1,4 @@
-from typing import Generator, Any
+from typing import Generator, Any, Optional
 
 from wapitiCore.definitions.inconsistent_redirection import InconsistentRedirectionFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL
@@ -7,6 +7,13 @@ from wapitiCore.main.log import log_orange
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
+
+
+def _points_to_redirection_target(link: str, target: Optional[str]) -> bool:
+    """True when a body link is just the redirection destination itself."""
+    if target is None:
+        return False
+    return link.rstrip("/") == target.rstrip("/")
 
 
 class ModuleInconsistentRedirection:
@@ -33,7 +40,20 @@ class ModuleInconsistentRedirection:
 
         # Use Html parser to check if the body contains at least one link or form
         page = Html(response.content, request.url)
-        if not page.links and not list(page.iter_forms()):
+        forms = list(page.iter_forms())
+
+        # The standard framework redirect body (ASP.NET/IIS "Object moved to
+        # <a href="target">here</a>") only links to the redirection target
+        # itself: that is expected boilerplate, not leaked content. Only the
+        # links pointing *elsewhere* betray the real bug this module targets
+        # (e.g. a PHP header() not followed by die() that still emits a page).
+        target = response.redirection_url
+        meaningful_links = [
+            link for link in page.links
+            if not _points_to_redirection_target(link, target)
+        ]
+
+        if not meaningful_links and not forms:
             return
 
         # Deduplicate with response MD5
