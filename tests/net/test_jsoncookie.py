@@ -121,6 +121,52 @@ async def test_jsoncookie():
 
 
 @pytest.mark.asyncio
+async def test_jsoncookie_dotless_local_hostname():
+    """A cookie saved (e.g. via wapiti-getcookie) for a dotless local hostname such as
+    "localhost" must be found back when reading it during the actual scan, using the
+    same domain the crawler would pass (the raw hostname, with no leading dot)."""
+    empty_cookie_path = "./empty_cookie.txt"
+    files = {
+        f'{empty_cookie_path}': "{}",
+    }
+
+    json_cookie = JsonCookie()
+    with mock.patch("builtins.open", get_mock_open(files)):
+        json_cookie.load(empty_cookie_path)
+
+    cookie = Cookie(
+        version=0,
+        name="SESSIONID",
+        value="df298788980e4793220097b8896b1a98",
+        port=None,
+        port_specified=False,
+        domain="localhost",
+        domain_specified=True,
+        domain_initial_dot=False,
+        path="/",
+        path_specified=True,
+        secure=True,
+        expires=None,
+        discard=True,
+        comment=None,
+        comment_url=None,
+        rest={'HttpOnly': None},
+        rfc2109=False
+    )
+    cookie_jar = CookieJar()
+    cookie_jar.set_cookie(cookie)
+
+    assert json_cookie.addcookies(cookie_jar) is not False
+    # addcookies() must apply the same ".local" normalization used for reading,
+    # otherwise the cookie is stored under a key cookiejar() will never look up.
+    assert ".localhost.local" in json_cookie.cookiedict
+
+    result_jar = json_cookie.cookiejar("localhost")
+    assert len(result_jar) == 1
+    assert list(result_jar)[0].value == "df298788980e4793220097b8896b1a98"
+
+
+@pytest.mark.asyncio
 async def test_exception_jsoncookie():
     json_cookie = JsonCookie()
 

@@ -54,7 +54,13 @@ class JsonCookie:
                 # Match either an IPv4 address or an IPv6 address with a local suffix
                 domain_key = search_ip.group("ip")
             else:
-                domain_key = cookie.domain if cookie.domain[0] == '.' else '.' + cookie.domain
+                domain = cookie.domain
+                # For hostnames on local network we must add a 'local' tld (needed by cookielib),
+                # same normalization as the one applied for reading in cookiejar()/delete(), otherwise
+                # a cookie saved for a dotless host (e.g. "localhost") is never found back on read.
+                if '.' not in domain.lstrip('.'):
+                    domain += ".local"
+                domain_key = domain if domain[0] == '.' else '.' + domain
 
             if domain_key not in self.cookiedict.keys():
                 self.cookiedict[domain_key] = {}
