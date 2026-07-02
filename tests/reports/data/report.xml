@@ -886,8 +886,8 @@
                </wstg>
             </reference>
             <reference>
-               <title>OWASP WSTG: Testing for Stack Traces</title>
-               <url>https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/02-Testing_for_Stack_Traces</url>
+               <title>OWASP WSTG: Testing for Improper Error Handling</title>
+               <url>https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling</url>
                <wstg>
                   <code>WSTG-ERRH-02</code>
                </wstg>
