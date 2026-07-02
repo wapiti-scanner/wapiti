@@ -29,12 +29,12 @@ class StacktraceDisclosureFinding(FindingBase):
             },
             {
                 "title": (
-                    "OWASP WSTG: Testing for Stack Traces"
+                    "OWASP WSTG: Testing for Improper Error Handling"
                 ),
                 "url": (
                     "https://owasp.org/www-project-web-security-testing-guide/latest/"
                     "4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/"
-                    "02-Testing_for_Stack_Traces"
+                    "01-Testing_For_Improper_Error_Handling"
                 ),
             },
             {
