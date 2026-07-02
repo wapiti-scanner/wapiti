@@ -169,7 +169,7 @@
       "sol": "Implement X-Frame-Options or Content Security Policy (CSP) frame-ancestors directive.",
       "ref": {
         "OWASP: Clickjacking": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/09-Testing_for_Clickjacking",
-        "KeyCDN: Preventing Clickjacking": "https://www.keycdn.com/support/prevent-clickjacking"
+        "OWASP: Clickjacking Defense Cheat Sheet": "https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html"
       },
       "wstg": [
         "OSHP-X-Frame-Options"
@@ -180,7 +180,7 @@
       "sol": "Implement the HTTP Strict Transport Security header to enforce secure connections to the server.",
       "ref": {
         "OWASP: HTTP Strict Transport Security": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/07-Test_HTTP_Strict_Transport_Security",
-        "KeyCDN: Enabling HSTS": "https://www.keycdn.com/support/hsts"
+        "OWASP: HTTP Strict Transport Security Cheat Sheet": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html"
       },
       "wstg": [
         "WSTG-CONF-07",
