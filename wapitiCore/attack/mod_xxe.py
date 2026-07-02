@@ -378,21 +378,21 @@ class ModuleXxe(Attack):
                             skip=self.options.get("skipped_parameters")
                         )
 
-                        mutation = next(mutator.mutate(original_request, [used_payload]), None)
-                        if mutation is None:
+                        try:
+                            mutated_request, __, __ = next(mutator.mutate(original_request, [used_payload]))
+                        except StopIteration:
                             # The parameter is in --skip: the mutator won't reproduce the
                             # evil request that actually triggered the OOB callback.
                             continue
-                        mutated_request, __, __ = mutation
                     else:
                         mutator = XXEUploadMutator(
                             parameters=[parameter_name],
                             skip=self.options.get("skipped_parameters")
                         )
-                        mutation = next(mutator.mutate(original_request, [used_payload]), None)
-                        if mutation is None:
+                        try:
+                            mutated_request, __, __ = next(mutator.mutate(original_request, [used_payload]))
+                        except StopIteration:
                             continue
-                        mutated_request, __, __ = mutation
 
                     if request_size:
                         add_vuln_method = self.add_high
