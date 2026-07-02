@@ -116,6 +116,100 @@ def test_no_stacktrace_in_clean_response(module):
     assert len(vulns) == 0
 
 
+DOTNET_404 = (
+    "<html><head><title>The resource cannot be found.</title></head><body>\n"
+    "<h2>Server Error in '/' Application.</h2>\n"
+    "<h3>The resource cannot be found.</h3>\n"
+    "Description: HTTP 404. The resource you are looking for has been removed, "
+    "had its name changed, or is temporarily unavailable.\n"
+    "Requested URL: /missing\n"
+    "</body></html>"
+)
+
+# Classic ASP.NET (full framework) Yellow Screen of Death, release build with
+# no PDB: the frames carry no source path, but the "[SqlException (0x…): …]"
+# tag still discloses the SQL error. Observed format.
+DOTNET_YSOD_NO_SOURCE = (
+    "Server Error in '/' Application.\n"
+    "[SqlException (0x80131904): Invalid column name 'foo'.]\n"
+    "   System.Data.SqlClient.SqlConnection.OnError(SqlException ex) +5314379\n"
+    "   System.Data.SqlClient.SqlInternalConnection.OnError(SqlException ex) +239\n"
+)
+
+DOTNET_YSOD_CLASSIC = (
+    "[NullReferenceException: Object reference not set to an instance of an object.]\n"
+    "   WebApplication1._Default.Page_Load(Object sender, EventArgs e) in "
+    "c:\\inetpub\\wwwroot\\Default.aspx.cs:42\n"
+)
+
+# ASP.NET Core, release build (no PDB), a custom exception handler echoing
+# Exception.ToString(): no frame has a source path, yet the message leaks the
+# full SQL query and a connection string with credentials. Reproduced with
+# a real .NET 8 app under Linux/Docker.
+DOTNET_NO_PDB_SQL_LEAK = (
+    "System.InvalidOperationException: Error executing query "
+    "[SELECT id, name, secret_password FROM users WHERE name = 'admin'] "
+    "against connection Server=db-prod-01;Database=customers;User Id=sa;\n"
+    "   at Program.<>c.<<Main>$>b__0_2()\n"
+    "   at lambda_method2(Closure, Object, HttpContext)\n"
+)
+
+
+def test_dotnet_404_page_is_not_a_false_positive(module):
+    """A plain ASP.NET 404 page (banner only, no exception) must not trigger."""
+    request, response = create_mock_objects(DOTNET_404)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 0
+
+
+def test_dotnet_ysod_without_source_path_is_reported(module):
+    """A YSOD exception tag without a source path is still a disclosure."""
+    request, response = create_mock_objects(DOTNET_YSOD_NO_SOURCE)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 1
+    assert ".NET" in vulns[0].info
+
+
+def test_dotnet_no_pdb_message_leak_is_reported(module):
+    """A pathless release-build trace still leaks SQL/credentials via the message."""
+    request, response = create_mock_objects(DOTNET_NO_PDB_SQL_LEAK)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 1
+    assert ".NET" in vulns[0].info
+
+
+def test_dotnet_lowercase_log_key_is_not_a_false_positive(module):
+    """A lowercase dotted log key ('app.db.error:') must not be taken for a type."""
+    content = "app.db.error: connection refused\napp.cache.warning: stale entry"
+    request, response = create_mock_objects(content)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 0
+
+
+def test_dotnet_classic_ysod_frame_with_path_is_reported(module):
+    """The classic YSOD frame form (no 'at'/'line', but a source path) triggers."""
+    request, response = create_mock_objects(DOTNET_YSOD_CLASSIC)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 1
+    assert ".NET" in vulns[0].info
+
+
+def test_node_timestamp_line_is_not_a_false_positive(module):
+    """An indented 'at HH:MM:SS' log/timestamp line must not look like a V8 frame."""
+    content = "job started\n    at 12:30:45\n    at 02:00:00\nfinished"
+    request, response = create_mock_objects(content)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert len(vulns) == 0
+
+
+def test_java_trace_is_not_misreported_as_dotnet(module):
+    """A JVM trace (lowercase package) must yield only a Java finding, not .NET."""
+    request, response = create_mock_objects(JAVA_TRACE)
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    labels = {label for label in ("Java", ".NET") if any(label in v.info for v in vulns)}
+    assert labels == {"Java"}
+
+
 def test_no_false_positive_on_prose_mentioning_at(module):
     """Plain prose that merely mentions 'at' or '.java' must not trigger."""
     content = (
