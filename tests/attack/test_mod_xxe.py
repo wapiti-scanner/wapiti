@@ -195,6 +195,65 @@ async def test_out_of_band_param():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_out_of_band_param_skipped_does_not_crash():
+    """A parameter excluded via --skip must not crash finish() with StopIteration
+    when the endpoint still reports an OOB hit for it (GH issue #483)."""
+    respx.route(host="127.0.0.1").pass_through()
+
+    persister = AsyncMock()
+    request = Request("http://127.0.0.1:65084/xxe/outofband/param.php?foo=bar&vuln=yolo")
+    request.path_id = 7
+    persister.get_path_by_id.return_value = request
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:65084/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {
+            "timeout": 10,
+            "level": 1,
+            "external_endpoint": "http://wapiti3.ovh/",
+            "internal_endpoint": "http://wapiti3.ovh/",
+            "skipped_parameters": {"vuln"}
+        }
+
+        module = ModuleXxe(crawler, persister, options, crawler_configuration)
+
+        respx.get("http://wapiti3.ovh/get_xxe.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    "7": {
+                        "76756c6e": [
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/xxe_data/yolo/7/76756c6e/31337-0-192.168.2.1.txt",
+                                "ip": "192.168.2.1",
+                                "size": 999,
+                                "payload": "linux2"
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
+        module.do_post = False
+        await module.attack(request)
+        calls_before_finish = persister.add_payload.call_count
+
+        # Must not raise RuntimeError("coroutine raised StopIteration"): the OOB
+        # endpoint reports a hit for "vuln", but that parameter is skipped, so the
+        # mutator that rebuilds the evil request for the report yields nothing.
+        await module.finish()
+
+        # finish() itself must not have reported anything for the skipped parameter
+        assert persister.add_payload.call_count == calls_before_finish
+        assert all(
+            call.kwargs.get("parameter") != "vuln"
+            for call in persister.add_payload.call_args_list
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_out_of_band_query_string():
     respx.route(host="127.0.0.1").pass_through()
 
