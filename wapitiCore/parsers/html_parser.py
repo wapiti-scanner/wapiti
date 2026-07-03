@@ -19,13 +19,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 # Standard libraries
 import re
+import warnings
 from functools import lru_cache
 from hashlib import md5
 from posixpath import normpath
 from urllib.parse import urlunparse
 from typing import Iterator, List, Optional, Dict, Set, Tuple, Union, Any
 
-from bs4 import BeautifulSoup, ParserRejectedMarkup
+from bs4 import BeautifulSoup, ParserRejectedMarkup, XMLParsedAsHTMLWarning
 from bs4.element import Comment, Doctype
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
@@ -284,10 +285,15 @@ class Html:
         self._content = text
         self._url = url
         self._base = None
-        try:
-            self._soup = BeautifulSoup(self._content, parser_name)
-        except (ParserRejectedMarkup, ValueError):
-            self._soup = BeautifulSoup("", parser_name)
+        # bs4 emits XMLParsedAsHTMLWarning when it parses an XML document (e.g. an RSS
+        # feed) with the HTML parser. Scanning arbitrary responses this way is intended,
+        # so we silence that warning to avoid polluting the crawl output.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=XMLParsedAsHTMLWarning)
+            try:
+                self._soup = BeautifulSoup(self._content, parser_name)
+            except (ParserRejectedMarkup, ValueError):
+                self._soup = BeautifulSoup("", parser_name)
         self._encoding = encoding
         self._allow_fragments = allow_fragments
 

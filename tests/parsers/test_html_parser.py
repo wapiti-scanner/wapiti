@@ -1,12 +1,29 @@
+import warnings
 from unittest.mock import patch
 
 import respx
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
 from wapitiCore.net.crawler import Response
 from wapitiCore.parsers.html_parser import Html
 import wapitiCore.parsers.html_parser as html_parser_module
+
+
+def test_parsing_xml_does_not_emit_xml_as_html_warning():
+    """Parsing an XML document (e.g. an RSS feed) with the HTML parser must not
+    surface bs4's XMLParsedAsHTMLWarning, which would otherwise pollute the crawl output."""
+    xml = (
+        b'<?xml version="1.0" encoding="UTF-8"?>'
+        b'<rss version="2.0"><channel><title>Feed</title>'
+        b'<item><link>http://example.com/article</link></item></channel></rss>'
+    )
+    with warnings.catch_warnings(record=True) as caught:
+        # Keep the module-level filter registered at import time (do not reset it)
+        page = Html(xml, "http://example.com/feed")
+        _ = page.soup, list(page.links)
+
+    assert not any(issubclass(w.category, XMLParsedAsHTMLWarning) for w in caught)
 
 
 @respx.mock
