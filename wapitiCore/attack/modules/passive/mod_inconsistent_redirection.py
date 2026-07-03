@@ -1,4 +1,5 @@
 from typing import Generator, Any, Optional
+from urllib.parse import urlparse
 
 from wapitiCore.definitions.inconsistent_redirection import InconsistentRedirectionFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL
@@ -9,11 +10,23 @@ from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
 
+def _resource_key(url: str) -> tuple:
+    """Normalized identity of a URL, ignoring the scheme and a trailing slash.
+
+    Server-generated redirect boilerplate often links to the destination with a
+    different scheme (an http:// link while the Location header is https://) or
+    with/without a trailing slash — most commonly for directory redirects that
+    only append a slash to the path. Those differences are not meaningful here."""
+    parts = urlparse(url)
+    return parts.netloc.lower(), parts.path.rstrip("/"), parts.query
+
+
 def _points_to_redirection_target(link: str, target: Optional[str]) -> bool:
-    """True when a body link is just the redirection destination itself."""
-    if target is None:
+    """True when a body link is just the redirection destination itself,
+    even if it differs only by scheme (http/https) or a trailing slash."""
+    if not target:
         return False
-    return link.rstrip("/") == target.rstrip("/")
+    return _resource_key(link) == _resource_key(target)
 
 
 class ModuleInconsistentRedirection:
