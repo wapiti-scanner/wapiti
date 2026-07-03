@@ -197,6 +197,39 @@ async def test_explorer_extract_links():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_explorer_extract_links_caps_repeated_parameters():
+    # Regression test for issue #252: a link that keeps appending the same parameter
+    # must not produce an ever-growing URL. The crawler caps repeated parameter names.
+    from wapitiCore.net.explorer import MAX_PARAMETER_OCCURRENCES
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
+    scope = Scope(Request("http://perdu.com/"), "folder")
+    explorer = Explorer(crawler_configuration, scope, Event())
+
+    repeated = "".join(f"&selectedPageVersions={i}" for i in range(58, 0, -1))
+    respx.get("http://perdu.com/").mock(
+        return_value=httpx.Response(
+            200,
+            text=f'<html><body><a href="/script?pageId=1{repeated}">link</a></body></html>',
+        )
+    )
+
+    request = Request("http://perdu.com/")
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_send(request)
+        results = list(explorer.extract_links(response, request))
+
+    # The crawler also adds the path-only variant ("/script"), so look at the one with params
+    with_params = [req for req in results if req.get_params]
+    assert len(with_params) == 1
+    kept = [value for name, value in with_params[0].get_params if name == "selectedPageVersions"]
+    assert len(kept) == MAX_PARAMETER_OCCURRENCES
+    # The first occurrences are kept, so the capped URL is stable when more are appended
+    assert kept == ["58", "57", "56", "55", "54"]
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_explorer_extract_links_from_js():
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), drop_cookies=True)
     scope = Scope(Request("http://perdu.com/"), "folder")
