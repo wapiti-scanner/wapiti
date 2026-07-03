@@ -4,31 +4,7 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
-                "info": "CSP directive \"foobar-src\" is unknown or misspelled for URL: http://csp/csp_insecured.php",
-                "parameter": null,
-                "module": "csp",
-                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "wstg": [
-                    "OSHP-Content-Security-Policy",
-                    "WSTG-CONF-12"
-                ]
-            },
-            {
-                "method": "GET",
-                "path": "/csp_insecured.php",
                 "info": "CSP \"default-src\" value is not safe for URL: http://csp/csp_insecured.php",
-                "parameter": null,
-                "module": "csp",
-                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "wstg": [
-                    "OSHP-Content-Security-Policy",
-                    "WSTG-CONF-12"
-                ]
-            },
-            {
-                "method": "GET",
-                "path": "/csp_insecured.php",
-                "info": "CSP \"script-src\" value is not safe for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
                 "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -52,7 +28,31 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
+                "info": "CSP \"script-src\" value is not safe for URL: http://csp/csp_insecured.php",
+                "parameter": null,
+                "module": "csp",
+                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/csp_insecured.php",
                 "info": "CSP attribute \"base-uri\" is missing for URL: http://csp/csp_insecured.php",
+                "parameter": null,
+                "module": "csp",
+                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/csp_insecured.php",
+                "info": "CSP attribute \"form-action\" is missing for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
                 "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -76,7 +76,7 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
-                "info": "CSP attribute \"form-action\" is missing for URL: http://csp/csp_insecured.php",
+                "info": "CSP directive \"foobar-src\" is unknown or misspelled for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
                 "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -90,6 +90,204 @@
     "infos": {
         "target": "http://csp/csp_insecured.php",
         "crawled_pages": [
+            {
+                "request": {
+                    "url": "http://csp/csp_insecured.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "csp"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <title>CSP Example</title>\n\n    </head>\n    <body>\n        <p>Page with an CSP highly bypassable.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "132"
+                        ],
+                        [
+                            "content-security-policy",
+                            "default-src *; script-src 'unsafe-inline'; 'unsafe-eval'; style-src 'unsafe-inline'; img-src *; connect-src *; foobar-src 'foobar'"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://csp/csp_insecured.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "csp"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <title>CSP Example</title>\n\n    </head>\n    <body>\n        <p>Page with an CSP highly bypassable.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "132"
+                        ],
+                        [
+                            "content-security-policy",
+                            "default-src *; script-src 'unsafe-inline'; 'unsafe-eval'; style-src 'unsafe-inline'; img-src *; connect-src *; foobar-src 'foobar'"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            },
+            {
+                "request": {
+                    "url": "http://csp/csp_insecured.php",
+                    "method": "GET",
+                    "headers": [
+                        [
+                            "accept",
+                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        ],
+                        [
+                            "accept-encoding",
+                            "gzip, deflate, br"
+                        ],
+                        [
+                            "accept-language",
+                            "en-US"
+                        ],
+                        [
+                            "connection",
+                            "keep-alive"
+                        ],
+                        [
+                            "host",
+                            "csp"
+                        ],
+                        [
+                            "user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
+                        ]
+                    ]
+                },
+                "response": {
+                    "status_code": 200,
+                    "body": "<!DOCTYPE html>\n<html>\n    <head>\n        <title>CSP Example</title>\n\n    </head>\n    <body>\n        <p>Page with an CSP highly bypassable.</p>\n    </body>\n</html>\n\n",
+                    "headers": [
+                        [
+                            "connection",
+                            "Keep-Alive"
+                        ],
+                        [
+                            "content-encoding",
+                            "gzip"
+                        ],
+                        [
+                            "content-length",
+                            "132"
+                        ],
+                        [
+                            "content-security-policy",
+                            "default-src *; script-src 'unsafe-inline'; 'unsafe-eval'; style-src 'unsafe-inline'; img-src *; connect-src *; foobar-src 'foobar'"
+                        ],
+                        [
+                            "content-type",
+                            "text/html; charset=UTF-8"
+                        ],
+                        [
+                            "server",
+                            "Apache/2.4.56 (Debian)"
+                        ],
+                        [
+                            "vary",
+                            "Accept-Encoding"
+                        ]
+                    ]
+                }
+            },
             {
                 "request": {
                     "url": "http://csp/csp_insecured.php",
