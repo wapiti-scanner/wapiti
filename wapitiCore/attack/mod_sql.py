@@ -43,6 +43,11 @@ class PayloadInfo:
     payload: str
     platform: str
     section: bool
+    # The part of `payload` appended after the parameter's own (untouched) value. Used to
+    # strip the payload's own reflection out of a response before comparing it to the
+    # baseline, so a page that echoes the injected value back (e.g. a search results page)
+    # isn't mistaken for "different" just because of that echo.
+    injected_suffix: str = ""
 
 
 # Two responses whose visible text is more similar than this are considered to be
@@ -301,12 +306,63 @@ DBMS_ERROR_PATTERNS = {
 }
 
 
+# SQL comment markers used to truncate the rest of the query after an OR-based boolean
+# injection, so the payload doesn't depend on the original condition ever matching a row
+# (e.g. a LIKE pattern or a value that never matches) the way the AND-based technique does.
+COMMENT_MARKERS = ("-- ", "#")
+
+
 def generate_boolean_payloads(_: Request, __: Parameter) -> Iterator[PayloadInfo]:
     # payloads = []
     for use_parenthesis in (False, True):
         for separator in ("", "'", "\""):
             yield from generate_boolean_test_values(separator, use_parenthesis)
+
+    for separator in ("'", "\""):
+        for comment in COMMENT_MARKERS:
+            yield from generate_boolean_comment_values(separator, comment)
     # return payloads
+
+
+def generate_boolean_comment_values(separator: str, comment: str) -> Iterator[PayloadInfo]:
+    # OR-based payloads that comment out the rest of the query instead of trying to keep
+    # the trailing quotes/parentheses balanced like the AND-based technique. This catches
+    # injections where the original condition can never be satisfied by construction
+    # (e.g. a LIKE pattern, or a value that matches no row), which defeats the AND
+    # technique regardless of what follows in the query.
+    #
+    # Polarity is inverted compared to the AND technique: there, a true condition
+    # preserves the original (matching) outcome and a false one breaks it. Here the
+    # original condition never matches to begin with, so a false OR'd condition leaves
+    # the outcome unchanged (same as baseline) while a true one matches unconditionally
+    # (differs from baseline, e.g. a login bypass).
+    fmt_string = "[VALUE]{sep} OR {left_value}={right_value}{comment}"
+    suffix_fmt = fmt_string[len("[VALUE]"):]
+
+    for __ in range(2):
+        value1 = randint(10, 99)
+        value2 = randint(10, 99) + value1
+
+        # OR'd condition is false: behaves like the unmodified request, response should
+        # match the baseline
+        yield PayloadInfo(
+            payload=fmt_string.format(left_value=value1, right_value=value2, sep=separator, comment=comment),
+            section=True,
+            platform=f"c_{separator}_{comment}",
+            injected_suffix=suffix_fmt.format(left_value=value1, right_value=value2, sep=separator, comment=comment),
+        )
+
+    for __ in range(2):
+        value1 = randint(10, 99)
+
+        # OR'd condition is always true: matches unconditionally, response should differ
+        # from the baseline
+        yield PayloadInfo(
+            payload=fmt_string.format(left_value=value1, right_value=value1, sep=separator, comment=comment),
+            section=False,
+            platform=f"c_{separator}_{comment}",
+            injected_suffix=suffix_fmt.format(left_value=value1, right_value=value1, sep=separator, comment=comment),
+        )
 
 
 def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[PayloadInfo]:
@@ -314,6 +370,7 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
         "[VALUE]{sep} AND {left_value}={right_value} AND {sep}{padding_value}{sep}={sep}{padding_value}",
         "[VALUE]{sep}) AND {left_value}={right_value} AND ({sep}{padding_value}{sep}={sep}{padding_value}"
     )[parenthesis]
+    suffix_fmt = fmt_string[len("[VALUE]"):]
 
     for __ in range(2):
         value1 = randint(10, 99)
@@ -330,6 +387,12 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
             ),
             section=False,
             platform=f"{'p' if parenthesis else ''}_{separator}",
+            injected_suffix=suffix_fmt.format(
+                left_value=value1,
+                right_value=value2,
+                padding_value=padding_value,
+                sep=separator
+            ),
         )
 
     for __ in range(2):
@@ -346,6 +409,12 @@ def generate_boolean_test_values(separator: str, parenthesis: bool) -> Iterator[
             ),
             section=True,
             platform=f"{'p' if parenthesis else ''}_{separator}",
+            injected_suffix=suffix_fmt.format(
+                left_value=value1,
+                right_value=value1,
+                padding_value=padding_value,
+                sep=separator,
+            ),
         )
 
 
@@ -624,19 +693,33 @@ class ModuleSql(Attack):
                 test_results.append(False)
                 continue
 
-            # A rate-limit or server-error response is not a trustworthy boolean
-            # signal: don't let it count as a legitimate "different page", which
-            # would otherwise satisfy a false-section test and cause a false positive.
-            if response.status == TOO_MANY_REQUESTS_STATUS or response.is_server_error:
+            # A rate-limit response is not a trustworthy boolean signal: don't let it count
+            # as a legitimate "different page", which would otherwise satisfy a
+            # false-section test and cause a false positive.
+            if response.status == TOO_MANY_REQUESTS_STATUS:
                 test_results.append(False)
                 continue
 
-            resp_text = Html(response.content, url=mutated_request.url).text_only
-            comparison = (
-                    response.status == good_status and
-                    response.redirection_url == good_redirect and
-                    text_similarity(resp_text, good_text) >= BOOLEAN_MATCH_THRESHOLD
-            )
+            if response.is_server_error:
+                # The baseline is confirmed stable and non-erroring, so a server error here
+                # is a genuine "differs from baseline" signal (e.g. a broken injected query
+                # crashing the backend), not noise — let it flow through the normal
+                # comparison logic below.
+                comparison = False
+            else:
+                resp_text = Html(response.content, url=mutated_request.url).text_only
+                # The injected suffix itself may be reflected back in the page (e.g. a
+                # search page echoing the query). Strip it before comparing, otherwise it
+                # differs deterministically between the "true" and "false" payloads
+                # regardless of the actual SQL outcome, which can fool the similarity ratio
+                # into a false positive.
+                if payload_info.injected_suffix:
+                    resp_text = resp_text.replace(payload_info.injected_suffix, "")
+                comparison = (
+                        response.status == good_status and
+                        response.redirection_url == good_redirect and
+                        text_similarity(resp_text, good_text) >= BOOLEAN_MATCH_THRESHOLD
+                )
 
             test_results.append(comparison == (payload_info.section is True))
             last_mutated_request = mutated_request
