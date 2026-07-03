@@ -1,3 +1,4 @@
+import re
 from urllib.parse import parse_qs
 from tempfile import NamedTemporaryFile
 import sqlite3
@@ -158,8 +159,9 @@ async def test_blind_detection():
             await module.attack(request)
 
             assert persister.add_payload.call_count
-            # One request for error-based, one to get normal response, four to test boolean-based attack
-            assert respx.calls.call_count == 6
+            # One request for error-based, two to sample the normal response (stability check),
+            # four to test boolean-based attack
+            assert respx.calls.call_count == 7
 
 
 @pytest.mark.asyncio
@@ -182,9 +184,9 @@ async def test_negative_blind():
         assert not persister.add_payload.call_count
         # We have:
         # - 1 request for error-based test
-        # - 1 request to get normal response
+        # - 2 requests to sample the normal response (stability check)
         # - 2*3 requests for the first test of each "session" (as the first test fails others are skipped)
-        assert respx.calls.call_count == 8
+        assert respx.calls.call_count == 9
 
 
 @pytest.mark.asyncio
@@ -241,9 +243,74 @@ async def test_blind_detection_parenthesis():
             assert persister.add_payload.call_count
             # We have:
             # - 1 request for error-based test
-            # - 1 request to get normal response
+            # - 2 requests to sample the normal response (stability check)
             # - 2 requests for boolean False test without parenthesis
             # - 1 request for boolean True test without parenthesis => this check fails
             # - 2 requests for boolean False test WITH parenthesis
             # - 2 requests for boolean True test WITH parenthesis
-            assert respx.calls.call_count == 9
+            assert respx.calls.call_count == 10
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_no_false_positive_when_rate_limited():
+    # Regression test: a server that rate-limits us (HTTP 429) on the "false" boolean
+    # requests must not be reported as vulnerable. A 429 differs from the normal page,
+    # which would otherwise satisfy a false-section test and produce a false positive.
+    def process(http_request):
+        query = urlparse(str(http_request.url)).query
+        values = " ".join(value for values in parse_qs(query).values() for value in values)
+        pairs = re.findall(r"(\d+)=(\d+)", values)
+        # A boolean "false" payload compares two different numbers (e.g. AND 13=37)
+        if any(left != right for left, right in pairs):
+            return httpx.Response(429, text="Too Many Requests")
+        return httpx.Response(200, text="Hello there")
+
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(side_effect=process)
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
+        await module.attack(request)
+
+        # Without the rate-limit guard, the "false" tests would pass (429 != normal page)
+        # and the "true" tests too, yielding a false positive.
+        assert not persister.add_payload.call_count
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_no_false_positive_on_dynamic_page():
+    # Regression test: a page whose content changes between two identical requests is
+    # dynamic. Boolean comparison cannot be trusted, so detection must be skipped instead
+    # of producing false results.
+    counter = {"n": 0}
+
+    def process(http_request):
+        counter["n"] += 1
+        return httpx.Response(200, text="unique dynamic content " + "x" * (counter["n"] * 100))
+
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(side_effect=process)
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSql(crawler, persister, options, crawler_configuration)
+        await module.attack(request)
+
+        assert not persister.add_payload.call_count
+        # 1 error-based request + 2 baseline samples that differ => boolean detection skipped
+        assert respx.calls.call_count == 3
