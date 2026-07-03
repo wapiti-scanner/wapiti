@@ -20,7 +20,12 @@ from typing import Generator, Any, Tuple
 
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
-from wapitiCore.net.csp_utils import csp_header_to_dict, CSP_CHECK_LISTS, check_policy_values
+from wapitiCore.net.csp_utils import (
+    csp_header_to_dict,
+    CSP_CHECK_LISTS,
+    check_policy_values,
+    find_unknown_directives,
+)
 from wapitiCore.definitions.csp import CspFinding
 from wapitiCore.main.log import log_red
 from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL
@@ -28,6 +33,7 @@ from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL
 MSG_NO_CSP = "CSP is not set for URL: {0}"
 MSG_CSP_MISSING = "CSP attribute \"{0}\" is missing for URL: {1}"
 MSG_CSP_UNSAFE = "CSP \"{0}\" value is not safe for URL: {1}"
+MSG_CSP_UNKNOWN = "CSP directive \"{0}\" is unknown or misspelled for URL: {1}"
 
 
 class ModuleCsp:
@@ -65,6 +71,20 @@ class ModuleCsp:
                 )
         else:
             csp_dict = csp_header_to_dict(csp_header_value)
+
+            for directive in find_unknown_directives(csp_dict):
+                identifier = (request.netloc, directive, "Unknown")
+                if identifier not in self._reported_csp_issues:
+                    self._reported_csp_issues.add(identifier)
+                    info = MSG_CSP_UNKNOWN.format(directive, request.url)
+                    log_red(info)
+                    yield VulnerabilityInstance(
+                        finding_class=CspFinding,
+                        request=request,
+                        response=response,
+                        info=info,
+                        severity=LOW_LEVEL,
+                    )
 
             for policy_name in CSP_CHECK_LISTS:
                 result = check_policy_values(policy_name, csp_dict)

@@ -8,11 +8,16 @@ from wapitiCore.attack.modules.passive.mod_csp import (
     MSG_NO_CSP,
     MSG_CSP_MISSING,
     MSG_CSP_UNSAFE,
+    MSG_CSP_UNKNOWN,
 )
 from wapitiCore.definitions.csp import CspFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, LOW_LEVEL
 from wapitiCore.net import Response, Request
-from wapitiCore.net.csp_utils import csp_header_to_dict, check_policy_values
+from wapitiCore.net.csp_utils import (
+    csp_header_to_dict,
+    check_policy_values,
+    find_unknown_directives,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -53,6 +58,41 @@ def test_bad_csp_examples():
 def test_missing_csp_directive():
     csp_dict = csp_header_to_dict("script-src 'self'")
     assert check_policy_values("default-src", csp_dict) == -1
+
+
+def test_no_fallback_directives_dont_use_default_src():
+    # base-uri, frame-ancestors and form-action have no fallback to default-src:
+    # they must be considered missing even when default-src is present.
+    csp_dict = csp_header_to_dict("default-src 'self'")
+    assert check_policy_values("base-uri", csp_dict) == -1
+    assert check_policy_values("frame-ancestors", csp_dict) == -1
+    assert check_policy_values("form-action", csp_dict) == -1
+    # A fetch directive like object-src still falls back to default-src
+    assert check_policy_values("object-src", csp_dict) == 0
+
+
+def test_valueless_directives_are_kept():
+    csp_dict = csp_header_to_dict("default-src 'none'; upgrade-insecure-requests")
+    assert csp_dict["upgrade-insecure-requests"] == []
+
+
+def test_directive_names_are_case_insensitive():
+    csp_dict = csp_header_to_dict("Default-Src 'none'; Script-SRC 'self'")
+    assert csp_dict.keys() == {"default-src", "script-src"}
+
+
+def test_orphan_value_is_not_treated_as_directive():
+    # A value left orphan by a misplaced semicolon must not become a directive
+    csp_dict = csp_header_to_dict("script-src 'self'; 'unsafe-eval'")
+    assert csp_dict.keys() == {"script-src"}
+
+
+def test_find_unknown_directives():
+    csp_dict = csp_header_to_dict("default-src 'none'; foobar-src 'self'; script-scr 'self'")
+    assert set(find_unknown_directives(csp_dict)) == {"foobar-src", "script-scr"}
+
+    csp_dict = csp_header_to_dict("default-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests")
+    assert find_unknown_directives(csp_dict) == []
 
 
 @pytest.fixture
@@ -117,14 +157,20 @@ def get_all_vulnerabilities(module, request, response):
             [MSG_NO_CSP.format("http://example.com")],
             [LOW_LEVEL],
         ),
-        # CSP declared but object-src is missing
+        # CSP declared with default-src only: object-src falls back to it (unsafe), while base-uri,
+        # frame-ancestors and form-action have no fallback and are therefore missing.
         (
             {
                 "Content-Type": "text/html",
                 "Content-Security-Policy": "default-src 'self'",
             },
-            [MSG_CSP_UNSAFE.format("object-src", "http://example.com")],
-            [MEDIUM_LEVEL],
+            [
+                MSG_CSP_UNSAFE.format("object-src", "http://example.com"),
+                MSG_CSP_MISSING.format("base-uri", "http://example.com"),
+                MSG_CSP_MISSING.format("frame-ancestors", "http://example.com"),
+                MSG_CSP_MISSING.format("form-action", "http://example.com"),
+            ],
+            [MEDIUM_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL, LOW_LEVEL],
         ),
         # CSP declared but script-src contains unsafe-inline. Also as default-src is missing, there are no fallback
         (
@@ -137,14 +183,31 @@ def get_all_vulnerabilities(module, request, response):
                 MSG_CSP_UNSAFE.format("script-src", "http://example.com"),
                 MSG_CSP_MISSING.format("object-src", "http://example.com"),
                 MSG_CSP_MISSING.format("base-uri", "http://example.com"),
+                MSG_CSP_MISSING.format("frame-ancestors", "http://example.com"),
+                MSG_CSP_MISSING.format("form-action", "http://example.com"),
             ],
-            [LOW_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL],
+            [LOW_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL, MEDIUM_LEVEL, LOW_LEVEL],
+        ),
+        # CSP declares an unknown/misspelled directive
+        (
+            {
+                "Content-Type": "text/html",
+                "Content-Security-Policy": (
+                    "default-src 'none'; base-uri 'self'; frame-ancestors 'none'; "
+                    "form-action 'self'; foobar-src 'self'"
+                ),
+            },
+            [MSG_CSP_UNKNOWN.format("foobar-src", "http://example.com")],
+            [LOW_LEVEL],
         ),
         # CSP is well-made
         (
             {
                 "Content-Type": "text/html",
-                "Content-Security-Policy": "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+                "Content-Security-Policy": (
+                    "default-src 'self'; script-src 'self'; object-src 'none'; "
+                    "base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+                ),
             },
             [],
             [],

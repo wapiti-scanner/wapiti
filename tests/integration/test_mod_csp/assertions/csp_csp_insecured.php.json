@@ -4,7 +4,7 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
-                "info": "CSP \"base-uri\" value is not safe for URL: http://csp/csp_insecured.php",
+                "info": "CSP directive \"foobar-src\" is unknown or misspelled for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
                 "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -28,6 +28,18 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
+                "info": "CSP \"script-src\" value is not safe for URL: http://csp/csp_insecured.php",
+                "parameter": null,
+                "module": "csp",
+                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/csp_insecured.php",
                 "info": "CSP \"object-src\" value is not safe for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
@@ -40,7 +52,31 @@
             {
                 "method": "GET",
                 "path": "/csp_insecured.php",
-                "info": "CSP \"script-src\" value is not safe for URL: http://csp/csp_insecured.php",
+                "info": "CSP attribute \"base-uri\" is missing for URL: http://csp/csp_insecured.php",
+                "parameter": null,
+                "module": "csp",
+                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/csp_insecured.php",
+                "info": "CSP attribute \"frame-ancestors\" is missing for URL: http://csp/csp_insecured.php",
+                "parameter": null,
+                "module": "csp",
+                "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "wstg": [
+                    "OSHP-Content-Security-Policy",
+                    "WSTG-CONF-12"
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/csp_insecured.php",
+                "info": "CSP attribute \"form-action\" is missing for URL: http://csp/csp_insecured.php",
                 "parameter": null,
                 "module": "csp",
                 "http_request": "GET /csp_insecured.php HTTP/1.1\nhost: csp\nconnection: keep-alive\nuser-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0\naccept-language: en-US\naccept-encoding: gzip, deflate, br\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
