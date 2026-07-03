@@ -46,6 +46,13 @@ MIME_TEXT_TYPES = ('text/', 'application/xml')
 # Limit page size to 2MB
 MAX_PAGE_SIZE = 2097152
 
+# Maximum number of times a same parameter name is kept in a crawled URL.
+# Some applications generate links that keep appending the same parameter
+# (e.g. ...&sel=3&sel=2&sel=1). Following them would produce ever-growing URLs
+# that never repeat, so the crawler would loop forever (issue #252). Capping the
+# occurrences bounds the URL and lets the crawler recognize an already-seen request.
+MAX_PARAMETER_OCCURRENCES = 5
+
 COMMON_PAGE_EXTENSIONS = {
     'php', 'html', 'htm', 'xml', 'xhtml', 'xht', 'xhtm', 'cgi',
     'asp', 'aspx', 'php3', 'php4', 'php5', 'txt', 'shtm',
@@ -61,6 +68,20 @@ EXCLUDED_MEDIA_EXTENSIONS = (
 
 
 BAD_URL_REGEX = re.compile(r"https?:/[^/]+")
+
+
+def limit_parameter_occurrences(params: List[list], max_occurrences: int = MAX_PARAMETER_OCCURRENCES) -> List[list]:
+    """Keep at most `max_occurrences` occurrences of each parameter name, preserving order.
+
+    Prevents the crawler from following links that endlessly append the same
+    parameter, which would otherwise produce ever-growing URLs (issue #252)."""
+    counts: dict = {}
+    limited = []
+    for key, value in params:
+        counts[key] = counts.get(key, 0) + 1
+        if counts[key] <= max_occurrences:
+            limited.append([key, value])
+    return limited
 
 
 class Explorer:
@@ -252,12 +273,12 @@ class Explorer:
             if "?" in new_url:
                 path, query_string = new_url.split("?", 1)
                 # TODO: encoding parameter ?
-                get_params = [
+                get_params = limit_parameter_occurrences([
                     list(t) for t in filter(
                         lambda param_tuple: param_tuple[0] not in self._bad_params,
                         web.parse_qsl(query_string)
                     )
-                ]
+                ])
             elif new_url.endswith(EXCLUDED_MEDIA_EXTENSIONS):
                 # exclude static media files
                 continue
