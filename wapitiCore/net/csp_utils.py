@@ -22,12 +22,44 @@ from wapitiCore.net.response import Response
 
 POLICY_REGEX = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
 
+# A directive name is a sequence of ASCII letters, digits and dashes.
+# Anything else (e.g. a value left orphan by a misplaced semicolon) is not a directive.
+DIRECTIVE_NAME_REGEX = re.compile(r"^[a-z0-9-]+$")
+
 CSP_CHECK_LISTS = {
     # As default-src is the fallback directive we may want to avoid those duplicates in the future
     "default-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
     "script-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
     "object-src": ["none"],
-    "base-uri": ["none", "self"]
+    "base-uri": ["none", "self"],
+    "frame-ancestors": ["none", "self"],
+    "form-action": ["none", "self"],
+}
+
+# Directives that do NOT fall back to default-src when they are omitted.
+# default-src only acts as a fallback for the fetch directives; document and
+# navigation directives (base-uri, frame-ancestors, form-action, ...) have no fallback.
+CSP_NO_FALLBACK_DIRECTIVES = {"base-uri", "frame-ancestors", "form-action"}
+
+# Every directive name defined by the CSP specification (Level 3), plus a few
+# widely-encountered deprecated ones. Used to flag unknown or misspelled directives.
+CSP_DIRECTIVES = {
+    # Fetch directives
+    "child-src", "connect-src", "default-src", "font-src", "frame-src",
+    "img-src", "manifest-src", "media-src", "object-src", "prefetch-src",
+    "script-src", "script-src-elem", "script-src-attr",
+    "style-src", "style-src-elem", "style-src-attr", "worker-src",
+    # Document directives
+    "base-uri", "sandbox",
+    # Navigation directives
+    "form-action", "frame-ancestors", "navigate-to",
+    # Reporting directives
+    "report-uri", "report-to",
+    # Directives without a source list
+    "block-all-mixed-content", "upgrade-insecure-requests",
+    "require-trusted-types-for", "trusted-types", "require-sri-for",
+    # Deprecated but still encountered in the wild
+    "referrer", "reflected-xss", "disown-opener", "plugin-types",
 }
 
 CSP_HEADERS = {"content-security-policy", "x-content-security-policy", "x-webkit-csp"}
@@ -82,12 +114,23 @@ def csp_header_to_dict(header):
     csp_dict = {}
 
     for policy_string in header.split(";"):
-        try:
-            policy_name, policy_values = policy_string.strip().split(" ", 1)
-        except ValueError:
-            # Either it is malformed or we reach the end
+        policy_string = policy_string.strip()
+        if not policy_string:
+            # We reached the end or an empty segment
             continue
-        csp_dict[policy_name] = [value.strip("'") for value in POLICY_REGEX.findall(policy_values)]
+
+        parts = policy_string.split(" ", 1)
+        # Directive names are case-insensitive
+        policy_name = parts[0].lower()
+        if not DIRECTIVE_NAME_REGEX.match(policy_name):
+            # Malformed segment (e.g. a value orphaned by a misplaced semicolon)
+            continue
+
+        if len(parts) == 2:
+            csp_dict[policy_name] = [value.strip("'") for value in POLICY_REGEX.findall(parts[1])]
+        else:
+            # Directive without a value (e.g. upgrade-insecure-requests)
+            csp_dict[policy_name] = []
 
     return csp_dict
 
@@ -100,12 +143,15 @@ def check_policy_values(policy_name, csp_dict):
     1  : the element is set and his value is secure
     """
 
-    if policy_name not in csp_dict and "default-src" not in csp_dict:
-        return -1
-
-    # The HTTP CSP "default-src" directive serves as a fallback for the other CSP fetch directives.
+    # The HTTP CSP "default-src" directive serves as a fallback for the other CSP fetch directives only.
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
-    policy_values = csp_dict.get(policy_name) or csp_dict["default-src"]
+    # Document/navigation directives (base-uri, frame-ancestors, form-action) have no fallback.
+    if policy_name in csp_dict:
+        policy_values = csp_dict[policy_name]
+    elif policy_name not in CSP_NO_FALLBACK_DIRECTIVES and "default-src" in csp_dict:
+        policy_values = csp_dict["default-src"]
+    else:
+        return -1
 
     # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present
     if policy_name in ["default-src", "script-src"]:
@@ -118,6 +164,13 @@ def check_policy_values(policy_name, csp_dict):
         return 0
 
     return 1
+
+
+def find_unknown_directives(csp_dict):
+    """Return the list of directive names present in the CSP that are not part of the
+    specification. Those are usually typos or misspelled directives, which are silently
+    ignored by browsers and thus provide no protection at all."""
+    return [name for name in csp_dict if name not in CSP_DIRECTIVES]
 
 
 def has_strong_csp(response: Response, page: Html) -> bool:
