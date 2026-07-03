@@ -60,6 +60,31 @@ def test_standard_object_moved_body_is_not_reported():
     assert len(list(module.analyze(Request(url), response))) == 0
 
 
+def test_directory_redirection_boilerplate_is_not_reported():
+    """A directory redirection (the Location only appends a trailing slash) whose
+    'Object Moved' boilerplate links to the target must not be flagged, even when
+    the body link uses a different scheme (http) than the Location header (https).
+    Real-world case: https://example.com/blogs -> https://example.com/blogs/
+    """
+    module = ModuleInconsistentRedirection()
+    url = "https://example.com/blogs"
+    location = "https://example.com/blogs/"
+    body = (
+        b"<head><title>Document Moved</title></head>\n"
+        b'<body><h1>Object Moved</h1>This document may be found '
+        b'<a HREF="http://example.com/blogs/">here</a></body>'
+    )
+    response = Response(
+        response=httpx.Response(
+            status_code=301,
+            headers={"Content-Type": "text/html; charset=UTF-8", "Location": location},
+            content=body,
+        ),
+        url=url,
+    )
+    assert len(list(module.analyze(Request(url), response))) == 0
+
+
 def test_redirect_body_with_extra_link_is_reported():
     """A redirect body linking somewhere *other* than the target is the real
     leak and must be reported."""
