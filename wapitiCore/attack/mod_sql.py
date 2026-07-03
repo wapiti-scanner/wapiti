@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import dataclasses
+import difflib
 import re
 from math import ceil
 from random import randint
@@ -42,6 +43,30 @@ class PayloadInfo:
     payload: str
     platform: str
     section: bool
+
+
+# Two responses whose visible text is more similar than this are considered to be
+# "the same page". Using a similarity ratio instead of an exact hash absorbs small
+# dynamic bits (tokens, counters, timestamps) that would otherwise break blind detection.
+BOOLEAN_MATCH_THRESHOLD = 0.95
+
+# HTTP status returned by servers that rate-limit us. Such a response is not a
+# trustworthy boolean signal and must not be mistaken for a "different page".
+TOO_MANY_REQUESTS_STATUS = 429
+
+
+def text_similarity(text_a: str, text_b: str) -> float:
+    """Return a 0..1 similarity ratio between two texts (1.0 = identical)."""
+    if text_a == text_b:
+        return 1.0
+
+    matcher = difflib.SequenceMatcher(None, text_a, text_b, autojunk=True)
+    # quick_ratio() is a cheap upper bound: if it is already below the threshold,
+    # the exact ratio is too, so we can skip the expensive computation.
+    quick = matcher.quick_ratio()
+    if quick < BOOLEAN_MATCH_THRESHOLD:
+        return quick
+    return matcher.ratio()
 
 
 # From https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/errors.xml
@@ -479,20 +504,41 @@ class ModuleSql(Attack):
 
         return vulnerable_parameters
 
-    async def boolean_based_attack(self, request: Request, parameters_to_skip: set):
+    async def _get_stable_baseline(self, request: Request):
+        """Sample the request twice and return (status, redirect, text) if the page is
+        stable enough for boolean comparison, otherwise None.
+
+        Returns None when the server is rate-limiting us or erroring out, when the status
+        flaps between two identical requests, or when the visible text changes between
+        them (dynamic page). In those cases boolean comparison cannot be trusted and would
+        yield false positives (or false negatives)."""
         try:
-            good_response = await self.crawler.async_send(request)
-            good_status = good_response.status
-            good_redirect = good_response.redirection_url
-            # good_title = response.title
-            html = Html(good_response.content, request.url)
-            good_hash = html.text_only_md5
-        except ReadTimeout:
+            first = await self.crawler.async_send(request)
+            second = await self.crawler.async_send(request)
+            first_text = Html(first.content, request.url).text_only
+            second_text = Html(second.content, request.url).text_only
+        except (ReadTimeout, RequestError):
             self.network_errors += 1
-            return
+            return None
         except ParserRejectedMarkup as exc:
             logging.warning(exc)
+            return None
+
+        if (
+            first.is_server_error
+            or first.status == TOO_MANY_REQUESTS_STATUS
+            or second.status != first.status
+            or text_similarity(first_text, second_text) < BOOLEAN_MATCH_THRESHOLD
+        ):
+            return None
+
+        return first.status, first.redirection_url, first_text
+
+    async def boolean_based_attack(self, request: Request, parameters_to_skip: set):
+        baseline = await self._get_stable_baseline(request)
+        if baseline is None:
             return
+        good_status, good_redirect, good_text = baseline
 
         methods = ""
         if self.do_get:
@@ -578,11 +624,18 @@ class ModuleSql(Attack):
                 test_results.append(False)
                 continue
 
-            Html(response.content, url=mutated_request.url)
+            # A rate-limit or server-error response is not a trustworthy boolean
+            # signal: don't let it count as a legitimate "different page", which
+            # would otherwise satisfy a false-section test and cause a false positive.
+            if response.status == TOO_MANY_REQUESTS_STATUS or response.is_server_error:
+                test_results.append(False)
+                continue
+
+            resp_text = Html(response.content, url=mutated_request.url).text_only
             comparison = (
                     response.status == good_status and
                     response.redirection_url == good_redirect and
-                    Html(response.content, url=mutated_request.url).text_only_md5 == good_hash
+                    text_similarity(resp_text, good_text) >= BOOLEAN_MATCH_THRESHOLD
             )
 
             test_results.append(comparison == (payload_info.section is True))
