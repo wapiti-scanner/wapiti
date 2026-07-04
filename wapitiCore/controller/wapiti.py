@@ -281,6 +281,9 @@ class Wapiti:
                     headless="hidden",
                     cookies=self.crawler_configuration.cookies,
                     wait_time=self._wait_time,
+                    # The standard Explorer above already seeded every host into the same
+                    # persister, so the seed fallback would only re-persist a duplicate here.
+                    seed_fallback=False,
                 )
                 logging.info("Start headless crawler.")
                 await run_explorer(intercepting_explorer)

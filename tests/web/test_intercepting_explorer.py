@@ -260,3 +260,71 @@ class TestInterceptingExplorer:
         assert results[0][1].status == 200
         mock_seed_crawler.async_send.assert_not_awaited()
         mock_launch_headless.assert_called_once()
+
+    @patch("wapitiCore.net.intercepting_explorer.AsyncCrawler")
+    @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
+    @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
+    async def test_seed_fallback_disabled_in_both_mode(
+        self, mock_launch_headless, mock_launch_proxy, mock_crawler_cls
+    ):
+        # GIVEN an explorer with the seed fallback disabled (as done in --headless both, where a
+        # standard Explorer already seeded every host into the persister)
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("https://example.com/"))
+        scope = Scope(Request("https://example.com/"), "folder")
+        explorer = InterceptingExplorer(
+            crawler_config, scope, stop_event, headless="hidden", seed_fallback=False
+        )
+
+        async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
+            stop_event.set()
+
+        mock_launch_proxy.side_effect = mock_proxy
+
+        mock_seed_crawler = AsyncMock()
+        mock_crawler_cls.with_configuration.return_value.__aenter__.return_value = mock_seed_crawler
+
+        # WHEN exploring an uncovered host
+        results = [
+            (req, res) async for req, res in explorer.async_explore(deque([Request("https://example.com/")]))
+        ]
+
+        # THEN no fallback fetch happens: the standard crawler already covered the host
+        assert results == []
+        mock_seed_crawler.async_send.assert_not_awaited()
+        mock_launch_headless.assert_called_once()
+
+    @patch("wapitiCore.net.intercepting_explorer.AsyncCrawler")
+    @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
+    @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
+    async def test_seed_fallback_honors_exclusions(
+        self, mock_launch_headless, mock_launch_proxy, mock_crawler_cls
+    ):
+        # GIVEN a headless crawl that captures nothing for the host
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("https://example.com/"))
+        scope = Scope(Request("https://example.com/"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event, headless="hidden")
+
+        async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
+            stop_event.set()
+
+        mock_launch_proxy.side_effect = mock_proxy
+
+        mock_seed_crawler = AsyncMock()
+        mock_crawler_cls.with_configuration.return_value.__aenter__.return_value = mock_seed_crawler
+
+        # WHEN the seed URL matches an exclusion pattern
+        results = [
+            (req, res) async for req, res in explorer.async_explore(
+                deque([Request("https://example.com/")]),
+                excluded_urls=["https://example.com/*"],
+            )
+        ]
+
+        # THEN the fallback skips it instead of fetching it directly
+        assert results == []
+        mock_seed_crawler.async_send.assert_not_awaited()
+        mock_launch_headless.assert_called_once()

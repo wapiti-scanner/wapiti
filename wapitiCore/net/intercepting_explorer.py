@@ -419,7 +419,8 @@ class InterceptingExplorer(Explorer):
             drop_cookies: bool = False,
             headless: str = "no",
             cookies: Optional[CookieJar] = None,
-            wait_time: float = 2.
+            wait_time: float = 2.,
+            seed_fallback: bool = True
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
         # Kept so the seed fallback can build a crawler that bypasses the MITM proxy
@@ -428,6 +429,10 @@ class InterceptingExplorer(Explorer):
         self._proxy = proxy
         self._drop_cookies = drop_cookies
         self._headless = headless
+        # Whether to directly fetch uncovered seeds after the headless crawl. Disabled in
+        # "both" mode, where a standard Explorer already seeded every host into the same
+        # persister, so a fallback fetch would only re-persist a duplicate.
+        self._seed_fallback_enabled = seed_fallback
         self._final_cookies = None
         self._cookies = cookies or CookieJar()
         self._wait_time = wait_time
@@ -541,14 +546,19 @@ class InterceptingExplorer(Explorer):
         # index returning 403, or a non-text root) would never produce a single request, so
         # host-level modules (ssl, http_headers, ...) that need one request per host would
         # never run against it. Fetch the uncovered seeds directly to restore that coverage.
-        if self._headless != "no":
-            async for request, response in self._seed_fallback(seed_requests, covered_hosts):
+        # Skipped in "both" mode (see self._seed_fallback_enabled).
+        if self._headless != "no" and self._seed_fallback_enabled:
+            async for request, response in self._seed_fallback(
+                seed_requests, covered_hosts, excluded_requests, exclusion_regexes
+            ):
                 yield request, response
 
     async def _seed_fallback(
             self,
             seed_requests: List[Request],
             covered_hosts: set,
+            excluded_requests: set,
+            exclusion_regexes: List[re.Pattern],
     ) -> AsyncIterator[Tuple[Request, Response]]:
         """
         Directly fetch the seed URLs of hosts the headless crawl did not cover, bypassing the
@@ -564,6 +574,12 @@ class InterceptingExplorer(Explorer):
                     continue
 
                 if not self._scope.check(request):
+                    continue
+
+                # Honor the same exclusions process_requests applies to intercepted requests.
+                if request in excluded_requests or any(
+                    regex.match(request.url) for regex in exclusion_regexes
+                ):
                     continue
 
                 try:
