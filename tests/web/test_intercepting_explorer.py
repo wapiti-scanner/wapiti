@@ -187,3 +187,76 @@ class TestInterceptingExplorer:
         assert len(requests) == 1
         assert requests[0].url == "http://example.com/test"
         mock_launch_headless.assert_called_once()
+
+    @patch("wapitiCore.net.intercepting_explorer.AsyncCrawler")
+    @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
+    @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
+    async def test_seed_fallback_covers_uncovered_host(
+        self, mock_launch_headless, mock_launch_proxy, mock_crawler_cls
+    ):
+        # GIVEN a headless crawl that captures nothing (e.g. an index returning 403 that the
+        # MITM proxy dropped), so no request is produced for the target host
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("https://example.com/"))
+        scope = Scope(Request("https://example.com/"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event, headless="hidden")
+
+        async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
+            stop_event.set()
+
+        mock_launch_proxy.side_effect = mock_proxy
+
+        # AND a direct (non-proxied) seed fetch that returns the 403 the proxy would have dropped
+        seed_response = Response(httpx.Response(403, text="Forbidden"), url="https://example.com/")
+        mock_seed_crawler = AsyncMock()
+        mock_seed_crawler.async_send.return_value = seed_response
+        mock_crawler_cls.with_configuration.return_value.__aenter__.return_value = mock_seed_crawler
+
+        # WHEN exploring
+        results = [
+            (req, res) async for req, res in explorer.async_explore(deque([Request("https://example.com/")]))
+        ]
+
+        # THEN the seed is fetched directly and emitted so host-level modules get their request
+        assert len(results) == 1
+        assert results[0][0].url == "https://example.com/"
+        assert results[0][1].status == 403
+        mock_seed_crawler.async_send.assert_awaited_once()
+        mock_launch_headless.assert_called_once()
+
+    @patch("wapitiCore.net.intercepting_explorer.AsyncCrawler")
+    @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
+    @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
+    async def test_seed_fallback_skips_covered_host(
+        self, mock_launch_headless, mock_launch_proxy, mock_crawler_cls
+    ):
+        # GIVEN a headless crawl that already captured the index (200 html) for the host
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("https://example.com/"))
+        scope = Scope(Request("https://example.com/"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event, headless="hidden")
+
+        async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
+            queue = args[1]
+            request = Request("https://example.com/")
+            response = Response(httpx.Response(200, text="<html></html>"), url="https://example.com/")
+            await queue.put((request, response))
+            stop_event.set()
+
+        mock_launch_proxy.side_effect = mock_proxy
+
+        mock_seed_crawler = AsyncMock()
+        mock_crawler_cls.with_configuration.return_value.__aenter__.return_value = mock_seed_crawler
+
+        # WHEN exploring
+        results = [
+            (req, res) async for req, res in explorer.async_explore(deque([Request("https://example.com/")]))
+        ]
+
+        # THEN the host is already covered: no direct fetch, no duplicate
+        assert len(results) == 1
+        assert results[0][1].status == 200
+        mock_seed_crawler.async_send.assert_not_awaited()
+        mock_launch_headless.assert_called_once()
