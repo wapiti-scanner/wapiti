@@ -114,3 +114,119 @@ async def test_query_string_injection():
         assert parameter.name == ""
         assert parameter.situation == ParameterSituation.QUERY_STRING
         assert payload_info.payload == "http://wapiti3.ovh/ssrf/yolo/1/51554552595f535452494e47/"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_finish_with_missing_request_id():
+    # finish() must skip request IDs that no longer resolve to a stored request instead of crashing
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(200, text="Hello there"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?foo=bar")
+    request.path_id = 2
+
+    # get_path_by_id returns None for the unknown request_id "999" but the real request for "2"
+    def get_path_by_id(request_id):
+        if int(request_id) == 2:
+            return request
+        return None
+
+    persister.get_path_by_id.side_effect = get_path_by_id
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+        module.do_post = True
+
+        respx.get("https://wapiti3.ovh/get_ssrf.php?session_id=" + module._session_id).mock(
+            return_value=httpx.Response(
+                200,
+                json={
+                    # request_id "999" does not exist in persister and must be skipped
+                    "999": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:52:41+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/999/666f6f/31337-0-10.0.0.1.txt",
+                                "ip": "10.0.0.1",
+                                "method": "GET"
+                            }
+                        ]
+                    },
+                    # request_id "2" exists and must still be reported
+                    "2": {
+                        "666f6f": [
+                            {
+                                "date": "2019-08-17T16:53:00+00:00",
+                                "url": "https://wapiti3.ovh/ssrf_data/yolo/2/666f6f/31337-0-10.0.0.2.txt",
+                                "ip": "10.0.0.2",
+                                "method": "GET"
+                            }
+                        ]
+                    }
+                }
+            )
+        )
+
+        # Must not raise, must skip the missing ID and report the valid one
+        await module.finish()
+
+        assert persister.add_payload.call_count == 1
+        assert persister.add_payload.call_args_list[0][1]["parameter"] == "foo"
+        assert persister.add_payload.call_args_list[0][1]["category"] == "Server Side Request Forgery"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_timeout_reported_as_resource_consumption():
+    # A timed-out injection must be reported once as a resource consumption anomaly
+    respx.route(host="perdu.com").mock(side_effect=httpx.ReadTimeout("Connection timed out"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        timeout_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Resource consumption"
+        ]
+        assert len(timeout_findings) == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_server_error_reported_as_internal_error():
+    # A 500 response to an injection must be reported once as an internal error anomaly
+    respx.route(host="perdu.com").mock(return_value=httpx.Response(500, text="Internal Server Error"))
+
+    persister = AsyncMock()
+
+    request = Request("http://perdu.com/?url=http://safe.example.com")
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 1}
+
+        module = ModuleSsrf(crawler, persister, options, crawler_configuration)
+
+        await module.attack(request)
+
+        error_findings = [
+            call for call in persister.add_payload.call_args_list
+            if call[1].get("category") == "Internal Server Error"
+        ]
+        assert len(error_findings) == 1
