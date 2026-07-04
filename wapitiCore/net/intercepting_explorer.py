@@ -20,6 +20,7 @@
 import asyncio
 import re
 import sys
+from dataclasses import replace
 from traceback import print_tb
 from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
 from logging import getLogger, WARNING, CRITICAL
@@ -421,6 +422,8 @@ class InterceptingExplorer(Explorer):
             wait_time: float = 2.
     ):
         super().__init__(crawler_configuration, scope, stop_event, parallelism)
+        # Kept so the seed fallback can build a crawler that bypasses the MITM proxy
+        self._crawler_configuration = crawler_configuration
         self._mitm_port = mitm_port
         self._proxy = proxy
         self._drop_cookies = drop_cookies
@@ -477,6 +480,9 @@ class InterceptingExplorer(Explorer):
     ) -> AsyncIterator[Tuple[Request, Response]]:
         self._queue = asyncio.Queue()
 
+        # Snapshot the seeds now: launch_headless_explorer drains the to_explore deque below.
+        seed_requests = list(to_explore)
+
         exclusion_regexes = []
         excluded_requests = set()
 
@@ -519,10 +525,59 @@ class InterceptingExplorer(Explorer):
                 )
             )
 
+        # Track which hosts the headless crawl actually produced a request for. We build this
+        # ourselves rather than reading self._processed_requests because process_requests marks
+        # a request processed only after its yield, and the loop below may break right after the
+        # last yield (stop event) before that happens.
+        covered_hosts = set()
         async for request, response in self.process_requests(excluded_requests, exclusion_regexes):
+            covered_hosts.add(request.hostname)
             yield request, response
             if self._stopped.is_set():
                 break
+
+        # The MITM proxy only forwards responses that are not 4xx and whose content-type is
+        # text/json/html/xml. A host whose only reachable endpoint is filtered out (e.g. an
+        # index returning 403, or a non-text root) would never produce a single request, so
+        # host-level modules (ssl, http_headers, ...) that need one request per host would
+        # never run against it. Fetch the uncovered seeds directly to restore that coverage.
+        if self._headless != "no":
+            async for request, response in self._seed_fallback(seed_requests, covered_hosts):
+                yield request, response
+
+    async def _seed_fallback(
+            self,
+            seed_requests: List[Request],
+            covered_hosts: set,
+    ) -> AsyncIterator[Tuple[Request, Response]]:
+        """
+        Directly fetch the seed URLs of hosts the headless crawl did not cover, bypassing the
+        MITM proxy filters, so host-level modules always get at least one request per host even
+        when the index returns a 4xx or a non-text response. Headless-captured requests, when
+        they exist, always take precedence (the host is already in covered_hosts).
+        """
+        # self._crawler routes through the MITM proxy; use the real upstream proxy (often none).
+        seed_configuration = replace(self._crawler_configuration, proxy=self._proxy)
+        async with AsyncCrawler.with_configuration(seed_configuration) as seed_crawler:
+            for request in seed_requests:
+                if request.method != "GET" or request.hostname in covered_hosts:
+                    continue
+
+                if not self._scope.check(request):
+                    continue
+
+                try:
+                    # follow_redirects=True so the terminal 200 is stored: a bare 3xx to the
+                    # trailing-slash variant would be skipped by must_attack as a directory
+                    # redirection.
+                    response = await seed_crawler.async_send(request, follow_redirects=True)
+                except (ConnectionError, httpx.RequestError) as exception:
+                    logging.error("[!] %s while seeding %s", type(exception).__name__, request.url)
+                    continue
+
+                covered_hosts.add(request.hostname)
+                self._processed_requests.add(request)
+                yield request, response
 
     def empty_queue(self):
         while not self._queue.empty():
