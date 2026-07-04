@@ -21,12 +21,14 @@ from asyncio import sleep
 from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
-from httpx import RequestError, InvalidURL
+from httpx import ReadTimeout, RequestError, InvalidURL
 
-from wapitiCore.main.log import logging, log_red, log_verbose
+from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.ssrf import SsrfFinding
+from wapitiCore.definitions.resource_consumption import ResourceConsumptionFinding
+from wapitiCore.definitions.internal_error import InternalErrorFinding
 from wapitiCore.model import PayloadInfo, str_to_payloadinfo
 from wapitiCore.net import Request, Response
 from wapitiCore.net.web import http_repr
@@ -70,18 +72,67 @@ class ModuleSsrf(Attack):
         yield PayloadInfo(payload=payload)
 
     async def attack(self, request: Request, response: Optional[Response] = None):
-        # Let's just send payloads, we don't care of the response as what we want to know is if the target
-        # contacted the endpoint.
-        for mutated_request, _parameter, _payload in self.mutator.mutate(request, self.get_payloads):
+        # SSRF detection itself is out-of-band: what we care about is whether the target contacted our
+        # endpoint (checked later in finish()). We still inspect responses to report anomalies (timeouts,
+        # internal errors) triggered by the injected payloads.
+        timeouted = False
+        page = request.path
+        saw_internal_error = False
+
+        for mutated_request, parameter, _payload in self.mutator.mutate(request, self.get_payloads):
             log_verbose(f"[¨] {mutated_request}")
 
             try:
-                await self.crawler.async_send(mutated_request)
+                response = await self.crawler.async_send(mutated_request)
+            except ReadTimeout:
+                self.network_errors += 1
+                if timeouted:
+                    continue
+
+                log_orange("---")
+                log_orange(Messages.MSG_TIMEOUT, page)
+                log_orange(Messages.MSG_EVIL_REQUEST)
+                log_orange(http_repr(mutated_request))
+                log_orange("---")
+
+                if parameter.is_qs_injection:
+                    anom_msg = Messages.MSG_QS_TIMEOUT
+                else:
+                    anom_msg = Messages.MSG_PARAM_TIMEOUT.format(parameter.display_name)
+
+                await self.add_medium(
+                    finding_class=ResourceConsumptionFinding,
+                    request=mutated_request,
+                    info=anom_msg,
+                    parameter=parameter.display_name,
+                )
+                timeouted = True
             except RequestError:
                 self.network_errors += 1
                 continue
             except InvalidURL:
                 continue
+            else:
+                if response.is_server_error and not saw_internal_error:
+                    saw_internal_error = True
+                    if parameter.is_qs_injection:
+                        anom_msg = Messages.MSG_QS_500
+                    else:
+                        anom_msg = Messages.MSG_PARAM_500.format(parameter.display_name)
+
+                    await self.add_high(
+                        finding_class=InternalErrorFinding,
+                        request=mutated_request,
+                        info=anom_msg,
+                        parameter=parameter.display_name,
+                        response=response
+                    )
+
+                    log_orange("---")
+                    log_orange(Messages.MSG_500, page)
+                    log_orange(Messages.MSG_EVIL_REQUEST)
+                    log_orange(http_repr(mutated_request))
+                    log_orange("---")
 
     async def finish(self):
         endpoint_url = f"{self.internal_endpoint}get_ssrf.php?session_id={self._session_id}"
@@ -102,7 +153,11 @@ class ModuleSsrf(Attack):
                 for request_id in data:
                     original_request = await self.persister.get_path_by_id(request_id)
                     if original_request is None:
-                        raise ValueError("Could not find the original request with that ID")
+                        logging.warning(
+                            "[!] Could not find original request with ID %s, skipping",
+                            request_id
+                        )
+                        continue
 
                     page = original_request.path
                     for hex_param in data[request_id]:
