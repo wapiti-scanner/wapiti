@@ -1,3 +1,4 @@
+import base64
 import ssl
 from itertools import zip_longest
 from unittest.mock import patch
@@ -5,9 +6,10 @@ from unittest.mock import patch
 import httpx
 import pytest
 import respx
+import spnego
 
 from wapitiCore.net.crawler import AsyncCrawler
-from wapitiCore.net.classes import CrawlerConfiguration
+from wapitiCore.net.classes import CrawlerConfiguration, HttpCredential
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 
@@ -99,6 +101,44 @@ async def test_redirect_with_invalid_location_is_returned():
 
     assert response.status == 302
     assert response.headers["location"] == location
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_ntlm_authentication(tmp_path, monkeypatch):
+    # NTLM auth relies on the third-party httpx-ntlm, which only works with httpxyz through the
+    # sys.modules alias (it does "from httpx import Auth"). Drive a full NTLM handshake against a
+    # pyspnego acceptor to make sure HttpNtlmAuth still authenticates on the (aliased) client.
+    domain, user, password = "DOMAIN", "user", "Password123!"
+    cred_file = tmp_path / "ntlm_creds"
+    cred_file.write_text(f"{domain}:{user}:{password}\n")
+    monkeypatch.setenv("NTLM_USER_FILE", str(cred_file))  # pyspnego acceptor credential store
+
+    server_ctx = spnego.server(protocol="ntlm")
+
+    def responder(request):
+        authorization = request.headers.get("authorization")
+        if not authorization:
+            return httpx.Response(401, headers={"WWW-Authenticate": "NTLM"})
+        token = base64.b64decode(authorization.split(" ", 1)[1])
+        out = server_ctx.step(token)
+        if not server_ctx.complete:
+            return httpx.Response(401, headers={"WWW-Authenticate": f"NTLM {base64.b64encode(out).decode()}"})
+        return httpx.Response(200, text="authenticated")
+
+    respx.get("http://ntlm.test/").mock(side_effect=responder)
+
+    crawler_configuration = CrawlerConfiguration(
+        Request("http://ntlm.test/"),
+        http_credential=HttpCredential(username=f"{domain}\\{user}", password=password, method="ntlm"),
+        timeout=5,
+    )
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_send(Request("http://ntlm.test/"))
+
+    assert response.status == 200
+    assert response.content == "authenticated"
+    assert server_ctx.complete
 
 
 def test_extract_disconnect_urls():
