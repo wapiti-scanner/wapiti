@@ -382,7 +382,7 @@ class ActiveScanner:
                 print_tb(traceback_, file=traceback_fd)
                 print(f"{exception.__class__.__name__}: {exception}", file=traceback_fd)
                 print(f"Occurred in {module_name} on {original_request}", file=traceback_fd)
-                logging.info("Wapiti %s. httpx %s. OS %s", WAPITI_VERSION, httpx_version, sys.platform)
+                logging.info("Wapiti %s. httpxyz %s. OS %s", WAPITI_VERSION, httpx_version, sys.platform)
 
             try:
                 with open(traceback_file, "rb") as traceback_byte_fd:
