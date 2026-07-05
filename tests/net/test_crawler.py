@@ -82,6 +82,25 @@ async def test_multiple_redirecton():
         assert response.content == "OK"
 
 
+@respx.mock
+@pytest.mark.asyncio
+async def test_redirect_with_invalid_location_is_returned():
+    # A redirect response whose Location is not a valid URL (here a data: URI) used to make httpx
+    # raise InvalidURL while building the redirect request, even with follow_redirects=False, so the
+    # response never reached the caller and its headers were lost. httpxyz returns the response as-is.
+    # Regression test for https://github.com/wapiti-scanner/wapiti/issues/690
+    target_url = "http://perdu.com/redirect"
+    location = "data:;base64,PD9waHAgZWNobyAndzRwMXQxJywnX2V2YWwnOyA/Pg=="
+    respx.get(target_url).mock(return_value=httpx.Response(302, headers={"Location": location}))
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_send(Request(target_url), follow_redirects=False)
+
+    assert response.status == 302
+    assert response.headers["location"] == location
+
+
 def test_extract_disconnect_urls():
     target_url = "http://perdu.com/"
     text = (
