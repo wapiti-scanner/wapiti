@@ -168,6 +168,57 @@ async def test_advanced():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_nothing_interesting():
+    # When OPTIONS brings nothing and every method is either not allowed (403/405)
+    # or behaves like GET, no report should be emitted at all.
+    mocking_link = "http://perdu.com/boring/"
+
+    # OPTIONS returns no Allow header -> falls back to heuristics
+    respx.options(mocking_link).mock(
+        return_value=httpx.Response(405, text="Method Not Allowed")
+    )
+    # Reference
+    respx.get(mocking_link).mock(
+        return_value=httpx.Response(200, text="Welcome")
+    )
+    # Same as GET -> not interesting
+    respx.post(mocking_link).mock(
+        return_value=httpx.Response(200, text="Welcome")
+    )
+    # HEAD with empty body -> not interesting
+    respx.head(mocking_link).mock(
+        return_value=httpx.Response(200, text="")
+    )
+    # Uncommon methods all refused
+    for method in ("PUT", "DELETE", "PATCH", "TRACE"):
+        respx.request(method, mocking_link).mock(
+            return_value=httpx.Response(405, text="Method Not Allowed")
+        )
+    respx.request("CONNECT", mocking_link).mock(
+        return_value=httpx.Response(400, text="Invalid request")
+    )
+
+    persister = AsyncMock()
+    request = Request(mocking_link)
+    request.path_id = 1
+    response = Response(
+        httpx.Response(status_code=200),
+        url=mocking_link
+    )
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2}
+
+        module = ModuleMethods(crawler, persister, options, crawler_configuration)
+        module.do_get = True
+        await module.attack(request, response)
+
+        # Nothing interesting found -> no finding at all
+        assert persister.add_payload.call_count == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_blind_with_trace():
     mocking_link = "http://perdu.com/dummy/"
 

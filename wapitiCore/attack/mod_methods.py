@@ -50,11 +50,6 @@ def is_interesting(method: str, response: Response) -> bool:
         # Common as CONNECT should be used with a resource
         return False
 
-    if response.status == 403 and (
-        "This distribution is not configured to allow the HTTP request method that was used for this request"
-    ) in response.content:
-        return False
-
     if method == "TRACE" and "TRACE /" not in response.content:
         return False
 
@@ -72,8 +67,11 @@ class ModuleMethods(Attack):
     UNCOMMON_METHODS = {"CONNECT", "DELETE", "PUT", "PATCH"}
     do_get = True
     do_post = True
-    excluded_path = set()
-    hosts_with_trace = set()
+
+    def __init__(self, crawler, persister, attack_options, crawler_configuration):
+        super().__init__(crawler, persister, attack_options, crawler_configuration)
+        self.excluded_path = set()
+        self.hosts_with_trace = set()
 
     async def query_method(self, path: str, method: str) -> Response:
         request = Request(
@@ -110,7 +108,7 @@ class ModuleMethods(Attack):
             allowed_methods = get_allowed_methods(options_response)
             if allowed_methods:
                 methods_to_test = allowed_methods
-                log_orange(f"Methods found in the header: {','.join(methods_to_test)}")
+                log_orange(f"Methods found in the Allow header for {page}: {', '.join(sorted(methods_to_test))}")
                 options_succeed = True
                 statuses["OPTIONS"] = options_response.status
 
@@ -124,9 +122,6 @@ class ModuleMethods(Attack):
         methods_to_test -= {"GET", "OPTIONS"}
 
         for method in methods_to_test:
-            if method == "GET":
-                continue
-
             try:
                 method_response = await self.query_method(page, method)
             except RequestError:
@@ -162,13 +157,14 @@ class ModuleMethods(Attack):
             logging_string += f"{' and '.join(differences_str)} different from GET method on {page}"
             log_orange(logging_string)
 
-        message = (
-            f"Possible interesting methods (using {'OPTIONS' if options_succeed else 'heuristics'}) "
-            f"on {page}: {format_statuses(statuses)}"
-        )
+        if statuses:
+            message = (
+                f"Possible interesting methods (using {'OPTIONS' if options_succeed else 'heuristics'}) "
+                f"on {page}: {format_statuses(statuses)}"
+            )
 
-        await self.add_info(
-            finding_class=MethodsFinding,
-            request=request,
-            info=message,
-        )
+            await self.add_info(
+                finding_class=MethodsFinding,
+                request=request,
+                info=message,
+            )
