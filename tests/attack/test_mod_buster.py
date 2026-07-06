@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 from unittest.mock import AsyncMock
 from asyncio import sleep
@@ -169,6 +170,39 @@ async def test_server_errors_are_not_reported():
         # the 503 candidates must be discarded.
         reported = {call[1]["request"].url for call in persister.add_payload.call_args_list}
         assert reported == {"http://perdu.com/real", "http://perdu.com/login"}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_rate_limiting_warning_emitted_once(caplog):
+    # A storm of 503 responses must trigger a single warning per host, not one per response.
+    caplog.set_level(logging.INFO)
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(200, text="Default page"))
+    respx.get(url__regex=r"http://perdu\.com/.*").mock(return_value=httpx.Response(503, text="nope"))
+
+    persister = AsyncMock()
+    request = Request("http://perdu.com/")
+    request.path_id = 1
+    persister.get_links = AsyncIterator([(request, None)])
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        options = {"timeout": 10, "level": 2, "tasks": 20}
+
+        files = {"wordlist.txt": "\n".join(f"path{i}" for i in range(30))}
+        with mock.patch("builtins.open", get_mock_open(files)):
+            module = ModuleBuster(crawler, persister, options, crawler_configuration)
+            module.DATA_DIR = ""
+            module.PATHS_FILE = "wordlist.txt"
+            module.do_get = True
+            await module.attack(request)
+
+        # No path reported despite the flood of 503...
+        assert persister.add_payload.call_count == 0
+        # ...and exactly one rate-limiting warning for the host
+        warnings = [rec.message for rec in caplog.records if "rate limiting or overload" in rec.message]
+        assert len(warnings) == 1
+        assert "perdu.com" in warnings[0]
 
 
 async def delayed_response():
