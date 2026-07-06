@@ -19,13 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+from collections import defaultdict
 from difflib import SequenceMatcher
 from os.path import join as path_join
 from typing import Optional
 
 from httpx import RequestError
 
-from wapitiCore.main.log import log_red, log_verbose
+from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.buster import BusterFinding
@@ -76,12 +77,36 @@ class ModuleBuster(Attack):
     do_get = True
     do_post = False
 
+    # Warn (once per host) only after that many HTTP 429/5xx responses, so a single
+    # transient error does not trigger a false alarm.
+    RATE_LIMIT_WARNING_THRESHOLD = 5
+
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
         self.known_dirs = []
         self.known_pages = []
         self.new_resources = []
         self.network_errors = 0
+        self.server_error_counts = defaultdict(int)
+        self.rate_limited_netlocs = set()
+
+    def warn_on_rate_limiting(self, request: Request, response: Response):
+        # HTTP 429 (rate limiting) and 5xx (overload) make path discovery unreliable:
+        # warn the user once per host instead of logging every single occurrence.
+        if response.status != 429 and response.status < 500:
+            return
+
+        netloc = request.netloc
+        if netloc in self.rate_limited_netlocs:
+            return
+
+        self.server_error_counts[netloc] += 1
+        if self.server_error_counts[netloc] >= self.RATE_LIMIT_WARNING_THRESHOLD:
+            self.rate_limited_netlocs.add(netloc)
+            log_orange(
+                f"[!] {netloc} is answering with HTTP 429/5xx responses (rate limiting or "
+                "overload): some paths may have been missed, consider lowering the scan speed."
+            )
 
     async def check_path(self, url, not_found_response: Response):
         request = Request(url)
@@ -90,6 +115,8 @@ class ModuleBuster(Attack):
         except RequestError:
             self.network_errors += 1
             return False
+
+        self.warn_on_rate_limiting(request, response)
 
         if response.redirection_url and response.is_directory_redirection:
             # A server that appends a trailing slash to every path (the improbable
