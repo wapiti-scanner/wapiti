@@ -19,15 +19,49 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+from difflib import SequenceMatcher
 from os.path import join as path_join
 from typing import Optional
 
 from httpx import RequestError
 
 from wapitiCore.main.log import log_red, log_verbose
-from wapitiCore.attack.attack import Attack
+from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.buster import BusterFinding
+
+# Above this similarity ratio, a candidate response is considered a mere copy of
+# the server's generic "not found" page (soft 404).
+SIMILARITY_THRESHOLD = 0.9
+
+
+def responses_are_similar(response1: str, response2: str) -> bool:
+    """Return True when the two response bodies are near-identical."""
+    return SequenceMatcher(None, response1, response2).quick_ratio() > SIMILARITY_THRESHOLD
+
+
+def is_false_positive(response: Response, not_found_response: Response) -> bool:
+    """
+    Return True when `response` merely replays the generic "not found" answer of the
+    server, captured in `not_found_response` by requesting an improbable resource.
+
+    This catches two common setups that would otherwise flood the results:
+      - catch-all redirection: any unknown path is redirected to the same location;
+      - soft 404: any unknown path returns a 200 with the same "not found" body.
+    """
+    # Catch-all redirection: both the improbable path and the candidate are
+    # redirected to the very same location.
+    if response.redirection_url and not_found_response.redirection_url:
+        return response.redirection_url == not_found_response.redirection_url
+
+    # Soft 404: same status code and a near-identical body as the improbable path.
+    if not response.redirection_url and not not_found_response.redirection_url:
+        return (
+            response.status == not_found_response.status
+            and responses_are_similar(response.content, not_found_response.content)
+        )
+
+    return False
 
 
 class ModuleBuster(Attack):
@@ -49,7 +83,7 @@ class ModuleBuster(Attack):
         self.new_resources = []
         self.network_errors = 0
 
-    async def check_path(self, url):
+    async def check_path(self, url, not_found_response: Response):
         request = Request(url)
         try:
             response = await self.crawler.async_send(request)
@@ -58,6 +92,10 @@ class ModuleBuster(Attack):
             return False
 
         if response.redirection_url and response.is_directory_redirection:
+            # A server that appends a trailing slash to every path (the improbable
+            # path included) would otherwise turn every candidate into a fake directory.
+            if not_found_response.is_directory_redirection:
+                return False
             loc = response.redirection_url
             log_red(f"Found webpage {loc}")
             self.new_resources.append(loc)
@@ -66,8 +104,12 @@ class ModuleBuster(Attack):
                 request=request,
                 info=f"Found webpage {loc} on {url}",
             )
-        elif (response.redirection_url and not response.is_directory_redirection) \
-                or response.status not in [403, 404, 429]:
+        elif not is_false_positive(response, not_found_response) and (
+            (response.redirection_url and not response.is_directory_redirection)
+            # A 5xx means the server failed to answer (often it is rate-limiting the
+            # scan), not that the resource exists: never report those.
+            or (response.status not in [403, 404, 429] and response.status < 500)
+        ):
             log_red(f"Found webpage {request.path}")
             self.new_resources.append(request.path)
             await self.add_info(
@@ -82,15 +124,15 @@ class ModuleBuster(Attack):
     async def test_directory(self, path: str):
         log_verbose(f"[¨] Testing directory {path}")
 
-        test_page = Request(path + "does_n0t_exist.htm")
+        # Request an improbable resource to learn how the server answers to non-existent
+        # paths in this directory. The wordlist candidates have no extension, so the probe
+        # must be extension-less too, otherwise application routing (soft 404, catch-all
+        # redirection) is missed and every candidate ends up being a false positive.
+        not_found_request = Request(path + random_string())
         try:
-            response = await self.crawler.async_send(test_page)
+            not_found_response = await self.crawler.async_send(not_found_request)
         except RequestError:
             self.network_errors += 1
-            return
-
-        if response.status not in [403, 404]:
-            # we don't want to deal with this at the moment
             return
 
         tasks = set()
@@ -107,7 +149,7 @@ class ModuleBuster(Attack):
                     else:
                         url = path + candidate
                         if url not in self.known_dirs and url not in self.known_pages and url not in self.new_resources:
-                            task = asyncio.create_task(self.check_path(url))
+                            task = asyncio.create_task(self.check_path(url, not_found_response))
                             tasks.add(task)
 
                 if not tasks:
