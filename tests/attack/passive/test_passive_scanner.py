@@ -27,6 +27,25 @@ def test_import_error_is_handled(mock_log_error, _, mock_persister):
     )
 
 
+@patch("pathlib.Path.glob", return_value=[])
+@patch("wapitiCore.attack.passive_scanner.logging.info")
+def test_log_summary_reports_only_modules_with_suppressed_findings(mock_log_info, _, mock_persister):
+    """Only modules that actually suppressed alerts are logged."""
+    scanner = PassiveScanner(persister=mock_persister)
+
+    noisy = MagicMock()
+    noisy.suppressed_findings = 3
+    silent = MagicMock()
+    silent.suppressed_findings = 0
+    scanner._modules = {"noisy": noisy, "silent": silent}
+
+    scanner.log_summary()
+
+    mock_log_info.assert_called_once_with(
+        "%s similar alerts were suppressed by module %s", 3, "noisy"
+    )
+
+
 @patch("pathlib.Path.glob", return_value=[Path("mod_broken.py")])
 @patch("wapitiCore.attack.passive_scanner.import_module")
 @patch("wapitiCore.main.log.logging.error")

@@ -1,5 +1,6 @@
 from typing import Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.cleartext_password_submission import CleartextPasswordSubmissionFinding
 from wapitiCore.language.vulnerability import HIGH_LEVEL
 from wapitiCore.main.log import log_red
@@ -9,14 +10,11 @@ from wapitiCore.net import Request, Response
 from wapitiCore.parsers.html_parser import Html
 
 
-class ModuleUnsecurePassword:
+class ModuleUnsecurePassword(PassiveModule):
     """
     Detects passwords sent over a non-encrypted (TLS) channel
     """
     name = "unsecure_password"
-
-    def __init__(self):
-        self._known_vulnerable_forms = set()
 
     def analyze(self, request: Request, response: Response) ->  Generator[VulnerabilityInstance, Any, None]:
         if "text/html" not in response.type:
@@ -29,10 +27,9 @@ class ModuleUnsecurePassword:
                     if field.tag_type == "password":
                         form_identifier = (form.url, form.method.upper(), field.name)
 
-                        if form_identifier in self._known_vulnerable_forms:
+                        if not self.should_report(form_identifier):
                             continue
 
-                        self._known_vulnerable_forms.add(form_identifier)
                         log_red(
                             "Cleartext transmission of sensitive information: "
                             f"Password field '{field.name}' is sent over unencrypted connections from URL {request.url}"

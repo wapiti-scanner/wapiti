@@ -1,6 +1,7 @@
 import re
 from typing import Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.stacktrace_disclosure import StacktraceDisclosureFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL
 from wapitiCore.main.log import log_orange
@@ -90,7 +91,7 @@ STACKTRACE_PATTERNS = [
 ]
 
 
-class ModuleStacktraceDisclosure:
+class ModuleStacktraceDisclosure(PassiveModule):
     """
     Detects framework/language stack traces and unhandled error messages
     leaked in HTTP responses (Python, PHP, Java, .NET, Node.js, Ruby, Go).
@@ -98,10 +99,6 @@ class ModuleStacktraceDisclosure:
     """
 
     name = "stacktrace_disclosure"
-
-    def __init__(self):
-        # Track already-reported (language, evidence) pairs across the scan.
-        self._reported = set()
 
     def analyze(
         self, request: Request, response: Response
@@ -125,9 +122,8 @@ class ModuleStacktraceDisclosure:
                 evidence = evidence[:150] + "..."
 
             key = (label, evidence)
-            if key in self._reported:
+            if not self.should_report(key):
                 continue
-            self._reported.add(key)
 
             log_orange(
                 f"Potential {label} stack trace disclosure in {request.url}: {evidence}"

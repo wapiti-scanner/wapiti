@@ -1,6 +1,7 @@
 import re
 from typing import Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.information_disclosure import InformationDisclosureFinding
 from wapitiCore.language.vulnerability import LOW_LEVEL
 from wapitiCore.main.log import log_orange
@@ -62,17 +63,13 @@ def _is_realistic_path(candidate: str) -> bool:
     )
 
 
-class ModuleInformationDisclosure:
+class ModuleInformationDisclosure(PassiveModule):
     """
     Detects disclosure of full system paths (Windows/Unix) in HTTP responses.
     Such paths may reveal sensitive information about the server environment.
     """
 
     name = "information_disclosure"
-
-    def __init__(self):
-        # track already-reported paths
-        self._reported_paths = set()
 
     def analyze(
         self, request: Request, response: Response
@@ -90,10 +87,8 @@ class ModuleInformationDisclosure:
             if not _is_realistic_path(evidence):
                 continue
 
-            if evidence.rstrip(".") in self._reported_paths:
+            if not self.should_report(evidence.rstrip(".")):
                 continue
-
-            self._reported_paths.add(evidence.rstrip("."))
 
             log_orange(f"Potential full path disclosure in {request.url}: {evidence}")
             yield VulnerabilityInstance(

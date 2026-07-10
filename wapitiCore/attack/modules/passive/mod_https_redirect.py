@@ -18,8 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-from typing import Generator, Any, Tuple
+from typing import Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.net import Request
 from wapitiCore.net.web import urlparse
 from wapitiCore.net.response import Response
@@ -29,7 +30,7 @@ from wapitiCore.language.vulnerability import LOW_LEVEL, MEDIUM_LEVEL
 from wapitiCore.main.log import log_orange, log_red
 
 
-class ModuleHttpsRedirect:
+class ModuleHttpsRedirect(PassiveModule):
     """Check for HTTPS redirections on sensitive HTTP requests."""
     name = "https_redirect"
 
@@ -48,13 +49,6 @@ class ModuleHttpsRedirect:
     MSG_REASON_RESPONSE_COOKIES = "cookie in the response"
 
     MSG_INFO_NO_REDIRECT = "No HTTPS redirection for this host. All HTTP requests are served in clear text."
-
-    def __init__(self):
-        """
-        Init the module along with the set of reported findings.
-        """
-        self._reported_findings_sensitive: set[Tuple[str, str, str]] = set()
-        self._reported_info_non_sensitive: set[str] = set()
 
     def _get_sensitive_reason(self, request: Request, response: Response) -> str:
         """
@@ -91,9 +85,7 @@ class ModuleHttpsRedirect:
                 finding_type = "no_redirect"
 
             identifier = (host, sensitive_reason, finding_type)
-            if identifier not in self._reported_findings_sensitive:
-                self._reported_findings_sensitive.add(identifier)
-
+            if self.should_report(identifier):
                 # Report the vulnerability based on the type of redirection
                 if finding_type == "redirect_to_https":
                     full_info = self.MSG_SENSITIVE_REDIRECT_TO_HTTPS.format(reason=sensitive_reason, url=request.url)
@@ -115,8 +107,7 @@ class ModuleHttpsRedirect:
                 )
         elif "html" in response.headers.get("content-type", "html").lower():
             # Non-sensitive case, check for general lack of HTTPS redirection
-            if host not in self._reported_info_non_sensitive:
-                self._reported_info_non_sensitive.add(host)
+            if self.should_report(host):
                 if not response.is_redirect or urlparse(response.redirection_url).scheme != "https":
                     log_orange(f"Host {host} serves HTTP content without redirecting to HTTPS.")
                     yield VulnerabilityInstance(

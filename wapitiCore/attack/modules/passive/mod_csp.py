@@ -16,8 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-from typing import Generator, Any, Tuple
+from typing import Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
 from wapitiCore.net.csp_utils import (
@@ -36,16 +37,11 @@ MSG_CSP_UNSAFE = "CSP \"{0}\" value is not safe for URL: {1}"
 MSG_CSP_UNKNOWN = "CSP directive \"{0}\" is unknown or misspelled for URL: {1}"
 
 
-class ModuleCsp:
+class ModuleCsp(PassiveModule):
     """
     Passively evaluates the security level of Content Security Policies in HTTP responses.
     """
     name = "csp"
-
-    def __init__(self):
-        # We wait to avoid flooding the user with repeated CSP misconfiguration
-        # Keep some identified cases here for each netloc
-        self._reported_csp_issues: set[Tuple[str, str, str]] = set()
 
     def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
         """
@@ -59,8 +55,7 @@ class ModuleCsp:
         if not csp_header_value:
             identifier = (request.netloc, "CSP", "Missing")
 
-            if identifier not in self._reported_csp_issues:
-                self._reported_csp_issues.add(identifier)
+            if self.should_report(identifier):
                 log_red(MSG_NO_CSP.format(request.url))
                 yield VulnerabilityInstance(
                     finding_class=CspFinding,
@@ -74,8 +69,7 @@ class ModuleCsp:
 
             for directive in find_unknown_directives(csp_dict):
                 identifier = (request.netloc, directive, "Unknown")
-                if identifier not in self._reported_csp_issues:
-                    self._reported_csp_issues.add(identifier)
+                if self.should_report(identifier):
                     info = MSG_CSP_UNKNOWN.format(directive, request.url)
                     log_red(info)
                     yield VulnerabilityInstance(
@@ -103,8 +97,7 @@ class ModuleCsp:
 
                 if info:
                     identifier = (request.netloc, policy_name, "Unsafe" if result == 0 else "Missing")
-                    if identifier not in self._reported_csp_issues:
-                        self._reported_csp_issues.add(identifier)
+                    if self.should_report(identifier):
                         log_red(info)
                         yield VulnerabilityInstance(
                             finding_class=CspFinding,

@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import List, Optional, Type, Generator, Any, Tuple
+from typing import List, Optional, Type, Generator, Any
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions import FindingBase
 from wapitiCore.net.web import urlparse
 from wapitiCore.net.response import Response
@@ -34,7 +35,7 @@ INVALID_XCONTENT_TYPE = "X-Content-Type-Options has an invalid value ('nosniff' 
 INVALID_XFRAME_OPTIONS = "X-Frame-Options has an invalid value ('deny' or 'sameorigin' or not found)"
 
 
-class ModuleHttpHeaders:
+class ModuleHttpHeaders(PassiveModule):
     """
     Passively evaluates the security of HTTP headers present in HTTP responses.
     """
@@ -61,10 +62,6 @@ class ModuleHttpHeaders:
             "finding": HstsFinding,
         }
     }
-
-    def __init__(self):
-        self._reported_findings: set[Tuple[str, str, str]] = set()
-
 
     @staticmethod
     def is_set(response: Response, header_name: str) -> bool:
@@ -94,8 +91,7 @@ class ModuleHttpHeaders:
             finding_info = info_messages["error"]
             identifier = (target, header_name, "not_set")
 
-            if identifier not in self._reported_findings:
-                self._reported_findings.add(identifier)
+            if self.should_report(identifier):
                 log_red(f"{finding_info} on {request.url}")
                 return VulnerabilityInstance(
                     finding_class=finding_class,
@@ -107,8 +103,7 @@ class ModuleHttpHeaders:
         elif not self.contains(response, header_name, check_list):
             finding_info = info_messages["warning"]
             identifier = (target, header_name, "invalid_value")
-            if identifier not in self._reported_findings:
-                self._reported_findings.add(identifier)
+            if self.should_report(identifier):
                 log_orange(f"{finding_info} on {request.url}")
                 return VulnerabilityInstance(
                     finding_class=finding_class,

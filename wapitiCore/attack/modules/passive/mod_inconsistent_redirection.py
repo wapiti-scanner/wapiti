@@ -1,6 +1,7 @@
 from typing import Generator, Any, Optional
 from urllib.parse import urlparse
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.inconsistent_redirection import InconsistentRedirectionFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL
 from wapitiCore.main.log import log_orange
@@ -29,17 +30,13 @@ def _points_to_redirection_target(link: str, target: Optional[str]) -> bool:
     return _resource_key(link) == _resource_key(target)
 
 
-class ModuleInconsistentRedirection:
+class ModuleInconsistentRedirection(PassiveModule):
     """
     Detects when a 3xx redirection response also returns meaningful HTML content
     (like links or forms), which may confuse clients and pose security risks.
     """
 
     name = "inconsistent_redirection"
-
-    def __init__(self):
-        # Keep track of already-reported responses, by response MD5
-        self._reported_hashes = set()
 
     def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
         if not response.is_redirect:
@@ -70,10 +67,8 @@ class ModuleInconsistentRedirection:
             return
 
         # Deduplicate with response MD5
-        if response.md5 in self._reported_hashes:
+        if not self.should_report(response.md5):
             return
-
-        self._reported_hashes.add(response.md5)
 
         log_orange(
             f"Redirection response at {request.url} contains HTML content with links/forms"
