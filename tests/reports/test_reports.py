@@ -279,6 +279,43 @@ def test_detailed_reports(report_format, level):
         os.remove(output)
 
 
+def test_html_report_escapes_target_controlled_data():
+    """The HTML report must not render target-controlled data as raw HTML.
+
+    Login form field names are auto-detected from the scanned target (see
+    Html.find_login_form): a malicious login page can name an input
+    `user"><script>...` and it ends up in the report auth section. The Mako
+    template must HTML-escape it, otherwise opening the report executes the
+    injected script in the auditor's browser (stored XSS).
+    """
+    payload = "\"><script>alert('XSS')</script>"
+
+    report_gen = GENERATORS["html"]()
+    report_gen.set_report_info(
+        f"http://perdu.com/?p={payload}",
+        "folder",
+        gmtime(0),
+        "WAPITI_VERSION",
+        {
+            "url": f"http://perdu.com/login?{payload}",
+            "logged_in": True,
+            "form": {"login_field": f"user{payload}", "password_field": f"pass{payload}"},
+        },
+        None,
+        123456,
+        0,
+    )
+
+    with tempfile.TemporaryDirectory() as output:
+        report_gen.generate_report(output)
+        with open(report_gen.final_path, "r", encoding="utf-8") as report_fd:
+            report = report_fd.read()
+
+    # The raw payload must never appear; only its HTML-escaped form may.
+    assert "<script>alert('XSS')</script>" not in report
+    assert "&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;" in report
+
+
 def test_level_to_css_class():
     assert level_to_css_class(CRITICAL_LEVEL) == "severity-critical"
     assert level_to_css_class(HIGH_LEVEL) == "severity-high"
