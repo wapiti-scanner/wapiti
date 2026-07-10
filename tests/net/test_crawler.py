@@ -113,6 +113,23 @@ def test_extract_disconnect_urls():
     assert all(url in disconnect_urls for url in test_disconnect_urls) is True
 
 
+@pytest.mark.asyncio
+async def test_read_timeout_is_not_disabled():
+    """Regression for issue #797: a stalled HTTP read must not hang forever.
+
+    The crawler's read timeout used to be None (unbounded), so a server that
+    sent its headers then stalled the body blocked ``response.read()``
+    indefinitely (the whole scan hung unless --max-scan-time was set). Every
+    timeout phase, read included, must honor the configured value.
+    """
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=7)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        assert crawler.timeout.read == 7
+        assert crawler.timeout.connect == 7
+        assert crawler.timeout.write == 7
+        assert crawler.timeout.pool == 7
+
+
 @respx.mock
 @pytest.mark.asyncio
 async def test_async_send():
