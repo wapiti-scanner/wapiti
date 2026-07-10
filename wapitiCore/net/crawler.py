@@ -102,7 +102,14 @@ class AsyncCrawler:
     ):
         self._base_request = base_request
         self._client = client
-        self._timeout = httpx.Timeout(timeout, read=None)
+        # Apply the configured timeout to every phase, including read. A None read
+        # timeout lets a stalled/slow-trickling server block `response.read()`
+        # forever (the whole scan hangs unless --max-scan-time / --max-attack-time
+        # is set). httpx's read timeout is per-chunk, so a large but progressing
+        # download is unaffected; only a genuine stall (no data for `timeout`s)
+        # is interrupted. This also matches the per-call timeout paths below,
+        # which already build httpx.Timeout(timeout) with every phase set.
+        self._timeout = httpx.Timeout(timeout)
 
         self.is_logged_in = False
         self.auth_url: str = self._base_request.url
