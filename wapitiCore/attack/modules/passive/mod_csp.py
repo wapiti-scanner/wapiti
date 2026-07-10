@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+import re
 from typing import Generator, Any
 
 from wapitiCore.attack.modules.passive.base import PassiveModule
@@ -36,6 +37,24 @@ MSG_CSP_MISSING = "CSP attribute \"{0}\" is missing for URL: {1}"
 MSG_CSP_UNSAFE = "CSP \"{0}\" value is not safe for URL: {1}"
 MSG_CSP_UNKNOWN = "CSP directive \"{0}\" is unknown or misspelled for URL: {1}"
 
+# Nonces and hashes rotate on every response; they must not turn one policy into a
+# distinct posture per page, otherwise every crawled page would re-report the same
+# CSP weakness.
+_CSP_DYNAMIC_TOKEN = re.compile(r"'(?:nonce-[^']*|sha(?:256|384|512)-[^']*)'", re.IGNORECASE)
+
+
+def csp_posture(csp_header_value: str) -> str:
+    """Return a canonical, dynamic-free fingerprint of a CSP header for deduplication.
+
+    Two responses whose policies are equivalent (modulo token ordering and per-request
+    nonces/hashes) share the same posture and are reported once; a genuinely different
+    policy served elsewhere on the site is a distinct posture and reported separately.
+    """
+    without_dynamic = _CSP_DYNAMIC_TOKEN.sub("", csp_header_value.lower())
+    # Make ';' a standalone token so directive separators fingerprint the same
+    # regardless of the surrounding whitespace in the raw header.
+    return " ".join(sorted(without_dynamic.replace(";", " ; ").split()))
+
 
 class ModuleCsp(PassiveModule):
     """
@@ -51,9 +70,12 @@ class ModuleCsp(PassiveModule):
             return
 
         csp_header_value = response.headers.get("Content-Security-Policy")
+        # Distinct CSP configurations across the site are distinct postures: each is
+        # reported once (LIMIT), instead of only the first crawled page (was per-netloc).
+        posture = csp_posture(csp_header_value or "")
 
         if not csp_header_value:
-            identifier = (request.netloc, "CSP", "Missing")
+            identifier = (request.netloc, "CSP", "Missing", posture)
 
             if self.should_report(identifier):
                 log_red(MSG_NO_CSP.format(request.url))
@@ -68,7 +90,7 @@ class ModuleCsp(PassiveModule):
             csp_dict = csp_header_to_dict(csp_header_value)
 
             for directive in find_unknown_directives(csp_dict):
-                identifier = (request.netloc, directive, "Unknown")
+                identifier = (request.netloc, directive, "Unknown", posture)
                 if self.should_report(identifier):
                     info = MSG_CSP_UNKNOWN.format(directive, request.url)
                     log_red(info)
@@ -96,7 +118,7 @@ class ModuleCsp(PassiveModule):
                         severity = MEDIUM_LEVEL
 
                 if info:
-                    identifier = (request.netloc, policy_name, "Unsafe" if result == 0 else "Missing")
+                    identifier = (request.netloc, policy_name, "Unsafe" if result == 0 else "Missing", posture)
                     if self.should_report(identifier):
                         log_red(info)
                         yield VulnerabilityInstance(

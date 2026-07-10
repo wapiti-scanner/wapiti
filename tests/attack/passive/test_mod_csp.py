@@ -9,6 +9,7 @@ from wapitiCore.attack.modules.passive.mod_csp import (
     MSG_CSP_MISSING,
     MSG_CSP_UNSAFE,
     MSG_CSP_UNKNOWN,
+    csp_posture,
 )
 from wapitiCore.definitions.csp import CspFinding
 from wapitiCore.language.vulnerability import MEDIUM_LEVEL, LOW_LEVEL
@@ -229,3 +230,38 @@ def test_module_csp_analyze(module, headers, expected_msgs, expected_severities)
         assert vuln.finding_class == CspFinding
         assert vuln.info == expected_msg
         assert vuln.severity == expected_sev
+
+
+def test_csp_posture_neutralizes_nonces_and_ordering():
+    """Nonces/hashes and directive ordering must not change the posture."""
+    a = csp_posture("script-src 'self' 'nonce-abc123'; object-src 'none'")
+    b = csp_posture("object-src 'none'; script-src 'nonce-XYZ789' 'self'")
+    assert a == b  # per-request nonce + directive ordering neutralized
+    # A genuinely different policy is a different posture.
+    assert csp_posture("script-src 'self' 'unsafe-inline'; object-src 'none'") != a
+
+
+def test_module_csp_same_posture_deduplicated_across_pages(module):
+    """Same weak CSP (modulo nonce) on two URLs of the same host -> reported once."""
+    headers1 = {"Content-Type": "text/html",
+                "Content-Security-Policy": "script-src 'self' 'unsafe-inline' 'nonce-aaa'"}
+    headers2 = {"Content-Type": "text/html",
+                "Content-Security-Policy": "script-src 'self' 'unsafe-inline' 'nonce-bbb'"}
+    req1, resp1 = create_mock_objects("http://example.com/a", response_headers=headers1)
+    req2, resp2 = create_mock_objects("http://example.com/b", response_headers=headers2)
+
+    assert list(module.analyze(req1, resp1))          # first page reports
+    assert not list(module.analyze(req2, resp2))       # identical posture -> deduplicated
+
+
+def test_module_csp_distinct_posture_reported_across_pages(module):
+    """Two genuinely different CSPs on the same host -> each posture surfaces (fixes #617)."""
+    headers1 = {"Content-Type": "text/html",
+                "Content-Security-Policy": "script-src 'self' 'unsafe-inline'"}
+    headers2 = {"Content-Type": "text/html",
+                "Content-Security-Policy": "script-src 'self' *"}
+    req1, resp1 = create_mock_objects("http://example.com/a", response_headers=headers1)
+    req2, resp2 = create_mock_objects("http://example.com/b", response_headers=headers2)
+
+    assert list(module.analyze(req1, resp1))
+    assert list(module.analyze(req2, resp2))           # different posture -> reported again

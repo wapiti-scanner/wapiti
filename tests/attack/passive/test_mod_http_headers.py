@@ -134,3 +134,28 @@ def test_module_http_headers_deduplication(module):
     req2, resp2 = create_mock_objects(URL_HTTPS, {})
     vulns2 = list(module.analyze(req2, resp2))
     assert not vulns2
+
+
+def test_module_http_headers_same_invalid_value_deduplicated(module):
+    """Same header carrying the same invalid value on the same host -> reported once."""
+    req1, resp1 = create_mock_objects(
+        URL_HTTP, {"X-Frame-Options": "ALLOWALL", "X-Content-Type-Options": "nosniff"}
+    )
+    req2, resp2 = create_mock_objects(
+        URL_HTTP, {"X-Frame-Options": "ALLOWALL", "X-Content-Type-Options": "nosniff"}
+    )
+    assert [v.info for v in module.analyze(req1, resp1)] == [INVALID_XFRAME_OPTIONS]
+    assert not list(module.analyze(req2, resp2))  # identical posture -> deduplicated
+
+
+def test_module_http_headers_distinct_invalid_values_reported(module):
+    """Same header with two DIFFERENT invalid values on the same host -> both surface."""
+    req1, resp1 = create_mock_objects(
+        URL_HTTP, {"X-Frame-Options": "ALLOWALL", "X-Content-Type-Options": "nosniff"}
+    )
+    req2, resp2 = create_mock_objects(
+        URL_HTTP, {"X-Frame-Options": "SOMETHING-ELSE", "X-Content-Type-Options": "nosniff"}
+    )
+    assert [v.info for v in module.analyze(req1, resp1)] == [INVALID_XFRAME_OPTIONS]
+    # Different offending value -> distinct posture -> reported again.
+    assert [v.info for v in module.analyze(req2, resp2)] == [INVALID_XFRAME_OPTIONS]

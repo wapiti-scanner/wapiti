@@ -89,7 +89,9 @@ class ModuleHttpHeaders(PassiveModule):
 
         if not self.is_set(response, header_name):
             finding_info = info_messages["error"]
-            identifier = (target, header_name, "not_set")
+            # A missing header is a single posture (empty value), so it is reported
+            # once per (netloc, header), as before.
+            identifier = (target, header_name, "not_set", "")
 
             if self.should_report(identifier):
                 log_red(f"{finding_info} on {request.url}")
@@ -102,7 +104,10 @@ class ModuleHttpHeaders(PassiveModule):
                 )
         elif not self.contains(response, header_name, check_list):
             finding_info = info_messages["warning"]
-            identifier = (target, header_name, "invalid_value")
+            # Include the offending value so pages that carry *different* invalid values
+            # for the same header each surface, while identical ones are deduplicated.
+            posture = response.headers[header_name].strip().lower()
+            identifier = (target, header_name, "invalid_value", posture)
             if self.should_report(identifier):
                 log_orange(f"{finding_info} on {request.url}")
                 return VulnerabilityInstance(
