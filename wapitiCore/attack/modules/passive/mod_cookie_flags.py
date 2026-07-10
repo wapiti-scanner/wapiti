@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Generator, Any, List, Tuple
 
+from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net.web import urlparse
 from wapitiCore.net import Request, Response
@@ -80,18 +81,12 @@ def _get_cookies_from_response(response: Response) -> List[Tuple[str, str, bool,
     return cookies_list
 
 
-class ModuleCookieFlags:
+class ModuleCookieFlags(PassiveModule):
     """
     Passively evaluates the security of cookies present in HTTP responses.
     """
 
     name = "cookieflags"
-
-    def __init__(self):
-        # To avoid reporting the same issue for the same cookie multiple times.
-        # We will store identifiers of already reported cookies.
-        # An identifier could be (cookie_name, cookie_domain, flag_type_missing)
-        self._reported_cookies: set[tuple[str, str, str]] = set()
 
     def analyze(
         self, request: Request, response: Response
@@ -110,8 +105,7 @@ class ModuleCookieFlags:
             # HttpOnly check
             if not httponly_flag:
                 identifier = (cookie_name, cookie_domain, "HttpOnly")
-                if identifier not in self._reported_cookies:
-                    self._reported_cookies.add(identifier)
+                if self.should_report(identifier):
                     log_red(INFO_COOKIE_HTTPONLY.format(cookie_name, request.url))
                     yield VulnerabilityInstance(
                         finding_class=HttpOnlyFinding,
@@ -124,8 +118,7 @@ class ModuleCookieFlags:
             # Secure flag check
             if not secure_flag:
                 identifier = (cookie_name, cookie_domain, "Secure")
-                if identifier not in self._reported_cookies:
-                    self._reported_cookies.add(identifier)
+                if self.should_report(identifier):
                     log_red(INFO_COOKIE_SECURE.format(cookie_name, request.url))
                     yield VulnerabilityInstance(
                         finding_class=SecureCookieFinding,

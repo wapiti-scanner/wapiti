@@ -309,6 +309,8 @@ class Wapiti:
 
             await run_explorer(explorer)
 
+        self._passive_scanner.log_summary()
+
     async def write_report(self):
         if not self.output_file:
             if self.report_generator_type == "html":

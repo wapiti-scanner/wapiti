@@ -51,6 +51,21 @@ class PassiveScanner:
             for vulnerability in passive_module_instance.analyze(request, response):
                 await self._record_vulnerability_instance(vulnerability, passive_module_name)
 
+    def log_summary(self):
+        """Log, once at the end of the crawl, how many alerts each module suppressed.
+
+        Passive modules cap the number of alerts they emit per deduplication key
+        to avoid flooding the report (see ``PassiveModule.should_report``). This
+        reports the volume that was silently dropped, mirroring the way the active
+        scanner surfaces its ``network_errors`` counter.
+        """
+        for module_name, module_instance in self._modules.items():
+            suppressed = getattr(module_instance, "suppressed_findings", 0)
+            if suppressed:
+                logging.info(
+                    "%s similar alerts were suppressed by module %s", suppressed, module_name
+                )
+
     async def _record_vulnerability_instance(self, vuln_instance: VulnerabilityInstance, module: str):
         await self._persister.add_payload(
             payload_type=vuln_instance.finding_class.type(),
