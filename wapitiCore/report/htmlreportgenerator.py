@@ -82,7 +82,13 @@ class HTMLReportGenerator(JSONReportGenerator):
         mytemplate = Template(
             filename=str(files("wapitiCore").joinpath(self.REPORT_DIR, "report.html")),
             input_encoding="utf-8",
-            output_encoding="utf-8"
+            output_encoding="utf-8",
+            # HTML-escape every ${...} expression by default. Report data comes from the
+            # scanned target (e.g. auto-detected login form field names) and must never be
+            # rendered as raw HTML, otherwise it could inject script into the report opened
+            # by the auditor. Expressions that already carry an explicit "| h" stay escaped
+            # exactly once (Mako does not double-apply the default filter).
+            default_filters=["h"],
         )
 
         report_target_name = urlparse(self._infos['target']).netloc.replace(':', '_')
