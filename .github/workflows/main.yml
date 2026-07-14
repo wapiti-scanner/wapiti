@@ -18,7 +18,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install "pylint==3.3.6"
+          pip install "pylint==4.0.6"
       - name: Pylint
         run: |
           pylint --rcfile=.pylintrc wapitiCore
