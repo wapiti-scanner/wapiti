@@ -38,7 +38,7 @@ dependencies = [
     "browser-cookie3>=0.19,<0.21",
     "dnspython>=2.6,<3.0",
     "httpcore>=1.0,<2.0",
-    "httpx[brotli,socks]>=0.27,<1.0",
+    "httpxyz[brotli,socks]>=0.31,<1.0",
     "httpx-ntlm>=1.4,<2.0",
     "mako>=1.2,<2.0",
     "mitmproxy>=12.0,<13.0",
@@ -83,7 +83,9 @@ find = {exclude=["tests*"]}
 testpaths = [
     "tests",
 ]
-addopts = "--cov --cov-report=xml"
+# "-p httpxyz" loads the httpxyz pytest plugin first so httpxyz/httpcorexyz shadow httpx/httpcore
+# before respx or any test module imports the real httpx (required by httpxyz's sys.modules aliasing).
+addopts = "-p httpxyz --cov --cov-report=xml"
 
 [tool.coverage.run]
 source = ["wapitiCore"]
