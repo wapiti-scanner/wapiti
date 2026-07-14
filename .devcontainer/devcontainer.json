@@ -2,7 +2,11 @@
 	"name": "Wapiti Development",
 	"build": {
 		"dockerfile": "Dockerfile",
-		"context": ".."
+		"context": "..",
+		"args": {
+			"USER_UID": "${localEnv:UID}",
+			"USER_GID": "${localEnv:GID}"
+		}
 	},
 	"features": {},
 	"customizations": {
@@ -15,7 +19,7 @@
 				"charliermarsh.ruff"
 			],
 			"settings": {
-				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"python.defaultInterpreterPath": "/workspace/.venv/bin/python",
 				"python.linting.enabled": true,
 				"python.linting.pylintEnabled": true,
 				"python.formatting.provider": "black",
@@ -27,11 +31,18 @@
 		}
 	},
 	"forwardPorts": [],
-	"postCreateCommand": "pip install -e '.[dev]' && playwright install --with-deps",
-	"remoteUser": "root",
+	"postCreateCommand": "bash -c '[ -d .venv ] || python3 -m venv .venv; .venv/bin/pip install -q --upgrade pip; .venv/bin/pip install -e \".[dev]\" --upgrade'",
+	"remoteUser": "wapiti",
 	"workspaceFolder": "/workspace",
+	"containerEnv": {
+		"PATH": "/workspace/.venv/bin:/usr/local/bin:/usr/bin:/bin:/home/wapiti/.local/bin"
+	},
 	"mounts": [
-		"source=${localWorkspaceFolder},target=/workspace,type=bind"
+		"source=${localWorkspaceFolder},target=/workspace,type=bind",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/wapiti/.gitconfig,type=bind,readonly",
+		"source=${localEnv:HOME}/.ssh,target=/home/wapiti/.ssh,type=bind,readonly",
+		"source=${localEnv:HOME}/.gnupg,target=/home/wapiti/.gnupg,type=bind,readonly",
+		"type=volume,source=wapiti-pip-cache,target=/home/wapiti/.cache/pip"
 	]
 }
 
