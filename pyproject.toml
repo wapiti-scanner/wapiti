@@ -32,7 +32,7 @@ classifiers = [
         "Topic :: Software Development :: Testing"
 ]
 dependencies = [
-    "aiosqlite>=0.19,<0.22.0",
+    "aiosqlite>=0.22.1,<0.23",
     "playwright>=1.42,<2.0",
     "beautifulsoup4>=4.12,<5.0",
     "browser-cookie3>=0.19,<0.21",
@@ -41,8 +41,8 @@ dependencies = [
     "httpx[brotli,socks]>=0.27,<1.0",
     "httpx-ntlm>=1.4,<2.0",
     "mako>=1.2,<2.0",
-    "mitmproxy>=12.0,<13.0",
-    "packaging>=23.0,<26.0",
+    "mitmproxy>=12.2.3,<13.0",
+    "packaging>=23.0,<27.0",
     "sqlalchemy>=2.0,<3.0",
     "tld>=0.13,<0.14",
     "wapiti-swagger>=0.1.9,<0.2.0",
@@ -59,20 +59,20 @@ wapiti-install-headless-browser = "wapitiCore.main.headless:install_browser"
 
 [project.optional-dependencies]
 test = [
-  "pytest>=8.0,<9.0",
-  "pytest-cov>=4.1,<5.0",
-  "pytest-asyncio>=0.23,<1.0",
-  "respx>=0.22,<1.0",
+  "pytest>=8.0,<10.0",
+  "pytest-cov>=7.0,<8.0",
+  "pytest-asyncio>=1.0,<2.0",
+  "respx>=0.23.1,<1.0",
 ]
 
 dev = [
   "build",
   "wheel",
-  "pylint>=3.2,<4.0",
-  "pytest>=8.0,<9.0",
-  "pytest-cov>=4.1,<5.0",
-  "pytest-asyncio>=0.23,<1.0",
-  "respx>=0.22,<1.0",
+  "pylint>=4.0,<5.0",
+  "pytest>=8.0,<10.0",
+  "pytest-cov>=7.0,<8.0",
+  "pytest-asyncio>=1.0,<2.0",
+  "respx>=0.23.1,<1.0",
   "humanize>=4.5,<5.0",
 ]
 
@@ -84,6 +84,7 @@ testpaths = [
     "tests",
 ]
 addopts = "--cov --cov-report=xml"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 source = ["wapitiCore"]
