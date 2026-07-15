@@ -39,7 +39,7 @@ from sqlite3 import OperationalError
 try:
     import sqlalchemy.dialects.sqlite.aiosqlite as sa_aiosqlite  # type: ignore[import-untyped] # noqa: E501
 
-    _ORIGINAL_TERMINATE = sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close
+    _ORIGINAL_TERMINATE = sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close  # pylint: disable=protected-access
 
     async def _timed_terminate_graceful_close(self):
         try:
@@ -47,7 +47,7 @@ try:
         except asyncio.TimeoutError:
             pass  # terminate() will call force_close()
 
-    sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close = (  # type: ignore[method-assign] # noqa: E501
+    sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close = (  # type: ignore[method-assign] # pylint: disable=protected-access  # noqa: E501
         _timed_terminate_graceful_close
     )
 except (ImportError, AttributeError):

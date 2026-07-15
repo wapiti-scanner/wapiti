@@ -1,3 +1,4 @@
+import asyncio
 import types
 from pathlib import Path
 from typing import Tuple
@@ -447,3 +448,33 @@ async def test_init_attack_modules_sorts_by_priority():
     assert {m.name for m in modules} == {"low", "high"}
     # Ensure they are sorted by PRIORITY (high first, then low)
     assert [m.name for m in modules] == ["high", "low"]
+
+
+@pytest.mark.asyncio
+async def test_attack_wrapper_returns_early_when_task_cancelled():
+    scanner = ActiveScanner(MagicMock(), MagicMock())
+    task = asyncio.create_task(asyncio.sleep(3600))
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+    scanner._current_attack_task = task
+    assert task.cancelled()
+
+    scanner._bug_report = True
+    scanner.send_bug_report = AsyncMock()
+
+    attack_module = MagicMock()
+    attack_module.name = "test_module"
+    attack_module.must_attack = AsyncMock(side_effect=Exception("db error during cancellation"))
+    attack_module.attack = AsyncMock()
+
+    request = MagicMock()
+    response = MagicMock()
+    attacked_ids = set()
+    semaphore = asyncio.Semaphore(10)
+
+    await scanner._attack_wrapper(attack_module, request, response, attacked_ids, semaphore)
+
+    scanner.send_bug_report.assert_not_called()
