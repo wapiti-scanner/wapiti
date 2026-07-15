@@ -27,6 +27,32 @@ from importlib import import_module
 from inspect import getdoc
 from sqlite3 import OperationalError
 
+# ── Monkey-patch SQLAlchemy's aiosqlite connection termination ──────────────
+# With aiosqlite >= 0.22, Connection.close() can hang when called from inside
+# asyncio.shield() during task cancellation (the worker-thread future never
+# resolves).  SQLAlchemy wraps it in asyncio.shield() so the hang propagates
+# to the event loop teardown and the process must be killed.
+#
+# We add a 5-second timeout to the graceful close.  If the close hangs,
+# asyncio.TimeoutError is raised, which terminate() catches (it is listed in
+# _terminate_handled_exceptions) and falls back to _terminate_force_close().
+try:
+    import sqlalchemy.dialects.sqlite.aiosqlite as sa_aiosqlite  # type: ignore[import-untyped] # noqa: E501
+
+    _ORIGINAL_TERMINATE = sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close
+
+    async def _timed_terminate_graceful_close(self):
+        try:
+            await asyncio.wait_for(_ORIGINAL_TERMINATE(self), timeout=5.0)
+        except asyncio.TimeoutError:
+            pass  # terminate() will call force_close()
+
+    sa_aiosqlite.AsyncAdapt_terminate._terminate_graceful_close = (  # type: ignore[method-assign] # noqa: E501
+        _timed_terminate_graceful_close
+    )
+except (ImportError, AttributeError):
+    pass  # aiosqlite or SQLAlchemy not available (tests, minimal install)
+
 import httpx
 from httpx import RequestError
 
@@ -515,4 +541,28 @@ async def wapiti_main():
 
 
 def wapiti_asyncio_wrapper():
-    asyncio.run(wapiti_main())
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(wapiti_main())
+    except (KeyboardInterrupt, RuntimeError):
+        pass
+    finally:
+        try:
+            loop.run_until_complete(_shutdown(loop))
+        except (asyncio.TimeoutError, KeyboardInterrupt, RuntimeError):
+            pass
+        try:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+        except (RuntimeError, KeyboardInterrupt):
+            pass
+        loop.close()
+
+
+async def _shutdown(loop, timeout=5.0):
+    current = asyncio.current_task()
+    pending = [t for t in asyncio.all_tasks(loop) if t is not current]
+    for t in pending:
+        t.cancel()
+    if pending:
+        await asyncio.wait(pending, timeout=timeout)

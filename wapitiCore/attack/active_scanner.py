@@ -201,6 +201,10 @@ class ActiveScanner:
             except InvalidURL:
                 pass
             except Exception as exception:  # pylint: disable=broad-except
+                # If the attack task was cancelled, DB connection errors during
+                # cleanup are expected side effects, not real bugs.
+                if self._current_attack_task is not None and self._current_attack_task.cancelled():
+                    return
                 exception_traceback = sys.exc_info()[2]
                 logging.exception("An exception occurred in module %s", attack_module.name)
                 if self._bug_report:
