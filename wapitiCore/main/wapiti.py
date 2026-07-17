@@ -22,6 +22,7 @@ import codecs
 import os
 import signal
 import sys
+import threading
 from argparse import Namespace
 from importlib import import_module
 from inspect import getdoc
@@ -514,5 +515,38 @@ async def wapiti_main():
         pass
 
 
+# Safety net: if the asyncio event loop shutdown deadlocks, force the process
+# out after this many seconds. A normal shutdown finishes in well under a
+# second, so this timer is disarmed long before it can fire.
+SHUTDOWN_WATCHDOG_TIMEOUT = 5.0
+
+
+def _force_process_exit():
+    # Called from a watchdog thread when the event loop teardown hangs.
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)  # pylint: disable=protected-access
+
+
 def wapiti_asyncio_wrapper():
-    asyncio.run(wapiti_main())
+    # We can't simply call asyncio.run(): its shutdown step cancels the tasks
+    # left pending and waits for them to complete. When the user interrupts an
+    # attack (Ctrl+C), the attack tasks still hold aiosqlite connections and
+    # SQLAlchemy tries to tear them down while they are being cancelled. With
+    # aiosqlite >= 0.22 on Python 3.13 that connection close never completes,
+    # so the shutdown hangs forever and Wapiti has to be killed (see #802).
+    #
+    # The report and the session database are already flushed once wapiti_main()
+    # returns, so we run the coroutine through an explicit asyncio.Runner and
+    # arm a watchdog around its close() step: a clean shutdown disarms it at
+    # once, a deadlocked one lets the watchdog force a graceful exit.
+    watchdog = threading.Timer(SHUTDOWN_WATCHDOG_TIMEOUT, _force_process_exit)
+    watchdog.daemon = True
+    try:
+        with asyncio.Runner() as runner:
+            try:
+                runner.run(wapiti_main())
+            finally:
+                watchdog.start()
+    finally:
+        watchdog.cancel()
