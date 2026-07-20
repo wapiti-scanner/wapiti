@@ -1,5 +1,6 @@
 import types
-from unittest.mock import MagicMock, patch, ANY
+from collections import defaultdict
+from unittest.mock import AsyncMock, MagicMock, patch, ANY
 from pathlib import Path
 
 import pytest
@@ -65,6 +66,50 @@ def test_log_summary_stays_silent_when_nothing_suppressed(mock_log_blue, _, mock
     scanner.log_summary()
 
     mock_log_blue.assert_not_called()
+
+
+@patch("pathlib.Path.glob", return_value=[])
+def test_suppressed_by_category_aggregates_modules(_, mock_persister):
+    """Per-module category counters are summed into a single per-category breakdown."""
+    scanner = PassiveScanner(persister=mock_persister)
+
+    first = MagicMock()
+    first.suppressed_by_category = defaultdict(int, {"CSP": 2, "HSTS": 1})
+    second = MagicMock()
+    second.suppressed_by_category = defaultdict(int, {"CSP": 3})
+    scanner._modules = {"csp": first, "https_redirect": second}
+
+    assert scanner.suppressed_by_category() == {"CSP": 5, "HSTS": 1}
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_persist_suppressed_findings_writes_non_empty_counts(_, mock_persister):
+    mock_persister.set_suppressed_findings = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+
+    module = MagicMock()
+    module.suppressed_by_category = defaultdict(int, {"CSP": 4})
+    scanner._modules = {"csp": module}
+
+    await scanner.persist_suppressed_findings()
+
+    mock_persister.set_suppressed_findings.assert_awaited_once_with({"CSP": 4})
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_persist_suppressed_findings_skips_when_nothing_suppressed(_, mock_persister):
+    mock_persister.set_suppressed_findings = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+
+    module = MagicMock()
+    module.suppressed_by_category = defaultdict(int)
+    scanner._modules = {"csp": module}
+
+    await scanner.persist_suppressed_findings()
+
+    mock_persister.set_suppressed_findings.assert_not_awaited()
 
 
 @patch("pathlib.Path.glob", return_value=[Path("mod_broken.py")])

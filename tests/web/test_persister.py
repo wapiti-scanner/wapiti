@@ -258,3 +258,29 @@ async def test_raw_post():
     payload = [__ async for __ in persister.get_payloads()][0]
     assert naughty_json == payload.evil_request
     assert payload.parameter == "z"
+
+
+@pytest.mark.asyncio
+async def test_suppressed_findings_round_trip():
+    try:
+        os.unlink("/tmp/suppressed.db")
+    except FileNotFoundError:
+        pass
+
+    persister = SqlPersister("/tmp/suppressed.db")
+    await persister.create()
+
+    # No suppressed findings stored yet
+    assert await persister.get_suppressed_findings() == {}
+
+    await persister.set_suppressed_findings({"Content Security Policy Configuration": 5, "HSTS": 2})
+    assert await persister.get_suppressed_findings() == {
+        "Content Security Policy Configuration": 5,
+        "HSTS": 2,
+    }
+
+    # Writing again overwrites the previous value (upsert on the key)
+    await persister.set_suppressed_findings({"HSTS": 3})
+    assert await persister.get_suppressed_findings() == {"HSTS": 3}
+
+    await persister.close()

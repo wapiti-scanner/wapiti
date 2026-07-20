@@ -77,7 +77,7 @@ class ModuleCsp(PassiveModule):
         if not csp_header_value:
             identifier = (request.netloc, "CSP", "Missing", posture)
 
-            if self.should_report(identifier):
+            if self.should_report(identifier, CspFinding):
                 log_red(MSG_NO_CSP.format(request.url))
                 yield VulnerabilityInstance(
                     finding_class=CspFinding,
@@ -91,7 +91,7 @@ class ModuleCsp(PassiveModule):
 
             for directive in find_unknown_directives(csp_dict):
                 identifier = (request.netloc, directive, "Unknown", posture)
-                if self.should_report(identifier):
+                if self.should_report(identifier, CspFinding):
                     info = MSG_CSP_UNKNOWN.format(directive, request.url)
                     log_red(info)
                     yield VulnerabilityInstance(
@@ -119,7 +119,7 @@ class ModuleCsp(PassiveModule):
 
                 if info:
                     identifier = (request.netloc, policy_name, "Unsafe" if result == 0 else "Missing", posture)
-                    if self.should_report(identifier):
+                    if self.should_report(identifier, CspFinding):
                         log_red(info)
                         yield VulnerabilityInstance(
                             finding_class=CspFinding,

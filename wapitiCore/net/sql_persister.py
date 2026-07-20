@@ -199,6 +199,36 @@ class SqlPersister:
             self.root_url = value
             return value
 
+    SUPPRESSED_FINDINGS_KEY = "suppressed_findings"
+
+    async def set_suppressed_findings(self, counts: Dict[str, int]):
+        """Store, per vulnerability category, how many similar passive alerts were suppressed.
+
+        Kept in the generic ``scan_infos`` key/value table as a single JSON blob so
+        the report can surface it even when generated in a separate step. Overwrites
+        any previous value for this scan (upsert on the key).
+        """
+        async with self._engine.begin() as conn:
+            await conn.execute(
+                self.scan_infos.delete().where(self.scan_infos.c.key == self.SUPPRESSED_FINDINGS_KEY)
+            )
+            await conn.execute(self.scan_infos.insert().values(
+                key=self.SUPPRESSED_FINDINGS_KEY,
+                value=json.dumps(counts)
+            ))
+
+    async def get_suppressed_findings(self) -> Dict[str, int]:
+        """Return the per-category suppressed-alert counts, or an empty dict if none were stored."""
+        statement = select(self.scan_infos).where(
+            self.scan_infos.c.key == self.SUPPRESSED_FINDINGS_KEY
+        ).limit(1)
+        async with self._engine.begin() as conn:
+            result = await conn.execute(statement)
+            row = result.fetchone()
+            if row is None:
+                return {}
+            return json.loads(row.value)
+
     async def set_to_browse(self, to_browse: Sequence[Request]):
         await self.save_requests([(request, None) for request in to_browse])
 

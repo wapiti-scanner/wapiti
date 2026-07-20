@@ -614,5 +614,6 @@
     "auth": null,
     "crawled_pages_nbr": 123456,
     "detailed_report_level": 0
-  }
+  },
+  "suppressed_findings": {}
 }

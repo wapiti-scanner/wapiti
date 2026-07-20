@@ -45,7 +45,12 @@
                             ${vuln_name}
                             % endif
                         </td>
-                        <td class="small text-centered">${len(vulnerabilities[vuln_name])}</td>
+                        <td class="small text-centered">
+                            ${len(vulnerabilities[vuln_name])}
+                            % if suppressed.get(vuln_name):
+                            <span class="small" title="Similar findings hidden to keep the report readable">(+${suppressed[vuln_name]} suppressed)</span>
+                            % endif
+                        </td>
                     </tr>
                 % endfor
                 % for i, anomaly_name in enumerate(anomalies):
@@ -129,6 +134,9 @@
                         </section>
                     </div>
                     % endfor
+                    % if suppressed.get(vuln_name):
+                    <p class="small"><em>${suppressed[vuln_name]} more similar finding(s) were suppressed to keep the report readable.</em></p>
+                    % endif
 
                 <dl><dt>Solutions</dt><dd>${flaws[vuln_name]["sol"]}</dd></dl>
                 <h5>References</h5>

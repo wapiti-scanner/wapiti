@@ -105,7 +105,7 @@ class ModuleCookieFlags(PassiveModule):
             # HttpOnly check
             if not httponly_flag:
                 identifier = (cookie_name, cookie_domain, "HttpOnly")
-                if self.should_report(identifier):
+                if self.should_report(identifier, HttpOnlyFinding):
                     log_red(INFO_COOKIE_HTTPONLY.format(cookie_name, request.url))
                     yield VulnerabilityInstance(
                         finding_class=HttpOnlyFinding,
@@ -118,7 +118,7 @@ class ModuleCookieFlags(PassiveModule):
             # Secure flag check
             if not secure_flag:
                 identifier = (cookie_name, cookie_domain, "Secure")
-                if self.should_report(identifier):
+                if self.should_report(identifier, SecureCookieFinding):
                     log_red(INFO_COOKIE_SECURE.format(cookie_name, request.url))
                     yield VulnerabilityInstance(
                         finding_class=SecureCookieFinding,

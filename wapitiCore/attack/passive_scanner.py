@@ -1,3 +1,4 @@
+from collections import defaultdict
 from importlib import import_module
 from pathlib import Path
 from typing import Dict
@@ -73,6 +74,31 @@ class PassiveScanner:
         log_blue("[*] Some similar passive alerts were suppressed to keep the report readable:")
         for module_name, suppressed in suppressed_by_module.items():
             log_blue("    {0}: {1} similar alert(s) suppressed", module_name, suppressed)
+
+    def suppressed_by_category(self) -> Dict[str, int]:
+        """Total number of suppressed alerts, broken down per vulnerability category.
+
+        Aggregates every module's ``suppressed_by_category`` counter. The report
+        is organized per category (finding class), not per module, so this is the
+        breakdown a report needs to annotate the right summary line and section.
+        """
+        totals: Dict[str, int] = defaultdict(int)
+        for module_instance in self._modules.values():
+            for category, count in getattr(module_instance, "suppressed_by_category", {}).items():
+                totals[category] += count
+        return dict(totals)
+
+    async def persist_suppressed_findings(self):
+        """Store the per-category suppression counts so the report survives the crawl.
+
+        The report is generated in a later, possibly decoupled step (e.g. a resumed
+        scan with ``--skip-crawl``, or regenerating a report from the ``.db`` file),
+        when the in-memory module counters are gone. Persisting them keeps the
+        information available to every report format.
+        """
+        counts = self.suppressed_by_category()
+        if counts:
+            await self._persister.set_suppressed_findings(counts)
 
     async def _record_vulnerability_instance(self, vuln_instance: VulnerabilityInstance, module: str):
         await self._persister.add_payload(

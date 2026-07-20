@@ -85,7 +85,7 @@ class ModuleHttpsRedirect(PassiveModule):
                 finding_type = "no_redirect"
 
             identifier = (host, sensitive_reason, finding_type)
-            if self.should_report(identifier):
+            if self.should_report(identifier, HstsFinding):
                 # Report the vulnerability based on the type of redirection
                 if finding_type == "redirect_to_https":
                     full_info = self.MSG_SENSITIVE_REDIRECT_TO_HTTPS.format(reason=sensitive_reason, url=request.url)
@@ -107,7 +107,7 @@ class ModuleHttpsRedirect(PassiveModule):
                 )
         elif "html" in response.headers.get("content-type", "html").lower():
             # Non-sensitive case, check for general lack of HTTPS redirection
-            if self.should_report(host):
+            if self.should_report(host, HstsFinding):
                 if not response.is_redirect or urlparse(response.redirection_url).scheme != "https":
                     log_orange(f"Host {host} serves HTTP content without redirecting to HTTPS.")
                     yield VulnerabilityInstance(

@@ -103,6 +103,9 @@ class XMLReportGenerator(JSONReportGenerator):
             # Child nodes with a description of the flaw type
             flaw_type_node = self._xml_doc.createElement(classification)
             flaw_type_node.setAttribute("name", flaw_type_name)
+            suppressed = self._suppressed.get(flaw_type_name)
+            if suppressed:
+                flaw_type_node.setAttribute("suppressed", str(suppressed))
             flaw_type_desc = self._xml_doc.createElement("description")
             flaw_type_desc.appendChild(self._xml_doc.createCDATASection(flaw_type["desc"]))
             flaw_type_node.appendChild(flaw_type_desc)

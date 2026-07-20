@@ -111,6 +111,7 @@ class HTMLReportGenerator(JSONReportGenerator):
                     vulnerabilities=self._vulns,
                     anomalies=self._anomalies,
                     additionals=self._additionals,
+                    suppressed=self._suppressed,
                     flaws=self._flaw_types,
                     level_to_css_class=level_to_css_class,
                     detailed_report_level=self._infos["detailed_report_level"]

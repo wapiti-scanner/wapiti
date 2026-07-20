@@ -316,6 +316,55 @@ def test_html_report_escapes_target_controlled_data():
     assert "&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;" in report
 
 
+@pytest.mark.parametrize("report_format", ["txt", "md", "json", "xml", "html"])
+def test_reports_surface_suppressed_passive_findings(report_format):
+    """A non-zero suppression count for a category is reflected in the report."""
+    category = "Content Security Policy Configuration"
+    report_gen = GENERATORS[report_format]()
+
+    report_gen.set_report_info(
+        "http://perdu.com", "folder", gmtime(0), "WAPITI_VERSION", None, None, 1, 0
+    )
+    for vul in vulnerabilities:
+        report_gen.add_vulnerability_type(
+            vul.name(), vul.description(), vul.solution(),
+            flatten_references(vul.references()), vul.wstg_code()
+        )
+
+    request = Request("http://perdu.com/")
+    response = Response(
+        httpx.Response(status_code=200, headers=httpx.Headers([["Content-Type", "text/html"]]), text="x"),
+        url="http://perdu.com/"
+    )
+    report_gen.add_vulnerability(
+        category=category, level=1, request=request, response=response,
+        parameter="", info="No CSP", module="csp", wstg=["WSTG-CONF-12"]
+    )
+    report_gen.set_suppressed_findings({category: 7})
+
+    if report_format == "html":
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_gen.generate_report(temp_dir)
+            with open(report_gen.final_path, encoding="utf-8") as report_fd:
+                content = report_fd.read()
+    else:
+        temp_file = tempfile.NamedTemporaryFile(delete=False, mode="w", encoding="utf-8")
+        temp_file.close()
+        report_gen.generate_report(temp_file.name)
+        with open(temp_file.name, encoding="utf-8") as report_fd:
+            content = report_fd.read()
+        os.remove(temp_file.name)
+
+    if report_format == "json":
+        generated = json.loads(content)
+        assert generated["suppressed_findings"] == {category: 7}
+    elif report_format == "xml":
+        assert 'suppressed="7"' in content
+    else:
+        assert "7" in content
+        assert "suppressed" in content.lower()
+
+
 def test_level_to_css_class():
     assert level_to_css_class(CRITICAL_LEVEL) == "severity-critical"
     assert level_to_css_class(HIGH_LEVEL) == "severity-high"

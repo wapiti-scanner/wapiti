@@ -67,7 +67,7 @@ class ModuleInconsistentRedirection(PassiveModule):
             return
 
         # Deduplicate with response MD5
-        if not self.should_report(response.md5):
+        if not self.should_report(response.md5, InconsistentRedirectionFinding):
             return
 
         log_orange(
