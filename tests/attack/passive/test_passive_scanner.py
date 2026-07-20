@@ -28,8 +28,8 @@ def test_import_error_is_handled(mock_log_error, _, mock_persister):
 
 
 @patch("pathlib.Path.glob", return_value=[])
-@patch("wapitiCore.attack.passive_scanner.logging.info")
-def test_log_summary_reports_only_modules_with_suppressed_findings(mock_log_info, _, mock_persister):
+@patch("wapitiCore.attack.passive_scanner.log_blue")
+def test_log_summary_reports_only_modules_with_suppressed_findings(mock_log_blue, _, mock_persister):
     """Only modules that actually suppressed alerts are logged."""
     scanner = PassiveScanner(persister=mock_persister)
 
@@ -41,9 +41,30 @@ def test_log_summary_reports_only_modules_with_suppressed_findings(mock_log_info
 
     scanner.log_summary()
 
-    mock_log_info.assert_called_once_with(
-        "%s similar alerts were suppressed by module %s", 3, "noisy"
+    # A header plus exactly one detail line for the only noisy module.
+    mock_log_blue.assert_any_call(
+        "    {0}: {1} similar alert(s) suppressed", "noisy", 3
     )
+    detail_calls = [
+        call for call in mock_log_blue.call_args_list
+        if call.args and call.args[0].startswith("    {0}")
+    ]
+    assert len(detail_calls) == 1
+
+
+@patch("pathlib.Path.glob", return_value=[])
+@patch("wapitiCore.attack.passive_scanner.log_blue")
+def test_log_summary_stays_silent_when_nothing_suppressed(mock_log_blue, _, mock_persister):
+    """No output at all (not even a header) when no alert was suppressed."""
+    scanner = PassiveScanner(persister=mock_persister)
+
+    silent = MagicMock()
+    silent.suppressed_findings = 0
+    scanner._modules = {"silent": silent}
+
+    scanner.log_summary()
+
+    mock_log_blue.assert_not_called()
 
 
 @patch("pathlib.Path.glob", return_value=[Path("mod_broken.py")])
