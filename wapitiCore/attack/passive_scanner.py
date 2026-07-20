@@ -5,7 +5,7 @@ from typing import Dict
 from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.attack import Attack
 from wapitiCore.attack.modules.core import ModuleActivationSettings
-from wapitiCore.main.log import logging
+from wapitiCore.main.log import log_blue, logging
 from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
 from wapitiCore.net.sql_persister import SqlPersister
@@ -59,12 +59,20 @@ class PassiveScanner:
         reports the volume that was silently dropped, mirroring the way the active
         scanner surfaces its ``network_errors`` counter.
         """
-        for module_name, module_instance in self._modules.items():
-            suppressed = getattr(module_instance, "suppressed_findings", 0)
-            if suppressed:
-                logging.info(
-                    "%s similar alerts were suppressed by module %s", suppressed, module_name
-                )
+        suppressed_by_module = {
+            module_name: getattr(module_instance, "suppressed_findings", 0)
+            for module_name, module_instance in self._modules.items()
+        }
+        suppressed_by_module = {
+            module_name: count for module_name, count in suppressed_by_module.items() if count
+        }
+        if not suppressed_by_module:
+            return
+
+        log_blue("")
+        log_blue("[*] Some similar passive alerts were suppressed to keep the report readable:")
+        for module_name, suppressed in suppressed_by_module.items():
+            log_blue("    {0}: {1} similar alert(s) suppressed", module_name, suppressed)
 
     async def _record_vulnerability_instance(self, vuln_instance: VulnerabilityInstance, module: str):
         await self._persister.add_payload(
