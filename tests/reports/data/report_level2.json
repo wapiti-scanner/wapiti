@@ -622,5 +622,6 @@
       }
     ],
     "detailed_report_level": 2
-  }
+  },
+  "suppressed_findings": {}
 }

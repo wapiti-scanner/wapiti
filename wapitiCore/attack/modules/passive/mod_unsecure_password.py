@@ -31,7 +31,7 @@ class ModuleUnsecurePassword(PassiveModule):
                         # flood the report. The exact URL is still displayed.
                         form_identifier = (request.path, form.method.upper(), field.name)
 
-                        if not self.should_report(form_identifier):
+                        if not self.should_report(form_identifier, CleartextPasswordSubmissionFinding):
                             continue
 
                         log_red(

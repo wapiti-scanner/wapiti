@@ -38,6 +38,14 @@ class ReportGenerator:
         self._vulns = {}
         self._anomalies = {}
         self._additionals = {}
+        # Per-category count of passive alerts that were suppressed to avoid
+        # flooding the report (see PassiveModule.should_report). Keyed by the
+        # vulnerability category, matching the keys of self._vulns.
+        self._suppressed = {}
+
+    def set_suppressed_findings(self, counts):
+        """Record, per category, how many similar passive alerts were suppressed."""
+        self._suppressed = counts or {}
 
     # pylint: disable=too-many-positional-arguments
     def set_report_info(

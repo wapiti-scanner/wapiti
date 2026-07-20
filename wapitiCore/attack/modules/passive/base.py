@@ -40,17 +40,27 @@ class PassiveModule:
         self._occurrences: dict = defaultdict(int)
         # Number of alerts dropped because their key already reached LIMIT.
         self.suppressed_findings: int = 0
+        # Same count, but broken down per vulnerability category (finding class
+        # name) so the report can annotate the right summary line and section.
+        self.suppressed_by_category: dict = defaultdict(int)
 
-    def should_report(self, key: Any) -> bool:
+    def should_report(self, key: Any, finding_class=None) -> bool:
         """Return True for the first :attr:`LIMIT` occurrences of a key, then False.
 
         A single decision drives both logging and persistence: when it returns
         False the caller must emit nothing (no log line, no finding) — the alert
         is only counted as suppressed. This guarantees logs and report never
         diverge.
+
+        ``finding_class`` is the vulnerability class the caller would have
+        emitted; when provided, suppressions are also tallied per category
+        (``finding_class.name()``) so the report can surface them where the
+        matching findings live.
         """
         if self._occurrences[key] >= self.LIMIT:
             self.suppressed_findings += 1
+            if finding_class is not None:
+                self.suppressed_by_category[finding_class.name()] += 1
             return False
 
         self._occurrences[key] += 1

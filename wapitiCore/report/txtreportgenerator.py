@@ -67,7 +67,9 @@ class TXTReportGenerator(ReportGenerator):
 
                 txt_report_file.write(title("Summary of vulnerabilities :"))
                 for category, vulnerabilities in self._vulns.items():
-                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}\n".rjust(NB_COLUMNS))
+                    suppressed = self._suppressed.get(category)
+                    suffix = f"  (+{suppressed} similar suppressed)" if suppressed else ""
+                    txt_report_file.write(f"{category} : {len(vulnerabilities):>3}{suffix}\n".rjust(NB_COLUMNS))
                 txt_report_file.write(separator)
 
                 for category, vulnerabilities in self._vulns.items():
@@ -86,6 +88,11 @@ class TXTReportGenerator(ReportGenerator):
                             txt_report_file.write(f"cURL command PoC : \"{curl_repr(vuln['request'])}\"")
                             txt_report_file.write("\n\n")
                             txt_report_file.write(center("*   *   *\n\n"))
+                        suppressed = self._suppressed.get(category)
+                        if suppressed:
+                            txt_report_file.write(
+                                f"{suppressed} more similar finding(s) were suppressed to keep the report readable.\n"
+                            )
                         txt_report_file.write(separator)
 
                 txt_report_file.write("\n")

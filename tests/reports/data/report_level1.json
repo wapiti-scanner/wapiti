@@ -604,5 +604,6 @@
       }
     ],
     "detailed_report_level": 1
-  }
+  },
+  "suppressed_findings": {}
 }

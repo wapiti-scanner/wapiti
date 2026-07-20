@@ -87,7 +87,7 @@ class ModuleInformationDisclosure(PassiveModule):
             if not _is_realistic_path(evidence):
                 continue
 
-            if not self.should_report(evidence.rstrip(".")):
+            if not self.should_report(evidence.rstrip("."), InformationDisclosureFinding):
                 continue
 
             log_orange(f"Potential full path disclosure in {request.url}: {evidence}")

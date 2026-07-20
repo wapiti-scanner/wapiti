@@ -23,3 +23,40 @@ def test_limit_allows_several_occurrences_before_suppressing():
     assert module.should_report("k") is False
 
     assert module.suppressed_findings == 1
+
+
+class _FindingA:
+    @staticmethod
+    def name():
+        return "Category A"
+
+
+class _FindingB:
+    @staticmethod
+    def name():
+        return "Category B"
+
+
+def test_suppressions_are_tallied_per_finding_category():
+    module = PassiveModule()
+
+    # First occurrence of each key is reported, subsequent ones are suppressed
+    # and counted against the finding class category.
+    assert module.should_report("a", _FindingA) is True
+    assert module.should_report("a", _FindingA) is False
+    assert module.should_report("a", _FindingA) is False
+    assert module.should_report("b", _FindingB) is True
+    assert module.should_report("b", _FindingB) is False
+
+    assert module.suppressed_findings == 3
+    assert dict(module.suppressed_by_category) == {"Category A": 2, "Category B": 1}
+
+
+def test_suppressions_without_category_only_bump_the_total():
+    module = PassiveModule()
+
+    assert module.should_report("k") is True
+    assert module.should_report("k") is False
+
+    assert module.suppressed_findings == 1
+    assert dict(module.suppressed_by_category) == {}

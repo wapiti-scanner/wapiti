@@ -167,6 +167,8 @@ class Wapiti:
             detailed_report_level=self.detailed_report_level
         )
 
+        self.report_gen.set_suppressed_findings(await self.persister.get_suppressed_findings())
+
         for vul in vulnerabilities:
             self.report_gen.add_vulnerability_type(
                 vul.name(),
@@ -310,6 +312,7 @@ class Wapiti:
             await run_explorer(explorer)
 
         self._passive_scanner.log_summary()
+        await self._passive_scanner.persist_suppressed_findings()
 
     async def write_report(self):
         if not self.output_file:

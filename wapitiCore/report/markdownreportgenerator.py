@@ -47,7 +47,11 @@ class MarkdownReportGenerator(ReportGenerator):
             md_report_file.write("| Category | Count |\n")
             md_report_file.write("|---|---|\n")
             for category, vulnerabilities in self._vulns.items():
-                md_report_file.write(f"| {category} | {len(vulnerabilities)} |\n")
+                count = str(len(vulnerabilities))
+                suppressed = self._suppressed.get(category)
+                if suppressed:
+                    count += f" (+{suppressed} suppressed)"
+                md_report_file.write(f"| {category} | {count} |\n")
             md_report_file.write("\n---\n\n")
 
             for category, vulnerabilities in self._vulns.items():
@@ -63,6 +67,11 @@ class MarkdownReportGenerator(ReportGenerator):
                         md_report_file.write("\n**cURL command PoC**:\n\n")
                         md_report_file.write(f"```bash\n{curl_repr(vuln['request'])}\n```\n\n")
                         md_report_file.write("---\n\n")
+                    suppressed = self._suppressed.get(category)
+                    if suppressed:
+                        md_report_file.write(
+                            f"> {suppressed} more similar finding(s) were suppressed to keep the report readable.\n\n"
+                        )
             md_report_file.write("\n")
 
             md_report_file.write("## Summary of anomalies\n\n")

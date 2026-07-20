@@ -93,7 +93,7 @@ class ModuleHttpHeaders(PassiveModule):
             # once per (netloc, header), as before.
             identifier = (target, header_name, "not_set", "")
 
-            if self.should_report(identifier):
+            if self.should_report(identifier, finding_class):
                 log_red(f"{finding_info} on {request.url}")
                 return VulnerabilityInstance(
                     finding_class=finding_class,
@@ -108,7 +108,7 @@ class ModuleHttpHeaders(PassiveModule):
             # for the same header each surface, while identical ones are deduplicated.
             posture = response.headers[header_name].strip().lower()
             identifier = (target, header_name, "invalid_value", posture)
-            if self.should_report(identifier):
+            if self.should_report(identifier, finding_class):
                 log_orange(f"{finding_info} on {request.url}")
                 return VulnerabilityInstance(
                     finding_class=finding_class,

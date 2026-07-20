@@ -122,7 +122,7 @@ class ModuleStacktraceDisclosure(PassiveModule):
                 evidence = evidence[:150] + "..."
 
             key = (label, evidence)
-            if not self.should_report(key):
+            if not self.should_report(key, StacktraceDisclosureFinding):
                 continue
 
             log_orange(
