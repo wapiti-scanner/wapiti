@@ -95,6 +95,25 @@ def test_module_unsecure_password_deduplication(module):
     assert len(vulns2) == 0  # Second time: deduplicated
 
 
+def test_module_unsecure_password_dedup_ignores_query_string(module):
+    """The same page reached with different query strings is reported only once."""
+    html = """<form action="/login" method="post">
+                 <input type="password" name="pwd" />
+              </form>"""
+
+    req1, resp1 = create_mock_objects("http://example.com/Login.asp?RetURL=%2FDefault.asp", html)
+    req2, resp2 = create_mock_objects("http://example.com/Login.asp?RetURL=%2FSearch.asp", html)
+
+    vulns1 = list(module.analyze(req1, resp1))
+    assert len(vulns1) == 1
+    # Dedup ignores the query string, but the exact URL is still displayed.
+    assert vulns1[0].info.endswith(req1.url)
+    assert "RetURL=%2FDefault.asp" in vulns1[0].info
+
+    vulns2 = list(module.analyze(req2, resp2))
+    assert len(vulns2) == 0  # Same page, different query string -> suppressed
+
+
 def test_module_unsecure_password_multiple_fields(module):
     """If a form has multiple password fields, each should be reported."""
     html = """<form action="/register" method="post">

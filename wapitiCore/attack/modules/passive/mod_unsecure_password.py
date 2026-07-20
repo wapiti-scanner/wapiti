@@ -25,7 +25,11 @@ class ModuleUnsecurePassword(PassiveModule):
             if form.url.startswith("http://"):
                 for field in form.fields:
                     if field.tag_type == "password":
-                        form_identifier = (form.url, form.method.upper(), field.name)
+                        # Deduplicate on the page URL without its query string:
+                        # crawled variants differing only by parameters (e.g.
+                        # ?RetURL=...) point to the very same form and must not
+                        # flood the report. The exact URL is still displayed.
+                        form_identifier = (request.path, form.method.upper(), field.name)
 
                         if not self.should_report(form_identifier):
                             continue
