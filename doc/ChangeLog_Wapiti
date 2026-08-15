@@ -1,4 +1,9 @@
 27/07/2026
+    Wapiti 3.3.2
+    Explorer: scope soft-404 detection to non-error, non-PATH_INFO responses (#809)
+    Explorer: detect soft-404 / SPA catch-all pages before persisting them (#808)
+
+27/07/2026
     Wapiti 3.3.1
     Security: fix a stored XSS in the HTML report, target-controlled login form field names were rendered unescaped (CWE-79)
     Modules: new passive module stacktrace_disclosure, detecting leaked stack traces for Python, PHP, Java, .NET (YSOD), Node.js, Ruby and Go
