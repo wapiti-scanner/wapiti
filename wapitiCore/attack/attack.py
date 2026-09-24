@@ -700,7 +700,8 @@ class Mutator:
                     )
 
                 if "[VALUE]" in raw_payload:
-                    if not isinstance(saved_value, (int, str)):
+                    # A float reads back fine; None has no sensible textual form to reuse.
+                    if not isinstance(saved_value, (int, float, str)):
                         continue
 
                     raw_payload = raw_payload.replace("[VALUE]", str(saved_value))

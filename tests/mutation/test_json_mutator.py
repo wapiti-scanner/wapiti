@@ -28,6 +28,14 @@ from wapitiCore.net import Request
             [["dict_with_int_value"]],
         ],
         [
+            {"dict_with_float_value": 99.99},
+            [["dict_with_float_value"]],
+        ],
+        [
+            {"dict_with_null_value": None},
+            [["dict_with_null_value"]],
+        ],
+        [
             {
                 "nested_dict": {
                     "list_of_dicts": [
@@ -92,6 +100,8 @@ from wapitiCore.net import Request
         "empty dict",
         "dict with string value",
         "dict with int value",
+        "dict with float value",
+        "dict with null value",
         "nested dict > list > dict",
         "nested dict > list",
         "nested list > dict",

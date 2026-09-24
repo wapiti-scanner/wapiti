@@ -2,7 +2,9 @@ from typing import Generator, List, Union
 
 
 def find_injectable(parents: List[str], obj) -> Generator[List[Union[str, int]], None, None]:
-    if isinstance(obj, (str, int)):
+    # A JSON scalar of any type is a place a payload can go. Floats and nulls are
+    # just as injectable as strings and ints once the value reaches the backend.
+    if obj is None or isinstance(obj, (str, int, float)):
         yield parents
     elif isinstance(obj, list):
         # Only consider the first item in the list if not empty
