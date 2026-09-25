@@ -317,3 +317,19 @@ async def test_passive_scanner_state_round_trip():
     assert await persister.get_passive_scanner_state() == {"csp": {"occurrences": {"c": 1}}}
 
     await persister.close()
+
+
+@pytest.mark.asyncio
+async def test_flush_attacks_forgets_passive_scanner_state(tmp_path):
+    """Passive findings are deleted along with the payloads: their deduplication keys must go too,
+    or attacking again would count the same findings as suppressed instead of reporting them."""
+    persister = SqlPersister(str(tmp_path / "flush.db"))
+    await persister.create()
+    await persister.set_passive_scanner_state({
+        "stacktrace_disclosure": {"occurrences": [[[".NET", "SqlException"], 1]]}
+    })
+
+    await persister.flush_attacks()
+
+    assert await persister.get_passive_scanner_state() == {}
+    await persister.close()

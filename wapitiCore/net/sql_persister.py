@@ -1060,6 +1060,11 @@ class SqlPersister:
             await conn.execute(self.paths.delete().where(self.paths.c.evil == True))  # Evil requests
             # Remove params tied to deleted requests
             await conn.execute(self.params.delete().where(~self.params.c.path_id.in_(select(self.paths.c.path_id))))
+            # Passive findings were just deleted with the payloads: forget their deduplication state too,
+            # otherwise the same findings would be suppressed instead of reported when attacking again.
+            await conn.execute(
+                self.scan_infos.delete().where(self.scan_infos.c.key == self.PASSIVE_SCANNER_STATE_KEY)
+            )
 
     async def delete_path_by_id(self, path_id):
         # First remove all references to that path then remove it
