@@ -114,12 +114,15 @@ class Wapiti:
             os.makedirs(SqlPersister.CRAWLER_DATA_DIR)
 
         self.persister = SqlPersister(self._history_file)
+        # The same passive scanner instance analyses crawl and attack responses, so an alert
+        # already reported during the crawl is not reported again during the attacks.
+        self._passive_scanner = PassiveScanner(persister=self.persister)
         self._active_scanner = ActiveScanner(
             persister=self.persister,
             crawler_configuration=self.crawler_configuration,
-            verbosity=self.verbose
+            verbosity=self.verbose,
+            passive_scanner=self._passive_scanner,
         )
-        self._passive_scanner = PassiveScanner(persister=self.persister)
 
     def refresh_logging(self):
         verbosity_levels = {
@@ -166,8 +169,6 @@ class Wapiti:
             crawled_pages_nbr=await self.count_resources(),
             detailed_report_level=self.detailed_report_level
         )
-
-        self.report_gen.set_suppressed_findings(await self.persister.get_suppressed_findings())
 
         for vul in vulnerabilities:
             self.report_gen.add_vulnerability_type(
@@ -329,6 +330,10 @@ class Wapiti:
             else:
                 filename = f"{self.server.replace(':', '_')}_{strftime('%m%d%Y_%H%M', self.report_gen.scan_date)}"
                 self.output_file = filename + "." + self.report_generator_type
+
+        # Read here rather than in init_report(): passive modules also run during the attacks, which
+        # persist their suppression counters once finished.
+        self.report_gen.set_suppressed_findings(await self.persister.get_suppressed_findings())
 
         async for payload in self.persister.get_payloads():
             if payload.type == "vulnerability":

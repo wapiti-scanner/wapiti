@@ -7,7 +7,7 @@ from importlib import import_module
 from operator import attrgetter
 from pathlib import Path
 from traceback import print_tb
-from typing import List, Dict, Optional, Set, AsyncIterator, Tuple, Type
+from typing import List, Dict, Optional, Set, AsyncIterator, Tuple, Type, TYPE_CHECKING
 from uuid import uuid1
 
 from httpx import RequestError, InvalidURL, __version__ as httpx_version
@@ -19,6 +19,10 @@ from wapitiCore.attack.attack import Attack, AttackProtocol
 from wapitiCore.attack.modules.core import all_modules, ModuleActivationSettings
 from wapitiCore.net import Request, Response
 from wapitiCore.net.crawler import AsyncCrawler
+
+if TYPE_CHECKING:
+    # passive_scanner imports this module, a runtime import would be circular
+    from wapitiCore.attack.passive_scanner import PassiveScanner
 
 
 class UserChoice(Enum):
@@ -42,8 +46,41 @@ def activate_method_module(module: AttackProtocol, method: str, status: bool):
         module.do_post = status
 
 
+class PassiveTeeCrawler:
+    """Crawler wrapper feeding every response received by an attack module to the passive scanner.
+
+    Attack modules only ever send requests through ``crawler.async_send``, so that is the only
+    method intercepted: any other attribute is forwarded to the wrapped crawler.
+    """
+
+    def __init__(self, crawler: AsyncCrawler, passive_scanner: "PassiveScanner"):
+        self._crawler = crawler
+        self._passive_scanner = passive_scanner
+
+    async def async_send(self, request: Request, *args, **kwargs) -> Response:
+        response = await self._crawler.async_send(request, *args, **kwargs)
+        # The body of a streamed response is not loaded yet, reading it here would steal it
+        # from the attack module.
+        if not kwargs.get("stream"):
+            try:
+                await self._passive_scanner.scan_attack_response(request, response)
+            except Exception:  # pylint: disable=broad-except
+                # Passive analysis must never break an attack
+                logging.exception("[!] Passive scan of an attack response failed")
+        return response
+
+    def __getattr__(self, name):
+        return getattr(self._crawler, name)
+
+
 class ActiveScanner:
-    def __init__(self, persister, crawler_configuration, verbosity: int = 1):
+    def __init__(
+        self,
+        persister,
+        crawler_configuration,
+        verbosity: int = 1,
+        passive_scanner: Optional["PassiveScanner"] = None,
+    ):
         """
         Initialize the ActiveScanner object
 
@@ -53,8 +90,11 @@ class ActiveScanner:
         :type crawler_configuration: wapitiCore.crawler.CrawlerConfiguration
         :param verbosity: The verbosity level
         :type verbosity: int
+        :param passive_scanner: If set, responses of attack modules are also analysed by passive modules
+        :type passive_scanner: wapitiCore.attack.passive_scanner.PassiveScanner
         """
         self.persister = persister
+        self._passive_scanner = passive_scanner
         self.attack_options = {}
         self.crawler_configuration = crawler_configuration
         self.verbosity = verbosity
@@ -109,9 +149,15 @@ class ActiveScanner:
             if class_.name not in self._activated_modules:
                 continue
 
+            # Modules opting out (brute-force, fingerprinting...) get the raw crawler: no overhead at all
+            if self._passive_scanner is not None and getattr(class_, "passive_scan_responses", False):
+                module_crawler = PassiveTeeCrawler(crawler, self._passive_scanner)
+            else:
+                module_crawler = crawler
+
             try:
                 class_instance = class_(
-                    crawler,
+                    module_crawler,
                     self.persister,
                     self.attack_options,
                     self.crawler_configuration,
@@ -329,6 +375,11 @@ class ActiveScanner:
                 # Only passive modules were selected or only the crawl was made
                 return True
 
+            if self._passive_scanner is not None:
+                # When the crawl is skipped (--skip-crawl, resumed attack) the passive state was never
+                # loaded: restore it so alerts already reported during the crawl stay deduplicated.
+                await self._passive_scanner.restore_state()
+
             for attack_module in attack_modules:
                 if attack_module.do_get is False and attack_module.do_post is False:
                     continue
@@ -372,6 +423,10 @@ class ActiveScanner:
                 # cases where we have to call `continue`. Just check for the two other options
                 if self._user_choice in (UserChoice.REPORT, UserChoice.QUIT):
                     break
+
+            if self._passive_scanner is not None:
+                # The report reads the suppressed alerts counters from the persisted state
+                await self._passive_scanner.persist_state()
 
             if self._user_choice == UserChoice.QUIT:
                 await self.persister.close()
