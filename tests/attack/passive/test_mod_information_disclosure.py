@@ -14,10 +14,9 @@ from wapitiCore.net import Request, Response
 # pylint: disable=redefined-outer-name
 
 
-def create_mock_objects(content: str, content_type: str = "text/html"):
-    """Helper to create mock Request and Response objects."""
-    request = MagicMock(spec=Request)
-    request.url = "http://test.com/"
+def create_mock_objects(content: str, content_type: str = "text/html", request: Request = None):
+    """Helper to create a Request and a mock Response object."""
+    request = request or Request("http://test.com/")
     response = MagicMock(spec=Response)
     response.content = content
     response.type = content_type
@@ -146,3 +145,36 @@ def test_path_deduplication(module):
         vulns[0].info
         == "Response contains potential system path: /var/www/html/index.php."
     )
+
+
+@pytest.mark.parametrize(
+    "request_",
+    [
+        Request("http://test.com/search.php?q=%2Fetc%2Fpasswd"),
+        Request("http://test.com/search.php", method="POST", post_params=[["q", "/../../../etc/passwd"]]),
+        Request(
+            "http://test.com/api", method="POST", enctype="application/json",
+            post_params='{"q": "/etc/passwd"}',
+        ),
+    ],
+    ids=["query string", "form body", "raw body"],
+)
+def test_path_sent_by_the_client_is_not_reported(module, request_):
+    """A path echoed back from the request (e.g. a mod_file payload reflected by a search page)
+    is not disclosed by the server."""
+    content = 'No result for <b>/etc/passwd</b><input value="/etc/passwd">'
+    request, response = create_mock_objects(content, request=request_)
+    assert not list(get_all_vulnerabilities(module, request, response))
+
+
+def test_disclosed_path_next_to_a_reflected_payload_is_reported(module):
+    """Only the reflected payload is ignored: a real path leaked by the error is still reported."""
+    content = (
+        "Warning: include(/etc/passwd): failed to open stream in "
+        "/var/www/html/page.php on line 3"
+    )
+    request, response = create_mock_objects(
+        content, request=Request("http://test.com/page.php?file=%2Fetc%2Fpasswd")
+    )
+    vulns = list(get_all_vulnerabilities(module, request, response))
+    assert [vuln.info for vuln in vulns] == ["Response contains potential system path: /var/www/html/page.php"]

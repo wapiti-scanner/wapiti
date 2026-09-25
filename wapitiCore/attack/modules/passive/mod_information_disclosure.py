@@ -1,5 +1,5 @@
 import re
-from typing import Generator, Any
+from typing import Generator, Any, List
 
 from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.information_disclosure import InformationDisclosureFinding
@@ -63,6 +63,26 @@ def _is_realistic_path(candidate: str) -> bool:
     )
 
 
+def _sent_values(request: Request) -> List[str]:
+    """Values the client itself sent in the request (query string, body, uploaded file names).
+
+    A path found in the response that comes from one of them is merely echoed back (e.g. a
+    mod_file payload like /etc/passwd reflected by a search page), not disclosed by the server.
+    """
+    values = [value for __, value in request.get_params_ref if value]
+    post_params = request.post_params_ref
+    if isinstance(post_params, list):
+        values.extend(value for __, value in post_params if value)
+    elif post_params:
+        # Raw body (JSON, XML...)
+        values.append(post_params)
+    values.extend(
+        file_value[0] for __, file_value in request.file_params_ref
+        if isinstance(file_value, (list, tuple)) and file_value and isinstance(file_value[0], str)
+    )
+    return values
+
+
 class ModuleInformationDisclosure(PassiveModule):
     """
     Detects disclosure of full system paths (Windows/Unix) in HTTP responses.
@@ -70,6 +90,7 @@ class ModuleInformationDisclosure(PassiveModule):
     """
 
     name = "information_disclosure"
+    scan_attack_responses = True
 
     def analyze(
         self, request: Request, response: Response
@@ -82,9 +103,15 @@ class ModuleInformationDisclosure(PassiveModule):
         ):
             return
 
+        sent_values = None
         for match in PATH_PATTERN.finditer(response.content):
             evidence = match.group()
             if not _is_realistic_path(evidence):
+                continue
+
+            if sent_values is None:
+                sent_values = _sent_values(request)
+            if any(evidence.rstrip(".") in value for value in sent_values):
                 continue
 
             if not self.should_report(evidence.rstrip("."), InformationDisclosureFinding):

@@ -35,6 +35,10 @@ class PassiveModule:
     # Maximum number of alerts reported per deduplication key. The default of 1
     # reproduces the historical "report once per key" behavior.
     LIMIT: int = 1
+    # Whether the module is also run on the responses produced by active attack modules.
+    # Only modules analysing the response body benefit from it (a payload may trigger an
+    # error page); header / redirect / form based modules would only add noise.
+    scan_attack_responses: bool = False
 
     def __init__(self):
         self._occurrences: dict = defaultdict(int)

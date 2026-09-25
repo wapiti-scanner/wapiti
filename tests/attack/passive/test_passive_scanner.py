@@ -2,9 +2,11 @@ import types
 from unittest.mock import AsyncMock, MagicMock, patch, ANY
 from pathlib import Path
 
+import httpx
 import pytest
 
 from wapitiCore.attack.passive_scanner import PassiveScanner
+from wapitiCore.net import Request, Response
 from wapitiCore.net.sql_persister import SqlPersister
 
 # pylint: disable=redefined-outer-name,protected-access
@@ -168,3 +170,149 @@ def test_broken_module_is_skipped(
     mock_log_exc.assert_called_with(
         "[!] Module %s seems broken and will be skipped", "mod_broken"
     )
+
+
+class FakePassiveModule:
+    """Minimal passive module recording the responses it analyses."""
+
+    def __init__(self, name: str, scan_attack_responses: bool):
+        self.name = name
+        self.scan_attack_responses = scan_attack_responses
+        self.analyzed = []
+
+    def analyze(self, request, response):
+        self.analyzed.append((request, response))
+        return iter(())
+
+
+def make_attack_response(content: str, content_type: str = "text/html") -> MagicMock:
+    response = MagicMock(spec=Response)
+    response.content = content
+    response.type = content_type
+    return response
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_scan_attack_response_only_runs_opted_in_modules(_, mock_persister):
+    scanner = PassiveScanner(persister=mock_persister)
+    body_module = FakePassiveModule("body", scan_attack_responses=True)
+    header_module = FakePassiveModule("header", scan_attack_responses=False)
+    scanner._modules = {"body": body_module, "header": header_module}
+    scanner.set_modules({"body": [], "header": []})
+
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("error page"))
+
+    assert len(body_module.analyzed) == 1
+    assert not header_module.analyzed
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_scan_attack_response_skips_deactivated_modules(_, mock_persister):
+    scanner = PassiveScanner(persister=mock_persister)
+    body_module = FakePassiveModule("body", scan_attack_responses=True)
+    scanner._modules = {"body": body_module}
+    scanner.set_modules({})
+
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("error page"))
+
+    assert not body_module.analyzed
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_scan_attack_response_analyses_each_body_once(_, mock_persister):
+    scanner = PassiveScanner(persister=mock_persister)
+    body_module = FakePassiveModule("body", scan_attack_responses=True)
+    scanner._modules = {"body": body_module}
+    scanner.set_modules({"body": []})
+
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("same error page"))
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("same error page"))
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("another error page"))
+
+    assert [response.content for __, response in body_module.analyzed] == ["same error page", "another error page"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "content, content_type",
+    [
+        ("", "text/html"),
+        ("GIF89a...", "image/gif"),
+        ("\x00\x01", "application/octet-stream"),
+    ],
+    ids=["empty body", "image", "binary"],
+)
+@patch("pathlib.Path.glob", return_value=[])
+async def test_scan_attack_response_skips_empty_and_binary_bodies(_, content, content_type, mock_persister):
+    scanner = PassiveScanner(persister=mock_persister)
+    body_module = FakePassiveModule("body", scan_attack_responses=True)
+    scanner._modules = {"body": body_module}
+    scanner.set_modules({"body": []})
+
+    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response(content, content_type))
+
+    assert not body_module.analyzed
+
+
+def test_only_body_analysing_modules_scan_attack_responses(mock_persister):
+    """Gate 1: header / redirect / form based modules would only add noise on attack traffic."""
+    scanner = PassiveScanner(persister=mock_persister)
+    assert {
+        name for name, module in scanner._modules.items() if module.scan_attack_responses
+    } == {"stacktrace_disclosure", "information_disclosure"}
+
+
+@pytest.mark.asyncio
+@patch("pathlib.Path.glob", return_value=[])
+async def test_restore_state_only_loads_once(_, mock_persister):
+    """Restoring again before the attacks must not overwrite the state built during the crawl."""
+    mock_persister.get_passive_scanner_state = AsyncMock(
+        return_value={"csp": {"occurrences": {"a": 1}}}
+    )
+    scanner = PassiveScanner(persister=mock_persister)
+    module = MagicMock()
+    scanner._modules = {"csp": module}
+
+    await scanner.restore_state()
+    await scanner.restore_state()
+
+    mock_persister.get_passive_scanner_state.assert_awaited_once()
+    module.load_state.assert_called_once()
+
+
+YSOD_BODY = (
+    "<html><head><title>Server Error in '/' Application.</title></head><body>"
+    "<h2><i>Incorrect syntax near 'x'.</i></h2>"
+    "<b>Exception Details: </b>System.Data.SqlClient.SqlException: Incorrect syntax near 'x'.<br>"
+    "<pre>[SqlException (0x80131904): Incorrect syntax near 'x'.]\n"
+    "   System.Data.SqlClient.SqlConnection.OnError(SqlException exception) +2073550\n"
+    "</pre></body></html>"
+)
+
+
+@pytest.mark.asyncio
+async def test_scan_attack_response_records_stacktrace_on_the_attack_request(mock_persister):
+    """End-to-end with the real passive modules: a payload triggering a .NET YSOD is reported
+    by stacktrace_disclosure on the attack request, while header based modules stay silent."""
+    mock_persister.add_payload = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+    scanner.set_modules({"stacktrace_disclosure": [], "http_headers": [], "csp": []})
+
+    evil_request = Request("http://perdu.com/?id=%27")
+    response = Response(
+        httpx.Response(
+            500,
+            text=YSOD_BODY,
+            headers={"content-type": "text/html; charset=utf-8"},
+            request=httpx.Request("GET", evil_request.url),
+        )
+    )
+
+    await scanner.scan_attack_response(evil_request, response)
+
+    modules_reporting = [call.kwargs["module"] for call in mock_persister.add_payload.await_args_list]
+    assert modules_reporting == ["stacktrace_disclosure"]
+    assert mock_persister.add_payload.await_args.kwargs["request"] is evil_request

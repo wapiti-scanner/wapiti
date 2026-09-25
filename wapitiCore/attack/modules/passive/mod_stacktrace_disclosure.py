@@ -99,6 +99,7 @@ class ModuleStacktraceDisclosure(PassiveModule):
     """
 
     name = "stacktrace_disclosure"
+    scan_attack_responses = True
 
     def analyze(
         self, request: Request, response: Response
