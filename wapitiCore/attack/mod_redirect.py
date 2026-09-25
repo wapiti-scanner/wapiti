@@ -37,6 +37,7 @@ class ModuleRedirect(Attack):
     # Won't work with PHP >= 4.4.2
 
     name = "redirect"
+    passive_scan_responses = False
     MSG_VULN = "Open Redirect"
     do_get = True
     do_post = False

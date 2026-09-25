@@ -62,6 +62,7 @@ class ModuleMethods(Attack):
     """
 
     name = "methods"
+    passive_scan_responses = False
     PRIORITY = 6
     KNOWN_METHODS = {"GET", "POST", "OPTIONS", "HEAD", "TRACE"}
     UNCOMMON_METHODS = {"CONNECT", "DELETE", "PUT", "PATCH"}

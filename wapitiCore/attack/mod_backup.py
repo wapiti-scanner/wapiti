@@ -53,6 +53,7 @@ class ModuleBackup(Attack):
     Uncover backup files on the web server.
     """
     name = "backup"
+    passive_scan_responses = False
 
     do_get = True
     do_post = False

@@ -40,6 +40,7 @@ class ModuleBuster(Attack):
     PATHS_FILE = "busterPayloads.txt"
 
     name = "buster"
+    passive_scan_responses = False
 
     do_get = True
     do_post = False
