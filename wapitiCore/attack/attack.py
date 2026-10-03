@@ -144,7 +144,7 @@ class Attack(AttackProtocol):
     parallelize_attacks = False
     # Whether the HTTP responses produced by this module are fed to the passive modules
     # (e.g. to catch a stack trace triggered by a payload). High-volume / low-value modules
-    # (brute-force, discovery, fingerprinting) opt out by setting it to False.
+    # (brute-force, discovery, fingerprinting, time-based blind SQL) opt out by setting it to False.
     passive_scan_responses = True
 
     # List of modules (strings) that must be launched before the current module

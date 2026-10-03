@@ -41,6 +41,9 @@ class ModuleTimesql(Attack):
     time_to_sleep = 6
     name = "timesql"
     PRIORITY = 6
+    # Hundreds of payloads per parameter, sent sequentially. A positive is a timeout (no response to
+    # analyse) and the error pages its quotes trigger are the ones mod_sql / mod_exec already produce.
+    passive_scan_responses = False
 
     MSG_VULN = "Blind SQL vulnerability"
 

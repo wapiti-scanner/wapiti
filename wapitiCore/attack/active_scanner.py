@@ -50,18 +50,34 @@ class PassiveTeeCrawler:
     """Crawler wrapper feeding every response received by an attack module to the passive scanner.
 
     Attack modules only ever send requests through ``crawler.async_send``, so that is the only
-    method intercepted: any other attribute is forwarded to the wrapped crawler.
+    method intercepted: any other attribute (async_get, async_request...) is forwarded untouched
+    to the wrapped crawler.
     """
 
     def __init__(self, crawler: AsyncCrawler, passive_scanner: "PassiveScanner"):
         self._crawler = crawler
         self._passive_scanner = passive_scanner
 
-    async def async_send(self, request: Request, *args, **kwargs) -> Response:
-        response = await self._crawler.async_send(request, *args, **kwargs)
+    async def async_send(
+            self,
+            request: Request,
+            headers: dict = None,
+            follow_redirects: bool = False,
+            stream: bool = False,
+            timeout: float = None
+    ) -> Response:
+        # Same signature as AsyncCrawler.async_send, so that positional calls such as
+        # async_send(request, headers, follow_redirects, True) are understood as well.
+        response = await self._crawler.async_send(
+            request,
+            headers=headers,
+            follow_redirects=follow_redirects,
+            stream=stream,
+            timeout=timeout,
+        )
         # The body of a streamed response is not loaded yet, reading it here would steal it
         # from the attack module.
-        if not kwargs.get("stream"):
+        if not stream:
             try:
                 await self._passive_scanner.scan_attack_response(request, response)
             except Exception:  # pylint: disable=broad-except

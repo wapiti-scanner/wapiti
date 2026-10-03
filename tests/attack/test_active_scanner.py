@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import types
 from pathlib import Path
 from typing import Tuple
@@ -534,22 +535,18 @@ async def test_init_attack_modules_uses_raw_crawler_without_passive_scanner():
     assert modules[0].crawler is crawler
 
 
-@pytest.mark.parametrize(
-    "module_name, expected",
-    [
-        ("mod_sql", True),
-        ("mod_exec", True),
-        ("mod_xss", True),
-        ("mod_buster", False),
-        ("mod_nikto", False),
-        ("mod_wapp", False),
-        ("mod_redirect", False),
-    ],
-)
-def test_passive_scan_responses_defaults(module_name, expected):
-    """Injection modules keep the default (True), discovery / fingerprint modules opt out."""
+def test_passive_scan_responses_opt_outs():
+    """Injection modules keep the default (True). Discovery, brute-force, fingerprint and time-based
+    modules opt out: listing them all forces any new module to make an explicit choice."""
     module_classes = ActiveScanner._load_attack_modules()
-    assert module_classes[module_name].passive_scan_responses is expected
+    assert {
+        class_.name for class_ in module_classes.values() if not class_.passive_scan_responses
+    } == {
+        "backup", "brute_login_form", "buster", "cms", "htaccess", "htp", "methods", "network_device",
+        "nikto", "printer", "redirect", "ssl", "takeover", "timesql", "wapp", "wp_enum",
+    }
+    # Its error-based payload is the very case passive analysis of attack responses was added for
+    assert module_classes["mod_sql"].passive_scan_responses is True
 
 
 @pytest.mark.asyncio
@@ -565,8 +562,38 @@ async def test_passive_tee_crawler_scans_response_and_returns_it():
     result = await tee.async_send(request, follow_redirects=True, timeout=3)
 
     assert result is response
-    crawler.async_send.assert_awaited_once_with(request, follow_redirects=True, timeout=3)
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=None, follow_redirects=True, stream=False, timeout=3
+    )
     passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
+
+
+@pytest.mark.asyncio
+async def test_passive_tee_crawler_forwards_positional_headers():
+    """mod_log4shell passes its malicious headers positionally."""
+    crawler = AsyncMock(spec=AsyncCrawler)
+    response = MagicMock(spec=Response)
+    crawler.async_send.return_value = response
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock()
+    request = Request("http://example.com/")
+    headers = {"X-Api-Version": "${jndi:ldap://example.com/a}"}
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    await tee.async_send(request, headers, follow_redirects=True)
+
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=headers, follow_redirects=True, stream=False, timeout=None
+    )
+    passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
+
+
+def test_passive_tee_crawler_mirrors_async_send_signature():
+    """A parameter added to AsyncCrawler.async_send must be added to the tee too."""
+    def parameters(function):
+        return [(param.name, param.kind, param.default) for param in inspect.signature(function).parameters.values()]
+
+    assert parameters(PassiveTeeCrawler.async_send) == parameters(AsyncCrawler.async_send)
 
 
 @pytest.mark.asyncio
@@ -600,14 +627,27 @@ async def test_passive_tee_crawler_propagates_request_errors_without_scanning():
 
 
 @pytest.mark.asyncio
-async def test_passive_tee_crawler_does_not_consume_streamed_responses():
+@pytest.mark.parametrize(
+    "args, kwargs",
+    [
+        ((), {"stream": True}),
+        ((None, False, True), {}),
+        ((None,), {"follow_redirects": False, "stream": True}),
+    ],
+    ids=["keyword", "positional", "mixed"],
+)
+async def test_passive_tee_crawler_does_not_consume_streamed_responses(args, kwargs):
     crawler = AsyncMock(spec=AsyncCrawler)
     passive_scanner = MagicMock()
     passive_scanner.scan_attack_response = AsyncMock()
+    request = Request("http://example.com/")
 
     tee = PassiveTeeCrawler(crawler, passive_scanner)
-    await tee.async_send(Request("http://example.com/"), stream=True)
+    await tee.async_send(request, *args, **kwargs)
 
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=None, follow_redirects=False, stream=True, timeout=None
+    )
     passive_scanner.scan_attack_response.assert_not_awaited()
 
 
