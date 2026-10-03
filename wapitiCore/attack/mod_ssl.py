@@ -305,6 +305,7 @@ async def process_vulnerabilities(xml_file: str) -> AsyncIterator[Tuple[int, str
 class ModuleSsl(Attack):
     """Evaluate the security of SSL/TLS certificate configuration."""
     name = "ssl"
+    passive_scan_responses = False
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)

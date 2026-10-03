@@ -35,6 +35,7 @@ from wapitiCore.net.response import Response
 class ModuleNetworkDevice(Attack):
     """Base class for detecting version."""
     name = "network_device"
+    passive_scan_responses = False
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if self.finished:

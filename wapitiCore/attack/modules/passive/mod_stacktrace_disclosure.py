@@ -1,5 +1,6 @@
 import re
 from typing import Generator, Any
+from urllib.parse import urlsplit
 
 from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions.stacktrace_disclosure import StacktraceDisclosureFinding
@@ -90,6 +91,36 @@ STACKTRACE_PATTERNS = [
     ),
 ]
 
+# An error message often echoes the input that caused it (.NET "Unclosed quotation mark after the
+# character string '<payload>'", PHP "include(<payload>): failed to open stream"). Keying on the
+# whole evidence would then report the same error once per payload sent by an attack module, so
+# these extract what identifies the error itself.
+DOTNET_EXCEPTION_TYPE = re.compile(r"\[?([\w.]*(?:Exception|Error))(?: \(0x[0-9A-Fa-f]+\))?:")
+# Exception.ToString() chains wrapped exceptions inline: "Outer: ... ---> Inner: ..."
+DOTNET_INNER_EXCEPTION = re.compile(r"\s*---(?:>|&gt;)\s*")
+PHP_ERROR_LOCATION = re.compile(r".* in (.+?\.php)(?:\(\d+\))? on line (\d+)$", re.DOTALL | re.IGNORECASE)
+GOROUTINE_ID = re.compile(r"\d+")
+
+
+def _dedup_key(label: str, evidence: str, request: Request) -> tuple:
+    if label == ".NET":
+        # The innermost exception is the one carrying the actual error. Its type alone would merge
+        # unrelated errors raised on different pages, so the endpoint is part of the key: all the
+        # payloads sent to an endpoint still collapse into one finding.
+        exception = DOTNET_EXCEPTION_TYPE.match(DOTNET_INNER_EXCEPTION.split(evidence)[-1])
+        if exception:
+            location = urlsplit(request.url)
+            return label, location.netloc, location.path, exception.group(1)
+    elif label == "PHP":
+        location = PHP_ERROR_LOCATION.match(evidence)
+        if location:
+            return label, location.group(1), location.group(2)
+    elif label == "Go":
+        # The goroutine number changes with the connection serving the request
+        return label, GOROUTINE_ID.sub("N", evidence)
+    # Stack frames, banners...: nothing echoed from the request
+    return label, evidence
+
 
 class ModuleStacktraceDisclosure(PassiveModule):
     """
@@ -99,6 +130,7 @@ class ModuleStacktraceDisclosure(PassiveModule):
     """
 
     name = "stacktrace_disclosure"
+    scan_attack_responses = True
 
     def analyze(
         self, request: Request, response: Response
@@ -117,11 +149,12 @@ class ModuleStacktraceDisclosure(PassiveModule):
                 continue
 
             evidence = match.group().strip()
+            # Computed before truncation, which could cut off the PHP file and line
+            key = _dedup_key(label, evidence, request)
             # Keep the reported snippet short; a frame is enough to prove the leak.
             if len(evidence) > 150:
                 evidence = evidence[:150] + "..."
 
-            key = (label, evidence)
             if not self.should_report(key, StacktraceDisclosureFinding):
                 continue
 

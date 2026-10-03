@@ -58,6 +58,7 @@ class ModuleHtp(Attack):
     """
 
     name = "htp"
+    passive_scan_responses = False
 
     do_get = True
     do_post = False

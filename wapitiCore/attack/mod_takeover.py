@@ -250,6 +250,7 @@ async def get_wildcard_responses(domain: str, resolvers: Iterator[str]) -> List[
 class ModuleTakeover(Attack):
     """Detect subdomains vulnerable to takeover (CNAME records pointing to non-existent and/or available domains)"""
     name = "takeover"
+    passive_scan_responses = False
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         super().__init__(crawler, persister, attack_options, crawler_configuration)

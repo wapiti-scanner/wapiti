@@ -41,6 +41,7 @@ MSG_WP_VERSION = "WordPress Version : {0}"
 class ModuleWpEnum(Attack):
     """Detect WordPress Plugins with version - DEPRECATED (replaced by the module cms)."""
     name = "wp_enum"
+    passive_scan_responses = False
     PAYLOADS_FILE_PLUGINS = "wordpress_plugins.txt"
     PAYLOADS_FILE_THEMES = "wordpress_themes.txt"
     false_positive = {"plugins": False, "themes": False}

@@ -48,6 +48,7 @@ PRINTER_BRANDS = PRINTER_ENDPOINTS.keys()
 class ModulePrinter(Attack):
     """Detect Printers."""
     name = "printer"
+    passive_scan_responses = False
 
     firmware_version = ""
 

@@ -38,6 +38,7 @@ MSG_TECHNO_VERSIONED = "{0} {1} detected"
 class ModuleCms(Attack):
     """Base class for detecting version."""
     name = "cms"
+    passive_scan_responses = False
 
     versions = []
 

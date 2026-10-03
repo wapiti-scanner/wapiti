@@ -62,6 +62,7 @@ class ModuleNikto(Attack):
     nikto_db = []
 
     name = "nikto"
+    passive_scan_responses = False
     NIKTO_DB = "nikto_db"
     NIKTO_DB_URL = "https://raw.githubusercontent.com/wapiti-scanner/nikto/master/program/databases/db_tests"
 

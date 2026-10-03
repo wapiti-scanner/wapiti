@@ -10,12 +10,17 @@ from wapitiCore.model.vulnerability import VulnerabilityInstance
 from wapitiCore.net import Request, Response
 from wapitiCore.net.sql_persister import SqlPersister
 
+# Content types that can't hold a stack trace or a path disclosure: skipped on attack traffic
+# before decoding the body.
+BINARY_CONTENT_TYPES = ("image/", "audio/", "video/", "font/", "application/octet-stream")
+
 
 class PassiveScanner:
     def __init__(self, persister: SqlPersister):
         self._persister = persister
         self._modules: Dict[str, Attack] = {}
         self._activated_modules: ModuleActivationSettings = {}
+        self._state_restored = False
         self._load_modules()
 
     def _load_modules(self):
@@ -46,6 +51,32 @@ class PassiveScanner:
     async def scan(self, request: Request, response: Response):
         for passive_module_name, passive_module_instance in self._modules.items():
             if passive_module_instance.name not in self._activated_modules:
+                continue
+
+            for vulnerability in passive_module_instance.analyze(request, response):
+                await self._record_vulnerability_instance(vulnerability, passive_module_name)
+
+    async def scan_attack_response(self, request: Request, response: Response):
+        """Run the body-analysing passive modules on a response produced by an active attack module.
+
+        Only modules flagged with ``scan_attack_responses`` are run: header or redirect based
+        checks would just repeat what was already seen during the crawl. Deduplication is left to
+        each module (``PassiveModule.should_report``): an alert already reported during the crawl
+        or on another attack response is counted as suppressed instead of being reported again.
+        Findings are recorded on the attack request itself (the persister stores it as a new evil
+        request along with its response).
+        """
+        if response.type.startswith(BINARY_CONTENT_TYPES):
+            return
+
+        if not response.content:
+            return
+
+        for passive_module_name, passive_module_instance in self._modules.items():
+            if passive_module_instance.name not in self._activated_modules:
+                continue
+
+            if not getattr(passive_module_instance, "scan_attack_responses", False):
                 continue
 
             for vulnerability in passive_module_instance.analyze(request, response):
@@ -105,7 +136,16 @@ class PassiveScanner:
         await self._persister.set_passive_scanner_state(self.get_state())
 
     async def restore_state(self):
-        """Reload the passive scanner state persisted by a previous (interrupted) crawl."""
+        """Reload the passive scanner state persisted by a previous (interrupted) crawl.
+
+        Only the first call has an effect: it is made before the crawl and again before the
+        attacks (for when the crawl is skipped), and reloading after the crawl would overwrite
+        the live in-memory state.
+        """
+        if self._state_restored:
+            return
+        self._state_restored = True
+
         state = await self._persister.get_passive_scanner_state()
         if state:
             self.load_state(state)

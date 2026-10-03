@@ -39,6 +39,7 @@ from wapitiCore.main.log import log_red
 class ModuleBruteLoginForm(Attack):
     """Attempt to log in on authentication forms using known weak credentials (like admin/admin)."""
     name = "brute_login_form"
+    passive_scan_responses = False
     PASSWORDS_FILE = "passwords.txt"
     USERS_FILE = "users.txt"
     SUCCESS_FILE = "successMessage.txt"

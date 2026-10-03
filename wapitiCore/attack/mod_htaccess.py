@@ -38,6 +38,7 @@ class ModuleHtaccess(Attack):
     """
 
     name = "htaccess"
+    passive_scan_responses = False
 
     do_get = True
     do_post = True

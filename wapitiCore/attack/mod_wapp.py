@@ -153,6 +153,7 @@ class ModuleWapp(Attack):
     """
 
     name = "wapp"
+    passive_scan_responses = False
 
     BASE_URL = Attack.wapp_url
     WAPP_DIR = Attack.wapp_dir
