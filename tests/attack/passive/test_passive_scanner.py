@@ -222,17 +222,19 @@ async def test_scan_attack_response_skips_deactivated_modules(_, mock_persister)
 
 @pytest.mark.asyncio
 @patch("pathlib.Path.glob", return_value=[])
-async def test_scan_attack_response_analyses_each_body_once(_, mock_persister):
+async def test_scan_attack_response_analyses_every_attack_response(_, mock_persister):
+    """Deduplication is left to the modules (should_report), so that suppressions are counted."""
     scanner = PassiveScanner(persister=mock_persister)
     body_module = FakePassiveModule("body", scan_attack_responses=True)
     scanner._modules = {"body": body_module}
     scanner.set_modules({"body": []})
+    first, second = MagicMock(spec=Request), MagicMock(spec=Request)
+    response = make_attack_response("same error page")
 
-    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("same error page"))
-    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("same error page"))
-    await scanner.scan_attack_response(MagicMock(spec=Request), make_attack_response("another error page"))
+    await scanner.scan_attack_response(first, response)
+    await scanner.scan_attack_response(second, response)
 
-    assert [response.content for __, response in body_module.analyzed] == ["same error page", "another error page"]
+    assert [request for request, __ in body_module.analyzed] == [first, second]
 
 
 @pytest.mark.asyncio
@@ -291,6 +293,62 @@ YSOD_BODY = (
     "   System.Data.SqlClient.SqlConnection.OnError(SqlException exception) +2073550\n"
     "</pre></body></html>"
 )
+
+
+def http_response(request: Request, body: str, content_type: str = "text/html; charset=utf-8") -> Response:
+    return Response(
+        httpx.Response(500, text=body, headers={"content-type": content_type}, request=httpx.Request("GET", request.url))
+    )
+
+
+@pytest.mark.asyncio
+async def test_same_error_page_is_reported_once_per_endpoint_and_counted_as_suppressed(mock_persister):
+    """A shared error page leaking on two endpoints is reported on both; the other payloads sent
+    to an endpoint are counted as suppressed."""
+    mock_persister.add_payload = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+    scanner.set_modules({"stacktrace_disclosure": []})
+    first = Request("http://perdu.com/products.aspx?id=%27")
+    second = Request("http://perdu.com/auth/login", method="POST", post_params=[["user", "'"]])
+    third = Request("http://perdu.com/products.aspx?id=%22")
+
+    for request in (first, second, third):
+        await scanner.scan_attack_response(request, http_response(request, YSOD_BODY))
+
+    assert [call.kwargs["request"] for call in mock_persister.add_payload.await_args_list] == [first, second]
+    module = scanner._modules["stacktrace_disclosure"]
+    assert module.suppressed_findings == 1
+    assert dict(module.suppressed_by_category) == {"Stack Trace Disclosure": 1}
+
+
+@pytest.mark.asyncio
+async def test_error_page_reported_during_the_crawl_is_counted_on_each_attack_response(mock_persister):
+    mock_persister.add_payload = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+    scanner.set_modules({"stacktrace_disclosure": []})
+    crawled = Request("http://perdu.com/products.aspx?id=1")
+
+    await scanner.scan(crawled, http_response(crawled, YSOD_BODY))
+    for evil_request in (Request("http://perdu.com/products.aspx?id=%27"), Request("http://perdu.com/products.aspx?id=%22")):
+        await scanner.scan_attack_response(evil_request, http_response(evil_request, YSOD_BODY))
+
+    assert [call.kwargs["request"] for call in mock_persister.add_payload.await_args_list] == [crawled]
+    assert scanner._modules["stacktrace_disclosure"].suppressed_findings == 2
+
+
+@pytest.mark.asyncio
+async def test_body_first_seen_with_a_non_text_content_type_is_still_analysed_later(mock_persister):
+    """The same body served as XML (not analysed by the modules) then as HTML must be reported."""
+    mock_persister.add_payload = AsyncMock()
+    scanner = PassiveScanner(persister=mock_persister)
+    scanner.set_modules({"stacktrace_disclosure": []})
+    xml_request = Request("http://perdu.com/api", method="POST", enctype="application/xml", post_params="<a>'</a>")
+    html_request = Request("http://perdu.com/products.aspx?id=%27")
+
+    await scanner.scan_attack_response(xml_request, http_response(xml_request, YSOD_BODY, "application/xml"))
+    await scanner.scan_attack_response(html_request, http_response(html_request, YSOD_BODY))
+
+    assert [call.kwargs["request"] for call in mock_persister.add_payload.await_args_list] == [html_request]
 
 
 @pytest.mark.asyncio

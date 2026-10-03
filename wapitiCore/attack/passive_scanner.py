@@ -1,6 +1,6 @@
 from importlib import import_module
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict
 
 from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.attack import Attack
@@ -20,9 +20,6 @@ class PassiveScanner:
         self._persister = persister
         self._modules: Dict[str, Attack] = {}
         self._activated_modules: ModuleActivationSettings = {}
-        # Hashes of the attack response bodies already analysed. Payloads often trigger the very
-        # same error page, so each distinct body is scanned only once per scan.
-        self._seen_attack_bodies: Set[int] = set()
         self._state_restored = False
         self._load_modules()
 
@@ -63,21 +60,17 @@ class PassiveScanner:
         """Run the body-analysing passive modules on a response produced by an active attack module.
 
         Only modules flagged with ``scan_attack_responses`` are run: header or redirect based
-        checks would just repeat what was already seen during the crawl. Identical bodies are
-        analysed once, and findings are recorded on the attack request itself (the persister
-        stores it as a new evil request along with its response).
+        checks would just repeat what was already seen during the crawl. Deduplication is left to
+        each module (``PassiveModule.should_report``): an alert already reported during the crawl
+        or on another attack response is counted as suppressed instead of being reported again.
+        Findings are recorded on the attack request itself (the persister stores it as a new evil
+        request along with its response).
         """
         if response.type.startswith(BINARY_CONTENT_TYPES):
             return
 
-        content = response.content
-        if not content:
+        if not response.content:
             return
-
-        digest = hash(content)
-        if digest in self._seen_attack_bodies:
-            return
-        self._seen_attack_bodies.add(digest)
 
         for passive_module_name, passive_module_instance in self._modules.items():
             if passive_module_instance.name not in self._activated_modules:
