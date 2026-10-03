@@ -255,6 +255,103 @@ def test_deduplication_same_trace(module):
     assert len(vulns) == 1
 
 
+def _analyze_all(module, contents, urls=None):
+    vulns = []
+    for content, url in zip(contents, urls or ["http://test.com/"] * len(contents)):
+        request, response = create_mock_objects(content)
+        request.url = url
+        vulns.extend(get_all_vulnerabilities(module, request, response))
+    return vulns
+
+
+def test_dotnet_same_exception_type_on_different_endpoints_is_reported_per_endpoint(module):
+    vulns = _analyze_all(
+        module,
+        [
+            "System.Data.SqlClient.SqlException: Invalid column name 'cc_number'.",
+            "System.Data.SqlClient.SqlException: Cannot open database \"HR_Payroll\".",
+            "System.Data.SqlClient.SqlException: Invalid column name 'other'.",
+        ],
+        ["http://shop.test.com/products.aspx", "http://hr.test.com/pay.aspx?id=1", "http://hr.test.com/pay.aspx?id=2"],
+    )
+    assert len(vulns) == 2
+    assert module.suppressed_findings == 1
+
+
+def test_dotnet_wrapped_exceptions_are_keyed_on_the_inner_exception(module):
+    wrapper = "System.Web.HttpUnhandledException (0x80004005): Exception of type 'X' was thrown. ---&gt; "
+    vulns = _analyze_all(module, [
+        wrapper + "System.Data.SqlClient.SqlException: Invalid column name 'a'.",
+        wrapper + "System.IO.FileNotFoundException: Could not find file 'D:\\backups\\web.config.bak'.",
+        wrapper + "System.Data.SqlClient.SqlException: Invalid column name 'b'.",
+    ])
+    assert len(vulns) == 2
+    assert module.suppressed_findings == 1
+
+
+def test_go_panic_on_different_connections_is_reported_once(module):
+    """The goroutine number depends on the connection serving the request, not on the panic."""
+    vulns = _analyze_all(module, [f"panic: boom\n\ngoroutine {number} [running]:\nmain.handler()" for number in (7, 23, 51)])
+    assert len(vulns) == 1
+    assert module.suppressed_findings == 2
+
+
+def test_php_error_in_an_uppercase_file_name_is_reported_once(module):
+    vulns = _analyze_all(module, [
+        f"Warning: include({payload}): failed to open stream in C:\\inetpub\\wwwroot\\INDEX.PHP on line 3"
+        for payload in ("a", "b")
+    ])
+    assert len(vulns) == 1
+
+
+def test_php_error_echoing_a_long_payload_is_reported_once(module):
+    """The key is computed before the evidence is truncated to 150 characters, which would cut off
+    the file and line."""
+    vulns = _analyze_all(module, [
+        f"Warning: include({payload * 120}): failed to open stream in /var/www/html/page.php on line 3"
+        for payload in ("A", "B")
+    ])
+    assert len(vulns) == 1
+    assert module.suppressed_findings == 1
+
+
+def test_dotnet_error_echoing_each_payload_is_reported_once(module):
+    """The exception message echoes the payload: attack modules must not get one finding per payload."""
+    vulns = _analyze_all(module, [
+        "System.Data.SqlClient.SqlException: Unclosed quotation mark after the character string '1'''.",
+        "System.Data.SqlClient.SqlException: Unclosed quotation mark after the character string '1\"'.",
+        "[SqlException (0x80131904): Incorrect syntax near 'x'.]",
+        "[SqlException (0x80131904): Incorrect syntax near 'y'.]",
+    ])
+    assert len(vulns) == 2  # one per exception form: namespaced type, then YSOD tag
+    assert module.suppressed_findings == 2
+
+
+def test_dotnet_different_exception_types_are_reported_separately(module):
+    vulns = _analyze_all(module, [
+        "System.Data.SqlClient.SqlException: Incorrect syntax near 'x'.",
+        "System.NullReferenceException: Object reference not set to an instance of an object.",
+    ])
+    assert len(vulns) == 2
+
+
+def test_php_error_echoing_each_payload_is_reported_once(module):
+    vulns = _analyze_all(module, [
+        "Warning: include(/etc/passwd): failed to open stream in /var/www/html/page.php on line 3",
+        "Warning: include(../../etc/shadow): failed to open stream in /var/www/html/page.php on line 3",
+    ])
+    assert len(vulns) == 1
+    assert module.suppressed_findings == 1
+
+
+def test_php_errors_at_different_locations_are_reported_separately(module):
+    vulns = _analyze_all(module, [
+        "Warning: include(x): failed to open stream in /var/www/html/page.php on line 3",
+        "Warning: include(x): failed to open stream in /var/www/html/other.php on line 3",
+    ])
+    assert len(vulns) == 2
+
+
 def test_multiple_languages_reported_separately(module):
     """Different language traces in one response yield distinct findings."""
     content = PYTHON_TRACEBACK + "\n" + GO_PANIC
