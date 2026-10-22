@@ -134,7 +134,7 @@ async def test_drop_cookies():
 
 def test_save_and_restore_state():
     # Create a temporary file
-    temp_file = NamedTemporaryFile(suffix=".pkl")  # pylint: disable=consider-using-with
+    temp_file = NamedTemporaryFile(suffix=".json")  # pylint: disable=consider-using-with
     # Get its names
     filename = temp_file.name
     # Delete it
@@ -158,6 +158,20 @@ def test_save_and_restore_state():
     explorer.load_saved_state(filename)
     assert explorer._hostnames == {"perdu.com"}
     os.unlink(filename)
+
+
+def test_load_unreadable_state_is_ignored(tmp_path):
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    scope = Scope(Request("http://perdu.com/"), "folder")
+
+    for content in (b"\x80\x04not json", b'{"hostnames": ["perdu.com"]}', b'{"file_counts": [], "pattern_counts": {}, "hostnames": 1}'):
+        state_file = tmp_path / "state.json"
+        state_file.write_bytes(content)
+        explorer = Explorer(crawler_configuration, scope, Event())
+        explorer._hostnames = {"kept.com"}
+        explorer.load_saved_state(str(state_file))
+        # Unreadable state leaves the explorer untouched instead of raising
+        assert explorer._hostnames == {"kept.com"}
 
 
 @pytest.mark.asyncio

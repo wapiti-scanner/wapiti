@@ -34,6 +34,7 @@ from httpx import RequestError
 from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.modules.core import all_modules, common_modules, resolve_module_settings
 from wapitiCore.controller.exceptions import InvalidOptionValue
+from wapitiCore.net.sql_persister import IncompatibleSessionError
 from wapitiCore.controller.wapiti import Wapiti
 from wapitiCore.main.banners import print_banner, print_easter_eggs
 from wapitiCore.net.web import is_valid_url, urlparse
@@ -400,14 +401,14 @@ async def wapiti_main():
 
         wap.active_scanner.set_attack_options(attack_options)
 
+        if args.flush_session:
+            await wap.flush_session()
+
         await wap.init_persister()
         if args.flush_attacks:
             await wap.flush_attacks()
 
-        if args.flush_session:
-            await wap.flush_session()
-
-    except InvalidOptionValue as msg:
+    except (InvalidOptionValue, IncompatibleSessionError) as msg:
         logging.error(msg)
         sys.exit(2)
 

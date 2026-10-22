@@ -153,6 +153,11 @@ class Wapiti:
     def history_file(self):
         return self._history_file
 
+    @property
+    def crawler_state_file(self) -> str:
+        """JSON file holding the crawler limits, stored next to the session database."""
+        return self.persister.output_file[:-2] + "json"
+
     async def init_report(self):
         self.report_gen = get_report_generator_instance(self.report_generator_type.lower())
 
@@ -243,7 +248,7 @@ class Wapiti:
             explorer.max_requests_per_depth = self._max_links_per_page
             explorer.forbidden_parameters = self._bad_params
             explorer.qs_limit = SCAN_FORCE_VALUES[self._scan_force]
-            explorer.load_saved_state(self.persister.output_file[:-2] + "pkl")
+            explorer.load_saved_state(self.crawler_state_file)
 
             self._buffer = []
 
@@ -262,7 +267,7 @@ class Wapiti:
             await self.persister.save_requests(self._buffer)
 
             # Let's save explorer values (limits)
-            explorer.save_state(self.persister.output_file[:-2] + "pkl")
+            explorer.save_state(self.crawler_state_file)
             # Overwrite cookies for the next (attack) step
             self.crawler_configuration.cookies = explorer.cookie_jar
             return not stop_event.is_set()
@@ -543,10 +548,12 @@ class Wapiti:
         except FileNotFoundError:
             pass
 
-        try:
-            os.unlink(self.persister.output_file[:-2] + "pkl")
-        except FileNotFoundError:
-            pass
+        # Also remove the crawler state file and the pickle file written by older versions
+        for state_file in (self.crawler_state_file, self.persister.output_file[:-2] + "pkl"):
+            try:
+                os.unlink(state_file)
+            except FileNotFoundError:
+                pass
         self.persister = SqlPersister(self._history_file)
         await self.persister.create()
 

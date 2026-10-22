@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from collections import defaultdict
-import pickle
+import json
 import math
 import random
 import string
@@ -174,27 +174,36 @@ class Explorer:
     def qs_limit(self, value: int):
         self._qs_limit = value
 
-    def save_state(self, pickle_file: str):
-        with open(pickle_file, "wb") as file_data:
-            pickle.dump(
+    def save_state(self, state_file: str):
+        """Persist the crawler limits as JSON so they survive a suspend/resume of the scan."""
+        with open(state_file, "w", encoding="utf-8") as file_data:
+            json.dump(
                 {
-                    "file_counts": self._file_counts,
-                    "pattern_counts": self._pattern_counts,
-                    "hostnames": self._hostnames
+                    "file_counts": dict(self._file_counts),
+                    "pattern_counts": dict(self._pattern_counts),
+                    "hostnames": sorted(self._hostnames)
                 },
-                file_data,
-                pickle.HIGHEST_PROTOCOL
+                file_data
             )
 
-    def load_saved_state(self, pickle_file: str):
+    def load_saved_state(self, state_file: str):
+        """Restore the crawler limits saved by save_state. A missing or unreadable file means a fresh state."""
         try:
-            with open(pickle_file, "rb") as file_data:
-                data = pickle.load(file_data)
-                self._file_counts = data["file_counts"]
-                self._pattern_counts = data["pattern_counts"]
-                self._hostnames = data["hostnames"]
+            with open(state_file, "r", encoding="utf-8") as file_data:
+                data = json.load(file_data)
+
+            file_counts = defaultdict(int, data["file_counts"])
+            pattern_counts = defaultdict(int, data["pattern_counts"])
+            hostnames = set(data["hostnames"])
         except FileNotFoundError:
-            pass
+            return
+        except (OSError, ValueError, TypeError, KeyError):
+            logging.warning("[!] Ignoring unreadable crawler state file %s", state_file)
+            return
+
+        self._file_counts = file_counts
+        self._pattern_counts = pattern_counts
+        self._hostnames = hostnames
 
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)

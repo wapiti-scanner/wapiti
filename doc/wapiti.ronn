@@ -254,7 +254,7 @@ Following options allows you to bypass this behavior:
     Forget everything about the target for the given scope.
 
   * `--store-session` <PATH>  
-    Specify an alternative path for storing session (.db and .pkl) files.
+    Specify an alternative path for storing session (.db and .json) files.
 
   * `--store-config` <PATH>  
     Specify an alternative path for storing particular module (`apps.json` and `nikto_db`) files.
