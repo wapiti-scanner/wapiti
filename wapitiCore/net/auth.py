@@ -210,7 +210,8 @@ async def async_submit_login_form(
 
     if login_form:
         if urlparse(page_url).scheme == "https" and urlparse(login_form.url).scheme == "http":
-            log_orange("[!] The login form submits the credentials over plain HTTP to %s", login_form.url)
+            # The colored log helpers format with str.format, hence the {} placeholders
+            log_orange("[!] The login form submits the credentials over plain HTTP to {}", login_form.url)
 
         # Step 2: submit the login form, keep new cookies
         login_request, form = _create_login_request(
@@ -262,7 +263,7 @@ async def async_try_form_login(
     if urlparse(page_url).hostname != urlparse(form_credential.url).hostname:
         # Legitimate with an external identity provider, but the operator must know where the credentials go
         log_orange(
-            "[!] Login page %s redirected to %s, credentials will be submitted to that host",
+            "[!] Login page {} redirected to {}, credentials will be submitted to that host",
             form_credential.url,
             page_url
         )

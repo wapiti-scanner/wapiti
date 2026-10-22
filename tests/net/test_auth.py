@@ -394,11 +394,15 @@ async def test_form_login_follows_redirect_to_identity_provider():
     )
     wrong_route = respx.post("http://wapiti.test/realms/app/authenticate").mock(return_value=httpx.Response(404))
 
-    is_logged_in, _, _ = await async_try_form_login(crawler_configuration, form_creds)
+    with patch("wapitiCore.net.auth.log_orange") as mock_log_orange:
+        is_logged_in, _, _ = await async_try_form_login(crawler_configuration, form_creds)
 
     assert is_logged_in is True
     assert idp_route.called
     assert not wrong_route.called
+    # The operator is told where the credentials went, with a properly formatted message
+    message, *args = mock_log_orange.call_args.args
+    assert "http://idp.test/realms/app/login" in message.format(*args)
 
 
 @pytest.mark.asyncio
