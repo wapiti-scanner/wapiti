@@ -605,7 +605,10 @@ class ModuleWapp(Attack):
         download_url = asset["browser_download_url"]
         download_request = Request(download_url)
         try:
-            download_response = await self.crawler.async_send(download_request, follow_redirects=True)
+            # Not the target: GitHub release assets redirect to another host
+            download_response = await self.crawler.async_send(
+                download_request, follow_redirects=True, allow_offsite_redirects=True
+            )
         except RequestError as exception:
             logging.error("Could not fetch CVE data for %s: %s", software_name, exception)
             return False

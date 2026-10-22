@@ -563,7 +563,7 @@ async def test_passive_tee_crawler_scans_response_and_returns_it():
 
     assert result is response
     crawler.async_send.assert_awaited_once_with(
-        request, headers=None, follow_redirects=True, stream=False, timeout=3
+        request, headers=None, follow_redirects=True, stream=False, timeout=3, allow_offsite_redirects=False
     )
     passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
 
@@ -583,7 +583,7 @@ async def test_passive_tee_crawler_forwards_positional_headers():
     await tee.async_send(request, headers, follow_redirects=True)
 
     crawler.async_send.assert_awaited_once_with(
-        request, headers=headers, follow_redirects=True, stream=False, timeout=None
+        request, headers=headers, follow_redirects=True, stream=False, timeout=None, allow_offsite_redirects=False
     )
     passive_scanner.scan_attack_response.assert_awaited_once_with(request, response)
 
@@ -646,7 +646,7 @@ async def test_passive_tee_crawler_does_not_consume_streamed_responses(args, kwa
     await tee.async_send(request, *args, **kwargs)
 
     crawler.async_send.assert_awaited_once_with(
-        request, headers=None, follow_redirects=False, stream=True, timeout=None
+        request, headers=None, follow_redirects=False, stream=True, timeout=None, allow_offsite_redirects=False
     )
     passive_scanner.scan_attack_response.assert_not_awaited()
 

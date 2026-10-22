@@ -22,7 +22,7 @@
 from urllib.parse import urlunparse
 import warnings
 import functools
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import asyncio
 import ssl
 
@@ -37,8 +37,14 @@ from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.web import urlparse
 
 from wapitiCore.net.response import Response
+from wapitiCore.main.log import logging, log_orange
+
+if TYPE_CHECKING:
+    from wapitiCore.net.scope import Scope
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
+
+DEFAULT_PORTS = {"http": 80, "https": 443}
 
 
 def retry(delay=1, times=3):
@@ -99,9 +105,13 @@ class AsyncCrawler:
             base_request: web.Request,
             client: httpx.AsyncClient,
             timeout: float = 10.0,
+            scope: Optional["Scope"] = None,
     ):
         self._base_request = base_request
         self._client = client
+        self._scope = scope
+        # Hosts we already warned about when refusing to follow a redirect, to keep the log readable
+        self._refused_redirect_hosts = set()
         # Apply the configured timeout to every phase, including read. A None read
         # timeout lets a stalled/slow-trickling server block `response.read()`
         # forever (the whole scan hangs unless --max-scan-time / --max-attack-time
@@ -175,7 +185,7 @@ class AsyncCrawler:
         )
 
         client.max_redirects = 5
-        return cls(configuration.base_request, client, configuration.timeout)
+        return cls(configuration.base_request, client, configuration.timeout, scope=configuration.scope)
 
     @staticmethod
     def _fix_proxy_url(proxy: str) -> Optional[str]:
@@ -197,6 +207,66 @@ class AsyncCrawler:
     @property
     def timeout(self):
         return self._timeout
+
+    @staticmethod
+    def _effective_port(url: httpx.URL) -> Optional[int]:
+        return url.port or DEFAULT_PORTS.get(url.scheme)
+
+    def is_redirect_allowed(self, origin: httpx.URL, destination: httpx.URL) -> bool:
+        """Tell whether a redirect from origin may be followed to destination.
+
+        The target decides where it redirects, so following blindly would let it drive the scanner to hosts
+        the operator never meant to reach (internal services, cloud metadata, a third party receiving the
+        custom headers...). A redirect is followed when it stays on the host and port of the original request,
+        upgrades it to HTTPS on the same host (very common) or lands within the scan scope.
+        """
+        if destination.host == origin.host:
+            if destination.scheme == "https" or self._effective_port(destination) == self._effective_port(origin):
+                return True
+
+        return self._scope is not None and self._scope.check(str(destination))
+
+    async def _send(
+            self,
+            request: httpx.Request,
+            stream: bool,
+            follow_redirects: bool,
+            allow_offsite_redirects: bool,
+    ) -> httpx.Response:
+        """Send the request, following redirects ourselves so each hop goes through is_redirect_allowed.
+
+        With allow_offsite_redirects the check is skipped: this is for URLs the operator gave explicitly
+        or resources that are not the target at all (CVE data downloads...). When a hop is refused the
+        redirect response itself is returned, like a scan with follow_redirects=False would get.
+        """
+        history = []
+        response = await self._client.send(request, stream=stream, follow_redirects=False)
+
+        while follow_redirects and response.next_request is not None:
+            next_request = response.next_request
+
+            if not allow_offsite_redirects and not self.is_redirect_allowed(request.url, next_request.url):
+                if next_request.url.host not in self._refused_redirect_hosts:
+                    self._refused_redirect_hosts.add(next_request.url.host)
+                    # log_orange formats with str.format, not with %
+                    log_orange(
+                        "[!] Not following the redirect from {} to {}: outside of the target and the scan scope",
+                        request.url,
+                        next_request.url
+                    )
+                else:
+                    logging.debug("Not following the redirect from %s to %s", request.url, next_request.url)
+                break
+
+            if len(history) >= self._client.max_redirects:
+                raise httpx.TooManyRedirects("Exceeded maximum allowed redirects.", request=next_request)
+
+            await response.aread()
+            history.append(response)
+            response = await self._client.send(next_request, stream=stream, follow_redirects=False)
+
+        response.history = history
+        return response
 
     @property
     def user_agent(self):
@@ -229,18 +299,23 @@ class AsyncCrawler:
             headers: dict = None,
             stream: bool = False,
             timeout: float = None,
+            allow_offsite_redirects: bool = False,
     ) -> Response:
         """Fetch the given url, returns a Response object on success, None otherwise.
         If None is returned, the error code can be obtained using the error_code property.
 
         @param resource: URL to get.
         @type resource: web.Request
-        @param follow_redirects: If set to True, responses with a 3XX code and a Location header will be followed.
+        @param follow_redirects: If set to True, responses with a 3XX code and a Location header will be followed
+            as long as they stay on the same host or within the scan scope (see is_redirect_allowed).
         @type follow_redirects: bool
         @param headers: Dictionary of additional headers to send with the request.
         @type headers: dict
         @type stream: bool
         @type timeout: float
+        @param allow_offsite_redirects: Follow redirects wherever they go. Only for URLs chosen by the operator
+            or resources that are not the scanned target.
+        @type allow_offsite_redirects: bool
         @rtype: Response
         """
         final_headers = self._client.headers.copy()
@@ -262,9 +337,7 @@ class AsyncCrawler:
         resource.set_sent_headers(final_httpx_request.headers)
 
         try:
-            response = await self._client.send(
-                final_httpx_request, stream=stream, follow_redirects=follow_redirects
-            )
+            response = await self._send(final_httpx_request, stream, follow_redirects, allow_offsite_redirects)
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
                 raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
@@ -288,6 +361,7 @@ class AsyncCrawler:
             headers: dict = None,
             stream: bool = False,
             timeout: float = None,
+            allow_offsite_redirects: bool = False,
     ) -> Response:
         """Submit the given form, returns a Response on success, None otherwise.
 
@@ -349,9 +423,7 @@ class AsyncCrawler:
         form.set_sent_headers(final_httpx_request.headers)
 
         try:
-            response = await self._client.send(
-                final_httpx_request, stream=stream, follow_redirects=follow_redirects
-            )
+            response = await self._send(final_httpx_request, stream, follow_redirects, allow_offsite_redirects)
         except httpx.TransportError as exception:
             if "Read timed out" in str(exception):
                 raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
@@ -372,7 +444,8 @@ class AsyncCrawler:
             headers: dict = None,
             follow_redirects: bool = False,
             stream: bool = False,
-            timeout: float = None
+            timeout: float = None,
+            allow_offsite_redirects: bool = False,
     ) -> Response:
         if request.method == "GET":
             return await self.async_get(
@@ -380,7 +453,8 @@ class AsyncCrawler:
                 headers=headers,
                 follow_redirects=follow_redirects,
                 stream=stream,
-                timeout=timeout
+                timeout=timeout,
+                allow_offsite_redirects=allow_offsite_redirects,
             )
 
         return await self.async_request(
@@ -389,7 +463,8 @@ class AsyncCrawler:
             headers=headers,
             follow_redirects=follow_redirects,
             stream=stream,
-            timeout=timeout
+            timeout=timeout,
+            allow_offsite_redirects=allow_offsite_redirects,
         )
 
     async def close(self):

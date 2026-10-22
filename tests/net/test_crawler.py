@@ -8,6 +8,7 @@ import respx
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
+from wapitiCore.net.scope import Scope
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net import Request
 
@@ -281,3 +282,101 @@ async def test_async_get_unexpected_transport_exception_raises_connect_error():
         with patch.object(crawler._client, "send", side_effect=FakeEndOfStream()):
             with pytest.raises(httpx.ConnectError):
                 await crawler.async_get(Request(target_url))
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_too_many_redirections():
+    urls = [f"http://perdu.com/{i}" for i in range(8)]
+    for current_url, next_url in zip(urls, urls[1:]):
+        respx.get(current_url).mock(return_value=httpx.Response(302, headers={"Location": next_url}))
+    respx.get(urls[-1]).mock(return_value=httpx.Response(200, text="OK"))
+
+    crawler_configuration = CrawlerConfiguration(Request(urls[0]), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        with pytest.raises(httpx.TooManyRedirects):
+            await crawler.async_get(Request(urls[0]), follow_redirects=True)
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_offsite_redirect_is_not_followed():
+    """The target can't drive the scanner to another host through a redirect."""
+    respx.get("http://perdu.com/api").mock(
+        return_value=httpx.Response(302, headers={"Location": "http://169.254.169.254/latest/meta-data/"})
+    )
+    metadata_route = respx.get("http://169.254.169.254/latest/meta-data/").mock(
+        return_value=httpx.Response(200, text="SECRET")
+    )
+
+    crawler_configuration = CrawlerConfiguration(
+        Request("http://perdu.com/"), timeout=1, scope=Scope(Request("http://perdu.com/"), "folder")
+    )
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_get(Request("http://perdu.com/api"), follow_redirects=True)
+        # The caller gets the redirect response itself, as if redirects were not followed
+        assert response.status == 302
+        assert response.redirection_url == "http://169.254.169.254/latest/meta-data/"
+        assert not metadata_route.called
+
+        # Same for a POST, whose body must not be replayed elsewhere either
+        respx.post("http://perdu.com/api").mock(
+            return_value=httpx.Response(307, headers={"Location": "http://169.254.169.254/latest/meta-data/"})
+        )
+        response = await crawler.async_send(
+            Request("http://perdu.com/api", post_params=[["a", "b"]]), follow_redirects=True
+        )
+        assert response.status == 307
+        assert not metadata_route.called
+
+        # Another port of the same host over plain HTTP is another service: not followed either
+        respx.get("http://perdu.com/other").mock(
+            return_value=httpx.Response(302, headers={"Location": "http://perdu.com:6379/"})
+        )
+        other_port_route = respx.get("http://perdu.com:6379/").mock(return_value=httpx.Response(200, text="PONG"))
+        response = await crawler.async_get(Request("http://perdu.com/other"), follow_redirects=True)
+        assert response.status == 302
+        assert not other_port_route.called
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_same_host_and_in_scope_redirects_are_followed():
+    respx.get("http://perdu.com/").mock(return_value=httpx.Response(302, headers={"Location": "https://perdu.com:8443/"}))
+    respx.get("https://perdu.com:8443/").mock(
+        return_value=httpx.Response(302, headers={"Location": "https://www.perdu.com/home"})
+    )
+    respx.get("https://www.perdu.com/home").mock(return_value=httpx.Response(200, text="OK"))
+
+    # Scheme and port changes on the same host are always fine, another host of the domain needs the scope
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_get(Request("http://perdu.com/"), follow_redirects=True)
+        assert response.status == 302
+        assert response.url == "https://perdu.com:8443/"
+        assert len(response.history) == 1
+
+    crawler_configuration.scope = Scope(Request("http://perdu.com/"), "domain")
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_get(Request("http://perdu.com/"), follow_redirects=True)
+        assert response.status == 200
+        assert response.url == "https://www.perdu.com/home"
+        assert [page.status for page in response.history] == [302, 302]
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_offsite_redirect_allowed_on_demand():
+    respx.get("http://perdu.com/download").mock(
+        return_value=httpx.Response(302, headers={"Location": "http://cdn.example.com/file"})
+    )
+    cdn_route = respx.get("http://cdn.example.com/file").mock(return_value=httpx.Response(200, text="DATA"))
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_get(
+            Request("http://perdu.com/download"), follow_redirects=True, allow_offsite_redirects=True
+        )
+        assert response.status == 200
+        assert response.content == "DATA"
+        assert cdn_route.called

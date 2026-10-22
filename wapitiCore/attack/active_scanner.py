@@ -64,7 +64,8 @@ class PassiveTeeCrawler:
             headers: dict = None,
             follow_redirects: bool = False,
             stream: bool = False,
-            timeout: float = None
+            timeout: float = None,
+            allow_offsite_redirects: bool = False,
     ) -> Response:
         # Same signature as AsyncCrawler.async_send, so that positional calls such as
         # async_send(request, headers, follow_redirects, True) are understood as well.
@@ -74,6 +75,7 @@ class PassiveTeeCrawler:
             follow_redirects=follow_redirects,
             stream=stream,
             timeout=timeout,
+            allow_offsite_redirects=allow_offsite_redirects,
         )
         # The body of a streamed response is not loaded yet, reading it here would steal it
         # from the attack module.

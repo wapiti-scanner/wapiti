@@ -167,9 +167,11 @@ async def async_fetch_login_page(
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             try:
+                # URL given by the operator, it may legitimately redirect to an identity provider
                 response: Response = await crawler.async_get(
                     Request(url),
-                    follow_redirects=True
+                    follow_redirects=True,
+                    allow_offsite_redirects=True,
                 )
                 crawler_configuration.cookies = crawler.cookie_jar
                 return response.content, response.url

@@ -69,6 +69,7 @@ class Wapiti:
         # self.crawler = None
 
         self.target_scope = Scope(self.base_request, scope)
+        self.crawler_configuration.scope = self.target_scope
 
         self.report_gen = None
         self.report_generator_type = "html"

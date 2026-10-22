@@ -254,7 +254,8 @@ async def getcookie_main(arguments):
 
                 request = Request(form.url, post_params=post_params)
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-                    await crawler.async_send(request, follow_redirects=True)
+                    # Interactive tool, the operator picked the form: follow the login wherever it goes
+                    await crawler.async_send(request, follow_redirects=True, allow_offsite_redirects=True)
                     json_cookie.addcookies(crawler.cookie_jar)
 
     json_cookie.dump()
