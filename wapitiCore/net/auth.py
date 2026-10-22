@@ -25,6 +25,8 @@ from urllib.parse import urljoin
 import importlib.util
 
 from httpx import RequestError
+from tld import get_fld
+from tld.exceptions import TldDomainNotFound
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
 from playwright.async_api import async_playwright, Error as PlaywrightError
@@ -35,6 +37,44 @@ from wapitiCore.main.log import logging, log_green, log_orange
 from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.cookies import headless_cookies_to_cookiejar
+from wapitiCore.net.scope import Scope
+from wapitiCore.net.web import urlparse
+
+DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def _host_and_port(url: str) -> Tuple[Optional[str], Optional[int]]:
+    parts = urlparse(url)
+    return parts.hostname, parts.port or DEFAULT_PORTS.get(parts.scheme)
+
+
+def _registrable_domain(url: str) -> Optional[str]:
+    try:
+        return get_fld(url)
+    except TldDomainNotFound:
+        # IP address, localhost, internal name...
+        return None
+
+
+def is_login_destination_allowed(login_url: str, page_url: str, scope: Optional[Scope] = None) -> bool:
+    """Tell whether credentials may be submitted to login_url, given the URL of the page holding the form.
+
+    The page content is untrusted (HTML injection, compromised target...) and chooses the form action, so
+    credentials only go to the host and port serving the login page, another host of its registrable domain
+    (www.example.com -> accounts.example.com) or a URL within the scan scope. Anything else is refused.
+    """
+    login_host, login_port = _host_and_port(login_url)
+    if not login_host:
+        return False
+
+    if (login_host, login_port) == _host_and_port(page_url):
+        return True
+
+    login_domain = _registrable_domain(login_url)
+    if login_domain and login_domain == _registrable_domain(page_url):
+        return True
+
+    return scope is not None and scope.check(login_url)
 
 
 async def check_http_auth(crawler_configuration: CrawlerConfiguration) -> bool:
@@ -80,10 +120,10 @@ async def async_fetch_login_page(
         crawler_configuration: CrawlerConfiguration,
         url: str,
         headless_mode: str = "no",
-) -> Optional[str]:
+) -> Tuple[Optional[str], Optional[str]]:
     """
-    Try to authenticate with the provided url and credentials.
-    Returns if the authentication has been successful, the used form variables and the disconnect urls.
+    Fetch the login page at url, keeping the cookies set along the way.
+    Returns the page source and the URL it was finally served from (after redirects), or (None, None) on error.
     """
     # Step 1: Fetch the login page and try to extract the login form, keep cookies too
     if headless_mode != "no":
@@ -112,17 +152,18 @@ async def async_fetch_login_page(
                     )
                     await page.wait_for_timeout(100)
                     page_source = await page.content()
+                    page_url = page.url
                     crawler_configuration.cookies = headless_cookies_to_cookiejar(await context.cookies())
-                    return page_source
+                    return page_source, page_url
                 finally:
                     await browser.close()
 
         except (PlaywrightError, asyncio.TimeoutError) as exception:
             if isinstance(exception, TargetClosedError):
-                return None
+                return None, None
 
             logging.error("[!] %s with URL %s", type(exception).__name__, url)
-            return None
+            return None, None
     else:
         async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
             try:
@@ -131,28 +172,46 @@ async def async_fetch_login_page(
                     follow_redirects=True
                 )
                 crawler_configuration.cookies = crawler.cookie_jar
-                page_source = response.content
-                return page_source
+                return response.content, response.url
             except ConnectionError:
                 logging.error("[!] Connection error with URL %s", url)
-                return None
+                return None, None
             except RequestError as exception:
                 logging.error(
                     "[!] %s with URL %s", type(exception).__name__, url
                 )
-                return None
+                return None, None
 
 
 async def async_submit_login_form(
         page_source: str,
         crawler_configuration: CrawlerConfiguration,
         form_credential: FormCredential,
+        page_url: Optional[str] = None,
+        scope: Optional[Scope] = None,
 ) -> Tuple[bool, dict, List[str]]:
+    """Find the login form in page_source and submit the credentials to it.
+
+    page_url is the URL the page was actually served from (defaults to the one given by the user) and
+    scope the scan scope: both decide where the credentials may be sent, see is_login_destination_allowed.
+    """
     disconnect_urls = []
-    page = Html(page_source, form_credential.url)
+    page_url = page_url or form_credential.url
+    page = Html(page_source, page_url)
 
     login_form, username_field_idx, password_field_idx = page.find_login_form()
+    if login_form and not is_login_destination_allowed(login_form.url, page_url, scope):
+        logging.error(
+            "[!] Login failed : the login form submits to %s, outside of the login page host and the scan scope. "
+            "Refusing to send the credentials there.",
+            urlparse(login_form.url).netloc
+        )
+        return False, {}, []
+
     if login_form:
+        if urlparse(page_url).scheme == "https" and urlparse(login_form.url).scheme == "http":
+            log_orange("[!] The login form submits the credentials over plain HTTP to %s", login_form.url)
+
         # Step 2: submit the login form, keep new cookies
         login_request, form = _create_login_request(
             login_form,
@@ -190,15 +249,25 @@ async def async_try_form_login(
         crawler_configuration: CrawlerConfiguration,
         form_credential: FormCredential,
         headless_mode: str = "no",
+        scope: Optional[Scope] = None,
 ) -> Tuple[bool, dict, List[str]]:
     """
     Try to authenticate with the provided url and credentials.
     Returns if the authentication has been successful, the used form variables and the disconnect urls.
     """
-    page_source = await async_fetch_login_page(crawler_configuration, form_credential.url, headless_mode)
+    page_source, page_url = await async_fetch_login_page(crawler_configuration, form_credential.url, headless_mode)
     if not page_source:
         return False, {}, []
-    return await async_submit_login_form(page_source, crawler_configuration, form_credential)
+
+    if urlparse(page_url).hostname != urlparse(form_credential.url).hostname:
+        # Legitimate with an external identity provider, but the operator must know where the credentials go
+        log_orange(
+            "[!] Login page %s redirected to %s, credentials will be submitted to that host",
+            form_credential.url,
+            page_url
+        )
+
+    return await async_submit_login_form(page_source, crawler_configuration, form_credential, page_url, scope)
 
 
 async def login_with_raw_data(crawler_configuration: CrawlerConfiguration, raw_credential: RawCredential):

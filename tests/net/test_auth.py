@@ -15,6 +15,7 @@ from wapitiCore.net.auth import (
 )
 from wapitiCore.net.classes import CrawlerConfiguration, FormCredential, RawCredential
 from wapitiCore.net import Request
+from wapitiCore.net.scope import Scope
 
 # Sample HTML for a login page
 LOGIN_PAGE_HTML = """
@@ -126,6 +127,7 @@ class TestAuth:
 
         mock_page = AsyncMock()
         mock_page.content.return_value = LOGIN_PAGE_HTML
+        mock_page.url = login_url
         mock_context = AsyncMock()
         mock_context.new_page.return_value = mock_page
         mock_context.cookies.return_value = []
@@ -284,3 +286,156 @@ async def run(crawler_configuration, form_credential, headless):
     async def test_check_http_auth_failure(self, crawler_configuration):
         respx.get(crawler_configuration.base_request.url).mock(return_value=httpx.Response(401))
         assert await check_http_auth(crawler_configuration) is False
+
+
+def login_page_posting_to(action: str) -> str:
+    return f"""
+<html><body>
+  <form action="{action}" method="post">
+    <input type="text" name="username">
+    <input type="password" name="password">
+  </form>
+</body></html>
+"""
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_refuses_foreign_host():
+    """A login form (injected or not) pointing to another host must not receive the credentials."""
+    crawler_configuration = CrawlerConfiguration(Request("http://wapiti.test/"))
+    form_creds = FormCredential(url="http://wapiti.test/login", username="admin", password="password")
+    respx.get("http://wapiti.test/login").mock(
+        return_value=httpx.Response(200, text=login_page_posting_to("http://evil.test/steal"))
+    )
+    steal_route = respx.post("http://evil.test/steal").mock(return_value=httpx.Response(200, text=LOGGED_IN_HTML))
+
+    result = await async_try_form_login(
+        crawler_configuration, form_creds, scope=Scope(Request("http://wapiti.test/"), "folder")
+    )
+
+    assert result == (False, {}, [])
+    assert not steal_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_refuses_base_tag_to_foreign_host():
+    """<base href> is another way for the page to move a relative action to a foreign host."""
+    crawler_configuration = CrawlerConfiguration(Request("http://wapiti.test/"))
+    form_creds = FormCredential(url="http://wapiti.test/login", username="admin", password="password")
+    respx.get("http://wapiti.test/login").mock(
+        return_value=httpx.Response(
+            200,
+            text='<html><head><base href="http://evil.test/x/"></head><body>' + login_page_posting_to("login")
+        )
+    )
+    steal_route = respx.post("http://evil.test/x/login").mock(return_value=httpx.Response(200, text=LOGGED_IN_HTML))
+
+    result = await async_try_form_login(crawler_configuration, form_creds)
+
+    assert result == (False, {}, [])
+    assert not steal_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_external_page_posting_into_scope():
+    """An external login page whose form submits to the scanned target is allowed through the scan scope."""
+    crawler_configuration = CrawlerConfiguration(Request("http://wapiti.test/"))
+    form_creds = FormCredential(url="http://sso.test/login", username="admin", password="password")
+    respx.get("http://sso.test/login").mock(
+        return_value=httpx.Response(200, text=login_page_posting_to("http://wapiti.test/auth"))
+    )
+    auth_route = respx.post("http://wapiti.test/auth").mock(return_value=httpx.Response(200, text=LOGGED_IN_HTML))
+
+    is_logged_in, form, _ = await async_try_form_login(
+        crawler_configuration, form_creds, scope=Scope(Request("http://wapiti.test/"), "folder")
+    )
+
+    assert is_logged_in is True
+    assert form == {"login_field": "username", "password_field": "password"}
+    assert auth_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_same_registrable_domain_is_allowed():
+    """www.example.com posting to accounts.example.com is a common legitimate setup."""
+    crawler_configuration = CrawlerConfiguration(Request("http://www.example.com/"))
+    form_creds = FormCredential(url="http://www.example.com/login", username="admin", password="password")
+    respx.get("http://www.example.com/login").mock(
+        return_value=httpx.Response(200, text=login_page_posting_to("http://accounts.example.com/login"))
+    )
+    auth_route = respx.post("http://accounts.example.com/login").mock(
+        return_value=httpx.Response(200, text=LOGGED_IN_HTML)
+    )
+
+    is_logged_in, _, _ = await async_try_form_login(crawler_configuration, form_creds)
+
+    assert is_logged_in is True
+    assert auth_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_follows_redirect_to_identity_provider():
+    """The login page may redirect to an IdP: the form is then checked against the final page, not --form-url."""
+    crawler_configuration = CrawlerConfiguration(Request("http://wapiti.test/"))
+    form_creds = FormCredential(url="http://wapiti.test/login", username="admin", password="password")
+    respx.get("http://wapiti.test/login").mock(
+        return_value=httpx.Response(302, headers={"Location": "http://idp.test/realms/app/login"})
+    )
+    respx.get("http://idp.test/realms/app/login").mock(
+        return_value=httpx.Response(200, text=login_page_posting_to("/realms/app/authenticate"))
+    )
+    idp_route = respx.post("http://idp.test/realms/app/authenticate").mock(
+        return_value=httpx.Response(200, text=LOGGED_IN_HTML)
+    )
+    wrong_route = respx.post("http://wapiti.test/realms/app/authenticate").mock(return_value=httpx.Response(404))
+
+    is_logged_in, _, _ = await async_try_form_login(crawler_configuration, form_creds)
+
+    assert is_logged_in is True
+    assert idp_route.called
+    assert not wrong_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_form_login_refuses_other_port_on_same_ip():
+    """Without a registrable domain, only the exact host:port of the login page (or the scope) is trusted."""
+    crawler_configuration = CrawlerConfiguration(Request("http://127.0.0.1:9011/"))
+    form_creds = FormCredential(url="http://127.0.0.1:9011/login", username="admin", password="password")
+    respx.get("http://127.0.0.1:9011/login").mock(
+        return_value=httpx.Response(200, text=login_page_posting_to("http://127.0.0.1:9015/steal"))
+    )
+    steal_route = respx.post("http://127.0.0.1:9015/steal").mock(return_value=httpx.Response(200, text=LOGGED_IN_HTML))
+
+    result = await async_try_form_login(
+        crawler_configuration, form_creds, scope=Scope(Request("http://127.0.0.1:9011/"), "folder")
+    )
+
+    assert result == (False, {}, [])
+    assert not steal_route.called
+
+
+def test_is_login_destination_allowed_rules():
+    from wapitiCore.net.auth import is_login_destination_allowed
+
+    page = "https://www.example.com/login"
+    assert is_login_destination_allowed("https://www.example.com/auth", page)
+    assert is_login_destination_allowed("https://www.example.com:8443/auth", page)  # same registrable domain
+    assert is_login_destination_allowed("https://accounts.example.com/auth", page)
+    assert is_login_destination_allowed("http://www.example.com/auth", page)  # downgrade is warned, not refused
+    assert not is_login_destination_allowed("https://example.net/auth", page)
+    assert not is_login_destination_allowed("https://evil.example.net/auth", page)
+    assert not is_login_destination_allowed("/auth", page)
+
+    page = "http://127.0.0.1:9011/login"
+    assert is_login_destination_allowed("http://127.0.0.1:9011/auth", page)
+    assert not is_login_destination_allowed("http://127.0.0.1:9015/auth", page)
+    assert not is_login_destination_allowed("http://127.0.0.2/auth", page)
+    assert is_login_destination_allowed(
+        "http://127.0.0.1:9015/auth", page, Scope(Request("http://127.0.0.1:9015/"), "folder")
+    )

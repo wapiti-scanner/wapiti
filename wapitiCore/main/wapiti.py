@@ -471,6 +471,7 @@ async def wapiti_main():
             wap.crawler_configuration,
             form_credential,
             wap.headless_mode,
+            scope=wap.target_scope,
         )
         wap.set_auth_state(is_logged_in, form, form_credential.url)
         for url in excluded_urls:
