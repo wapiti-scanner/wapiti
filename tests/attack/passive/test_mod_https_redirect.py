@@ -1,3 +1,4 @@
+import json
 from typing import List, Tuple, Union
 from unittest.mock import MagicMock
 
@@ -306,3 +307,133 @@ def test_no_analysis_for_https(module):
     vuln = next(module.analyze(request, response), None)
 
     assert vuln is None
+
+
+# ---------------------------------------------------------------------------
+# Non-sensitive HTML ordering regressions: a safe redirect to HTTPS is not a
+# finding, so it must neither consume the host's occurrence nor be counted as
+# a suppressed alert.
+# ---------------------------------------------------------------------------
+
+def safe_redirect(url="http://test.com/index.html", target="https://test.com/index.html"):
+    """Non-sensitive HTML 3xx response redirecting to HTTPS: never a finding."""
+    return create_mock_objects(
+        url,
+        response_status=301,
+        redirection_url=target,
+        response_headers={"Content-Type": "text/html"},
+    )
+
+
+def insecure_html(url="http://test.com/page"):
+    """Non-sensitive HTML 200 served in clear text: the finding under test."""
+    return create_mock_objects(url, response_headers={"Content-Type": "text/html"})
+
+
+def test_safe_redirect_does_not_consume_the_host_occurrence(module):
+    """safe -> unsafe -> repeated unsafe: only the repeat is suppressed."""
+    request, response = safe_redirect()
+    assert next(module.analyze(request, response), None) is None
+    assert module.suppressed_findings == 0
+
+    request, response = insecure_html()
+    vuln = next(module.analyze(request, response), None)
+    assert vuln is not None
+    assert vuln.severity == LOW_LEVEL
+    assert vuln.request is request
+
+    request, response = insecure_html("http://test.com/other")
+    assert next(module.analyze(request, response), None) is None
+    assert module.suppressed_findings == 1
+    assert dict(module.suppressed_by_category) == {HstsFinding.name(): 1}
+
+
+def test_repeated_safe_redirects_record_nothing(module):
+    """Repeated safe redirects leave no occurrence and no suppression behind."""
+    for _ in range(3):
+        request, response = safe_redirect()
+        assert next(module.analyze(request, response), None) is None
+
+    state = module.get_state()
+    assert state["occurrences"] == []
+    assert state["suppressed_findings"] == 0
+    assert state["suppressed_by_category"] == {}
+
+    # The host slot is still free for the real finding.
+    request, response = insecure_html()
+    assert next(module.analyze(request, response), None) is not None
+
+
+def test_unsafe_then_safe_adds_no_false_suppression(module):
+    """A safe redirect after the real alert must not be counted as suppressed."""
+    request, response = insecure_html()
+    assert next(module.analyze(request, response), None) is not None
+
+    request, response = safe_redirect()
+    assert next(module.analyze(request, response), None) is None
+
+    assert module.suppressed_findings == 0
+    assert module.get_state()["occurrences"] == [["test.com", 1]]
+
+
+def test_json_state_roundtrip_keeps_safe_and_unsafe_semantics(module):
+    """Persisted state must not turn a safe redirect into a consumed occurrence."""
+    request, response = insecure_html()
+    assert next(module.analyze(request, response), None) is not None
+    request, response = safe_redirect()
+    assert next(module.analyze(request, response), None) is None
+
+    restored = ModuleHttpsRedirect()
+    restored.load_state(json.loads(json.dumps(module.get_state())))
+
+    request, response = insecure_html("http://test.com/other")
+    assert next(restored.analyze(request, response), None) is None
+    assert restored.suppressed_findings == 1
+
+    # State built from safe redirects only stays empty across a JSON roundtrip.
+    safe_only = ModuleHttpsRedirect()
+    for _ in range(2):
+        request, response = safe_redirect("http://other.com/")
+        assert next(safe_only.analyze(request, response), None) is None
+
+    empty_state = json.loads(json.dumps(safe_only.get_state()))
+    assert empty_state["occurrences"] == []
+    assert empty_state["suppressed_findings"] == 0
+
+    restored_empty = ModuleHttpsRedirect()
+    restored_empty.load_state(empty_state)
+    request, response = safe_redirect("http://other.com/")
+    assert next(restored_empty.analyze(request, response), None) is None
+    assert restored_empty.suppressed_findings == 0
+    request, response = insecure_html("http://other.com/x")
+    assert next(restored_empty.analyze(request, response), None) is not None
+
+
+def test_non_html_non_sensitive_response_is_ignored(module):
+    """Unchanged invariant: non-HTML bodies are out of scope and consume nothing."""
+    request, response = create_mock_objects(
+        "http://test.com/api", response_headers={"Content-Type": "application/json"}
+    )
+    assert next(module.analyze(request, response), None) is None
+    assert module.get_state()["occurrences"] == []
+    assert module.suppressed_findings == 0
+
+
+def test_sensitive_keys_and_cap_are_unchanged(module):
+    """Unchanged invariant: sensitive keys stay distinct per reason, cap stays 1."""
+    get_request, get_response = create_mock_objects(
+        "http://test.com/page?p=1", get_params=[["p", "1"]]
+    )
+    post_request, post_response = create_mock_objects(
+        "http://test.com/submit", method="POST", post_params=[["p", "1"]]
+    )
+
+    assert next(module.analyze(get_request, get_response), None) is not None
+    assert next(module.analyze(post_request, post_response), None) is not None
+    assert next(module.analyze(get_request, get_response), None) is None
+
+    assert module.suppressed_findings == 1
+    assert sorted(entry[0][1] for entry in module.get_state()["occurrences"]) == [
+        "GET parameters",
+        "POST data",
+    ]
