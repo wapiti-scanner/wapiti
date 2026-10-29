@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+import json
 import re
 from typing import Generator, Any
 
@@ -51,9 +52,17 @@ def csp_posture(csp_header_value: str) -> str:
     policy served elsewhere on the site is a distinct posture and reported separately.
     """
     without_dynamic = _CSP_DYNAMIC_TOKEN.sub("", csp_header_value.lower())
-    # Make ';' a standalone token so directive separators fingerprint the same
-    # regardless of the surrounding whitespace in the raw header.
-    return " ".join(sorted(without_dynamic.replace(";", " ; ").split()))
+    # Keep every value attached to the directive that declares it: sorting the header as a
+    # single token bag makes two different policies collide as soon as they happen to share
+    # the same tokens, which then hides a genuinely different posture from deduplication.
+    directives = csp_header_to_dict(without_dynamic)
+    # Values are only reordered inside their own directive. A structured serialization is
+    # used because joining tokens with spaces would merge a value that itself contains
+    # spaces with its neighbours, so distinct source lists could fingerprint the same.
+    return json.dumps(
+        [[directive, sorted(values)] for directive, values in sorted(directives.items())],
+        separators=(",", ":"),
+    )
 
 
 class ModuleCsp(PassiveModule):
