@@ -1,6 +1,40 @@
 from pathlib import Path
 
+import pytest
+
 from wapitiCore.parsers.html_parser import Html
+
+LOGIN_URL = "http://perdu.com/login"
+
+# Named controls stay in document order whatever the nameless decorations around them.
+USER_FIELD = '<input type="text" name="username" value="u1">'
+PASSWORD_FIELD = '<input type="password" name="password" value="p1">'
+HIDDEN_FIELD = '<input type="hidden" name="csrf" value="tok-42">'
+SUBMIT_FIELD = '<input type="submit" name="commit" value="Sign in">'
+NAMELESS_CONTROLS = (
+    '<input type="hidden">'
+    '<input type="checkbox" checked>'
+    '<input type="text" value="decorative">'
+)
+
+EXPECTED_PARAMS = [
+    ["csrf", "tok-42"],
+    ["username", "u1"],
+    ["password", "p1"],
+    ["commit", "Sign in"],
+]
+
+LOGIN_FORMS = {
+    "clean": HIDDEN_FIELD + USER_FIELD + PASSWORD_FIELD + SUBMIT_FIELD,
+    "nameless-before": NAMELESS_CONTROLS + HIDDEN_FIELD + USER_FIELD + PASSWORD_FIELD + SUBMIT_FIELD,
+    "nameless-between": HIDDEN_FIELD + USER_FIELD + NAMELESS_CONTROLS + PASSWORD_FIELD + SUBMIT_FIELD,
+    "nameless-after": HIDDEN_FIELD + USER_FIELD + PASSWORD_FIELD + SUBMIT_FIELD + NAMELESS_CONTROLS,
+}
+
+
+def _login_form_page(method: str, fields: str) -> Html:
+    body = f'<html><body><form action="/login" method="{method}">{fields}</form></body></html>'
+    return Html(body, LOGIN_URL)
 
 
 def test_forms():
@@ -138,3 +172,52 @@ def test_wordpress_comment_form():
     request = form.to_requests()[0]
     # We expect all fields to have values (no empty string)
     assert all(value for _, value in request.post_params)
+
+
+@pytest.mark.parametrize("method", ["GET", "POST"])
+@pytest.mark.parametrize("case", sorted(LOGIN_FORMS))
+def test_login_form_indexes_match_request_params(method: str, case: str):
+    """Returned indexes must address the same named inputs used to build Request parameters."""
+    login_form, username_idx, password_idx = _login_form_page(method, LOGIN_FORMS[case]).find_login_form()
+
+    assert login_form is not None
+    assert login_form.method == method
+    assert login_form.file_path == "/login"
+
+    params = login_form.get_params if method == "GET" else login_form.post_params
+    unused_params = login_form.post_params if method == "GET" else login_form.get_params
+    assert params == EXPECTED_PARAMS
+    assert unused_params == []
+
+    assert (username_idx, password_idx) == (1, 2)
+    assert 0 <= username_idx < len(params)
+    assert 0 <= password_idx < len(params)
+    assert params[username_idx] == ["username", "u1"]
+    assert params[password_idx] == ["password", "p1"]
+
+
+def test_nameless_identity_and_password_inputs_are_not_indexed():
+    """A nameless email/password pair must not hide a properly named login pair."""
+    fields = (
+        '<input type="email">'
+        '<input type="password">'
+        '<input type="text" name="username" value="u1">'
+        '<input type="password" name="password" value="p1">'
+    )
+    login_form, username_idx, password_idx = _login_form_page("POST", fields).find_login_form()
+
+    assert login_form is not None
+    assert login_form.post_params == [["username", "u1"], ["password", "p1"]]
+    assert (username_idx, password_idx) == (0, 1)
+    assert 0 <= username_idx < len(login_form.post_params)
+    assert 0 <= password_idx < len(login_form.post_params)
+
+
+def test_form_with_only_nameless_identity_fields_is_not_a_login_form():
+    """Nameless identity/password controls alone must not make a form a login form."""
+    fields = (
+        '<input type="email">'
+        '<input type="password">'
+        '<input type="text" name="search" value="q">'
+    )
+    assert _login_form_page("POST", fields).find_login_form() == (None, 0, 0)

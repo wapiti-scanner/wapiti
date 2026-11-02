@@ -778,7 +778,8 @@ class Html:
             username_field_idx = []
             password_field_idx = []
 
-            for i, input_field in enumerate(form.find_all("input")):
+            inputs = form.find_all("input", attrs={"name": True})
+            for i, input_field in enumerate(inputs):
                 input_type = input_field.attrs.get("type", "text").lower()
                 input_name = input_field.attrs.get("name", "undefined").lower()
                 input_id = input_field.attrs.get("id", "undefined").lower()
@@ -796,8 +797,6 @@ class Html:
 
             # ensure login form
             if len(username_field_idx) == 1 and len(password_field_idx) == 1:
-                inputs = form.find_all("input", attrs={"name": True})
-
                 url = self._make_absolute(form.attrs.get("action", "").strip() or self._url)
                 method = form.attrs.get("method", "GET").strip().upper()
                 enctype = form.attrs.get("enctype", "application/x-www-form-urlencoded").lower()
