@@ -175,14 +175,14 @@ OTHER OPTIONS:
     Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
-    (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods bellow).  
+    (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods below).  
     Given value should be in the form login%password (% is used as a separator)
 
   * `--auth-user` <USERNAME>  
-    Set username to use for HTTP authentication on the target (see available methods bellow).
+    Set username to use for HTTP authentication on the target (see available methods below).
 
   * `--auth-password` <PASSWORD>  
-    Set password to use for HTTP authentication on the target (see available methods bellow).
+    Set password to use for HTTP authentication on the target (see available methods below).
 
   * `--auth-method` <TYPE>  
     Set the authentication mechanism to use. Valid choices are basic, digest and ntlm.  
