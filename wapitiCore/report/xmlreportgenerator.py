@@ -23,6 +23,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Modifications: 2026-11-06, declare the xsi namespace on the auth info element
+# when it is exported with xsi:nil (no authentication used) so the report stays
+# namespace-well-formed.
 from typing import Optional
 from xml.dom.minidom import Document, Element
 
@@ -286,6 +290,8 @@ class XMLReportGenerator(JSONReportGenerator):
             else:
                 form_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
         else:
+            auth_node.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xsi",
+                                     "http://www.w3.org/2001/XMLSchema-instance")
             auth_node.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:nil", "true")
         report_infos.appendChild(auth_node)
         if self._infos["detailed_report_level"] == 2:
