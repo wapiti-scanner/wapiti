@@ -24,9 +24,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# Modifications: 2026-11-06, declare the xsi namespace on the auth info element
-# when it is exported with xsi:nil (no authentication used) so the report stays
-# namespace-well-formed.
 from typing import Optional
 from xml.dom.minidom import Document, Element
 
