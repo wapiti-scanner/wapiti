@@ -265,3 +265,86 @@ def test_module_csp_distinct_posture_reported_across_pages(module):
 
     assert list(module.analyze(req1, resp1))
     assert list(module.analyze(req2, resp2))           # different posture -> reported again
+
+
+# Two different policies built from the same tokens, attached to different directives:
+# a global token multiset cannot tell them apart.
+POLICY_SCRIPT_UNSAFE = "script-src 'self' 'unsafe-inline'; object-src 'none'"
+POLICY_OBJECT_UNSAFE = "script-src 'none'; object-src 'self' 'unsafe-inline'"
+
+
+def _global_tokens(policy: str) -> list:
+    return sorted(policy.replace(";", " ; ").split())
+
+
+def test_colliding_policies_share_a_global_token_multiset():
+    """Fixture sanity check for the assertions below."""
+    assert _global_tokens(POLICY_SCRIPT_UNSAFE) == _global_tokens(POLICY_OBJECT_UNSAFE)
+
+
+def test_csp_posture_keeps_values_attached_to_their_directive():
+    assert csp_posture(POLICY_SCRIPT_UNSAFE) != csp_posture(POLICY_OBJECT_UNSAFE)
+    # Ordering inside a directive and ordering of the directives stay neutralized.
+    assert csp_posture(POLICY_SCRIPT_UNSAFE) == csp_posture(
+        "object-src 'none'; script-src 'unsafe-inline' 'self'"
+    )
+
+
+def test_csp_posture_preserves_token_boundaries():
+    # A quoted value is a single token for the parser, so these two source lists differ
+    # even though they contain the same characters.
+    single_token = csp_posture("script-src 'data: unsafe-inline'; object-src 'none'")
+    two_tokens = csp_posture("script-src data: unsafe-inline; object-src 'none'")
+    assert single_token != two_tokens
+
+
+def test_csp_posture_neutralizes_nonces_hashes_and_casing():
+    assert csp_posture(
+        "Script-Src 'self' 'nonce-aaa' 'sha256-bbb'; Object-Src 'none'"
+    ) == csp_posture("object-src 'none'; script-src 'nonce-zzz' 'self'")
+
+
+def test_csp_posture_of_a_missing_header_is_stable():
+    assert csp_posture("") == csp_posture("  ;  ")
+    assert csp_posture("") != csp_posture("script-src 'self'")
+
+
+def test_module_csp_reports_distinct_policies_that_share_tokens(module):
+    """A reused module must not treat two different policies as already reported."""
+    request_a, response_a = create_mock_objects(
+        "http://example.com/a",
+        response_headers={
+            "Content-Type": "text/html",
+            "Content-Security-Policy": POLICY_SCRIPT_UNSAFE,
+        },
+    )
+    request_b, response_b = create_mock_objects(
+        "http://example.com/b",
+        response_headers={
+            "Content-Type": "text/html",
+            "Content-Security-Policy": POLICY_OBJECT_UNSAFE,
+        },
+    )
+
+    first = [vuln.info for vuln in module.analyze(request_a, response_a)]
+    assert MSG_CSP_UNSAFE.format("script-src", "http://example.com/a") in first
+    assert not [info for info in first if "object-src" in info]
+
+    second = [vuln.info for vuln in module.analyze(request_b, response_b)]
+    # The unsafe directive moved from script-src to object-src: the script-src warning is
+    # gone and the object-src one is new, on top of the shared missing directives.
+    assert MSG_CSP_UNSAFE.format("object-src", "http://example.com/b") in second
+    assert not [info for info in second if "script-src" in info]
+    assert len(second) == 5
+
+    # An equivalent variant of an already reported policy stays deduplicated.
+    request_c, response_c = create_mock_objects(
+        "http://example.com/c",
+        response_headers={
+            "Content-Type": "text/html",
+            "Content-Security-Policy": (
+                "object-src 'none'; script-src 'nonce-x' 'unsafe-inline' 'self'"
+            ),
+        },
+    )
+    assert list(module.analyze(request_c, response_c)) == []
