@@ -1,4 +1,5 @@
 import sys
+from argparse import Namespace
 from pathlib import Path
 from time import monotonic
 from unittest import mock
@@ -10,7 +11,7 @@ import pytest
 
 from wapitiCore.attack.modules.core import all_modules
 from wapitiCore.net import Request, Response
-from wapitiCore.main.wapiti import wapiti_main
+from wapitiCore.main.wapiti import validate_basic_args, wapiti_main
 from wapitiCore.controller.wapiti import Wapiti, InvalidOptionValue
 
 # Mock persister/callback signatures impose arguments unused by the test bodies, and tests
@@ -421,3 +422,17 @@ async def test_basic_usage(_, __):
 
     with mock.patch.object(sys, "argv", testsagrs):
         await wapiti_main()
+
+
+@pytest.mark.parametrize("base_url", ["not-a-url", "example.com", ""])
+def test_invalid_base_url_exits_nonzero(base_url):
+    """An invalid base URL must not exit with a success status code."""
+    args = Namespace(base_url=base_url, tasks=2)
+    with pytest.raises(SystemExit) as exit_info:
+        validate_basic_args(args)
+    assert exit_info.value.code not in (None, 0)
+
+
+def test_valid_base_url_ok():
+    args = Namespace(base_url="http://example.com/", tasks=2)
+    assert validate_basic_args(args) == "http://example.com/"
