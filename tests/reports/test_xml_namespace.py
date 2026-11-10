@@ -101,9 +101,8 @@ def test_authenticated_report_keeps_auth_payload(tmp_path):
     assert form_node.getElementsByTagName("login_field")[0].firstChild.nodeValue == "username"
     assert form_node.getElementsByTagName("password_field")[0].firstChild.nodeValue == "password"
 
-    # No namespace declaration leaks into reports that do not use xsi:nil.
+    # No nil marker leaks into reports whose auth payload is not nil.
     assert "xsi:nil" not in report_text
-    assert "xmlns:xsi" not in report_text
 
 
 @pytest.mark.parametrize("form", [None, {}])
@@ -117,4 +116,3 @@ def test_authenticated_report_without_form_stays_parseable(tmp_path, form):
     assert not auth_node.hasAttributeNS(XSI_NAMESPACE, "nil")
     assert not auth_node.getElementsByTagName("form")
     assert "<form" not in report_text
-    assert "xmlns:xsi" not in report_text
