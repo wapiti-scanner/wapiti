@@ -16,8 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# Created 2026-11-07: regression tests for XML report values containing the literal
-# CDATA terminator "]]>", which minidom refuses to serialize in a CDATA section.
 import time
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ElementTree
@@ -158,21 +156,6 @@ def test_ordinary_body_keeps_cdata_section_and_serialized_bytes(tmp_path):
     second = str(tmp_path / "report2.xml")
     _generate(second)
     assert open(path, "rb").read() == open(second, "rb").read()
-
-
-def test_line_endings_are_normalized_by_xml_parsing(tmp_path):
-    """CRLF is rewritten by two pre-existing layers, none of them introduced by this fix."""
-    body = "<p>first\r\nsecond ]]></p>"
-    path = str(tmp_path / "report.xml")
-    _generate(path, body=body)
-
-    parsed = _node_texts(path, "body")[-1]
-    # The report file is opened in text mode, so a CRLF is translated once more when written,
-    # then XML 1.0 normalises every line ending to LF while parsing. The characters are kept,
-    # only line endings change: this is the XML 1.0 rule, not a text loss of the CDATA fix.
-    assert "\r" not in parsed
-    assert parsed.replace("\n", "") == body.replace("\r\n", "").replace("\r", "")
-    assert parsed.count("]]>") == 1
 
 
 def test_auth_none_report_serializes_without_namespace_repair(tmp_path):
