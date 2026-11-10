@@ -140,7 +140,7 @@ def validate_basic_args(args: Namespace):
     parts = urlparse(url)
     if not parts.scheme or not parts.netloc:
         logging.error("Invalid base URL was specified, please give a complete URL with protocol scheme.")
-        sys.exit()
+        sys.exit(2)
 
     return url
 
