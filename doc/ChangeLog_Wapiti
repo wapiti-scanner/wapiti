@@ -2,6 +2,7 @@
     Wapiti 3.3.2
     Explorer: scope soft-404 detection to non-error, non-PATH_INFO responses (#809)
     Explorer: detect soft-404 / SPA catch-all pages before persisting them (#808)
+    Attack: csp fingerprint format now comes from the same parse as the checks, so a scan resumed from a session saved by an older version reports its CSP findings once more (robustness/compatibility, not a security fix) (#820)
 
 27/07/2026
     Wapiti 3.3.1
