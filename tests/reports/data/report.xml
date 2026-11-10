@@ -7,7 +7,7 @@
       <info name="dateOfScan">Thu, 01 Jan 1970 00:00:00 +0000</info>
       <info name="target">http://perdu.com</info>
       <info name="crawledPages">123456</info>
-      <info name="auth" xsi:nil="true"/>
+      <info name="auth" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
    </report_infos>
    <vulnerabilities>
       <vulnerability name="Backup file">
