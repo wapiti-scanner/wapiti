@@ -24,10 +24,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# Modified 2026-11-07: values containing the literal CDATA terminator "]]>" are written as
-# text nodes, escaped by the DOM serializer, instead of CDATA sections. minidom refuses to
-# serialize that sequence in a CDATA section, so a produced body, description or solution
-# could abort the whole report at write time. Ordinary values keep using CDATA sections.
 from typing import Optional
 from xml.dom.minidom import Document, Element
 
