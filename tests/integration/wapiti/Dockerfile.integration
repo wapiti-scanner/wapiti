@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 RUN apt-get -y update &&\
   apt-get -y install --no-install-recommends\
-  python3 python3-pip python3-setuptools ca-certificates &&\
+  python3 python3-pip python3-setuptools ca-certificates libatomic1 &&\
   apt-get -y clean &&\
   apt-get -y autoremove &&\
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
@@ -27,7 +27,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get -y update &&\
   apt-get -y install --no-install-recommends \
-  python3 python3-setuptools curl &&\
+  python3 python3-setuptools curl libatomic1 &&\
   apt-get -y clean &&\
   apt-get -y autoremove &&\
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
