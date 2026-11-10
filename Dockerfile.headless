@@ -10,6 +10,11 @@ COPY . .
 RUN pip install setuptools wheel build --break-system-packages
 RUN pip install . --break-system-packages
 
+# The Node.js binary bundled with Playwright >= 1.65 needs libatomic, absent from the slim image
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends --no-install-suggests libatomic1 \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN playwright install firefox
 
 FROM python:3.13-slim
@@ -27,7 +32,7 @@ COPY --chmod=755 openssl_conf /etc/wapiti/
 
 RUN apt update \
   && apt-get install -y --no-install-recommends --no-install-suggests \
-     xz-utils curl bzip2 \
+     xz-utils curl bzip2 libatomic1 \
   && playwright install-deps firefox  \
   && apt clean -yq \
   && apt autoremove -yq \
