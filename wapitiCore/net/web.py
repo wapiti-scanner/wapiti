@@ -426,7 +426,7 @@ class Request:
             if isinstance(self._post_params, list):
                 post_kv = tuple(tuple(param) for param in self._post_params)
             else:
-                post_kv = self._enctype + str(len(self._post_params))
+                post_kv = (self._enctype, self._post_params)
             file_kv = tuple(tuple([param[0], param[1][0]]) for param in self._file_params)
 
             self._cached_hash = hash((self._method, self._resource_path, get_kv, post_kv, file_kv))
