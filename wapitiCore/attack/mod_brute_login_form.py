@@ -29,11 +29,12 @@ from httpx import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages
 from wapitiCore.definitions.credentials import CredentialsFinding
-from wapitiCore.net.web import http_repr
+from wapitiCore.net.auth import is_login_destination_allowed
+from wapitiCore.net.web import http_repr, urlparse
 from wapitiCore.parsers.html_parser import Html
 from wapitiCore.net.response import Response
 from wapitiCore.net import Request
-from wapitiCore.main.log import log_red
+from wapitiCore.main.log import logging, log_red
 
 
 class ModuleBruteLoginForm(Attack):
@@ -139,9 +140,18 @@ class ModuleBruteLoginForm(Attack):
             self.network_errors += 1
             return
 
-        page = Html(response.content, request.referer)
+        page = Html(response.content, response.url)
         login_form, username_field_idx, password_field_idx = page.find_login_form()
         if not login_form:
+            return
+
+        # The page content decides the form action: only send passwords where the login page lives
+        if not is_login_destination_allowed(login_form.url, response.url):
+            logging.warning(
+                "[!] Login form at %s submits to %s, outside of the target: skipping",
+                response.url,
+                urlparse(login_form.url).netloc
+            )
             return
 
         try:

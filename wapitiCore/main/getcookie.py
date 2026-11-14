@@ -198,7 +198,7 @@ async def getcookie_main(arguments):
     json_cookie.load(args.cookie)
     json_cookie.delete(server)
 
-    page_source = await async_fetch_login_page(crawler_configuration, args.url, args.headless)
+    page_source, page_url = await async_fetch_login_page(crawler_configuration, args.url, args.headless)
     json_cookie.addcookies(crawler_configuration.cookies)
 
     if "form_data" in args:
@@ -212,7 +212,7 @@ async def getcookie_main(arguments):
     else:
         # Not data specified, try interactive mode by fetching forms
         forms = []
-        html = Html(page_source, args.url)
+        html = Html(page_source, page_url or args.url)
         for i, form in enumerate(html.iter_forms()):
             form_request = form.to_requests()[0]
             if i == 0:
@@ -254,7 +254,8 @@ async def getcookie_main(arguments):
 
                 request = Request(form.url, post_params=post_params)
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-                    await crawler.async_send(request, follow_redirects=True)
+                    # Interactive tool, the operator picked the form: follow the login wherever it goes
+                    await crawler.async_send(request, follow_redirects=True, allow_offsite_redirects=True)
                     json_cookie.addcookies(crawler.cookie_jar)
 
     json_cookie.dump()

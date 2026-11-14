@@ -114,7 +114,10 @@ class Swagger:
     async def get_requests(self) -> list[Request]:
         if self._swagger_url.startswith(("http://", "https://")):
             async with AsyncCrawler.with_configuration(self._crawler_configuration) as crawler:
-                response = await crawler.async_get(Request(self._swagger_url), follow_redirects=True)
+                # URL given by the operator: follow it wherever it goes
+                response = await crawler.async_get(
+                    Request(self._swagger_url), follow_redirects=True, allow_offsite_redirects=True
+                )
                 if not 200 <= response.status < 300:
                     raise RuntimeError(f"Got an unexpected status code for the given swagger URL: {response.status}")
                 with TemporaryDirectory() as temp_dir:

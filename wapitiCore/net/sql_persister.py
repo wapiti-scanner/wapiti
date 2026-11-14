@@ -20,11 +20,12 @@
 import json
 import os
 from collections import namedtuple
+from collections.abc import Mapping
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dict, Any
 
 import httpx
 from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer, MetaData,
-                        PickleType, String, Table, Text, LargeBinary, and_,
+                        String, Table, Text, LargeBinary, TypeDecorator, and_,
                         event, literal_column, select)
 from sqlalchemy.sql.functions import max as sql_max
 from sqlalchemy.sql.functions import count as sql_count
@@ -32,6 +33,51 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from wapitiCore.net import Request, Response
 
 Payload = namedtuple("Payload", "evil_request,category,level,parameter,info,type,wstg,module,response")
+
+# Bump when the on-disk layout of a session database changes in a way older code can't read.
+# Format 2 stores HTTP headers as JSON (previous sessions used pickle, which executes code on load).
+SESSION_FORMAT = "2"
+SESSION_FORMAT_KEY = "session_format"
+
+
+class IncompatibleSessionError(Exception):
+    """Raised when a session database was created by a version using another on-disk format."""
+
+
+class HeadersType(TypeDecorator):  # pylint: disable=too-many-ancestors
+    """HTTP headers stored as a JSON list of [name, value] pairs.
+
+    Duplicate header names (Set-Cookie...) are kept and rows come back as httpx.Headers objects,
+    which keeps the case-insensitive lookups the callers rely on.
+    """
+    impl = Text
+    cache_ok = True
+
+    @property
+    def python_type(self):
+        return httpx.Headers
+
+    def process_literal_param(self, value, dialect):
+        return self.process_bind_param(value, dialect)
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+
+        if isinstance(value, httpx.Headers):
+            pairs = value.multi_items()
+        elif isinstance(value, Mapping):
+            pairs = list(value.items())
+        else:
+            pairs = [tuple(pair) for pair in value]
+
+        return json.dumps([[str(name), str(header_value)] for name, header_value in pairs])
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+
+        return httpx.Headers(json.loads(value))
 
 # pylint: disable=too-many-lines
 class SqlPersister:
@@ -124,7 +170,7 @@ class SqlPersister:
             Column("enctype", String(length=255), nullable=False),  # HTTP request encoding (like multipart...)
             Column("depth", Integer, nullable=False),
             Column("encoding", String(length=255)),  # page encoding (like UTF-8...)
-            Column("headers", PickleType),  # Pickled sent HTTP headers, can be huge
+            Column("headers", HeadersType),  # Sent HTTP headers as JSON, can be huge
             Column("referer", Text),  # Another URL so potentially huge
             Column("evil", Boolean, nullable=False, index=True),
             Column("response_id", None, ForeignKey(f"{table_prefix}responses.response_id"), nullable=True, index=True),
@@ -168,7 +214,7 @@ class SqlPersister:
             Column("response_id", Integer, primary_key=True),
             Column("url", Text, nullable=False),  # URL, can be huge
             Column("status_code", Integer, nullable=False),  # HTTP status code
-            Column("headers", PickleType),  # Pickled HTTP headers, can be huge
+            Column("headers", HeadersType),  # HTTP headers as JSON, can be huge
             Column("body", LargeBinary, nullable=False)  # base64 body
         )
 
@@ -176,6 +222,26 @@ class SqlPersister:
         if self._must_create:
             async with self._engine.begin() as conn:
                 await conn.run_sync(self.metadata.create_all)
+                await conn.execute(self.scan_infos.insert().values(key=SESSION_FORMAT_KEY, value=SESSION_FORMAT))
+            self._must_create = False
+            return
+
+        if await self._get_session_format() != SESSION_FORMAT:
+            raise IncompatibleSessionError(
+                f"The session file {self.output_file} was created by an older version of Wapiti and can't be "
+                "loaded. Delete it or run again with --flush-session."
+            )
+
+    async def _get_session_format(self) -> Optional[str]:
+        statement = select(self.scan_infos.c.value).where(self.scan_infos.c.key == SESSION_FORMAT_KEY).limit(1)
+        async with self._engine.begin() as conn:
+            try:
+                row = (await conn.execute(statement)).fetchone()
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Not even a Wapiti session (missing table...): treat it as an unknown format
+                return None
+
+        return row.value if row else None
 
     async def close(self):
         await self._engine.dispose()
@@ -606,7 +672,7 @@ class SqlPersister:
             # Build response from pre-fetched JOIN data instead of a separate query
             response = None
             if row.resp_url is not None and row.resp_status_code is not None:
-                # Defensive copy: avoid mutating the underlying pickled dict returned by SQLAlchemy.
+                # Defensive copy: avoid mutating the headers object returned by SQLAlchemy.
                 resp_headers = dict(row.resp_headers) if row.resp_headers else {}
                 resp_headers.pop("content-encoding", None)
                 response = Response(

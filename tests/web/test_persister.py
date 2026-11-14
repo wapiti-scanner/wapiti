@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 import httpx
 import respx
+from sqlalchemy import select
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.parsers.html_parser import Html
@@ -332,4 +333,59 @@ async def test_flush_attacks_forgets_passive_scanner_state(tmp_path):
     await persister.flush_attacks()
 
     assert await persister.get_passive_scanner_state() == {}
+    await persister.close()
+
+
+@pytest.mark.asyncio
+async def test_headers_round_trip_keeps_duplicates_and_case_insensitivity(tmp_path):
+    persister = SqlPersister(str(tmp_path / "crawl.db"))
+    await persister.create()
+    await persister.set_root_url("http://perdu.com/")
+
+    request = Request("http://perdu.com/?k=v")
+    request.set_sent_headers(httpx.Headers([("X-Custom", "sent")]))
+    response = Response(
+        httpx.Response(
+            200,
+            headers=[("Set-Cookie", "a=1"), ("Set-Cookie", "b=2"), ("Content-Type", "text/html")],
+            text="Hello"
+        ),
+        "http://perdu.com/?k=v"
+    )
+    await persister.save_request(request, response)
+
+    links = [__ async for __ in persister.get_links()]
+    assert len(links) == 1
+    stored_request, stored_response = links[0]
+    assert stored_request.headers["x-custom"] == "sent"
+    assert stored_response.headers["content-type"] == "text/html"
+
+    # The column itself keeps duplicate headers (get_links merges them when rebuilding the response)
+    async with persister._engine.begin() as conn:
+        row = (await conn.execute(select(persister.responses.c.headers))).fetchone()
+    assert isinstance(row.headers, httpx.Headers)
+    assert row.headers.get_list("set-cookie") == ["a=1", "b=2"]
+    await persister.close()
+
+
+@pytest.mark.asyncio
+async def test_session_without_format_marker_is_rejected(tmp_path):
+    from wapitiCore.net.sql_persister import IncompatibleSessionError, SESSION_FORMAT_KEY
+
+    db_file = tmp_path / "crawl.db"
+    persister = SqlPersister(str(db_file))
+    await persister.create()
+    # Simulate a session created by a version predating the format marker
+    async with persister._engine.begin() as conn:
+        await conn.execute(persister.scan_infos.delete().where(persister.scan_infos.c.key == SESSION_FORMAT_KEY))
+    await persister.close()
+
+    with pytest.raises(IncompatibleSessionError):
+        await SqlPersister(str(db_file)).create()
+
+    # A session with the current marker opens fine
+    persister = SqlPersister(str(db_file))
+    async with persister._engine.begin() as conn:
+        await conn.execute(persister.scan_infos.insert().values(key=SESSION_FORMAT_KEY, value="2"))
+    await persister.create()
     await persister.close()

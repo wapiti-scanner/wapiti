@@ -16,11 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from dataclasses import dataclass
 from http.cookiejar import CookieJar
 
 from wapitiCore.net import Request
+
+if TYPE_CHECKING:
+    from wapitiCore.net.scope import Scope
 
 # Keep a reasonably modern Firefox UA by default to avoid being blocked by sites
 # rejecting very old browsers. Users can still override it via configuration.
@@ -61,3 +64,5 @@ class CrawlerConfiguration:
     stream: bool = False
     headers: Optional[dict] = None
     drop_cookies: bool = False
+    # Scan scope: redirects leaving both the requested host and this scope are not followed
+    scope: Optional["Scope"] = None

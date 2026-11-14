@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
 # Install system dependencies for Playwright
 # (will be completed by playwright install --with-deps in postCreateCommand)
 RUN apt-get update && apt-get install -y \
+    libatomic1 \
     libnss3 \
     libnspr4 \
     libatk1.0-0 \

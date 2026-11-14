@@ -177,7 +177,13 @@ async def test_redirect():
         assert response.url == slyfx
         assert not response.history
 
+        # Another host: not followed unless explicitly asked for
         response = await crawler.async_send(Request(slyfx), follow_redirects=True)
+        assert response.url == slyfx
+        assert response.status == 301
+        assert not response.history
+
+        response = await crawler.async_send(Request(slyfx), follow_redirects=True, allow_offsite_redirects=True)
         assert response.url == disney
         assert response.history[0].url == slyfx
 
