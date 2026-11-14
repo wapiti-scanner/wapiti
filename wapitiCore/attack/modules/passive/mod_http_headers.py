@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+import re
 from typing import List, Optional, Type, Generator, Any
 
 from wapitiCore.attack.modules.passive.base import PassiveModule
@@ -30,9 +31,103 @@ from wapitiCore.language.vulnerability import LOW_LEVEL
 HSTS_NOT_SET = "Strict-Transport-Security is not set"
 XCONTENT_TYPE_NOT_SET = "X-Content-Type-Options is not set"
 XFRAME_OPTIONS_NOT_SET = "X-Frame-Options is not set"
-INVALID_HSTS = "Strict-Transport-Security has an invalid value ('max-age' not found)"
+INVALID_HSTS = (
+    "Strict-Transport-Security has an invalid value "
+    "(expected a single 'max-age' directive with a positive integer)"
+)
 INVALID_XCONTENT_TYPE = "X-Content-Type-Options has an invalid value ('nosniff' not found)"
 INVALID_XFRAME_OPTIONS = "X-Frame-Options has an invalid value ('deny' or 'sameorigin' or not found)"
+
+_HSTS_MAX_AGE = re.compile(r"[0-9]+")
+_HSTS_TOKEN = re.compile(r"[A-Za-z0-9!#$%&'*+.^_`|~-]+")
+_QUOTED_STRING = re.compile(r'"((?:[^"\\\x00-\x1f\x7f]|\\[\x20-\x7e])*)"')
+
+
+def _split_hsts_directives(value: str) -> Optional[List[str]]:
+    """Split an STS field value on ';' outside quoted-strings.
+
+    Returns None when a quoted-string is left unterminated, making the whole
+    field syntactically invalid (RFC 6797 section 8.1).
+    """
+    parts: List[str] = []
+    current: List[str] = []
+    quoted = escaped = False
+    for character in value:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                quoted = False
+        elif character == '"':
+            quoted = True
+        elif character == ";":
+            parts.append("".join(current))
+            current = []
+            continue
+        current.append(character)
+    if quoted:
+        return None
+    parts.append("".join(current))
+    return parts
+
+
+def _unquote_hsts_value(value: str) -> Optional[str]:
+    """Strip a quoted-string (removing quoted-pair escapes) or return a token as-is."""
+    value = value.strip()
+    if not value.startswith('"'):
+        return value
+    match = _QUOTED_STRING.fullmatch(value)
+    if match is None:
+        return None
+    return re.sub(r"\\([\x20-\x7e])", r"\1", match.group(1))
+
+
+def _valid_hsts_directive(element: str) -> Optional[tuple[str, Optional[str]]]:
+    """Return (lowercase name, max-age digits) or None when the directive is invalid."""
+    name, separator, raw_value = element.partition("=")
+    name = name.strip()
+    if _HSTS_TOKEN.fullmatch(name) is None:
+        return None
+    directive = name.lower()
+    if directive == "max-age":
+        digits = _unquote_hsts_value(raw_value) if separator else None
+        return (directive, digits) if digits is not None and _HSTS_MAX_AGE.fullmatch(digits) else None
+    if directive == "includesubdomains":
+        return (directive, None) if not separator else None
+    if separator:
+        value = raw_value.strip()
+        if value.startswith('"'):
+            return (directive, None) if _QUOTED_STRING.fullmatch(value) else None
+        return (directive, None) if _HSTS_TOKEN.fullmatch(value) else None
+    return directive, None
+
+
+def _has_valid_hsts(value: str) -> bool:
+    """Return True when every directive is valid and max-age is a positive integer."""
+    if "\r" in value or "\n" in value:
+        return False
+    elements = _split_hsts_directives(value)
+    if elements is None:
+        return False
+
+    seen = set()
+    max_age: Optional[str] = None
+    for element in elements:
+        if not element.strip():
+            continue
+        parsed = _valid_hsts_directive(element)
+        if parsed is None:
+            return False
+        directive, digits = parsed
+        if directive in seen:
+            return False
+        seen.add(directive)
+        if digits is not None:
+            max_age = digits
+
+    return max_age is not None and bool(max_age.lstrip("0"))
 
 
 class ModuleHttpHeaders(PassiveModule):
@@ -43,7 +138,8 @@ class ModuleHttpHeaders(PassiveModule):
 
     check_list_xframe = ["deny", "sameorigin"]
     check_list_xcontent = ["nosniff"]
-    check_list_hsts = ["max-age="]
+    # HSTS is validated structurally (see _has_valid_hsts), not by substring lookup.
+    check_list_hsts: List[str] = []
 
     headers_to_check = {
         "X-Frame-Options": {
@@ -69,6 +165,12 @@ class ModuleHttpHeaders(PassiveModule):
 
     @staticmethod
     def contains(response: Response, header_name: str, check_list: List[str]) -> bool:
+        if header_name == "Strict-Transport-Security":
+            # RFC 6797 section 8.1: only the first STS field is processed. Asking
+            # for the list without comma splitting prevents a merged "invalid,
+            # valid" value from rescuing the invalid first field.
+            values = response.headers.get_list(header_name)
+            return bool(values) and _has_valid_hsts(values[0])
         if header_name in response.headers:
             return any(element in response.headers[header_name].lower() for element in check_list)
         return False
