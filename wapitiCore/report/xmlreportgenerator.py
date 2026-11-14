@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
 from typing import Optional
 from xml.dom.minidom import Document, Element
 
@@ -62,6 +63,19 @@ class XMLReportGenerator(JSONReportGenerator):
         self._vulns = {}
         self._anomalies = {}
         self._additionals = {}
+
+    def _create_cdata_or_text_node(self, value):
+        """
+        Create the node holding a free-form text value of the report.
+
+        A CDATA section cannot contain the "]]>" sequence, minidom raises a ValueError while
+        serializing it, which would abort the report. Such values fall back to a plain text
+        node so that the DOM serializer escapes them and the parsed character data is kept.
+        Every other value keeps the CDATA section it always had.
+        """
+        if "]]>" in value:
+            return self._xml_doc.createTextNode(value)
+        return self._xml_doc.createCDATASection(value)
 
     # pylint: disable=too-many-locals
     def generate_report(self, output_path):
@@ -107,10 +121,10 @@ class XMLReportGenerator(JSONReportGenerator):
             if suppressed:
                 flaw_type_node.setAttribute("suppressed", str(suppressed))
             flaw_type_desc = self._xml_doc.createElement("description")
-            flaw_type_desc.appendChild(self._xml_doc.createCDATASection(flaw_type["desc"]))
+            flaw_type_desc.appendChild(self._create_cdata_or_text_node(flaw_type["desc"]))
             flaw_type_node.appendChild(flaw_type_desc)
             flaw_type_solution = self._xml_doc.createElement("solution")
-            flaw_type_solution.appendChild(self._xml_doc.createCDATASection(flaw_type["sol"]))
+            flaw_type_solution.appendChild(self._create_cdata_or_text_node(flaw_type["sol"]))
             flaw_type_node.appendChild(flaw_type_solution)
 
             flaw_type_references = self._xml_doc.createElement("references")
@@ -159,10 +173,10 @@ class XMLReportGenerator(JSONReportGenerator):
                 module_node.appendChild(self._xml_doc.createTextNode(flaw["module"]))
                 entry_node.appendChild(module_node)
                 http_request_node = self._xml_doc.createElement("http_request")
-                http_request_node.appendChild(self._xml_doc.createCDATASection(flaw["http_request"]))
+                http_request_node.appendChild(self._create_cdata_or_text_node(flaw["http_request"]))
                 entry_node.appendChild(http_request_node)
                 curl_command_node = self._xml_doc.createElement("curl_command")
-                curl_command_node.appendChild(self._xml_doc.createCDATASection(flaw["curl_command"]))
+                curl_command_node.appendChild(self._create_cdata_or_text_node(flaw["curl_command"]))
                 entry_node.appendChild(curl_command_node)
                 wstg_node = self._xml_doc.createElement("wstg")
                 for wstg_code in flaw["wstg"] or []:
@@ -209,7 +223,7 @@ class XMLReportGenerator(JSONReportGenerator):
 
         if level == 2:
             body_node = self._xml_doc.createElement("body")
-            body_node.appendChild(self._xml_doc.createCDATASection(response["body"]))
+            body_node.appendChild(self._create_cdata_or_text_node(response["body"]))
             response_section.appendChild(body_node)
 
             headers_node = self._xml_doc.createElement("headers")
