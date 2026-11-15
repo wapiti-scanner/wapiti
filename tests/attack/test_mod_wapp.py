@@ -1176,7 +1176,7 @@ def read_json_file(file_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_wappalyzer_raise_on_not_valid_json_for_update():
+async def test_wappalyzer_raise_on_not_valid_json_for_update(tmp_path):
     """Tests that a ValueError is raised when calling update() with an invalid json file."""
     respx.get(url__regex=r"http://perdu.com/.*").mock(
         return_value=httpx.Response(
@@ -1193,6 +1193,9 @@ async def test_wappalyzer_raise_on_not_valid_json_for_update():
             # Mock builtins.open to provide content for the JSON files
             with patch('builtins.open', new_callable=mock_open, read_data='{"key": "value"}'):
                 persister = AsyncMock()
+                # A real directory: left as a mock, CONFIG_DIR makes the module create
+                # an "AsyncMock/mock.CONFIG_DIR/<id>" folder in the current directory
+                persister.CONFIG_DIR = str(tmp_path)
                 crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
@@ -1207,7 +1210,7 @@ async def test_wappalyzer_raise_on_not_valid_json_for_update():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_wappalyzer_raise_on_not_valid_json_file_for_update():
+async def test_wappalyzer_raise_on_not_valid_json_file_for_update(tmp_path):
     """Tests that a ValueError is raised when calling update() with an invalid json file."""
     respx.get(url__regex=r"http://perdu.com/.*").mock(
         return_value=httpx.Response(
@@ -1224,6 +1227,9 @@ async def test_wappalyzer_raise_on_not_valid_json_file_for_update():
             # Mock builtins.open to provide content for the JSON files
             with patch('builtins.open', new_callable=mock_open, read_data='{"{key "value"}'):
                 persister = AsyncMock()
+                # A real directory: left as a mock, CONFIG_DIR makes the module create
+                # an "AsyncMock/mock.CONFIG_DIR/<id>" folder in the current directory
+                persister.CONFIG_DIR = str(tmp_path)
                 crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
                 async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
                     options = {"timeout": 10, "level": 2, "wapp_dir": wapp_dir}
