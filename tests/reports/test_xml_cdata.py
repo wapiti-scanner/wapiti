@@ -19,7 +19,6 @@
 import time
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ElementTree
-from xml.dom import expatbuilder
 
 import httpx
 import pytest
@@ -158,21 +157,14 @@ def test_ordinary_body_keeps_cdata_section_and_serialized_bytes(tmp_path):
     assert open(path, "rb").read() == open(second, "rb").read()
 
 
-def test_auth_none_report_serializes_without_namespace_repair(tmp_path):
-    """auth=None: the report is written to completion and its ordinary body text is kept.
-
-    The unbound xsi prefix of this pre-existing state is tracked separately, so nothing here
-    requires it to be declared, repaired or rejected: the file is read with namespace
-    processing off and only the serialization result is asserted.
-    """
+def test_auth_none_report_serializes(tmp_path):
+    """auth=None: the report is written to completion and its ordinary body text is kept."""
     path = str(tmp_path / "report.xml")
     _generate(path, auth=None)
 
     # The report runs to completion and closes its root element.
-    assert path and open(path, "rb").read()
     assert open(path, encoding="utf-8").read().rstrip().endswith("</report>")
-    # Namespace-agnostic read: the document is accepted as it is written.
-    document = expatbuilder.parse(path, namespaces=False)
+    document = minidom.parse(path)
     assert document.documentElement.tagName == "report"
     bodies = document.getElementsByTagName("body")
     assert bodies
