@@ -1,8 +1,22 @@
-27/07/2026
+Unreleased
+    Security: crawler state and HTTP headers of a session are stored as JSON instead of pickle
+    Security: redirect destinations are checked before the crawler follows them
+    Security: form-login credentials are only submitted to the login page origin or the scan scope
+    Modules: stacktrace_disclosure and information_disclosure also analyse the responses received by attack modules (#785)
+    Modules: mod_csp only treats quoted values as keywords ('self' is not the host self), keeps the first occurrence of a duplicated directive and matches keywords case-insensitively
+    Attack: csp posture fingerprint keeps values attached to their directive, a scan resumed from an older session reports its CSP findings once more (#820)
+    CLI: exit with a nonzero status when the base URL is invalid
+    Docker: install libatomic1, required by the Playwright driver
+    Fixes: XML report is now well-formed when no authentication is used (#825)
+    Fixes: float and null JSON values are treated as injection points
+    Fixes: https_redirect only spends its alert budget on insecure responses
+    Fixes: login-form field indexes stay aligned with named inputs
+    Fixes: mod_csp no longer ignores a directive whose name is followed by a tab
+
+19/08/2026
     Wapiti 3.3.2
     Explorer: scope soft-404 detection to non-error, non-PATH_INFO responses (#809)
     Explorer: detect soft-404 / SPA catch-all pages before persisting them (#808)
-    Attack: csp fingerprint format now comes from the same parse as the checks, so a scan resumed from a session saved by an older version reports its CSP findings once more (robustness/compatibility, not a security fix) (#820)
 
 27/07/2026
     Wapiti 3.3.1
