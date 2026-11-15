@@ -1,7 +1,7 @@
 Introduction
 ============
 
-All installation methods assume you already have Python 3.12, 3.13 or 3.14 on your system.
+All installation methods assume you already have Python 3.12, 3.13, 3.14 or 3.15 on your system.
 
 Wapiti is a command-line tool. You can install it from the Python Package Index (PyPI) or from the source code.
 Using a virtual environment is highly recommended to avoid conflicts with other Python packages on your system.
