@@ -8,6 +8,7 @@ Unreleased
     CLI: exit with a nonzero status when the base URL is invalid
     Docker: install libatomic1, required by the Playwright driver
     Fixes: XML report is now well-formed when no authentication is used (#825)
+    Fixes: XML report generation no longer fails when a value contains the CDATA terminator "]]>" (#826)
     Fixes: float and null JSON values are treated as injection points
     Fixes: https_redirect only spends its alert budget on insecure responses
     Fixes: login-form field indexes stay aligned with named inputs
