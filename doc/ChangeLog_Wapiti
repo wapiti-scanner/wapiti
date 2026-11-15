@@ -5,6 +5,7 @@ Unreleased
     Modules: stacktrace_disclosure and information_disclosure also analyse the responses received by attack modules (#785)
     Modules: mod_csp only treats quoted values as keywords ('self' is not the host self), keeps the first occurrence of a duplicated directive and matches keywords case-insensitively
     Attack: csp posture fingerprint keeps values attached to their directive, a scan resumed from an older session reports its CSP findings once more (#820)
+    Core: raise the minimum versions of playwright (1.50), sqlalchemy (2.0.46) and mitmproxy (12.3.1), the previous ones could not be installed on Python 3.14
     CLI: exit with a nonzero status when the base URL is invalid
     Docker: install libatomic1, required by the Playwright driver
     Fixes: XML report is now well-formed when no authentication is used (#825)
