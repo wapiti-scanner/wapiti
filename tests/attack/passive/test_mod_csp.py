@@ -29,12 +29,12 @@ def test_csp_parsing():
     )
     assert csp_dict.keys() == {"script-src", "object-src"}
     assert set(csp_dict["script-src"]) == {
-        "self",
-        "unsafe-inline",
+        "'self'",
+        "'unsafe-inline'",
         "data:",
         "http://*.fr",
     }
-    assert set(csp_dict["object-src"]) == {"none", ""}
+    assert set(csp_dict["object-src"]) == {"'none'", "''"}
 
 
 def test_bad_csp_examples():
@@ -80,6 +80,37 @@ def test_valueless_directives_are_kept():
 def test_directive_names_are_case_insensitive():
     csp_dict = csp_header_to_dict("Default-Src 'none'; Script-SRC 'self'")
     assert csp_dict.keys() == {"default-src", "script-src"}
+
+
+def test_directive_name_can_be_followed_by_any_whitespace():
+    # A tab (or several spaces) between the name and its values is still a valid directive
+    csp_dict = csp_header_to_dict("script-src\t'self';object-src   'none'")
+    assert csp_dict == {"script-src": ["'self'"], "object-src": ["'none'"]}
+
+
+def test_first_occurrence_of_a_duplicated_directive_wins():
+    # Browsers ignore the following occurrences: the effective policy here allows inline scripts
+    csp_dict = csp_header_to_dict("script-src 'unsafe-inline'; script-src 'none'")
+    assert csp_dict["script-src"] == ["'unsafe-inline'"]
+    assert check_policy_values("script-src", csp_dict) == 0
+
+
+def test_unquoted_keywords_are_not_keywords():
+    # Without quotes, `self` and `none` are hosts named "self" and "none", not the keywords
+    csp_dict = csp_header_to_dict("base-uri self; object-src none; frame-ancestors 'self'")
+    assert check_policy_values("base-uri", csp_dict) == 0
+    assert check_policy_values("object-src", csp_dict) == 0
+    assert check_policy_values("frame-ancestors", csp_dict) == 1
+
+    # ... and an unquoted unsafe-inline does not allow inline scripts
+    csp_dict = csp_header_to_dict("script-src unsafe-inline")
+    assert check_policy_values("script-src", csp_dict) == 1
+
+
+def test_keywords_are_case_insensitive():
+    csp_dict = csp_header_to_dict("script-src 'Unsafe-Inline'; object-src 'NONE'")
+    assert check_policy_values("script-src", csp_dict) == 0
+    assert check_policy_values("object-src", csp_dict) == 1
 
 
 def test_orphan_value_is_not_treated_as_directive():
@@ -302,6 +333,11 @@ def test_csp_posture_neutralizes_nonces_hashes_and_casing():
     assert csp_posture(
         "Script-Src 'self' 'nonce-aaa' 'sha256-bbb'; Object-Src 'none'"
     ) == csp_posture("object-src 'none'; script-src 'nonce-zzz' 'self'")
+
+
+def test_csp_posture_tells_keywords_from_hosts_and_ignores_whitespace_style():
+    assert csp_posture("script-src 'self'") != csp_posture("script-src self")
+    assert csp_posture("script-src\t'self'") == csp_posture("script-src 'self'")
 
 
 def test_csp_posture_of_a_missing_header_is_stable():

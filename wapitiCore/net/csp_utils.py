@@ -26,14 +26,16 @@ POLICY_REGEX = re.compile(r"\s*((?:'[^']*')|(?:[^'\s]+))\s*")
 # Anything else (e.g. a value left orphan by a misplaced semicolon) is not a directive.
 DIRECTIVE_NAME_REGEX = re.compile(r"^[a-z0-9-]+$")
 
+# Keywords are only keywords when they are single-quoted: an unquoted `self` or `none` is a
+# host-source (a host literally named "self"), so the quotes are part of the expected values.
 CSP_CHECK_LISTS = {
     # As default-src is the fallback directive we may want to avoid those duplicates in the future
-    "default-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
-    "script-src": ["unsafe-inline", "data:", "http:", "https:", "*", "unsafe-eval"],
-    "object-src": ["none"],
-    "base-uri": ["none", "self"],
-    "frame-ancestors": ["none", "self"],
-    "form-action": ["none", "self"],
+    "default-src": ["'unsafe-inline'", "data:", "http:", "https:", "*", "'unsafe-eval'"],
+    "script-src": ["'unsafe-inline'", "data:", "http:", "https:", "*", "'unsafe-eval'"],
+    "object-src": ["'none'"],
+    "base-uri": ["'none'", "'self'"],
+    "frame-ancestors": ["'none'", "'self'"],
+    "form-action": ["'none'", "'self'"],
 }
 
 # Directives that do NOT fall back to default-src when they are omitted.
@@ -111,6 +113,11 @@ def get_csp(response):
 
 
 def csp_header_to_dict(header):
+    """Parse a CSP header into a dict mapping each directive name (lowercase) to its list of values.
+
+    Values are returned as written, quotes included, so that the `'self'` keyword can be told
+    apart from a host named `self`.
+    """
     csp_dict = {}
 
     for policy_string in header.split(";"):
@@ -119,15 +126,20 @@ def csp_header_to_dict(header):
             # We reached the end or an empty segment
             continue
 
-        parts = policy_string.split(" ", 1)
+        # The name is separated from its values by any whitespace, not only a space
+        parts = policy_string.split(None, 1)
         # Directive names are case-insensitive
         policy_name = parts[0].lower()
         if not DIRECTIVE_NAME_REGEX.match(policy_name):
             # Malformed segment (e.g. a value orphaned by a misplaced semicolon)
             continue
 
+        if policy_name in csp_dict:
+            # Browsers keep the first occurrence of a directive and ignore the following ones
+            continue
+
         if len(parts) == 2:
-            csp_dict[policy_name] = [value.strip("'") for value in POLICY_REGEX.findall(parts[1])]
+            csp_dict[policy_name] = POLICY_REGEX.findall(parts[1])
         else:
             # Directive without a value (e.g. upgrade-insecure-requests)
             csp_dict[policy_name] = []
@@ -152,6 +164,9 @@ def check_policy_values(policy_name, csp_dict):
         policy_values = csp_dict["default-src"]
     else:
         return -1
+
+    # Keywords and schemes are matched case-insensitively
+    policy_values = [value.lower() for value in policy_values]
 
     # If the tested element is default-src or script-src, we must ensure that none of this unsafe values are present
     if policy_name in ["default-src", "script-src"]:
