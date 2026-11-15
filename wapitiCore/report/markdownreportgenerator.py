@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import codecs
+from typing import TextIO
 
 from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
@@ -32,7 +32,7 @@ class MarkdownReportGenerator(ReportGenerator):
         Create a Markdown file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
         the methods add_vulnerability and add_anomaly.
         """
-        with codecs.open(output_path, mode="w", encoding="UTF-8") as md_report_file:
+        with open(output_path, mode="w", encoding="UTF-8", newline="") as md_report_file:
             md_report_file.write(f"# {self._infos['version']} - wapiti-scanner.github.io\n\n")
             md_report_file.write(f"## Report for {self._infos['target']}\n")
             md_report_file.write(f"* Date of the scan : {self._infos['date']}\n")
@@ -114,7 +114,7 @@ class MarkdownReportGenerator(ReportGenerator):
                         md_report_file.write("---\n\n")
             md_report_file.write("\n")
 
-    def _write_auth_info(self, md_report_file: codecs.StreamReaderWriter):
+    def _write_auth_info(self, md_report_file: TextIO):
         """
         Write the authentication section explaining what method, fields, url were used and also if it has been
         successful

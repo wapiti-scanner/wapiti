@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
-import codecs
 import os
 import signal
 import sys
@@ -318,7 +317,7 @@ async def wapiti_main():
                 wap.add_start_url(Request(start_url))
             elif os.path.isfile(start_url):
                 try:
-                    with codecs.open(start_url, encoding="UTF-8") as url_fd:
+                    with open(start_url, encoding="UTF-8") as url_fd:
                         for urlline in url_fd:
                             urlline = urlline.strip()
                             if urlline.startswith(("http://", "https://")):

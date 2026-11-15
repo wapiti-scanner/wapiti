@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-import codecs
+from typing import TextIO
 
 from wapitiCore.net.web import http_repr, curl_repr
 from wapitiCore.report.reportgenerator import ReportGenerator
@@ -51,7 +51,7 @@ class TXTReportGenerator(ReportGenerator):
         Create a TXT file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
         the methods add_vulnerability and add_anomaly.
         """
-        with codecs.open(output_path, mode="w", encoding="UTF-8") as txt_report_file:
+        with open(output_path, mode="w", encoding="UTF-8", newline="") as txt_report_file:
             try:
                 txt_report_file.write(separator)
                 txt_report_file.write(center(f"{self._infos['version']} - wapiti-scanner.github.io\n"))
@@ -137,7 +137,7 @@ class TXTReportGenerator(ReportGenerator):
             finally:
                 txt_report_file.close()
 
-    def _write_auth_info(self, txt_report_file: codecs.StreamReaderWriter):
+    def _write_auth_info(self, txt_report_file: TextIO):
         """
         Write the authentication section explaining what method, fields, url were used and also if it has been
         successful
