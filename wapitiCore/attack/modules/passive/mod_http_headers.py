@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-from typing import List, Optional, Type, Generator, Any
+from typing import List, Optional, Type, Generator, Any, Callable
 
 from wapitiCore.attack.modules.passive.base import PassiveModule
 from wapitiCore.definitions import FindingBase
@@ -30,9 +30,54 @@ from wapitiCore.language.vulnerability import LOW_LEVEL
 HSTS_NOT_SET = "Strict-Transport-Security is not set"
 XCONTENT_TYPE_NOT_SET = "X-Content-Type-Options is not set"
 XFRAME_OPTIONS_NOT_SET = "X-Frame-Options is not set"
-INVALID_HSTS = "Strict-Transport-Security has an invalid value ('max-age' not found)"
+INVALID_HSTS = (
+    "Strict-Transport-Security has an invalid value "
+    "(expected a single 'max-age' directive with a positive integer)"
+)
 INVALID_XCONTENT_TYPE = "X-Content-Type-Options has an invalid value ('nosniff' not found)"
 INVALID_XFRAME_OPTIONS = "X-Frame-Options has an invalid value ('deny' or 'sameorigin' or not found)"
+
+# A per-header validator answers "is the received value acceptable?" for one header.
+HeaderValidator = Callable[[Response, str], bool]
+
+
+def _contains_any(check_list: List[str]) -> HeaderValidator:
+    """Build a validator accepting a header value containing one of the expected tokens."""
+
+    def validator(response: Response, header_name: str) -> bool:
+        return any(token in response.headers[header_name].lower() for token in check_list)
+
+    return validator
+
+
+def _is_valid_hsts(response: Response, header_name: str) -> bool:
+    """Return True when the first STS field carries exactly one usable max-age.
+
+    Wapiti reports header posture, it does not behave as a user agent: the other
+    directives are ignored, whatever their syntax, and only max-age is looked at.
+    """
+    fields = response.headers.get_list(header_name)
+    if not fields:
+        return False
+
+    # RFC 6797 section 8.1: only the first field is processed, hence get_list()
+    # rather than the comma-joined value returned by __getitem__.
+    values = []
+    for directive in fields[0].split(";"):
+        name, _, value = directive.partition("=")
+        if name.strip().lower() == "max-age":
+            values.append(value.strip())
+
+    if len(values) != 1:
+        return False
+
+    value = values[0]
+    if len(value) > 1 and value[0] == '"' and value[-1] == '"':
+        value = value[1:-1].strip()
+
+    # A non-zero ASCII decimal integer, checked with str methods only so that an
+    # oversized value is accepted without any int() conversion.
+    return value.isascii() and value.isdigit() and value.strip("0") != ""
 
 
 class ModuleHttpHeaders(PassiveModule):
@@ -43,21 +88,20 @@ class ModuleHttpHeaders(PassiveModule):
 
     check_list_xframe = ["deny", "sameorigin"]
     check_list_xcontent = ["nosniff"]
-    check_list_hsts = ["max-age="]
 
     headers_to_check = {
         "X-Frame-Options": {
-            "list": check_list_xframe,
+            "validator": _contains_any(check_list_xframe),
             "info": {"error": XFRAME_OPTIONS_NOT_SET, "warning": INVALID_XFRAME_OPTIONS},
             "finding": ClickjackingFinding,
         },
         "X-Content-Type-Options": {
-            "list": check_list_xcontent,
+            "validator": _contains_any(check_list_xcontent),
             "info": {"error": XCONTENT_TYPE_NOT_SET, "warning": INVALID_XCONTENT_TYPE},
             "finding": MimeTypeConfusionFinding,
         },
         "Strict-Transport-Security": {
-            "list": check_list_hsts,
+            "validator": _is_valid_hsts,
             "info": {"error": HSTS_NOT_SET, "warning": INVALID_HSTS},
             "finding": HstsFinding,
         }
@@ -67,18 +111,12 @@ class ModuleHttpHeaders(PassiveModule):
     def is_set(response: Response, header_name: str) -> bool:
         return header_name in response.headers
 
-    @staticmethod
-    def contains(response: Response, header_name: str, check_list: List[str]) -> bool:
-        if header_name in response.headers:
-            return any(element in response.headers[header_name].lower() for element in check_list)
-        return False
-
     def _check_header(
         self,
         response: Response,
         request: Request,
         header_name: str,
-        check_list: List[str],
+        validator: HeaderValidator,
         info_messages: dict[str, str],
         finding_class: Type[FindingBase],
     ) -> Optional[VulnerabilityInstance]:
@@ -102,7 +140,7 @@ class ModuleHttpHeaders(PassiveModule):
                     info=finding_info,
                     severity=LOW_LEVEL,
                 )
-        elif not self.contains(response, header_name, check_list):
+        elif not validator(response, header_name):
             finding_info = info_messages["warning"]
             # Include the offending value so pages that carry *different* invalid values
             # for the same header each surface, while identical ones are deduplicated.
@@ -120,7 +158,6 @@ class ModuleHttpHeaders(PassiveModule):
 
         return None
 
-
     def analyze(self, request: Request, response: Response) -> Generator[VulnerabilityInstance, Any, None]:
         """
         Analyzes an HTTP response for missing or insecure HTTP headers.
@@ -135,7 +172,7 @@ class ModuleHttpHeaders(PassiveModule):
                 response,
                 request,
                 header_name,
-                header_data["list"],
+                header_data["validator"],
                 header_data["info"],
                 header_data["finding"],
             )
