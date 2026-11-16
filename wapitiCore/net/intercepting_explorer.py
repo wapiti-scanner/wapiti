@@ -466,10 +466,16 @@ class InterceptingExplorer(Explorer):
             if self._max_files_per_dir and self._file_counts[dir_name] >= self._max_files_per_dir:
                 continue
 
-            self._file_counts[dir_name] += 1
-
             if self.has_too_many_parameters(request):
                 continue
+
+            # Same raw body budget as the standard explorer, applied last so that a request
+            # dropped by another rule takes no budget slot: a rejected body is never persisted,
+            # never attacked and does not consume a per-directory file slot either.
+            if self.has_enough_raw_bodies(request):
+                continue
+
+            self._file_counts[dir_name] += 1
 
             if self._qs_limit and request.parameters_count:
                 self._pattern_counts[request.pattern] += 1
