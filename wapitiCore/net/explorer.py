@@ -19,11 +19,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
 from collections import defaultdict
+import hashlib
 import json
 import math
 import random
 import string
-from typing import Dict, Tuple, List, Optional, AsyncIterator, Deque
+from typing import Dict, Tuple, List, Optional, AsyncIterator, Deque, Set
 import re
 from http.cookiejar import CookieJar
 
@@ -55,6 +56,16 @@ MAX_PAGE_SIZE = 2097152
 # that never repeat, so the crawler would loop forever (issue #252). Capping the
 # occurrences bounds the URL and lets the crawler recognize an already-seen request.
 MAX_PARAMETER_OCCURRENCES = 5
+
+# Maximum number of distinct raw request bodies admitted per endpoint, the endpoint being
+# identified by (method, origin + path, normalized content-type). A JSON, XML or GraphQL body
+# is stored as a plain string, so `Request.parameters_count` is 0 and the pattern it belongs to
+# has no key: the per-pattern budget of `has_too_many_parameters` never applies to it. Without
+# this second budget every distinct body sent to the same URL would be a separate request,
+# persisted then attacked by every module, so an endpoint receiving telemetry or GraphQL
+# payloads would make the crawl grow without limit. Kept internal (no CLI, no setter): the
+# crawler must not be able to grow back an unbounded number of raw-body variants.
+MAX_RAW_BODIES_PER_ENDPOINT = 10
 
 COMMON_PAGE_EXTENSIONS = {
     'php', 'html', 'htm', 'xml', 'xhtml', 'xht', 'xhtm', 'cgi',
@@ -111,6 +122,10 @@ class Explorer:
         # Locking required for writing to the following structures
         self._file_counts = defaultdict(int)
         self._pattern_counts = defaultdict(int)
+        # Distinct raw request bodies already admitted, per (method, origin + path, content-type).
+        # Only 16-byte digests are kept and a rejected body is never stored, so this state stays
+        # bounded by MAX_RAW_BODIES_PER_ENDPOINT per endpoint.
+        self._raw_body_counts: Dict[Tuple[str, str, str], Set[bytes]] = {}
         # One soft-404 probe task per directory, cached so concurrent requests share it
         # instead of each firing their own (not persisted across --resume-crawl: re-probing
         # a handful of directories on resume is cheap, and asyncio Task/Response objects
@@ -181,7 +196,8 @@ class Explorer:
                 {
                     "file_counts": dict(self._file_counts),
                     "pattern_counts": dict(self._pattern_counts),
-                    "hostnames": sorted(self._hostnames)
+                    "hostnames": sorted(self._hostnames),
+                    "raw_body_counts": self._raw_body_state()
                 },
                 file_data
             )
@@ -195,6 +211,10 @@ class Explorer:
             file_counts = defaultdict(int, data["file_counts"])
             pattern_counts = defaultdict(int, data["pattern_counts"])
             hostnames = set(data["hostnames"])
+            # State files written before this budget existed have no such key: they are read as
+            # an empty budget. A damaged budget raises like any other damaged field, so the whole
+            # file is ignored below and the caller keeps its own (fresh or current) state.
+            raw_body_counts = self._parse_raw_body_state(data.get("raw_body_counts", []))
         except FileNotFoundError:
             return
         except (OSError, ValueError, TypeError, KeyError):
@@ -204,6 +224,7 @@ class Explorer:
         self._file_counts = file_counts
         self._pattern_counts = pattern_counts
         self._hostnames = hostnames
+        self._raw_body_counts = raw_body_counts
 
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)
@@ -221,6 +242,105 @@ class Explorer:
                     # but I guess insane mode can do it as it is insane
                     return True
         return False
+
+    @staticmethod
+    def _raw_body_bucket(request: Request) -> Optional[Tuple[str, str, str]]:
+        """Return the budget key of a raw-body request, or None when it carries no raw body.
+
+        Only a plain string body is a raw body: urlencoded and multipart bodies are kept as
+        parameter lists and requests without a body have none, so both keep going through the
+        per-pattern budget and are never affected by this one. `Request.path` is the resource
+        path including scheme and netloc, which isolates endpoints of different origins.
+        """
+        post_params = request.post_params_ref
+        if not isinstance(post_params, str):
+            return None
+
+        # Parameters of a content type (charset, boundary...) are not part of the media type:
+        # "application/json; charset=utf-8" and "application/json" share the same budget.
+        content_type = request.enctype.split(";", 1)[0].strip().lower()
+        return request.method, request.path, content_type
+
+    def has_enough_raw_bodies(self, request: Request) -> bool:
+        """Return True when the request must be dropped because its endpoint already has
+        MAX_RAW_BODIES_PER_ENDPOINT distinct raw bodies.
+
+        The body is admitted exactly when this method returns False: at least one entry is added
+        to `_raw_body_counts` for it. A body already admitted for the same endpoint is not
+        counted twice (the existing request identity keeps deduplicating it) and a rejected body
+        stores nothing, so it cannot be persisted nor attacked and does not hold a slot.
+        """
+        bucket = self._raw_body_bucket(request)
+        if bucket is None:
+            return False
+
+        digest = hashlib.blake2b(
+            request.post_params_ref.encode("utf-8", "surrogatepass"), digest_size=16
+        ).digest()
+        admitted = self._raw_body_counts.get(bucket)
+        if admitted is None:
+            admitted = self._raw_body_counts[bucket] = set()
+        elif digest in admitted:
+            # Same body for the same endpoint: not a new variant, so it takes no extra budget.
+            return False
+
+        if len(admitted) >= MAX_RAW_BODIES_PER_ENDPOINT:
+            return True
+
+        admitted.add(digest)
+        return False
+
+    def _raw_body_state(self) -> List[dict]:
+        """JSON form of the raw body budget.
+
+        The in-memory state is keyed by tuples and holds bytes, neither of which JSON can carry:
+        each bucket becomes one explicit record whose digests are the 32 lowercase hex digits of
+        the digest, sorted so that the same state always produces the same file.
+        """
+        return [
+            {
+                "method": method,
+                "path": path,
+                "media_type": media_type,
+                "digests": [digest.hex() for digest in sorted(admitted)]
+            }
+            for (method, path, media_type), admitted in sorted(self._raw_body_counts.items())
+        ]
+
+    @staticmethod
+    def _parse_raw_body_state(records) -> Dict[Tuple[str, str, str], Set[bytes]]:
+        """Rebuild the raw body budget from the records written by `_raw_body_state`.
+
+        Only the shape written above is understood: a list of records whose method, path and
+        media type are strings, digests that decode to 16 bytes, and no bucket above the cap.
+        Anything else raises so that `load_saved_state` can ignore the whole file instead of
+        resuming from a partial budget (a bad key type would also break `save_state` later).
+        """
+        if not isinstance(records, list):
+            raise ValueError(f"raw_body_counts must be a list, got {type(records).__name__}")
+
+        buckets: Dict[Tuple[str, str, str], Set[bytes]] = {}
+        for record in records:
+            if not isinstance(record, dict):
+                raise ValueError(f"raw_body_counts record must be an object, got {type(record).__name__}")
+
+            method, path, media_type = record["method"], record["path"], record["media_type"]
+            if not all(isinstance(value, str) for value in (method, path, media_type)):
+                raise ValueError("raw_body_counts record fields must be strings")
+
+            admitted = buckets.setdefault((method, path, media_type), set())
+            for digest in record["digests"]:
+                value = bytes.fromhex(digest)
+                if len(value) != 16:
+                    raise ValueError("raw_body_counts digest is not a 16 byte hex string")
+                admitted.add(value)
+
+            if len(admitted) > MAX_RAW_BODIES_PER_ENDPOINT:
+                raise ValueError(
+                    f"raw_body_counts holds more than {MAX_RAW_BODIES_PER_ENDPOINT} digests for one endpoint"
+                )
+
+        return buckets
 
     def extract_links(self, response: Response, request) -> List:
         js_links = []
@@ -473,6 +593,12 @@ class Explorer:
                     continue
 
                 if self.is_forbidden(resource_url):
+                    continue
+
+                # Admission happens after every existing rejection (deduplication, depth, file
+                # budget, parameters, exclusions) and before the request is sent, so a dropped
+                # raw body costs no request, is never yielded, persisted nor attacked.
+                if self.has_enough_raw_bodies(request):
                     continue
 
                 task = asyncio.create_task(self._async_analyze(request, request in seed_requests))
