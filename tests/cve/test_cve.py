@@ -29,6 +29,30 @@ def test_cvss_score_to_wapiti_level():
     assert cvss_score_to_wapiti_level(9) == CRITICAL_LEVEL
 
 
+@pytest.mark.parametrize(
+    ("cvss_score", "expected_level"),
+    [
+        # 0.0 stays LOW: the existing contract of this function is kept, no None level is introduced.
+        (0, LOW_LEVEL),
+        (0.1, LOW_LEVEL),    # lowest published score
+        (3.8, LOW_LEVEL),
+        (3.9, LOW_LEVEL),    # top of the Low band (CVSS v3.1 Table 14)
+        (4, MEDIUM_LEVEL),   # bottom of the Medium band
+        (5, MEDIUM_LEVEL),
+        (6.9, MEDIUM_LEVEL),  # top of the Medium band
+        (7, HIGH_LEVEL),     # bottom of the High band
+        (8.9, HIGH_LEVEL),   # top of the High band
+        (9, CRITICAL_LEVEL),  # bottom of the Critical band
+        (10, CRITICAL_LEVEL),
+    ],
+)
+def test_cvss_score_to_wapiti_level_severity_bands(cvss_score, expected_level):
+    """CVSS v3.1 Table 14 bands are inclusive on the upper bound: Low 0.1-3.9, Medium 4.0-6.9,
+    High 7.0-8.9, Critical 9.0-10.0. Published scores always carry one decimal (spec section 7,
+    Roundup), so the band tops are ordinary input values, not floating point artefacts."""
+    assert cvss_score_to_wapiti_level(cvss_score) == expected_level
+
+
 def test_is_version_in_list():
     version_list = [
         [None, "<=1.6.2"],

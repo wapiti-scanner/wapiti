@@ -78,12 +78,18 @@ def is_version_in_list(version: str, version_list: list) -> bool:
 
 
 def cvss_score_to_wapiti_level(cvss_score: float):
-    """Returns the Wapiti alert level for a CVSS score. It is based on CVSS v3 Ratings."""
-    if cvss_score < 3.9:
+    """Returns the Wapiti alert level for a CVSS score. It is based on CVSS v3 Ratings.
+
+    The qualitative bands of CVSS v3.1 section 5 (Table 14) are inclusive on the upper bound:
+    Low 0.1 - 3.9, Medium 4.0 - 6.9, High 7.0 - 8.9, Critical 9.0 - 10.0. Published scores always
+    carry a single decimal (section 7, Roundup), so comparing against the next band's integer
+    lower bound keeps 3.9 / 6.9 / 8.9 in their own band.
+    """
+    if cvss_score < 4.0:
         return LOW_LEVEL
-    if cvss_score < 6.9:
+    if cvss_score < 7.0:
         return MEDIUM_LEVEL
-    if cvss_score < 8.9:
+    if cvss_score < 9.0:
         return HIGH_LEVEL
     return CRITICAL_LEVEL
 
