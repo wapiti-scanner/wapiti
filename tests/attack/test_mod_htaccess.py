@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import respx
 import pytest
 
@@ -28,7 +29,7 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/")
     request.path_id = 1
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url="http://perdu.com/"
     )
     all_requests.append((request, response))
@@ -36,7 +37,7 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/admin/")
     request.path_id = 2
     response = Response(
-        httpx.Response(status_code=401),
+        httpx2.Response(status_code=401),
         url="http://perdu.com/admin/"
     )
     all_requests.append((request, response))

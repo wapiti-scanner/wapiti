@@ -1,4 +1,4 @@
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.attack.modules.passive.mod_inconsistent_redirection import ModuleInconsistentRedirection
@@ -26,7 +26,7 @@ def test_inconsistent_redirection_cases(status, content_type, body, expected_cou
     module = ModuleInconsistentRedirection()
     request = Request("http://example.com")
     response = Response(
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=status,
             headers={"Content-Type": content_type, "Location": "http://example.org"},
             content=body,
@@ -50,7 +50,7 @@ def test_standard_object_moved_body_is_not_reported():
         b'</body></html>'
     )
     response = Response(
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=302,
             headers={"Content-Type": "text/html; charset=utf-8", "Location": location},
             content=body,
@@ -75,7 +75,7 @@ def test_directory_redirection_boilerplate_is_not_reported():
         b'<a HREF="http://example.com/blogs/">here</a></body>'
     )
     response = Response(
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=301,
             headers={"Content-Type": "text/html; charset=UTF-8", "Location": location},
             content=body,
@@ -96,7 +96,7 @@ def test_redirect_body_with_extra_link_is_reported():
         b'<a href="/secret/panel">panel</a></body></html>'
     )
     response = Response(
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=302,
             headers={"Content-Type": "text/html", "Location": location},
             content=body,
@@ -113,7 +113,7 @@ def test_inconsistent_redirection_deduplication():
 
     body = b"<html><a href='/'>Click</a></html>"
     response = Response(
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=302,
             headers={"Content-Type": "text/html", "Location": "http://example.org"},
             content=body,

@@ -27,7 +27,7 @@ from os.path import splitext, join as path_join
 from urllib.parse import urljoin
 from typing import Optional, Iterator
 
-from httpx import RequestError, InvalidURL
+from httpx2 import RequestError, InvalidURL
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange
 from wapitiCore.attack.attack import Attack, random_string, Parameter

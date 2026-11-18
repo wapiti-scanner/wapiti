@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import httpx
+import httpx2
 import respx
 from sqlalchemy import select
 
@@ -187,7 +188,7 @@ async def test_persister_forms():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         page = Html(Response(resp).content, url)
 
         requests = []
@@ -343,9 +344,9 @@ async def test_headers_round_trip_keeps_duplicates_and_case_insensitivity(tmp_pa
     await persister.set_root_url("http://perdu.com/")
 
     request = Request("http://perdu.com/?k=v")
-    request.set_sent_headers(httpx.Headers([("X-Custom", "sent")]))
+    request.set_sent_headers(httpx2.Headers([("X-Custom", "sent")]))
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             200,
             headers=[("Set-Cookie", "a=1"), ("Set-Cookie", "b=2"), ("Content-Type", "text/html")],
             text="Hello"
@@ -363,7 +364,7 @@ async def test_headers_round_trip_keeps_duplicates_and_case_insensitivity(tmp_pa
     # The column itself keeps duplicate headers (get_links merges them when rebuilding the response)
     async with persister._engine.begin() as conn:
         row = (await conn.execute(select(persister.responses.c.headers))).fetchone()
-    assert isinstance(row.headers, httpx.Headers)
+    assert isinstance(row.headers, httpx2.Headers)
     assert row.headers.get_list("set-cookie") == ["a=1", "b=2"]
     await persister.close()
 

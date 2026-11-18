@@ -23,7 +23,7 @@ from collections import defaultdict
 from os.path import join as path_join
 from typing import Optional
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, random_string

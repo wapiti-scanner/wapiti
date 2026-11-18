@@ -5,6 +5,7 @@ import re
 import pytest
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -15,7 +16,7 @@ from wapitiCore.attack.mod_upload import ModuleUpload
 logging.basicConfig(level=logging.DEBUG)
 
 
-def upload_callback(request: httpx.Request):
+def upload_callback(request: httpx2.Request):
     match = re.search(r"filename=\"(\w+\.\w+)\"", request.content.decode(encoding="utf-8", errors="ignore"))
     if match and match.group(1).endswith(".phtml"):
         return httpx.Response(

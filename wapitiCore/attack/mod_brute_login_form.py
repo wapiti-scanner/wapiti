@@ -24,7 +24,7 @@ from itertools import product
 import asyncio
 from typing import Optional, Tuple
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.language.vulnerability import Messages

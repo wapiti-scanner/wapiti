@@ -24,7 +24,7 @@ from typing import Optional
 from urllib.parse import urljoin
 
 from wapitiCore.parsers.html_parser import Html
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.net import Request

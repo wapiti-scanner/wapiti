@@ -5,8 +5,9 @@ from time import monotonic
 from unittest import mock
 
 import respx
-from httpcore import URL
+from httpcore2 import URL
 import httpx
+import httpx2
 import pytest
 
 from wapitiCore.attack.modules.core import all_modules
@@ -50,7 +51,7 @@ async def test_max_attack_time(_):
             request = Request("http://perdu.com/test/config/")
             request.path_id = 0
             response = Response(
-                httpx.Response(
+                httpx2.Response(
                     status_code=200,
                     headers={"content-type": "text/html"},
                 ),
@@ -62,7 +63,7 @@ async def test_max_attack_time(_):
             request = Request("http://perdu.com/test/config/", "POST")
             request.path_id = 0
             response = Response(
-                httpx.Response(
+                httpx2.Response(
                     status_code=200,
                     headers={"content-type": "text/html"},
                 ),

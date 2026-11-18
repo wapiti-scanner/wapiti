@@ -298,7 +298,7 @@ class Html:
         self._allow_fragments = allow_fragments
 
         try:
-            # TODO: httpx.URL is interesting, reuse that
+            # TODO: httpx2.URL is interesting, reuse that
             self._fld = get_fld(url)
         except TldDomainNotFound:
             self._fld = urlparse(url).netloc

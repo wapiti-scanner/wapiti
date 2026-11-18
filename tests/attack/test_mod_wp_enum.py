@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, patch, MagicMock
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -332,7 +333,7 @@ async def test_detect_version_network_error():
 
     # Mock the calls to RSS feeds to raise a network error
     respx.get(url__regex=r"http://perdu.com/.*?feed.*?").mock(
-        side_effect=httpx.RequestError("mocked error", request=httpx.Request("GET", "http://perdu.com/feed/"))
+        side_effect=httpx2.RequestError("mocked error", request=httpx2.Request("GET", "http://perdu.com/feed/"))
     )
 
     respx.get(url__regex=r"http://perdu.com/wp-content/.*").mock(return_value=httpx.Response(404))

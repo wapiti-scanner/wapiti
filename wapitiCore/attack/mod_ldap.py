@@ -24,7 +24,7 @@ from typing import Optional, Iterator, List, Tuple, Dict, Any
 from hashlib import md5
 from urllib.parse import quote_plus, quote
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Parameter

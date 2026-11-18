@@ -20,7 +20,7 @@
 import json
 from typing import Optional
 from bs4 import BeautifulSoup
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED

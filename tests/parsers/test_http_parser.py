@@ -1,5 +1,6 @@
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.net.crawler import Response
 
@@ -20,7 +21,7 @@ def test_http():
         )
     )
 
-    response = Response(httpx.get(url))
+    response = Response(httpx2.get(url))
 
     assert response.status == 418
     assert response.headers["X-Men"] == "Wolverine"
@@ -42,6 +43,6 @@ def test_http_redir():
         return_value=httpx.Response(301, text="Hello world!", headers={"Location": "http://perdu.com/folder/"})
     )
 
-    resp = httpx.get(url, follow_redirects=False)
+    resp = httpx2.get(url, follow_redirects=False)
     page = Response(resp)
     assert page.is_directory_redirection

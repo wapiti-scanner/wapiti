@@ -21,7 +21,7 @@ import asyncio
 import json
 
 from typing import Optional
-from httpx import RequestError
+from httpx2 import RequestError
 from os.path import join as path_join
 from urllib.parse import urljoin
 

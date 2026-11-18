@@ -4,7 +4,7 @@ import sys
 from time import sleep
 from unittest.mock import AsyncMock
 
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.net import Request, Response
@@ -30,7 +30,7 @@ async def test_csrf_cases():
     all_requests = []
 
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url="http://127.0.0.1:65086/"
     )
 
@@ -63,7 +63,7 @@ async def test_csrf_cases():
     all_requests.append((request, response))
 
     response = Response(
-        httpx.Response(status_code=200, headers={"x-csrf-token": "testestestest"}),
+        httpx2.Response(status_code=200, headers={"x-csrf-token": "testestestest"}),
         url="http://127.0.0.1:65086/"
     )
 
@@ -72,7 +72,7 @@ async def test_csrf_cases():
     all_requests.append((request, response))
 
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url="http://127.0.0.1:65086/"
     )
 

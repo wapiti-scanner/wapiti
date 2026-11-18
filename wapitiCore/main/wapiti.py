@@ -28,8 +28,8 @@ from importlib import import_module
 from inspect import getdoc
 from sqlite3 import OperationalError
 
-import httpx
-from httpx import RequestError
+import httpx2
+from httpx2 import RequestError
 
 from wapitiCore.attack.active_scanner import module_to_class_name
 from wapitiCore.attack.modules.core import all_modules, common_modules, resolve_module_settings
@@ -104,7 +104,7 @@ def validate_cms_choices(cms_value):
 
 def ping(url: str):
     try:
-        httpx.get(url, timeout=5)
+        httpx2.get(url, timeout=5)
     except RequestError:
         return False
     return True

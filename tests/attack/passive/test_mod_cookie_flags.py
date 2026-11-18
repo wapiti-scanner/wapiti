@@ -18,7 +18,7 @@ import unittest
 from typing import List, Tuple, Union
 from unittest.mock import MagicMock
 
-import httpx
+import httpx2
 
 from wapitiCore.net import Request, Response
 from wapitiCore.definitions.secure_cookie import SecureCookieFinding
@@ -55,14 +55,14 @@ def create_mock_objects(
 
         response = Response(
             url=url,
-            response=httpx.Response(
+            response=httpx2.Response(
                 status_code=200, headers=httpx_headers, content=b""
             ),
         )
     else:
         response = Response(
             url=url,
-            response=httpx.Response(status_code=200, content=b"", headers=headers),
+            response=httpx2.Response(status_code=200, content=b"", headers=headers),
         )
     return request, response
 

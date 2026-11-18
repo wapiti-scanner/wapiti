@@ -24,7 +24,7 @@ import asyncio
 from urllib.parse import urljoin
 import importlib.util
 
-from httpx import RequestError
+from httpx2 import RequestError
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound
 # pylint: disable=protected-access

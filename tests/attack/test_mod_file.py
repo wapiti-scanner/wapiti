@@ -6,6 +6,7 @@ from asyncio import sleep as Sleep
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -61,7 +62,7 @@ async def test_open_redirect():
         module.do_post = False
         await module.attack(request)
 
-        assert pytest.raises(httpx.InvalidURL)
+        assert pytest.raises(httpx2.InvalidURL)
 
 
 @pytest.mark.asyncio

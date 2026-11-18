@@ -4,7 +4,7 @@ import os
 from time import sleep
 
 import pytest
-from httpx import ReadTimeout
+from httpx2 import ReadTimeout
 
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration

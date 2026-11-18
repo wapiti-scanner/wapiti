@@ -39,7 +39,7 @@ from typing import (
 import json
 from importlib.resources import files
 
-from httpx import ReadTimeout, RequestError
+from httpx2 import ReadTimeout, RequestError
 
 from wapitiCore.definitions import FindingBase
 from wapitiCore.net.web import urlparse

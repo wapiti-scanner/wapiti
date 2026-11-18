@@ -2,6 +2,7 @@ import asyncio
 from collections import deque
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -111,7 +112,7 @@ async def _explore(batches, excluded_urls=None):
     posts = []
     yielded = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx.Response:
         if request.method == "POST":
             posts.append(
                 {
@@ -206,11 +207,11 @@ async def test_sql_persister_resume_admits_only_distinct_body(tmp_path, pending_
     completed = raw('{"a":1}')
     pending = raw(pending_body)
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             200,
             content=b"stored",
             headers={"Content-Type": "text/plain"},
-            request=httpx.Request("POST", completed.url),
+            request=httpx2.Request("POST", completed.url),
         ),
         url=completed.url,
     )

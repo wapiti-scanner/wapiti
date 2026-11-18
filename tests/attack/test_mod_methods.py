@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import respx
 import pytest
 
@@ -70,7 +71,7 @@ async def test_trivial():
         request.path_id = i+1
         # we simulate the get response
         response = Response(
-            httpx.Response(status_code=200, text="Body from GET option"),
+            httpx2.Response(status_code=200, text="Body from GET option"),
             url=link
         )
         all_requests.append((request, response))
@@ -148,7 +149,7 @@ async def test_advanced():
     request = Request(mocking_link)
     request.path_id = 1
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url=mocking_link
     )
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
@@ -202,7 +203,7 @@ async def test_nothing_interesting():
     request = Request(mocking_link)
     request.path_id = 1
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url=mocking_link
     )
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)
@@ -251,7 +252,7 @@ async def test_blind_with_trace():
     request = Request(mocking_link)
     request.path_id = 1
     response = Response(
-        httpx.Response(status_code=200),
+        httpx2.Response(status_code=200),
         url=mocking_link
     )
     crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"), timeout=1)

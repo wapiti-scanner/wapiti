@@ -23,7 +23,7 @@ from os.path import join as path_join
 from typing import Optional, List, Set, Dict
 
 from urllib.parse import urljoin
-from httpx import RequestError
+from httpx2 import RequestError
 from asyncio import TimeoutError
 from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 

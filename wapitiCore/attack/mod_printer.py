@@ -23,7 +23,7 @@ from typing import Optional
 from urllib.parse import urljoin
 import xml.etree.ElementTree as ET
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding

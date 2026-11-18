@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 from typing import Optional
 
-from httpx import RequestError, InvalidURL
+from httpx2 import RequestError, InvalidURL
 
 from wapitiCore.net.web import urlparse
 from wapitiCore.main.log import log_red, log_verbose

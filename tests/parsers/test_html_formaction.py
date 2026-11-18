@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import httpx
+import httpx2
 import respx
 
 from wapitiCore.net.crawler import Response
@@ -14,7 +15,7 @@ def test_formactions():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=form_action.read()))
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         page = Html(Response(resp).content, url)
         count = 0
 

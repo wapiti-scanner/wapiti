@@ -26,7 +26,7 @@ import sqlite3
 from typing import Dict, List, Tuple, Optional
 from itertools import chain
 
-from httpx import RequestError
+from httpx2 import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.fingerprint_webserver import WebServerVersionDisclosureFinding
 from wapitiCore.main.log import log_blue, logging

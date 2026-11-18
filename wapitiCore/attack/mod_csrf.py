@@ -20,7 +20,7 @@
 from collections import Counter
 from typing import Optional
 import math
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.csrf import CsrfFinding

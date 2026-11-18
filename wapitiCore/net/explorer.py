@@ -29,7 +29,7 @@ import re
 from http.cookiejar import CookieJar
 
 # Third-parties
-import httpx
+import httpx2
 
 # Internal libraries
 from wapitiCore.net import web
@@ -455,7 +455,7 @@ class Explorer:
 
         try:
             return await task
-        except (ConnectionError, httpx.RequestError):
+        except (ConnectionError, httpx2.RequestError):
             # Could not establish a baseline for this directory: fail open, every
             # response there will be treated as a legitimate resource.
             return None
@@ -482,7 +482,7 @@ class Explorer:
             except (TypeError, UnicodeDecodeError) as exception:
                 logging.debug("%s with URL %s", exception, resource_url)  # debug
                 return False, [], None
-            except (ConnectionError, httpx.RequestError) as error:
+            except (ConnectionError, httpx2.RequestError) as error:
                 logging.error("[!] %s with URL %s", error.__class__.__name__, resource_url)
                 return False, [], None
 

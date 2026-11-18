@@ -6,6 +6,7 @@ from typing import Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -137,7 +138,7 @@ async def test_send_bug_report_request_error():
 
     # Fake network error
     respx.post("https://wapiti3.ovh/upload.php").mock(
-        side_effect=httpx.RequestError("fail")
+        side_effect=httpx2.RequestError("fail")
     )
 
     await scanner.send_bug_report(
@@ -615,12 +616,12 @@ async def test_passive_tee_crawler_never_breaks_the_attack(mock_log_exc):
 @pytest.mark.asyncio
 async def test_passive_tee_crawler_propagates_request_errors_without_scanning():
     crawler = AsyncMock(spec=AsyncCrawler)
-    crawler.async_send.side_effect = httpx.ReadTimeout("timeout")
+    crawler.async_send.side_effect = httpx2.ReadTimeout("timeout")
     passive_scanner = MagicMock()
     passive_scanner.scan_attack_response = AsyncMock()
 
     tee = PassiveTeeCrawler(crawler, passive_scanner)
-    with pytest.raises(httpx.ReadTimeout):
+    with pytest.raises(httpx2.ReadTimeout):
         await tee.async_send(Request("http://example.com/"))
 
     passive_scanner.scan_attack_response.assert_not_awaited()

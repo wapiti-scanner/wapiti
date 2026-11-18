@@ -1,4 +1,4 @@
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.net.response import Response, detail_response
@@ -7,9 +7,9 @@ from wapitiCore.net.web import is_valid_url, shell_escape, urlparse
 
 def test_detail_response():
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             200,
-            headers=httpx.Headers([["foo", "bar"]]),
+            headers=httpx2.Headers([["foo", "bar"]]),
             content=b"body"
         ),
         url="http://perdu.com/"

@@ -23,7 +23,7 @@ import json
 from os.path import join as path_join
 
 from typing import Tuple
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request

@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import respx
 import httpx
+import httpx2
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
 from wapitiCore.net.crawler import Response
@@ -32,7 +33,7 @@ def test_absolute_root():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url)
+        resp = httpx2.get(url)
         page = Html(Response(resp).content, url)
 
         assert page.links == [url]
@@ -44,7 +45,7 @@ def test_relative_root():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url)
+        resp = httpx2.get(url)
         page = Html(Response(resp).content, url)
 
         # We will get invalid hostnames with dots. Browsers do that too.
@@ -57,7 +58,7 @@ def test_relative_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url)
+        resp = httpx2.get(url)
         page = Html(Response(resp).content, url)
 
         assert set(page.links) == {
@@ -85,7 +86,7 @@ def test_other_links():
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         response = Response(resp)
         page = Html(response.content, url)
 
@@ -112,7 +113,7 @@ def test_extra_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         page = Html(Response(resp).content, url)
 
         assert set(page.extra_urls) == {
@@ -146,7 +147,7 @@ def test_meta():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         response = Response(resp)
         assert response.md5 == "2778718d04cfa16ffd264bd76b0cf18b"
 
@@ -165,7 +166,7 @@ def test_base_relative_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url)
+        resp = httpx2.get(url)
         page = Html(Response(resp).content, url)
 
         assert set(page.links) == {
@@ -195,7 +196,7 @@ def test_base_extra_links():
         url = "http://perdu.com/"
         respx.get(url).mock(return_value=httpx.Response(200, text=data_body.read()))
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         page = Html(Response(resp).content, url)
 
         assert set(page.extra_urls) == {
@@ -230,7 +231,7 @@ def test_base_other_links():
             return_value=httpx.Response(301, text=data_body.read(), headers={"Location": "https://perdu.com/login"})
         )
 
-        resp = httpx.get(url, follow_redirects=False)
+        resp = httpx2.get(url, follow_redirects=False)
         response = Response(resp)
         assert response.redirection_url == "https://perdu.com/login"
 

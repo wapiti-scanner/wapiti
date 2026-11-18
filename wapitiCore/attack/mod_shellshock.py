@@ -22,7 +22,7 @@ import string
 from binascii import hexlify
 from typing import Optional
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack
 from wapitiCore.net import Request, Response

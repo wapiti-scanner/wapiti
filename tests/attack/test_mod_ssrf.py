@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import respx
 import pytest
 
@@ -184,7 +185,7 @@ async def test_finish_with_missing_request_id():
 @respx.mock
 async def test_timeout_reported_as_resource_consumption():
     # A timed-out injection must be reported once as a resource consumption anomaly
-    respx.route(host="perdu.com").mock(side_effect=httpx.ReadTimeout("Connection timed out"))
+    respx.route(host="perdu.com").mock(side_effect=httpx2.ReadTimeout("Connection timed out"))
 
     persister = AsyncMock()
 

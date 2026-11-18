@@ -22,6 +22,7 @@ import pathlib
 from collections import defaultdict, deque
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -84,7 +85,7 @@ async def explore(batches, explorer: Explorer = None):
     sent = []
     yielded = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx.Response:
         sent.append(
             {
                 "method": request.method,
@@ -511,7 +512,7 @@ def fill_intercept_queue(explorer, requests):
     explorer._queue = asyncio.Queue()
     for request in requests:
         response = Response(
-            httpx.Response(200, content=b"ok", headers={"Content-Type": "text/plain"}),
+            httpx2.Response(200, content=b"ok", headers={"Content-Type": "text/plain"}),
             url=request.url,
         )
         explorer._queue.put_nowait((request, response))

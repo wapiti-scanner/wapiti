@@ -1,5 +1,6 @@
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.net.crawler import Response
 
@@ -11,7 +12,7 @@ def test_json():
         return_value=httpx.Response(200, json={"key": "v4lu3"}, headers={"Content-Type": "application/json"})
     )
 
-    resp = httpx.get(url)
+    resp = httpx2.get(url)
     page = Response(resp)
 
     assert page.json["key"] == "v4lu3"

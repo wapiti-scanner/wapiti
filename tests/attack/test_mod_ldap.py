@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.attack.attack import random_string
 from wapitiCore.language.vulnerability import CRITICAL_LEVEL, HIGH_LEVEL
@@ -192,7 +193,7 @@ async def test_vulnerabilities():
 @pytest.mark.asyncio
 @respx.mock
 async def test_is_page_dynamic():
-    respx.get("http://perdu.com/").mock(side_effect=httpx.RequestError("error"))
+    respx.get("http://perdu.com/").mock(side_effect=httpx2.RequestError("error"))
     respx.get("http://perdu.com/hello").mock(return_value=httpx.Response(200, text="Hello there"))
 
     persister = AsyncMock()

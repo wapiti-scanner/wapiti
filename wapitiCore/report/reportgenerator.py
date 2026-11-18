@@ -25,7 +25,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import time
 
-from httpx import Response
+from httpx2 import Response
 
 from wapitiCore.net.response import detail_response
 

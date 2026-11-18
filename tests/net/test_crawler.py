@@ -3,6 +3,7 @@ from itertools import zip_longest
 from unittest.mock import patch
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -240,7 +241,7 @@ async def test_async_get_ssl_error_raises_connect_error():
     config = CrawlerConfiguration(Request(target_url))
     async with AsyncCrawler.with_configuration(config) as crawler:
         with patch.object(crawler._client, "send", side_effect=ssl.SSLZeroReturnError()):
-            with pytest.raises(httpx.ConnectError):
+            with pytest.raises(httpx2.ConnectError):
                 await crawler.async_get(Request(target_url))
 
 
@@ -254,7 +255,7 @@ async def test_async_get_non_ascii_cookie_raises_invalid_url():
             "build_request",
             side_effect=UnicodeEncodeError("ascii", "\xbf", 0, 1, "ordinal not in range(128)"),
         ):
-            with pytest.raises(httpx.InvalidURL):
+            with pytest.raises(httpx2.InvalidURL):
                 await crawler.async_get(Request(target_url))
 
 
@@ -265,7 +266,7 @@ async def test_async_request_ssl_error_raises_connect_error():
     config = CrawlerConfiguration(Request(target_url))
     async with AsyncCrawler.with_configuration(config) as crawler:
         with patch.object(crawler._client, "send", side_effect=ssl.SSLZeroReturnError()):
-            with pytest.raises(httpx.ConnectError):
+            with pytest.raises(httpx2.ConnectError):
                 await crawler.async_request("POST", Request(target_url))
 
 
@@ -280,8 +281,26 @@ async def test_async_get_unexpected_transport_exception_raises_connect_error():
     config = CrawlerConfiguration(Request(target_url))
     async with AsyncCrawler.with_configuration(config) as crawler:
         with patch.object(crawler._client, "send", side_effect=FakeEndOfStream()):
-            with pytest.raises(httpx.ConnectError):
+            with pytest.raises(httpx2.ConnectError):
                 await crawler.async_get(Request(target_url))
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_redirect_with_invalid_location_is_returned():
+    # A payload reflected in the Location header may not be a URL httpx2 can follow (no host).
+    # The response must still reach the attack modules, with its Location header (issue #690).
+    payload = "data:text/html,<script>alert(1)</script>"
+    respx.get("http://perdu.com/redirect").mock(
+        return_value=httpx.Response(302, headers={"Location": payload})
+    )
+
+    crawler_configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        response = await crawler.async_send(Request("http://perdu.com/redirect"))
+
+    assert response.status == 302
+    assert response.headers["location"] == payload
 
 
 @respx.mock
@@ -294,7 +313,7 @@ async def test_too_many_redirections():
 
     crawler_configuration = CrawlerConfiguration(Request(urls[0]), timeout=1)
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
-        with pytest.raises(httpx.TooManyRedirects):
+        with pytest.raises(httpx2.TooManyRedirects):
             await crawler.async_get(Request(urls[0]), follow_redirects=True)
 
 

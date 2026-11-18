@@ -2,7 +2,7 @@ import types
 from unittest.mock import AsyncMock, MagicMock, patch, ANY
 from pathlib import Path
 
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.attack.passive_scanner import PassiveScanner
@@ -297,7 +297,7 @@ YSOD_BODY = (
 
 def http_response(request: Request, body: str, content_type: str = "text/html; charset=utf-8") -> Response:
     return Response(
-        httpx.Response(500, text=body, headers={"content-type": content_type}, request=httpx.Request("GET", request.url))
+        httpx2.Response(500, text=body, headers={"content-type": content_type}, request=httpx2.Request("GET", request.url))
     )
 
 
@@ -361,11 +361,11 @@ async def test_scan_attack_response_records_stacktrace_on_the_attack_request(moc
 
     evil_request = Request("http://perdu.com/?id=%27")
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             500,
             text=YSOD_BODY,
             headers={"content-type": "text/html; charset=utf-8"},
-            request=httpx.Request("GET", evil_request.url),
+            request=httpx2.Request("GET", evil_request.url),
         )
     )
 

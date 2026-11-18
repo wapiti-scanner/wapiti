@@ -23,7 +23,7 @@ from collections import namedtuple
 from collections.abc import Mapping
 from typing import AsyncIterator, Iterable, List, Optional, Sequence, Tuple, Dict, Any
 
-import httpx
+import httpx2
 from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer, MetaData,
                         String, Table, Text, LargeBinary, TypeDecorator, and_,
                         event, literal_column, select)
@@ -47,7 +47,7 @@ class IncompatibleSessionError(Exception):
 class HeadersType(TypeDecorator):  # pylint: disable=too-many-ancestors
     """HTTP headers stored as a JSON list of [name, value] pairs.
 
-    Duplicate header names (Set-Cookie...) are kept and rows come back as httpx.Headers objects,
+    Duplicate header names (Set-Cookie...) are kept and rows come back as httpx2.Headers objects,
     which keeps the case-insensitive lookups the callers rely on.
     """
     impl = Text
@@ -55,7 +55,7 @@ class HeadersType(TypeDecorator):  # pylint: disable=too-many-ancestors
 
     @property
     def python_type(self):
-        return httpx.Headers
+        return httpx2.Headers
 
     def process_literal_param(self, value, dialect):
         return self.process_bind_param(value, dialect)
@@ -64,7 +64,7 @@ class HeadersType(TypeDecorator):  # pylint: disable=too-many-ancestors
         if value is None:
             return None
 
-        if isinstance(value, httpx.Headers):
+        if isinstance(value, httpx2.Headers):
             pairs = value.multi_items()
         elif isinstance(value, Mapping):
             pairs = list(value.items())
@@ -77,7 +77,7 @@ class HeadersType(TypeDecorator):  # pylint: disable=too-many-ancestors
         if value is None:
             return None
 
-        return httpx.Headers(json.loads(value))
+        return httpx2.Headers(json.loads(value))
 
 # pylint: disable=too-many-lines
 class SqlPersister:
@@ -676,7 +676,7 @@ class SqlPersister:
                 resp_headers = dict(row.resp_headers) if row.resp_headers else {}
                 resp_headers.pop("content-encoding", None)
                 response = Response(
-                    httpx.Response(
+                    httpx2.Response(
                         row.resp_status_code,
                         headers=resp_headers,
                         content=row.resp_body or b""
@@ -937,7 +937,7 @@ class SqlPersister:
             del headers["content-encoding"]
 
         response = Response(
-            httpx.Response(
+            httpx2.Response(
                 row.status_code,
                 headers=headers,
                 content=row.body
@@ -1091,7 +1091,7 @@ class SqlPersister:
                 if resp_headers and "content-encoding" in resp_headers:
                     del resp_headers["content-encoding"]
                 response = Response(
-                    httpx.Response(
+                    httpx2.Response(
                         row.resp_status_code,
                         headers=resp_headers,
                         content=row.resp_body
