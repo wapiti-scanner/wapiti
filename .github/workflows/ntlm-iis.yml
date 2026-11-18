@@ -1,0 +1,73 @@
+# Temporary: checks the NTLM authentication of the httpx2 migration against a real IIS.
+# To be removed before merging.
+name: NTLM against IIS
+on:
+  push:
+    branches: [feat/migrate-httpx2]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ntlm-iis:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate a throwaway password for the test account
+        shell: pwsh
+        run: |
+          $password = "Aa1!" + [guid]::NewGuid().ToString("N")
+          "::add-mask::$password"
+          "NTLM_PASSWORD=$password" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install IIS with Windows Authentication
+        shell: pwsh
+        run: |
+          Install-WindowsFeature Web-Server, Web-Windows-Auth | Out-Host
+          $password = ConvertTo-SecureString $env:NTLM_PASSWORD -AsPlainText -Force
+          New-LocalUser -Name alice -Password $password -PasswordNeverExpires | Out-Host
+          $appcmd = "$env:windir\system32\inetsrv\appcmd.exe"
+          & $appcmd set config "Default Web Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:false /commit:apphost
+          & $appcmd set config "Default Web Site" -section:system.webServer/security/authentication/windowsAuthentication /enabled:true /commit:apphost
+          & $appcmd list config "Default Web Site" -section:system.webServer/security/authentication/windowsAuthentication
+
+      - name: Install wapiti
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Check the challenge sent by IIS
+        shell: pwsh
+        run: |
+          try { Invoke-WebRequest http://localhost/ -UseBasicParsing } catch { $_.Exception.Response.Headers["WWW-Authenticate"] }
+
+      - name: NTLM with the default providers (Negotiate, NTLM)
+        shell: pwsh
+        run: python .github/scripts/ntlm_iis_check.py http://localhost/ "$env:COMPUTERNAME\alice" $env:NTLM_PASSWORD
+
+      - name: Wapiti scan through NTLM
+        shell: pwsh
+        run: |
+          wapiti -u http://localhost/ --auth-user "$env:COMPUTERNAME\alice" --auth-password $env:NTLM_PASSWORD --auth-method ntlm -m "" --flush-session -v 2 -f json -o report.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Restrict IIS to the Negotiate provider
+        shell: pwsh
+        run: |
+          $appcmd = "$env:windir\system32\inetsrv\appcmd.exe"
+          & $appcmd set config "Default Web Site" -section:system.webServer/security/authentication/windowsAuthentication /-"providers.[value='NTLM']" /commit:apphost
+          & $appcmd list config "Default Web Site" -section:system.webServer/security/authentication/windowsAuthentication
+          try { Invoke-WebRequest http://localhost/ -UseBasicParsing } catch { $_.Exception.Response.Headers["WWW-Authenticate"] }
+
+      - name: NTLM token under the Negotiate scheme
+        shell: pwsh
+        run: python .github/scripts/ntlm_iis_check.py http://localhost/ "$env:COMPUTERNAME\alice" $env:NTLM_PASSWORD
+
+      - name: IIS logs
+        if: always()
+        shell: pwsh
+        run: Get-Content C:\inetpub\logs\LogFiles\W3SVC1\*.log -ErrorAction SilentlyContinue
