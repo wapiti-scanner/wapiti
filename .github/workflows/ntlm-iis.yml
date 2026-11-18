@@ -43,7 +43,20 @@ jobs:
       - name: Check the challenge sent by IIS
         shell: pwsh
         run: |
-          try { Invoke-WebRequest http://localhost/ -UseBasicParsing } catch { $_.Exception.Response.Headers["WWW-Authenticate"] }
+          try { Invoke-WebRequest http://localhost/ -UseBasicParsing } catch { $_.Exception.Response.Headers.WwwAuthenticate | ForEach-Object { "WWW-Authenticate: $_" } }
+
+      - name: Baseline - PowerShell client with the same account
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $password = ConvertTo-SecureString $env:NTLM_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\alice", $password)
+          (Invoke-WebRequest http://localhost/ -Credential $credential -AllowUnencryptedAuthentication -UseBasicParsing).StatusCode
+
+      - name: Trace the handshake
+        shell: pwsh
+        continue-on-error: true
+        run: python .github/scripts/ntlm_iis_debug.py http://localhost/ "$env:COMPUTERNAME\alice" $env:NTLM_PASSWORD
 
       - name: NTLM with the default providers (Negotiate, NTLM)
         shell: pwsh
@@ -70,4 +83,10 @@ jobs:
       - name: IIS logs
         if: always()
         shell: pwsh
-        run: Get-Content C:\inetpub\logs\LogFiles\W3SVC1\*.log -ErrorAction SilentlyContinue
+        run: |
+          netsh http flush logbuffer | Out-Null
+          Start-Sleep -Seconds 2
+          # Columns include sc-status sc-substatus sc-win32-status: 401.1 = credentials refused, 401.2 = no usable auth
+          Get-Content C:\inetpub\logs\LogFiles\W3SVC1\*.log -ErrorAction SilentlyContinue
+          # Failed logons (4625) with their failure reason, if auditing records them
+          Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 5 -ErrorAction SilentlyContinue | Format-List TimeCreated, Message
