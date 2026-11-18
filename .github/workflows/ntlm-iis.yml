@@ -10,6 +10,9 @@ on:
 jobs:
   ntlm-iis:
     runs-on: windows-2022
+    env:
+      # The runner console is cp1252: wapiti's output must not depend on it
+      PYTHONUTF8: "1"
     steps:
       - uses: actions/checkout@v4
 
