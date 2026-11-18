@@ -29,7 +29,7 @@ async def fetch_statuses(url: str, username: str, password: str, count: int) -> 
 async def main() -> int:
     url, username, password = sys.argv[1:4]
 
-    good = await fetch_statuses(url, username, password, 10)
+    good = await fetch_statuses(url, username, password, 30)
     print(f"valid credentials: {good}")
     bad = await fetch_statuses(url, username, password + "-wrong", 2)
     print(f"wrong password: {bad}")

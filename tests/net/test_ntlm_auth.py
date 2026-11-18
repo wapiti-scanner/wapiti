@@ -1,3 +1,4 @@
+import asyncio
 import base64
 
 import httpx2
@@ -173,3 +174,108 @@ async def test_malformed_challenge_returns_the_last_response():
 
     response = await fetch(not_base64, HttpNtlmAuth("PERDU\\alice", "Letmein!"))
     assert response.status_code == 401
+
+
+class SocketNtlmServer:
+    """A real HTTP server where, like IIS, the NTLM handshake and its result are bound to the TCP connection.
+
+    `/public` needs no authentication, `delays` slows down some answers (keyed by path or "challenge")
+    so tests can make connections free up in a chosen order.
+    """
+
+    def __init__(self, delays=None):
+        self.delays = delays or {}
+        self.connections = 0
+        self.rejected_answers = 0
+        self.server = None
+
+    async def __aenter__(self):
+        self.server = await asyncio.start_server(self.handle, "127.0.0.1", 0)
+        return f"http://127.0.0.1:{self.server.sockets[0].getsockname()[1]}"
+
+    async def __aexit__(self, *args):
+        self.server.close()
+        await self.server.wait_closed()
+
+    async def handle(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+        self.connections += 1
+        context = spnego.server(protocol="ntlm")
+        authenticated = False
+        try:
+            while True:
+                head = await reader.readuntil(b"\r\n\r\n")
+                lines = head.decode("latin-1").split("\r\n")
+                path = lines[0].split(" ")[1]
+                headers = {
+                    name.strip().lower(): value.strip()
+                    for name, _, value in (line.partition(":") for line in lines[1:] if line)
+                }
+
+                status, extra_headers, body = 401, [("WWW-Authenticate", "NTLM")], b"denied"
+                answer = headers.get("authorization")
+                if path == "/public" or (authenticated and answer is None):
+                    status, extra_headers, body = 200, [], b"ok"
+                elif answer:
+                    try:
+                        token = context.step(base64.b64decode(answer.split(" ", 1)[1]))
+                    except (spnego.exceptions.SpnegoError, ValueError):
+                        # An answer to a challenge this connection never sent: start over
+                        self.rejected_answers += 1
+                        context = spnego.server(protocol="ntlm")
+                    else:
+                        if context.complete:
+                            authenticated = True
+                            status, extra_headers, body = 200, [], b"welcome"
+                        else:
+                            await asyncio.sleep(self.delays.get("challenge", 0))
+                            extra_headers = [("WWW-Authenticate", "NTLM " + base64.b64encode(token).decode("ascii"))]
+
+                await asyncio.sleep(self.delays.get(path, 0))
+                response = [f"HTTP/1.1 {status} X", f"Content-Length: {len(body)}"]
+                response += [f"{name}: {value}" for name, value in extra_headers]
+                writer.write(("\r\n".join(response) + "\r\n\r\n").encode("ascii") + body)
+                await writer.drain()
+        except (asyncio.IncompleteReadError, ConnectionError):
+            pass
+        finally:
+            writer.close()
+
+
+@pytest.mark.asyncio
+async def test_handshake_restarts_when_its_answer_is_sent_over_another_connection():
+    # The client pool sends each request over the first free connection, not over the one that
+    # carried the challenge. Here the public request frees its connection while the challenge of the
+    # protected one is delayed, so the answer to that challenge leaves through the wrong connection.
+    server = SocketNtlmServer(delays={"/public": 0.2, "challenge": 0.4})
+    async with server as base_url:
+        async with httpx2.AsyncClient(auth=HttpNtlmAuth("PERDU\\alice", "Letmein!")) as client:
+            public = asyncio.create_task(client.get(base_url + "/public"))
+            await asyncio.sleep(0.05)  # the public request takes the first connection
+            response = await client.get(base_url + "/secret")
+            assert (await public).status_code == 200
+
+    assert server.connections == 2
+    # The first answer was refused by the connection that never sent its challenge, the second one went through
+    assert server.rejected_answers == 1
+    assert response.status_code == 200
+    assert response.text == "welcome"
+
+
+@pytest.mark.asyncio
+async def test_wrong_password_refused_on_the_same_connection_is_not_retried():
+    server = SocketNtlmServer()
+    async with server as base_url:
+        async with httpx2.AsyncClient(auth=HttpNtlmAuth("PERDU\\alice", "wrong")) as client:
+            response = await client.get(base_url + "/secret")
+
+    assert response.status_code == 401
+    assert server.rejected_answers == 1
+
+
+@pytest.mark.asyncio
+async def test_concurrent_requests_all_authenticate_against_a_real_server():
+    async with SocketNtlmServer() as base_url:
+        async with httpx2.AsyncClient(auth=HttpNtlmAuth("PERDU\\alice", "Letmein!")) as client:
+            responses = await asyncio.gather(*(client.get(base_url + "/secret") for _ in range(20)))
+
+    assert [response.status_code for response in responses] == [200] * 20

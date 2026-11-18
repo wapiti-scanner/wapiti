@@ -24,10 +24,13 @@ rejects. This is the same handshake on top of pyspnego, as an `httpx2.Auth`.
 import base64
 import binascii
 import struct
-from typing import Generator, List, Optional
+from typing import Generator, List, Optional, Tuple
 
 import httpx2
 import spnego
+
+# A handshake whose answer left through another connection than its challenge is started over, up to this
+_MAX_HANDSHAKES = 3
 
 # (challenge header sent by the server, header carrying our answer), per status code
 _HEADERS_BY_STATUS = {
@@ -99,27 +102,53 @@ class HttpNtlmAuth(httpx2.Auth):
         if scheme is None:
             return
 
-        try:
-            # pyspnego's own NTLM implementation on every platform: on Windows it would otherwise go
-            # through SSPI, which IIS refused in our tests while the pure-Python handshake succeeded
-            client = spnego.client(
-                self.username, self.password, protocol="ntlm", options=spnego.NegotiateOptions.use_ntlm
-            )
-            request.headers[answer_header] = f"{scheme} {base64.b64encode(client.step()).decode('ascii')}"
-            response = yield request
-
-            # Some applications tie the handshake to a cookie set along with the challenge
-            if response.cookies:
-                httpx2.Cookies(response.cookies).set_cookie_header(request)
-
-            token = _server_token(_challenges(response, challenge_header), scheme)
-            if token is None:
+        for _ in range(_MAX_HANDSHAKES):
+            try:
+                challenge_response, response = yield from self._handshake(
+                    request, scheme, challenge_header, answer_header
+                )
+            except (spnego.exceptions.SpnegoError, KeyError, IndexError, ValueError, struct.error):
+                # A malformed challenge must not abort the scan: the caller gets the last response.
+                # pyspnego doesn't wrap every parsing error of a token it can't decode.
                 return
 
-            request.headers[answer_header] = f"{scheme} {base64.b64encode(client.step(token)).decode('ascii')}"
-        except (spnego.exceptions.SpnegoError, KeyError, IndexError, ValueError, struct.error):
-            # A malformed challenge must not abort the scan: the caller gets the last response.
-            # pyspnego doesn't wrap every parsing error of a token it can't decode.
-            return
+            if response is None or response.status_code != challenge_response.status_code:
+                return
 
-        yield request
+            # The client pool sends each request over the first free connection, not over the one that
+            # carried the challenge: if our answer left through another connection, the server never
+            # saw that challenge and refused it. Start the handshake over.
+            challenge_stream = challenge_response.extensions.get("network_stream")
+            if challenge_stream is None or response.extensions.get("network_stream") is challenge_stream:
+                # Same connection: the credentials really were refused
+                return
+
+    def _handshake(
+            self,
+            request: httpx2.Request,
+            scheme: str,
+            challenge_header: str,
+            answer_header: str,
+    ) -> Generator[httpx2.Request, httpx2.Response, Tuple[httpx2.Response, Optional[httpx2.Response]]]:
+        """Send the negotiate then the authenticate message.
+
+        Returns the response carrying the challenge, and the response to our answer (None if there was no
+        challenge to answer).
+        """
+        # pyspnego's own NTLM implementation on every platform: on Windows it would otherwise go
+        # through SSPI, which IIS refused in our tests while the pure-Python handshake succeeded
+        client = spnego.client(self.username, self.password, protocol="ntlm", options=spnego.NegotiateOptions.use_ntlm)
+        request.headers[answer_header] = f"{scheme} {base64.b64encode(client.step()).decode('ascii')}"
+        challenge_response = yield request
+
+        # Some applications tie the handshake to a cookie set along with the challenge
+        if challenge_response.cookies:
+            httpx2.Cookies(challenge_response.cookies).set_cookie_header(request)
+
+        token = _server_token(_challenges(challenge_response, challenge_header), scheme)
+        if token is None:
+            return challenge_response, None
+
+        request.headers[answer_header] = f"{scheme} {base64.b64encode(client.step(token)).decode('ascii')}"
+        response = yield request
+        return challenge_response, response
