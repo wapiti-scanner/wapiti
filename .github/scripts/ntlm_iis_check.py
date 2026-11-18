@@ -1,4 +1,4 @@
-"""Check wapiti's NTLM authentication against a real IIS (temporary, used by the ntlm-iis workflow).
+"""Check wapiti's NTLM authentication against a real IIS (used by the ntlm-iis workflow).
 
 Usage: python ntlm_iis_check.py URL DOMAIN\\USER PASSWORD
 """
@@ -14,6 +14,8 @@ async def fetch_statuses(url: str, username: str, password: str, count: int) -> 
     configuration = CrawlerConfiguration(
         Request(url),
         timeout=10,
+        # Lets the workflow tell these requests apart from the wapiti scan in the IIS logs
+        user_agent="wapiti-ntlm-check",
         http_credential=HttpCredential(username, password, "ntlm"),
     )
     async with AsyncCrawler.with_configuration(configuration) as crawler:
