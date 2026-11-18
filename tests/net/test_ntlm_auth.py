@@ -70,6 +70,23 @@ async def test_ntlm_handshake_succeeds_with_valid_credentials():
 
 
 @pytest.mark.asyncio
+async def test_ntlm_uses_pyspnego_own_implementation(monkeypatch):
+    # SSPI (Windows) was refused by IIS where pyspnego's own NTLM succeeded: always ask for the latter
+    calls = []
+    original_client = spnego.client
+
+    def recording_client(*args, **kwargs):
+        calls.append(kwargs)
+        return original_client(*args, **kwargs)
+
+    monkeypatch.setattr(spnego, "client", recording_client)
+    response = await fetch(NtlmServer(), HttpNtlmAuth("PERDU\\alice", "Letmein!"))
+
+    assert response.status_code == 200
+    assert calls and calls[0]["options"] & spnego.NegotiateOptions.use_ntlm
+
+
+@pytest.mark.asyncio
 async def test_ntlm_is_preferred_to_negotiate():
     # IIS advertises both by default: with only a username and a password Kerberos is not an option
     server = NtlmServer(schemes=("Negotiate", "NTLM"))

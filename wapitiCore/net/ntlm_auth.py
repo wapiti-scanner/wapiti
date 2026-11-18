@@ -100,7 +100,11 @@ class HttpNtlmAuth(httpx2.Auth):
             return
 
         try:
-            client = spnego.client(self.username, self.password, protocol="ntlm")
+            # pyspnego's own NTLM implementation on every platform: on Windows it would otherwise go
+            # through SSPI, which IIS refused in our tests while the pure-Python handshake succeeded
+            client = spnego.client(
+                self.username, self.password, protocol="ntlm", options=spnego.NegotiateOptions.use_ntlm
+            )
             request.headers[answer_header] = f"{scheme} {base64.b64encode(client.step()).decode('ascii')}"
             response = yield request
 
