@@ -75,6 +75,34 @@ def get_all_vulnerabilities(
             "An error occurred at C:\\Program Files\\Custom App\\error.log",
             "Response contains potential system path: C:\\Program Files\\Custom",
         ),
+        (
+            "Server Error in '/' Application. D:\\inetpub\\wwwroot\\app\\web.config line 12",
+            "Response contains potential system path: D:\\inetpub\\wwwroot\\app\\web.config",
+        ),
+        (
+            "Could not read D:\\home\\site\\wwwroot\\appsettings.json",
+            "Response contains potential system path: D:\\home\\site\\wwwroot\\appsettings.json",
+        ),
+        (
+            "Warning: include(): failed in C:\\xampp\\htdocs\\index.php on line 3",
+            "Response contains potential system path: C:\\xampp\\htdocs\\index.php",
+        ),
+        (
+            "Warning in C:\\wamp64\\www\\site\\index.php",
+            "Response contains potential system path: C:\\wamp64\\www\\site\\index.php",
+        ),
+        (
+            "AH00526: Syntax error in C:\\Apache24\\conf\\httpd.conf",
+            "Response contains potential system path: C:\\Apache24\\conf\\httpd.conf",
+        ),
+        (
+            "Cannot write C:\\Temp\\upload_42.tmp",
+            "Response contains potential system path: C:\\Temp\\upload_42.tmp",
+        ),
+        (
+            "Profile in C:\\Documents and Settings\\admin",
+            "Response contains potential system path: C:\\Documents and Settings\\admin",
+        ),
     ],
 )
 def test_path_disclosure_detected(module, content, expected_info):
@@ -87,6 +115,16 @@ def test_path_disclosure_detected(module, content, expected_info):
     assert found_vuln, f"Expected vulnerability not found: {expected_info}"
     assert all(vuln.severity == LOW_LEVEL for vuln in vulns)
     assert all(vuln.finding_class == InformationDisclosureFinding for vuln in vulns)
+
+
+@pytest.mark.parametrize(
+    "content",
+    ["Set C:\\Temperature to 20", "See C:\\homepage.html", "Open C:\\inetpub.zip"],
+    ids=["temperature", "homepage", "inetpub archive"],
+)
+def test_word_starting_with_a_windows_root_is_not_reported(module, content):
+    request, response = create_mock_objects(content)
+    assert not list(get_all_vulnerabilities(module, request, response))
 
 
 def test_no_path_disclosure(module):

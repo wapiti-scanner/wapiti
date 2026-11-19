@@ -23,8 +23,11 @@ PATH_PATTERN = re.compile(
     r"(?:bin|usr|mnt|proc|sbin|dev|lib|tmp|opt|home|var|root|etc|Applications|Volumes|System|Users|Developer|Library)"
     r"/[\w./~-]*"
     r"|"
-    # Windows absolute paths
-    r"[A-Za-z]:\\(?:Program Files|Users|Windows|ProgramData|Progra~1)[^ \t\r\n<>'\"]*"
+    # Windows absolute paths: system directories, then web server roots (IIS, Azure App Service,
+    # XAMPP, WampServer, Apache Lounge) and the temporary directory. A short root must be followed
+    # by a separator so that a word starting with it (C:\Temperature) is not taken for a path.
+    r"[A-Za-z]:\\(?:Program Files|Users|Windows|ProgramData|Progra~1|Documents and Settings"
+    r"|(?:inetpub|home|xampp|wamp(?:64)?|Apache24|Temp)\\)[^ \t\r\n<>'\"]*"
     r")",
     flags=re.IGNORECASE,
 )
