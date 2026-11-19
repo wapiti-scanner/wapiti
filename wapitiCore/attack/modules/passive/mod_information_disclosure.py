@@ -80,6 +80,39 @@ HTML_APOSTROPHES = ("'", "&#039;", "&#x27;", "&#39;", "&apos;")
 # The Windows branch of PATH_PATTERN also swallows the punctuation following the path
 WINDOWS_PATH_TRAILER = ".,;:)]}"
 
+# Files targeted by the payloads of mod_file and mod_xxe. They exist on every system of their
+# kind, so printing one of them tells nothing about the server. Their payloads are often written
+# back by a page other than the one attacked (a forum showing stored posts, a value kept in the
+# session), where the values sent in the request can't explain them.
+ATTACK_TARGETS = frozenset((
+    "/etc/passwd",
+    "/etc/services",
+    "/etc/networks",
+    "/usr/etc/networks",
+    "/lib",
+    "/windows",
+    "/windows/system32/drivers/etc/services",
+    "/windows/system32/drivers/etc/networks",
+))
+# How a NUL byte of a payload is written back: kept, percent-encoded, as a character reference,
+# escaped by addslashes(), or replaced by U+FFFD when the body is decoded
+NUL_RENDERINGS = re.compile(r"\0|%00|&#0+;|&#x0+;|\\0|\ufffd", re.IGNORECASE)
+# Traversal at the very start of a path: nothing of the server is disclosed before it
+LEADING_TRAVERSAL = re.compile(r"^(?:/*\.{2,}/+)+")
+# Extension appended to the payload by the application, e.g. include($_GET["page"] . ".php")
+APPENDED_EXTENSION = re.compile(r"\.\w{1,5}$")
+
+
+def _is_attack_target(path: str) -> bool:
+    """Whether the path is one of the files targeted by Wapiti's payloads, whatever the way it is
+    written: drive letter, separator, case, leading traversal, NUL byte, NTFS stream, appended
+    extension. A path with a real directory before a traversal still discloses that directory."""
+    key = NUL_RENDERINGS.sub("", path).replace("\\", "/").casefold()
+    key = re.sub(r"^[a-z]:", "", key)
+    key = LEADING_TRAVERSAL.sub("/", key)
+    key = re.sub(r"/{2,}", "/", key).removesuffix("::$data").rstrip("/")
+    return key in ATTACK_TARGETS or APPENDED_EXTENSION.sub("", key) in ATTACK_TARGETS
+
 
 def _json_strings(document: Any) -> Iterator[str]:
     """Every string (key or value) of a decoded JSON document. Iterative: no recursion limit."""
@@ -270,6 +303,8 @@ class ModuleInformationDisclosure(PassiveModule):
             if is_windows:
                 core = core.split("&", 1)[0].rstrip(WINDOWS_PATH_TRAILER)
             core = core.rstrip(".")
+            if _is_attack_target(core):
+                continue
 
             if reflections is None:
                 reflections = _Reflections(request, content)

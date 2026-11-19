@@ -1,10 +1,14 @@
+import configparser
 import json
 import time
+from pathlib import Path
 from unittest.mock import MagicMock
 from typing import Generator, Any
 from urllib.parse import quote
 
 import pytest
+
+import wapitiCore
 
 from wapitiCore.attack.modules.passive.mod_information_disclosure import (
     ModuleInformationDisclosure,
@@ -412,3 +416,59 @@ def test_long_echoed_value_full_of_paths_stays_fast(module):
 def test_sent_value_equal_to_the_path_hides_every_occurrence(module):
     """Known limitation: when the value IS the path, a copy of it can't be told apart from a disclosure."""
     assert not infos(module, get_request(id="1'", tpl="/var/www/html/index.php"), STACK_TRACE)
+
+
+def attack_payload_paths(ini_name: str) -> list:
+    """Payloads of an ini file of Wapiti, with their tags replaced the way mod_file does."""
+    parser = configparser.ConfigParser(interpolation=None)
+    parser.read(Path(wapitiCore.__file__).parent / "data" / "attacks" / ini_name)
+    payloads = []
+    for section in parser.sections():
+        payload = parser[section]["payload"]
+        if "[EXTERNAL_ENDPOINT]" in payload or payload.startswith("php://") or "wapiti.txt" in payload:
+            continue
+        for tag, value in (
+            ("[VALUE]", "page.php"), ("[DIRVALUE]", "pages"), ("[EXTVALUE]", "php"),
+            ("[FILE_NAME]", "index.php"), ("[NULL]", "\0"),
+        ):
+            payload = payload.replace(tag, value)
+        payloads.append(payload)
+    return payloads
+
+
+@pytest.mark.parametrize("payload", attack_payload_paths("fileHandlingPayloads.ini"))
+def test_stored_mod_file_payload_is_not_reported(module, payload):
+    """A page printing a payload sent by an earlier request (a forum showing stored posts, a value
+    kept in the session) only shows a file that exists on every system."""
+    assert not infos(module, Request("http://test.com/showthread.asp?id=1"), f"<p>Hi there {payload}</p>")
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "Message: /../../../../../../../../../../etc/passwd",
+        "Message: C:\\Windows\\System32\\drivers\\etc\\services::$DATA",
+        "Message: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\SERVICES",
+        "Message: c:\\windows\\system32\\drivers\\etc\\services%00.php",
+        "include(/etc/passwd.php): Failed to open stream",
+        "file:///usr/etc/networks",
+    ],
+    ids=["leading traversal", "ntfs stream", "upper case", "percent-encoded nul", "appended extension", "xxe target"],
+)
+def test_file_targeted_by_attack_payloads_is_not_reported(module, content):
+    assert not infos(module, Request("http://test.com/Login.asp?RetURL=%2Fetc%2Fservices"), content)
+
+
+@pytest.mark.parametrize(
+    "content, disclosed",
+    [
+        ("open /var/www/app/../../etc/passwd failed", "/var/www/app/../../etc/passwd"),
+        ("Cannot read /etc/nginx/sites-enabled/app.conf", "/etc/nginx/sites-enabled/app.conf"),
+        ("Cannot read C:\\Windows\\Temp\\app.log", "C:\\Windows\\Temp\\app.log"),
+    ],
+    ids=["server directory before a traversal", "other file of /etc", "other file of C:\\Windows"],
+)
+def test_path_close_to_an_attack_target_is_reported(module, content, disclosed):
+    assert infos(module, Request("http://test.com/"), content) == [
+        f"Response contains potential system path: {disclosed}"
+    ]
