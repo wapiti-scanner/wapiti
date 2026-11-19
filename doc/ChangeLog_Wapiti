@@ -1,11 +1,14 @@
-Unreleased
+19/11/2026
+    Wapiti 3.4.0
     Security: crawler state and HTTP headers of a session are stored as JSON instead of pickle
     Security: redirect destinations are checked before the crawler follows them
     Security: form-login credentials are only submitted to the login page origin or the scan scope
     Modules: stacktrace_disclosure and information_disclosure also analyse the responses received by attack modules (#785)
     Modules: mod_csp only treats quoted values as keywords ('self' is not the host self), keeps the first occurrence of a duplicated directive and matches keywords case-insensitively
+    Modules: mod_http_headers validates the effective HSTS policy (max-age=0, malformed or duplicated directives are reported as missing HSTS) (#822)
     Attack: csp posture fingerprint keeps values attached to their directive, a scan resumed from an older session reports its CSP findings once more (#820)
     Core: raise the minimum versions of playwright (1.50), sqlalchemy (2.0.46), mitmproxy (12.3.1) and httpx (0.28.1), some of the previous ones could not be installed on Python 3.14
+    Core: bound the number of distinct raw bodies (JSON, XML...) sent to one endpoint by method, path and media type (#819)
     CLI: exit with a nonzero status when the base URL is invalid
     Docker: install libatomic1, required by the Playwright driver
     Fixes: XML report is now well-formed when no authentication is used (#825)
@@ -14,7 +17,7 @@ Unreleased
     Fixes: https_redirect only spends its alert budget on insecure responses
     Fixes: login-form field indexes stay aligned with named inputs
     Fixes: mod_csp no longer ignores a directive whose name is followed by a tab
-    Core: bound the number of distinct raw bodies (JSON, XML...) sent to one endpoint by method, path and media type (#819)
+    Fixes: CVSS scores on a band boundary (3.9, 6.9, 8.9) are mapped to the right severity level (#834)
 
 19/08/2026
     Wapiti 3.3.2
