@@ -196,9 +196,6 @@ async def launch_proxy(
         proxy: Optional[str] = None,
         drop_cookies: bool = False,
 ):
-    log_blue(
-        f"Launching MitmProxy on port {port}. Configure your browser to use it, press ctrl+c when you are done."
-    )
     opt = Options()
     # We can use an upstream proxy that way but socks is not supported
     if proxy:
@@ -503,6 +500,14 @@ class InterceptingExplorer(Explorer):
                     exclusion_regexes.append(wildcard_translate(bad_request))
                 elif isinstance(bad_request, Request):
                     excluded_requests.add(bad_request)
+
+        if self._headless == "no":
+            log_blue(
+                f"Launching MitmProxy on port {self._mitm_port}. "
+                "Configure your browser to use it, press ctrl+c when you are done."
+            )
+        else:
+            log_blue(f"Launching MitmProxy on port {self._mitm_port} for the headless browser.")
 
         # Launch proxy as asyncio task
         self._mitm_task = asyncio.create_task(

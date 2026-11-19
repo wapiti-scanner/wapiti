@@ -188,6 +188,42 @@ class TestInterceptingExplorer:
         assert requests[0].url == "http://example.com/test"
         mock_launch_headless.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "headless, expected",
+        [
+            (
+                "no",
+                "Launching MitmProxy on port 8080. Configure your browser to use it, press ctrl+c when you are done.",
+            ),
+            ("hidden", "Launching MitmProxy on port 8080 for the headless browser."),
+        ],
+        ids=["interception only", "headless crawler"],
+    )
+    @patch("wapitiCore.net.intercepting_explorer.log_blue")
+    @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
+    @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
+    @pytest.mark.asyncio
+    async def test_proxy_announcement_depends_on_headless_mode(
+        self, mock_launch_headless, mock_launch_proxy, mock_log_blue, headless, expected
+    ):
+        # pylint: disable=unused-argument
+        # GIVEN an intercepting explorer whose proxy stops the crawl as soon as it starts
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("http://example.com"))
+        scope = Scope(Request("http://example.com"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event, mitm_port=8080, headless=headless)
+
+        async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
+            stop_event.set()
+
+        mock_launch_proxy.side_effect = mock_proxy
+
+        # WHEN the crawl runs
+        _ = [req async for req, __ in explorer.async_explore(deque([Request("http://example.com/")]))]
+
+        # THEN only a user driving the proxy with their own browser is asked to configure it
+        mock_log_blue.assert_any_call(expected)
+
     @patch("wapitiCore.net.intercepting_explorer.AsyncCrawler")
     @patch("wapitiCore.net.intercepting_explorer.launch_proxy")
     @patch("wapitiCore.net.intercepting_explorer.launch_headless_explorer")
