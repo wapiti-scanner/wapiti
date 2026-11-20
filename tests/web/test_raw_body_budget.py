@@ -525,7 +525,7 @@ async def drain_intercept_queue(explorer):
 
 @pytest.mark.asyncio
 async def test_intercepting_explorer_bounds_admitted_raw_bodies_and_file_budget():
-    # mitmproxy and playwright are runtime dependencies of wapiti but are not installed in every
+    # playwright is a runtime dependency of wapiti but is not installed in every
     # local environment: skip (not pass) when the module cannot be imported.
     intercepting_explorer = pytest.importorskip("wapitiCore.net.intercepting_explorer")
 
@@ -608,7 +608,7 @@ async def test_intercepting_parameter_rejection_takes_no_raw_body_slot():
 
 
 def test_intercepting_parameter_check_comes_before_the_raw_body_budget():
-    """Check the same ordering statically: importing the module needs mitmproxy."""
+    """Check the same ordering statically: importing the module needs playwright."""
     net_dir = pathlib.Path(__file__).resolve().parents[2] / "wapitiCore" / "net"
     source = (net_dir / "intercepting_explorer.py").read_text(encoding="utf-8")
     process_requests = next(

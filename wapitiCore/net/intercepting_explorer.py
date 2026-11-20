@@ -18,20 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+import os
 import re
 import sys
 from dataclasses import replace
 from traceback import print_tb
-from typing import Tuple, List, AsyncIterator, Dict, Optional, Deque
+from typing import Tuple, List, AsyncIterator, Optional, Deque
 from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
 import inspect
 import json
 
-from mitmproxy import addons
-from mitmproxy.master import Master
-from mitmproxy.options import Options
-from mitmproxy.http import Request as MitmRequest
 import httpx
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
@@ -44,9 +41,12 @@ from wapitiCore.net.response import Response
 from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net.async_stickycookie import AsyncStickyCookie
+from wapitiCore.net.proxy import CertificateAuthority, Flow, InterceptingProxy, ProxyRequest
+from wapitiCore.net.proxy.server import EVENT_STREAM
+from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS
 from wapitiCore.net.scope import Scope, wildcard_translate
-from wapitiCore.main.log import log_verbose, log_blue, logging
+from wapitiCore.main.log import log_verbose, log_blue, log_red, logging
 from wapitiCore.parsers.html_parser import Html
 
 # Mime types that a browser will commonly display instead of downloading
@@ -56,6 +56,10 @@ KNOWN_INTERPRETED_TYPES = (
     "image/avif", "image/png", "image/gif", "image/x-icon", "font/woff2", "image/jpeg", "image/svg+xml",
     "application/ld+json", "font/ttf", "font/woff", "application/xhtml+xml",
 )
+
+
+# Directory of the certificate authority of the intercepting proxy, inside the configuration directory
+CA_DIRECTORY_NAME = "ca"
 
 
 def is_interpreted_type(mime_type: str) -> bool:
@@ -74,95 +78,93 @@ def set_playwright_log_level(level: int = WARNING):
 set_playwright_log_level(CRITICAL)
 
 
-def decode_key_value_dict(bytes_dict: Dict[bytes, bytes], multi: bool = True) -> List[Tuple[str, str]]:
-    result = []
-    for key, value in bytes_dict.items(multi=multi):
-        if isinstance(key, bytes):
-            key = key.decode("utf-8", errors="ignore")
-        if isinstance(value, bytes):
-            value = value.decode("utf-8", errors="ignore")
-        result.append((key, value))
-    return result
-
-
-def mitm_to_wapiti_request(mitm_request: MitmRequest) -> Optional[Request]:
+def mitm_to_wapiti_request(proxy_request: ProxyRequest) -> Optional[Request]:
     post_params = []
+    file_params = []
     enctype = ""
-    if mitm_request.urlencoded_form:
-        post_params.extend(decode_key_value_dict(mitm_request.urlencoded_form))
+    media_type = proxy_request.media_type
 
-    if mitm_request.multipart_form:
+    if media_type == "application/x-www-form-urlencoded":
+        post_params.extend(proxy_request.urlencoded_form)
+    elif media_type == "multipart/form-data":
         enctype = "multipart/form-data"
-        # This is wrong but mitmproxy doesn't give files entries (along with filename, mime type)
-        # so we will consider values as simple fields but still send using multipart encoding
-        post_params.extend(decode_key_value_dict(mitm_request.multipart_form))
+        fields, files = proxy_request.multipart_form
+        post_params.extend(fields)
+        file_params.extend([name, file_value] for name, file_value in files)
 
-    if not enctype and mitm_request.method in ["POST", "PUT", "PATCH"]:
-        enctype = mitm_request.headers.get("Content-Type", "")
+    if not enctype and proxy_request.method in ["POST", "PUT", "PATCH"]:
+        enctype = proxy_request.headers.get("Content-Type", "")
 
-    if enctype == "application/json":
+    if media_type == "application/json":
         try:
-            json.loads(mitm_request.text)
+            json.loads(proxy_request.text)
         except json.JSONDecodeError:
             # Ignore request if JSON data seems invalid
             return None
 
-        post_params = mitm_request.text
-
-    request_headers = httpx.Headers(decode_key_value_dict(mitm_request.headers))
+    if proxy_request.content and media_type not in ("application/x-www-form-urlencoded", "multipart/form-data"):
+        # Not a form: the body (JSON, XML...) is kept as is
+        post_params = proxy_request.text
 
     return Request(
-        path=mitm_request.url,
-        method=mitm_request.method,
-        referer=mitm_request.headers.get("Referer", ""),
+        path=proxy_request.url,
+        method=proxy_request.method,
+        referer=proxy_request.headers.get("Referer", ""),
         post_params=post_params or None,
+        file_params=file_params or None,
         enctype=enctype,
-        headers=request_headers
+        headers=httpx.Headers(proxy_request.headers.multi_items()),
     )
 
 
 class MitmFlowToWapitiRequests:
+    """Addon of the intercepting proxy turning what the browser does into Wapiti requests and responses."""
+
     def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, scope: Scope, drop_cookies: bool = False):
         self._queue = data_queue
         self._headers = headers
         self._drop_cookies = drop_cookies
         self._scope = scope
 
-    async def request(self, flow):
+    async def request(self, flow: Flow):
         for key, value in self._headers.items():
-            # This will use our user-agent too
+            # This will use our user-agent too.
+            # Accept-Encoding is among those headers, so the browser can't ask for a compression we don't know.
             flow.request.headers[key] = value
 
-    async def response(self, flow):
-        if flow.request.method.upper() == "CONNECT":
-            return
-
-        if 400 <= flow.response.status_code < 500:
-            # Those are certainly broken links, and we don't want to deal with that
+    async def response(self, flow: Flow):
+        response = flow.response
+        # 101 is a switch to another protocol (WebSocket): there is no HTTP response to look at.
+        # 4xx are certainly broken links, and we don't want to deal with that.
+        if response.status_code == 101 or 400 <= response.status_code < 500:
             return
 
         if self._drop_cookies:
-            if "set-cookie" in flow.response.headers:
-                del flow.response.headers["set-cookie"]
+            if "set-cookie" in response.headers:
+                del response.headers["set-cookie"]
 
-        content_type = flow.response.headers.get("Content-Type", "text/plain").split(";")[0]
-        flow.response.stream = False
+        content_type = response.headers.get("Content-Type", "text/plain").split(";")[0]
+        if content_type.strip().lower() == EVENT_STREAM:
+            # Server-sent events: an endless response the page is waiting for, we have nothing to do with it
+            return
 
         # We only need this for the automated part, a human without the headless crawler will be able to deal
         # with download popups. Let's keep in mind we should tweak that later.
-        is_forced_download = flow.response.headers.get("content-disposition", "").startswith("attachment")
+        is_forced_download = response.headers.get("content-disposition", "").startswith("attachment")
         if not is_interpreted_type(content_type) or is_forced_download:
-            flow.response.status_code = 200
-            flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
-            flow.response.headers["content-type"] = "text/plain"
-            flow.response.headers.pop("content-disposition", "")
+            response.status_code = 200
+            response.replace_body(b"Lasciate ogne speranza, voi ch'intrate.", "text/plain")
+            response.headers.pop("content-disposition", None)
             return
 
-        redirection = flow.response.headers.get("location", "")
+        redirection = response.headers.get("location", "")
         if redirection.startswith(("http://", "https://")) and not self._scope.check(redirection):
-            flow.response.status_code = 200
-            flow.response.content = b"Lasciate ogne speranza, voi ch'intrate."
-            flow.response.headers["content-type"] = "text/plain"
+            response.status_code = 200
+            response.replace_body(b"Lasciate ogne speranza, voi ch'intrate.", "text/plain")
+            return
+
+        if response.streamed:
+            # The body is too big to be kept by the proxy, the browser gets it but we can't analyze it
             return
 
         if "text" in content_type or "json" in content_type or "html" in content_type or "xml" in content_type:
@@ -170,23 +172,27 @@ class MitmFlowToWapitiRequests:
             if request is None:
                 return
 
-            decoded_headers = decode_key_value_dict(flow.response.headers)
-
-            response = Response(
+            wapiti_response = Response(
                 httpx.Response(
-                    status_code=flow.response.status_code,
-                    headers=decoded_headers,
+                    status_code=response.status_code,
+                    headers=response.headers.multi_items(),
                     # httpx expect the raw content (not decompressed)
-                    content=flow.response.raw_content,
+                    content=response.content,
                 ),
                 url=flow.request.url
             )
 
             await self._queue.put(
-                (request, response)
+                (request, wapiti_response)
             )
 
 
+def get_certificate_authority() -> CertificateAuthority:
+    """Returns the certificate authority of the intercepting proxy, kept in the configuration directory."""
+    return CertificateAuthority(os.path.join(SqlPersister.CONFIG_DIR, CA_DIRECTORY_NAME))
+
+
+# pylint: disable=too-many-positional-arguments
 async def launch_proxy(
         port: int,
         data_queue: asyncio.Queue,
@@ -195,30 +201,50 @@ async def launch_proxy(
         scope: Scope,
         proxy: Optional[str] = None,
         drop_cookies: bool = False,
+        intercept_everything: bool = True,
+        stop_event: Optional[asyncio.Event] = None,
 ):
-    opt = Options()
-    # We can use an upstream proxy that way but socks is not supported
+    """
+    Run the intercepting proxy until the task is cancelled, then returns the cookies it has seen.
+
+    `intercept_everything` must be False when a human drives the browser: the proxy then only decrypts the
+    traffic of the hosts in the scope and leaves the rest of the browsing alone.
+    """
     if proxy:
         log_blue(f"Using upstream proxy {proxy}")
-        opt.update(mode=f"upstream:{proxy}")
 
-    opt.update(listen_port=port,  http2=False, ssl_insecure=True)
-    master = Master(opt)
-    master.addons.add(addons.core.Core())
-    master.addons.add(addons.proxyserver.Proxyserver())
-    master.addons.add(addons.next_layer.NextLayer())
-    # mitmproxy will generate an authority cert in the ~/.mitmproxy directory. Load it in your browser.
-    master.addons.add(addons.tlsconfig.TlsConfig())
     # If ever we want to have both the interception proxy and an automated crawler then we need to sync cookies
-    # This mitmproxy module will do that and also load init cookies in the internal jar
-    master.addons.add(AsyncStickyCookie(cookies))
-    # Finally here is our custom addon that will generate Wapiti Request and Response objects and push them to the queue
-    master.addons.add(MitmFlowToWapitiRequests(data_queue, headers, scope, drop_cookies))
+    # This addon will do that and also load init cookies in the internal jar
+    sticky_cookies = AsyncStickyCookie(cookies)
     try:
-        await master.run()
+        intercepting_proxy = InterceptingProxy(
+            get_certificate_authority(),
+            port=port,
+            addons=[
+                sticky_cookies,
+                # Our custom addon that will generate Wapiti Request and Response objects and push them to the queue
+                MitmFlowToWapitiRequests(data_queue, headers, scope, drop_cookies),
+            ],
+            upstream_proxy=proxy,
+            should_intercept=None if intercept_everything else (lambda host, port: scope.check_host(host)),
+        )
+        await intercepting_proxy.start()
+    except (OSError, ValueError) as exception:
+        log_red(f"Can't start the intercepting proxy on port {port}: {exception}")
+        if stop_event:
+            # Nothing will ever be captured, no need to wait
+            stop_event.set()
+        return sticky_cookies.jar
+
+    try:
+        # Sleep until someone cancels us
+        await asyncio.Event().wait()
     except asyncio.CancelledError:
-        log_blue("Stopping mitmproxy")
-    return master.addons.get("asyncstickycookie").jar
+        log_blue("Stopping the intercepting proxy")
+    finally:
+        await intercepting_proxy.stop()
+
+    return sticky_cookies.jar
 
 
 def extract_requests(html: Html, request: Request):
@@ -502,12 +528,18 @@ class InterceptingExplorer(Explorer):
                     excluded_requests.add(bad_request)
 
         if self._headless == "no":
+            authority = get_certificate_authority()
             log_blue(
-                f"Launching MitmProxy on port {self._mitm_port}. "
+                f"Launching the intercepting proxy on port {self._mitm_port}. "
                 "Configure your browser to use it, press ctrl+c when you are done."
             )
+            log_blue(
+                "To browse HTTPS websites, import this certificate as a trusted authority in your browser "
+                f"(a dedicated browser profile is recommended): {authority.certificate_path}"
+            )
+            log_blue(f"It can also be downloaded from http://127.0.0.1:{self._mitm_port}/")
         else:
-            log_blue(f"Launching MitmProxy on port {self._mitm_port} for the headless browser.")
+            log_blue(f"Launching the intercepting proxy on port {self._mitm_port} for the headless browser.")
 
         # Launch proxy as asyncio task
         self._mitm_task = asyncio.create_task(
@@ -519,6 +551,9 @@ class InterceptingExplorer(Explorer):
                 self._scope,
                 proxy=self._proxy,
                 drop_cookies=self._drop_cookies,
+                # A human browsing through the proxy visits more than the target, see launch_proxy
+                intercept_everything=self._headless != "no",
+                stop_event=self._stopped,
             )
         )
 
@@ -618,8 +653,6 @@ class InterceptingExplorer(Explorer):
         if self._headless_task:
             await self._headless_task
 
-        # We are canceling the mitm proxy, but we could have used a special request to shut down the master to.
-        # https://docs.mitmproxy.org/stable/addons-examples/#shutdown
         self._mitm_task.cancel()
         self._final_cookies = await self._mitm_task
         await self._crawler.close()

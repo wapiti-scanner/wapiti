@@ -1,6 +1,6 @@
 .\" generated with Ronn-NG/v0.10.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.10.1
-.TH "WAPITI" "1" "May 2026" ""
+.TH "WAPITI" "1" "November 2026" ""
 .SH "NAME"
 \fBwapiti\fR \- A web application vulnerability scanner in Python
 .SH "SYNOPSIS"
@@ -258,9 +258,13 @@ Make Wapiti use a Tor listener (same as \fB\-\-proxy socks://127\.0\.0\.1:9050/\
 .IP "\(bu" 4
 \fB\-\-mitm\-port\fR \fIPORT\fR
 .br
-If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target\.
+If used, this option will launch an intercepting proxy listening on the given port instead of using an automated crawler to explore the target\.
 .br
 Configure your browser to use the intercepting proxy then explore the target manually\. Ctrl+C in the console when you are done\.
+.br
+To browse HTTPS websites your browser must trust the certificate authority of Wapiti: the path of the certificate to import is given when the proxy starts (\fB~/\.wapiti/config/ca/wapiti\-ca\.pem\fR) and it can be downloaded by opening the address of the proxy in the browser\. Use a dedicated browser profile\.
+.br
+Only the traffic of hosts in the scope of the scan is decrypted\.
 .IP "\(bu" 4
 \fB\-a\fR, \fB\-\-auth\-cred\fR \fICREDENTIALS\fR
 .br

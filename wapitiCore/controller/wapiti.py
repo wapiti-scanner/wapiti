@@ -401,7 +401,7 @@ class Wapiti:
         self.set_intercepting_proxy_port(self._mitm_proxy_port)
 
     def set_intercepting_proxy_port(self, port: int):
-        """Set the listening port for the mitmproxy instance."""
+        """Set the listening port of the intercepting proxy."""
         if not port:
             return
 
@@ -409,9 +409,9 @@ class Wapiti:
         # self.crawler_configuration.proxy = f"http://127.0.0.1:{self._mitm_proxy_port}/"
         if self._proxy:
             parts = urlparse(self._proxy)
-            if parts.scheme not in ("http", "https"):
+            if parts.scheme not in ("http", "https", "socks", "socks5"):
                 raise InvalidOptionValue(
-                    "--proxy", f"The proxy protocol '{parts.scheme}' is not supported by mitmproxy"
+                    "--proxy", f"The proxy protocol '{parts.scheme}' is not supported by the intercepting proxy"
                 )
 
     async def set_headless(self, headless_mode: str):

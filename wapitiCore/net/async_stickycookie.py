@@ -3,13 +3,12 @@ import collections
 from http import cookiejar
 from typing import List, Tuple, Dict
 
-from mitmproxy import http
-from mitmproxy.net.http import cookies
+from wapitiCore.net.proxy.flow import Flow, is_expired_cookie
 
 TOrigin = Tuple[str, int, str]
 
 
-def ckey(attrs: Dict[str, str], f: http.HTTPFlow) -> TOrigin:
+def ckey(attrs: Dict[str, str], f: Flow) -> TOrigin:
     """
         Returns a (domain, port, path) tuple.
     """
@@ -40,13 +39,13 @@ class AsyncStickyCookie:
             port = 0 if not cookie.port else int(cookie.port)
             self.jar[(domain, port, cookie.path)][cookie.name] = cookie.value
 
-    async def response(self, flow: http.HTTPFlow):
-        for name, (value, attrs) in flow.response.cookies.items(multi=True):
+    async def response(self, flow: Flow):
+        for name, value, attrs in flow.response.set_cookies:
             # valid RFC 822/1123 datetime specifications for expiry. Sigh.
             dom_port_path = ckey(attrs, flow)
 
             if domain_match(flow.request.host, dom_port_path[0]):
-                if cookies.is_expired(attrs):
+                if is_expired_cookie(attrs):
                     # Remove the cookie from jar
                     self.jar[dom_port_path].pop(name, None)
 
@@ -57,17 +56,17 @@ class AsyncStickyCookie:
                 else:
                     self.jar[dom_port_path][name] = value
 
-    async def request(self, flow: http.HTTPFlow):
+    async def request(self, flow: Flow):
         cookie_list: List[Tuple[str, str]] = []
         for (domain, port, path), c in self.jar.items():
             match = [
                 domain_match(flow.request.host, domain),
                 flow.request.port == port or not port,
-                flow.request.path.startswith(path)
+                flow.request.target.startswith(path)
             ]
             if all(match):
                 cookie_list.extend(c.items())
 
         if cookie_list:
             flow.metadata["stickycookie"] = True
-            flow.request.headers["cookie"] = cookies.format_cookie_header(cookie_list)
+            flow.request.headers["cookie"] = "; ".join(f"{name}={value}" for name, value in cookie_list)

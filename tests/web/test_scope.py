@@ -127,3 +127,26 @@ def test_wildcard_translate(wildcard_expression, texts, results):
     regex = wildcard_translate(wildcard_expression)
     for text, result in zip(texts, results):
         assert bool(regex.match(text)) is result
+
+
+def test_check_host():
+    base_request = Request("https://www.example.com/app/index.php")
+    for scope_name in ("url", "page", "folder", "subdomain"):
+        scope = Scope(base_request, scope_name)
+        assert scope.check_host("www.example.com")
+        assert scope.check_host("WWW.Example.com")
+        assert not scope.check_host("api.example.com")
+        assert not scope.check_host("example.org")
+
+    scope = Scope(base_request, "domain")
+    assert scope.check_host("www.example.com")
+    assert scope.check_host("api.example.com")
+    assert not scope.check_host("example.org")
+
+    scope = Scope(base_request, "punk")
+    assert scope.check_host("example.org")
+
+    # No public suffix to rely on for IP addresses and internal names
+    scope = Scope(Request("http://127.0.0.1:8000/"), "domain")
+    assert scope.check_host("127.0.0.1")
+    assert not scope.check_host("127.0.0.2")
