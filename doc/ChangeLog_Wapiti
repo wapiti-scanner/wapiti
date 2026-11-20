@@ -6,6 +6,7 @@ Unreleased
     Crawler: files of multipart forms and raw bodies (XML, text...) seen by the intercepting proxy are kept
     Crawler: WebSocket connections and server-sent events go through the intercepting proxy
     Fixes: attack modules no longer crash with IndexError on a request carrying a raw body (XML, plain text); only the query string is fuzzed and the body is left untouched. JSON bodies with a charset parameter in the Content-Type are now recognised
+    Core: update the wapiti-swagger dependency to 0.2.0
 
 19/11/2026
     Wapiti 3.3.3
