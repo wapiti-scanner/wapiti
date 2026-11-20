@@ -8,8 +8,8 @@ import sys
 from time import sleep
 from uuid import uuid4
 
-import httpx
-from httpx import ConnectError
+import httpx2
+from httpx2 import ConnectError
 
 from misc_functions import purge_irrelevant_data, filter_data, all_keys_dicts, sort_lists_in_dict
 from templates_and_data import DEFAULT_FILTER_TREE, EXISTING_MODULES, TREE_CHECKER
@@ -68,10 +68,10 @@ for key_test, content_test in iter_tests:
             sys.stdout.write(f"Querying target {target['name']}...\n")
             requests_counter[target['name']] += 1
             try:
-                ssl_context = httpx.create_ssl_context()
+                ssl_context = httpx2.create_ssl_context()
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
-                httpx.get(f"{target['name']}", verify=ssl_context)
+                httpx2.get(f"{target['name']}", verify=ssl_context)
                 json_output_path = f"/home/{key_test}/{re.sub(r'[/:]', '_', re.sub(r'^https?://', '', target['name']))}.out"
 
                 # We define supplementary arguments globally and for each target:

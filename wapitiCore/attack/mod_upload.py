@@ -20,7 +20,7 @@
 from typing import Optional, Iterator, Tuple, List
 from random import randint, shuffle
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.definitions.unrestricted_upload import UnrestrictedUploadFinding
 from wapitiCore.attack.attack import Attack, Parameter, ParameterSituation, random_string

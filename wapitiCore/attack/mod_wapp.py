@@ -25,7 +25,7 @@ from typing import Dict, Tuple, Optional, List, AsyncIterator
 import re
 from urllib.parse import quote_plus
 
-from httpx import RequestError
+from httpx2 import RequestError
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
 from playwright.async_api import async_playwright, Error as PlaywrightError

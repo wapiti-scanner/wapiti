@@ -6,6 +6,7 @@ import tempfile
 from unittest.mock import patch, PropertyMock, AsyncMock
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -124,7 +125,7 @@ async def test_analyze_file_none_content():
 @respx.mock
 async def test_analyze_file_request_error():
     respx.get("http://perdu.com/").mock(
-        side_effect=httpx.RequestError("error")
+        side_effect=httpx2.RequestError("error")
     )
 
     persister = AsyncMock()

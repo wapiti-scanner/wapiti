@@ -7,6 +7,8 @@ Unreleased
     Crawler: WebSocket connections and server-sent events go through the intercepting proxy
     Fixes: attack modules no longer crash with IndexError on a request carrying a raw body (XML, plain text); only the query string is fuzzed and the body is left untouched. JSON bodies with a charset parameter in the Content-Type are now recognised
     Core: update the wapiti-swagger dependency to 0.2.0
+    Core: replace httpx with httpx2, a redirect whose Location header is not a valid URL is no longer lost (#690, #786)
+    Core: NTLM authentication is handled by Wapiti on top of pyspnego, httpx-ntlm is no longer required
 
 19/11/2026
     Wapiti 3.3.3

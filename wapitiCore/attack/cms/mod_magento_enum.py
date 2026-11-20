@@ -22,7 +22,7 @@ import json
 import re
 from typing import Optional, Tuple
 
-from httpx import RequestError
+from httpx2 import RequestError
 from asyncio import TimeoutError
 from playwright.async_api import async_playwright, Page, Browser, Error as PlaywrightError
 

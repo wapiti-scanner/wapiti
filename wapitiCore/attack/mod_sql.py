@@ -25,7 +25,7 @@ from random import randint
 from typing import Optional, Iterator
 
 from bs4.builder import ParserRejectedMarkup
-from httpx import ReadTimeout, RequestError, InvalidURL
+from httpx2 import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose, logging
 from wapitiCore.attack.attack import Attack, Mutator, Parameter

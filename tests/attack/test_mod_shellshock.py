@@ -3,6 +3,7 @@ from binascii import unhexlify
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import respx
 import pytest
 
@@ -12,7 +13,7 @@ from wapitiCore.net.crawler import AsyncCrawler
 from wapitiCore.attack.mod_shellshock import ModuleShellshock
 
 
-def shellshock_callback(request: httpx.Request):
+def shellshock_callback(request: httpx2.Request):
     if "user-agent" in request.headers:
         search = re.search(r"(\\x[0-9a-f]{2})+", request.headers["user-agent"])
         if search:

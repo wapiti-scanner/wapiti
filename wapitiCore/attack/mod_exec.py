@@ -21,7 +21,7 @@ import re
 from os.path import join as path_join
 from typing import Optional, Iterator
 
-from httpx import ReadTimeout, RequestError, InvalidURL
+from httpx2 import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import log_red, log_verbose, log_orange
 from wapitiCore.attack.attack import Attack, Parameter

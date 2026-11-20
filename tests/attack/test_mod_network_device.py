@@ -2,7 +2,8 @@ import json
 from unittest.mock import AsyncMock
 
 import httpx
-from httpx import RequestError
+import httpx2
+from httpx2 import RequestError
 import respx
 import pytest
 
@@ -1583,7 +1584,7 @@ async def test_detect_palo_alto_version():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":"661c69a8-2606e"})
+            headers=httpx2.Headers({"Etag":"661c69a8-2606e"})
         )
     )
     respx.get("http://perdu.com/global-protect/login.esp").mock(
@@ -1631,7 +1632,7 @@ async def test_detect_palo_alto_version_format2():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":"2606e661c69a8"})
+            headers=httpx2.Headers({"Etag":"2606e661c69a8"})
         )
     )
     respx.get("http://perdu.com/global-protect/login.esp").mock(
@@ -1679,7 +1680,7 @@ async def test_detect_palo_alto_version_format3():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":'W/"2606e661c69a8'})
+            headers=httpx2.Headers({"Etag":'W/"2606e661c69a8'})
         )
     )
     respx.get("http://perdu.com/global-protect/login.esp").mock(
@@ -1727,7 +1728,7 @@ async def test_detect_palo_alto_version_format4():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":""})
+            headers=httpx2.Headers({"Etag":""})
         )
     )
     respx.get("http://perdu.com/").mock(
@@ -1764,7 +1765,7 @@ async def test_detect_palo_alto_false_positive():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body> \
                     <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":"661c69a8-2606e"})
+            headers=httpx2.Headers({"Etag":"661c69a8-2606e"})
         )
     )
     respx.get("http://perdu.com/").mock(
@@ -1772,7 +1773,7 @@ async def test_detect_palo_alto_false_positive():
             200,
             content='<html><head><title>Vous Perdu ?</title></head><body><h1>Perdu sur Internet ?</h1> \
                 <h2>Pas de panique, on va vous aider</h2> </body></html>',
-            headers=httpx.Headers({"Etag":"661c69a8-2606e"})
+            headers=httpx2.Headers({"Etag":"661c69a8-2606e"})
         )
     )
 

@@ -20,7 +20,7 @@
 from os.path import join as path_join
 from typing import Optional, Tuple, Dict
 
-from httpx import ReadTimeout, RequestError
+from httpx2 import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, random_string, Parameter, ParameterSituation

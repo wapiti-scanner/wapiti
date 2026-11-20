@@ -5,7 +5,7 @@ HTTP exchange is synthetic, so no network access is needed.
 """
 import asyncio
 
-import httpx
+import httpx2
 
 from wapitiCore.attack.passive_scanner import PassiveScanner
 from wapitiCore.net import Request, Response
@@ -26,7 +26,7 @@ BASE_URL = "http://example.test/"
 def _make_response(url: str, policy: str) -> tuple:
     request = Request(url)
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             200,
             headers={"Content-Type": "text/html", "Content-Security-Policy": policy},
             content=b"<html></html>",

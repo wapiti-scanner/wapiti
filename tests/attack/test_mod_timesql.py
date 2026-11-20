@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock
 import pytest
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -72,8 +73,8 @@ async def test_timesql_false_positive():
 @pytest.mark.asyncio
 @respx.mock
 async def test_false_positive_request_count():
-    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=sleep").mock(side_effect=httpx.ReadTimeout)
-    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=hello").mock(side_effect=httpx.ReadTimeout)
+    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=sleep").mock(side_effect=httpx2.ReadTimeout("Mock Error"))
+    respx.get(url__regex=r"http://perdu.com/blind_sql.php\?vuln1=hello").mock(side_effect=httpx2.ReadTimeout("Mock Error"))
 
     persister = AsyncMock()
     request = Request("http://perdu.com/blind_sql.php?vuln1=hello%20there")
@@ -95,7 +96,7 @@ async def test_false_positive_request_count():
 @pytest.mark.asyncio
 @respx.mock
 async def test_true_positive_request_count():
-    respx.get(url__regex=r"http://perdu.com/blind_sql\.php\?vuln1=sleep").mock(side_effect=httpx.ReadTimeout)
+    respx.get(url__regex=r"http://perdu.com/blind_sql\.php\?vuln1=sleep").mock(side_effect=httpx2.ReadTimeout("Mock Error"))
     respx.get(url__regex=r"http://perdu.com/blind_sql\.php\?vuln1=hello").mock(
         return_value=httpx.Response(200, text="Hello there!")
     )

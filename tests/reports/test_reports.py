@@ -5,7 +5,7 @@ import shutil
 from time import gmtime
 import tempfile
 
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.report import GENERATORS
@@ -219,9 +219,9 @@ def test_detailed_reports(report_format, level):
 
     request = Request("http://perdu.com/riri?foo=bar")
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
-            headers=httpx.Headers([["Content-Type", "text/html"]]),
+            headers=httpx2.Headers([["Content-Type", "text/html"]]),
             text="<html><body>riri</body></html>"
         ),
         url="http://perdu.com/riri?foo=bar"
@@ -333,7 +333,7 @@ def test_reports_surface_suppressed_passive_findings(report_format):
 
     request = Request("http://perdu.com/")
     response = Response(
-        httpx.Response(status_code=200, headers=httpx.Headers([["Content-Type", "text/html"]]), text="x"),
+        httpx2.Response(status_code=200, headers=httpx2.Headers([["Content-Type", "text/html"]]), text="x"),
         url="http://perdu.com/"
     )
     report_gen.add_vulnerability(

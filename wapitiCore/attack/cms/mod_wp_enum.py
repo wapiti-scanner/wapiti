@@ -21,7 +21,7 @@ import json
 import re
 from os.path import join as path_join
 from typing import Optional
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.net import Request
 from wapitiCore.attack.cms.cms_common import CommonCMS, MSG_TECHNO_VERSIONED

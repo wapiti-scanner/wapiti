@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, patch, mock_open, ANY
 
 import httpx
-from httpx import RequestError
+from httpx2 import RequestError
 import pytest
 import respx
 

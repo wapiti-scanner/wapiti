@@ -21,7 +21,7 @@ import json
 from typing import Optional
 
 from bs4 import BeautifulSoup
-from httpx import RequestError
+from httpx2 import RequestError
 from os.path import join as path_join
 from urllib.parse import urljoin
 

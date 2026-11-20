@@ -27,13 +27,12 @@ import asyncio
 import ssl
 
 # Third-parties
-import httpx
-# https://github.com/ulodciv/httpx-ntlm
-from httpx_ntlm import HttpNtlmAuth
+import httpx2
 
 # Internal libraries
 from wapitiCore.net import web
 from wapitiCore.net.classes import CrawlerConfiguration
+from wapitiCore.net.ntlm_auth import HttpNtlmAuth
 from wapitiCore.net.web import urlparse
 
 from wapitiCore.net.response import Response
@@ -45,6 +44,10 @@ if TYPE_CHECKING:
 warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
 DEFAULT_PORTS = {"http": 80, "https": 443}
+
+# Maximum number of redirect hops wapiti follows itself (see AsyncCrawler._send). This is not httpx2's own
+# max_redirects: wapiti always calls httpx2 with follow_redirects=False and follows redirects on its own.
+MAX_REDIRECTS = 5
 
 
 def retry(delay=1, times=3):
@@ -68,9 +71,9 @@ def retry(delay=1, times=3):
                 try:
                     value = await function(*args, **kwargs)
                     return value
-                except httpx.NetworkError as exception:
+                except httpx2.NetworkError as exception:
                     raise exception
-                except httpx.TimeoutException as exception:
+                except httpx2.TimeoutException as exception:
                     final_excep = exception
 
             if final_excep is not None:
@@ -103,7 +106,7 @@ class AsyncCrawler:
     def __init__(
             self,
             base_request: web.Request,
-            client: httpx.AsyncClient,
+            client: httpx2.AsyncClient,
             timeout: float = 10.0,
             scope: Optional["Scope"] = None,
     ):
@@ -118,8 +121,8 @@ class AsyncCrawler:
         # is set). httpx's read timeout is per-chunk, so a large but progressing
         # download is unaffected; only a genuine stall (no data for `timeout`s)
         # is interrupted. This also matches the per-call timeout paths below,
-        # which already build httpx.Timeout(timeout) with every phase set.
-        self._timeout = httpx.Timeout(timeout)
+        # which already build httpx2.Timeout(timeout) with every phase set.
+        self._timeout = httpx2.Timeout(timeout)
 
         self.is_logged_in = False
         self.auth_url: str = self._base_request.url
@@ -149,7 +152,7 @@ class AsyncCrawler:
         if "cookie" in headers:
             del headers["cookie"]
 
-        ssl_context = httpx.create_ssl_context()
+        ssl_context = httpx2.create_ssl_context()
         ssl_context.check_hostname = configuration.secure
         ssl_context.verify_mode = ssl.CERT_REQUIRED if configuration.secure else ssl.CERT_NONE
 
@@ -159,12 +162,12 @@ class AsyncCrawler:
         auth = None
         if configuration.http_credential:
             if configuration.http_credential.method == "basic":
-                auth = httpx.BasicAuth(
+                auth = httpx2.BasicAuth(
                     configuration.http_credential.username,
                     configuration.http_credential.password
                 )
             elif configuration.http_credential.method == "digest":
-                auth = httpx.DigestAuth(
+                auth = httpx2.DigestAuth(
                     configuration.http_credential.username,
                     configuration.http_credential.password
                 )
@@ -174,7 +177,7 @@ class AsyncCrawler:
                     configuration.http_credential.password
                 )
 
-        client = httpx.AsyncClient(
+        client = httpx2.AsyncClient(
             auth=auth,
             headers=headers,
             cookies=configuration.cookies,
@@ -184,7 +187,13 @@ class AsyncCrawler:
             event_hooks={"request": [drop_cookies_from_request]} if configuration.drop_cookies else None,
         )
 
-        client.max_redirects = 5
+        # wapiti follows redirects itself (see _send), always calling httpx2 with follow_redirects=False, so
+        # httpx2 never follows a redirect here. Its max_redirects then only caps the sub-requests httpx2
+        # issues inside a single send() while driving an auth handshake: NTLM sends several (negotiate then
+        # authenticate, restarted when the pool answers over another connection), and they all count against
+        # this limit. Keep it well above that handshake budget so authentication does not raise
+        # TooManyRedirects; the real redirect-chain limit is MAX_REDIRECTS, enforced in _send.
+        client.max_redirects = 20
         return cls(configuration.base_request, client, configuration.timeout, scope=configuration.scope)
 
     @staticmethod
@@ -209,10 +218,10 @@ class AsyncCrawler:
         return self._timeout
 
     @staticmethod
-    def _effective_port(url: httpx.URL) -> Optional[int]:
+    def _effective_port(url: httpx2.URL) -> Optional[int]:
         return url.port or DEFAULT_PORTS.get(url.scheme)
 
-    def is_redirect_allowed(self, origin: httpx.URL, destination: httpx.URL) -> bool:
+    def is_redirect_allowed(self, origin: httpx2.URL, destination: httpx2.URL) -> bool:
         """Tell whether a redirect from origin may be followed to destination.
 
         The target decides where it redirects, so following blindly would let it drive the scanner to hosts
@@ -228,11 +237,11 @@ class AsyncCrawler:
 
     async def _send(
             self,
-            request: httpx.Request,
+            request: httpx2.Request,
             stream: bool,
             follow_redirects: bool,
             allow_offsite_redirects: bool,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Send the request, following redirects ourselves so each hop goes through is_redirect_allowed.
 
         With allow_offsite_redirects the check is skipped: this is for URLs the operator gave explicitly
@@ -258,8 +267,8 @@ class AsyncCrawler:
                     logging.debug("Not following the redirect from %s to %s", request.url, next_request.url)
                 break
 
-            if len(history) >= self._client.max_redirects:
-                raise httpx.TooManyRedirects("Exceeded maximum allowed redirects.", request=next_request)
+            if len(history) >= MAX_REDIRECTS:
+                raise httpx2.TooManyRedirects("Exceeded maximum allowed redirects.", request=next_request)
 
             await response.aread()
             history.append(response)
@@ -282,7 +291,7 @@ class AsyncCrawler:
         self._client.headers["User-Agent"] = value
 
     @property
-    def headers(self) -> httpx.Headers:
+    def headers(self) -> httpx2.Headers:
         """Returns the headers kept on the HTTP client"""
         return self._client.headers
 
@@ -327,28 +336,28 @@ class AsyncCrawler:
         if headers:
             final_headers.update(headers)
 
-        timeout = self.timeout if timeout is None else httpx.Timeout(timeout)
+        timeout = self.timeout if timeout is None else httpx2.Timeout(timeout)
         try:
             final_httpx_request = self._client.build_request(
                 "GET", resource.url, headers=final_headers, timeout=timeout
             )
         except UnicodeEncodeError as exc:
-            raise httpx.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
+            raise httpx2.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
         resource.set_sent_headers(final_httpx_request.headers)
 
         try:
             response = await self._send(final_httpx_request, stream, follow_redirects, allow_offsite_redirects)
-        except httpx.TransportError as exception:
+        except httpx2.TransportError as exception:
             if "Read timed out" in str(exception):
-                raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
+                raise httpx2.ReadTimeout("Request time out", request=final_httpx_request)
 
             raise exception
         except ssl.SSLError as exception:
-            raise httpx.ConnectError(str(exception), request=final_httpx_request) from exception
-        except httpx.RequestError:
+            raise httpx2.ConnectError(str(exception), request=final_httpx_request) from exception
+        except httpx2.RequestError:
             raise
         except Exception as exception:
-            raise httpx.ConnectError(repr(exception), request=final_httpx_request) from exception
+            raise httpx2.ConnectError(repr(exception), request=final_httpx_request) from exception
 
         return Response(response)
 
@@ -382,7 +391,7 @@ class AsyncCrawler:
         if form.enctype and not form.is_multipart:
             form_headers.setdefault("Content-Type", form.enctype)
 
-        if isinstance(headers, (dict, httpx.Headers)) and headers:
+        if isinstance(headers, (dict, httpx2.Headers)) and headers:
             form_headers.update(headers)
 
         if form.referer:
@@ -416,25 +425,25 @@ class AsyncCrawler:
                 content=content,
                 files=file_params,
                 headers=form_headers,
-                timeout=self.timeout if timeout is None else httpx.Timeout(timeout)
+                timeout=self.timeout if timeout is None else httpx2.Timeout(timeout)
             )
         except UnicodeEncodeError as exc:
-            raise httpx.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
+            raise httpx2.InvalidURL(f"Request contains non-encodable characters: {exc}") from exc
         form.set_sent_headers(final_httpx_request.headers)
 
         try:
             response = await self._send(final_httpx_request, stream, follow_redirects, allow_offsite_redirects)
-        except httpx.TransportError as exception:
+        except httpx2.TransportError as exception:
             if "Read timed out" in str(exception):
-                raise httpx.ReadTimeout("Request time out", request=final_httpx_request)
+                raise httpx2.ReadTimeout("Request time out", request=final_httpx_request)
 
             raise exception
         except ssl.SSLError as exception:
-            raise httpx.ConnectError(str(exception), request=final_httpx_request) from exception
-        except httpx.RequestError:
+            raise httpx2.ConnectError(str(exception), request=final_httpx_request) from exception
+        except httpx2.RequestError:
             raise
         except Exception as exception:
-            raise httpx.ConnectError(repr(exception), request=final_httpx_request) from exception
+            raise httpx2.ConnectError(repr(exception), request=final_httpx_request) from exception
 
         return Response(response)
 

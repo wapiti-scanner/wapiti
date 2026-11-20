@@ -6,6 +6,7 @@ import sys
 
 import respx
 import httpx
+import httpx2
 import pytest
 
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -190,7 +191,7 @@ async def test_redirect():
 
 def test_request_headers():
     req = Request("http://perdu.com/")
-    assert req.headers == httpx.Headers()
+    assert req.headers == httpx2.Headers()
 
     # Test add_header
     req.add_header("User-Agent", "Wapiti/3.x")
@@ -281,7 +282,7 @@ def test_request_headers():
             Request("http://perdu.com/", headers={"User-Agent": "Wapiti"}),
             '''GET / HTTP/1.1
     user-agent: Custom''',
-            httpx.Headers({"User-Agent": "Custom"})
+            httpx2.Headers({"User-Agent": "Custom"})
         ),
     ]
 )

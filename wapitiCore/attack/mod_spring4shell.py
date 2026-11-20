@@ -20,7 +20,7 @@
 import uuid
 
 from typing import Optional
-from httpx import RequestError
+from httpx2 import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.spring4shell import Spring4ShellFinding
 from wapitiCore.main.log import log_red, log_verbose

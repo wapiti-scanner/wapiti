@@ -24,7 +24,7 @@ import random
 import re
 from typing import List, Optional
 
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.net.web import urlparse
 from wapitiCore.main.log import logging, log_verbose, log_red

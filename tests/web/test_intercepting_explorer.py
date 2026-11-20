@@ -5,7 +5,7 @@ from collections import deque
 from http.cookiejar import CookieJar
 from unittest.mock import AsyncMock, patch
 
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.net import Request
@@ -21,25 +21,25 @@ from wapitiCore.net.scope import Scope
 
 
 def make_request(method: str, url: str, content: bytes = b"", headers: dict = None) -> ProxyRequest:
-    parts = httpx.URL(url)
+    parts = httpx2.URL(url)
     return ProxyRequest(
         method=method,
         scheme=parts.scheme,
         host=parts.host,
         port=parts.port or {"http": 80, "https": 443}[parts.scheme],
         target=parts.raw_path.decode(),
-        headers=httpx.Headers(headers or {}),
+        headers=httpx2.Headers(headers or {}),
         content=content,
     )
 
 
 def make_response(status_code: int, content: bytes = b"", headers: dict = None, **kwargs) -> ProxyResponse:
-    return ProxyResponse(status_code, httpx.Headers(headers or {}), content, **kwargs)
+    return ProxyResponse(status_code, httpx2.Headers(headers or {}), content, **kwargs)
 
 
 def make_addon(queue: asyncio.Queue = None, headers: dict = None, drop_cookies: bool = False):
     scope = Scope(Request("http://example.com/"), "folder")
-    return MitmFlowToWapitiRequests(queue or asyncio.Queue(), httpx.Headers(headers or {}), scope, drop_cookies)
+    return MitmFlowToWapitiRequests(queue or asyncio.Queue(), httpx2.Headers(headers or {}), scope, drop_cookies)
 
 
 class TestInterceptingExplorer:
@@ -61,7 +61,7 @@ class TestInterceptingExplorer:
         assert wapiti_request.post_params == []
         assert wapiti_request.enctype == ""
 
-        expected_headers = httpx.Headers([
+        expected_headers = httpx2.Headers([
             ("host", "example.com"),
             ("referer", "http://some.referer/"),
         ])
@@ -278,7 +278,7 @@ class TestInterceptingExplorer:
         flow = Flow(make_request("GET", "https://example.com/app/login"))
         flow.response = ProxyResponse(
             200,
-            httpx.Headers([
+            httpx2.Headers([
                 ("Set-Cookie", "session=abc; Path=/app; HttpOnly"),
                 ("Set-Cookie", "lang=fr; Expires=Wed, 01 Jan 2099 00:00:00 GMT"),
                 ("Set-Cookie", "old=1; Max-Age=0"),
@@ -340,15 +340,15 @@ class TestInterceptingExplorer:
             await probe.wait_closed()
 
             task = asyncio.create_task(
-                launch_proxy(proxy_port, queue, httpx.Headers({"User-Agent": "Wapiti"}), CookieJar(), scope)
+                launch_proxy(proxy_port, queue, httpx2.Headers({"User-Agent": "Wapiti"}), CookieJar(), scope)
             )
             try:
-                async with httpx.AsyncClient(proxy=f"http://127.0.0.1:{proxy_port}") as client:
+                async with httpx2.AsyncClient(proxy=f"http://127.0.0.1:{proxy_port}") as client:
                     for __ in range(50):
                         try:
                             response = await client.get(f"http://127.0.0.1:{server_port}/index?a=b")
                             break
-                        except httpx.TransportError:
+                        except httpx2.TransportError:
                             await asyncio.sleep(0.05)
             finally:
                 task.cancel()
@@ -375,7 +375,7 @@ class TestInterceptingExplorer:
                 scope = Scope(Request("http://example.com/"), "folder")
                 jar = await asyncio.wait_for(
                     launch_proxy(
-                        busy_port, asyncio.Queue(), httpx.Headers(), CookieJar(), scope, stop_event=stop_event
+                        busy_port, asyncio.Queue(), httpx2.Headers(), CookieJar(), scope, stop_event=stop_event
                     ),
                     timeout=5,
                 )
@@ -446,7 +446,7 @@ class TestInterceptingExplorer:
         async def mock_explore(*args, **kwargs):  # pylint: disable=unused-argument
             queue = args[1]
             request = Request("http://example.com/test")
-            response = Response(httpx.Response(200, text="test"), url="http://example.com/test")
+            response = Response(httpx2.Response(200, text="test"), url="http://example.com/test")
             await queue.put((request, response))
             # In a real scenario, the stop event would be set by another part of the application
             # For this test, we set it after putting one item in the queue.
@@ -522,7 +522,7 @@ class TestInterceptingExplorer:
         mock_launch_proxy.side_effect = mock_proxy
 
         # AND a direct (non-proxied) seed fetch that returns the 403 the proxy would have dropped
-        seed_response = Response(httpx.Response(403, text="Forbidden"), url="https://example.com/")
+        seed_response = Response(httpx2.Response(403, text="Forbidden"), url="https://example.com/")
         mock_seed_crawler = AsyncMock()
         mock_seed_crawler.async_send.return_value = seed_response
         mock_crawler_cls.with_configuration.return_value.__aenter__.return_value = mock_seed_crawler
@@ -555,7 +555,7 @@ class TestInterceptingExplorer:
         async def mock_proxy(*args, **kwargs):  # pylint: disable=unused-argument
             queue = args[1]
             request = Request("https://example.com/")
-            response = Response(httpx.Response(200, text="<html></html>"), url="https://example.com/")
+            response = Response(httpx2.Response(200, text="<html></html>"), url="https://example.com/")
             await queue.put((request, response))
             stop_event.set()
 

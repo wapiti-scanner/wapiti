@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock
 import pytest
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.attack.attack import Parameter, ParameterSituation
 from wapitiCore.net.classes import CrawlerConfiguration
@@ -120,7 +121,7 @@ async def test_blind_detection():
 
     def timeout_callback(http_request):
         if "sleep" in str(http_request.url):
-            raise httpx.ReadTimeout("Read timed out", request=http_request)
+            raise httpx2.ReadTimeout("Read timed out", request=http_request)
         return httpx.Response(200, text="Hello there")
 
     respx.get(url__regex=r"http://perdu.com/\?vuln=.*").mock(side_effect=timeout_callback)

@@ -2,6 +2,7 @@ import sys
 
 import respx
 import httpx
+import httpx2
 import pytest
 
 from wapitiCore.parsers.html_parser import Html
@@ -529,7 +530,7 @@ def test_csp_detection():
     url = "http://perdu.com/"
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
-    response = Response(httpx.get(url))
+    response = Response(httpx2.get(url))
     assert not has_csp_header(response)
     assert not has_csp_meta(Html(response.content, url))
 
@@ -544,7 +545,7 @@ def test_csp_detection():
         )
     )
 
-    response = Response(httpx.get(url))
+    response = Response(httpx2.get(url))
     assert has_csp_header(response)
     assert not has_csp_meta(Html(response.content, url))
 
@@ -565,7 +566,7 @@ def test_csp_detection():
         )
     )
 
-    response = Response(httpx.get(url))
+    response = Response(httpx2.get(url))
     assert not has_csp_header(response)
     assert has_csp_meta(Html(response.content, url))
 
@@ -575,14 +576,14 @@ def test_valid_content_type():
     url = "http://perdu.com/"
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "text/html"}))
 
-    resp = httpx.get(url)
+    resp = httpx2.get(url)
     page = Response(resp)
     assert valid_xss_content_type(page)
 
     url = "http://perdu.com/picture.png"
     respx.get(url).mock(return_value=httpx.Response(200, headers={"Content-Type": "image/png"}))
 
-    resp = httpx.get(url)
+    resp = httpx2.get(url)
     page = Response(resp)
     assert not valid_xss_content_type(page)
 

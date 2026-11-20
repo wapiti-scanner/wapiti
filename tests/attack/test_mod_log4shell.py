@@ -3,7 +3,7 @@ import os
 import random
 from unittest import mock
 from unittest.mock import patch, AsyncMock
-from httpx import Response as HttpxResponse
+import httpx2
 
 import dns.resolver
 import pytest
@@ -151,7 +151,7 @@ async def test_verify_headers_vuln_found():
             malicious_headers = {"Header": "payload"}
             headers_uuid_record = {"Header": "unique_id"}
 
-            page = Response(HttpxResponse(200, request=modified_request))
+            page = Response(httpx2.Response(200, request=modified_request))
 
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_called_once_with(modified_request)
@@ -198,7 +198,7 @@ async def test_verify_headers_vuln_not_found():
             malicious_headers = {"Header": "payload"}
             headers_uuid_record = {"Header": "unique_id"}
 
-            page = Response(HttpxResponse(200, request=modified_request))
+            page = Response(httpx2.Response(200, request=modified_request))
 
             await module._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
             mock_http_repr.assert_not_called()

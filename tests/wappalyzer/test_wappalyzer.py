@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, mock_open
 
 import respx
 import httpx
+import httpx2
 import pytest
 
 from wapitiCore.wappalyzer.wappalyzer import ApplicationData, ApplicationDataException, Wappalyzer
@@ -197,7 +198,7 @@ async def test_applicationdata():
             ]
         )
     )
-    client = httpx.Client(cookies= {"merchello":"RANDOM"})
+    client = httpx2.Client(cookies= {"merchello":"RANDOM"})
     resp = client.get(target_url, follow_redirects=False)
     page = Response(resp)
 

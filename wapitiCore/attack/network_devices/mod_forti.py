@@ -25,7 +25,7 @@ from string import ascii_lowercase
 import random
 
 from wapitiCore.parsers.html_parser import Html
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.network_devices.network_device_common import NetworkDeviceCommon, MSG_TECHNO_VERSIONED
 from wapitiCore.definitions.cve_2024_55591 import FortiAuthenticationBypass

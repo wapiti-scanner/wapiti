@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import respx
 import httpx
+import httpx2
 
 from wapitiCore.net.classes import CrawlerConfiguration
 from wapitiCore.net import Request
@@ -31,7 +32,7 @@ async def test_must_attack():
 
     # Case 1: A valid request that should be attacked
     request_ok = Request("http://perdu.com/", post_params=[["p", "Letm3in_"]], referer="http://perdu.com/login")
-    response_ok = Response(httpx.Response(status_code=200, text="body"), url="http://perdu.com/")
+    response_ok = Response(httpx2.Response(status_code=200, text="body"), url="http://perdu.com/")
     assert await module.must_attack(request_ok, response_ok) is True
 
     # Case 2: No "Letm3in_" placeholder
@@ -47,7 +48,7 @@ async def test_must_attack():
         "http://perdu.com/login", post_params=[["p", "Letm3in_"]], referer="http://perdu.com/login"
     )
     response_dir_redir = Response(
-        httpx.Response(status_code=301, headers={"Location": "http://perdu.com/login/"}),
+        httpx2.Response(status_code=301, headers={"Location": "http://perdu.com/login/"}),
         url="http://perdu.com/login"
     )
     assert await module.must_attack(request_dir_redir, response_dir_redir) is False

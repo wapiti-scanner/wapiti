@@ -29,8 +29,8 @@ from contextlib import AsyncExitStack, suppress
 from typing import AsyncIterator, Callable, Iterable, List, Optional, Set, Tuple
 
 import h11
-import httpcore
-import httpx
+import httpcore2
+import httpx2
 
 from wapitiCore.main.log import logging
 from wapitiCore.net.proxy.ca import CA_CERT_FILENAME, CertificateAuthority
@@ -69,7 +69,7 @@ HOP_BY_HOP_HEADERS = frozenset({
 })
 
 UPSTREAM_ERRORS = (
-    httpcore.NetworkError, httpcore.ProtocolError, httpcore.ProxyError, httpcore.UnsupportedProtocol,
+    httpcore2.NetworkError, httpcore2.ProtocolError, httpcore2.ProxyError, httpcore2.UnsupportedProtocol,
     OSError, ssl.SSLError,
 )
 
@@ -86,16 +86,16 @@ def parse_authority(authority: str, default_port: int) -> Authority:
     return host.strip("[]"), int(port) if port else default_port
 
 
-def connection_tokens(headers: httpx.Headers) -> Set[str]:
+def connection_tokens(headers: httpx2.Headers) -> Set[str]:
     return {value.strip().lower() for value in headers.get_list("connection", split_commas=True)}
 
 
-def is_upgrade(headers: httpx.Headers) -> bool:
+def is_upgrade(headers: httpx2.Headers) -> bool:
     """Tells if the message asks for (request) or accepts (response) a switch to another protocol, like WebSocket."""
     return "upgrade" in headers and "upgrade" in connection_tokens(headers)
 
 
-def forwardable_headers(headers: httpx.Headers, keep_upgrade: bool = False) -> RawHeaders:
+def forwardable_headers(headers: httpx2.Headers, keep_upgrade: bool = False) -> RawHeaders:
     """
     Returns the headers a proxy is allowed to forward, with their original order and casing.
 
@@ -161,7 +161,7 @@ class InterceptingProxy:
         self._idle_timeout = idle_timeout
         self._max_buffered_body = max_buffered_body
         self._server: Optional[asyncio.AbstractServer] = None
-        self._pool: Optional[httpcore.AsyncConnectionPool] = None
+        self._pool: Optional[httpcore2.AsyncConnectionPool] = None
         self._tasks: Set[asyncio.Task] = set()
 
     @property
@@ -290,11 +290,11 @@ class InterceptingProxy:
         Answer of the proxy to the requests sent to itself: a page giving the certificate of the authority,
         so a user can import it in the browser without looking for the file.
         """
-        request = ProxyRequest("GET", "http", self._host, self._port, target.decode("latin-1"), httpx.Headers())
+        request = ProxyRequest("GET", "http", self._host, self._port, target.decode("latin-1"), httpx2.Headers())
         if target.split(b"?")[0] == CA_DOWNLOAD_PATH.encode():
             response = ProxyResponse(
                 200,
-                httpx.Headers({
+                httpx2.Headers({
                     # With this type browsers offer to import the certificate instead of saving a file
                     "Content-Type": "application/x-x509-ca-cert",
                     "Content-Disposition": f'attachment; filename="{CA_CERT_FILENAME}"',
@@ -304,7 +304,7 @@ class InterceptingProxy:
         else:
             response = ProxyResponse(
                 200,
-                httpx.Headers({"Content-Type": "text/html; charset=utf-8"}),
+                httpx2.Headers({"Content-Type": "text/html; charset=utf-8"}),
                 WELCOME_PAGE.format(path=CA_DOWNLOAD_PATH, file=self._ca.certificate_path).encode("utf-8"),
             )
 
@@ -341,7 +341,7 @@ class InterceptingProxy:
             port=port,
             target=target,
             # raw_items gives the header names with the casing used by the client
-            headers=httpx.Headers(event.headers.raw_items()),
+            headers=httpx2.Headers(event.headers.raw_items()),
             content=body,
             http_version=f"HTTP/{event.http_version.decode('latin-1')}",
         )
@@ -452,7 +452,7 @@ class InterceptingProxy:
 
             await self._send_response(connection, writer, flow, pending_body)
 
-    def _must_stream(self, headers: httpx.Headers) -> bool:
+    def _must_stream(self, headers: httpx2.Headers) -> bool:
         """Tells from its headers if the body of a response must be relayed without being buffered."""
         if headers.get("content-type", "").lower().startswith(EVENT_STREAM):
             # Server-sent events: the body never ends
@@ -467,7 +467,7 @@ class InterceptingProxy:
             self,
             flow: Flow,
             stack: AsyncExitStack,
-    ) -> Tuple[Optional[httpcore.Response], Optional[AsyncIterator[bytes]]]:
+    ) -> Tuple[Optional[httpcore2.Response], Optional[AsyncIterator[bytes]]]:
         """
         Send the request to the server and store its response in the flow.
 
@@ -484,7 +484,7 @@ class InterceptingProxy:
             host = format_authority(request.host, request.port) if ":" in request.host else request.host
             headers.insert(0, (b"Host", host.encode("latin-1")))
 
-        url = httpcore.URL(
+        url = httpcore2.URL(
             scheme=request.scheme,
             host=request.host,
             port=request.port,
@@ -498,7 +498,7 @@ class InterceptingProxy:
         buffered: List[bytes] = []
         pending_body = None
         try:
-            # httpcore follows no redirection, handles no cookie and decodes no content: what we get is what
+            # httpcore2 follows no redirection, handles no cookie and decodes no content: what we get is what
             # the server sent.
             response = await stack.enter_async_context(
                 self._pool.stream(
@@ -509,7 +509,7 @@ class InterceptingProxy:
                     extensions={"timeout": timeouts},
                 )
             )
-            response_headers = httpx.Headers(response.headers)
+            response_headers = httpx2.Headers(response.headers)
             switching = response.status == 101 and upgrade
             has_body = request.method != "HEAD" and response.status not in (204, 304) and not switching
 
@@ -527,7 +527,7 @@ class InterceptingProxy:
                             pending_body = chain(buffered, chunks)
                             buffered = []
                             break
-        except httpcore.TimeoutException as exception:
+        except httpcore2.TimeoutException as exception:
             self._set_error(flow, 504, f"The server did not answer in time: {exception!r}")
             return None, None
         except UPSTREAM_ERRORS as exception:
@@ -553,7 +553,7 @@ class InterceptingProxy:
         flow.error = message
         flow.response = ProxyResponse(
             status_code=status_code,
-            headers=httpx.Headers({"Content-Type": "text/plain; charset=utf-8"}),
+            headers=httpx2.Headers({"Content-Type": "text/plain; charset=utf-8"}),
             content=message.encode("utf-8"),
         )
 
@@ -563,7 +563,7 @@ class InterceptingProxy:
             reader,
             writer,
             flow: Flow,
-            server_response: httpcore.Response,
+            server_response: httpcore2.Response,
     ):
         """
         The server accepted to switch to another protocol (WebSocket): tell it to the client then relay the
@@ -583,7 +583,7 @@ class InterceptingProxy:
             writer.write(data)
             await writer.drain()
 
-        with suppress(*UPSTREAM_ERRORS, httpcore.TimeoutException):
+        with suppress(*UPSTREAM_ERRORS, httpcore2.TimeoutException):
             await bridge(
                 pump(lambda: reader.read(READ_SIZE), server.write),
                 # No timeout: such connections are meant to stay silent for long periods
@@ -630,7 +630,7 @@ class InterceptingProxy:
                     if chunk:
                         writer.write(connection.send(h11.Data(data=chunk)))
                         await writer.drain()
-            except (*UPSTREAM_ERRORS, httpcore.TimeoutException) as exception:
+            except (*UPSTREAM_ERRORS, httpcore2.TimeoutException) as exception:
                 # Too late for an error page: cutting the connection is the only way to tell the client that
                 # the body is incomplete
                 raise ConnectionError("The server failed while sending its response") from exception

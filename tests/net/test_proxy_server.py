@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager, suppress
 from typing import Callable, List, Optional, Tuple
 
 import h11
-import httpx
+import httpx2
 import pytest
 
 from wapitiCore.net.proxy import CertificateAuthority, Flow, InterceptingProxy, ProxyResponse
@@ -125,7 +125,7 @@ def client_context(authority: CertificateAuthority) -> ssl.SSLContext:
 
 @asynccontextmanager
 async def proxy_client(proxy: InterceptingProxy, trusted: CertificateAuthority):
-    async with httpx.AsyncClient(
+    async with httpx2.AsyncClient(
         proxy=f"http://127.0.0.1:{proxy.port}",
         verify=client_context(trusted),
         timeout=10,
@@ -155,7 +155,7 @@ def test_parse_authority():
 
 
 def test_forwardable_headers():
-    headers = httpx.Headers([
+    headers = httpx2.Headers([
         (b"Host", b"example.com"),
         (b"Connection", b"keep-alive, X-Per-Hop"),
         (b"X-Per-Hop", b"1"),
@@ -334,7 +334,7 @@ async def test_addons_can_rewrite_request_and_response(authority):
 async def test_addon_can_answer_in_place_of_the_server(authority):
     class Blocker:
         async def request(self, flow: Flow):
-            flow.response = ProxyResponse(403, httpx.Headers({"Content-Type": "text/plain"}), b"blocked")
+            flow.response = ProxyResponse(403, httpx2.Headers({"Content-Type": "text/plain"}), b"blocked")
 
     recorder = Recorder()
     async with Upstream() as upstream:
@@ -420,7 +420,7 @@ async def test_tunnel_when_not_intercepting(authority, server_authority):
 
             # ... and a client only trusting the proxy CA refuses the connection
             async with proxy_client(proxy, authority) as client:
-                with pytest.raises(httpx.ConnectError):
+                with pytest.raises(httpx2.ConnectError):
                     await client.get(f"https://localhost:{upstream.port}/tunneled")
 
     assert response.content == b"hello from /tunneled"
@@ -455,7 +455,7 @@ async def test_unreachable_server_when_tunneling(authority):
 
     async with InterceptingProxy(authority, port=0, should_intercept=lambda host, port: False) as proxy:
         async with proxy_client(proxy, authority) as client:
-            with pytest.raises(httpx.ProxyError):
+            with pytest.raises(httpx2.ProxyError):
                 await client.get(f"https://127.0.0.1:{closed_port}/")
 
 
@@ -465,7 +465,7 @@ async def test_proxy_serves_its_certificate(authority, through_proxy):
     recorder = Recorder()
     async with InterceptingProxy(authority, port=0, addons=[recorder]) as proxy:
         proxy_url = f"http://127.0.0.1:{proxy.port}"
-        async with httpx.AsyncClient(proxy=proxy_url if through_proxy else None) as client:
+        async with httpx2.AsyncClient(proxy=proxy_url if through_proxy else None) as client:
             page = await client.get(f"http://localhost:{proxy.port}/")
             certificate = await client.get(f"http://localhost:{proxy.port}/wapiti-ca.pem")
 
@@ -848,7 +848,7 @@ async def test_unreachable_upstream_proxy(authority, server_authority, scheme):
             authority, port=0, upstream_proxy=upstream_proxy, should_intercept=lambda host, port: False
         ) as proxy:
             async with proxy_client(proxy, server_authority) as client:
-                with pytest.raises(httpx.ProxyError):
+                with pytest.raises(httpx2.ProxyError):
                     await client.get(f"https://localhost:{server.port}/")
 
     assert response.status_code == 502

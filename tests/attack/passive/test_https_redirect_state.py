@@ -8,7 +8,7 @@ reported once, and only its repeat may be counted as suppressed.
 """
 import asyncio
 
-import httpx
+import httpx2
 
 from wapitiCore.attack.passive_scanner import PassiveScanner
 from wapitiCore.language.vulnerability import LOW_LEVEL
@@ -28,7 +28,7 @@ def safe_redirect(request: Request) -> Response:
     """Synthetic non-sensitive HTML 301 redirect to HTTPS (no socket involved)."""
     return Response(
         url=request.url,
-        response=httpx.Response(
+        response=httpx2.Response(
             301,
             headers={"Location": HTTPS_URL, "Content-Type": "text/html"},
             content=b"",
@@ -40,7 +40,7 @@ def insecure_html(request: Request) -> Response:
     """Synthetic non-sensitive HTML 200 served in clear text."""
     return Response(
         url=request.url,
-        response=httpx.Response(
+        response=httpx2.Response(
             200,
             headers={"Content-Type": "text/html"},
             content=b"<html><body>ok</body></html>",

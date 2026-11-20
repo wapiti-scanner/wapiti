@@ -23,7 +23,7 @@ from typing import Optional, Iterator
 from urllib.parse import quote
 from os.path import join as path_join
 
-from httpx import ReadTimeout, RequestError
+from httpx2 import ReadTimeout, RequestError
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, XXEUploadMutator, Mutator, Parameter

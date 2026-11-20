@@ -24,7 +24,7 @@ from urllib.parse import urlparse as _urlparse, urlunparse, unquote, quote, urlj
 from typing import Optional, List, Tuple, Union, TYPE_CHECKING
 import re
 
-import httpx
+import httpx2
 
 from wapitiCore.main.log import logging
 
@@ -285,7 +285,7 @@ class Request:
             get_params: Parameters = None,
             post_params: Parameters = None,
             file_params: list = None,
-            headers: Union[httpx.Headers, dict, list] = None,
+            headers: Union[httpx2.Headers, dict, list] = None,
             encoding: str = "UTF-8",
             enctype: str = "",
             referer: str = "",
@@ -411,8 +411,8 @@ class Request:
             self._port = port
         elif url_parts.scheme == "https":
             self._port = 443
-        self._headers = httpx.Headers(headers or {})
-        self.sent_headers: Optional[httpx.Headers] = None
+        self._headers = httpx2.Headers(headers or {})
+        self.sent_headers: Optional[httpx2.Headers] = None
         self._response_content = None
         self._start_time = None
         self._size = 0
@@ -521,7 +521,7 @@ class Request:
         return buff
 
     @property
-    def headers(self) -> httpx.Headers:
+    def headers(self) -> httpx2.Headers:
         return self._headers
 
     def add_header(self, key: str, value: str):
@@ -532,7 +532,7 @@ class Request:
         """Updates headers from a dictionary or a list of tuples."""
         self._headers.update(new_headers)
 
-    def set_sent_headers(self, headers: httpx.Headers):
+    def set_sent_headers(self, headers: httpx2.Headers):
         """Set the sent HTTP headers while requesting the resource"""
         self.sent_headers = headers
 

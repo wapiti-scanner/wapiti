@@ -28,7 +28,7 @@ from functools import lru_cache
 import socket
 from random import shuffle
 
-import httpx
+import httpx2
 from tld import get_fld
 from tld.exceptions import TldDomainNotFound, TldBadUrl
 import dns.asyncresolver
@@ -67,11 +67,11 @@ class TakeoverChecker:
             data = json.load(fd)
             self.ignore = [re.compile(r"(" + ignore_regex + r")") for ignore_regex in data["ignore"]]
             self.services = data["services"]
-        self._http_client: Optional[httpx.AsyncClient] = None
+        self._http_client: Optional[httpx2.AsyncClient] = None
 
-    async def _get_client(self) -> httpx.AsyncClient:
+    async def _get_client(self) -> httpx2.AsyncClient:
         if self._http_client is None:
-            self._http_client = httpx.AsyncClient(timeout=10., verify=False)
+            self._http_client = httpx2.AsyncClient(timeout=10., verify=False)
         return self._http_client
 
     async def close(self):
@@ -158,17 +158,17 @@ class TakeoverChecker:
         return is_vulnerable
 
 
-async def _check_github_availability(username: str, client: httpx.AsyncClient) -> bool:
+async def _check_github_availability(username: str, client: httpx2.AsyncClient) -> bool:
     """Check if a GitHub username/organization is available."""
     try:
         response = await client.head(f"https://github.com/{username}", timeout=10.)
         return response.is_client_error
-    except httpx.RequestError:
+    except httpx2.RequestError:
         logging.warning("HTTP request to https://github.com/%s failed", username)
         return False
 
 
-async def _check_shopify_availability(shop_name: str, client: httpx.AsyncClient) -> bool:
+async def _check_shopify_availability(shop_name: str, client: httpx2.AsyncClient) -> bool:
     """Check if a Shopify shop name is available."""
     try:
         response = await client.get(
@@ -180,7 +180,7 @@ async def _check_shopify_availability(shop_name: str, client: httpx.AsyncClient)
         )
         data = response.json()
         return data["status"] == "available"
-    except httpx.RequestError:
+    except httpx2.RequestError:
         logging.warning("HTTP request to Shopify API failed")
         return False
 

@@ -23,7 +23,7 @@ from base64 import b64encode
 from typing import Optional, Tuple
 from urllib.parse import unquote, urlsplit
 
-import httpcore
+import httpcore2
 from socksio import socks5
 
 DEFAULT_PORTS = {"http": 80, "https": 443, "socks": 1080, "socks5": 1080, "socks5h": 1080}
@@ -76,26 +76,26 @@ class Upstream:
     def is_socks(self) -> bool:
         return self.scheme.startswith("socks")
 
-    def build_pool(self) -> httpcore.AsyncConnectionPool:
+    def build_pool(self) -> httpcore2.AsyncConnectionPool:
         """Returns the connection pool used to send the intercepted requests."""
         context = insecure_ssl_context()
         if not self.is_proxied:
-            return httpcore.AsyncConnectionPool(ssl_context=context, max_connections=MAX_CONNECTIONS)
+            return httpcore2.AsyncConnectionPool(ssl_context=context, max_connections=MAX_CONNECTIONS)
 
         if self.is_socks:
             # Hostnames are always resolved by the SOCKS proxy, whatever the scheme says
-            return httpcore.AsyncSOCKSProxy(
+            return httpcore2.AsyncSOCKSProxy(
                 proxy_url=f"socks5://{format_authority(self.host, self.port)}",
                 proxy_auth=self.credentials,
                 ssl_context=context,
                 max_connections=MAX_CONNECTIONS,
             )
 
-        return httpcore.AsyncHTTPProxy(
+        return httpcore2.AsyncHTTPProxy(
             proxy_url=f"{self.scheme}://{format_authority(self.host, self.port)}",
             proxy_auth=self.credentials,
             ssl_context=context,
-            # httpcore refuses this argument when the proxy itself is not reached over TLS
+            # httpcore2 refuses this argument when the proxy itself is not reached over TLS
             proxy_ssl_context=context if self.scheme == "https" else None,
             max_connections=MAX_CONNECTIONS,
         )

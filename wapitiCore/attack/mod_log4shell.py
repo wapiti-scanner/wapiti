@@ -25,7 +25,7 @@ from os.path import join as path_join
 from typing import Dict, List, Tuple, Optional
 
 import dns.asyncresolver
-from httpx import RequestError
+from httpx2 import RequestError
 from wapitiCore.attack.attack import Attack
 from wapitiCore.definitions.log4shell import Log4ShellFinding
 from wapitiCore.main.log import log_red, logging, log_verbose

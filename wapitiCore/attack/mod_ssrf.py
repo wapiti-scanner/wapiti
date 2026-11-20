@@ -21,7 +21,7 @@ from asyncio import sleep
 from typing import Optional, Iterator
 from binascii import hexlify, unhexlify
 
-from httpx import ReadTimeout, RequestError, InvalidURL
+from httpx2 import ReadTimeout, RequestError, InvalidURL
 
 from wapitiCore.main.log import logging, log_red, log_orange, log_verbose
 from wapitiCore.attack.attack import Attack, Mutator, Parameter, ParameterSituation

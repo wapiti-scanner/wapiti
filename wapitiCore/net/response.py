@@ -27,7 +27,7 @@ from http.client import IncompleteRead
 from typing import List, Optional
 
 # Third-parties
-import httpx
+import httpx2
 
 from wapitiCore.net.web import make_absolute
 
@@ -36,7 +36,7 @@ warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
 
 class Response:
-    def __init__(self, response: httpx.Response, url: Optional[str] = None):
+    def __init__(self, response: httpx2.Response, url: Optional[str] = None):
         """Create a new Response object.
 
         @type response: Response
@@ -63,7 +63,7 @@ class Response:
         return [Response(response) for response in self._response.history]
 
     @property
-    def headers(self) -> httpx.Headers:
+    def headers(self) -> httpx2.Headers:
         """Returns the dictionary of HTTP headers as sent by the web-server.
 
         @rtype: dict
@@ -147,7 +147,7 @@ class Response:
         """HTML source code of the web-page as str"""
         try:
             return self._response.text
-        except (httpx.ConnectError, OSError, IncompleteRead):
+        except (httpx2.ConnectError, OSError, IncompleteRead):
             return ""
 
     @property

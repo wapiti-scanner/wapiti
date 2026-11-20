@@ -1,4 +1,4 @@
-import httpx
+import httpx2
 
 from wapitiCore.net.response import Response
 from wapitiCore.net.soft_404 import is_false_positive, probe_dir_name
@@ -6,7 +6,7 @@ from wapitiCore.net.soft_404 import is_false_positive, probe_dir_name
 
 def make_response(url, status=200, text="", location=None):
     headers = {"location": location} if location else {}
-    return Response(httpx.Response(status, headers=headers, text=text, request=httpx.Request("GET", url)), url=url)
+    return Response(httpx2.Response(status, headers=headers, text=text, request=httpx2.Request("GET", url)), url=url)
 
 
 def test_is_false_positive_flags_identical_soft_404():

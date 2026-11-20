@@ -31,7 +31,7 @@ import re
 import tempfile
 import shutil
 
-from httpx import RequestError
+from httpx2 import RequestError
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography import x509

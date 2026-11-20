@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import httpx
+import httpx2
 import respx
 import pytest
 
@@ -23,7 +24,7 @@ async def test_whole_stuff():
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
             headers={"content-type": "text/html"},
         ),
@@ -54,7 +55,7 @@ async def test_false_positive():
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
             headers={"content-type": "text/html"},
         ),
@@ -74,14 +75,14 @@ async def test_false_positive():
 @respx.mock
 async def test_attack_request_error_on_original_fetch():
     """When the initial fetch of the page raises RequestError, network_errors is incremented and we return."""
-    respx.get("http://perdu.com/config.php").mock(side_effect=httpx.RequestError("error"))
+    respx.get("http://perdu.com/config.php").mock(side_effect=httpx2.RequestError("error"))
     respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
 
     persister = AsyncMock()
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
             headers={"content-type": "text/html"},
         ),
@@ -104,14 +105,14 @@ async def test_attack_request_error_on_original_fetch():
 async def test_attack_request_error_in_gathered_responses():
     """When one of the backup URL requests raises RequestError, network_errors is incremented and we continue."""
     respx.get("http://perdu.com/config.php").mock(return_value=httpx.Response(200, text="Hello there"))
-    respx.get("http://perdu.com/config.php.bak").mock(side_effect=httpx.RequestError("error"))
+    respx.get("http://perdu.com/config.php.bak").mock(side_effect=httpx2.RequestError("error"))
     respx.get(url__startswith="http://perdu.com/").mock(return_value=httpx.Response(404))
 
     persister = AsyncMock()
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
             headers={"content-type": "text/html"},
         ),
@@ -142,7 +143,7 @@ async def test_attack_skip_when_response_too_similar():
     request = Request("http://perdu.com/config.php")
     request.path_id = 1
     response = Response(
-        httpx.Response(
+        httpx2.Response(
             status_code=200,
             headers={"content-type": "text/html"},
         ),

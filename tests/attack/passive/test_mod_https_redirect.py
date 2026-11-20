@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import httpx
+import httpx2
 
 from wapitiCore.attack.modules.passive.mod_https_redirect import ModuleHttpsRedirect
 from wapitiCore.net import Request
@@ -38,7 +39,7 @@ def create_response(
 
     return Response(
         url=url,
-        response=httpx.Response(
+        response=httpx2.Response(
             status_code=status_code, headers=httpx_headers, content=b""
         ),
     )

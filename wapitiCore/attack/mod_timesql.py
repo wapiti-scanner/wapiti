@@ -21,7 +21,7 @@ from math import ceil
 from os.path import join as path_join
 from typing import Optional, Iterator
 
-from httpx import ReadTimeout, RequestError
+from httpx2 import ReadTimeout, RequestError
 
 from wapitiCore.main.log import log_verbose, log_red, log_orange, logging
 from wapitiCore.attack.attack import Attack, Parameter

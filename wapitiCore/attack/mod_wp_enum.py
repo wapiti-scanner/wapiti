@@ -24,7 +24,7 @@ import xml
 import xml.etree.ElementTree as ET
 from os.path import join as path_join
 from typing import Match, Optional
-from httpx import RequestError
+from httpx2 import RequestError
 
 from wapitiCore.attack.attack import Attack, random_string
 from wapitiCore.definitions.fingerprint import SoftwareNameDisclosureFinding
