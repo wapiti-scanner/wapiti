@@ -79,6 +79,16 @@ class Scope:
             checked = url == self._base_request.url
         return checked
 
+    def check_host(self, hostname: str) -> bool:
+        """Tells if some URLs of the given host may be in the scope."""
+        if self._scope == "punk":
+            return True
+
+        if self._scope == "domain":
+            return is_same_domain(f"https://{hostname}/", self._base_request)
+
+        return hostname.lower() == (self._base_request.hostname or "").lower()
+
     def filter(self, resources: Iterable[Union[Request, str]]) -> Set[Union[Request, str]]:
         return {resource for resource in resources if self.check(resource)}
 

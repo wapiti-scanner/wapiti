@@ -171,8 +171,10 @@ OTHER OPTIONS:
     Make Wapiti use a Tor listener (same as `--proxy socks://127.0.0.1:9050/`)
 
   * `--mitm-port` <PORT>  
-    If used, this option will launch a mitmproxy instance listening on the given port instead of using an automated crawler to explore the target.  
-    Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.
+    If used, this option will launch an intercepting proxy listening on the given port instead of using an automated crawler to explore the target.  
+    Configure your browser to use the intercepting proxy then explore the target manually. Ctrl+C in the console when you are done.  
+    To browse HTTPS websites your browser must trust the certificate authority of Wapiti: the path of the certificate to import is given when the proxy starts (`~/.wapiti/config/ca/wapiti-ca.pem`) and it can be downloaded by opening the address of the proxy in the browser. Use a dedicated browser profile.  
+    Only the traffic of hosts in the scope of the scan is decrypted.
 
   * `-a`, `--auth-cred` <CREDENTIALS>  
     (DEPRECATED) Set credentials to use for HTTP authentication on the target (see available methods below).  
