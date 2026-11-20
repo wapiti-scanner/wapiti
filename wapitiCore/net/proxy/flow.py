@@ -25,7 +25,7 @@ from http.cookiejar import http2time
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qsl
 
-import httpx
+import httpx2
 
 DEFAULT_PORTS = {"http": 80, "https": 443}
 
@@ -33,7 +33,7 @@ DEFAULT_PORTS = {"http": 80, "https": 443}
 FileParameter = Tuple[str, Tuple[str, bytes, str]]
 
 
-def media_type(headers: httpx.Headers) -> str:
+def media_type(headers: httpx2.Headers) -> str:
     """Returns the Content-Type without its parameters, in lowercase."""
     return headers.get("content-type", "").split(";")[0].strip().lower()
 
@@ -74,7 +74,7 @@ def parse_multipart(content_type: str, body: bytes) -> Tuple[List[Tuple[str, str
 
         # The line break before the next delimiter belongs to the delimiter, not to the content
         content = content.removesuffix(b"\r\n")
-        headers = httpx.Headers([
+        headers = httpx2.Headers([
             tuple(item.strip() for item in line.split(b":", 1))
             for line in raw_headers.split(b"\r\n") if b":" in line
         ])
@@ -135,7 +135,7 @@ class ProxyRequest:
     host: str
     port: int
     target: str
-    headers: httpx.Headers
+    headers: httpx2.Headers
     content: bytes = b""
     http_version: str = "HTTP/1.1"
 
@@ -185,7 +185,7 @@ class ProxyResponse:
     sends it in place of the body of the server (set `streamed` to False to send an empty body).
     """
     status_code: int
-    headers: httpx.Headers
+    headers: httpx2.Headers
     content: bytes = b""
     reason: str = ""
     http_version: str = "HTTP/1.1"

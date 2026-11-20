@@ -29,7 +29,7 @@ from http.cookiejar import CookieJar
 import inspect
 import json
 
-import httpx
+import httpx2
 # pylint: disable=protected-access
 from playwright._impl._errors import TargetClosedError
 from playwright.async_api import async_playwright, Error as PlaywrightError
@@ -113,14 +113,14 @@ def mitm_to_wapiti_request(proxy_request: ProxyRequest) -> Optional[Request]:
         post_params=post_params or None,
         file_params=file_params or None,
         enctype=enctype,
-        headers=httpx.Headers(proxy_request.headers.multi_items()),
+        headers=httpx2.Headers(proxy_request.headers.multi_items()),
     )
 
 
 class MitmFlowToWapitiRequests:
     """Addon of the intercepting proxy turning what the browser does into Wapiti requests and responses."""
 
-    def __init__(self, data_queue: asyncio.Queue, headers: httpx.Headers, scope: Scope, drop_cookies: bool = False):
+    def __init__(self, data_queue: asyncio.Queue, headers: httpx2.Headers, scope: Scope, drop_cookies: bool = False):
         self._queue = data_queue
         self._headers = headers
         self._drop_cookies = drop_cookies
@@ -173,10 +173,10 @@ class MitmFlowToWapitiRequests:
                 return
 
             wapiti_response = Response(
-                httpx.Response(
+                httpx2.Response(
                     status_code=response.status_code,
                     headers=response.headers.multi_items(),
-                    # httpx expect the raw content (not decompressed)
+                    # httpx2 expect the raw content (not decompressed)
                     content=response.content,
                 ),
                 url=flow.request.url
@@ -196,7 +196,7 @@ def get_certificate_authority() -> CertificateAuthority:
 async def launch_proxy(
         port: int,
         data_queue: asyncio.Queue,
-        headers: httpx.Headers,
+        headers: httpx2.Headers,
         cookies: CookieJar,
         scope: Scope,
         proxy: Optional[str] = None,
@@ -389,7 +389,7 @@ async def launch_headless_explorer(
                     else:
                         try:
                             response = await crawler.async_send(request, timeout=crawler.timeout.connect)
-                        except httpx.RequestError as exception:
+                        except httpx2.RequestError as exception:
                             logging.error("%s generated an exception: %s", request, type(exception).__name__)
                             continue
 
@@ -633,7 +633,7 @@ class InterceptingExplorer(Explorer):
                     # trailing-slash variant would be skipped by must_attack as a directory
                     # redirection.
                     response = await seed_crawler.async_send(request, follow_redirects=True)
-                except (ConnectionError, httpx.RequestError) as exception:
+                except (ConnectionError, httpx2.RequestError) as exception:
                     logging.error("[!] %s while seeding %s", type(exception).__name__, request.url)
                     continue
 
