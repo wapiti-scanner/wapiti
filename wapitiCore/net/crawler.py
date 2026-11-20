@@ -45,6 +45,10 @@ warnings.filterwarnings(action='ignore', category=UserWarning, module='bs4')
 
 DEFAULT_PORTS = {"http": 80, "https": 443}
 
+# Maximum number of redirect hops wapiti follows itself (see AsyncCrawler._send). This is not httpx2's own
+# max_redirects: wapiti always calls httpx2 with follow_redirects=False and follows redirects on its own.
+MAX_REDIRECTS = 5
+
 
 def retry(delay=1, times=3):
     """
@@ -183,7 +187,13 @@ class AsyncCrawler:
             event_hooks={"request": [drop_cookies_from_request]} if configuration.drop_cookies else None,
         )
 
-        client.max_redirects = 5
+        # wapiti follows redirects itself (see _send), always calling httpx2 with follow_redirects=False, so
+        # httpx2 never follows a redirect here. Its max_redirects then only caps the sub-requests httpx2
+        # issues inside a single send() while driving an auth handshake: NTLM sends several (negotiate then
+        # authenticate, restarted when the pool answers over another connection), and they all count against
+        # this limit. Keep it well above that handshake budget so authentication does not raise
+        # TooManyRedirects; the real redirect-chain limit is MAX_REDIRECTS, enforced in _send.
+        client.max_redirects = 20
         return cls(configuration.base_request, client, configuration.timeout, scope=configuration.scope)
 
     @staticmethod
@@ -257,7 +267,7 @@ class AsyncCrawler:
                     logging.debug("Not following the redirect from %s to %s", request.url, next_request.url)
                 break
 
-            if len(history) >= self._client.max_redirects:
+            if len(history) >= MAX_REDIRECTS:
                 raise httpx2.TooManyRedirects("Exceeded maximum allowed redirects.", request=next_request)
 
             await response.aread()

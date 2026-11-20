@@ -399,3 +399,18 @@ async def test_offsite_redirect_allowed_on_demand():
         assert response.status == 200
         assert response.content == "DATA"
         assert cdn_route.called
+
+
+@pytest.mark.asyncio
+async def test_crawler_client_allows_the_ntlm_handshake_subrequests():
+    # NTLM drives several sub-requests inside a single httpx2 send() (negotiate then authenticate, restarted
+    # when the connection pool answers over another connection). httpx2 counts each of them against its own
+    # max_redirects, so the crawler's client must allow more than the handshake can ever need or
+    # authentication raises TooManyRedirects under concurrency. Regression: the client used max_redirects=5
+    # while a 3-handshake NTLM negotiation issues up to 7 sub-requests.
+    from wapitiCore.net.ntlm_auth import _MAX_HANDSHAKES  # pylint: disable=import-outside-toplevel
+
+    max_ntlm_subrequests = 1 + 2 * _MAX_HANDSHAKES
+    configuration = CrawlerConfiguration(Request("http://perdu.com/"))
+    async with AsyncCrawler.with_configuration(configuration) as crawler:
+        assert crawler._client.max_redirects >= max_ntlm_subrequests
