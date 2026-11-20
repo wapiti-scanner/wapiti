@@ -349,3 +349,47 @@ def test_json_mutator_query_string():
     assert mutated_requests[1].url == "http://perdu.com/api/?session=31337"
     assert mutated_requests[1].post_params == json.dumps({"a": "Hello there"})
     assert mutated_requests[1].enctype == "application/json"
+
+
+@pytest.mark.parametrize(
+    "enctype, body",
+    [
+        ("text/xml", "<forgot><username>admin</username></forgot>"),
+        ("application/xml; charset=utf-8", "<a>b</a>"),
+        ("text/plain", "just some text"),
+        ("text/plain", ""),
+    ],
+)
+def test_raw_body_is_not_mutated_as_parameters(enctype, body):
+    # A raw body is a string: only the query string can be fuzzed by the mutator
+    request = Request("http://perdu.com/forgotpw?lang=en", method="POST", post_params=body, enctype=enctype)
+    mutator = Mutator()
+
+    mutations = list(mutator.mutate(request, [PayloadInfo(payload="INJECT")]))
+
+    assert [(parameter.name, parameter.situation) for __, parameter, __ in mutations] == [
+        ("lang", ParameterSituation.QUERY_STRING)
+    ]
+    mutated_request = mutations[0][0]
+    assert mutated_request.get_params == [["lang", "INJECT"]]
+    # The body is sent untouched
+    assert mutated_request.post_params == (body or [])
+    assert mutated_request.enctype == enctype
+
+
+def test_raw_body_without_query_string_gives_no_mutation():
+    request = Request("http://perdu.com/forgotpw", method="POST", post_params="<a>b</a>", enctype="text/xml")
+    assert not list(Mutator().mutate(request, [PayloadInfo(payload="INJECT")]))
+
+
+@pytest.mark.parametrize("enctype", ["application/json", "application/json; charset=utf-8", "Application/JSON ;charset=UTF-8"])
+def test_json_with_content_type_parameters_is_mutated(enctype):
+    request = Request("http://perdu.com/api", method="POST", post_params='{"user": "admin"}', enctype=enctype)
+    assert request.is_json
+
+    mutations = list(Mutator().mutate(request, [PayloadInfo(payload="INJECT")]))
+
+    assert len(mutations) == 1
+    mutated_request, parameter, __ = mutations[0]
+    assert parameter.situation == ParameterSituation.JSON_BODY
+    assert json.loads(mutated_request.post_params) == {"user": "INJECT"}

@@ -72,7 +72,8 @@ class ModuleCsrf(Attack):
 
     def is_csrf_present(self, request: Request, response: Response):
         """Check whether anti-csrf token is present"""
-        if request.is_json:
+        if not isinstance(request.post_params_ref, list):
+            # Raw body (JSON, XML...): there is no form parameter to look at
             return None
 
         # Look for anti-csrf token in form params
@@ -179,8 +180,9 @@ class ModuleCsrf(Attack):
             return False
 
         # JSON requests can only be sent using JS with same-origin policy in place
-        # so, it is unlikely that a CSRF is possible. Let's filter those requests to prevent false positives
-        if request.is_json:
+        # so, it is unlikely that a CSRF is possible. Let's filter those requests to prevent false positives.
+        # Other raw bodies (XML...) are skipped too: there is no form parameter where to look for a token.
+        if not isinstance(request.post_params_ref, list):
             return False
 
         if (request.url, request.post_keys) in self.already_vulnerable:
