@@ -646,7 +646,8 @@ class Request:
 
     @property
     def is_json(self) -> bool:
-        return self._enctype == "application/json"
+        # The content type may carry parameters: application/json; charset=utf-8
+        return self._enctype.split(";")[0].strip() == "application/json"
 
     @property
     def referer(self) -> str:

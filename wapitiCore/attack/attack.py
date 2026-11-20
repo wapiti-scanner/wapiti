@@ -426,10 +426,11 @@ class Mutator:
         file_params = request.file_params
         referer = request.referer
 
-        # On a JSON body we exclude post and file parameters as it won't work with this mutator
-        # still it may be interesting to fuzz the query string
+        # On a raw body (JSON, XML, plain text...) we exclude post and file parameters as it won't work with
+        # this mutator: the body is a string, not a list of parameters.
+        # Still it may be interesting to fuzz the query string
         all_params = (
-            [get_params] if request.is_json else [get_params, post_params, file_params]
+            [get_params] if isinstance(post_params, str) else [get_params, post_params, file_params]
         )
         for params_list in all_params:
             parameter_situation = None

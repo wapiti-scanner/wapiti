@@ -213,7 +213,8 @@ class ModuleLog4Shell(Attack):
             await self._verify_headers_vulnerability(modified_request, malicious_headers, headers_uuid_record, page)
 
         all_params = [request.get_params]
-        if request.post_params and not request.is_json:
+        # A raw body (JSON, XML...) is a string, not a list of parameters
+        if request.post_params and isinstance(request.post_params, list):
             all_params.append(request.post_params)
 
         for parameters_list in all_params:
