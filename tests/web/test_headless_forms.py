@@ -39,6 +39,24 @@ function logIn() {
 </script>
 """
 
+# The form only shows up once a link of the menu was clicked, and the first button of the modal closes it
+MODAL_PAGE = """<html><body>
+<a href="#" data-toggle="modal" onclick="document.getElementById('modal').style.display = 'block'">Sign up</a>
+<a href="#" onclick="fetch('/api/category')">Phones</a>
+<a href="/away.html">A real link</a>
+<div id="modal" style="display: none">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal"
+      onclick="fetch('/api/dismissed'); document.getElementById('modal').style.display = 'none'">x</button>
+  </div>
+  <div class="modal-body"><form><input type="text" id="sign-username"></form></div>
+  <div class="modal-footer">
+    <button type="button"
+      onclick="fetch('/api/signup?user=' + document.getElementById('sign-username').value)">Sign up</button>
+  </div>
+</div>
+</body></html>"""
+
 PAGES = {
     "": f"<html><body>{LOGIN_BLOCK}<button onclick=\"fetch('/api/next')\">Next</button></body></html>",
     "other.html": f"<html><body>{LOGIN_BLOCK}<button onclick=\"fetch('/api/next')\">Next</button></body></html>",
@@ -56,6 +74,8 @@ PAGES = {
         <button onclick="fetch('/api/after-leave')">Stay</button>
         </body></html>""",
     "away.html": "<html><body>Somewhere else</body></html>",
+    "modal.html": MODAL_PAGE,
+    "modal2.html": MODAL_PAGE,
 }
 
 
@@ -131,6 +151,24 @@ async def test_buttons_are_still_clicked_after_a_navigation():
     assert [call[1] for call in api_calls] == ["api/after-leave"]
 
 
+@pytest.mark.asyncio
+async def test_hidden_forms_are_revealed_by_triggers():
+    api_calls = await crawl_pages("modal.html")
+    paths = [call[1] for call in api_calls]
+
+    # The modal was opened, its form filled and submitted, and the button closing it was left alone
+    assert sorted(paths) == ["api/category", "api/signup?user=alice"]
+
+
+@pytest.mark.asyncio
+async def test_triggers_are_clicked_once_for_the_whole_crawl():
+    api_calls = await crawl_pages("modal.html", "modal2.html")
+    paths = [call[1] for call in api_calls]
+
+    assert paths.count("api/category") == 1
+    assert paths.count("api/signup?user=alice") == 1
+
+
 def test_get_autofill_value():
     assert get_autofill_value("text", "sign-username") == "alice"
     assert get_autofill_value("text", "contact mail") == "wapiti2021@mailinator.com"
@@ -151,4 +189,7 @@ def test_get_button_fingerprint():
     )
     assert get_button_fingerprint(bare_info, Request("http://perdu.com/a")) != get_button_fingerprint(
         bare_info, Request("http://perdu.com/b")
+    )
+    assert get_button_fingerprint(bare_info, Request("http://perdu.com/a"), is_trigger=True) == (
+        get_button_fingerprint(bare_info, Request("http://perdu.com/b"), is_trigger=True)
     )

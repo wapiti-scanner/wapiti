@@ -3,7 +3,7 @@ import gzip
 import json
 from collections import deque
 from http.cookiejar import CookieJar
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
@@ -398,6 +398,9 @@ class TestInterceptingExplorer:
         mock_page.content.return_value = "<html><a href='/page2'>Link</a></html>"
         mock_page.url = "http://example.com/"
         mock_page.query_selector_all.return_value = []
+        # Registering event handlers is synchronous in Playwright
+        mock_page.on = Mock()
+        mock_page.remove_listener = Mock()
 
         async def goto_with_delay(*args, **kwargs):  # pylint: disable=unused-argument
             await asyncio.sleep(0.2)
