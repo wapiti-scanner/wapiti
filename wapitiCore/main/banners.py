@@ -49,7 +49,12 @@ def print_banner():
   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝   ╚═╝╚═════╝  """
     ]
 
-    print(choice(banners))
+    try:
+        print(choice(banners))
+    except UnicodeEncodeError:
+        # The output encoding may not handle the box-drawing characters of the last banner (cp1252 on Windows when
+        # the output is redirected to a file or a pipe). The banner is cosmetic: fall back to an ASCII one.
+        print(banners[0])
 
 def print_easter_eggs():
     log_yellow(f"Wapiti {WAPITI_VERSION} (wapiti-scanner.github.io)")
