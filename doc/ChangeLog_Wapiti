@@ -1,12 +1,13 @@
-Unreleased
-    Core: mitmproxy is replaced by a built-in intercepting proxy, which removes 37 packages from the dependencies (--mitm-port and headless modes)
-    Crawler: the intercepting proxy uses its own certificate authority, kept in ~/.wapiti/config/ca/. With --mitm-port its path is displayed and the certificate can be downloaded from the address of the proxy. The certificate of mitmproxy is not used anymore
-    Crawler: with --mitm-port only the traffic of hosts in the scope is decrypted
-    Crawler: SOCKS proxies can be used along with --mitm-port and the headless modes
-    Crawler: files of multipart forms and raw bodies (XML, text...) seen by the intercepting proxy are kept
-    Crawler: WebSocket connections and server-sent events go through the intercepting proxy
-    Fixes: attack modules no longer crash with IndexError on a request carrying a raw body (XML, plain text); only the query string is fuzzed and the body is left untouched. JSON bodies with a charset parameter in the Content-Type are now recognised
-    Core: update the wapiti-swagger dependency to 0.2.0
+22/11/2026
+    Wapiti 3.3.4
+    Core: mitmproxy is replaced by a built-in intercepting proxy, which removes 37 packages from the dependencies (--mitm-port and headless modes) (#844)
+    Core: update the wapiti-swagger dependency to 0.2.0 (#844)
+    Crawler: the intercepting proxy uses its own certificate authority, kept in ~/.wapiti/config/ca/. With --mitm-port its path is displayed and the certificate can be downloaded from the address of the proxy. The certificate of mitmproxy is not used anymore (#844)
+    Crawler: with --mitm-port only the traffic of hosts in the scope is decrypted (#844)
+    Crawler: SOCKS proxies can be used along with --mitm-port and the headless modes (#844)
+    Crawler: files of multipart forms and raw bodies (XML, text...) seen by the intercepting proxy are kept (#844)
+    Crawler: WebSocket connections and server-sent events go through the intercepting proxy (#844)
+    Fixes: attack modules no longer crash with IndexError on a request carrying a raw body (XML, plain text); only the query string is fuzzed and the body is left untouched. JSON bodies with a charset parameter in the Content-Type are now recognised (#844)
 
 19/11/2026
     Wapiti 3.3.3
