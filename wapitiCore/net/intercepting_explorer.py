@@ -47,7 +47,7 @@ from wapitiCore.net.sql_persister import SqlPersister
 from wapitiCore.net.explorer import Explorer, EXCLUDED_MEDIA_EXTENSIONS
 from wapitiCore.net.scope import Scope, wildcard_translate
 from wapitiCore.main.log import log_verbose, log_blue, log_red, logging
-from wapitiCore.parsers.html_parser import Html
+from wapitiCore.parsers.html_parser import Html, HtmlFormField, get_input_field_value
 
 # Mime types that a browser will commonly display instead of downloading
 KNOWN_INTERPRETED_TYPES = (
@@ -300,14 +300,201 @@ async def wait_for_pending_requests(pending_requests: set, wait_time: float):
             break
 
 
-async def click_in_webpage(page, request: Request, wait_time: float, timeout: float):
-    try:
-        buttons = await page.query_selector_all(BUTTON_SELECTOR)
-    except PlaywrightError:
+MAX_FIELDS_PER_FORM = 50
+# Filling a field must be quick: it is visible and enabled, otherwise we would not have picked it
+FILL_TIMEOUT = 2.
+
+# Describes a button and the fields it is likely to submit, in a single round trip with the browser.
+# Returns {container, info}: the element holding the fields (if any) and a description that can be serialized.
+BUTTON_CONTEXT_SCRIPT = """
+(button) => {
+  const IGNORED_TYPES = ["hidden", "submit", "button", "reset", "image", "file"];
+  const fieldType = (field) => {
+    const tag = field.tagName.toLowerCase();
+    return tag === "input" ? (field.getAttribute("type") || "text").toLowerCase() : tag;
+  };
+  const listFields = (root) => [...root.querySelectorAll("input, textarea, select")].filter(
+    (field) => !IGNORED_TYPES.includes(fieldType(field))
+  );
+
+  const form = button.closest("form");
+  let container = form;
+  if (!container) {
+    // Fields and buttons are often siblings (modals with a body and a footer): look a few levels up
+    let node = button.parentElement;
+    for (let level = 0; node && level < 5; level++, node = node.parentElement) {
+      if (node === document.body || node === document.documentElement) break;
+      if (listFields(node).length) {
+        container = node;
+        break;
+      }
+    }
+  }
+
+  const tag = button.tagName.toLowerCase();
+  const buttonType = (button.getAttribute("type") || (tag === "button" ? "submit" : "")).toLowerCase();
+  // Such a form is found in the HTML and submitted by the crawler itself: clicking would submit it twice
+  const nativeSubmit = Boolean(
+    form && buttonType === "submit" && form.hasAttribute("action")
+    && !form.hasAttribute("onsubmit") && !button.hasAttribute("onclick")
+  );
+
+  const buttonKey = tag + ":" + (
+    button.getAttribute("onclick") || button.id || (button.textContent || "").trim().slice(0, 50)
+  );
+
+  const checkedRadios = new Set();
+  const fields = container ? listFields(container) : [];
+  for (const field of fields) {
+    if (fieldType(field) === "radio" && field.checked) checkedRadios.add(field.name);
+  }
+
+  const descriptions = fields.map((field, index) => {
+    const type = fieldType(field);
+    const usable = field.getClientRects().length > 0 && !field.disabled && !field.readOnly;
+    let action = null;
+    let option = null;
+    if (usable) {
+      if (type === "checkbox") {
+        if (!field.checked) action = "check";
+      } else if (type === "radio") {
+        if (!checkedRadios.has(field.name)) {
+          action = "check";
+          checkedRadios.add(field.name);
+        }
+      } else if (type === "select") {
+        if (!field.value) {
+          const candidate = [...field.options].find((opt) => opt.value && !opt.disabled);
+          if (candidate) {
+            action = "select";
+            option = candidate.value;
+          }
+        }
+      } else if (!field.value) {
+        action = "fill";
+      }
+    }
+    return {
+      index: index,
+      type: type,
+      key: type + ":" + (field.id || field.getAttribute("name") || field.getAttribute("placeholder") || ""),
+      hint: [
+        field.id, field.getAttribute("name"), field.getAttribute("placeholder"),
+        field.getAttribute("autocomplete"), field.getAttribute("aria-label")
+      ].filter(Boolean).join(" "),
+      action: action,
+      option: option,
+    };
+  });
+
+  return {
+    container: container,
+    info: {nativeSubmit: nativeSubmit, buttonKey: buttonKey, fields: descriptions},
+  };
+}
+"""
+
+# Must list the fields in the same order as BUTTON_CONTEXT_SCRIPT does
+FIELD_HANDLES_SCRIPT = """
+(container) => [...container.querySelectorAll("input, textarea, select")].filter((field) => {
+  const tag = field.tagName.toLowerCase();
+  const type = tag === "input" ? (field.getAttribute("type") || "text").toLowerCase() : tag;
+  return !["hidden", "submit", "button", "reset", "image", "file"].includes(type);
+})
+"""
+
+
+def get_button_fingerprint(button_info: dict, request: Request) -> tuple:
+    """Identify what a click does, so the same form is not filled and submitted over and over.
+
+    A button coming with fields is identified by those fields whatever the page is: a login form put on every
+    page of a website is submitted once for the whole crawl.
+    A button alone depends more on where it is (pagination, add to cart...): it is clicked once per path.
+    """
+    fields = tuple(sorted(field["key"] for field in button_info["fields"]))
+    if fields:
+        return "form", fields, button_info["buttonKey"]
+
+    return "button", request.url.split("?")[0], button_info["buttonKey"]
+
+
+def get_autofill_value(field_type: str, hint: str) -> str:
+    """Pick the value the standard crawler would have used for such a field."""
+    value = get_input_field_value(HtmlFormField(hint or field_type, field_type, "", {}))
+    return value if isinstance(value, str) else ""
+
+
+async def fill_fields(container, fields: List[dict]):
+    """Fill the empty fields of a form before one of its buttons is clicked."""
+    todo = [field for field in fields if field["action"]][:MAX_FIELDS_PER_FORM]
+    if not todo:
         return
 
-    if not buttons:
-        return
+    handles_list = await container.evaluate_handle(FIELD_HANDLES_SCRIPT)
+    properties = await handles_list.get_properties()
+
+    for field in todo:
+        handle = properties.get(str(field["index"]))
+        element = handle.as_element() if handle else None
+        if element is None:
+            continue
+
+        try:
+            if field["action"] == "check":
+                await element.check(timeout=FILL_TIMEOUT * 1000)
+            elif field["action"] == "select":
+                await element.select_option(field["option"], timeout=FILL_TIMEOUT * 1000)
+            else:
+                value = get_autofill_value(field["type"], field["hint"])
+                if value:
+                    await element.fill(value, timeout=FILL_TIMEOUT * 1000)
+        except PlaywrightError:
+            # A field we can't fill must not prevent the others from being filled
+            continue
+
+
+async def click_button(button, request: Request, seen_fingerprints: set, timeout: float) -> bool:
+    """Fill the fields tied to a button then click on it. Returns True if the click was made."""
+    try:
+        # Clicking a hidden button (closed modal, collapsed menu...) would wait for the whole timeout
+        if not await button.is_visible():
+            return False
+
+        context = await button.evaluate_handle(BUTTON_CONTEXT_SCRIPT)
+        button_info = await (await context.get_property("info")).json_value()
+        if button_info["nativeSubmit"]:
+            return False
+
+        fingerprint = get_button_fingerprint(button_info, request)
+        if fingerprint in seen_fingerprints:
+            return False
+
+        seen_fingerprints.add(fingerprint)
+
+        container = (await context.get_property("container")).as_element()
+        if container is not None:
+            await fill_fields(container, button_info["fields"])
+
+        await button.click(timeout=timeout * 1000)
+    except PlaywrightError:
+        return False
+
+    return True
+
+
+async def click_in_webpage(
+        page,
+        request: Request,
+        wait_time: float,
+        timeout: float,
+        seen_fingerprints: Optional[set] = None,
+):
+    """Click on the buttons of the page, filling the fields they come with.
+
+    seen_fingerprints is shared by the whole crawl to prevent the same form from being submitted on each page.
+    """
+    if seen_fingerprints is None:
+        seen_fingerprints = set()
 
     pending_requests = set()
 
@@ -318,39 +505,49 @@ async def click_in_webpage(page, request: Request, wait_time: float, timeout: fl
     def request_done(browser_request):
         pending_requests.discard(browser_request)
 
-    page.on("request", request_started)
-    page.on("requestfinished", request_done)
-    page.on("requestfailed", request_done)
+    listening = False
+    total_clicked = 0
+    reloaded = True
 
     try:
-        total_clicked = 0
-        for button in buttons:
-            if total_clicked >= MAX_BUTTONS_PER_PAGE:
+        # Each reload invalidates the buttons we know, the fingerprints tell which ones are left to click
+        while reloaded and total_clicked < MAX_BUTTONS_PER_PAGE:
+            reloaded = False
+            try:
+                buttons = await page.query_selector_all(BUTTON_SELECTOR)
+            except PlaywrightError:
                 break
 
-            try:
-                # Clicking a hidden button (closed modal, collapsed menu...) would wait for the whole timeout
-                if not await button.is_visible():
+            if buttons and not listening:
+                page.on("request", request_started)
+                page.on("requestfinished", request_done)
+                page.on("requestfailed", request_done)
+                listening = True
+
+            for button in buttons:
+                if total_clicked >= MAX_BUTTONS_PER_PAGE:
+                    break
+
+                if not await click_button(button, request, seen_fingerprints, timeout):
                     continue
 
-                await button.click(timeout=timeout * 1000)
-            except PlaywrightError:
-                continue
+                total_clicked += 1
+                await wait_for_pending_requests(pending_requests, wait_time)
 
-            total_clicked += 1
-            await wait_for_pending_requests(pending_requests, wait_time)
-
-            if page.url != request.url_with_fragment:
-                pending_requests.clear()
-                await page.goto(
-                    request.url_with_fragment,
-                    timeout=timeout * 1000,
-                    wait_until="domcontentloaded"
-                )
+                if page.url != request.url_with_fragment:
+                    pending_requests.clear()
+                    await page.goto(
+                        request.url_with_fragment,
+                        timeout=timeout * 1000,
+                        wait_until="domcontentloaded"
+                    )
+                    reloaded = True
+                    break
     finally:
-        page.remove_listener("request", request_started)
-        page.remove_listener("requestfinished", request_done)
-        page.remove_listener("requestfailed", request_done)
+        if listening:
+            page.remove_listener("request", request_started)
+            page.remove_listener("requestfinished", request_done)
+            page.remove_listener("requestfailed", request_done)
 
 
 # pylint: disable=too-many-positional-arguments
@@ -369,10 +566,6 @@ async def launch_headless_explorer(
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
     # This is the only way as a headless browser can't provide us response headers.
-    proxy_settings = {
-        "server": f"http://127.0.0.1:{proxy_port}"
-    }
-
     # We need to make a copy of this set otherwise requests won't make their way into async_explore (because set is
     # shared). Also, we want our own set here because we will see URLs with anchors that the proxy can't catch.
     excluded_requests = set(excluded_requests)
@@ -381,7 +574,7 @@ async def launch_headless_explorer(
         async with async_playwright() as p:
             browser = await p.firefox.launch(
                 headless=visibility == "hidden",
-                proxy=proxy_settings,
+                proxy={"server": f"http://127.0.0.1:{proxy_port}"},
                 firefox_user_prefs={
                     "network.proxy.allow_hijacking_localhost": True,
                     "devtools.jsonview.enabled": False,
@@ -389,6 +582,9 @@ async def launch_headless_explorer(
             )
             context = await browser.new_context(ignore_https_errors=True)
             page = await context.new_page()
+
+            # Forms already filled and buttons already clicked, whatever the page they were seen on
+            seen_fingerprints = set()
 
             # Shadow set for O(1) lookups on to_explore deque
             to_explore_set = set(to_explore)
@@ -422,7 +618,13 @@ async def launch_headless_explorer(
                                 continue
 
                             page_source = await page.content()
-                            await click_in_webpage(page, request, wait_time, timeout=crawler.timeout.connect)
+                            await click_in_webpage(
+                                page,
+                                request,
+                                wait_time,
+                                timeout=crawler.timeout.connect,
+                                seen_fingerprints=seen_fingerprints,
+                            )
                         except (PlaywrightError, asyncio.TimeoutError) as exception:
                             if isinstance(exception, TargetClosedError):
                                 break
