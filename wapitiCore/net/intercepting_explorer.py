@@ -276,6 +276,15 @@ MAX_BUTTONS_PER_PAGE = 10
 # The "xpath=" prefix is mandatory: Playwright only guesses XPath for selectors starting with "//" or "..",
 # anything else is parsed as CSS and a selector such as ".//button" is then rejected as invalid.
 BUTTON_SELECTOR = "xpath=.//button | .//*[@role=\"button\" and not(@href) and not(self::button)]"
+# Elements that are not buttons but act on the page instead of leading somewhere: links without a real target
+# and whatever opens a modal. They may reveal forms and buttons that were hidden until then.
+TRIGGER_SELECTOR = (
+    "a[href='#'], a[href=''], a[href^='javascript:'], a[onclick]:not([href]), "
+    "[data-toggle='modal'], [data-bs-toggle='modal']"
+)
+MAX_TRIGGERS_PER_PAGE = 6
+# A visible element may be covered by another one (modal backdrop...), Playwright then waits for nothing
+MAX_CLICK_TIMEOUT = 5.
 # How long the network must stay silent after a click before we consider the page is done with it
 NETWORK_QUIET_TIME = 0.25
 
@@ -342,6 +351,12 @@ BUTTON_CONTEXT_SCRIPT = """
   const buttonKey = tag + ":" + (
     button.getAttribute("onclick") || button.id || (button.textContent || "").trim().slice(0, 50)
   );
+  // Buttons closing a modal or resetting a form send nothing and undo what we are doing
+  const dismiss = Boolean(
+    button.hasAttribute("data-dismiss") || button.hasAttribute("data-bs-dismiss") || buttonType === "reset"
+    || button.classList.contains("close") || button.classList.contains("btn-close")
+  );
+  const opensModal = ["data-toggle", "data-bs-toggle"].some((name) => button.getAttribute(name) === "modal");
 
   const checkedRadios = new Set();
   const fields = container ? listFields(container) : [];
@@ -389,7 +404,10 @@ BUTTON_CONTEXT_SCRIPT = """
 
   return {
     container: container,
-    info: {nativeSubmit: nativeSubmit, buttonKey: buttonKey, fields: descriptions},
+    info: {
+      nativeSubmit: nativeSubmit, dismiss: dismiss, opensModal: opensModal,
+      buttonKey: buttonKey, fields: descriptions
+    },
   };
 }
 """
@@ -404,16 +422,21 @@ FIELD_HANDLES_SCRIPT = """
 """
 
 
-def get_button_fingerprint(button_info: dict, request: Request) -> tuple:
+def get_button_fingerprint(button_info: dict, request: Request, is_trigger: bool = False) -> tuple:
     """Identify what a click does, so the same form is not filled and submitted over and over.
 
     A button coming with fields is identified by those fields whatever the page is: a login form put on every
     page of a website is submitted once for the whole crawl.
     A button alone depends more on where it is (pagination, add to cart...): it is clicked once per path.
+    A trigger (link opening a modal, link with a JS handler...) is clicked once for the whole crawl: those are
+    mostly found in menus repeated on every page, and each one costs a reload of the page.
     """
     fields = tuple(sorted(field["key"] for field in button_info["fields"]))
     if fields:
         return "form", fields, button_info["buttonKey"]
+
+    if is_trigger:
+        return "trigger", button_info["buttonKey"]
 
     return "button", request.url.split("?")[0], button_info["buttonKey"]
 
@@ -453,7 +476,13 @@ async def fill_fields(container, fields: List[dict]):
             continue
 
 
-async def click_button(button, request: Request, seen_fingerprints: set, timeout: float) -> bool:
+async def click_button(
+        button,
+        request: Request,
+        seen_fingerprints: set,
+        timeout: float,
+        is_trigger: bool = False,
+) -> bool:
     """Fill the fields tied to a button then click on it. Returns True if the click was made."""
     try:
         # Clicking a hidden button (closed modal, collapsed menu...) would wait for the whole timeout
@@ -462,10 +491,14 @@ async def click_button(button, request: Request, seen_fingerprints: set, timeout
 
         context = await button.evaluate_handle(BUTTON_CONTEXT_SCRIPT)
         button_info = await (await context.get_property("info")).json_value()
-        if button_info["nativeSubmit"]:
+        if button_info["nativeSubmit"] or button_info["dismiss"]:
             return False
 
-        fingerprint = get_button_fingerprint(button_info, request)
+        if button_info["opensModal"] and not is_trigger:
+            # Kept for later: what a modal reveals is dealt with then the page is reloaded
+            return False
+
+        fingerprint = get_button_fingerprint(button_info, request, is_trigger)
         if fingerprint in seen_fingerprints:
             return False
 
@@ -475,11 +508,87 @@ async def click_button(button, request: Request, seen_fingerprints: set, timeout
         if container is not None:
             await fill_fields(container, button_info["fields"])
 
-        await button.click(timeout=timeout * 1000)
+        await button.click(timeout=min(timeout, MAX_CLICK_TIMEOUT) * 1000)
     except PlaywrightError:
         return False
 
     return True
+
+
+class PageClicker:
+    """Clicks on what can be clicked in a page and waits for the requests it triggers."""
+
+    def __init__(self, page, request: Request, wait_time: float, timeout: float, seen_fingerprints: set):
+        self._page = page
+        self._request = request
+        self._wait_time = wait_time
+        self._timeout = timeout
+        self._seen_fingerprints = seen_fingerprints
+        self._pending_requests = set()
+        self._buttons_clicked = 0
+
+    # Playwright needs plain functions as handlers, it can't use the methods of a built-in type
+    def _request_started(self, browser_request):
+        self._pending_requests.add(browser_request)
+
+    def _request_done(self, browser_request):
+        self._pending_requests.discard(browser_request)
+
+    async def _reload(self):
+        self._pending_requests.clear()
+        await self._page.goto(
+            self._request.url_with_fragment,
+            timeout=self._timeout * 1000,
+            wait_until="domcontentloaded"
+        )
+
+    async def _click_first(self, selector: str, is_trigger: bool = False) -> bool:
+        """Click on the first element matching the selector that deserves it then wait for the network."""
+        try:
+            elements = await self._page.query_selector_all(selector)
+        except PlaywrightError:
+            return False
+
+        for element in elements:
+            if await click_button(element, self._request, self._seen_fingerprints, self._timeout, is_trigger):
+                await wait_for_pending_requests(self._pending_requests, self._wait_time)
+                return True
+
+        return False
+
+    async def _click_buttons(self):
+        # Elements are listed again after each click: the page may have changed or may have been reloaded,
+        # the fingerprints tell which buttons are left.
+        while self._buttons_clicked < MAX_BUTTONS_PER_PAGE and await self._click_first(BUTTON_SELECTOR):
+            self._buttons_clicked += 1
+            if self._page.url != self._request.url_with_fragment:
+                await self._reload()
+
+    async def _click_triggers(self):
+        for _ in range(MAX_TRIGGERS_PER_PAGE):
+            if not await self._click_first(TRIGGER_SELECTOR, is_trigger=True):
+                break
+
+            # A link to "#" only adds an empty fragment to the URL: we are still on the same document
+            if self._page.url.split("#")[0] == self._request.url:
+                # Deal with the buttons the trigger may have revealed (form of a modal...)
+                await self._click_buttons()
+
+            # Back to a known state: an opened modal covers the page and prevents the next clicks
+            await self._reload()
+            await wait_for_pending_requests(self._pending_requests, self._wait_time)
+
+    async def run(self):
+        self._page.on("request", self._request_started)
+        self._page.on("requestfinished", self._request_done)
+        self._page.on("requestfailed", self._request_done)
+        try:
+            await self._click_buttons()
+            await self._click_triggers()
+        finally:
+            self._page.remove_listener("request", self._request_started)
+            self._page.remove_listener("requestfinished", self._request_done)
+            self._page.remove_listener("requestfailed", self._request_done)
 
 
 async def click_in_webpage(
@@ -496,58 +605,7 @@ async def click_in_webpage(
     if seen_fingerprints is None:
         seen_fingerprints = set()
 
-    pending_requests = set()
-
-    # Playwright needs plain functions here, it can't use the methods of a built-in type as handlers
-    def request_started(browser_request):
-        pending_requests.add(browser_request)
-
-    def request_done(browser_request):
-        pending_requests.discard(browser_request)
-
-    listening = False
-    total_clicked = 0
-    reloaded = True
-
-    try:
-        # Each reload invalidates the buttons we know, the fingerprints tell which ones are left to click
-        while reloaded and total_clicked < MAX_BUTTONS_PER_PAGE:
-            reloaded = False
-            try:
-                buttons = await page.query_selector_all(BUTTON_SELECTOR)
-            except PlaywrightError:
-                break
-
-            if buttons and not listening:
-                page.on("request", request_started)
-                page.on("requestfinished", request_done)
-                page.on("requestfailed", request_done)
-                listening = True
-
-            for button in buttons:
-                if total_clicked >= MAX_BUTTONS_PER_PAGE:
-                    break
-
-                if not await click_button(button, request, seen_fingerprints, timeout):
-                    continue
-
-                total_clicked += 1
-                await wait_for_pending_requests(pending_requests, wait_time)
-
-                if page.url != request.url_with_fragment:
-                    pending_requests.clear()
-                    await page.goto(
-                        request.url_with_fragment,
-                        timeout=timeout * 1000,
-                        wait_until="domcontentloaded"
-                    )
-                    reloaded = True
-                    break
-    finally:
-        if listening:
-            page.remove_listener("request", request_started)
-            page.remove_listener("requestfinished", request_done)
-            page.remove_listener("requestfailed", request_done)
+    await PageClicker(page, request, wait_time, timeout, seen_fingerprints).run()
 
 
 # pylint: disable=too-many-positional-arguments
