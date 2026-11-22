@@ -273,41 +273,84 @@ def extract_requests(html: Html, request: Request):
 
 
 MAX_BUTTONS_PER_PAGE = 10
+# The "xpath=" prefix is mandatory: Playwright only guesses XPath for selectors starting with "//" or "..",
+# anything else is parsed as CSS and a selector such as ".//button" is then rejected as invalid.
+BUTTON_SELECTOR = "xpath=.//button | .//*[@role=\"button\" and not(@href) and not(self::button)]"
+# How long the network must stay silent after a click before we consider the page is done with it
+NETWORK_QUIET_TIME = 0.25
+
+
+async def wait_for_pending_requests(pending_requests: set, wait_time: float):
+    """Wait for the requests triggered by a click to be over, without exceeding wait_time seconds.
+
+    page.wait_for_load_state("networkidle") can't be used here: that state was already reached when the page
+    was loaded, so it returns at once and the requests sent by the click are lost if the browser moves on.
+    """
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + wait_time
+    quiet_since = None
+
+    while loop.time() < deadline:
+        await asyncio.sleep(0.05)
+        if pending_requests:
+            quiet_since = None
+        elif quiet_since is None:
+            quiet_since = loop.time()
+        elif loop.time() - quiet_since >= NETWORK_QUIET_TIME:
+            break
 
 
 async def click_in_webpage(page, request: Request, wait_time: float, timeout: float):
-    # We are using XPath because CSS selectors doesn't allow to combine nth-of-type with other cool stuff
-    total_clicked = 0
-    for xpath_selector in (".//button", ".//*[@role=\"button\" and not(@href)]"):
-        if total_clicked >= MAX_BUTTONS_PER_PAGE:
-            break
+    try:
+        buttons = await page.query_selector_all(BUTTON_SELECTOR)
+    except PlaywrightError:
+        return
 
-        try:
-            buttons = await page.query_selector_all(xpath_selector)
-        except PlaywrightError:
-            continue
+    if not buttons:
+        return
 
+    pending_requests = set()
+
+    # Playwright needs plain functions here, it can't use the methods of a built-in type as handlers
+    def request_started(browser_request):
+        pending_requests.add(browser_request)
+
+    def request_done(browser_request):
+        pending_requests.discard(browser_request)
+
+    page.on("request", request_started)
+    page.on("requestfinished", request_done)
+    page.on("requestfailed", request_done)
+
+    try:
+        total_clicked = 0
         for button in buttons:
             if total_clicked >= MAX_BUTTONS_PER_PAGE:
                 break
 
             try:
+                # Clicking a hidden button (closed modal, collapsed menu...) would wait for the whole timeout
+                if not await button.is_visible():
+                    continue
+
                 await button.click(timeout=timeout * 1000)
             except PlaywrightError:
                 continue
-            else:
-                total_clicked += 1
-                # Use networkidle with a short timeout instead of a fixed delay
-                try:
-                    await page.wait_for_load_state("networkidle", timeout=wait_time * 1000)
-                except PlaywrightError:
-                    pass
-                if page.url != request.url_with_fragment:
-                    await page.goto(
-                        request.url_with_fragment,
-                        timeout=timeout * 1000,
-                        wait_until="domcontentloaded"
-                    )
+
+            total_clicked += 1
+            await wait_for_pending_requests(pending_requests, wait_time)
+
+            if page.url != request.url_with_fragment:
+                pending_requests.clear()
+                await page.goto(
+                    request.url_with_fragment,
+                    timeout=timeout * 1000,
+                    wait_until="domcontentloaded"
+                )
+    finally:
+        page.remove_listener("request", request_started)
+        page.remove_listener("requestfinished", request_done)
+        page.remove_listener("requestfailed", request_done)
 
 
 # pylint: disable=too-many-positional-arguments

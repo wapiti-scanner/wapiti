@@ -1,5 +1,6 @@
 Unreleased
     Fixes: Wapiti no longer crashes at startup on Windows when its output is redirected (banner not encodable in cp1252) (#836)
+    Fixes: the headless crawler clicks on buttons again: the selectors were rejected by Playwright so no button was ever clicked. Hidden buttons are skipped instead of waiting for the click timeout, and the requests sent by a click are waited for before leaving the page (#623)
 
 22/11/2026
     Wapiti 3.3.4
