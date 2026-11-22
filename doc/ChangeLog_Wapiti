@@ -1,5 +1,6 @@
 Unreleased
     Fixes: Wapiti no longer crashes at startup on Windows when its output is redirected (banner not encodable in cp1252) (#836)
+    Fixes: the htp module updates again: HashThePlanet no longer ships a prebuilt database, so `wapiti --update` now rebuilds it from the per-technology JSON files of the latest release (#843)
     Fixes: the headless crawler clicks on buttons again: the selectors were rejected by Playwright so no button was ever clicked. Hidden buttons are skipped instead of waiting for the click timeout, and the requests sent by a click are waited for before leaving the page (#623)
     Crawler: the headless crawler fills the empty fields tied to a button before clicking on it, with the same values as the standard crawler. A form is submitted once for the whole crawl even if it is on every page, a button without fields once per path, and forms with an action are left to the standard submission (#623)
     Crawler: the headless crawler clicks on links without a real target (href="#", javascript:, onclick) and on elements opening a modal, then deals with the forms and buttons they reveal. Each one is clicked once for the whole crawl, 6 at most per page, and buttons closing a modal are ignored (#623)

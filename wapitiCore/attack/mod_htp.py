@@ -67,7 +67,10 @@ class ModuleHtp(Attack):
     _db = None
 
     HTP_DATABASE = "hashtheplanet.db"
-    HTP_DATABASE_URL = "https://github.com/Cyberwatch/HashThePlanet/releases/download/latest/hashtheplanet.db"
+    # HashThePlanet no longer ships a prebuilt SQLite database. Each release now carries one JSON file per
+    # technology (format_version 2), so the database is rebuilt locally from those files.
+    HTP_RELEASE_API_URL = "https://api.github.com/repos/Cyberwatch/HashThePlanet/releases/latest"
+    HTP_ASSET_SUFFIX = "_hash_files.json"
 
     def __init__(self, crawler, persister, attack_options, crawler_configuration):
         Attack.__init__(self, crawler, persister, attack_options, crawler_configuration)
@@ -78,14 +81,13 @@ class ModuleHtp(Attack):
             os.makedirs(self.user_config_dir)
 
     async def update(self):
-        """Update the HashThePlanet database from the web."""
+        """Rebuild the HashThePlanet database from the per-technology JSON files of the latest release."""
         try:
-            await self._download_htp_database(
-                self.HTP_DATABASE_URL,
+            await self._build_htp_database(
                 os.path.join(self.user_config_dir, self.HTP_DATABASE)
             )
-        except IOError:
-            logging.error("Error downloading htp database.")
+        except (IOError, ValueError) as exception:
+            logging.error("Error downloading htp database: %s", exception)
 
     async def must_attack(self, request: Request, response: Optional[Response] = None):
         if request.method == "POST":
@@ -242,15 +244,93 @@ class ModuleHtp(Attack):
         cursor.close()
         return [path for path, in result]
 
-    async def _download_htp_database(self, htp_database_url: str, htp_database_path: str):
-        request = Request(htp_database_url)
-        response: Response = await self.crawler.async_send(request, follow_redirects=True)
+    async def _fetch_json(self, url: str) -> dict:
+        """Download a URL and return its parsed JSON body, raising IOError on any HTTP error."""
+        # allow_offsite_redirects: release downloads redirect to GitHub's CDN, outside the scan scope
+        response: Response = await self.crawler.async_send(
+            Request(url), follow_redirects=True, allow_offsite_redirects=True
+        )
 
         if response.status != 200:
-            raise IOError(f"Failed to download htp database: HTTP {response.status}")
+            raise IOError(f"Failed to download {url}: HTTP {response.status}")
 
-        with open(htp_database_path, 'wb') as file:
-            file.write(response.bytes)
+        content = response.json
+        if content is None:
+            raise IOError(f"Failed to parse JSON from {url}")
+
+        return content
+
+    async def _get_release_asset_urls(self) -> List[str]:
+        """List the download URLs of the per-technology JSON files of the latest release."""
+        release = await self._fetch_json(self.HTP_RELEASE_API_URL)
+        urls = [
+            asset["browser_download_url"]
+            for asset in release.get("assets", [])
+            if asset.get("name", "").endswith(self.HTP_ASSET_SUFFIX)
+        ]
+
+        if not urls:
+            raise IOError("No HashThePlanet hash file found in the latest release")
+
+        return urls
+
+    async def _build_htp_database(self, htp_database_path: str):
+        """Download every technology hash file and (re)build the local SQLite database from them."""
+        asset_urls = await self._get_release_asset_urls()
+
+        tmp_path = htp_database_path + ".tmp"
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+        try:
+            db = sqlite3.connect(tmp_path)
+            try:
+                db.executescript(
+                    "CREATE TABLE Hash (hash TEXT, technology TEXT, versions TEXT);"
+                    "CREATE TABLE Version (technology TEXT, version TEXT);"
+                    "CREATE TABLE File (path TEXT);"
+                )
+
+                for url in asset_urls:
+                    technology = os.path.basename(url)[: -len(self.HTP_ASSET_SUFFIX)]
+                    self._insert_technology(db, technology, await self._fetch_json(url))
+
+                # The hash lookup runs for every crawled file, the path lookup once per scan
+                db.executescript(
+                    "CREATE INDEX idx_hash ON Hash (hash);"
+                    "CREATE INDEX idx_file_path ON File (path);"
+                )
+                db.commit()
+            finally:
+                db.close()
+        except BaseException:
+            # Leave the previous database in place and drop the half-written temporary file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
+
+        # Replace the database in one step so a failed build never leaves a half-written file behind
+        os.replace(tmp_path, htp_database_path)
+
+    @staticmethod
+    def _insert_technology(db: sqlite3.Connection, technology: str, hash_file: dict):
+        """Fill the three tables from one technology JSON file (HashThePlanet format_version 2)."""
+        versions = hash_file.get("_meta", {}).get("sorted_versions", [])
+        # Version rows are read back in insertion order (rowid), so keep the sorted order of the file
+        db.executemany(
+            "INSERT INTO Version (technology, version) VALUES (?, ?)",
+            [(technology, version) for version in versions],
+        )
+
+        hash_rows = []
+        for path, hashes in hash_file.get("files", {}).items():
+            db.execute("INSERT INTO File (path) VALUES (?)", (path,))
+            for file_hash, file_versions in hashes.items():
+                # The reader decodes this column twice (json.loads(json.loads(...))), so encode it twice
+                encoded = json.dumps(json.dumps({"versions": file_versions}))
+                hash_rows.append((file_hash, technology, encoded))
+
+        db.executemany("INSERT INTO Hash (hash, technology, versions) VALUES (?, ?, ?)", hash_rows)
 
     async def _verify_htp_database(self, htp_database_path: str):
         needs_download = not os.path.exists(htp_database_path)

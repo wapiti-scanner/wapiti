@@ -484,15 +484,97 @@ async def test_verify_htp_database_valid_db_no_download():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_download_htp_database_non_200_raises():
-    respx.get("https://example.com/hashtheplanet.db").mock(
+async def test_fetch_json_non_200_raises():
+    respx.get("https://example.com/file.json").mock(
         return_value=httpx.Response(404, text="Not Found")
     )
     persister, crawler_configuration = _make_module_htp()
     async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
         module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
         with pytest.raises(IOError):
-            await module_htp._download_htp_database(
-                "https://example.com/hashtheplanet.db",
-                "/tmp/test_hashtheplanet.db"
-            )
+            await module_htp._fetch_json("https://example.com/file.json")
+
+
+# A minimal HashThePlanet release: one technology, two versions, one static file and one non-static file
+RELEASE_API_URL = "https://api.github.com/repos/Cyberwatch/HashThePlanet/releases/latest"
+JQUERY_ASSET_URL = "https://github.com/Cyberwatch/HashThePlanet/releases/download/latest/jquery_hash_files.json"
+
+RELEASE_JSON = {
+    "assets": [
+        {"name": "jquery_hash_files.json", "browser_download_url": JQUERY_ASSET_URL},
+        {"name": "source_code.zip", "browser_download_url": "https://example.com/ignored.zip"},
+    ]
+}
+
+JQUERY_HASH_FILE = {
+    "_meta": {"format_version": 2, "sorted_versions": ["1.0", "1.1", "1.2"]},
+    "files": {
+        "dist/jquery.js": {"aaaa": ["1.0"], "bbbb": ["1.1", "1.2"]},
+        "README.md": {"cccc": ["1.2"]},
+    },
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_build_htp_database_creates_usable_db():
+    respx.get(RELEASE_API_URL).mock(return_value=httpx.Response(200, json=RELEASE_JSON))
+    respx.get(JQUERY_ASSET_URL).mock(return_value=httpx.Response(200, json=JQUERY_HASH_FILE))
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_path = os.path.join(tmp_dir, "hashtheplanet.db")
+            await module_htp._build_htp_database(db_path)
+
+            assert os.path.exists(db_path)
+            assert not os.path.exists(db_path + ".tmp")
+
+            db = sqlite3.connect(db_path)
+            # Versions are stored in sorted order so a range can be rebuilt
+            assert [row[0] for row in db.execute(
+                "SELECT version FROM Version WHERE technology='jquery' ORDER BY rowid"
+            )] == ["1.0", "1.1", "1.2"]
+
+            # A hash resolves to its technology, and the versions column decodes the way the reader expects
+            tech, versions = db.execute("SELECT technology, versions FROM Hash WHERE hash='bbbb'").fetchone()
+            assert tech == "jquery"
+            assert json.loads(json.loads(versions))["versions"] == ["1.1", "1.2"]
+
+            # Every file path is kept, static or not; the static-file query filters them later
+            assert {row[0] for row in db.execute("SELECT path FROM File")} == {"dist/jquery.js", "README.md"}
+            db.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_build_htp_database_no_asset_raises():
+    respx.get(RELEASE_API_URL).mock(return_value=httpx.Response(200, json={"assets": []}))
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with pytest.raises(IOError):
+                await module_htp._build_htp_database(os.path.join(tmp_dir, "hashtheplanet.db"))
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_build_htp_database_keeps_previous_db_on_failure():
+    # The release lists an asset, but downloading it fails: the existing database must be left untouched
+    respx.get(RELEASE_API_URL).mock(return_value=httpx.Response(200, json=RELEASE_JSON))
+    respx.get(JQUERY_ASSET_URL).mock(return_value=httpx.Response(500, text="boom"))
+    persister, crawler_configuration = _make_module_htp()
+    async with AsyncCrawler.with_configuration(crawler_configuration) as crawler:
+        module_htp = ModuleHtp(crawler, persister, {"timeout": 10, "level": 2}, crawler_configuration)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_path = os.path.join(tmp_dir, "hashtheplanet.db")
+            with open(db_path, "wb") as file:
+                file.write(b"previous database")
+
+            with pytest.raises(IOError):
+                await module_htp._build_htp_database(db_path)
+
+            with open(db_path, "rb") as file:
+                assert file.read() == b"previous database"
+            assert not os.path.exists(db_path + ".tmp")
