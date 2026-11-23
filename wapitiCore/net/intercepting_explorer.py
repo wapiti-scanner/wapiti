@@ -23,7 +23,7 @@ import re
 import sys
 from dataclasses import replace
 from traceback import print_tb
-from typing import Tuple, List, AsyncIterator, Optional, Deque
+from typing import Tuple, List, AsyncIterator, Optional, Deque, Callable
 from logging import getLogger, WARNING, CRITICAL
 from http.cookiejar import CookieJar
 import inspect
@@ -608,7 +608,7 @@ async def click_in_webpage(
     await PageClicker(page, request, wait_time, timeout, seen_fingerprints).run()
 
 
-# pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-positional-arguments,too-many-locals
 async def launch_headless_explorer(
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
@@ -620,6 +620,8 @@ async def launch_headless_explorer(
         visibility: str = "hidden",
         wait_time: float = 2.,
         max_depth: int = 20,
+        *,
+        exceeds_budget: Optional[Callable[[Request], bool]] = None,
 ):
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
@@ -652,6 +654,9 @@ async def launch_headless_explorer(
                     request = to_explore.popleft()
                     to_explore_set.discard(request)
                     excluded_requests.add(request)
+
+                    if exceeds_budget is not None and exceeds_budget(request):
+                        continue
 
                     if request.method == "GET":
                         try:
@@ -710,6 +715,9 @@ async def launch_headless_explorer(
                         if any(regex.match(next_request.url) for regex in exclusion_regexes):
                             continue
 
+                        if exceeds_budget is not None and exceeds_budget(next_request):
+                            continue
+
                         if next_request not in to_explore_set and next_request not in excluded_requests:
                             to_explore.append(next_request)
                             to_explore_set.add(next_request)
@@ -765,6 +773,11 @@ class InterceptingExplorer(Explorer):
         self._headless_task = None
         self._mitm_task = None
         self._queue = None
+
+    def _exceeds_crawl_budget(self, request: Request) -> bool:
+        if self._max_files_per_dir and self._file_counts[request.dir_name] >= self._max_files_per_dir:
+            return True
+        return self.has_too_many_parameters(request)
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
@@ -876,6 +889,7 @@ class InterceptingExplorer(Explorer):
                     visibility=self._headless,
                     wait_time=self._wait_time,
                     max_depth=self._max_depth,
+                    exceeds_budget=self._exceeds_crawl_budget,
                 )
             )
 
