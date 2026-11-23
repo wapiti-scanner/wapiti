@@ -645,3 +645,132 @@ class TestInterceptingExplorer:
         assert results == []
         mock_seed_crawler.async_send.assert_not_awaited()
         mock_launch_headless.assert_called_once()
+
+    @patch("wapitiCore.net.intercepting_explorer.click_in_webpage", new_callable=AsyncMock)
+    @patch("wapitiCore.net.intercepting_explorer.async_playwright")
+    @pytest.mark.asyncio
+    async def test_launch_headless_explorer_respects_budget(
+        self, mock_async_playwright, _mock_click
+    ):
+        stop_event = asyncio.Event()
+        to_explore = deque([Request("http://example.com/ajax/popular?offset=0")])
+        scope = Scope(Request("http://example.com"), "folder")
+
+        visited = []
+        pattern_hits = {}
+        current_offset = 0
+
+        mock_page = AsyncMock()
+        mock_page.url = "http://example.com/ajax/popular?offset=0"
+        mock_page.on = Mock()
+        mock_page.remove_listener = Mock()
+
+        async def fake_goto(url, **_kwargs):
+            nonlocal current_offset
+            visited.append(url)
+            req = Request(url)
+            pattern_hits[req.pattern] = pattern_hits.get(req.pattern, 0) + 1
+            current_offset += 5
+            mock_page.url = url
+
+        async def fake_content():
+            return f"<html><a href='/ajax/popular?offset={current_offset}'>Next</a></html>"
+
+        mock_page.goto.side_effect = fake_goto
+        mock_page.content.side_effect = fake_content
+
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright = AsyncMock()
+        mock_playwright.firefox.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
+
+        mock_crawler = AsyncMock()
+        mock_crawler.timeout.connect = 5
+
+        await launch_headless_explorer(
+            stop_event,
+            mock_crawler,
+            to_explore,
+            scope,
+            8080,
+            set(),
+            [],
+            wait_time=0.0,
+            max_depth=10,
+            exceeds_budget=lambda req: pattern_hits.get(req.pattern, 0) >= 3,
+        )
+
+        offset_visits = [url for url in visited if "offset=" in url]
+        assert len(offset_visits) == 3
+
+    def test_exceeds_crawl_budget_honors_limits(self):
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("http://example.com/"))
+        scope = Scope(Request("http://example.com/"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event)
+
+        req = Request("http://example.com/dir/page?offset=0")
+        assert explorer._exceeds_crawl_budget(req) is False  # pylint: disable=protected-access
+
+        explorer.qs_limit = 1
+        explorer._pattern_counts[req.pattern] = 1000  # pylint: disable=protected-access
+        assert explorer._exceeds_crawl_budget(req) is True  # pylint: disable=protected-access
+
+        explorer.qs_limit = 0
+        assert explorer._exceeds_crawl_budget(req) is False  # pylint: disable=protected-access
+
+        explorer.max_files_per_dir = 2
+        explorer._file_counts[req.dir_name] = 1  # pylint: disable=protected-access
+        assert explorer._exceeds_crawl_budget(req) is False  # pylint: disable=protected-access
+        explorer._file_counts[req.dir_name] = 2  # pylint: disable=protected-access
+        assert explorer._exceeds_crawl_budget(req) is True  # pylint: disable=protected-access
+
+    @patch("wapitiCore.net.intercepting_explorer.click_in_webpage", new_callable=AsyncMock)
+    @patch("wapitiCore.net.intercepting_explorer.async_playwright")
+    @pytest.mark.asyncio
+    async def test_launch_headless_explorer_does_not_mutate_counters(
+        self, mock_async_playwright, _mock_click
+    ):
+        stop_event = asyncio.Event()
+        crawler_config = CrawlerConfiguration(Request("http://example.com/"))
+        scope = Scope(Request("http://example.com/"), "folder")
+        explorer = InterceptingExplorer(crawler_config, scope, stop_event)
+        explorer.qs_limit = 1
+        explorer.max_files_per_dir = 5
+
+        to_explore = deque([Request("http://example.com/page?a=1")])
+        mock_page = AsyncMock()
+        mock_page.url = "http://example.com/page?a=1"
+        mock_page.content.return_value = "<html><a href='/page?a=2'>Next</a></html>"
+        mock_page.on = Mock()
+        mock_page.remove_listener = Mock()
+
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright = AsyncMock()
+        mock_playwright.firefox.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_playwright
+
+        mock_crawler = AsyncMock()
+        mock_crawler.timeout.connect = 5
+
+        await launch_headless_explorer(
+            stop_event,
+            mock_crawler,
+            to_explore,
+            scope,
+            8080,
+            set(),
+            [],
+            wait_time=0.0,
+            max_depth=2,
+            exceeds_budget=explorer._exceeds_crawl_budget,  # pylint: disable=protected-access
+        )
+
+        assert sum(explorer._pattern_counts.values()) == 0  # pylint: disable=protected-access
+        assert sum(explorer._file_counts.values()) == 0  # pylint: disable=protected-access
