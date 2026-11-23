@@ -1,4 +1,5 @@
-from subprocess import Popen
+import subprocess
+from subprocess import Popen, run
 import os
 import sys
 from time import sleep
@@ -17,6 +18,15 @@ from wapitiCore.net import Request
 from wapitiCore.net.scope import Scope
 
 # pylint: disable=protected-access
+
+
+def php_version_id() -> int:
+    """Version of the PHP binary as an integer (80400 for 8.4.0), 0 if it can't be found"""
+    try:
+        result = run(["php", "-r", "echo PHP_VERSION_ID;"], capture_output=True, text=True, check=True, timeout=10)
+        return int(result.stdout.strip())
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return 0
 
 
 @pytest.fixture(autouse=True)
@@ -71,6 +81,7 @@ async def test_explorer_filtering():
     assert results == {"http://127.0.0.1:65080/filters.html", "http://127.0.0.1:65080/yolo.js"}
 
 
+@pytest.mark.skipif(php_version_id() < 80400, reason="index.html fallback of the PHP built-in server needs PHP >= 8.4")
 @pytest.mark.asyncio
 async def test_explorer_for_non_existing_files():
     """
