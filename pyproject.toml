@@ -78,7 +78,8 @@ dev = [
 ]
 
 [tool.setuptools.packages]
-find = {exclude=["tests*"]}
+# Only wapitiCore: namespace discovery would otherwise also ship doc/ (#699)
+find = {include=["wapitiCore*"]}
 
 [tool.pytest.ini_options]
 testpaths = [
