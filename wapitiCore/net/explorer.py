@@ -24,7 +24,7 @@ import json
 import math
 import random
 import string
-from typing import Dict, Tuple, List, Optional, AsyncIterator, Deque, Set
+from typing import Dict, Tuple, List, Optional, AsyncIterator, Deque, Set, Mapping
 import re
 from http.cookiejar import CookieJar
 
@@ -229,19 +229,21 @@ class Explorer:
     def is_forbidden(self, candidate_url: str):
         return any(regex.match(candidate_url) for regex in self._regexes)
 
-    def has_too_many_parameters(self, request: Request) -> bool:
-        if self._qs_limit:
-            if request.parameters_count:
-                try:
-                    if self._pattern_counts[
-                        request.pattern
-                    ] >= 220 / (math.exp(request.parameters_count * self._qs_limit) ** 2):
-                        return True
-                except OverflowError:
-                    # Oh boy... that's not good to try to attack a form with more than 600 input fields
-                    # but I guess insane mode can do it as it is insane
+    def _has_too_many_parameters(self, request: Request, pattern_counts: Mapping[str, int]) -> bool:
+        if self._qs_limit and request.parameters_count:
+            try:
+                if pattern_counts.get(request.pattern, 0) >= 220 / (
+                    math.exp(request.parameters_count * self._qs_limit) ** 2
+                ):
                     return True
+            except OverflowError:
+                # Oh boy... that's not good to try to attack a form with more than 600 input fields
+                # but I guess insane mode can do it as it is insane
+                return True
         return False
+
+    def has_too_many_parameters(self, request: Request) -> bool:
+        return self._has_too_many_parameters(request, self._pattern_counts)
 
     @staticmethod
     def _raw_body_bucket(request: Request) -> Optional[Tuple[str, str, str]]:

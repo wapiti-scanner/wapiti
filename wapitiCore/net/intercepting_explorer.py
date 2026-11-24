@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import asyncio
+from collections import defaultdict
 import os
 import re
 import sys
@@ -608,8 +609,7 @@ async def click_in_webpage(
     await PageClicker(page, request, wait_time, timeout, seen_fingerprints).run()
 
 
-# pylint: disable=too-many-positional-arguments,too-many-locals
-async def launch_headless_explorer(
+async def launch_headless_explorer(  # pylint: disable=too-many-positional-arguments,too-many-locals
         stop_event: asyncio.Event,
         crawler: AsyncCrawler,
         to_explore: Deque[Request],
@@ -622,6 +622,7 @@ async def launch_headless_explorer(
         max_depth: int = 20,
         *,
         exceeds_budget: Optional[Callable[[Request], bool]] = None,
+        on_navigate: Optional[Callable[[Request], None]] = None,
 ):
     # The headless browser will be configured to use the MITM proxy
     # The intercepting will be in charge of generating Request objects.
@@ -657,6 +658,9 @@ async def launch_headless_explorer(
 
                     if exceeds_budget is not None and exceeds_budget(request):
                         continue
+
+                    if on_navigate is not None:
+                        on_navigate(request)
 
                     if request.method == "GET":
                         try:
@@ -773,11 +777,22 @@ class InterceptingExplorer(Explorer):
         self._headless_task = None
         self._mitm_task = None
         self._queue = None
+        # Dedicated browser-navigation counters (not saved in the state file), so
+        # `--headless both` and resumed scans still render pages whose patterns were
+        # saturated by the standard crawler, and 4xx/non-text responses count too.
+        self._nav_file_counts = defaultdict(int)
+        self._nav_pattern_counts = defaultdict(int)
 
-    def _exceeds_crawl_budget(self, request: Request) -> bool:
-        if self._max_files_per_dir and self._file_counts[request.dir_name] >= self._max_files_per_dir:
+    def _exceeds_nav_budget(self, request: Request) -> bool:
+        if self._max_files_per_dir and self._nav_file_counts.get(request.dir_name, 0) >= self._max_files_per_dir:
             return True
-        return self.has_too_many_parameters(request)
+        return self._has_too_many_parameters(request, self._nav_pattern_counts)
+
+    def _record_navigation(self, request: Request) -> None:
+        if self._max_files_per_dir:
+            self._nav_file_counts[request.dir_name] += 1
+        if self._qs_limit and request.parameters_count:
+            self._nav_pattern_counts[request.pattern] += 1
 
     async def process_requests(self, excluded_requests, exclusion_regexes):
         while True:
@@ -889,7 +904,8 @@ class InterceptingExplorer(Explorer):
                     visibility=self._headless,
                     wait_time=self._wait_time,
                     max_depth=self._max_depth,
-                    exceeds_budget=self._exceeds_crawl_budget,
+                    exceeds_budget=self._exceeds_nav_budget,
+                    on_navigate=self._record_navigation,
                 )
             )
 
