@@ -248,6 +248,30 @@ async def test_swagger_invalid_url():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "extra_args",
+    [
+        ["--endpoint", "not a url"],
+        ["--external-endpoint", "not a url"],
+        ["--internal-endpoint", "not a url"],
+        ["-m", "cms", "--cms", "bogus"],
+        ["-m", "wapp", "--wapp-url", "not a url"],
+        ["-m", "wapp", "--wapp-dir", "/nope"],
+    ],
+)
+async def test_invalid_attack_options_exit_cleanly(extra_args, caplog):
+    """Invalid --endpoint/--cms/--wapp-* values must exit with a clean message, not a traceback."""
+    testargs = ["wapiti", "-u", "http://perdu.com/", *extra_args]
+
+    with mock.patch.object(sys, "argv", testargs):
+        with pytest.raises(SystemExit) as exc_info:
+            await wapiti_main()
+
+    assert exc_info.value.code == 2
+    assert "Invalid argument for option" in caplog.text
+
+
+@pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
 @mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.controller.wapiti.Wapiti.add_start_url")
