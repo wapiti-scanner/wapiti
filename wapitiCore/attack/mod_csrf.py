@@ -20,6 +20,7 @@
 from collections import Counter
 from typing import Optional
 import math
+import re
 from httpx import RequestError
 
 from wapitiCore.attack.attack import Attack
@@ -28,6 +29,9 @@ from wapitiCore.net import Request
 from wapitiCore.net.crawler import Response
 from wapitiCore.main.log import log_red
 from wapitiCore.net.web import http_repr
+
+
+BRACKETED_FIELD_RE = re.compile(r"[^\[\]]+(?:\[[^\[\]]*\])+")
 
 
 class ModuleCsrf(Attack):
@@ -70,15 +74,23 @@ class ModuleCsrf(Attack):
         e_x = [-p_x * math.log(p_x, 2) for p_x in probabilities]
         return sum(e_x)
 
+    @staticmethod
+    def extract_field_name(param_name: str) -> str:
+        """Extract the final field name from a bracketed form parameter (e.g., 'form[csrf_token]' -> 'csrf_token')."""
+        if param_name.endswith("]") and BRACKETED_FIELD_RE.fullmatch(param_name):
+            return param_name[param_name.rfind("[") + 1:-1]
+        return param_name
+
     def is_csrf_present(self, request: Request, response: Response):
         """Check whether anti-csrf token is present"""
+        self.csrf_string = None
         if not isinstance(request.post_params_ref, list):
             # Raw body (JSON, XML...): there is no form parameter to look at
             return None
 
         # Look for anti-csrf token in form params
         for param in request.post_params:
-            if param[0].lower() in self.TOKEN_FORM_STRINGS:
+            if self.extract_field_name(param[0]).lower() in self.TOKEN_FORM_STRINGS:
                 self.csrf_string = param[0]
                 return param[1]
 
