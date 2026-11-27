@@ -281,7 +281,11 @@ async def wapiti_main():
     await configure_wapiti_basic_settings(wap, args)
     print_easter_eggs()
 
-    attack_options = build_attack_options_from_args(args)
+    try:
+        attack_options = build_attack_options_from_args(args)
+    except InvalidOptionValue as msg:
+        logging.error(msg)
+        sys.exit(2)
 
     if args.update:
         await wap.init_persister()
