@@ -248,6 +248,20 @@ async def test_swagger_invalid_url():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("port", ["65536", "70000", "-1"])
+async def test_out_of_range_mitm_port_exits_cleanly(port, caplog):
+    """--mitm-port outside 1-65535 must exit with a clean message, not a ValueError traceback."""
+    testargs = ["wapiti", "-u", "http://perdu.com/", "--mitm-port", port]
+
+    with mock.patch.object(sys, "argv", testargs):
+        with pytest.raises(SystemExit) as exc_info:
+            await wapiti_main()
+
+    assert exc_info.value.code == 2
+    assert "Invalid argument for option --mitm-port" in caplog.text
+
+
+@pytest.mark.asyncio
 @mock.patch("wapitiCore.main.wapiti.Wapiti.browse")
 @mock.patch("wapitiCore.attack.active_scanner.ActiveScanner.attack")
 @mock.patch("wapitiCore.controller.wapiti.Wapiti.add_start_url")
