@@ -7,7 +7,7 @@ name = "wapiti3"
 version = "3.3.5"
 description = "A web application vulnerability scanner"
 readme  = "README.rst"
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.12,<3.16"
 authors = [
         {name="Nicolas Surribas", email="nicolas.surribas@gmail.com"},
 ]
@@ -27,6 +27,7 @@ classifiers = [
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Topic :: Security",
         "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
         "Topic :: Software Development :: Testing"

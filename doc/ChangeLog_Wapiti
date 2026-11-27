@@ -29,6 +29,7 @@
     Attack: csp posture fingerprint keeps values attached to their directive, a scan resumed from an older session reports its CSP findings once more (#820)
     Core: raise the minimum versions of playwright (1.50), sqlalchemy (2.0.46), mitmproxy (12.3.1) and httpx (0.28.1), some of the previous ones could not be installed on Python 3.14
     Core: bound the number of distinct raw bodies (JSON, XML...) sent to one endpoint by method, path and media type (#819)
+    Core: Python 3.15 is supported
     CLI: exit with a nonzero status when the base URL is invalid
     Docker: install libatomic1, required by the Playwright driver
     Fixes: XML report is now well-formed when no authentication is used (#825)
